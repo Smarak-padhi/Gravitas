@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
-    { "path": "./packages/git" }
+    { "path": "./packages/git" },
+    { "path": "./packages/harnesses" }
   ]
 }

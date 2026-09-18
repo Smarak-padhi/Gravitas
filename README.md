@@ -4,10 +4,9 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 2 — Git Repository & Worktree Isolation)
+## Current State (Wave 3 — Single Real AI Harness)
 
-This repository contains the architecture specification, verified domain contracts, and shell-free Git repository inspection & worktree isolation infrastructure.
-Agent execution, harnesses, and UI are not yet implemented.
+This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, and provider-neutral AI agent harness execution (`@gravitas/harnesses` with Claude Code adapter).
 
 | Subsystem | Status |
 |---|---|
@@ -15,22 +14,25 @@ Agent execution, harnesses, and UI are not yet implemented.
 | TypeScript workspace scaffold | ✅ Complete (Wave 0) |
 | Domain model & core contracts (`@gravitas/core`) | ✅ Complete (Wave 1: FSM, Dependencies, Contract, Prompt Composer, Events) |
 | Git repository & worktree isolation (`@gravitas/git`) | ✅ Complete (Wave 2: Process boundary, Inspector, Worktree isolation) |
-| Agent harness (Claude) | ⬜ Wave 3 (next) |
-| Verification runner | ⬜ Wave 4 |
+| Agent harness (Claude) (`@gravitas/harnesses`) | ✅ Complete (Wave 3: Subprocess boundary, Claude Code adapter, Mutation capture) |
+| Verification runner | ⬜ Wave 4 (next) |
 | Multi-task DAG orchestrator | ⬜ Wave 5 |
 | CLI / REST API | ⬜ Wave 6 |
 | Web UI | ⬜ Wave 7+ |
 
 ---
 
-## Git Worktree Isolation Guarantees
+## Agent Harness & Security Boundary Guarantees
 
-*Verified by 198 automated unit and real-Git integration tests on Windows:*
+*Verified by 219 automated unit, child-process, and real-Git integration tests on Windows:*
 
-1. **Primary Working Tree Integrity**: Gravitas never commandeers, stashes, resets, or checks out different branches in the primary repository.
-2. **Physical Task Isolation**: Every task executes in an external Git worktree located under a designated runtime directory (`<RUNTIME_ROOT>/worktrees/<runId>/<taskId>`).
-3. **Immutability of Primary HEAD**: Primary repository branch and HEAD commit are verified unchanged before and after worktree allocation.
-4. **Conservative Removal Policy**: Task worktrees with uncommitted staged, unstaged, or untracked changes are strictly refused removal by default to prevent data loss. Task branches are preserved in Git history.
+1. **Untrusted Worker Principle**: Worker claims (e.g. "done", "tests pass") are never proof of completion. Output is parsed strictly as diagnostic metadata.
+2. **Working Directory as Security Boundary**: The AI worker is strictly spawned with `cwd` bound to an isolated task worktree. The primary repository is never touched.
+3. **Shell-Free Invocation**: Worker subprocesses execute directly via `spawn(..., { shell: false })`, eliminating shell-escape and command-injection vulnerabilities.
+4. **Least-Privilege Mode**: Claude Code runs under `--permission-mode acceptEdits` with whitelisted tools (`--tools Edit,Read`). Dangerous bypasses (`--dangerously-skip-permissions`) are strictly forbidden.
+5. **Prompt Stdin Streaming**: Prompts are streamed through stdin rather than CLI argument strings, preventing command-line length overflow and process-table leakage.
+6. **Worktree Mutation Telemetry**: Every execution captures pre- and post-run snapshots, detecting unexpected commits (HEAD mutations), computing a cryptographic SHA-256 hash of the diff, and flagging out-of-scope file modifications.
+7. **Process-Tree Cleanup**: Timeouts and cancellations terminate the entire worker process tree (using Windows `taskkill /T /F` or POSIX group kill) to prevent orphaned processes.
 
 ---
 
@@ -41,6 +43,7 @@ apps/          ← application packages (server, web) — added in later waves
 packages/
   core/        ← domain model, FSM, dependency evaluation, prompt boundary
   git/         ← shell-free Git boundary, repository inspector, worktree isolation
+  harnesses/   ← agent harness interfaces, subprocess boundary, mutation capture, Claude adapter
 docs/          ← Phase 0 architecture documents
 architecture/  ← system diagrams, event model, FSM, permissions
 research/      ← agent matrix, MCP catalog, CLI catalog, sources

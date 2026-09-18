@@ -12,6 +12,9 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
+    "test:harnesses": "vitest run packages/harnesses",
+    "test:claude-integration": "vitest run packages/harnesses/src/claude-integration.test.ts",
+    "demo:claude": "vitest run packages/harnesses/src/claude-integration.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "clean": "npm run clean --workspaces --if-present"
