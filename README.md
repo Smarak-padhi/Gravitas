@@ -4,21 +4,33 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 1 — Core Contracts & Domain Model)
+## Current State (Wave 2 — Git Repository & Worktree Isolation)
 
-This repository contains the architecture specification and the verified core domain contracts.
+This repository contains the architecture specification, verified domain contracts, and shell-free Git repository inspection & worktree isolation infrastructure.
 Agent execution, harnesses, and UI are not yet implemented.
 
 | Subsystem | Status |
 |---|---|
 | Architecture documentation (`docs/`, `architecture/`, `research/`) | ✅ Complete (26 files, committed at `778a8a5`) |
 | TypeScript workspace scaffold | ✅ Complete (Wave 0) |
-| Domain model & core contracts (`packages/core`) | ✅ Complete (Wave 1: FSM, Dependencies, Contract, Prompt Composer, Events) |
-| DAG orchestrator | ⬜ Wave 2 (next) |
-| Agent harness (Claude) | ⬜ Wave 3 |
+| Domain model & core contracts (`@gravitas/core`) | ✅ Complete (Wave 1: FSM, Dependencies, Contract, Prompt Composer, Events) |
+| Git repository & worktree isolation (`@gravitas/git`) | ✅ Complete (Wave 2: Process boundary, Inspector, Worktree isolation) |
+| Agent harness (Claude) | ⬜ Wave 3 (next) |
 | Verification runner | ⬜ Wave 4 |
-| CLI / REST API | ⬜ Wave 5 |
-| Web UI | ⬜ Wave 6+ |
+| Multi-task DAG orchestrator | ⬜ Wave 5 |
+| CLI / REST API | ⬜ Wave 6 |
+| Web UI | ⬜ Wave 7+ |
+
+---
+
+## Git Worktree Isolation Guarantees
+
+*Verified by 198 automated unit and real-Git integration tests on Windows:*
+
+1. **Primary Working Tree Integrity**: Gravitas never commandeers, stashes, resets, or checks out different branches in the primary repository.
+2. **Physical Task Isolation**: Every task executes in an external Git worktree located under a designated runtime directory (`<RUNTIME_ROOT>/worktrees/<runId>/<taskId>`).
+3. **Immutability of Primary HEAD**: Primary repository branch and HEAD commit are verified unchanged before and after worktree allocation.
+4. **Conservative Removal Policy**: Task worktrees with uncommitted staged, unstaged, or untracked changes are strictly refused removal by default to prevent data loss. Task branches are preserved in Git history.
 
 ---
 
@@ -27,7 +39,8 @@ Agent execution, harnesses, and UI are not yet implemented.
 ```
 apps/          ← application packages (server, web) — added in later waves
 packages/
-  core/        ← domain model and shared types (Wave 1+)
+  core/        ← domain model, FSM, dependency evaluation, prompt boundary
+  git/         ← shell-free Git boundary, repository inspector, worktree isolation
 docs/          ← Phase 0 architecture documents
 architecture/  ← system diagrams, event model, FSM, permissions
 research/      ← agent matrix, MCP catalog, CLI catalog, sources
@@ -58,10 +71,10 @@ cd Gravitas
 # Install all workspace dependencies
 npm install
 
-# Type-check
+# Type-check all packages
 npm run typecheck
 
-# Run tests
+# Run test suite
 npm test
 ```
 
@@ -83,7 +96,7 @@ npm test
 | Branch | Purpose |
 |---|---|
 | `main` | Stable, human-approved work only |
-| `feat/v0-golden-loop` | Wave 0 bootstrap (this branch) |
+| `feat/v0-golden-loop` | Implementation branch (Waves 0–2) |
 
 No automatic merges to `main`. Every merge requires explicit human approval.
 

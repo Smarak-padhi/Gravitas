@@ -1,0 +1,18 @@
+{
+  "name": "@gravitas/git",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Gravitas Git execution boundary, repository inspection, and worktree isolation",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
+  }
+}

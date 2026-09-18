@@ -13,6 +13,11 @@ export default defineConfig({
     ],
     environment: 'node',
     /**
+     * Test timeouts: real-git operations on Windows benefit from 20s headroom.
+     */
+    testTimeout: 25000,
+    hookTimeout: 25000,
+    /**
      * Reporters: verbose in CI (when $CI is set), compact locally.
      * Vitest will pick up $CI automatically.
      */
