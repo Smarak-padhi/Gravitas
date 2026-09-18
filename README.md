@@ -4,18 +4,18 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 0 — Baseline Scaffold)
+## Current State (Wave 1 — Core Contracts & Domain Model)
 
-This repository contains **architecture and research documentation only**.
-No orchestration logic, agent harnesses, or UI is implemented yet.
+This repository contains the architecture specification and the verified core domain contracts.
+Agent execution, harnesses, and UI are not yet implemented.
 
 | Subsystem | Status |
 |---|---|
 | Architecture documentation (`docs/`, `architecture/`, `research/`) | ✅ Complete (26 files, committed at `778a8a5`) |
-| TypeScript workspace scaffold | ✅ Wave 0 — this commit |
-| Domain model types | ⬜ Wave 1 (next) |
+| TypeScript workspace scaffold | ✅ Complete (Wave 0) |
+| Domain model & core contracts (`packages/core`) | ✅ Complete (Wave 1: FSM, Dependencies, Contract, Prompt Composer, Events) |
+| DAG orchestrator | ⬜ Wave 2 (next) |
 | Agent harness (Claude) | ⬜ Wave 3 |
-| DAG orchestrator | ⬜ Wave 2 |
 | Verification runner | ⬜ Wave 4 |
 | CLI / REST API | ⬜ Wave 5 |
 | Web UI | ⬜ Wave 6+ |

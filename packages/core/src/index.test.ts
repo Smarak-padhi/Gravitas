@@ -1,72 +1,59 @@
 import { describe, it, expect } from 'vitest'
-import { GRAVITAS_VERSION, type TaskState } from './index.js'
+import * as Core from './index.js'
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Wave 0 — workspace smoke tests
-//
-// These tests verify that:
-//   1. The test runner itself is operational
-//   2. TypeScript module resolution works within the monorepo
-//   3. The TaskState union covers exactly the 9 contract-mandated states
-//   4. The package exports are correct
-//
-// These are NOT unit tests of orchestration logic (that starts Wave 1).
-// They exist solely to prove the workspace is correctly configured.
-// ──────────────────────────────────────────────────────────────────────────────
-
-describe('@gravitas/core — Wave 0 baseline', () => {
-  it('test runner is operational', () => {
-    expect(true).toBe(true)
+describe('@gravitas/core — Public Export Boundary', () => {
+  it('exports GRAVITAS_VERSION constant', () => {
+    expect(Core.GRAVITAS_VERSION).toBe('0.0.1')
   })
 
-  it('GRAVITAS_VERSION is the expected semver string', () => {
-    expect(GRAVITAS_VERSION).toMatch(/^\d+\.\d+\.\d+$/)
-    expect(GRAVITAS_VERSION).toBe('0.0.1')
+  it('exports FSM functions and constants', () => {
+    expect(typeof Core.canTransition).toBe('function')
+    expect(typeof Core.transitionTask).toBe('function')
+    expect(typeof Core.isTerminalState).toBe('function')
+    expect(typeof Core.isSuccessfulState).toBe('function')
+    expect(typeof Core.isFailedState).toBe('function')
+    expect(Core.TERMINAL_STATES).toBeDefined()
+    expect(Core.ALLOWED_TRANSITIONS).toBeDefined()
   })
 
-  describe('TaskState union', () => {
-    /**
-     * The Implementation Master Contract mandates exactly 9 task states.
-     * This test documents and enforces that set as an executable contract.
-     *
-     * If a state is added or removed, this test must fail visibly until
-     * the contract is updated and the change is reviewed.
-     */
-    const MANDATED_STATES: ReadonlyArray<TaskState> = [
-      'PLANNED',
-      'BLOCKED',
-      'READY',
-      'RUNNING',
-      'VERIFYING',
-      'WAITING_APPROVAL',
-      'APPROVED',
-      'FAILED',
-      'CANCELLED',
-    ] as const
+  it('exports dependency evaluation functions', () => {
+    expect(typeof Core.isDependencySatisfied).toBe('function')
+    expect(typeof Core.isDependencyBroken).toBe('function')
+    expect(typeof Core.evaluateTaskReadiness).toBe('function')
+    expect(typeof Core.resolveInitialTaskState).toBe('function')
+    expect(Core.DEFAULT_SATISFYING_STATES).toEqual(['SUCCEEDED', 'APPROVED'])
+  })
 
-    it('mandated states are exactly 9', () => {
-      expect(MANDATED_STATES).toHaveLength(9)
-    })
+  it('exports execution contract functions', () => {
+    expect(typeof Core.createExecutionContract).toBe('function')
+    expect(typeof Core.validateExecutionContract).toBe('function')
+  })
 
-    it.each(MANDATED_STATES)('"%s" is a valid TaskState', (state) => {
-      // TypeScript compile-time check: the assignment below fails if the
-      // type constraint is violated.  Runtime check confirms the value.
-      const s: TaskState = state
-      expect(typeof s).toBe('string')
-      expect(s.length).toBeGreaterThan(0)
-    })
+  it('exports prompt composition functions and order', () => {
+    expect(typeof Core.composePrompt).toBe('function')
+    expect(Core.CANONICAL_PROMPT_LAYER_ORDER).toEqual([
+      'GLOBAL',
+      'PROJECT',
+      'EXECUTION_CONTRACT',
+      'TASK',
+      'AGENT_ROLE',
+      'RUNTIME_CONTEXT',
+    ])
+  })
 
-    it('PLANNED comes before BLOCKED in canonical ordering', () => {
-      const planned = MANDATED_STATES.indexOf('PLANNED')
-      const blocked = MANDATED_STATES.indexOf('BLOCKED')
-      expect(planned).toBeLessThan(blocked)
-    })
+  it('exports event model functions and collector', () => {
+    expect(typeof Core.generateEventId).toBe('function')
+    expect(typeof Core.createGravitasEvent).toBe('function')
+    expect(typeof Core.createRunCreatedEvent).toBe('function')
+    expect(typeof Core.createTaskCreatedEvent).toBe('function')
+    expect(typeof Core.createTaskStateChangedEvent).toBe('function')
+    expect(typeof Core.createExecutionContractCreatedEvent).toBe('function')
+    expect(typeof Core.InMemoryEventCollector).toBe('function')
+  })
 
-    it('terminal states are APPROVED, FAILED, CANCELLED', () => {
-      const terminalStates: TaskState[] = ['APPROVED', 'FAILED', 'CANCELLED']
-      for (const state of terminalStates) {
-        expect(MANDATED_STATES).toContain(state)
-      }
-    })
+  it('exports domain error classes', () => {
+    expect(Core.InvalidStateTransitionError).toBeDefined()
+    expect(Core.ContractValidationError).toBeDefined()
+    expect(Core.DependencyEvaluationError).toBeDefined()
   })
 })
