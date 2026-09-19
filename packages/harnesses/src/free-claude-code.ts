@@ -15,7 +15,8 @@
  */
 
 import { existsSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { rm, writeFile } from 'node:fs/promises'
+import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runSubprocess, type SubprocessHandle } from './process.js'
 import type {
@@ -110,19 +111,24 @@ export async function checkFccProxyHealth(
   }
 }
 
-/**
- * Builds the exact noninteractive argument list for Free Claude Code.
- */
-export function buildFccCliArgs(options?: {
+export interface BuildFccCliArgsOptions {
   readonly allowedTools?: readonly string[] | undefined
   readonly outputFormat?: 'json' | 'text' | undefined
   readonly permissionMode?: string | undefined
-}): readonly string[] {
+  readonly strictIsolation?: boolean | undefined
+  readonly mcpConfigFile?: string | undefined
+}
+
+/**
+ * Builds the exact noninteractive argument list for Free Claude Code.
+ */
+export function buildFccCliArgs(options?: BuildFccCliArgsOptions): readonly string[] {
   const tools = options?.allowedTools?.join(',') || 'Edit,Read'
   const outputFormat = options?.outputFormat ?? 'json'
   const permissionMode = options?.permissionMode ?? 'acceptEdits'
+  const strictIsolation = options?.strictIsolation ?? true
 
-  return [
+  const args = [
     '-p',
     '--output-format',
     outputFormat,
@@ -132,23 +138,46 @@ export function buildFccCliArgs(options?: {
     '--tools',
     tools,
   ]
+
+  if (strictIsolation) {
+    args.push(
+      '--strict-mcp-config',
+      '--safe-mode',
+      '--setting-sources',
+      ''
+    )
+    if (options?.mcpConfigFile) {
+      args.push('--mcp-config', options.mcpConfigFile)
+    }
+  }
+
+  return args
 }
 
 export interface FreeClaudeCodeHarnessOptions {
   readonly launcherPath?: string | undefined
   readonly proxyUrl?: string | undefined
+  readonly strictIsolation?: boolean | undefined
+  readonly mcpConfigFile?: string | undefined
+  readonly runtimeTempDir?: string | undefined
 }
 
 export class FreeClaudeCodeHarness implements AgentHarness {
   public readonly id = 'free-claude-code'
   private readonly configuredLauncher?: string | undefined
   private readonly proxyUrl: string
+  private readonly strictIsolation: boolean
+  private readonly mcpConfigFile?: string | undefined
+  private readonly runtimeTempDir?: string | undefined
   private readonly activeExecutions = new Map<string, SubprocessHandle>()
   private cachedVersion?: string | undefined
 
   constructor(options?: FreeClaudeCodeHarnessOptions) {
     this.configuredLauncher = options?.launcherPath
     this.proxyUrl = options?.proxyUrl ?? DEFAULT_FCC_PROXY_URL
+    this.strictIsolation = options?.strictIsolation ?? true
+    this.mcpConfigFile = options?.mcpConfigFile
+    this.runtimeTempDir = options?.runtimeTempDir
   }
 
   public getLauncherPath(): string {
@@ -227,46 +256,69 @@ export class FreeClaudeCodeHarness implements AgentHarness {
     const startedAt = new Date().toISOString()
     const launcher = this.getLauncherPath()
 
-    const cliArgs = buildFccCliArgs({
-      allowedTools: request.permissions?.allowedTools ?? ['Edit', 'Read'],
-      permissionMode: 'acceptEdits',
-      outputFormat: 'json',
-    })
+    let ephemeralMcpPath: string | undefined
+    let effectiveMcpConfigFile = this.mcpConfigFile
 
-    let currentHandle: SubprocessHandle | undefined
+    if (this.strictIsolation && !effectiveMcpConfigFile) {
+      const baseDir = this.runtimeTempDir ?? tmpdir()
+      const safeId = `${request.runId}-${request.taskId}`.replace(/[^a-zA-Z0-9_-]/g, '_')
+      ephemeralMcpPath = join(baseDir, `gravitas-mcp-empty-${safeId}.json`)
+      await writeFile(ephemeralMcpPath, JSON.stringify({ mcpServers: {} }, null, 2), 'utf8')
+      effectiveMcpConfigFile = ephemeralMcpPath
+    }
 
-    const subprocessResult = await runSubprocess(
-      {
-        executable: launcher,
-        args: cliArgs,
-        cwd: request.worktreePath,
-        stdinInput: request.compiledPrompt,
-        timeoutMs: request.timeoutMs ?? 60000,
-      },
-      (handle) => {
-        currentHandle = handle
-        this.activeExecutions.set(request.executionId, handle)
+    try {
+      const cliArgs = buildFccCliArgs({
+        allowedTools: request.permissions?.allowedTools ?? ['Edit', 'Read'],
+        permissionMode: 'acceptEdits',
+        outputFormat: 'json',
+        strictIsolation: this.strictIsolation,
+        mcpConfigFile: effectiveMcpConfigFile,
+      })
+
+      let currentHandle: SubprocessHandle | undefined
+
+      const subprocessResult = await runSubprocess(
+        {
+          executable: launcher,
+          args: cliArgs,
+          cwd: request.worktreePath,
+          stdinInput: request.compiledPrompt,
+          timeoutMs: request.timeoutMs ?? 60000,
+        },
+        (handle) => {
+          currentHandle = handle
+          this.activeExecutions.set(request.executionId, handle)
+        }
+      )
+
+      this.activeExecutions.delete(request.executionId)
+      const finishedAt = new Date().toISOString()
+
+      return {
+        executionId: request.executionId,
+        harnessId: this.id,
+        harnessVersion: this.cachedVersion,
+        startedAt,
+        finishedAt,
+        durationMs: subprocessResult.durationMs,
+        exitCode: subprocessResult.exitCode,
+        terminationReason: subprocessResult.terminationReason,
+        stdout: subprocessResult.stdout,
+        stderr: subprocessResult.stderr,
+        stdoutTruncated: subprocessResult.stdoutTruncated,
+        stderrTruncated: subprocessResult.stderrTruncated,
+        worktreePath: request.worktreePath,
+        ...(subprocessResult.pid !== undefined ? { pid: subprocessResult.pid } : {}),
       }
-    )
-
-    this.activeExecutions.delete(request.executionId)
-    const finishedAt = new Date().toISOString()
-
-    return {
-      executionId: request.executionId,
-      harnessId: this.id,
-      harnessVersion: this.cachedVersion,
-      startedAt,
-      finishedAt,
-      durationMs: subprocessResult.durationMs,
-      exitCode: subprocessResult.exitCode,
-      terminationReason: subprocessResult.terminationReason,
-      stdout: subprocessResult.stdout,
-      stderr: subprocessResult.stderr,
-      stdoutTruncated: subprocessResult.stdoutTruncated,
-      stderrTruncated: subprocessResult.stderrTruncated,
-      worktreePath: request.worktreePath,
-      ...(subprocessResult.pid !== undefined ? { pid: subprocessResult.pid } : {}),
+    } finally {
+      if (ephemeralMcpPath) {
+        try {
+          await rm(ephemeralMcpPath, { force: true })
+        } catch {
+          // Best-effort cleanup
+        }
+      }
     }
   }
 

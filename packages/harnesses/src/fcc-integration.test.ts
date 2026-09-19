@@ -65,7 +65,9 @@ describe('Free Claude Code Real Worker Integration Proof (fcc-integration.test.t
     'proves real FCC worker execution, in-scope worktree mutation, and absolute primary repo immutability',
     { timeout: 120000 },
     async () => {
-      const harness = new FreeClaudeCodeHarness()
+      const harness = new FreeClaudeCodeHarness({
+        runtimeTempDir: runtimeRoot,
+      })
 
     // Step 0: Availability check
     const availability = await harness.availability()
@@ -81,17 +83,19 @@ describe('Free Claude Code Real Worker Integration Proof (fcc-integration.test.t
     const baseSha = primaryPreInspection.headSha
     expect(baseSha).toBeDefined()
 
-    // Step 2: Allocate isolated task worktree
+    // Step 2: Allocate isolated task worktree under external runtimeRoot
     const worktreeAlloc = await allocateWorktree({
       repository: primaryRepoPath,
-      runId: 'wave3-fcc',
+      runId: 'wave3-fcc-isolated',
       taskId: 'implement-add',
       baseRef: 'HEAD',
       runtimeRoot,
     })
 
     expect(worktreeAlloc.worktreePath).not.toBe(primaryRepoPath)
-    expect(worktreeAlloc.branch).toBe('gravitas/wave3-fcc/implement-add')
+    expect(worktreeAlloc.worktreePath.startsWith(runtimeRoot)).toBe(true)
+    expect(worktreeAlloc.worktreePath.startsWith(primaryRepoPath)).toBe(false)
+    expect(worktreeAlloc.branch).toBe('gravitas/wave3-fcc-isolated/implement-add')
 
     // Step 3: Worktree pre-execution snapshot
     const beforeSnapshot = await takeWorktreeSnapshot(worktreeAlloc.worktreePath)
@@ -114,8 +118,8 @@ describe('Free Claude Code Real Worker Integration Proof (fcc-integration.test.t
     // Step 5: Execute real FCC worker
     const startedAt = new Date().toISOString()
     const result = await harness.execute({
-      executionId: 'exec-fcc-real-001',
-      runId: 'wave3-fcc',
+      executionId: 'exec-fcc-real-002',
+      runId: 'wave3-fcc-isolated',
       taskId: 'implement-add',
       worktreePath: worktreeAlloc.worktreePath,
       compiledPrompt: compiled.prompt,
@@ -127,7 +131,7 @@ describe('Free Claude Code Real Worker Integration Proof (fcc-integration.test.t
     })
 
     // Step 6: Assertions on execution record
-    expect(result.executionId).toBe('exec-fcc-real-001')
+    expect(result.executionId).toBe('exec-fcc-real-002')
     expect(result.harnessId).toBe('free-claude-code')
     expect(result.durationMs).toBeGreaterThan(0)
     expect(result.worktreePath).toBe(worktreeAlloc.worktreePath)

@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
+import { existsSync, readFileSync } from 'node:fs'
+import * as processModule from './process.js'
 import {
   buildFccCliArgs,
   checkFccProxyHealth,
@@ -8,7 +10,7 @@ import {
 
 describe('Free Claude Code Harness Adapter (free-claude-code.ts)', () => {
   describe('buildFccCliArgs', () => {
-    it('constructs safe default arguments without dangerous permissions or shell access', () => {
+    it('constructs safe default arguments with strict host isolation and without dangerous permissions or shell access', () => {
       const args = buildFccCliArgs()
 
       expect(args).toEqual([
@@ -20,30 +22,54 @@ describe('Free Claude Code Harness Adapter (free-claude-code.ts)', () => {
         'acceptEdits',
         '--tools',
         'Edit,Read',
+        '--strict-mcp-config',
+        '--safe-mode',
+        '--setting-sources',
+        '',
       ])
 
+      expect(args).toContain('--strict-mcp-config')
+      expect(args).toContain('--safe-mode')
+      expect(args).toContain('--setting-sources')
       expect(args).not.toContain('--dangerously-skip-permissions')
+      expect(args).not.toContain('--allow-dangerously-skip-permissions')
       expect(args).not.toContain('Bash')
       expect(args).not.toContain('WebFetch')
     })
 
-    it('allows tool whitelisting and custom output format', () => {
+    it('allows tool whitelisting, custom output format, and explicit mcpConfigFile', () => {
       const args = buildFccCliArgs({
         allowedTools: ['Edit', 'Read'],
-        outputFormat: 'json',
+        outputFormat: 'text',
         permissionMode: 'acceptEdits',
+        mcpConfigFile: 'C:\\tmp\\empty-mcp.json',
       })
 
       expect(args).toEqual([
         '-p',
         '--output-format',
-        'json',
+        'text',
         '--no-session-persistence',
         '--permission-mode',
         'acceptEdits',
         '--tools',
         'Edit,Read',
+        '--strict-mcp-config',
+        '--safe-mode',
+        '--setting-sources',
+        '',
+        '--mcp-config',
+        'C:\\tmp\\empty-mcp.json',
       ])
+    })
+
+    it('supports disabling strictIsolation if explicitly configured', () => {
+      const args = buildFccCliArgs({
+        strictIsolation: false,
+      })
+
+      expect(args).not.toContain('--strict-mcp-config')
+      expect(args).not.toContain('--safe-mode')
     })
   })
 
@@ -145,6 +171,103 @@ describe('Free Claude Code Harness Adapter (free-claude-code.ts)', () => {
       expect(serialized).not.toContain('NVIDIA')
       expect(serialized).not.toContain('API_KEY')
       expect(serialized).not.toContain('AUTH_TOKEN')
+    })
+
+    it('creates ephemeral empty MCP config in external runtime temp dir and cleans it up', async () => {
+      let capturedArgs: string[] = []
+      let capturedCwd: string = ''
+      let ephemeralPathDuringExec: string = ''
+      let ephemeralContentDuringExec: string = ''
+
+      vi.spyOn(processModule, 'runSubprocess').mockImplementation(async (options, _onHandle) => {
+        capturedArgs = [...options.args]
+        capturedCwd = options.cwd
+        const idx = capturedArgs.indexOf('--mcp-config')
+        if (idx !== -1 && capturedArgs[idx + 1]) {
+          ephemeralPathDuringExec = capturedArgs[idx + 1]
+          if (existsSync(ephemeralPathDuringExec)) {
+            ephemeralContentDuringExec = readFileSync(ephemeralPathDuringExec, 'utf8')
+          }
+        }
+        return {
+          exitCode: 0,
+          durationMs: 25,
+          stdout: JSON.stringify({ ok: true }),
+          stderr: '',
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          terminationReason: 'COMPLETED',
+        }
+      })
+
+      const harness = new FreeClaudeCodeHarness()
+      const fakeWorktree = 'C:\\fake\\worktree\\path'
+
+      const result = await harness.execute({
+        executionId: 'mock-iso-01',
+        runId: 'iso-run',
+        taskId: 'iso-task',
+        worktreePath: fakeWorktree,
+        compiledPrompt: 'TEST PROMPT',
+        timeoutMs: 5000,
+      })
+
+      expect(result.terminationReason).toBe('COMPLETED')
+      expect(capturedCwd).toBe(fakeWorktree)
+
+      // Verify strict isolation flags passed
+      expect(capturedArgs).toContain('--strict-mcp-config')
+      expect(capturedArgs).toContain('--safe-mode')
+      expect(capturedArgs).toContain('--setting-sources')
+
+      // Verify --mcp-config was passed with ephemeral path outside worktree
+      expect(ephemeralPathDuringExec).toBeDefined()
+      expect(ephemeralPathDuringExec.length).toBeGreaterThan(0)
+      expect(ephemeralPathDuringExec.startsWith(fakeWorktree)).toBe(false)
+
+      // Verify ephemeral config was valid empty MCP config while running
+      expect(JSON.parse(ephemeralContentDuringExec)).toEqual({ mcpServers: {} })
+
+      // Verify ephemeral file was cleaned up after execution
+      expect(existsSync(ephemeralPathDuringExec)).toBe(false)
+    })
+
+    it('proves worker configuration strictly isolates from simulated host sentinel MCP server', async () => {
+      let capturedArgs: string[] = []
+
+      vi.spyOn(processModule, 'runSubprocess').mockImplementation(async (options, _onHandle) => {
+        capturedArgs = [...options.args]
+        return {
+          exitCode: 0,
+          durationMs: 20,
+          stdout: JSON.stringify({ ok: true }),
+          stderr: '',
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          terminationReason: 'COMPLETED',
+        }
+      })
+
+      const harness = new FreeClaudeCodeHarness()
+      const sentinelMcp = 'sentinel-rogue-mcp-server'
+
+      const result = await harness.execute({
+        executionId: 'mock-sentinel-01',
+        runId: 'sentinel-run',
+        taskId: 'sentinel-task',
+        worktreePath: process.cwd(),
+        compiledPrompt: 'TEST PROMPT',
+        timeoutMs: 5000,
+      })
+
+      expect(result.terminationReason).toBe('COMPLETED')
+
+      // Prove that CLI args contain --strict-mcp-config which tells Claude Code to ignore all host MCP configs
+      expect(capturedArgs).toContain('--strict-mcp-config')
+      expect(capturedArgs).toContain('--safe-mode')
+
+      // Prove that sentinel MCP server is never passed or referenced in args
+      expect(capturedArgs.join(' ')).not.toContain(sentinelMcp)
     })
   })
 
