@@ -17,6 +17,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
   GRAVITAS_VERSION,
+  ContractValidationError,
   createApprovalRequiredEvent,
   createEvidenceCreatedEvent,
   createExecutionContract,
@@ -117,28 +118,53 @@ export class RunService {
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
     const taskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 
+    const acceptanceCriteria = input.acceptanceCriteria !== undefined
+      ? input.acceptanceCriteria.map((ac, idx) => ({
+          id: ac.id?.trim() || `ac_${idx + 1}`,
+          description: ac.description,
+          ...(ac.verificationMethod ? { verificationMethod: ac.verificationMethod } : {}),
+        }))
+      : [
+          {
+            id: 'ac_default',
+            description: `Deliver goal: ${input.goal.trim()}`,
+            verificationMethod: 'AUTOMATED_TEST',
+          },
+        ]
+
+    const requiredEvidence = input.requiredEvidence !== undefined
+      ? input.requiredEvidence.map((ev, idx) => ({
+          id: ev.id?.trim() || `ev_${idx + 1}`,
+          type: ev.type,
+          description: ev.description,
+          mandatory: Boolean(ev.mandatory),
+        }))
+      : [
+          {
+            id: 'ev_git_diff',
+            type: 'GIT_DIFF',
+            description: 'Non-empty valid git diff in scope',
+            mandatory: true,
+          },
+        ]
+
     // Create execution contract using @gravitas/core validation
-    const contract = createExecutionContract({
-      goal: input.goal.trim(),
-      repository,
-      baseBranch: input.baseBranch ?? 'HEAD',
-      constraints: input.constraints ?? [],
-      acceptanceCriteria: input.acceptanceCriteria ?? [
-        {
-          id: 'ac_default',
-          description: `Deliver goal: ${input.goal.trim()}`,
-          verificationMethod: 'AUTOMATED_TEST',
-        },
-      ],
-      requiredEvidence: input.requiredEvidence ?? [
-        {
-          id: 'ev_git_diff',
-          type: 'GIT_DIFF',
-          description: 'Non-empty valid git diff in scope',
-          mandatory: true,
-        },
-      ],
-    })
+    let contract: ExecutionContract
+    try {
+      contract = createExecutionContract({
+        goal: input.goal.trim(),
+        repository,
+        baseBranch: input.baseBranch ?? 'HEAD',
+        constraints: input.constraints ?? [],
+        acceptanceCriteria,
+        requiredEvidence,
+      })
+    } catch (err) {
+      if (err instanceof ContractValidationError) {
+        throw new InvalidRequestError('INVALID_CONTRACT', err.message)
+      }
+      throw err
+    }
 
     const contractId = `contract_${runId}`
     this.registry.addContract(contractId, contract)

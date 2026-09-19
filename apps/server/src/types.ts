@@ -45,12 +45,12 @@ export interface CreateRunInput {
   readonly baseBranch?: string | undefined
   readonly constraints?: readonly string[] | undefined
   readonly acceptanceCriteria?: readonly {
-    readonly id: string
+    readonly id?: string | undefined
     readonly description: string
     readonly verificationMethod?: string | undefined
   }[] | undefined
   readonly requiredEvidence?: readonly {
-    readonly id: string
+    readonly id?: string | undefined
     readonly type: 'GIT_DIFF' | 'TEST_REPORT' | 'COMMAND_LOG' | 'SCREENSHOT' | 'BROWSER_TRACE' | (string & {})
     readonly description: string
     readonly mandatory: boolean

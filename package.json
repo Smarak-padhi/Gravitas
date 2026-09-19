@@ -23,7 +23,7 @@
     "dev:server": "npx tsx apps/server/src/index.ts",
     "web": "npm run dev --workspace=@gravitas/web",
     "build:web": "npm run build --workspace=@gravitas/web",
-    "test:browser": "npx tsx tests/browser-test.ts"
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

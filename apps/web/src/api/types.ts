@@ -98,11 +98,26 @@ export interface TaskEvidenceDiffResponse {
   readonly diff: string
 }
 
+export interface AcceptanceCriterionInput {
+  readonly id?: string | undefined
+  readonly description: string
+  readonly verificationMethod?: string | undefined
+}
+
+export interface RequiredEvidenceInput {
+  readonly id?: string | undefined
+  readonly type: 'GIT_DIFF' | 'TEST_REPORT' | 'COMMAND_LOG' | 'SCREENSHOT' | 'BROWSER_TRACE' | string
+  readonly description: string
+  readonly mandatory: boolean
+}
+
 export interface CreateRunInput {
   readonly goal: string
   readonly repository?: string | undefined
   readonly baseBranch?: string | undefined
   readonly constraints?: readonly string[] | undefined
+  readonly acceptanceCriteria?: readonly AcceptanceCriterionInput[] | undefined
+  readonly requiredEvidence?: readonly RequiredEvidenceInput[] | undefined
   readonly requiresApproval?: boolean | undefined
 }
 

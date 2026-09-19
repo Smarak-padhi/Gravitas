@@ -20,6 +20,7 @@ build/
 coverage/
 .nyc_output/
 test-results/
+tests/screenshots/
 
 # Environment / secrets — NEVER commit secrets
 .env
