@@ -156,7 +156,7 @@ export function createRequestListener(deps: AppDependencies) {
 
       // --- State ---
       if (method === 'GET' && pathname === '/api/v1/state') {
-        const response = service.getStateSummary()
+        const response = await service.getStateSummary()
         sendJson(res, 200, response)
         return
       }
@@ -234,6 +234,23 @@ export function createRequestListener(deps: AppDependencies) {
           return
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on task rejection.`, requestId)
+        return
+      }
+
+      // --- Task Evidence Diff: GET /api/v1/runs/:runId/tasks/:taskId/evidence/diff ---
+      const diffMatch = pathname.match(/^\/api\/v1\/runs\/([^/]+)\/tasks\/([^/]+)\/evidence\/diff$/)
+      if (diffMatch) {
+        if (method === 'GET') {
+          const [, runId, taskId] = diffMatch
+          if (!runId || !taskId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing runId or taskId.', requestId)
+            return
+          }
+          const diffData = await service.getEvidenceDiff(runId, taskId)
+          sendJson(res, 200, diffData)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on evidence diff.`, requestId)
         return
       }
 

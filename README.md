@@ -4,9 +4,9 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 5 — Local Control Plane + Live Event Stream)
+## Current State (Wave 6 — Command Center Frontend)
 
-This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, provider-neutral AI agent harness execution (`@gravitas/harnesses`), independent deterministic verification with cryptographic evidence bundling (`@gravitas/verifier`), and a lightweight local control plane HTTP server with live Server-Sent Events (`@gravitas/server`).
+This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, provider-neutral AI agent harness execution (`@gravitas/harnesses`), independent deterministic verification with cryptographic evidence bundling (`@gravitas/verifier`), a lightweight local control plane HTTP server with live Server-Sent Events (`@gravitas/server`), and the real Gravitas Command Center frontend (`@gravitas/web`).
 
 | Subsystem | Status |
 |---|---|
@@ -17,20 +17,47 @@ This repository contains the architecture specification, verified domain contrac
 | Agent harness (Claude) (`@gravitas/harnesses`) | ✅ Complete (Wave 3: Subprocess boundary, Claude Code adapter, Mutation capture) |
 | Verification runner (`@gravitas/verifier`) | ✅ Complete (Wave 4: Deterministic verifier, State authority, Evidence bundle) |
 | Local Control Plane & Live Event Stream (`@gravitas/server`) | ✅ Complete (Wave 5: Native HTTP, SSE, In-memory registry, Approval/Rejection API) |
-| Command Center Web UI | ⬜ Wave 6+ |
+| Command Center Web UI (`@gravitas/web`) | ✅ Complete (Wave 6: Observability + Human Review Gate + Playwright E2E) |
+
+---
+
+## Command Center Frontend (`apps/web`)
+
+The Command Center provides human operators with real-time observability and authoritative control over autonomous AI workers:
+
+- **Observability & Human Gate**: Observes real server state via REST (`/api/v1/`) and live Server-Sent Events (`/api/v1/events`). Zero orchestration runs in React.
+- **Zero Fake Runtime Data**: Empty states honestly display "No runs yet". No invented costs, tokens, or simulated workers.
+- **Visual Golden Loop Pipeline**: 6-stage execution graph (`GOAL` → `TASK` → `WORKER` → `VERIFY` → `EVIDENCE` → `APPROVAL`) with stage status indicators and responsive layout.
+- **Human Review Gate (WAITING_APPROVAL)**: Prominent action card displaying verification pass/fail status, scope compliance, HEAD mutation check, and raw unified git diff before allowing approval or rejection.
+- **Live Event Console**: Real-time streaming log with pause/resume and deduplication.
+- **Browser-Verified Responsive Design**: Tested across 1920x1080, 1440x900, and 1024x768 viewports with Playwright screenshot evidence in `tests/screenshots/`.
+
+### Running the Command Center
+
+```powershell
+# Terminal 1: Start local backend server (port 4317)
+npm run server
+
+# Terminal 2: Start Command Center UI (port 5173 with proxy to 4317)
+npm run web
+
+# Run browser E2E test suite with screenshot capture
+npm run test:browser
+```
 
 ---
 
 ## Local Control Plane (`apps/server`)
 
-The local control plane provides a trustworthy backend boundary for future CLI and Command Center clients:
+The local control plane provides a trustworthy backend boundary for CLI and Command Center clients:
 
 - **Local-Only Loopback Binding**: Binds strictly to `127.0.0.1:4317` by default (never `0.0.0.0`).
 - **Live Event Stream**: Emits real-time domain events over Server-Sent Events (`GET /api/v1/events`).
 - **In-Memory Registry**: Centralizes runs, tasks, contracts, and evidence references with a bounded recent event history (1000 events FIFO).
 - **Explicit Human Approval**: `POST /approve` and `POST /reject` are restricted strictly to tasks in `WAITING_APPROVAL` state.
-- **Evidence Access**: Strictly registry-controlled artifact lookups; no arbitrary filesystem access.
+- **Evidence Access & Safe Diff**: Safe, registry-keyed diff and manifest inspection (`GET /api/v1/runs/:runId/tasks/:taskId/evidence/diff`).
 - **Payload & Error Bounds**: Request bodies capped at 256 KiB; error envelopes never leak stack traces or internal paths.
+- **Truthful Harness Telemetry**: Reports actual configured harness status (`GET /api/v1/state`).
 
 ### Runtime Command
 

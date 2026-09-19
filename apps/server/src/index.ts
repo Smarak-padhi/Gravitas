@@ -6,7 +6,7 @@
 
 import { pathToFileURL } from 'node:url'
 import { GRAVITAS_VERSION } from '@gravitas/core'
-import { ClaudeCodeHarness } from '@gravitas/harnesses'
+import { FreeClaudeCodeHarness, type AgentHarness } from '@gravitas/harnesses'
 import { EventHub } from './events.js'
 import { InMemoryRegistry } from './registry.js'
 import { GravitasServer } from './server.js'
@@ -27,6 +27,7 @@ export {
 export type {
   ApiErrorEnvelope,
   TaskEvidenceRef,
+  TaskEvidenceDiffResponse,
   CreateRunInput,
   CreateRunResponse,
   RunDetailResponse,
@@ -48,10 +49,11 @@ export async function createStandaloneServer(options?: {
   port?: number | undefined
   runtimeRoot?: string | undefined
   defaultRepository?: string | undefined
+  harness?: AgentHarness | undefined
 }): Promise<GravitasServer> {
   const registry = new InMemoryRegistry()
   const eventHub = new EventHub(registry)
-  const harness = new ClaudeCodeHarness()
+  const harness = options?.harness ?? new FreeClaudeCodeHarness()
 
   const service = new RunService({
     registry,

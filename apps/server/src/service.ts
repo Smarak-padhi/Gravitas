@@ -69,6 +69,7 @@ import type {
   RunDetailResponse,
   StateSummaryResponse,
   TaskDetailResponse,
+  TaskEvidenceDiffResponse,
   TaskEvidenceRef,
   TaskEvidenceResponse,
 } from './types.js'
@@ -89,6 +90,7 @@ export class RunService {
   private readonly runtimeRoot: string
   private readonly defaultRepository?: string | undefined
   private readonly defaultVerificationPlan?: VerificationPlan | undefined
+  private cachedHarnessAvailability?: { status: string; message?: string | undefined; timestamp: number } | undefined
 
   public constructor(options: RunServiceOptions) {
     this.registry = options.registry
@@ -610,13 +612,73 @@ export class RunService {
   }
 
   /**
-   * Returns a state summary suitable for client bootstrapping.
+   * Retrieves the raw unified git diff patch for a task's evidence.
+   * Traversal safe: uses the internal evidenceRef to locate diff.patch.
    */
-  public getStateSummary(): StateSummaryResponse {
+  public async getEvidenceDiff(runId: string, taskId: string): Promise<TaskEvidenceDiffResponse> {
+    const run = this.registry.getRun(runId)
+    if (!run) {
+      throw new NotFoundError('Run', runId)
+    }
+
+    const task = this.registry.getTask(taskId)
+    if (!task || task.runId !== runId) {
+      throw new NotFoundError('Task', taskId)
+    }
+
+    const evidenceRef = this.registry.getEvidenceRef(taskId)
+    if (!evidenceRef) {
+      throw new NotFoundError('Evidence', taskId)
+    }
+
+    const diffPath = join(evidenceRef.evidenceDir, 'diff.patch')
+    try {
+      const diff = await readFile(diffPath, 'utf8')
+      // Cap at 1MB to prevent memory exhaustion
+      const cappedDiff = diff.length > 1024 * 1024 ? diff.slice(0, 1024 * 1024) + '\n\n[Diff truncated at 1MB]' : diff
+      return {
+        runId,
+        taskId,
+        diff: cappedDiff,
+      }
+    } catch {
+      return {
+        runId,
+        taskId,
+        diff: '',
+      }
+    }
+  }
+
+  /**
+   * Returns a state summary suitable for client bootstrapping.
+   * Truthfully queries configured harness availability (cached for 5 seconds).
+   */
+  public async getStateSummary(): Promise<StateSummaryResponse> {
     const runs = this.registry.listRuns()
     const tasks: Task[] = []
     for (const run of runs) {
       tasks.push(...this.registry.listTasksForRun(run.id))
+    }
+
+    const now = Date.now()
+    let harnessStatus = 'UNKNOWN'
+    let harnessMessage: string | undefined
+
+    if (this.cachedHarnessAvailability && now - this.cachedHarnessAvailability.timestamp < 5000) {
+      harnessStatus = this.cachedHarnessAvailability.status
+      harnessMessage = this.cachedHarnessAvailability.message
+    } else {
+      try {
+        const avail = await this.harness.availability()
+        harnessStatus = avail.status
+        harnessMessage = avail.message
+        this.cachedHarnessAvailability = { status: avail.status, message: avail.message, timestamp: now }
+      } catch (err) {
+        harnessStatus = 'UNAVAILABLE'
+        harnessMessage = err instanceof Error ? err.message : 'Availability check failed'
+        this.cachedHarnessAvailability = { status: 'UNAVAILABLE', message: harnessMessage, timestamp: now }
+      }
     }
 
     return {
@@ -626,7 +688,8 @@ export class RunService {
       tasks,
       harness: {
         id: this.harness.id,
-        status: 'AVAILABLE',
+        status: harnessStatus,
+        ...(harnessMessage ? { message: harnessMessage } : {}),
       },
     }
   }

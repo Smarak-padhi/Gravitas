@@ -20,9 +20,13 @@
     "test:coverage": "vitest run --coverage",
     "clean": "npm run clean --workspaces --if-present",
     "server": "npx tsx apps/server/src/index.ts",
-    "dev:server": "npx tsx apps/server/src/index.ts"
+    "dev:server": "npx tsx apps/server/src/index.ts",
+    "web": "npm run dev --workspace=@gravitas/web",
+    "build:web": "npm run build --workspace=@gravitas/web",
+    "test:browser": "npx tsx tests/browser-test.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.15.0",
     "typescript": "^5.8.3",
     "vitest": "^5.0.1"

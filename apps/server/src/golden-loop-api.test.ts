@@ -261,6 +261,22 @@ test('adds numbers correctly', () => {
     expect(evidenceData.manifest.mutation.diffSha256).toBeDefined()
     expect(evidenceData.artifactFiles.length).toBeGreaterThan(0)
 
+    // 5b. GET /api/v1/runs/:runId/tasks/:taskId/evidence/diff — inspect raw diff patch
+    const diffRes = await fetch(`${serverUrl}/api/v1/runs/${runId}/tasks/${taskId}/evidence/diff`)
+    expect(diffRes.status).toBe(200)
+    const diffData = await diffRes.json()
+    expect(diffData.runId).toBe(runId)
+    expect(diffData.taskId).toBe(taskId)
+    expect(diffData.diff).toContain('add(a, b)')
+    expect(diffData.diff).toContain('+  return a + b;')
+
+    // 5c. GET /api/v1/state — verify truthful harness reporting
+    const stateRes = await fetch(`${serverUrl}/api/v1/state`)
+    expect(stateRes.status).toBe(200)
+    const stateData = await stateRes.json()
+    expect(stateData.harness.id).toBe('fake-deterministic-worker')
+    expect(stateData.harness.status).toBe('AVAILABLE')
+
     // 6. Verify primary fixture repository remains completely pristine
     const primaryInspection = await inspectRepository(primaryRepoPath)
     expect(primaryInspection.isClean).toBe(true)

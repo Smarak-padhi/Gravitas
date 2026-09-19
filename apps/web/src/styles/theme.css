@@ -1,0 +1,126 @@
+/**
+ * Gravitas Command Center Theme & Layout Variables
+ * Mission-Control Dark Theme, Density-First, High Contrast
+ */
+
+:root {
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Surfaces */
+  --bg-app: #080a0f;
+  --bg-panel: #0e121a;
+  --bg-panel-elevated: #151b26;
+  --bg-panel-subtle: #111520;
+  --border-color: #212838;
+  --border-subtle: #1a202c;
+  --border-focus: #3b82f6;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+
+  /* Status Tokens */
+  --state-ready-fg: #94a3b8;
+  --state-ready-bg: #1e293b;
+  --state-ready-border: #334155;
+
+  --state-running-fg: #38bdf8;
+  --state-running-bg: #082f49;
+  --state-running-border: #0284c7;
+
+  --state-verifying-fg: #fbbf24;
+  --state-verifying-bg: #451a03;
+  --state-verifying-border: #d97706;
+
+  --state-waiting-fg: #fde047;
+  --state-waiting-bg: #422006;
+  --state-waiting-border: #eab308;
+  --state-waiting-glow: rgba(234, 179, 8, 0.4);
+
+  --state-success-fg: #4ade80;
+  --state-success-bg: #052e16;
+  --state-success-border: #16a34a;
+
+  --state-failure-fg: #f87171;
+  --state-failure-bg: #450a0a;
+  --state-failure-border: #dc2626;
+
+  /* Spacing */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Code & Monospace Elements */
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Pulse animation for active running/waiting stages */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px rgba(234, 179, 8, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -13,7 +13,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { ClaudeCodeHarness } from '@gravitas/harnesses'
+import type { AgentHarness } from '@gravitas/harnesses'
 import { EventHub } from './events.js'
 import { InMemoryRegistry } from './registry.js'
 import { GravitasServer } from './server.js'
@@ -28,7 +28,18 @@ describe('GravitasServer HTTP Boundary (server.test.ts)', () => {
   beforeEach(async () => {
     registry = new InMemoryRegistry()
     eventHub = new EventHub(registry)
-    const harness = new ClaudeCodeHarness()
+    const harness: AgentHarness = {
+      id: 'test-worker-harness',
+      availability: async () => ({
+        status: 'AVAILABLE',
+        installed: true,
+        usableNoninteractive: true,
+        message: 'Worker ready',
+      }),
+      execute: async () => {
+        throw new Error('Not implemented for HTTP boundary tests')
+      },
+    }
     const service = new RunService({
       registry,
       eventHub,
@@ -82,8 +93,9 @@ describe('GravitasServer HTTP Boundary (server.test.ts)', () => {
     expect(Array.isArray(data.runs)).toBe(true)
     expect(Array.isArray(data.tasks)).toBe(true)
     expect(data.harness).toEqual({
-      id: 'claude-code',
+      id: 'test-worker-harness',
       status: 'AVAILABLE',
+      message: 'Worker ready',
     })
   })
 

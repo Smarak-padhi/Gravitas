@@ -142,6 +142,15 @@ export interface HealthResponse {
 }
 
 /**
+ * Diff representation returned by GET /api/v1/runs/:runId/tasks/:taskId/evidence/diff.
+ */
+export interface TaskEvidenceDiffResponse {
+  readonly runId: string
+  readonly taskId: string
+  readonly diff: string
+}
+
+/**
  * State summary returned by GET /api/v1/state.
  */
 export interface StateSummaryResponse {
@@ -152,6 +161,7 @@ export interface StateSummaryResponse {
   readonly harness: {
     readonly id: string
     readonly status: string
+    readonly message?: string | undefined
   }
 }
 

@@ -16,9 +16,10 @@ dist/
 build/
 *.tsbuildinfo
 
-# Test coverage
+# Test coverage and artifacts
 coverage/
 .nyc_output/
+test-results/
 
 # Environment / secrets — NEVER commit secrets
 .env
