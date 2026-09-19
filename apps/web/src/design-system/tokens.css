@@ -1,0 +1,93 @@
+/**
+ * Gravitas Design System — Tokens
+ * High-Density, High-Contrast Mission Control Palette
+ */
+
+:root {
+  /* Surfaces */
+  --bg-app: #07090e;
+  --bg-canvas: #07090e;
+  --bg-panel: #0d111a;
+  --bg-panel-elevated: #141a26;
+  --bg-panel-subtle: #101520;
+  --bg-surface-active: #1b2333;
+  --bg-surface-hover: #161c2b;
+
+  /* Borders */
+  --border-subtle: #1a2233;
+  --border-color: #242e42;
+  --border-hover: #374663;
+  --border-focus: #3b82f6;
+
+  /* Typography */
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Text colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+
+  /* Engine State Tokens */
+  --state-ready-fg: #94a3b8;
+  --state-ready-bg: #161e2e;
+  --state-ready-border: #2e3d59;
+
+  --state-running-fg: #38bdf8;
+  --state-running-bg: #0c2538;
+  --state-running-border: #0284c7;
+
+  --state-verifying-fg: #fbbf24;
+  --state-verifying-bg: #382006;
+  --state-verifying-border: #d97706;
+
+  --state-waiting-fg: #fde047;
+  --state-waiting-bg: #3a2206;
+  --state-waiting-border: #eab308;
+  --state-waiting-glow: rgba(234, 179, 8, 0.35);
+
+  --state-success-fg: #4ade80;
+  --state-success-bg: #062b16;
+  --state-success-border: #16a34a;
+
+  --state-failure-fg: #f87171;
+  --state-failure-bg: #3b0d0d;
+  --state-failure-border: #dc2626;
+
+  /* Inbox Severities */
+  --severity-action-fg: #fde047;
+  --severity-action-bg: #3a2206;
+  --severity-action-border: #eab308;
+
+  --severity-critical-fg: #f87171;
+  --severity-critical-bg: #3b0d0d;
+  --severity-critical-border: #dc2626;
+
+  --severity-important-fg: #fbbf24;
+  --severity-important-bg: #382006;
+  --severity-important-border: #d97706;
+
+  --severity-fyi-fg: #94a3b8;
+  --severity-fyi-bg: #161e2e;
+  --severity-fyi-border: #242e42;
+
+  /* Spacing and Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.7);
+
+  /* Z-indices */
+  --z-base: 1;
+  --z-drawer: 40;
+  --z-console: 50;
+  --z-modal: 100;
+  --z-palette: 200;
+  --z-tooltip: 300;
+}
