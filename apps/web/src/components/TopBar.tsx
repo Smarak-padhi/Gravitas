@@ -1,5 +1,9 @@
 import React from 'react'
 import type { ConnectionStatus } from '../api/useEvents.js'
+import { Tabs, type TabItem } from '../design-system/components/Tabs.js'
+import { Button } from '../design-system/components/Button.js'
+
+export type WorkspaceView = 'OFFICE' | 'GRAPH' | 'EVIDENCE' | 'TIMELINE'
 
 export interface TopBarProps {
   readonly connectionStatus: ConnectionStatus
@@ -10,6 +14,11 @@ export interface TopBarProps {
     readonly message?: string | undefined
   }
   readonly onNewRunClick: () => void
+  readonly currentView?: WorkspaceView | undefined
+  readonly onViewChange?: ((view: WorkspaceView) => void) | undefined
+  readonly inboxCount?: number | undefined
+  readonly onToggleInbox?: (() => void) | undefined
+  readonly onOpenCommandPalette?: (() => void) | undefined
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -17,6 +26,11 @@ export const TopBar: React.FC<TopBarProps> = ({
   version,
   harness,
   onNewRunClick,
+  currentView = 'OFFICE',
+  onViewChange,
+  inboxCount = 0,
+  onToggleInbox,
+  onOpenCommandPalette,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -40,19 +54,28 @@ export const TopBar: React.FC<TopBarProps> = ({
     }
   }
 
+  const viewTabs: TabItem<WorkspaceView>[] = [
+    { id: 'OFFICE', label: 'OFFICE' },
+    { id: 'GRAPH', label: 'GRAPH' },
+    { id: 'EVIDENCE', label: 'EVIDENCE' },
+    { id: 'TIMELINE', label: 'TIMELINE' },
+  ]
+
   return (
     <header
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px 20px',
+        padding: '8px 16px',
         backgroundColor: 'var(--bg-panel)',
         borderBottom: '1px solid var(--border-color)',
         minHeight: '52px',
+        gap: '12px',
+        flexWrap: 'wrap',
       }}
     >
-      {/* Brand & Version */}
+      {/* Left: Brand & Telemetry */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div
           style={{
@@ -63,6 +86,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             fontSize: '15px',
             letterSpacing: '0.5px',
             color: 'var(--text-primary)',
+            userSelect: 'none',
           }}
         >
           <div
@@ -99,17 +123,15 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           v{version}
         </span>
-      </div>
 
-      {/* Center / Telemetry: Harness Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Harness Telemetry */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             fontSize: '11px',
-            padding: '4px 10px',
+            padding: '3px 8px',
             borderRadius: 'var(--radius-sm)',
             backgroundColor: getStatusBg(harness.status),
             border: `1px solid ${getStatusColor(harness.status)}`,
@@ -123,11 +145,12 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span>[{harness.status}]</span>
         </div>
 
+        {/* SSE Telemetry */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '4px',
             fontSize: '11px',
             color: 'var(--text-muted)',
             fontFamily: 'var(--font-mono)',
@@ -140,6 +163,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 connectionStatus === 'connected'
                   ? 'var(--state-success-fg)'
                   : 'var(--state-failure-fg)',
+              fontWeight: 700,
             }}
           >
             {connectionStatus.toUpperCase()}
@@ -147,29 +171,91 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
       </div>
 
-      {/* Actions */}
-      <div>
-        <button
-          onClick={onNewRunClick}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 14px',
-            backgroundColor: 'var(--border-focus)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 600,
-            fontSize: '12px',
-            cursor: 'pointer',
-            transition: 'background-color 0.15s ease',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-focus)')}
-        >
+      {/* Center: View Switcher */}
+      {onViewChange && (
+        <div data-testid="workspace-view-tabs">
+          <Tabs
+            items={viewTabs}
+            activeId={currentView}
+            onChange={onViewChange}
+            ariaLabel="Workspace Views"
+          />
+        </div>
+      )}
+
+      {/* Right: Actions & Tools */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Command Palette Trigger */}
+        {onOpenCommandPalette && (
+          <button
+            onClick={onOpenCommandPalette}
+            data-testid="command-palette-trigger"
+            aria-label="Open command palette"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              backgroundColor: 'var(--bg-panel-elevated)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--text-secondary)',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              cursor: 'pointer',
+              transition: 'all var(--motion-duration-fast) var(--motion-ease-standard)',
+            }}
+          >
+            <span>⌘K</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Palette</span>
+          </button>
+        )}
+
+        {/* Human Inbox Button */}
+        {onToggleInbox && (
+          <button
+            onClick={onToggleInbox}
+            data-testid="human-inbox-trigger"
+            aria-label="Toggle Operator Inbox"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              backgroundColor: inboxCount > 0 ? 'var(--state-waiting-bg)' : 'var(--bg-panel-elevated)',
+              border: `1px solid ${inboxCount > 0 ? 'var(--state-waiting-border)' : 'var(--border-color)'}`,
+              borderRadius: 'var(--radius-md)',
+              color: inboxCount > 0 ? 'var(--state-waiting-fg)' : 'var(--text-secondary)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              animation: inboxCount > 0 ? 'attentionPulse 2.4s ease-in-out infinite' : 'none',
+              transition: 'all var(--motion-duration-fast) var(--motion-ease-standard)',
+            }}
+          >
+            <span>📥 Inbox</span>
+            {inboxCount > 0 && (
+              <span
+                style={{
+                  padding: '1px 5px',
+                  borderRadius: 'var(--radius-sm)',
+                  backgroundColor: 'var(--state-waiting-border)',
+                  color: '#000',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
+                {inboxCount}
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* + New Run Button */}
+        <Button variant="primary" size="sm" onClick={onNewRunClick}>
           + New Run
-        </button>
+        </Button>
       </div>
     </header>
   )

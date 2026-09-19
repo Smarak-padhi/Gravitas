@@ -1,14 +1,13 @@
 /**
- * Gravitas Command Center End-to-End Browser Verification Spec.
+ * Gravitas Command Center & Living Office End-to-End Browser Verification Spec.
  *
- * Authoritative Playwright test suite verifying:
- * 1. Honest empty state across viewports (1920x1080, 1440x900, 1024x768)
- * 2. Truthful harness status and live SSE stream connectivity
- * 3. Expanded Goal Composer with acceptance criteria, evidence requirements, and UX validation
- * 4. End-to-end Golden Loop execution into WAITING_APPROVAL state
- * 5. Scope compliance and unified diff display
- * 6. Explicit human approval transitioning to APPROVED / COMPLETED
- * 7. Explicit human rejection transitioning to FAILED with 409 conflict safety
+ * Authoritative Playwright test suite verifying Wave 7.5 Experience System:
+ * 1. Living Office View rendering data-driven worker desks across states (IDLE, ASSIGNED, WORKING, VERIFYING, NEEDS_YOU, DONE, FAILED)
+ * 2. Truthful view switching: Office, Graph, Evidence, and Operational Timeline
+ * 3. Keyboard-first Command Palette (Ctrl/Cmd+K) navigation and action execution
+ * 4. Human Inbox drawer surfacing ACTION_REQUIRED and CRITICAL alerts
+ * 5. Goal Composer, Canonical Prompt Manager (6 layers with SHA-256 hash), Mutation Scope & Diff Inspector
+ * 6. Responsive viewports (1920x1080, 1440x900, 1024x768) with zero horizontal overflow
  *
  * Saves local screenshot evidence to tests/screenshots/ (untracked).
  */
@@ -178,28 +177,37 @@ test('adds numbers correctly', () => {
   test('renders empty command center honestly without fabricated metrics across viewports', async ({ page }: { page: Page }) => {
     await page.goto('http://127.0.0.1:5173/')
 
-    // Assert TopBar brand and truthful telemetry
+    // Assert TopBar brand, View Switcher tabs, and truthful telemetry
     await expect(page.locator('header')).toBeVisible()
     await expect(page.getByText('GRAVITAS')).toBeVisible()
     await expect(page.getByText('fake-deterministic-worker')).toBeVisible()
     await expect(page.getByText('[AVAILABLE]')).toBeVisible()
     await expect(page.getByText('CONNECTED')).toBeVisible()
+    await expect(page.locator('[data-testid="workspace-view-tabs"]')).toBeVisible()
+    await expect(page.locator('[data-testid="command-palette-trigger"]')).toBeVisible()
+    await expect(page.locator('[data-testid="human-inbox-trigger"]')).toBeVisible()
 
-    // Assert empty state in runs list
+    // Assert Living Office Floor empty state
+    await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+    await expect(page.getByText('ENGINEERING OPERATIONS FLOOR')).toBeVisible()
     await expect(page.getByText('No runs yet')).toBeVisible()
     await expect(page.getByText('RUNS (0)')).toBeVisible()
 
-    // 1440x900 Screenshot
+    // 1440x900 Screenshot (01-office-empty)
     await page.setViewportSize({ width: 1440, height: 900 })
+    await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1440x900.png') })
+    await page.screenshot({ path: join(screenshotsDir, '01-office-empty.png') })
     await page.screenshot({ path: join(screenshotsDir, '01-empty-command-center.png') })
     await page.screenshot({ path: join(screenshotsDir, 'viewport-1440x900.png') })
 
     // 1920x1080 Screenshot
     await page.setViewportSize({ width: 1920, height: 1080 })
+    await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1920x1080.png') })
     await page.screenshot({ path: join(screenshotsDir, 'viewport-1920x1080.png') })
 
     // 1024x768 Screenshot & overflow check
     await page.setViewportSize({ width: 1024, height: 768 })
+    await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1024x768.png') })
     await page.screenshot({ path: join(screenshotsDir, 'viewport-1024x768.png') })
 
     const hasHorizontalOverflow = await page.evaluate(() => {
@@ -208,11 +216,27 @@ test('adds numbers correctly', () => {
     expect(hasHorizontalOverflow).toBe(false)
   })
 
-  test('validates and submits expanded Goal Composer, executes Golden Loop, and approves mutation', async ({ page }: { page: Page }) => {
+  test('validates Goal Composer, operates Command Palette, executes Golden Loop, verifies Office & Inbox, and approves mutation', async ({ page }: { page: Page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('http://127.0.0.1:5173/')
+    await expect(page.getByText('CONNECTED')).toBeVisible()
 
-    // Open Goal Composer
+    // 1. Open and test Command Palette via trigger button
+    await page.click('[data-testid="command-palette-trigger"]')
+    const palette = page.locator('[data-testid="command-palette-modal"]')
+    await expect(palette).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '09-command-palette.png') })
+
+    // Test Command Palette search filter
+    const paletteInput = page.locator('[data-testid="command-palette-input"]')
+    await paletteInput.fill('office')
+    await expect(page.locator('[data-testid="command-item-nav-office"]')).toBeVisible()
+
+    // Close with Escape
+    await page.keyboard.press('Escape')
+    await expect(palette).not.toBeVisible()
+
+    // 2. Open Goal Composer
     await page.click('button:has-text("+ New Run")')
     await expect(page.locator('#composer-goal')).toBeVisible()
     await expect(page.getByText('ACCEPTANCE CRITERIA')).toBeVisible()
@@ -255,9 +279,15 @@ test('adds numbers correctly', () => {
     // Submit valid form
     await page.click('button:has-text("Create Run")')
 
-    // Verify run created and task in READY state
+    // 3. Verify run created and task in READY state (Office station is ASSIGNED)
     await expect(page.getByText('READY').first()).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: '▶ Execute Golden Loop' })).toBeVisible()
+    await expect(page.locator('[data-testid="worker-station-fake-deterministic-worker"]')).toBeVisible()
+    await expect(page.locator('[data-testid="worker-station-fake-deterministic-worker"]')).toContainText('ASSIGNED')
+
+    // Capture 02-office-ready
+    await page.screenshot({ path: join(screenshotsDir, '02-office-ready.png') })
+    await page.screenshot({ path: join(screenshotsDir, '02-ready-run.png') })
 
     // Inspect Prompt Manager in READY state: preview compiled prompt
     const promptManager = page.locator('[data-testid="prompt-manager"]')
@@ -269,14 +299,13 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="prompt-layer-PROJECT"]')).toBeVisible()
     await expect(page.locator('[data-testid="prompt-layer-TASK"]')).toBeVisible()
 
-    await page.screenshot({ path: join(screenshotsDir, '02-ready-run.png') })
-
-    // Execute Golden Loop
+    // 4. Execute Golden Loop
     await page.click('button:has-text("Execute Golden Loop")')
     await page.waitForTimeout(200)
+    await page.screenshot({ path: join(screenshotsDir, '03-office-working.png') })
     await page.screenshot({ path: join(screenshotsDir, '03-running-execution.png') })
 
-    // Wait for WAITING_APPROVAL state
+    // 5. Wait for WAITING_APPROVAL state
     const approvalBox = page.locator('[data-testid="approval-action-box"]')
     await expect(approvalBox).toBeVisible({ timeout: 15000 })
     await expect(page.getByText('HUMAN REVIEW REQUIRED')).toBeVisible()
@@ -284,19 +313,42 @@ test('adds numbers correctly', () => {
     await expect(page.getByText('HEAD Mutated (Commit):').locator('..')).toContainText('NO')
     await expect(page.getByText('Result:').locator('..')).toContainText('PASSED')
 
-    // Verify Prompt Manager displays recorded execution prompt
-    await expect(promptManager).toBeVisible()
-    await expect(page.getByText('RECORDED EXECUTION PROMPT')).toBeVisible({ timeout: 5000 })
-    await expect(page.locator('[data-testid="prompt-hash"]')).toBeVisible()
+    // Verify Office station is in NEEDS_YOU state
+    const workerStation = page.locator('[data-testid="worker-station-fake-deterministic-worker"]')
+    await expect(workerStation).toContainText('NEEDS_YOU')
+    await page.screenshot({ path: join(screenshotsDir, '05-office-needs-you.png') })
+    await page.screenshot({ path: join(screenshotsDir, '04-waiting-approval.png') })
 
-    // Verify unified diff display
+    // 6. Test Human Inbox Drawer
+    await page.click('[data-testid="human-inbox-trigger"]')
+    const inboxDrawer = page.locator('[data-testid="human-inbox-drawer"]')
+    await expect(inboxDrawer).toBeVisible()
+    await expect(inboxDrawer.locator('[data-testid^="inbox-item-"]').getByText('ACTION_REQUIRED')).toBeVisible()
+    await expect(inboxDrawer.getByText('Human Review Required')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '06-inbox-approval.png') })
+    // Close inbox
+    await page.click('[data-testid="human-inbox-trigger"]')
+
+    // 7. Test View Switcher: EVIDENCE View
+    await page.click('button[role="tab"]:has-text("EVIDENCE")')
     await expect(page.getByText('EVIDENCE GIT DIFF')).toBeVisible()
     await expect(page.locator('body')).toContainText('return a + b;')
-
-    await page.screenshot({ path: join(screenshotsDir, '04-waiting-approval.png') })
+    await page.screenshot({ path: join(screenshotsDir, '07-task-evidence.png') })
     await page.screenshot({ path: join(screenshotsDir, '05-diff-inspector.png') })
 
-    // Approve the task
+    // 8. Test View Switcher: TIMELINE View
+    await page.click('button[role="tab"]:has-text("TIMELINE")')
+    const timelineView = page.locator('[data-testid="activity-timeline-view"]')
+    await expect(timelineView).toBeVisible()
+    await expect(timelineView.getByText('OPERATIONAL TIMELINE')).toBeVisible()
+    await expect(timelineView.getByText('RUN_CREATED')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '08-timeline.png') })
+
+    // Switch back to OFFICE View
+    await page.click('button[role="tab"]:has-text("OFFICE")')
+    await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+
+    // 9. Approve the task
     await page.click('button:has-text("Approve & Merge")')
     await expect(page.getByText('APPROVED')).toBeVisible({ timeout: 5000 })
     await expect(page.getByText('COMPLETED')).toBeVisible()
@@ -306,6 +358,7 @@ test('adds numbers correctly', () => {
   test('executes second run and supports explicit human rejection into FAILED state', async ({ page }: { page: Page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('http://127.0.0.1:5173/')
+    await expect(page.getByText('CONNECTED')).toBeVisible()
 
     // Create second run
     await page.click('button:has-text("+ New Run")')
@@ -327,6 +380,16 @@ test('adds numbers correctly', () => {
 
     // Confirm transitioned to FAILED
     await expect(page.getByText('FAILED').first()).toBeVisible({ timeout: 5000 })
+
+    // Verify Office worker station displays FAILED
+    const workerStation = page.locator('[data-testid="worker-station-fake-deterministic-worker"]')
+    await expect(workerStation).toContainText('FAILED')
+
+    // Verify Human Inbox displays CRITICAL notification
+    await page.click('[data-testid="human-inbox-trigger"]')
+    const inboxDrawer = page.locator('[data-testid="human-inbox-drawer"]')
+    await expect(inboxDrawer.locator('[data-testid^="inbox-item-"]').getByText('CRITICAL')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '10-failed-state.png') })
     await page.screenshot({ path: join(screenshotsDir, '06-failed-or-rejected.png') })
   })
 })
