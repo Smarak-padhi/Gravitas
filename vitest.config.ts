@@ -11,6 +11,16 @@ export default defineConfig({
       'packages/*/tests/**/*.test.ts',
       'apps/*/src/**/*.test.ts',
     ],
+    /**
+     * Exclude live AI integration tests from standard deterministic test runs.
+     * Integration tests are invoked explicitly via `npm run test:fcc-integration`
+     * or `npm run test:claude-integration`.
+     */
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      'packages/harnesses/src/*integration.test.ts',
+    ],
     environment: 'node',
     /**
      * Test timeouts: real-git operations on Windows benefit from 20s headroom.

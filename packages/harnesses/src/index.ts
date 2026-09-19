@@ -45,9 +45,20 @@ export {
   normalizePathForScope,
 } from './mutation.js'
 
-// Claude Code harness adapter
+// Claude Code harness adapter (Official)
 export {
   ClaudeCodeHarness,
   buildClaudeCliArgs,
   resolveClaudeExecutable,
 } from './claude-code.js'
+
+// Free Claude Code harness adapter (FCC Launcher + Local Proxy)
+export {
+  FreeClaudeCodeHarness,
+  buildFccCliArgs,
+  resolveFccLauncher,
+  checkFccProxyHealth,
+  DEFAULT_FCC_PROXY_URL,
+  type FccHealthResult,
+  type FreeClaudeCodeHarnessOptions,
+} from './free-claude-code.js'
