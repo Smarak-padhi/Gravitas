@@ -8,6 +8,7 @@ import type {
   GravitasEvent,
   GravitasEventType,
   Run,
+  RunStatus,
   Task,
   TaskState,
 } from './types.js'
@@ -148,6 +149,146 @@ export function createExecutionContractCreatedEvent(
     },
     options
   )
+}
+
+/**
+  * Emits a RUN_STATE_CHANGED event.
+  */
+export function createRunStateChangedEvent(
+  runId: string,
+  fromStatus: RunStatus,
+  toStatus: RunStatus,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'RUN_STATE_CHANGED',
+    runId,
+    { fromStatus, toStatus },
+    options
+  )
+}
+
+/**
+  * Emits a WORKER_STARTED event.
+  */
+export function createWorkerStartedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('WORKER_STARTED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits a WORKER_FINISHED event.
+  */
+export function createWorkerFinishedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('WORKER_FINISHED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits a VERIFICATION_STARTED event.
+  */
+export function createVerificationStartedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('VERIFICATION_STARTED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits a VERIFICATION_FINISHED event.
+  */
+export function createVerificationFinishedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('VERIFICATION_FINISHED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits an EVIDENCE_CREATED event.
+  */
+export function createEvidenceCreatedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('EVIDENCE_CREATED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits an APPROVAL_REQUIRED event.
+  */
+export function createApprovalRequiredEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('APPROVAL_REQUIRED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits a TASK_APPROVED event.
+  */
+export function createTaskApprovedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('TASK_APPROVED', runId, payload, { ...options, taskId })
+}
+
+/**
+  * Emits a TASK_REJECTED event.
+  */
+export function createTaskRejectedEvent(
+  runId: string,
+  taskId: string,
+  reason?: string | undefined,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'TASK_REJECTED',
+    runId,
+    { ...(reason !== undefined ? { reason } : {}) },
+    { ...options, taskId }
+  )
+}
+
+/**
+  * Emits a RUN_COMPLETED event.
+  */
+export function createRunCompletedEvent(
+  runId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('RUN_COMPLETED', runId, payload, options)
+}
+
+/**
+  * Emits a RUN_FAILED event.
+  */
+export function createRunFailedEvent(
+  runId: string,
+  payload: Record<string, unknown> = {},
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('RUN_FAILED', runId, payload, options)
 }
 
 /**

@@ -4,9 +4,9 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 4 — Independent Verification + Evidence Bundle)
+## Current State (Wave 5 — Local Control Plane + Live Event Stream)
 
-This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, provider-neutral AI agent harness execution (`@gravitas/harnesses`), and independent deterministic verification with cryptographic evidence bundling (`@gravitas/verifier`).
+This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, provider-neutral AI agent harness execution (`@gravitas/harnesses`), independent deterministic verification with cryptographic evidence bundling (`@gravitas/verifier`), and a lightweight local control plane HTTP server with live Server-Sent Events (`@gravitas/server`).
 
 | Subsystem | Status |
 |---|---|
@@ -16,9 +16,30 @@ This repository contains the architecture specification, verified domain contrac
 | Git repository & worktree isolation (`@gravitas/git`) | ✅ Complete (Wave 2: Process boundary, Inspector, Worktree isolation) |
 | Agent harness (Claude) (`@gravitas/harnesses`) | ✅ Complete (Wave 3: Subprocess boundary, Claude Code adapter, Mutation capture) |
 | Verification runner (`@gravitas/verifier`) | ✅ Complete (Wave 4: Deterministic verifier, State authority, Evidence bundle) |
-| Multi-task DAG orchestrator | ⬜ Wave 5 |
-| CLI / REST API | ⬜ Wave 6 |
-| Web UI | ⬜ Wave 7+ |
+| Local Control Plane & Live Event Stream (`@gravitas/server`) | ✅ Complete (Wave 5: Native HTTP, SSE, In-memory registry, Approval/Rejection API) |
+| Command Center Web UI | ⬜ Wave 6+ |
+
+---
+
+## Local Control Plane (`apps/server`)
+
+The local control plane provides a trustworthy backend boundary for future CLI and Command Center clients:
+
+- **Local-Only Loopback Binding**: Binds strictly to `127.0.0.1:4317` by default (never `0.0.0.0`).
+- **Live Event Stream**: Emits real-time domain events over Server-Sent Events (`GET /api/v1/events`).
+- **In-Memory Registry**: Centralizes runs, tasks, contracts, and evidence references with a bounded recent event history (1000 events FIFO).
+- **Explicit Human Approval**: `POST /approve` and `POST /reject` are restricted strictly to tasks in `WAITING_APPROVAL` state.
+- **Evidence Access**: Strictly registry-controlled artifact lookups; no arbitrary filesystem access.
+- **Payload & Error Bounds**: Request bodies capped at 256 KiB; error envelopes never leak stack traces or internal paths.
+
+### Runtime Command
+
+```powershell
+# Start local Gravitas control plane on 127.0.0.1:4317
+npm run server
+```
+
+*Explicit limitation*: Registry state is in-memory only. State is reset when the server restarts.
 
 ---
 

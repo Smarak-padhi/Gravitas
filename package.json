@@ -18,7 +18,9 @@
     "demo:claude": "vitest run packages/harnesses/src/claude-integration.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "clean": "npm run clean --workspaces --if-present"
+    "clean": "npm run clean --workspaces --if-present",
+    "server": "npx tsx apps/server/src/index.ts",
+    "dev:server": "npx tsx apps/server/src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
