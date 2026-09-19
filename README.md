@@ -4,9 +4,9 @@ Local-first multi-agent command center.
 
 ---
 
-## Current State (Wave 3 — Single Real AI Harness)
+## Current State (Wave 4 — Independent Verification + Evidence Bundle)
 
-This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, and provider-neutral AI agent harness execution (`@gravitas/harnesses` with Claude Code adapter).
+This repository contains the architecture specification, verified domain contracts, shell-free Git repository inspection & worktree isolation infrastructure, provider-neutral AI agent harness execution (`@gravitas/harnesses`), and independent deterministic verification with cryptographic evidence bundling (`@gravitas/verifier`).
 
 | Subsystem | Status |
 |---|---|
@@ -15,7 +15,7 @@ This repository contains the architecture specification, verified domain contrac
 | Domain model & core contracts (`@gravitas/core`) | ✅ Complete (Wave 1: FSM, Dependencies, Contract, Prompt Composer, Events) |
 | Git repository & worktree isolation (`@gravitas/git`) | ✅ Complete (Wave 2: Process boundary, Inspector, Worktree isolation) |
 | Agent harness (Claude) (`@gravitas/harnesses`) | ✅ Complete (Wave 3: Subprocess boundary, Claude Code adapter, Mutation capture) |
-| Verification runner | ⬜ Wave 4 (next) |
+| Verification runner (`@gravitas/verifier`) | ✅ Complete (Wave 4: Deterministic verifier, State authority, Evidence bundle) |
 | Multi-task DAG orchestrator | ⬜ Wave 5 |
 | CLI / REST API | ⬜ Wave 6 |
 | Web UI | ⬜ Wave 7+ |
@@ -24,7 +24,7 @@ This repository contains the architecture specification, verified domain contrac
 
 ## Agent Harness & Security Boundary Guarantees
 
-*Verified by 219 automated unit, child-process, and real-Git integration tests on Windows:*
+*Verified by 253 automated unit, child-process, and real-Git integration tests on Windows:*
 
 1. **Untrusted Worker Principle**: Worker claims (e.g. "done", "tests pass") are never proof of completion. Output is parsed strictly as diagnostic metadata.
 2. **Working Directory as Security Boundary**: The AI worker is strictly spawned with `cwd` bound to an isolated task worktree. The primary repository is never touched.
@@ -44,7 +44,8 @@ packages/
   core/        ← domain model, FSM, dependency evaluation, prompt boundary
   git/         ← shell-free Git boundary, repository inspector, worktree isolation
   harnesses/   ← agent harness interfaces, subprocess boundary, mutation capture, Claude adapter
-docs/          ← Phase 0 architecture documents
+  verifier/    ← independent deterministic verification, state authority, evidence bundling
+docs/          ← Phase 0 architecture documents and ADRs
 architecture/  ← system diagrams, event model, FSM, permissions
 research/      ← agent matrix, MCP catalog, CLI catalog, sources
 .gravitas/     ← GITIGNORED — runtime evidence (created at execution time)
