@@ -108,6 +108,9 @@ export async function writeEvidenceBundle(
           terminationReason: worker.terminationReason,
           durationMs: worker.durationMs,
           promptSha256: worker.promptSha256,
+          ...(worker.compilerVersion ? { compilerVersion: worker.compilerVersion } : {}),
+          ...(worker.globalPolicyVersion ? { globalPolicyVersion: worker.globalPolicyVersion } : {}),
+          ...(worker.roleTemplateVersion ? { roleTemplateVersion: worker.roleTemplateVersion } : {}),
           ...(worker.rawResult ? { rawResult: worker.rawResult } : {}),
         },
         null,
@@ -157,6 +160,16 @@ export async function writeEvidenceBundle(
     )
     artifactPaths['verification.json'] = verificationJsonPath
 
+    // 5b. Write prompt.txt if compiled prompt text is available (sanitized, no secrets)
+    // Rationale: compiled prompt contains only managed policy + explicit project context +
+    // contract + task objective. No secrets (API keys, env vars) are ever inserted.
+    // Hash is listed in manifest for integrity verification.
+    if (worker.compiledPromptText) {
+      const promptTxtPath = join(taskEvidenceDir, 'prompt.txt')
+      artifactHashes['prompt.txt'] = await atomicWriteFile(promptTxtPath, worker.compiledPromptText)
+      artifactPaths['prompt.txt'] = promptTxtPath
+    }
+
     // 6. Build evidence manifest
     const manifest: EvidenceManifest = {
       schemaVersion: 'gravitas.evidence.v1',
@@ -178,6 +191,9 @@ export async function writeEvidenceBundle(
         terminationReason: worker.terminationReason,
         durationMs: worker.durationMs,
         promptSha256: worker.promptSha256,
+        ...(worker.compilerVersion ? { compilerVersion: worker.compilerVersion } : {}),
+        ...(worker.globalPolicyVersion ? { globalPolicyVersion: worker.globalPolicyVersion } : {}),
+        ...(worker.roleTemplateVersion ? { roleTemplateVersion: worker.roleTemplateVersion } : {}),
       },
       mutation: {
         changedPaths: mutation.changedFiles,

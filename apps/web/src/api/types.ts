@@ -5,13 +5,36 @@
 import type {
   ExecutionContract,
   GravitasEvent,
+  PromptLayerName,
   Run,
   RunStatus,
   Task,
   TaskState,
 } from '@gravitas/core'
+import type {
+  LayerMetadata,
+  ProjectPromptContext,
+  PromptLayerPreview,
+  PromptPreviewRequest,
+  PromptPreviewResponse,
+  TaskPromptResponse,
+} from '@gravitas/prompts'
 
-export type { ExecutionContract, GravitasEvent, Run, RunStatus, Task, TaskState }
+export type {
+  ExecutionContract,
+  GravitasEvent,
+  LayerMetadata,
+  ProjectPromptContext,
+  PromptLayerName,
+  PromptLayerPreview,
+  PromptPreviewRequest,
+  PromptPreviewResponse,
+  Run,
+  RunStatus,
+  Task,
+  TaskPromptResponse,
+  TaskState,
+}
 
 export interface HealthResponse {
   readonly status: 'ok'
@@ -119,6 +142,7 @@ export interface CreateRunInput {
   readonly acceptanceCriteria?: readonly AcceptanceCriterionInput[] | undefined
   readonly requiredEvidence?: readonly RequiredEvidenceInput[] | undefined
   readonly requiresApproval?: boolean | undefined
+  readonly projectContext?: ProjectPromptContext | undefined
 }
 
 export interface CreateRunResponse {

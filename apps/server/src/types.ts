@@ -9,8 +9,22 @@ import type {
   Run,
   Task,
 } from '@gravitas/core'
+import type {
+  ProjectPromptContext,
+  PromptPreviewRequest,
+  PromptPreviewResponse,
+  TaskPromptResponse,
+} from '@gravitas/prompts'
 import type { MutationCapture } from '@gravitas/harnesses'
 import type { EvidenceManifest, VerificationPlan, VerificationResult } from '@gravitas/verifier'
+
+// Re-export prompt types for server API consumers
+export type {
+  ProjectPromptContext,
+  PromptPreviewRequest,
+  PromptPreviewResponse,
+  TaskPromptResponse,
+} from '@gravitas/prompts'
 
 /**
  * Standard API error envelope.
@@ -57,6 +71,12 @@ export interface CreateRunInput {
   }[] | undefined
   readonly verificationPlan?: VerificationPlan | undefined
   readonly requiresApproval?: boolean | undefined
+  /**
+   * Project-level prompt context injected into the PROJECT layer of the compiled prompt.
+   * Explicit trusted input — not automatically scraped from repository files.
+   * Must NOT contain secrets, API keys, or credential-bearing material.
+   */
+  readonly projectContext?: ProjectPromptContext | undefined
 }
 
 /**

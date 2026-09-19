@@ -103,6 +103,12 @@ export interface EvidenceManifest {
     readonly terminationReason: string
     readonly durationMs: number
     readonly promptSha256: string
+    /** Prompt compiler version that produced the compiled prompt. */
+    readonly compilerVersion?: string | undefined
+    /** Global policy version used in the compiled prompt. */
+    readonly globalPolicyVersion?: string | undefined
+    /** Role template version used in the compiled prompt. */
+    readonly roleTemplateVersion?: string | undefined
   }
   readonly mutation: {
     readonly changedPaths: readonly string[]
@@ -157,6 +163,18 @@ export interface EvidenceBundleInput {
     readonly terminationReason: string
     readonly durationMs: number
     readonly promptSha256: string
+    /** Prompt compiler version. Optional for backward compatibility with existing tests. */
+    readonly compilerVersion?: string | undefined
+    /** Global policy version. Optional for backward compatibility. */
+    readonly globalPolicyVersion?: string | undefined
+    /** Role template version. Optional for backward compatibility. */
+    readonly roleTemplateVersion?: string | undefined
+    /**
+     * Full compiled prompt text for writing as prompt.txt evidence artifact.
+     * Optional: only set when Prompt Manager was used (Wave 7+).
+     * Must contain no secrets (API keys, env vars, credentials).
+     */
+    readonly compiledPromptText?: string | undefined
     readonly rawResult?: unknown
   }
   readonly mutation: MutationCapture

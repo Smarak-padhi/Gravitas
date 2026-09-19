@@ -236,6 +236,12 @@ test('adds numbers correctly', () => {
     await page.selectOption('[data-testid="evidence-type-1"]', 'TEST_REPORT')
     await page.fill('[data-testid="evidence-desc-1"]', 'Node test runner execution output')
 
+    // Fill optional Project Context
+    await page.click('[data-testid="project-context-toggle"]')
+    await expect(page.locator('[data-testid="composer-project-name"]')).toBeVisible()
+    await page.fill('[data-testid="composer-project-name"]', 'Math Service')
+    await page.fill('[data-testid="composer-technical-constraints"]', 'ESM only, zero network calls')
+
     // Capture expanded Goal Composer evidence
     await page.screenshot({ path: join(screenshotsDir, '02a-goal-composer-expanded.png') })
 
@@ -250,8 +256,18 @@ test('adds numbers correctly', () => {
     await page.click('button:has-text("Create Run")')
 
     // Verify run created and task in READY state
-    await expect(page.getByText('READY')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('READY').first()).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: '▶ Execute Golden Loop' })).toBeVisible()
+
+    // Inspect Prompt Manager in READY state: preview compiled prompt
+    const promptManager = page.locator('[data-testid="prompt-manager"]')
+    await expect(promptManager).toBeVisible()
+    await page.click('[data-testid="preview-prompt-btn"]')
+    await expect(page.locator('[data-testid="prompt-hash"]')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('[data-testid="prompt-bytes"]')).toBeVisible()
+    await expect(page.locator('[data-testid="prompt-layer-GLOBAL"]')).toBeVisible()
+    await expect(page.locator('[data-testid="prompt-layer-PROJECT"]')).toBeVisible()
+    await expect(page.locator('[data-testid="prompt-layer-TASK"]')).toBeVisible()
 
     await page.screenshot({ path: join(screenshotsDir, '02-ready-run.png') })
 
@@ -267,6 +283,11 @@ test('adds numbers correctly', () => {
     await expect(page.getByText('Scope Compliant:').locator('..')).toContainText('YES')
     await expect(page.getByText('HEAD Mutated (Commit):').locator('..')).toContainText('NO')
     await expect(page.getByText('Result:').locator('..')).toContainText('PASSED')
+
+    // Verify Prompt Manager displays recorded execution prompt
+    await expect(promptManager).toBeVisible()
+    await expect(page.getByText('RECORDED EXECUTION PROMPT')).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('[data-testid="prompt-hash"]')).toBeVisible()
 
     // Verify unified diff display
     await expect(page.getByText('EVIDENCE GIT DIFF')).toBeVisible()

@@ -9,6 +9,7 @@
  */
 
 import type { ExecutionContract, GravitasEvent, Run, Task } from '@gravitas/core'
+import type { ManagedCompiledPrompt, ProjectPromptContext } from '@gravitas/prompts'
 import type { MutationCapture } from '@gravitas/harnesses'
 import type { VerificationPlan, VerificationResult } from '@gravitas/verifier'
 import type { TaskEvidenceRef } from './types.js'
@@ -27,6 +28,8 @@ export class InMemoryRegistry {
   private readonly mutations = new Map<string, MutationCapture>()
   private readonly verifications = new Map<string, VerificationResult>()
   private readonly verificationPlans = new Map<string, VerificationPlan>()
+  private readonly compiledPrompts = new Map<string, ManagedCompiledPrompt>()
+  private readonly projectContexts = new Map<string, ProjectPromptContext>()
   private readonly events: GravitasEvent[] = []
   private readonly maxEvents: number
 
@@ -158,6 +161,26 @@ export class InMemoryRegistry {
     return runEvents.slice(-limit)
   }
 
+  // --- Compiled prompt operations ---
+
+  public setCompiledPrompt(taskId: string, prompt: ManagedCompiledPrompt): void {
+    this.compiledPrompts.set(taskId, Object.freeze({ ...prompt }))
+  }
+
+  public getCompiledPrompt(taskId: string): ManagedCompiledPrompt | undefined {
+    return this.compiledPrompts.get(taskId)
+  }
+
+  // --- Project context operations ---
+
+  public setProjectContext(runId: string, context: ProjectPromptContext): void {
+    this.projectContexts.set(runId, Object.freeze({ ...context }))
+  }
+
+  public getProjectContext(runId: string): ProjectPromptContext | undefined {
+    return this.projectContexts.get(runId)
+  }
+
   // --- Clear (for clean test fixture reuse) ---
 
   public clear(): void {
@@ -168,6 +191,8 @@ export class InMemoryRegistry {
     this.mutations.clear()
     this.verifications.clear()
     this.verificationPlans.clear()
+    this.compiledPrompts.clear()
+    this.projectContexts.clear()
     this.events.length = 0
   }
 }

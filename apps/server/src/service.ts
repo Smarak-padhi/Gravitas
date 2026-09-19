@@ -41,6 +41,14 @@ import {
   type Run,
   type Task,
 } from '@gravitas/core'
+import {
+  compilePrompt,
+  type ManagedCompiledPrompt,
+  type ProjectPromptContext,
+  type PromptPreviewRequest,
+  type PromptPreviewResponse,
+  type TaskPromptResponse,
+} from '@gravitas/prompts'
 import { allocateWorktree, removeWorktree } from '@gravitas/git'
 import {
   captureWorktreeMutation,
@@ -200,6 +208,11 @@ export class RunService {
       this.registry.setVerificationPlan(runId, input.verificationPlan)
     }
 
+    // Store project context for prompt compilation
+    if (input.projectContext) {
+      this.registry.setProjectContext(runId, input.projectContext)
+    }
+
     // Publish creation events through EventHub
     this.eventHub.publish(createRunCreatedEvent(run))
     this.eventHub.publish(createExecutionContractCreatedEvent(runId, contract))
@@ -277,14 +290,45 @@ export class RunService {
       )
       this.eventHub.publish(createWorkerStartedEvent(run.id, currentTask.id, { harnessId: this.harness.id }))
 
-      // 4. Invoke Worker Harness
-      const promptText = currentTask.objective
+      // 4. Compile managed prompt via Prompt Manager
+      // RunService delegates prompt compilation entirely to @gravitas/prompts.
+      // The exact CompiledPrompt.text is what the harness receives — no secondary transformation.
+      const projectContext = this.registry.getProjectContext(run.id)
+      const compiledAt = new Date().toISOString()
+      const managedPrompt: ManagedCompiledPrompt = compilePrompt({
+        projectContext,
+        contract: contract ?? {
+          version: '1.0.0',
+          goal: run.goal,
+          repository: repository,
+          baseBranch: baseBranch,
+          constraints: [],
+          acceptanceCriteria: currentTask.acceptanceCriteria,
+          requiredEvidence: [],
+        },
+        task: currentTask,
+        role: 'IMPLEMENTER', // Default role; future waves may add per-task role selection
+        runtimeContext: {
+          runId: run.id,
+          taskId: currentTask.id,
+          worktreePath: worktreeAlloc.worktreePath,
+          taskBranch: worktreeAlloc.branch,
+          baseSha: worktreeAlloc.baseSha,
+          allowedPaths: contract?.constraints ?? [],
+          harnessId: this.harness.id,
+          compiledAt,
+        },
+      })
+
+      // Store compiled prompt in registry for later retrieval
+      this.registry.setCompiledPrompt(currentTask.id, managedPrompt)
+
       const executionResult = await this.harness.execute({
         executionId: generateEventId('exec'),
         runId: run.id,
         taskId: currentTask.id,
         worktreePath: worktreeAlloc.worktreePath,
-        compiledPrompt: promptText,
+        compiledPrompt: managedPrompt.text,   // EXACT bytes from compiled prompt
         permissions: { allowFileEdits: true },
         timeoutMs: options?.timeoutMs ?? 60000,
       })
@@ -362,7 +406,8 @@ export class RunService {
       this.registry.updateTask(currentTask)
 
       // 9. Write Evidence Bundle
-      const promptHash = createHash('sha256').update(promptText).digest('hex')
+      // Uses managedPrompt.sha256 — the hash of the EXACT bytes sent to the worker.
+      // Also records compiler/policy/role versions for full prompt provenance.
       const bundleResult = await writeEvidenceBundle({
         runtimeRoot,
         runId: run.id,
@@ -379,7 +424,11 @@ export class RunService {
           exitCode: executionResult.exitCode,
           terminationReason: executionResult.terminationReason,
           durationMs: executionResult.durationMs,
-          promptSha256: promptHash,
+          promptSha256: managedPrompt.sha256,
+          compilerVersion: managedPrompt.compilerVersion,
+          globalPolicyVersion: managedPrompt.globalPolicyVersion,
+          roleTemplateVersion: managedPrompt.roleTemplateVersion,
+          compiledPromptText: managedPrompt.text,
           rawResult: executionResult,
         },
         mutation,
@@ -716,6 +765,126 @@ export class RunService {
         id: this.harness.id,
         status: harnessStatus,
         ...(harnessMessage ? { message: harnessMessage } : {}),
+      },
+    }
+  }
+
+  /**
+   * Compiles a prompt preview without executing a worker.
+   *
+   * If runId+taskId are provided: uses the authoritative stored contract.
+   * RUNTIME_CONTEXT is omitted unless runtimeContextOverride is provided (no worktree exists yet).
+   * Does NOT invoke the harness.
+   */
+  public previewPrompt(req: PromptPreviewRequest): PromptPreviewResponse {
+    let contract: ExecutionContract | undefined
+    let task: Task | undefined
+    let storedProjectContext: ProjectPromptContext | undefined
+
+    if (req.runId && req.taskId) {
+      const run = this.registry.getRun(req.runId)
+      if (!run) {
+        throw new NotFoundError('Run', req.runId)
+      }
+      contract = this.registry.getContract(run.contractId)
+      if (!contract) {
+        throw new NotFoundError('ExecutionContract', run.contractId)
+      }
+      task = this.registry.getTask(req.taskId)
+      if (!task || task.runId !== req.runId) {
+        throw new NotFoundError('Task', req.taskId)
+      }
+      storedProjectContext = this.registry.getProjectContext(req.runId)
+    } else {
+      throw new InvalidRequestError(
+        'INVALID_PREVIEW_REQUEST',
+        'POST /api/v1/prompts/preview requires runId and taskId (referencing an existing run/task).'
+      )
+    }
+
+    // Merge project contexts: inline request overrides stored run context
+    const effectiveProjectContext = req.projectContext ?? storedProjectContext
+
+    // Runtime context only if explicitly provided (no worktree allocated for preview)
+    const runtimeContext = req.runtimeContextOverride
+      ? {
+          runId: req.runId ?? '',
+          taskId: req.taskId ?? '',
+          worktreePath: req.runtimeContextOverride.worktreePath ?? '(not yet allocated)',
+          taskBranch: req.runtimeContextOverride.taskBranch ?? '(not yet allocated)',
+          baseSha: req.runtimeContextOverride.baseSha ?? '(unknown)',
+          allowedPaths: req.runtimeContextOverride.allowedPaths ?? contract?.constraints ?? [],
+          harnessId: req.runtimeContextOverride.harnessId ?? this.harness.id,
+          compiledAt: req.runtimeContextOverride.compiledAt ?? new Date().toISOString(),
+        }
+      : undefined
+
+    const compiled = compilePrompt({
+      projectContext: effectiveProjectContext,
+      contract,
+      task,
+      role: req.role,
+      runtimeContext,
+    })
+
+    return {
+      compiledPrompt: compiled.text,
+      byteLength: compiled.byteLength,
+      sha256: compiled.sha256,
+      compilerVersion: compiled.compilerVersion,
+      globalPolicyVersion: compiled.globalPolicyVersion,
+      roleTemplateVersion: compiled.roleTemplateVersion,
+      roleUsed: compiled.roleUsed,
+      compiledAt: compiled.compiledAt,
+      runtimeContextIncluded: compiled.includedLayers.includes('RUNTIME_CONTEXT'),
+      layers: compiled.layerMetadata.map((meta) => ({
+        name: meta.name,
+        included: meta.included,
+        source: meta.source,
+        byteLength: meta.byteLength,
+        // Reconstruct per-layer text from the full compiled text for preview.
+        // Safe: compiled text contains only managed policy + explicit user input, no secrets.
+        text: meta.included ? `[included — ${meta.byteLength} bytes]` : '[not included]',
+      })),
+    }
+  }
+
+  /**
+   * Retrieves the compiled prompt metadata for a task.
+   * Returns a 404-equivalent response if no prompt has been compiled yet.
+   */
+  public getTaskPrompt(runId: string, taskId: string): TaskPromptResponse {
+    const run = this.registry.getRun(runId)
+    if (!run) {
+      throw new NotFoundError('Run', runId)
+    }
+
+    const task = this.registry.getTask(taskId)
+    if (!task || task.runId !== runId) {
+      throw new NotFoundError('Task', taskId)
+    }
+
+    const compiledPrompt = this.registry.getCompiledPrompt(taskId)
+
+    if (!compiledPrompt) {
+      return { runId, taskId, compiled: false }
+    }
+
+    return {
+      runId,
+      taskId,
+      compiled: true,
+      prompt: {
+        sha256: compiledPrompt.sha256,
+        byteLength: compiledPrompt.byteLength,
+        compilerVersion: compiledPrompt.compilerVersion,
+        globalPolicyVersion: compiledPrompt.globalPolicyVersion,
+        roleTemplateVersion: compiledPrompt.roleTemplateVersion,
+        roleUsed: compiledPrompt.roleUsed,
+        compiledAt: compiledPrompt.compiledAt,
+        includedLayers: compiledPrompt.includedLayers,
+        layerMetadata: compiledPrompt.layerMetadata,
+        text: compiledPrompt.text,
       },
     }
   }

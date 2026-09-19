@@ -22,6 +22,7 @@ import type {
   ApproveTaskInput,
   CreateRunInput,
   HealthResponse,
+  PromptPreviewRequest,
   RejectTaskInput,
 } from './types.js'
 
@@ -302,6 +303,35 @@ export function createRequestListener(deps: AppDependencies) {
           return
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on run detail.`, requestId)
+        return
+      }
+
+      // --- Prompt Preview: POST /api/v1/prompts/preview ---
+      if (pathname === '/api/v1/prompts/preview') {
+        if (method === 'POST') {
+          const body = await readJsonBody<PromptPreviewRequest>(req, requestId)
+          const preview = service.previewPrompt(body)
+          sendJson(res, 200, preview)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on prompt preview.`, requestId)
+        return
+      }
+
+      // --- Task Prompt: GET /api/v1/runs/:runId/tasks/:taskId/prompt ---
+      const taskPromptMatch = pathname.match(/^\/api\/v1\/runs\/([^/]+)\/tasks\/([^/]+)\/prompt$/)
+      if (taskPromptMatch) {
+        if (method === 'GET') {
+          const [, runId, taskId] = taskPromptMatch
+          if (!runId || !taskId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing runId or taskId.', requestId)
+            return
+          }
+          const taskPrompt = service.getTaskPrompt(runId, taskId)
+          sendJson(res, 200, taskPrompt)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on task prompt.`, requestId)
         return
       }
 

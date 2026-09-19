@@ -145,4 +145,41 @@ describe('GoalComposer Form Logic & Validation (GoalComposer.test.ts)', () => {
       ])
     }
   })
+
+  it('includes projectContext when project fields are provided', () => {
+    const state: ComposerFormState = {
+      ...baseValidState,
+      projectName: 'PaymentService',
+      projectSummary: 'Handles card billing',
+      technicalConstraints: 'Zero secrets in prompt',
+      projectInstructions: 'Use strict type annotations',
+    }
+
+    const result = validateAndBuildCreateRunPayload(state)
+    expect(result.valid).toBe(true)
+    if (result.valid) {
+      expect(result.payload.projectContext).toEqual({
+        projectName: 'PaymentService',
+        projectSummary: 'Handles card billing',
+        technicalConstraints: 'Zero secrets in prompt',
+        projectInstructions: 'Use strict type annotations',
+      })
+    }
+  })
+
+  it('omits projectContext when all project fields are blank or whitespace', () => {
+    const state: ComposerFormState = {
+      ...baseValidState,
+      projectName: '   ',
+      projectSummary: '',
+      technicalConstraints: undefined,
+      projectInstructions: '  ',
+    }
+
+    const result = validateAndBuildCreateRunPayload(state)
+    expect(result.valid).toBe(true)
+    if (result.valid) {
+      expect(result.payload.projectContext).toBeUndefined()
+    }
+  })
 })

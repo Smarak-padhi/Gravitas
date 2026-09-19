@@ -8,6 +8,8 @@ import type {
   CreateRunInput,
   CreateRunResponse,
   HealthResponse,
+  PromptPreviewRequest,
+  PromptPreviewResponse,
   Run,
   RunDetailResponse,
   StateSummaryResponse,
@@ -15,6 +17,7 @@ import type {
   TaskDetailResponse,
   TaskEvidenceDiffResponse,
   TaskEvidenceResponse,
+  TaskPromptResponse,
 } from './types.js'
 
 export class GravitasApiError extends Error {
@@ -136,6 +139,19 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ reason }),
       }
+    )
+  },
+
+  previewPrompt(input: PromptPreviewRequest): Promise<PromptPreviewResponse> {
+    return request<PromptPreviewResponse>('/api/v1/prompts/preview', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+
+  getTaskPrompt(runId: string, taskId: string): Promise<TaskPromptResponse> {
+    return request<TaskPromptResponse>(
+      `/api/v1/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}/prompt`
     )
   },
 }

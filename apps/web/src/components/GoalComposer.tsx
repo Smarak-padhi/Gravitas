@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type {
   AcceptanceCriterionInput,
   CreateRunInput,
+  ProjectPromptContext,
   RequiredEvidenceInput,
 } from '../api/types.js'
 
@@ -20,6 +21,10 @@ export interface ComposerFormState {
   readonly acceptanceCriteria: readonly AcceptanceCriterionInput[]
   readonly requiredEvidence: readonly RequiredEvidenceInput[]
   readonly requiresApproval: boolean
+  readonly projectName?: string | undefined
+  readonly projectSummary?: string | undefined
+  readonly technicalConstraints?: string | undefined
+  readonly projectInstructions?: string | undefined
 }
 
 export function addCriterion(
@@ -86,6 +91,13 @@ export function validateAndBuildCreateRunPayload(
     .map((c) => c.trim())
     .filter(Boolean)
 
+  const projectContext: ProjectPromptContext = {
+    ...(state.projectName?.trim() ? { projectName: state.projectName.trim() } : {}),
+    ...(state.projectSummary?.trim() ? { projectSummary: state.projectSummary.trim() } : {}),
+    ...(state.technicalConstraints?.trim() ? { technicalConstraints: state.technicalConstraints.trim() } : {}),
+    ...(state.projectInstructions?.trim() ? { projectInstructions: state.projectInstructions.trim() } : {}),
+  }
+
   return {
     valid: true,
     payload: {
@@ -105,6 +117,7 @@ export function validateAndBuildCreateRunPayload(
         mandatory: ev.mandatory,
       })),
       requiresApproval: state.requiresApproval,
+      ...(Object.keys(projectContext).length > 0 ? { projectContext } : {}),
     },
   }
 }
@@ -133,6 +146,12 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
       mandatory: true,
     },
   ])
+
+  const [projectName, setProjectName] = useState('')
+  const [projectSummary, setProjectSummary] = useState('')
+  const [technicalConstraints, setTechnicalConstraints] = useState('')
+  const [projectInstructions, setProjectInstructions] = useState('')
+  const [showProjectContext, setShowProjectContext] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
@@ -181,6 +200,10 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
       acceptanceCriteria,
       requiredEvidence,
       requiresApproval,
+      projectName,
+      projectSummary,
+      technicalConstraints,
+      projectInstructions,
     })
 
     if (!validation.valid) {
@@ -389,6 +412,158 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
                 fontSize: '11px',
               }}
             />
+          </div>
+
+          {/* Project Context (Prompt Guidance) */}
+          <div
+            style={{
+              padding: '12px',
+              backgroundColor: 'var(--bg-panel-subtle)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+              }}
+              onClick={() => setShowProjectContext(!showProjectContext)}
+              data-testid="project-context-toggle"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {showProjectContext ? '▼' : '▶'}
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  PROJECT CONTEXT (OPTIONAL PROMPT GUIDANCE)
+                </span>
+              </div>
+              <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
+                {showProjectContext ? 'Collapse' : 'Expand'}
+              </span>
+            </div>
+
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+              Explicit guidance injected into the compiled prompt's <code>PROJECT</code> layer. Never enter secrets or API keys.
+            </div>
+
+            {showProjectContext && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label
+                    htmlFor="composer-project-name"
+                    style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                  >
+                    Project Name
+                  </label>
+                  <input
+                    id="composer-project-name"
+                    data-testid="composer-project-name"
+                    type="text"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder="e.g. Gravitas"
+                    style={{
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '11px',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label
+                    htmlFor="composer-project-summary"
+                    style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                  >
+                    Project Summary
+                  </label>
+                  <input
+                    id="composer-project-summary"
+                    data-testid="composer-project-summary"
+                    type="text"
+                    value={projectSummary}
+                    onChange={(e) => setProjectSummary(e.target.value)}
+                    placeholder="e.g. Local-first multi-agent orchestration platform"
+                    style={{
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '11px',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label
+                    htmlFor="composer-technical-constraints"
+                    style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                  >
+                    Technical Constraints
+                  </label>
+                  <input
+                    id="composer-technical-constraints"
+                    data-testid="composer-technical-constraints"
+                    type="text"
+                    value={technicalConstraints}
+                    onChange={(e) => setTechnicalConstraints(e.target.value)}
+                    placeholder="e.g. TypeScript strict mode, ESM only, zero network calls"
+                    style={{
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '11px',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label
+                    htmlFor="composer-project-instructions"
+                    style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                  >
+                    Project Instructions
+                  </label>
+                  <textarea
+                    id="composer-project-instructions"
+                    data-testid="composer-project-instructions"
+                    value={projectInstructions}
+                    onChange={(e) => setProjectInstructions(e.target.value)}
+                    placeholder="e.g. Adhere to existing code formatting and error envelope conventions."
+                    rows={2}
+                    style={{
+                      padding: '6px 8px',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '11px',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Acceptance Criteria Section */}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import type { Task, TaskDetailResponse } from '../api/types.js'
 import { DiffViewer } from './DiffViewer.js'
+import { PromptManager } from './PromptManager.js'
 
 export interface TaskInspectorProps {
   readonly task: Task | null
@@ -520,6 +521,13 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
           )}
         </div>
       </div>
+
+      {/* Prompt Manager (Canonical Compilation & Provenance) */}
+      <PromptManager
+        runId={task.runId}
+        taskId={task.id}
+        taskState={task.state}
+      />
 
       {/* Diff Viewer */}
       <div>
