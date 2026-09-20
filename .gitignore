@@ -4,6 +4,7 @@
 
 # Runtime evidence — NEVER commit execution artifacts
 .gravitas/
+codex-qualification.json
 
 # Node / npm
 node_modules/

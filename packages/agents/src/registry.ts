@@ -13,6 +13,10 @@ import {
   type CapabilityGrant,
   type TaskRequirement,
 } from './grants.js'
+import {
+  isQualificationEvidenceValid,
+  type QualificationEvidence,
+} from './qualification.js'
 
 export const CANONICAL_AGENTS: readonly AgentDescriptor[] = Object.freeze([
   {
@@ -109,6 +113,7 @@ export interface AgentRegistry {
   findEligible(requirement: TaskRequirement): readonly AgentDescriptor[]
   requestGrant(requirement: TaskRequirement, preferredAgentId?: string | undefined): CapabilityGrant
   updateStatus(id: string, status: QualificationStatus, notes?: string | undefined): void
+  applyQualificationEvidence(evidence: QualificationEvidence, currentCodexVersion: string): boolean
   reset(): void
 }
 
@@ -173,11 +178,44 @@ export class DefaultAgentRegistry implements AgentRegistry {
     const updated: AgentDescriptor = {
       ...existing,
       qualificationStatus: status,
-      isProductionQualified: status === 'READY' && existing.isProductionQualified,
+      isProductionQualified: status === 'READY',
       ...(notes !== undefined ? { qualificationNotes: notes } : {}),
     }
 
     this.agents.set(id, Object.freeze(updated))
+  }
+
+  public applyQualificationEvidence(
+    evidence: QualificationEvidence,
+    currentCodexVersion: string
+  ): boolean {
+    const validity = isQualificationEvidenceValid(evidence, currentCodexVersion)
+    const existing = this.get('codex-worker')
+    if (!existing) return false
+
+    if (!validity.valid || evidence.decision !== 'APPROVED') {
+      const updated: AgentDescriptor = {
+        ...existing,
+        name: 'Codex Experimental Worker (Unqualified)',
+        qualificationStatus: 'UNQUALIFIED',
+        isProductionQualified: false,
+        maxConcurrency: 0,
+        qualificationNotes: validity.reason ?? evidence.rejectionReason ?? 'Qualification evidence rejected or invalid.',
+      }
+      this.agents.set('codex-worker', Object.freeze(updated))
+      return false
+    }
+
+    const updated: AgentDescriptor = {
+      ...existing,
+      name: 'Codex AI Worker (Engineering Desk)',
+      qualificationStatus: 'READY',
+      isProductionQualified: true,
+      maxConcurrency: 2,
+      qualificationNotes: `Qualified on ${evidence.qualifiedAt} (${evidence.codexVersion})`,
+    }
+    this.agents.set('codex-worker', Object.freeze(updated))
+    return true
   }
 
   public reset(): void {

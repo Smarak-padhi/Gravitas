@@ -14,6 +14,10 @@ import {
   type TaskRequirement,
 } from './grants.js'
 import { DefaultAgentRegistry, CANONICAL_AGENTS } from './registry.js'
+import {
+  buildQualificationEvidence,
+  QUALIFICATION_EXPERIMENT_SPECS,
+} from './qualification.js'
 
 describe('Agent Capability Vocabulary & Security', () => {
   it('registers all canonical capabilities with valid domains', () => {
@@ -238,5 +242,81 @@ describe('DefaultAgentRegistry', () => {
     // Reset restores it
     registry.reset()
     expect(registry.get('playwright-browser-qa')?.qualificationStatus).toBe('READY')
+  })
+
+  it('transitions codex-worker to READY upon valid APPROVED qualification evidence', () => {
+    const allPassed = QUALIFICATION_EXPERIMENT_SPECS.map((s) => ({
+      experimentId: s.id,
+      title: s.title,
+      mandatory: s.mandatory,
+      passed: true,
+      durationMs: 50,
+    }))
+
+    const evidence = buildQualificationEvidence('codex-cli 0.153.4', allPassed)
+    expect(evidence.decision).toBe('APPROVED')
+
+    // Initial state: UNQUALIFIED
+    const codexBefore = registry.get('codex-worker')!
+    expect(codexBefore.qualificationStatus).toBe('UNQUALIFIED')
+    expect(codexBefore.isProductionQualified).toBe(false)
+
+    // Apply valid evidence
+    const applied = registry.applyQualificationEvidence(evidence, 'codex-cli 0.153.4')
+    expect(applied).toBe(true)
+
+    // After state: READY and production qualified
+    const codexAfter = registry.get('codex-worker')!
+    expect(codexAfter.qualificationStatus).toBe('READY')
+    expect(codexAfter.isProductionQualified).toBe(true)
+
+    // Now eligible for filesystem task
+    const req: TaskRequirement = {
+      taskId: 'task_math',
+      requiredCapabilities: ['filesystem.read', 'filesystem.write'],
+      requireProductionReady: true,
+    }
+    const eligible = registry.findEligible(req)
+    expect(eligible.some((a) => a.id === 'codex-worker')).toBe(true)
+  })
+
+  it('rejects codex-worker transition when qualification version mismatches', () => {
+    const allPassed = QUALIFICATION_EXPERIMENT_SPECS.map((s) => ({
+      experimentId: s.id,
+      title: s.title,
+      mandatory: s.mandatory,
+      passed: true,
+      durationMs: 50,
+    }))
+
+    const evidence = buildQualificationEvidence('codex-cli 0.150.0', allPassed)
+
+    // Apply with mismatched installed version
+    const applied = registry.applyQualificationEvidence(evidence, 'codex-cli 0.153.4')
+    expect(applied).toBe(false)
+
+    const codex = registry.get('codex-worker')!
+    expect(codex.qualificationStatus).toBe('UNQUALIFIED')
+    expect(codex.isProductionQualified).toBe(false)
+  })
+
+  it('rejects codex-worker transition when qualification evidence decision is REJECTED', () => {
+    const withFailures = QUALIFICATION_EXPERIMENT_SPECS.map((s) => ({
+      experimentId: s.id,
+      title: s.title,
+      mandatory: s.mandatory,
+      passed: s.id !== 'head-protection', // Mandatory failure
+      durationMs: 50,
+    }))
+
+    const evidence = buildQualificationEvidence('codex-cli 0.153.4', withFailures)
+    expect(evidence.decision).toBe('REJECTED')
+
+    const applied = registry.applyQualificationEvidence(evidence, 'codex-cli 0.153.4')
+    expect(applied).toBe(false)
+
+    const codex = registry.get('codex-worker')!
+    expect(codex.qualificationStatus).toBe('UNQUALIFIED')
+    expect(codex.isProductionQualified).toBe(false)
   })
 })

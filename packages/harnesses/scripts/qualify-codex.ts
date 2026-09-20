@@ -24,9 +24,8 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Resolve project root (script is in packages/harnesses/scripts/)
-const __filename = fileURLToPath(import.meta.url)
-const projectRoot = resolve(__filename, '..', '..', '..', '..', '..')
+// Resolve project root (script is run from repo root)
+const projectRoot = process.cwd()
 
 // Dynamically import package modules (after build via tsx)
 const { CodexHarness, resolveCodexExecutable, parseCodexJsonlOutput } = await import('../src/codex.js')
