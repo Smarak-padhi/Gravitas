@@ -8,10 +8,11 @@
  * In-memory only. Server restarts clear state.
  */
 
-import type { ExecutionContract, GravitasEvent, Run, Task } from '@gravitas/core'
+import type { BrowserQaResult, ExecutionContract, GravitasEvent, Run, Task } from '@gravitas/core'
 import type { ManagedCompiledPrompt, ProjectPromptContext } from '@gravitas/prompts'
 import type { MutationCapture } from '@gravitas/harnesses'
 import type { VerificationPlan, VerificationResult } from '@gravitas/verifier'
+import { DefaultAgentRegistry, type AgentRegistry } from '@gravitas/agents'
 import type { TaskEvidenceRef } from './types.js'
 
 export const DEFAULT_MAX_RECENT_EVENTS = 1000
@@ -28,6 +29,8 @@ export class InMemoryRegistry {
   private readonly mutations = new Map<string, MutationCapture>()
   private readonly verifications = new Map<string, VerificationResult>()
   private readonly verificationPlans = new Map<string, VerificationPlan>()
+  private readonly browserQaResults = new Map<string, BrowserQaResult>()
+  private readonly agentRegistry = new DefaultAgentRegistry()
   private readonly compiledPrompts = new Map<string, ManagedCompiledPrompt>()
   private readonly projectContexts = new Map<string, ProjectPromptContext>()
   private readonly events: GravitasEvent[] = []
@@ -135,6 +138,22 @@ export class InMemoryRegistry {
     return this.verificationPlans.get(runId)
   }
 
+  // --- Browser QA operations ---
+
+  public setBrowserQaResult(taskId: string, result: BrowserQaResult): void {
+    this.browserQaResults.set(taskId, Object.freeze({ ...result }))
+  }
+
+  public getBrowserQaResult(taskId: string): BrowserQaResult | undefined {
+    return this.browserQaResults.get(taskId)
+  }
+
+  // --- Agent Registry operations ---
+
+  public getAgentRegistry(): AgentRegistry {
+    return this.agentRegistry
+  }
+
   // --- Event operations (Bounded FIFO buffer) ---
 
   public recordEvent(event: GravitasEvent): void {
@@ -191,6 +210,8 @@ export class InMemoryRegistry {
     this.mutations.clear()
     this.verifications.clear()
     this.verificationPlans.clear()
+    this.browserQaResults.clear()
+    this.agentRegistry.reset()
     this.compiledPrompts.clear()
     this.projectContexts.clear()
     this.events.length = 0

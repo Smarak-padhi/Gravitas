@@ -41,6 +41,7 @@ export function Tabs<T extends string = string>({
           <button
             key={item.id}
             role="tab"
+            data-testid={`tab-${item.id}`}
             aria-selected={isActive}
             onClick={() => onChange(item.id)}
             style={{

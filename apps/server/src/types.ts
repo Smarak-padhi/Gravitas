@@ -4,6 +4,7 @@
  */
 
 import type {
+  BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
   Run,
@@ -133,6 +134,7 @@ export interface TaskDetailResponse {
     readonly passedCommands: number
     readonly failedCommands: number
   } | undefined
+  readonly browserQa?: BrowserQaResult | undefined
   readonly evidenceAvailable: boolean
 }
 

@@ -919,4 +919,144 @@ test('adds numbers correctly', () => {
     await page.screenshot({ path: join(screenshotsDir, '14-reduced-motion.png') })
     await page.emulateMedia({ reducedMotion: 'no-preference' })
   })
+
+  // =========================================================================
+  // 08. WAVE 9: CAPABILITY REGISTRY V0 & DETERMINISTIC BROWSER QA (SCREENSHOTS 17-25)
+  // =========================================================================
+  test('08. Wave 9: Capability Registry V0 & Deterministic Browser QA Verification (Screenshots 17-25)', async ({
+    page,
+  }) => {
+    test.setTimeout(90000)
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    await page.goto('http://127.0.0.1:5173/')
+    await expect(page.getByText('CONNECTED')).toBeVisible()
+
+    // -----------------------------------------------------------------------
+    // Stage 1: Agent Registry View & Codex Disqualification Proof
+    // -----------------------------------------------------------------------
+    await page.click('[data-testid="tab-AGENTS"]')
+    await expect(page.locator('[data-testid="agent-registry-view"]')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('[data-testid="codex-disqualification-notice"]')).toBeVisible()
+    await expect(page.locator('[data-testid="agent-card-codex-worker"]')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '24-agent-registry-view.png') })
+
+    // -----------------------------------------------------------------------
+    // Stage 2: Passing Browser QA Run
+    // -----------------------------------------------------------------------
+    await page.click('button[role="tab"]:has-text("OFFICE")')
+    await page.click('button:has-text("+ New Run")')
+    await page.click('[data-testid="composer-tab-dag"]')
+
+    const passTask = [
+      {
+        id: 'task-qa-pass-1',
+        title: 'Tactile Atelier Living HQ Validation',
+        objective: 'Render living office and verify header in loopback Playwright sandbox',
+        dependencies: [],
+        requiresApproval: true,
+        browserQa: {
+          id: 'qa_contract_pass_1',
+          actions: [
+            { type: 'navigate', url: 'http://127.0.0.1:5173/' },
+            { type: 'assertVisible', selector: 'header' },
+            { type: 'screenshot', name: 'qa-verified-living-hq.png' },
+          ],
+        },
+      },
+    ]
+
+    await page.fill('[data-testid="composer-dag-json"]', JSON.stringify(passTask, null, 2))
+    await page.fill('#composer-goal', 'Wave 9 Golden Loop: Passing Browser QA')
+    await page.fill('[data-testid="criterion-desc-0"]', 'All Playwright browser steps pass with 0 errors')
+    await page.fill('#composer-constraints', '')
+    await page.click('button:has-text("Create Run")')
+
+    // Execute run
+    await expect(page.locator('button:has-text("▶ Execute Golden Loop")')).toBeVisible({ timeout: 10000 })
+    await page.click('button:has-text("▶ Execute Golden Loop")')
+
+    // Wait for WAITING_APPROVAL state
+    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 45000 })
+
+    // Screenshot 18: Verification Lab with Browser QA Passed
+    const labFloor = page.locator('[data-testid="verification-lab-floor"]')
+    await expect(labFloor).toBeVisible()
+    const qaBadge = page.locator('[data-testid="browser-qa-status-badge"]')
+    await expect(qaBadge).toContainText('RUNTIME QA VERIFIED')
+    await page.screenshot({ path: join(screenshotsDir, '18-verification-lab-browser-qa-passed.png') })
+
+    // Screenshot 20: Task Inspector 4 Authorities Breakdown
+    // Verify all 4 authorities are present in Task Inspector
+    await expect(page.locator('[data-testid="authority-section-worker"]')).toBeVisible()
+    await expect(page.locator('[data-testid="authority-section-verifier"]')).toBeVisible()
+    await expect(page.locator('[data-testid="authority-section-browser-qa"]')).toBeVisible()
+    await expect(page.locator('[data-testid="authority-section-human"]')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '20-task-inspector-4-authorities.png') })
+
+    // Screenshot 21: Browser QA Screenshot Artifact Preview
+    const qaThumbnail = page.locator('[data-testid="browser-qa-screenshot-thumbnail"]')
+    await expect(qaThumbnail).toBeVisible({ timeout: 10000 })
+    await page.screenshot({ path: join(screenshotsDir, '21-browser-qa-screenshot-artifact.png') })
+
+    // Approve task -> transitions to APPROVED
+    await page.click('button:has-text("✓ Approve Result")')
+    await expect(page.locator('[data-testid="approval-action-box"]')).not.toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('APPROVED').first()).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '25-golden-loop-e2e-approved.png') })
+
+    // -----------------------------------------------------------------------
+    // Stage 3: Failing Browser QA Run
+    // -----------------------------------------------------------------------
+    await page.click('button:has-text("+ New Run")')
+    await page.click('[data-testid="composer-tab-dag"]')
+
+    const failTask = [
+      {
+        id: 'task-qa-reject-1',
+        title: 'Component QA Rejection',
+        objective: 'Asserts nonexistent element, rejecting candidate and halting golden loop',
+        dependencies: [],
+        requiresApproval: true,
+        browserQa: {
+          id: 'qa_contract_fail_1',
+          actions: [
+            { type: 'navigate', url: 'http://127.0.0.1:5173/' },
+            { type: 'assertVisible', selector: '#nonexistent-faulty-element-404', timeoutMs: 500 },
+          ],
+        },
+      },
+    ]
+
+    await page.fill('[data-testid="composer-dag-json"]', JSON.stringify(failTask, null, 2))
+    await page.fill('#composer-goal', 'Wave 9 Golden Loop: Failing Browser QA')
+    await page.fill('[data-testid="criterion-desc-0"]', 'Must reject on assertion error')
+    await page.fill('#composer-constraints', '')
+    await page.click('button:has-text("Create Run")')
+
+    // Execute run
+    await expect(page.locator('button:has-text("▶ Execute Golden Loop")')).toBeVisible({ timeout: 10000 })
+    await page.click('button:has-text("▶ Execute Golden Loop")')
+
+    // Wait for FAILED state
+    await expect(page.locator('[data-testid="browser-qa-failure-alert"]').first()).toBeVisible({ timeout: 45000 })
+
+    // Screenshot 19: Verification Lab with Browser QA Failed
+    await page.screenshot({ path: join(screenshotsDir, '19-verification-lab-browser-qa-failed.png') })
+
+    // Screenshot 22: Activity Timeline with Browser QA Events
+    await page.click('button[role="tab"]:has-text("TIMELINE")')
+    await expect(page.locator('[data-testid="activity-timeline-view"]')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '22-timeline-browser-qa-events.png') })
+
+    // Screenshot 23: Human Inbox Drawer with Browser QA Rejection Alert
+    await page.click('[data-testid="human-inbox-trigger"]')
+    await expect(page.locator('[data-testid="human-inbox-drawer"]')).toBeVisible()
+    await expect(page.getByText('Browser QA Rejected: Component QA Rejection')).toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '23-inbox-browser-qa-rejection.png') })
+    await page.click('button[aria-label="Close inbox"]')
+
+    // Screenshot 17: Verification Lab Desk View
+    await page.click('button[role="tab"]:has-text("OFFICE")')
+    await page.screenshot({ path: join(screenshotsDir, '17-verification-lab-browser-qa-active.png') })
+  })
 })

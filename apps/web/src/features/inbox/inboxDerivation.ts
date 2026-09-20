@@ -60,11 +60,15 @@ export function deriveInboxItems(input: DeriveInboxInput): readonly InboxItem[] 
 
     // 2. Scan tasks for FAILED
     if (task.state === 'FAILED') {
+      const isBrowserQaFailure = Boolean(
+        task.failureReason?.toLowerCase().includes('browser') ||
+        task.failureReason?.toLowerCase().includes('qa')
+      )
       items.push({
         id: `inbox_failed_${task.runId}_${task.id}`,
         severity: 'CRITICAL',
-        title: `Task Failed: ${task.title}`,
-        summary: `Task [${task.id}] failed during worker execution or verification.`,
+        title: isBrowserQaFailure ? `Browser QA Rejected: ${task.title}` : `Task Failed: ${task.title}`,
+        summary: task.failureReason || `Task [${task.id}] failed during worker execution or verification.`,
         runId: task.runId,
         taskId: task.id,
         timestamp: task.updatedAt || task.createdAt,

@@ -4,7 +4,10 @@
  */
 
 import type {
+  AgentCapabilityItem,
+  AgentDescriptor,
   ApiErrorPayload,
+  BrowserQaResult,
   CreateRunInput,
   CreateRunResponse,
   HealthResponse,
@@ -153,5 +156,19 @@ export const api = {
     return request<TaskPromptResponse>(
       `/api/v1/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}/prompt`
     )
+  },
+
+  getBrowserQa(runId: string, taskId: string): Promise<BrowserQaResult> {
+    return request<BrowserQaResult>(
+      `/api/v1/runs/${encodeURIComponent(runId)}/tasks/${encodeURIComponent(taskId)}/browser-qa`
+    )
+  },
+
+  listAgents(): Promise<readonly AgentDescriptor[]> {
+    return request<readonly AgentDescriptor[]>('/api/v1/agents')
+  },
+
+  listCapabilities(): Promise<readonly AgentCapabilityItem[]> {
+    return request<readonly AgentCapabilityItem[]>('/api/v1/capabilities')
   },
 }

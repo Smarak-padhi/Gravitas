@@ -163,45 +163,148 @@ export const VerificationLabFloor: React.FC<VerificationLabFloorProps> = ({
 
         {/* Browser QA Bench */}
         <div
+          data-testid="browser-qa-bench"
           style={{
             padding: '16px',
-            backgroundColor: 'var(--hq-surface-parchment, #FCFAF6)',
-            border: '1px solid var(--hq-border-subtle, #E3DFD5)',
+            backgroundColor:
+              browserQaCoworker.pose === 'WORKING'
+                ? '#F0FDFA'
+                : browserQaCoworker.pose === 'FAILED'
+                  ? '#FEF2F2'
+                  : browserQaCoworker.pose === 'DONE'
+                    ? '#F0FDF4'
+                    : 'var(--hq-surface-parchment, #FCFAF6)',
+            border: `1.5px solid ${
+              browserQaCoworker.pose === 'WORKING'
+                ? '#0D9488'
+                : browserQaCoworker.pose === 'FAILED'
+                  ? '#EF4444'
+                  : browserQaCoworker.pose === 'DONE'
+                    ? '#10B981'
+                    : 'var(--hq-border-subtle, #E3DFD5)'
+            }`,
             borderRadius: '6px',
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <CoworkerAvatar identity={browserQaCoworker.identity} pose={browserQaCoworker.pose} size={50} />
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--hq-text-primary, #1C1E21)' }}>
-                {browserQaCoworker.identity.name}
-              </div>
-              <div style={{ fontSize: '11px', color: '#0D9488' }}>
-                {browserQaCoworker.identity.roleTitle}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <CoworkerAvatar identity={browserQaCoworker.identity} pose={browserQaCoworker.pose} size={50} />
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--hq-text-primary, #1C1E21)' }}>
+                  {browserQaCoworker.identity.name}
+                </div>
+                <div style={{ fontSize: '11px', color: '#0D9488', fontWeight: 700 }}>
+                  {browserQaCoworker.identity.roleTitle}
+                </div>
               </div>
             </div>
+            <span
+              data-testid="browser-qa-status-badge"
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                fontFamily: 'var(--font-mono, monospace)',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                backgroundColor:
+                  browserQaCoworker.pose === 'WORKING'
+                    ? '#CCFBF1'
+                    : browserQaCoworker.pose === 'FAILED'
+                      ? '#FEE2E2'
+                      : browserQaCoworker.pose === 'DONE'
+                        ? '#DCFCE7'
+                        : '#F3F4F6',
+                color:
+                  browserQaCoworker.pose === 'WORKING'
+                    ? '#0F766E'
+                    : browserQaCoworker.pose === 'FAILED'
+                      ? '#B91C1C'
+                      : browserQaCoworker.pose === 'DONE'
+                        ? '#15803D'
+                        : '#6B7280',
+                border: `1px solid ${
+                  browserQaCoworker.pose === 'WORKING'
+                    ? '#5EEAD4'
+                    : browserQaCoworker.pose === 'FAILED'
+                      ? '#FCA5A5'
+                      : browserQaCoworker.pose === 'DONE'
+                        ? '#86EFAC'
+                        : '#E5E7EB'
+                }`,
+              }}
+            >
+              {browserQaCoworker.pose === 'WORKING'
+                ? '● EXECUTING BROWSER QA'
+                : browserQaCoworker.pose === 'FAILED'
+                  ? '⚠ QA REJECTED'
+                  : browserQaCoworker.pose === 'DONE'
+                    ? '✓ RUNTIME QA VERIFIED'
+                    : 'STANDBY'}
+            </span>
           </div>
 
           <p style={{ fontSize: '11px', color: 'var(--hq-text-secondary, #555B66)', margin: 0 }}>
             {browserQaCoworker.identity.bio}
           </p>
 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--hq-text-secondary, #555B66)' }}>Runtime Browser Engine:</span>
+              <strong style={{ color: '#0F766E', fontFamily: 'monospace' }}>Playwright (Loopback Sandbox)</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--hq-text-secondary, #555B66)' }}>Observation Capture:</span>
+              <strong style={{ color: browserQaCoworker.pose === 'FAILED' ? '#B91C1C' : '#059669' }}>
+                {browserQaCoworker.pose === 'FAILED'
+                  ? 'ASSERTION FAILURE / ERROR LOGGED'
+                  : browserQaCoworker.pose === 'DONE'
+                    ? 'SCREENSHOT & CONSOLE CLEAN'
+                    : browserQaCoworker.pose === 'WORKING'
+                      ? 'SAMPLING DOM & ERRORS...'
+                      : 'ARMED'}
+              </strong>
+            </div>
+          </div>
+
+          {browserQaCoworker.failureReason && (
+            <div
+              data-testid="browser-qa-failure-alert"
+              style={{
+                padding: '8px 10px',
+                backgroundColor: '#FEF2F2',
+                border: '1px solid #FCA5A5',
+                borderRadius: '4px',
+                fontSize: '11px',
+                color: '#991B1B',
+                lineHeight: 1.4,
+              }}
+            >
+              <strong>QA Rejection:</strong> {browserQaCoworker.failureReason}
+            </div>
+          )}
+
           {/* Matrix Wall Viewports Preview */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', fontSize: '10px' }}>
             <div style={{ padding: '6px', backgroundColor: '#FFFFFF', border: '1px solid var(--hq-border-subtle, #E3DFD5)', borderRadius: '3px', textAlign: 'center' }}>
               <div style={{ fontWeight: 700 }}>1920×1080</div>
-              <div style={{ color: '#0D9488' }}>Desktop OK</div>
+              <div style={{ color: browserQaCoworker.pose === 'FAILED' ? '#DC2626' : '#0D9488' }}>
+                {browserQaCoworker.pose === 'FAILED' ? 'Assertion Failed' : 'Desktop OK'}
+              </div>
             </div>
             <div style={{ padding: '6px', backgroundColor: '#FFFFFF', border: '1px solid var(--hq-border-subtle, #E3DFD5)', borderRadius: '3px', textAlign: 'center' }}>
               <div style={{ fontWeight: 700 }}>1440×900</div>
-              <div style={{ color: '#0D9488' }}>Laptop OK</div>
+              <div style={{ color: browserQaCoworker.pose === 'FAILED' ? '#DC2626' : '#0D9488' }}>
+                {browserQaCoworker.pose === 'FAILED' ? 'Error Logged' : 'Laptop OK'}
+              </div>
             </div>
             <div style={{ padding: '6px', backgroundColor: '#FFFFFF', border: '1px solid var(--hq-border-subtle, #E3DFD5)', borderRadius: '3px', textAlign: 'center' }}>
               <div style={{ fontWeight: 700 }}>1024×768</div>
-              <div style={{ color: '#0D9488' }}>No Scrollbar</div>
+              <div style={{ color: browserQaCoworker.pose === 'FAILED' ? '#DC2626' : '#0D9488' }}>
+                {browserQaCoworker.pose === 'FAILED' ? 'Viewport Alert' : 'No Scrollbar'}
+              </div>
             </div>
           </div>
         </div>

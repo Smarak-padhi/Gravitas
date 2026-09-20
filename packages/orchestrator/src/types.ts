@@ -5,6 +5,7 @@
 import type {
   AcceptanceCriterion,
   AgentRole,
+  BrowserQaContract,
   EvidenceRequirement,
   RunStatus,
   Task,
@@ -24,6 +25,8 @@ export interface TaskPlanDefinition {
   readonly acceptanceCriteria?: readonly AcceptanceCriterion[] | undefined
   readonly requiresApproval?: boolean | undefined
   readonly role?: AgentRole | undefined
+  readonly requiredCapabilities?: readonly string[] | undefined
+  readonly browserQa?: BrowserQaContract | undefined
   readonly verificationPlan?: VerificationPlan | undefined
   readonly requiredEvidence?: readonly EvidenceRequirement[] | undefined
 }

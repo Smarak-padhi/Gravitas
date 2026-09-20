@@ -448,7 +448,220 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
         </div>
       </div>
 
-      {/* AUTHORITY SECTION 3: HUMAN OPERATOR REVIEW GATE */}
+      {/* AUTHORITY SECTION 3: DETERMINISTIC BROWSER QA (RUNTIME OBSERVATION GATE) */}
+      <div
+        data-testid="authority-section-browser-qa"
+        style={{
+          padding: '14px 16px',
+          backgroundColor: 'var(--bg-panel)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-lg)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: '8px',
+            borderBottom: '1px solid var(--border-subtle)',
+          }}
+        >
+          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.4px' }}>
+            SECTION 3 · RUNTIME BROWSER QA: DETERMINISTIC OBSERVATION
+          </div>
+          <span
+            style={{
+              fontSize: '9px',
+              fontFamily: 'var(--font-mono)',
+              padding: '2px 6px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: 'rgba(13, 148, 136, 0.1)',
+              border: '1px solid rgba(13, 148, 136, 0.3)',
+              color: '#0D9488',
+              fontWeight: 700,
+            }}
+          >
+            AUTHORITY: BROWSER QA
+          </span>
+        </div>
+
+        {taskDetail?.browserQa ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Result Status:</span>
+              <span
+                data-testid="browser-qa-result-status"
+                style={{
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  color:
+                    taskDetail.browserQa.status === 'PASSED'
+                      ? 'var(--state-success-fg)'
+                      : 'var(--state-failure-fg)',
+                }}
+              >
+                {taskDetail.browserQa.status}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Contract ID:</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>
+                {taskDetail.browserQa.contractId}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Execution Duration:</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                {taskDetail.browserQa.durationMs}ms
+              </span>
+            </div>
+
+            {/* Steps execution trace */}
+            <div>
+              <div style={{ color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                Executed Actions DSL ({taskDetail.browserQa.steps.length} steps):
+              </div>
+              <div
+                data-testid="browser-qa-step-list"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  backgroundColor: 'var(--bg-app)',
+                  padding: '8px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                {taskDetail.browserQa.steps.map((step, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '10px',
+                    }}
+                  >
+                    <span>
+                      {step.action.type === 'navigate' && `🌐 navigate: ${step.action.url}`}
+                      {step.action.type === 'click' && `🖱 click: ${step.action.selector}`}
+                      {step.action.type === 'fill' && `⌨ fill: ${step.action.selector}`}
+                      {step.action.type === 'assertVisible' && `👁 assertVisible: ${step.action.selector}`}
+                      {step.action.type === 'assertText' && `📝 assertText: ${step.action.selector}`}
+                      {step.action.type === 'screenshot' && `📸 screenshot (${step.action.name})`}
+                    </span>
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        color: step.status === 'PASSED' ? 'var(--state-success-fg)' : 'var(--state-failure-fg)',
+                      }}
+                    >
+                      {step.status} ({step.durationMs}ms)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Console & Page Errors */}
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Console Errors: </span>
+                <strong
+                  style={{
+                    color:
+                      taskDetail.browserQa.observations.consoleErrors.length > 0
+                        ? 'var(--state-failure-fg)'
+                        : 'var(--state-success-fg)',
+                  }}
+                >
+                  {taskDetail.browserQa.observations.consoleErrors.length}
+                </strong>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Page Errors: </span>
+                <strong
+                  style={{
+                    color:
+                      taskDetail.browserQa.observations.pageErrors.length > 0
+                        ? 'var(--state-failure-fg)'
+                        : 'var(--state-success-fg)',
+                  }}
+                >
+                  {taskDetail.browserQa.observations.pageErrors.length}
+                </strong>
+              </div>
+            </div>
+
+            {/* Failure Reason Alert */}
+            {taskDetail.browserQa.error && (
+              <div
+                data-testid="browser-qa-failure-alert"
+                style={{
+                  padding: '8px 10px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid var(--state-failure-border)',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--state-failure-fg)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                }}
+              >
+                ⚠ Assertion Failure: {taskDetail.browserQa.error}
+              </div>
+            )}
+
+            {/* Screenshot Preview */}
+            {taskDetail.browserQa.screenshots.length > 0 && taskDetail.browserQa.screenshots[0]?.base64 && (
+              <div style={{ marginTop: '6px' }}>
+                <div style={{ color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                  Runtime Verification Artifact (DOM Screenshot):
+                </div>
+                <div
+                  style={{
+                    padding: '6px',
+                    backgroundColor: 'var(--bg-app)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <img
+                    data-testid="browser-qa-screenshot-thumbnail"
+                    src={`data:image/png;base64,${taskDetail.browserQa.screenshots[0].base64}`}
+                    alt="Browser QA Verification Screenshot"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '180px',
+                      borderRadius: '3px',
+                      objectFit: 'contain',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            {task.state === 'VERIFYING'
+              ? 'Browser QA runtime validation in progress...'
+              : task.state === 'WAITING_APPROVAL' || task.state === 'APPROVED' || task.state === 'SUCCEEDED'
+                ? 'Deterministic Browser QA verified or not required for this task.'
+                : 'Browser QA pending deterministic verifier stage.'}
+          </div>
+        )}
+      </div>
+
+      {/* AUTHORITY SECTION 4: HUMAN OPERATOR REVIEW GATE */}
       {isWaitingApproval ? (
         <div
           data-testid="authority-section-human"
@@ -480,7 +693,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
                 letterSpacing: '0.4px',
               }}
             >
-              SECTION 3 · OPERATOR GATE: APPROVAL / REJECTION
+              SECTION 4 · OPERATOR GATE: APPROVAL / REJECTION
             </div>
             <span
               style={{
@@ -671,7 +884,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
             <span style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>
-              SECTION 3 · OPERATOR GATE:
+              SECTION 4 · OPERATOR GATE:
             </span>
             <span style={{ color: 'var(--text-muted)' }}>
               {task.state === 'APPROVED'

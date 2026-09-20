@@ -1,10 +1,9 @@
 {
-  "name": "@gravitas/server",
+  "name": "@gravitas/browser-qa",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Gravitas local control plane HTTP API and live event stream",
-  "main": "dist/index.js",
+  "description": "Gravitas deterministic browser QA runner and security boundary",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -17,13 +16,7 @@
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@gravitas/agents": "*",
-    "@gravitas/browser-qa": "*",
     "@gravitas/core": "*",
-    "@gravitas/git": "*",
-    "@gravitas/harnesses": "*",
-    "@gravitas/orchestrator": "*",
-    "@gravitas/prompts": "*",
-    "@gravitas/verifier": "*"
+    "@playwright/test": "^1.63.0"
   }
 }

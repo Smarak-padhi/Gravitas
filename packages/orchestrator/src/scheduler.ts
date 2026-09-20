@@ -10,6 +10,7 @@
  * 6. Verified result commits: engine creates commits upon verification / approval.
  */
 
+import { join } from 'node:path'
 import {
   applyVerificationOutcome,
   executeVerification,
@@ -42,10 +43,14 @@ import {
   createWorkerStartedEvent,
   createVerificationFinishedEvent,
   createVerificationStartedEvent,
+  createBrowserQaStartedEvent,
+  createBrowserQaCompletedEvent,
+  createBrowserQaFailedEvent,
   evaluateTaskReadiness,
   generateEventId,
   isTerminalState,
   transitionTask,
+  type BrowserQaResult,
   type ExecutionContract,
   type GravitasEvent,
   type RunStatus,
@@ -54,6 +59,8 @@ import {
   type TaskState,
 } from '@gravitas/core'
 import { executeGit, removeWorktree, type WorktreeAllocation } from '@gravitas/git'
+import { executeBrowserQa } from '@gravitas/browser-qa'
+import type { AgentRegistry } from '@gravitas/agents'
 import { composeTaskWorktree, materializeVerifiedResult } from './composition.js'
 import { CompositionConflictError, OrchestratorExecutionError } from './errors.js'
 import type { OrchestratorResult, RunPlan, SchedulerTelemetry, TaskPlanDefinition } from './types.js'
@@ -73,6 +80,8 @@ export interface BoundedSchedulerOptions {
   readonly onVerification?: ((taskId: string, verification: any) => void) | undefined
   readonly onEvidence?: ((taskId: string, evidenceRef: any) => void) | undefined
   readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
+  readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
+  readonly agentRegistry?: AgentRegistry | undefined
   readonly autoPauseOnWaitingApproval?: boolean | undefined
 }
 
@@ -94,6 +103,8 @@ export class BoundedScheduler {
   private readonly onVerification?: ((taskId: string, verification: any) => void) | undefined
   private readonly onEvidence?: ((taskId: string, evidenceRef: any) => void) | undefined
   private readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
+  private readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
+  private readonly agentRegistry?: AgentRegistry | undefined
 
   private readonly tasks = new Map<string, Task>()
   private readonly taskDefinitions = new Map<string, TaskPlanDefinition>()
@@ -128,6 +139,8 @@ export class BoundedScheduler {
     this.onVerification = options.onVerification
     this.onEvidence = options.onEvidence
     this.onCompiledPrompt = options.onCompiledPrompt
+    this.onBrowserQa = options.onBrowserQa
+    this.agentRegistry = options.agentRegistry
     this.autoPauseOnWaitingApproval = options.autoPauseOnWaitingApproval ?? false
 
     this.initializeTasks()
@@ -155,6 +168,8 @@ export class BoundedScheduler {
         acceptanceCriteria: taskDef.acceptanceCriteria ?? [],
         requiresApproval: taskDef.requiresApproval ?? true,
         ...(taskDef.role ? { role: taskDef.role } : {}),
+        ...(taskDef.requiredCapabilities ? { requiredCapabilities: taskDef.requiredCapabilities } : {}),
+        ...(taskDef.browserQa ? { browserQa: taskDef.browserQa } : {}),
         createdAt: now,
         updatedAt: now,
       }
@@ -368,6 +383,20 @@ export class BoundedScheduler {
     // 1. Task transitions READY -> RUNNING
     this.updateTaskState(taskId, 'RUNNING', 'Dispatched: composing worktree and preparing execution')
 
+    // 1b. Verify agent capabilities if AgentRegistry is provided
+    if (this.agentRegistry && taskDef?.requiredCapabilities && taskDef.requiredCapabilities.length > 0) {
+      try {
+        this.agentRegistry.requestGrant({
+          taskId,
+          requiredCapabilities: taskDef.requiredCapabilities,
+          role: taskDef.role,
+        })
+      } catch (grantErr) {
+        this.handleTaskCrash(taskId, `Capability grant refused: ${(grantErr as Error).message}`)
+        return
+      }
+    }
+
     // 2. Compose / Allocate Worktree
     let worktreeAlloc: WorktreeAllocation
     try {
@@ -519,9 +548,107 @@ export class BoundedScheduler {
         mutation,
         verification,
       })
-      this.tasks.set(taskId, outcome.task)
-      this.onTaskUpdated?.(outcome.task)
-      this.onEvent(outcome.event)
+
+      let finalTaskState = outcome.task.state
+      let qaResult: BrowserQaResult | undefined
+
+      if (outcome.task.state === 'FAILED') {
+        // Deterministic verifier failed
+        this.tasks.set(taskId, outcome.task)
+        this.onTaskUpdated?.(outcome.task)
+        this.onEvent(outcome.event)
+      } else if (taskDef?.browserQa) {
+        // Verifier passed, but Browser QA is required — task remains in VERIFYING during QA
+        const browserQa = taskDef.browserQa
+        this.onEvent(
+          createBrowserQaStartedEvent(this.runId, taskId, {
+            contractId: browserQa.id,
+            actionCount: browserQa.actions.length,
+          })
+        )
+
+        try {
+          const qaScreenshotDir = join(
+            this.runtimeRoot,
+            'scratch',
+            this.runId,
+            taskId,
+            'browser-qa-screenshots'
+          )
+          qaResult = await executeBrowserQa({
+            taskId,
+            contract: browserQa,
+            screenshotDir: qaScreenshotDir,
+            headless: true,
+          })
+          this.onBrowserQa?.(taskId, qaResult)
+
+          if (qaResult.status === 'PASSED') {
+            this.onEvent(createBrowserQaCompletedEvent(this.runId, taskId, qaResult))
+            // Browser QA passed! Now transition to WAITING_APPROVAL / SUCCEEDED
+            this.tasks.set(taskId, outcome.task)
+            this.onTaskUpdated?.(outcome.task)
+            this.onEvent(outcome.event)
+          } else {
+            this.onEvent(
+              createBrowserQaFailedEvent(this.runId, taskId, {
+                contractId: browserQa.id,
+                error: qaResult.error ?? 'Browser QA verification failed',
+                result: qaResult,
+              })
+            )
+            finalTaskState = 'FAILED'
+            const failedTask: Task = {
+              ...outcome.task,
+              state: 'FAILED',
+              failureReason: `Browser QA verification rejected candidate: ${qaResult.error ?? 'Assertion failure'}`,
+              updatedAt: new Date().toISOString(),
+            }
+            this.tasks.set(taskId, failedTask)
+            this.onTaskUpdated?.(failedTask)
+            this.onEvent(
+              createTaskStateChangedEvent({
+                runId: this.runId,
+                taskId,
+                fromState: 'VERIFYING',
+                toState: 'FAILED',
+                reason: failedTask.failureReason,
+              })
+            )
+          }
+        } catch (qaErr) {
+          const errorMsg = (qaErr as Error).message || String(qaErr)
+          this.onEvent(
+            createBrowserQaFailedEvent(this.runId, taskId, {
+              contractId: browserQa.id,
+              error: errorMsg,
+            })
+          )
+          finalTaskState = 'FAILED'
+          const failedTask: Task = {
+            ...outcome.task,
+            state: 'FAILED',
+            failureReason: `Browser QA execution error: ${errorMsg}`,
+            updatedAt: new Date().toISOString(),
+          }
+          this.tasks.set(taskId, failedTask)
+          this.onTaskUpdated?.(failedTask)
+          this.onEvent(
+            createTaskStateChangedEvent({
+              runId: this.runId,
+              taskId,
+              fromState: 'VERIFYING',
+              toState: 'FAILED',
+              reason: failedTask.failureReason,
+            })
+          )
+        }
+      } else {
+        // Verifier passed and no Browser QA required
+        this.tasks.set(taskId, outcome.task)
+        this.onTaskUpdated?.(outcome.task)
+        this.onEvent(outcome.event)
+      }
 
       // 10. Write evidence bundle
       const bundleResult = await writeEvidenceBundle({
@@ -549,7 +676,7 @@ export class BoundedScheduler {
         },
         mutation,
         verification,
-        finalTaskState: outcome.task.state,
+        finalTaskState,
       })
 
       this.onEvidence?.(taskId, {
@@ -568,12 +695,12 @@ export class BoundedScheduler {
         })
       )
 
-      // 11. Handle outcome state transitions
-      if (outcome.task.state === 'WAITING_APPROVAL') {
+      // 11. Handle outcome state transitions (gated strictly on finalTaskState)
+      if (finalTaskState === 'WAITING_APPROVAL') {
         this.waitingApprovalTasks.add(taskId)
         this.onEvent(createApprovalRequiredEvent(this.runId, taskId))
         // Note: Do NOT remove worktree yet! Worktree changes are needed for commit upon approval.
-      } else if (outcome.task.state === 'SUCCEEDED') {
+      } else if (finalTaskState === 'SUCCEEDED') {
         this.succeededTasks.add(taskId)
         // Materialize result commit immediately!
         const commitSha = await materializeVerifiedResult({
@@ -588,7 +715,7 @@ export class BoundedScheduler {
 
         // Evaluate downstream tasks
         this.unlockDownstreamTasks(taskId)
-      } else if (outcome.task.state === 'FAILED') {
+      } else if (finalTaskState === 'FAILED') {
         this.failedTasks.add(taskId)
         await this.cleanWorktree(taskId)
         this.propagateFailure(taskId, 'DEPENDENCY_FAILED')

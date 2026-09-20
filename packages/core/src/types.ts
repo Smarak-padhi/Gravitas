@@ -86,6 +86,119 @@ export interface TaskDependency {
 }
 
 /**
+ * Domain of an agent capability.
+ */
+export type CapabilityDomain = 'filesystem' | 'git' | 'verifier' | 'browser' | (string & {})
+
+/**
+ * Declared capability of an agent or requirement of a task.
+ */
+export interface AgentCapability {
+  readonly id: string
+  readonly domain: CapabilityDomain
+  readonly description: string
+}
+
+/**
+ * Browser QA action types supported in deterministic browser verification.
+ */
+export type BrowserQaActionType =
+  | 'navigate'
+  | 'click'
+  | 'fill'
+  | 'assertVisible'
+  | 'assertText'
+  | 'screenshot'
+
+export interface BrowserQaActionNavigate {
+  readonly type: 'navigate'
+  readonly url: string
+}
+
+export interface BrowserQaActionClick {
+  readonly type: 'click'
+  readonly selector: string
+  readonly timeoutMs?: number | undefined
+}
+
+export interface BrowserQaActionFill {
+  readonly type: 'fill'
+  readonly selector: string
+  readonly value: string
+  readonly timeoutMs?: number | undefined
+}
+
+export interface BrowserQaActionAssertVisible {
+  readonly type: 'assertVisible'
+  readonly selector: string
+  readonly timeoutMs?: number | undefined
+}
+
+export interface BrowserQaActionAssertText {
+  readonly type: 'assertText'
+  readonly selector: string
+  readonly expected: string
+  readonly exact?: boolean | undefined
+  readonly timeoutMs?: number | undefined
+}
+
+export interface BrowserQaActionScreenshot {
+  readonly type: 'screenshot'
+  readonly name: string
+}
+
+export type BrowserQaAction =
+  | BrowserQaActionNavigate
+  | BrowserQaActionClick
+  | BrowserQaActionFill
+  | BrowserQaActionAssertVisible
+  | BrowserQaActionAssertText
+  | BrowserQaActionScreenshot
+
+export interface BrowserQaContract {
+  readonly id: string
+  readonly description?: string | undefined
+  readonly baseUrl?: string | undefined
+  readonly actions: readonly BrowserQaAction[]
+  readonly allowedOrigins?: readonly string[] | undefined
+  readonly maxDurationMs?: number | undefined
+}
+
+export interface BrowserQaObservation {
+  readonly consoleErrors: readonly string[]
+  readonly pageErrors: readonly string[]
+  readonly failedRequests: readonly {
+    readonly url: string
+    readonly status: number
+    readonly statusText: string
+  }[]
+}
+
+export interface BrowserQaStepResult {
+  readonly stepIndex: number
+  readonly action: BrowserQaAction
+  readonly status: 'PASSED' | 'FAILED'
+  readonly durationMs: number
+  readonly error?: string | undefined
+}
+
+export interface BrowserQaResult {
+  readonly taskId: string
+  readonly contractId: string
+  readonly status: 'PASSED' | 'FAILED'
+  readonly durationMs: number
+  readonly steps: readonly BrowserQaStepResult[]
+  readonly observations: BrowserQaObservation
+  readonly screenshots: readonly {
+    readonly name: string
+    readonly path: string
+    readonly base64?: string | undefined
+  }[]
+  readonly error?: string | undefined
+  readonly timestamp: string
+}
+
+/**
  * Core Task domain model.
  */
 export interface Task {
@@ -102,6 +215,8 @@ export interface Task {
    * If false (default), successful verification leads directly to SUCCEEDED.
    */
   readonly requiresApproval?: boolean | undefined
+  readonly requiredCapabilities?: readonly string[] | undefined
+  readonly browserQa?: BrowserQaContract | undefined
   readonly createdAt: string
   readonly updatedAt: string
   readonly failureReason?: string | undefined
@@ -169,6 +284,9 @@ export type GravitasEventType =
   | 'TASK_SCHEDULED'
   | 'TASK_RESULT_MATERIALIZED'
   | 'TASK_COMPOSITION_CONFLICT'
+  | 'BROWSER_QA_STARTED'
+  | 'BROWSER_QA_COMPLETED'
+  | 'BROWSER_QA_FAILED'
 
 /**
  * Standard Gravitas Event envelope.

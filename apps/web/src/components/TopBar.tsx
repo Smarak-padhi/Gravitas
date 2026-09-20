@@ -3,7 +3,7 @@ import type { ConnectionStatus } from '../api/useEvents.js'
 import { Tabs, type TabItem } from '../design-system/components/Tabs.js'
 import { Button } from '../design-system/components/Button.js'
 
-export type WorkspaceView = 'OFFICE' | 'GRAPH' | 'EVIDENCE' | 'TIMELINE'
+export type WorkspaceView = 'OFFICE' | 'GRAPH' | 'EVIDENCE' | 'TIMELINE' | 'AGENTS'
 
 export interface TopBarProps {
   readonly connectionStatus: ConnectionStatus
@@ -59,6 +59,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     { id: 'GRAPH', label: 'GRAPH' },
     { id: 'EVIDENCE', label: 'EVIDENCE' },
     { id: 'TIMELINE', label: 'TIMELINE' },
+    { id: 'AGENTS', label: 'AGENTS' },
   ]
 
   return (

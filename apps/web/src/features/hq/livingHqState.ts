@@ -90,11 +90,16 @@ export function deriveLivingHqState(input: DeriveLivingHqInput): LivingHqState {
   const runningTask = tasks.find((t) => t.state === 'RUNNING') ?? null
   const failedTask = tasks.find((t) => t.state === 'FAILED') ?? null
 
+  const validActiveTask = activeTask && tasks.some((t) => t.id === activeTask.id)
+    ? (tasks.find((t) => t.id === activeTask.id) ?? activeTask)
+    : null
+
   const focalTask =
     waitingApprovalTask ??
     verifyingTask ??
     runningTask ??
-    activeTask ??
+    failedTask ??
+    validActiveTask ??
     tasks[0] ??
     null
 
@@ -125,6 +130,9 @@ export function deriveLivingHqState(input: DeriveLivingHqInput): LivingHqState {
   } else if (verifyingTask) {
     activeFloor = 3
     transitStatusText = `Packet [${verifyingTask.id}] at Floor 3 · Verification Cleanroom`
+  } else if (focalTask?.state === 'FAILED') {
+    activeFloor = 3
+    transitStatusText = `Packet [${focalTask.id}] at Floor 3 · Rejection Inspected`
   } else if (focalTask?.state === 'RUNNING') {
     activeFloor = 1
     transitStatusText = `Packet [${focalTask.id}] at Floor 1 · Implementation in Progress`
@@ -206,10 +214,49 @@ export function deriveLivingHqState(input: DeriveLivingHqInput): LivingHqState {
   }
 
   // 5. Browser QA (Floor 3)
-  const browserQaPose: CanonicalPose = verifyingTask ? 'WORKING' : 'IDLE'
+  let browserQaPose: CanonicalPose = 'IDLE'
+  let browserQaFailureReason: string | undefined = undefined
+
+  const browserFailedTask = tasks.find(
+    (t) =>
+      t.state === 'FAILED' &&
+      (Boolean(t.browserQa) ||
+        t.failureReason?.toLowerCase().includes('browser') ||
+        t.failureReason?.toLowerCase().includes('qa') ||
+        t.failureReason?.toLowerCase().includes('assertion') ||
+        t.failureReason?.toLowerCase().includes('selector'))
+  )
+
+  if (verifyingTask && Boolean(verifyingTask.browserQa)) {
+    browserQaPose = 'WORKING'
+  } else if (browserFailedTask) {
+    browserQaPose = 'FAILED'
+    browserQaFailureReason = browserFailedTask.failureReason
+  } else if (waitingApprovalTask || focalTask?.state === 'APPROVED' || focalTask?.state === 'SUCCEEDED') {
+    browserQaPose = 'DONE'
+  } else if (verifyingTask) {
+    browserQaPose = 'WORKING'
+  } else if (focalTask?.state === 'FAILED') {
+    const isBrowserFailure = Boolean(
+      focalTask.failureReason?.toLowerCase().includes('browser') ||
+      focalTask.failureReason?.toLowerCase().includes('qa') ||
+      focalTask.failureReason?.toLowerCase().includes('assertion') ||
+      focalTask.failureReason?.toLowerCase().includes('selector')
+    )
+    if (isBrowserFailure) {
+      browserQaPose = 'FAILED'
+      browserQaFailureReason = focalTask.failureReason
+    } else {
+      browserQaPose = 'IDLE'
+    }
+  }
+
   const browserQaCoworker: CoworkerStationState = {
     identity: COWORKER_IDENTITIES['browser-qa']!,
     pose: browserQaPose,
+    activeTaskId: verifyingTask?.id ?? waitingApprovalTask?.id ?? focalTask?.id,
+    activeTaskTitle: verifyingTask?.title ?? waitingApprovalTask?.title ?? focalTask?.title,
+    failureReason: browserQaFailureReason,
     isWorking: browserQaPose === 'WORKING',
     isNeedsOperator: false,
   }

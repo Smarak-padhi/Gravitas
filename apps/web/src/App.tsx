@@ -22,6 +22,7 @@ import { deriveInboxItems, type InboxItem } from './features/inbox/inboxDerivati
 import { InboxDrawer } from './features/inbox/InboxDrawer.js'
 import { browserNotifier } from './features/inbox/browserNotifier.js'
 import { ActivityTimeline } from './features/timeline/ActivityTimeline.js'
+import { AgentRegistryView } from './features/agents/AgentRegistryView.js'
 import { CommandPalette } from './features/command-palette/CommandPalette.js'
 import type { CommandItem } from './features/command-palette/commandPaletteState.js'
 import './styles/theme.css'
@@ -354,6 +355,14 @@ export const App: React.FC = () => {
         run: () => setActiveView('TIMELINE'),
       },
       {
+        id: 'nav-agents',
+        title: 'Open Capability Registry V0',
+        subtitle: 'Inspect registered agents, qualifications, and capability grants',
+        category: 'NAVIGATION',
+        shortcut: 'Ctrl+5',
+        run: () => setActiveView('AGENTS'),
+      },
+      {
         id: 'toggle-inbox',
         title: 'Toggle Operator Inbox',
         subtitle: `${inboxItems.length} actionable review items`,
@@ -634,6 +643,11 @@ export const App: React.FC = () => {
           {/* VIEW: ACTIVITY TIMELINE */}
           {activeView === 'TIMELINE' && (
             <ActivityTimeline events={allEvents} onClear={clearEvents} />
+          )}
+
+          {/* VIEW: AGENT CAPABILITY REGISTRY V0 */}
+          {activeView === 'AGENTS' && (
+            <AgentRegistryView />
           )}
         </main>
 

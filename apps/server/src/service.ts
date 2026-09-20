@@ -36,11 +36,14 @@ import {
   createVerificationStartedEvent,
   generateEventId,
   transitionTask,
+  type AgentCapability,
+  type BrowserQaResult,
   type ExecutionContract,
   type GravitasEvent,
   type Run,
   type Task,
 } from '@gravitas/core'
+import { CANONICAL_CAPABILITIES, type AgentDescriptor } from '@gravitas/agents'
 import {
   compilePrompt,
   type ManagedCompiledPrompt,
@@ -261,6 +264,8 @@ export class RunService {
         acceptanceCriteria: taskDef.acceptanceCriteria ?? contract.acceptanceCriteria,
         requiresApproval: taskDef.requiresApproval ?? input.requiresApproval ?? true,
         ...(taskDef.role ? { role: taskDef.role } : {}),
+        ...(taskDef.browserQa ? { browserQa: taskDef.browserQa } : {}),
+        ...(taskDef.requiredCapabilities ? { requiredCapabilities: taskDef.requiredCapabilities } : {}),
         createdAt: now,
         updatedAt: now,
       }
@@ -355,6 +360,8 @@ export class RunService {
           acceptanceCriteria: t.acceptanceCriteria,
           requiresApproval: t.requiresApproval ?? true,
           role: t.role,
+          browserQa: t.browserQa,
+          requiredCapabilities: t.requiredCapabilities,
         })),
         projectContext: this.registry.getProjectContext(runId),
         defaultVerificationPlan: this.registry.getVerificationPlan(runId) ?? this.defaultVerificationPlan,
@@ -393,6 +400,10 @@ export class RunService {
       onCompiledPrompt: (taskId, compiledPrompt) => {
         this.registry.setCompiledPrompt(taskId, compiledPrompt)
       },
+      onBrowserQa: (taskId, qaResult) => {
+        this.registry.setBrowserQaResult(taskId, qaResult)
+      },
+      agentRegistry: this.registry.getAgentRegistry(),
     })
 
     this.activeSchedulers.set(runId, scheduler)
@@ -631,6 +642,7 @@ export class RunService {
     const mutation = this.registry.getMutation(taskId)
     const verification = this.registry.getVerification(taskId)
     const evidenceRef = this.registry.getEvidenceRef(taskId)
+    const browserQa = this.registry.getBrowserQaResult(taskId)
 
     return {
       task,
@@ -650,6 +662,7 @@ export class RunService {
             failedCommands: verification.commands.filter((c) => c.exitCode !== 0).length,
           }
         : undefined,
+      browserQa,
       evidenceAvailable: evidenceRef !== undefined,
     }
   }
@@ -886,5 +899,36 @@ export class RunService {
         text: compiledPrompt.text,
       },
     }
+  }
+
+  /**
+   * Retrieves Browser QA verification results for a task.
+   */
+  public getBrowserQa(runId: string, taskId: string): BrowserQaResult | undefined {
+    const run = this.registry.getRun(runId)
+    if (!run) {
+      throw new NotFoundError('Run', runId)
+    }
+
+    const task = this.registry.getTask(taskId)
+    if (!task || task.runId !== runId) {
+      throw new NotFoundError('Task', taskId)
+    }
+
+    return this.registry.getBrowserQaResult(taskId)
+  }
+
+  /**
+   * Lists all agents registered in the Capability Registry V0.
+   */
+  public listAgents(): readonly AgentDescriptor[] {
+    return this.registry.getAgentRegistry().list()
+  }
+
+  /**
+   * Lists canonical capability vocabulary.
+   */
+  public listCapabilities(): readonly AgentCapability[] {
+    return CANONICAL_CAPABILITIES
   }
 }

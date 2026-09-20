@@ -28,6 +28,20 @@ export type {
   ExecutionContract,
   GravitasEventType,
   GravitasEvent,
+  CapabilityDomain,
+  AgentCapability,
+  BrowserQaActionType,
+  BrowserQaActionNavigate,
+  BrowserQaActionClick,
+  BrowserQaActionFill,
+  BrowserQaActionAssertVisible,
+  BrowserQaActionAssertText,
+  BrowserQaActionScreenshot,
+  BrowserQaAction,
+  BrowserQaContract,
+  BrowserQaObservation,
+  BrowserQaStepResult,
+  BrowserQaResult,
 } from './types.js'
 
 // Task FSM
@@ -100,6 +114,9 @@ export {
   createTaskScheduledEvent,
   createTaskResultMaterializedEvent,
   createTaskCompositionConflictEvent,
+  createBrowserQaStartedEvent,
+  createBrowserQaCompletedEvent,
+  createBrowserQaFailedEvent,
   InMemoryEventCollector,
 } from './events.js'
 

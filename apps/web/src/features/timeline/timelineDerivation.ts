@@ -162,6 +162,30 @@ export function formatEventToMilestone(event: GravitasEvent): {
         badgeVariant: 'failure',
       }
 
+    case 'BROWSER_QA_STARTED':
+      return {
+        title: `Browser QA Started [${event.taskId ?? 'Task'}]`,
+        description: `Deterministic Playwright sandbox executing runtime validation against ${p.url ?? 'target origin'}`,
+        badgeText: 'BROWSER_QA',
+        badgeVariant: 'verifying',
+      }
+
+    case 'BROWSER_QA_COMPLETED':
+      return {
+        title: `Browser QA Passed [${event.taskId ?? 'Task'}]`,
+        description: `Runtime assertions passed (${p.passedSteps ?? 0}/${p.totalSteps ?? 0} actions, 0 console errors, screenshot captured).`,
+        badgeText: 'QA_PASSED',
+        badgeVariant: 'success',
+      }
+
+    case 'BROWSER_QA_FAILED':
+      return {
+        title: `Browser QA Failed [${event.taskId ?? 'Task'}]`,
+        description: `Runtime QA failure: ${p.failureReason ?? 'Assertion failed or console errors detected.'}`,
+        badgeText: 'QA_FAILED',
+        badgeVariant: 'failure',
+      }
+
     case 'RUN_FAILED':
       return {
         title: `Run Failed`,

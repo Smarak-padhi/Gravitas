@@ -10,6 +10,9 @@ import {
   createTaskResultMaterializedEvent,
   createTaskScheduledEvent,
   createTaskStateChangedEvent,
+  createBrowserQaStartedEvent,
+  createBrowserQaCompletedEvent,
+  createBrowserQaFailedEvent,
   generateEventId,
   InMemoryEventCollector,
 } from './events.js'
@@ -155,6 +158,37 @@ describe('Gravitas Event Model', () => {
       expect(confEvt.runId).toBe('run_123')
       expect(confEvt.taskId).toBe('task_1')
       expect(confEvt.payload['conflict']).toBe(true)
+
+      const qaStartEvt = createBrowserQaStartedEvent('run_123', 'task_1', { contractId: 'qa_1', actionCount: 3 })
+      expect(qaStartEvt.type).toBe('BROWSER_QA_STARTED')
+      expect(qaStartEvt.runId).toBe('run_123')
+      expect(qaStartEvt.taskId).toBe('task_1')
+      expect(qaStartEvt.payload['contractId']).toBe('qa_1')
+      expect(qaStartEvt.payload['actionCount']).toBe(3)
+
+      const qaResult = {
+        taskId: 'task_1',
+        contractId: 'qa_1',
+        status: 'PASSED' as const,
+        durationMs: 120,
+        steps: [],
+        observations: { consoleErrors: [], pageErrors: [], failedRequests: [] },
+        screenshots: [],
+        timestamp: '2026-09-20T12:00:00.000Z',
+      }
+      const qaCompEvt = createBrowserQaCompletedEvent('run_123', 'task_1', qaResult)
+      expect(qaCompEvt.type).toBe('BROWSER_QA_COMPLETED')
+      expect(qaCompEvt.runId).toBe('run_123')
+      expect(qaCompEvt.taskId).toBe('task_1')
+      expect(qaCompEvt.payload['result']).toEqual(qaResult)
+
+      const qaFailEvt = createBrowserQaFailedEvent('run_123', 'task_1', {
+        contractId: 'qa_1',
+        error: 'Target not visible',
+        result: { ...qaResult, status: 'FAILED' as const },
+      })
+      expect(qaFailEvt.type).toBe('BROWSER_QA_FAILED')
+      expect(qaFailEvt.payload['error']).toBe('Target not visible')
     })
   })
 

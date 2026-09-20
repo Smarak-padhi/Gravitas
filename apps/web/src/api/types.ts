@@ -3,6 +3,7 @@
  */
 
 import type {
+  BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
   PromptLayerName,
@@ -26,6 +27,7 @@ import type {
 } from '@gravitas/orchestrator'
 
 export type {
+  BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
   LayerMetadata,
@@ -83,7 +85,26 @@ export interface TaskDetailResponse {
     readonly passedCommands: number
     readonly failedCommands: number
   } | undefined
+  readonly browserQa?: BrowserQaResult | undefined
   readonly evidenceAvailable: boolean
+}
+
+export interface AgentCapabilityItem {
+  readonly id: string
+  readonly domain: string
+  readonly description: string
+}
+
+export interface AgentDescriptor {
+  readonly id: string
+  readonly name: string
+  readonly provider: string
+  readonly defaultRole: string
+  readonly capabilities: readonly string[]
+  readonly qualificationStatus: 'INSTALLED' | 'READY' | 'DEGRADED' | 'UNQUALIFIED' | 'DISABLED'
+  readonly qualificationNotes?: string | undefined
+  readonly isProductionQualified: boolean
+  readonly maxConcurrency?: number | undefined
 }
 
 export interface TaskEvidenceResponse {

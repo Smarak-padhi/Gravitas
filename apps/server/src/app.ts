@@ -335,6 +335,49 @@ export function createRequestListener(deps: AppDependencies) {
         return
       }
 
+      // --- Task Browser QA: GET /api/v1/runs/:runId/tasks/:taskId/browser-qa ---
+      const browserQaMatch = pathname.match(/^\/api\/v1\/runs\/([^/]+)\/tasks\/([^/]+)\/browser-qa$/)
+      if (browserQaMatch) {
+        if (method === 'GET') {
+          const [, runId, taskId] = browserQaMatch
+          if (!runId || !taskId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing runId or taskId.', requestId)
+            return
+          }
+          const qaResult = service.getBrowserQa(runId, taskId)
+          if (!qaResult) {
+            sendError(res, 404, 'NOT_FOUND', `Browser QA result not found for task '${taskId}'.`, requestId)
+            return
+          }
+          sendJson(res, 200, qaResult)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on task browser QA.`, requestId)
+        return
+      }
+
+      // --- Agents Registry: GET /api/v1/agents ---
+      if (pathname === '/api/v1/agents') {
+        if (method === 'GET') {
+          const agents = service.listAgents()
+          sendJson(res, 200, agents)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/agents.`, requestId)
+        return
+      }
+
+      // --- Capability Vocabulary: GET /api/v1/capabilities ---
+      if (pathname === '/api/v1/capabilities') {
+        if (method === 'GET') {
+          const capabilities = service.listCapabilities()
+          sendJson(res, 200, capabilities)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/capabilities.`, requestId)
+        return
+      }
+
       // --- Not Found ---
       sendError(res, 404, 'NOT_FOUND', `Route '${pathname}' not found.`, requestId)
     } catch (err: unknown) {

@@ -4,6 +4,7 @@
  */
 
 import type {
+  BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
   GravitasEventType,
@@ -353,6 +354,57 @@ export function createTaskCompositionConflictEvent(
 ): GravitasEvent {
   return createGravitasEvent(
     'TASK_COMPOSITION_CONFLICT',
+    runId,
+    payload,
+    { ...options, taskId }
+  )
+}
+
+/**
+ * Emits a BROWSER_QA_STARTED event.
+ */
+export function createBrowserQaStartedEvent(
+  runId: string,
+  taskId: string,
+  payload: { readonly contractId: string; readonly actionCount: number },
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'BROWSER_QA_STARTED',
+    runId,
+    payload,
+    { ...options, taskId }
+  )
+}
+
+/**
+ * Emits a BROWSER_QA_COMPLETED event.
+ */
+export function createBrowserQaCompletedEvent(
+  runId: string,
+  taskId: string,
+  result: BrowserQaResult,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'BROWSER_QA_COMPLETED',
+    runId,
+    { result },
+    { ...options, taskId }
+  )
+}
+
+/**
+ * Emits a BROWSER_QA_FAILED event.
+ */
+export function createBrowserQaFailedEvent(
+  runId: string,
+  taskId: string,
+  payload: { readonly contractId: string; readonly error: string; readonly result?: BrowserQaResult | undefined },
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'BROWSER_QA_FAILED',
     runId,
     payload,
     { ...options, taskId }
