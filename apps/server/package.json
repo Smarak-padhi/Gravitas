@@ -20,6 +20,7 @@
     "@gravitas/agents": "*",
     "@gravitas/browser-qa": "*",
     "@gravitas/core": "*",
+    "@gravitas/gateways": "*",
     "@gravitas/git": "*",
     "@gravitas/harnesses": "*",
     "@gravitas/orchestrator": "*",

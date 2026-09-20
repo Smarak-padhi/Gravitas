@@ -59,6 +59,12 @@ import {
   type AgentHarness,
 } from '@gravitas/harnesses'
 import {
+  DefaultGatewayRegistry,
+  OmniRouteAdapter,
+  type GatewayDescriptor,
+  type GatewayRegistry,
+} from '@gravitas/gateways'
+import {
   applyVerificationOutcome,
   executeVerification,
   writeEvidenceBundle,
@@ -99,6 +105,7 @@ export interface RunServiceOptions {
   readonly registry: InMemoryRegistry
   readonly eventHub: EventHub
   readonly harness: AgentHarness
+  readonly gatewayRegistry?: GatewayRegistry | undefined
   readonly runtimeRoot?: string | undefined
   readonly defaultRepository?: string | undefined
   readonly defaultVerificationPlan?: VerificationPlan | undefined
@@ -108,6 +115,7 @@ export class RunService {
   private readonly registry: InMemoryRegistry
   private readonly eventHub: EventHub
   private readonly harness: AgentHarness
+  private readonly gatewayRegistry: GatewayRegistry
   private readonly runtimeRoot: string
   private readonly defaultRepository?: string | undefined
   private readonly defaultVerificationPlan?: VerificationPlan | undefined
@@ -122,6 +130,22 @@ export class RunService {
     this.runtimeRoot = options.runtimeRoot ?? join(tmpdir(), 'gravitas-runtime')
     this.defaultRepository = options.defaultRepository
     this.defaultVerificationPlan = options.defaultVerificationPlan
+
+    this.gatewayRegistry = options.gatewayRegistry ?? new DefaultGatewayRegistry()
+    if (!options.gatewayRegistry) {
+      const omnirouteAdapter = new OmniRouteAdapter({ baseUrl: 'http://127.0.0.1:20128' })
+      this.gatewayRegistry.registerGateway(omnirouteAdapter, {
+        id: 'omniroute-local',
+        name: 'OmniRoute Local Gateway',
+        baseUrl: 'http://127.0.0.1:20128',
+        securityProfile: 'wave11.2-isolated',
+      })
+      this.gatewayRegistry.loadEvidence('omniroute-local', './omniroute-qualification.json')
+    }
+  }
+
+  public listGateways(): GatewayDescriptor[] {
+    return this.gatewayRegistry.listGateways()
   }
 
   /**

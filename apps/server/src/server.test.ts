@@ -99,6 +99,17 @@ describe('GravitasServer HTTP Boundary (server.test.ts)', () => {
     })
   })
 
+  it('GET /api/v1/gateways returns registered gateways list', async () => {
+    const res = await fetch(`${serverUrl}/api/v1/gateways`)
+    expect(res.status).toBe(200)
+
+    const data = await res.json()
+    expect(Array.isArray(data.gateways)).toBe(true)
+    expect(data.gateways.length).toBeGreaterThanOrEqual(1)
+    expect(data.gateways[0].id).toBe('omniroute-local')
+    expect(data.gateways[0].securityProfile).toBe('wave11.2-isolated')
+  })
+
   it('attaches X-Gravitas-Request-Id to every response and error envelope', async () => {
     const res = await fetch(`${serverUrl}/api/v1/nonexistent-route`)
     expect(res.status).toBe(404)

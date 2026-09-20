@@ -26,7 +26,9 @@
     "build:web": "npm run build --workspace=@gravitas/web",
     "test:browser": "playwright test",
     "qualify:codex": "npx tsx packages/harnesses/scripts/qualify-codex.ts",
-    "qualify:codex:dry": "npx tsx packages/harnesses/scripts/qualify-codex.ts -- --dry-run"
+    "qualify:codex:dry": "npx tsx packages/harnesses/scripts/qualify-codex.ts -- --dry-run",
+    "qualify:omniroute": "npx tsx packages/gateways/scripts/qualify-omniroute.ts",
+    "qualify:omniroute:dry": "npx tsx packages/gateways/scripts/qualify-omniroute.ts -- --dry-run"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

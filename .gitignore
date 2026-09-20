@@ -5,6 +5,7 @@
 # Runtime evidence — NEVER commit execution artifacts
 .gravitas/
 codex-qualification.json
+omniroute-qualification.json
 
 # Node / npm
 node_modules/

@@ -13,6 +13,11 @@ export interface TopBarProps {
     readonly status: string
     readonly message?: string | undefined
   }
+  readonly gateways?: ReadonlyArray<{
+    readonly id: string
+    readonly state: string
+    readonly version?: string | undefined
+  }> | undefined
   readonly onNewRunClick: () => void
   readonly currentView?: WorkspaceView | undefined
   readonly onViewChange?: ((view: WorkspaceView) => void) | undefined
@@ -25,6 +30,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   connectionStatus,
   version,
   harness,
+  gateways,
   onNewRunClick,
   currentView = 'OFFICE',
   onViewChange,
@@ -145,6 +151,31 @@ export const TopBar: React.FC<TopBarProps> = ({
           <strong>{harness.id}</strong>
           <span>[{harness.status}]</span>
         </div>
+
+        {/* Gateways Telemetry (Infrastructure) */}
+        {gateways && gateways.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11px',
+              padding: '3px 8px',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-mono)',
+            }}
+            title={gateways.map((g) => `${g.id}: ${g.state}`).join(', ')}
+          >
+            <span style={{ color: 'var(--text-muted)' }}>GATEWAY:</span>
+            <strong>{gateways[0].id}</strong>
+            <span style={{ color: gateways[0].state === 'READY' ? 'var(--state-success-fg)' : 'var(--text-muted)' }}>
+              [{gateways[0].state}]
+            </span>
+          </div>
+        )}
 
         {/* SSE Telemetry */}
         <div

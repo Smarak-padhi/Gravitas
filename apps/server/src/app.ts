@@ -162,6 +162,17 @@ export function createRequestListener(deps: AppDependencies) {
         return
       }
 
+      // --- Gateways ---
+      if (pathname === '/api/v1/gateways') {
+        if (method === 'GET') {
+          const gateways = service.listGateways()
+          sendJson(res, 200, { gateways })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/gateways.`, requestId)
+        return
+      }
+
       // --- Live SSE Stream ---
       if (method === 'GET' && pathname === '/api/v1/events') {
         eventHub.registerSubscriber(res)
