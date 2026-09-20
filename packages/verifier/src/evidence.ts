@@ -170,6 +170,19 @@ export async function writeEvidenceBundle(
       artifactPaths['prompt.txt'] = promptTxtPath
     }
 
+    // 5c. Write route-provenance.json if routeProvenance is provided (sanitized)
+    if (input.routeProvenance) {
+      const routeProvenanceJsonPath = join(taskEvidenceDir, 'route-provenance.json')
+      const sanitizedRouteProvenance = sanitizeOutput(
+        JSON.stringify(input.routeProvenance, null, 2)
+      )
+      artifactHashes['route-provenance.json'] = await atomicWriteFile(
+        routeProvenanceJsonPath,
+        sanitizedRouteProvenance
+      )
+      artifactPaths['route-provenance.json'] = routeProvenanceJsonPath
+    }
+
     // 6. Build evidence manifest
     const manifest: EvidenceManifest = {
       schemaVersion: 'gravitas.evidence.v1',
@@ -226,6 +239,7 @@ export async function writeEvidenceBundle(
       },
       finalTaskState,
       artifactHashes: Object.freeze(artifactHashes),
+      ...(input.routeProvenance ? { routeProvenance: input.routeProvenance } : {}),
     }
 
     // 7. Write evidence-manifest.json

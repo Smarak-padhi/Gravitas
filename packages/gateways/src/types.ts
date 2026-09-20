@@ -135,3 +135,53 @@ export const GatewayQualificationEvidenceSchema = z.object({
 });
 
 export type GatewayQualificationEvidence = z.infer<typeof GatewayQualificationEvidenceSchema>;
+
+// ─── Route Contracts (Wave 11.3) ──────────────────────────────────────────────
+
+export type InferenceTransport = 'DIRECT' | 'GATEWAY';
+
+export type InferenceRouteReason =
+  | 'DIRECT_DEFAULT'
+  | 'DIRECT_REQUIRED'
+  | 'GATEWAY_EXPLICIT'
+  | 'GATEWAY_REQUIRED_PROVIDER'
+  | 'GATEWAY_UNQUALIFIED'
+  | 'GATEWAY_UNHEALTHY'
+  | 'GATEWAY_INCOMPATIBLE'
+  | 'DIRECT_FALLBACK_ALLOWED'
+  | 'NO_VALID_ROUTE';
+
+export type InferenceFallbackPolicy = 'GATEWAY_ONLY' | 'GATEWAY_WITH_DIRECT_FALLBACK';
+
+export interface InferenceRouteRequirement {
+  readonly transportPreference?: InferenceTransport | undefined;
+  readonly gatewayAllowlist?: readonly string[] | undefined;
+  readonly gatewayDenylist?: readonly string[] | undefined;
+  readonly providerAllowlist?: readonly string[] | undefined;
+  readonly modelAllowlist?: readonly string[] | undefined;
+  readonly requireFallback?: boolean | undefined;
+  readonly requireProviderProvenance?: boolean | undefined;
+  readonly fallbackPolicy?: InferenceFallbackPolicy | undefined;
+  readonly requestedGatewayId?: string | undefined;
+  readonly requestedProvider?: string | undefined;
+  readonly requestedModel?: string | undefined;
+  readonly workerProtocol?: string | undefined;
+}
+
+export interface ResolvedInferenceRoute {
+  readonly workerId: string;
+  readonly workerQualificationIdentity: string;
+  readonly transport: InferenceTransport;
+  readonly gatewayId?: string | undefined;
+  readonly gatewayBaseUrl?: string | undefined;
+  readonly gatewayQualificationIdentity?: string | undefined;
+  readonly requestedProvider?: string | undefined;
+  readonly requestedModel?: string | undefined;
+  readonly actualProvider?: string | undefined;
+  readonly actualModel?: string | undefined;
+  readonly reason: InferenceRouteReason;
+  readonly fallbackPolicy: InferenceFallbackPolicy;
+  readonly routePolicyVersion: string;
+  readonly providerFallbackOccurred?: boolean | undefined;
+  readonly transportFallbackOccurred?: boolean | undefined;
+}

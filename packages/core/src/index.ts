@@ -117,6 +117,12 @@ export {
   createBrowserQaStartedEvent,
   createBrowserQaCompletedEvent,
   createBrowserQaFailedEvent,
+  createRouteSelectedEvent,
+  createGatewayRouteStartedEvent,
+  createGatewayRouteCompletedEvent,
+  createGatewayRouteFailedEvent,
+  createProviderFallbackOccurredEvent,
+  createTransportFallbackOccurredEvent,
   InMemoryEventCollector,
 } from './events.js'
 

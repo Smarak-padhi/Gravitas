@@ -412,6 +412,78 @@ export function createBrowserQaFailedEvent(
 }
 
 /**
+ * Emits a ROUTE_SELECTED event.
+ */
+export function createRouteSelectedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('ROUTE_SELECTED', runId, payload, { ...options, taskId })
+}
+
+/**
+ * Emits a GATEWAY_ROUTE_STARTED event.
+ */
+export function createGatewayRouteStartedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('GATEWAY_ROUTE_STARTED', runId, payload, { ...options, taskId })
+}
+
+/**
+ * Emits a GATEWAY_ROUTE_COMPLETED event.
+ */
+export function createGatewayRouteCompletedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('GATEWAY_ROUTE_COMPLETED', runId, payload, { ...options, taskId })
+}
+
+/**
+ * Emits a GATEWAY_ROUTE_FAILED event.
+ */
+export function createGatewayRouteFailedEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('GATEWAY_ROUTE_FAILED', runId, payload, { ...options, taskId })
+}
+
+/**
+ * Emits a PROVIDER_FALLBACK_OCCURRED event.
+ */
+export function createProviderFallbackOccurredEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('PROVIDER_FALLBACK_OCCURRED', runId, payload, { ...options, taskId })
+}
+
+/**
+ * Emits a TRANSPORT_FALLBACK_OCCURRED event.
+ */
+export function createTransportFallbackOccurredEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('TRANSPORT_FALLBACK_OCCURRED', runId, payload, { ...options, taskId })
+}
+
+/**
  * In-memory event collector for testing domain behaviors and event sequences.
  */
 export class InMemoryEventCollector {

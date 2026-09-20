@@ -60,6 +60,8 @@ export interface AgentExecutionRequest {
   readonly timeoutMs?: number | undefined
   /** Permissions granted to this execution. */
   readonly permissions?: HarnessPermissions | undefined
+  /** Optional resolved inference route context for gateway execution. */
+  readonly routeContext?: Record<string, unknown> | undefined
 }
 
 /**
@@ -89,6 +91,8 @@ export interface AgentExecutionResult {
   readonly stderrTruncated: boolean
   readonly worktreePath: string
   readonly pid?: number | undefined
+  /** Optional route provenance details observed during execution. */
+  readonly routeProvenance?: Record<string, unknown> | undefined
 }
 
 /**

@@ -141,6 +141,8 @@ export interface EvidenceManifest {
   }
   readonly finalTaskState: TaskState
   readonly artifactHashes: Record<string, string>
+  /** Optional route provenance details from deterministic router / gateway. */
+  readonly routeProvenance?: Record<string, unknown> | undefined
 }
 
 /**
@@ -180,6 +182,8 @@ export interface EvidenceBundleInput {
   readonly mutation: MutationCapture
   readonly verification: VerificationResult
   readonly finalTaskState: TaskState
+  /** Optional route provenance details from deterministic router / gateway. */
+  readonly routeProvenance?: Record<string, unknown> | undefined
 }
 
 /**

@@ -428,6 +428,7 @@ export class RunService {
         this.registry.setBrowserQaResult(taskId, qaResult)
       },
       agentRegistry: this.registry.getAgentRegistry(),
+      gatewayRegistry: this.gatewayRegistry,
     })
 
     this.activeSchedulers.set(runId, scheduler)

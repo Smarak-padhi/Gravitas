@@ -172,6 +172,11 @@ export function resolveCodexExecutable(customPath?: string): string | null {
   return 'codex'
 }
 
+export interface BuildCodexCliArgsOptions {
+  readonly gatewayBaseUrl?: string | undefined
+  readonly requestedModel?: string | undefined
+}
+
 /**
  * Builds the exact argument list for Codex non-interactive execution.
  *
@@ -187,8 +192,11 @@ export function resolveCodexExecutable(customPath?: string): string | null {
  * - --skip-git-repo-check: prevents git repository discovery requirement
  * - --cd <worktreePath>: bound execution directory
  */
-export function buildCodexCliArgs(worktreePath: string): readonly string[] {
-  return [
+export function buildCodexCliArgs(
+  worktreePath: string,
+  options?: BuildCodexCliArgsOptions
+): readonly string[] {
+  const args = [
     'exec',
     '--ephemeral',
     '--ignore-user-config',
@@ -201,22 +209,36 @@ export function buildCodexCliArgs(worktreePath: string): readonly string[] {
     worktreePath,
     '--approve-for-me',
   ]
+
+  if (options?.gatewayBaseUrl) {
+    const url = options.gatewayBaseUrl.replace(/\/+$/, '')
+    args.push('-c', `model_providers.openai.base_url="${url}/v1"`)
+  }
+
+  if (options?.requestedModel) {
+    args.push('-c', `model="${options.requestedModel}"`)
+  }
+
+  return args
 }
 
 // ─── Harness ──────────────────────────────────────────────────────────────────
 
 export interface CodexHarnessOptions {
   readonly executablePath?: string | undefined
+  readonly gatewayBaseUrl?: string | undefined
 }
 
 export class CodexHarness implements AgentHarness {
   public readonly id = 'codex'
   private readonly configuredExecutable?: string | undefined
+  private readonly configuredGatewayBaseUrl?: string | undefined
   private readonly activeExecutions = new Map<string, SubprocessHandle>()
   private cachedVersion?: string | undefined
 
   constructor(options?: CodexHarnessOptions) {
     this.configuredExecutable = options?.executablePath
+    this.configuredGatewayBaseUrl = options?.gatewayBaseUrl
   }
 
   public getExecutablePath(): string | null {
@@ -312,7 +334,15 @@ export class CodexHarness implements AgentHarness {
     }
 
     const startedAt = new Date().toISOString()
-    const cliArgs = buildCodexCliArgs(request.worktreePath)
+    const effectiveGatewayBaseUrl =
+      (request.routeContext?.['gatewayBaseUrl'] as string | undefined) ??
+      this.configuredGatewayBaseUrl
+    const effectiveRequestedModel = request.routeContext?.['requestedModel'] as string | undefined
+
+    const cliArgs = buildCodexCliArgs(request.worktreePath, {
+      gatewayBaseUrl: effectiveGatewayBaseUrl,
+      requestedModel: effectiveRequestedModel,
+    })
 
     // --- Git Authority Containment: Quarantine .git entry ---
     const dotGitPath = join(request.worktreePath, '.git')
@@ -348,6 +378,9 @@ export class CodexHarness implements AgentHarness {
     const isolatedEnv: Record<string, string | undefined> = {
       ...process.env,
       ...(shimCreated ? { PATH: `${shimDir};${process.env['PATH'] ?? ''}` } : {}),
+      ...(effectiveGatewayBaseUrl
+        ? { OPENAI_BASE_URL: `${effectiveGatewayBaseUrl.replace(/\/+$/, '')}/v1` }
+        : {}),
       GIT_DIR: 'C:\\gravitas_denied_git_dir',
       GIT_WORK_TREE: 'C:\\gravitas_denied_worktree',
       GIT_CEILING_DIRECTORIES: dirname(request.worktreePath),
@@ -422,6 +455,27 @@ export class CodexHarness implements AgentHarness {
       stderrTruncated: subprocessResult.stderrTruncated,
       worktreePath: request.worktreePath,
       ...(subprocessResult.pid !== undefined ? { pid: subprocessResult.pid } : {}),
+      ...(request.routeContext
+        ? {
+            routeProvenance: {
+              workerId: this.id,
+              transport: request.routeContext['transport'] ?? 'DIRECT',
+              gatewayId: request.routeContext['gatewayId'] ?? null,
+              requestedProvider: request.routeContext['requestedProvider'] ?? null,
+              requestedModel: request.routeContext['requestedModel'] ?? null,
+              actualProvider:
+                request.routeContext['actualProvider'] ??
+                (request.routeContext['transport'] === 'GATEWAY' ? 'openai' : 'direct-provider'),
+              actualModel:
+                request.routeContext['actualModel'] ??
+                (request.routeContext['requestedModel'] ?? 'default-model'),
+              providerFallbackOccurred: request.routeContext['providerFallbackOccurred'] ?? false,
+              transportFallbackOccurred: request.routeContext['transportFallbackOccurred'] ?? false,
+              routeDecisionReason: request.routeContext['reason'] ?? 'DIRECT_DEFAULT',
+              routePolicyVersion: request.routeContext['routePolicyVersion'] ?? '1.0.0',
+            },
+          }
+        : {}),
     }
   }
 

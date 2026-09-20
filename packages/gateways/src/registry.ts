@@ -93,6 +93,7 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
       const isRealMode = evidence.qualificationMode === 'REAL';
       const isSecurityProfileMatch =
         evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION &&
+        (!descriptor.securityProfile || descriptor.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION) &&
         (!evidence.adapterSecurityProfile || evidence.adapterSecurityProfile === GATEWAY_SECURITY_PROFILE_VERSION);
       const isGatewayIdMatch = evidence.gatewayId === id;
       const isVersionMatch = !descriptor.version || evidence.gatewayVersion === descriptor.version;

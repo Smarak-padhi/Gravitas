@@ -46,6 +46,11 @@ import {
   createBrowserQaStartedEvent,
   createBrowserQaCompletedEvent,
   createBrowserQaFailedEvent,
+  createRouteSelectedEvent,
+  createGatewayRouteStartedEvent,
+  createGatewayRouteCompletedEvent,
+  createGatewayRouteFailedEvent,
+  createTransportFallbackOccurredEvent,
   evaluateTaskReadiness,
   generateEventId,
   isTerminalState,
@@ -61,6 +66,11 @@ import {
 import { executeGit, removeWorktree, type WorktreeAllocation } from '@gravitas/git'
 import { executeBrowserQa } from '@gravitas/browser-qa'
 import type { AgentRegistry } from '@gravitas/agents'
+import {
+  InferenceRouter,
+  type GatewayRegistry,
+  type ResolvedInferenceRoute,
+} from '@gravitas/gateways'
 import { composeTaskWorktree, materializeVerifiedResult } from './composition.js'
 import { CompositionConflictError, OrchestratorExecutionError } from './errors.js'
 import type { OrchestratorResult, RunPlan, SchedulerTelemetry, TaskPlanDefinition } from './types.js'
@@ -81,7 +91,10 @@ export interface BoundedSchedulerOptions {
   readonly onEvidence?: ((taskId: string, evidenceRef: any) => void) | undefined
   readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
   readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
+  readonly onRouteResolved?: ((taskId: string, route: ResolvedInferenceRoute) => void) | undefined
   readonly agentRegistry?: AgentRegistry | undefined
+  readonly gatewayRegistry?: GatewayRegistry | undefined
+  readonly router?: InferenceRouter | undefined
   readonly autoPauseOnWaitingApproval?: boolean | undefined
 }
 
@@ -104,7 +117,10 @@ export class BoundedScheduler {
   private readonly onEvidence?: ((taskId: string, evidenceRef: any) => void) | undefined
   private readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
   private readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
+  private readonly onRouteResolved?: ((taskId: string, route: ResolvedInferenceRoute) => void) | undefined
   private readonly agentRegistry?: AgentRegistry | undefined
+  private readonly gatewayRegistry?: GatewayRegistry | undefined
+  private readonly router?: InferenceRouter | undefined
 
   private readonly tasks = new Map<string, Task>()
   private readonly taskDefinitions = new Map<string, TaskPlanDefinition>()
@@ -140,7 +156,14 @@ export class BoundedScheduler {
     this.onEvidence = options.onEvidence
     this.onCompiledPrompt = options.onCompiledPrompt
     this.onBrowserQa = options.onBrowserQa
+    this.onRouteResolved = options.onRouteResolved
     this.agentRegistry = options.agentRegistry
+    this.gatewayRegistry = options.gatewayRegistry
+    this.router =
+      options.router ??
+      (options.gatewayRegistry
+        ? new InferenceRouter({ registry: options.gatewayRegistry })
+        : undefined)
     this.autoPauseOnWaitingApproval = options.autoPauseOnWaitingApproval ?? false
 
     this.initializeTasks()
@@ -206,6 +229,14 @@ export class BoundedScheduler {
       failedCount: this.failedTasks.size,
       cancelledCount: this.cancelledTasks.size,
     }
+  }
+
+  public getGatewayRegistry(): GatewayRegistry | undefined {
+    return this.gatewayRegistry
+  }
+
+  public getRouter(): InferenceRouter | undefined {
+    return this.router
   }
 
   public getTask(taskId: string): Task | undefined {
@@ -459,6 +490,79 @@ export class BoundedScheduler {
       })
       this.onCompiledPrompt?.(taskId, managedPrompt)
 
+      // 4b. Deterministic route resolution (Wave 11.3)
+      const workerIdentity = `${this.harness.id}@${(this.harness as any).cachedVersion ?? '1.0.0'}`
+      let resolvedRoute: ResolvedInferenceRoute = {
+        workerId: this.harness.id,
+        workerQualificationIdentity: workerIdentity,
+        transport: 'DIRECT',
+        reason: 'DIRECT_DEFAULT',
+        fallbackPolicy: 'GATEWAY_ONLY',
+        routePolicyVersion: '1.0.0',
+      }
+
+      if (this.router) {
+        resolvedRoute = await this.router.resolveRoute({
+          workerId: this.harness.id,
+          workerQualificationIdentity: workerIdentity,
+          workerProtocol:
+            taskDef?.inferenceRoute?.workerProtocol ??
+            (this.harness.id === 'codex' ? 'openai_chat_completions' : undefined),
+          requirement: taskDef?.inferenceRoute,
+        })
+      }
+
+      this.onEvent(
+        createRouteSelectedEvent(this.runId, taskId, {
+          workerId: resolvedRoute.workerId,
+          transport: resolvedRoute.transport,
+          gatewayId: resolvedRoute.gatewayId ?? null,
+          reason: resolvedRoute.reason,
+          requestedProvider: resolvedRoute.requestedProvider ?? null,
+          requestedModel: resolvedRoute.requestedModel ?? null,
+          fallbackPolicy: resolvedRoute.fallbackPolicy,
+          transportFallbackOccurred: resolvedRoute.transportFallbackOccurred ?? false,
+        })
+      )
+      this.onRouteResolved?.(taskId, resolvedRoute)
+
+      // If route resolution failed (e.g. GATEWAY_ONLY failure without direct fallback)
+      if (
+        resolvedRoute.transport === 'GATEWAY' &&
+        (resolvedRoute.reason === 'GATEWAY_UNQUALIFIED' ||
+          resolvedRoute.reason === 'GATEWAY_UNHEALTHY' ||
+          resolvedRoute.reason === 'GATEWAY_INCOMPATIBLE' ||
+          resolvedRoute.reason === 'NO_VALID_ROUTE')
+      ) {
+        this.onEvent(
+          createGatewayRouteFailedEvent(this.runId, taskId, {
+            gatewayId: resolvedRoute.gatewayId,
+            reason: resolvedRoute.reason,
+            message: `Inference gateway route rejected: ${resolvedRoute.reason}`,
+          })
+        )
+        this.failTask(taskId, `GATEWAY_ROUTE_FAILED: ${resolvedRoute.reason}`)
+        return
+      }
+
+      if (resolvedRoute.transport === 'GATEWAY') {
+        this.onEvent(
+          createGatewayRouteStartedEvent(this.runId, taskId, {
+            gatewayId: resolvedRoute.gatewayId,
+            requestedProvider: resolvedRoute.requestedProvider ?? null,
+            requestedModel: resolvedRoute.requestedModel ?? null,
+          })
+        )
+      } else if (resolvedRoute.transportFallbackOccurred) {
+        this.onEvent(
+          createTransportFallbackOccurredEvent(this.runId, taskId, {
+            originalGatewayId: resolvedRoute.gatewayId ?? 'omniroute-local',
+            fallbackTransport: 'DIRECT',
+            reason: resolvedRoute.reason,
+          })
+        )
+      }
+
       // 5. Execute harness
       const executionResult = await this.harness.execute({
         executionId: generateEventId('exec'),
@@ -468,7 +572,27 @@ export class BoundedScheduler {
         compiledPrompt: managedPrompt.text,
         permissions: { allowFileEdits: true },
         timeoutMs: 60000,
+        routeContext: resolvedRoute as any,
       })
+
+      if (resolvedRoute.transport === 'GATEWAY') {
+        if (executionResult.exitCode === 0) {
+          this.onEvent(
+            createGatewayRouteCompletedEvent(this.runId, taskId, {
+              gatewayId: resolvedRoute.gatewayId,
+              durationMs: executionResult.durationMs,
+            })
+          )
+        } else {
+          this.onEvent(
+            createGatewayRouteFailedEvent(this.runId, taskId, {
+              gatewayId: resolvedRoute.gatewayId,
+              exitCode: executionResult.exitCode,
+              terminationReason: executionResult.terminationReason,
+            })
+          )
+        }
+      }
 
       this.onEvent(
         createWorkerFinishedEvent(this.runId, taskId, {
@@ -677,6 +801,9 @@ export class BoundedScheduler {
         mutation,
         verification,
         finalTaskState,
+        routeProvenance:
+          executionResult.routeProvenance ??
+          (resolvedRoute as unknown as Record<string, unknown>),
       })
 
       this.onEvidence?.(taskId, {
