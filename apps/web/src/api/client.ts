@@ -171,4 +171,8 @@ export const api = {
   listCapabilities(): Promise<readonly AgentCapabilityItem[]> {
     return request<readonly AgentCapabilityItem[]>('/api/v1/capabilities')
   },
+
+  getAgentQualification(agentId: string): Promise<unknown> {
+    return request<unknown>(`/api/v1/agents/${encodeURIComponent(agentId)}/qualification`)
+  },
 }

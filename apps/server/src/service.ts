@@ -931,4 +931,27 @@ export class RunService {
   public listCapabilities(): readonly AgentCapability[] {
     return CANONICAL_CAPABILITIES
   }
+
+  /**
+   * Reads durable qualification evidence for a specific agent.
+   *
+   * For 'codex-worker', reads codex-qualification.json from the project root
+   * (written by `npm run qualify:codex`).
+   * Returns null if no evidence file exists yet.
+   */
+  public async getAgentQualification(agentId: string): Promise<unknown | null> {
+    if (agentId === 'codex-worker') {
+      try {
+        // codex-qualification.json is written to the project root by qualify:codex
+        const evidencePath = join(process.cwd(), 'codex-qualification.json')
+        const raw = await readFile(evidencePath, 'utf8')
+        return JSON.parse(raw) as unknown
+      } catch {
+        return null
+      }
+    }
+    // Other agents do not currently have durable qualification evidence
+    return null
+  }
 }
+

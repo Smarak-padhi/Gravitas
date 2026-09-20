@@ -1,10 +1,29 @@
 import React, { useEffect, useState } from 'react'
-import { api } from '../../api/client.js'
+import { api, GravitasApiError } from '../../api/client.js'
 import type { AgentCapabilityItem, AgentDescriptor } from '../../api/types.js'
+
+interface QualificationExperimentResult {
+  experimentId: string
+  title: string
+  mandatory: boolean
+  passed: boolean
+  message?: string
+  durationMs: number
+}
+
+interface QualificationEvidence {
+  codexVersion: string
+  qualifiedAt: string
+  schemaVersion: number
+  experiments: QualificationExperimentResult[]
+  decision: 'APPROVED' | 'REJECTED' | 'INCONCLUSIVE'
+  rejectionReason?: string
+}
 
 export const AgentRegistryView: React.FC = () => {
   const [agents, setAgents] = useState<readonly AgentDescriptor[]>([])
   const [capabilities, setCapabilities] = useState<readonly AgentCapabilityItem[]>([])
+  const [codexQualification, setCodexQualification] = useState<QualificationEvidence | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,6 +40,19 @@ export const AgentRegistryView: React.FC = () => {
           setAgents(agentsData)
           setCapabilities(capsData)
           setError(null)
+        }
+
+        // Fetch Codex qualification evidence (404 = not yet qualified — not an error)
+        try {
+          const qualData = (await api.getAgentQualification('codex-worker')) as QualificationEvidence
+          if (isMounted) {
+            setCodexQualification(qualData)
+          }
+        } catch (qualErr) {
+          if (!(qualErr instanceof GravitasApiError && qualErr.statusCode === 404)) {
+            // Only ignore 404 — other errors are real
+            console.warn('[AgentRegistryView] qualification fetch failed:', qualErr)
+          }
         }
       } catch (err) {
         if (isMounted) {
@@ -223,32 +255,165 @@ export const AgentRegistryView: React.FC = () => {
                 <strong style={{ color: 'var(--text-primary)' }}>{agent.defaultRole}</strong>
               </div>
 
-              {/* Disqualification / Notice banner */}
+              {/* Codex Qualification Panel */}
               {isCodex && (
                 <div
                   data-testid="codex-disqualification-notice"
                   style={{
-                    padding: '8px 10px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '10px',
-                    color: '#EF4444',
-                    lineHeight: 1.4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
                   }}
                 >
-                  ⚠ <strong>Production Access Disallowed:</strong> Codex is cataloged in the registry but marked{' '}
-                  <code style={{ fontFamily: 'monospace' }}>UNQUALIFIED</code> until autonomous isolation and security
-                  contracts are formally ratified.
+                  {/* Status Banner */}
+                  {codexQualification ? (
+                    <div
+                      data-testid="codex-qualification-evidence"
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor:
+                          codexQualification.decision === 'APPROVED'
+                            ? 'rgba(16, 185, 129, 0.1)'
+                            : 'rgba(239, 68, 68, 0.1)',
+                        border: `1px solid ${codexQualification.decision === 'APPROVED' ? 'rgba(16,185,129,0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '10px',
+                        color: codexQualification.decision === 'APPROVED' ? '#10B981' : '#EF4444',
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {codexQualification.decision === 'APPROVED' ? '✓' : '⚠'}{' '}
+                      <strong>Qualification Decision: {codexQualification.decision}</strong>
+                      {codexQualification.rejectionReason && (
+                        <div style={{ marginTop: '4px', opacity: 0.85 }}>
+                          {codexQualification.rejectionReason}
+                        </div>
+                      )}
+                      <div style={{ marginTop: '4px', opacity: 0.7 }}>
+                        Version: <code style={{ fontFamily: 'monospace' }}>{codexQualification.codexVersion}</code> ·
+                        Run: {new Date(codexQualification.qualifiedAt).toLocaleString()}
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '10px',
+                        color: '#EF4444',
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      ⚠ <strong>Production Access Disallowed:</strong> Codex is cataloged but marked{' '}
+                      <code style={{ fontFamily: 'monospace' }}>UNQUALIFIED</code>. Run{' '}
+                      <code style={{ fontFamily: 'monospace' }}>npm run qualify:codex</code> to execute the
+                      adversarial qualification suite.
+                    </div>
+                  )}
+
+                  {/* Experiment Results Table */}
+                  {codexQualification && codexQualification.experiments.length > 0 && (
+                    <div
+                      data-testid="codex-qualification-experiments"
+                      style={{
+                        backgroundColor: 'var(--bg-app)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-sm)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          color: 'var(--text-muted)',
+                          borderBottom: '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span>
+                          Qualification Experiments ({codexQualification.experiments.filter((e) => e.passed).length}/
+                          {codexQualification.experiments.length} passed)
+                        </span>
+                        <span>
+                          {codexQualification.experiments.filter((e) => e.mandatory && !e.passed).length} mandatory
+                          failures
+                        </span>
+                      </div>
+                      {codexQualification.experiments.map((exp) => (
+                        <div
+                          key={exp.experimentId}
+                          data-testid={`codex-experiment-${exp.experimentId}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '6px',
+                            padding: '4px 10px',
+                            borderBottom: '1px solid var(--border-subtle)',
+                            fontSize: '10px',
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: exp.passed ? '#10B981' : exp.mandatory ? '#EF4444' : '#EAB308',
+                              flexShrink: 0,
+                              width: '10px',
+                            }}
+                          >
+                            {exp.passed ? '✓' : '✗'}
+                          </span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                              {exp.experimentId}
+                            </span>
+                            {!exp.passed && exp.message && (
+                              <div
+                                style={{
+                                  color: 'var(--text-muted)',
+                                  marginTop: '1px',
+                                  wordBreak: 'break-word',
+                                }}
+                              >
+                                {exp.message}
+                              </div>
+                            )}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '9px',
+                              color: 'var(--text-muted)',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {exp.mandatory ? 'REQ' : 'OPT'}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '9px',
+                              color: 'var(--text-muted)',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {exp.durationMs}ms
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Qualification Notes */}
+              {/* Qualification Notes (non-Codex agents) */}
               {Boolean(agent.qualificationNotes) && !isCodex && (
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                   {agent.qualificationNotes}
                 </div>
               )}
+
 
               {/* Capabilities List */}
               <div>

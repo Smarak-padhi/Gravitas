@@ -356,6 +356,27 @@ export function createRequestListener(deps: AppDependencies) {
         return
       }
 
+      // --- Agent Qualification Evidence: GET /api/v1/agents/:agentId/qualification ---
+      const agentQualMatch = pathname.match(/^\/api\/v1\/agents\/([^/]+)\/qualification$/)
+      if (agentQualMatch) {
+        if (method === 'GET') {
+          const agentId = agentQualMatch[1]
+          if (!agentId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing agentId.', requestId)
+            return
+          }
+          const qualData = await service.getAgentQualification(agentId)
+          if (!qualData) {
+            sendError(res, 404, 'NOT_FOUND', `No qualification evidence found for agent '${agentId}'.`, requestId)
+            return
+          }
+          sendJson(res, 200, qualData)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on agent qualification.`, requestId)
+        return
+      }
+
       // --- Agents Registry: GET /api/v1/agents ---
       if (pathname === '/api/v1/agents') {
         if (method === 'GET') {

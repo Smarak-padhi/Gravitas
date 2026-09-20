@@ -23,7 +23,9 @@
     "dev:server": "npx tsx apps/server/src/index.ts",
     "web": "npm run dev --workspace=@gravitas/web",
     "build:web": "npm run build --workspace=@gravitas/web",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "qualify:codex": "npx tsx packages/harnesses/scripts/qualify-codex.ts",
+    "qualify:codex:dry": "npx tsx packages/harnesses/scripts/qualify-codex.ts -- --dry-run"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

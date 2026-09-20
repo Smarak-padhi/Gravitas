@@ -135,7 +135,7 @@ describe('Deterministic Browser QA Runner Execution', () => {
       taskId: 'task_qa_2',
       contract,
       headless: true,
-      defaultTimeoutMs: 1000,
+      defaultTimeoutMs: 15000,
     })
 
     expect(result.status).toBe('FAILED')

@@ -34,3 +34,14 @@ export {
   DefaultAgentRegistry,
   type AgentRegistry,
 } from './registry.js'
+
+export {
+  evaluateQualificationPolicy,
+  buildQualificationEvidence,
+  isQualificationEvidenceValid,
+  QUALIFICATION_EXPERIMENT_SPECS,
+  type ExperimentResult,
+  type QualificationEvidence,
+  type QualificationDecision,
+  type ExperimentSpec,
+} from './qualification.js'

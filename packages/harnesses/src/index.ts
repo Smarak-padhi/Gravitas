@@ -62,3 +62,16 @@ export {
   type FccHealthResult,
   type FreeClaudeCodeHarnessOptions,
 } from './free-claude-code.js'
+
+// Codex harness adapter (OpenAI Codex CLI — Unqualified until qualification passes)
+export {
+  CodexHarness,
+  buildCodexCliArgs,
+  resolveCodexExecutable,
+  parseCodexJsonlOutput,
+  type CodexHarnessOptions,
+  type CodexJsonlEvent,
+  type CodexTurnCompletedEvent,
+  type CodexItemCompletedEvent,
+  type ParsedCodexEvents,
+} from './codex.js'
