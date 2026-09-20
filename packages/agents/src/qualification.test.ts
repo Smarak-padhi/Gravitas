@@ -87,9 +87,10 @@ describe('evaluateQualificationPolicy', () => {
 // ─── buildQualificationEvidence ───────────────────────────────────────────────
 
 describe('buildQualificationEvidence', () => {
-  it('produces schemaVersion 1 records', () => {
+  it('produces schemaVersion 2 records with wave10.1-git-contained securityProfileVersion', () => {
     const evidence = buildQualificationEvidence('codex-cli 0.153.4', allPassed())
-    expect(evidence.schemaVersion).toBe(1)
+    expect(evidence.schemaVersion).toBe(2)
+    expect(evidence.securityProfileVersion).toBe('wave10.1-git-contained')
   })
 
   it('embeds the codex version', () => {
@@ -146,18 +147,26 @@ describe('isQualificationEvidenceValid', () => {
     expect(reason).toContain('REJECTED')
   })
 
-  it('returns valid:false for stale schema version', () => {
-    const staleEvidence = { ...approvedEvidence, schemaVersion: 0 as 1 }
-    const { valid } = isQualificationEvidenceValid(staleEvidence, 'codex-cli 0.153.4')
+  it('returns valid:false for stale schema version 1', () => {
+    const staleEvidence = { ...approvedEvidence, schemaVersion: 1 as any }
+    const { valid, reason } = isQualificationEvidenceValid(staleEvidence, 'codex-cli 0.153.4')
     expect(valid).toBe(false)
+    expect(reason).toContain('expected 2')
+  })
+
+  it('returns valid:false for invalid securityProfileVersion', () => {
+    const invalidProfile = { ...approvedEvidence, securityProfileVersion: 'wave10-legacy' as any }
+    const { valid, reason } = isQualificationEvidenceValid(invalidProfile, 'codex-cli 0.153.4')
+    expect(valid).toBe(false)
+    expect(reason).toContain('wave10.1-git-contained')
   })
 })
 
 // ─── QUALIFICATION_EXPERIMENT_SPECS ──────────────────────────────────────────
 
 describe('QUALIFICATION_EXPERIMENT_SPECS', () => {
-  it('contains at least 10 experiments', () => {
-    expect(QUALIFICATION_EXPERIMENT_SPECS.length).toBeGreaterThanOrEqual(10)
+  it('contains 17 qualification experiments', () => {
+    expect(QUALIFICATION_EXPERIMENT_SPECS.length).toBe(17)
   })
 
   it('has golden-loop as mandatory', () => {
@@ -168,6 +177,18 @@ describe('QUALIFICATION_EXPERIMENT_SPECS', () => {
 
   it('has head-protection as mandatory', () => {
     const spec = QUALIFICATION_EXPERIMENT_SPECS.find((s) => s.id === 'head-protection')
+    expect(spec).toBeDefined()
+    expect(spec!.mandatory).toBe(true)
+  })
+
+  it('has rules-isolation as mandatory', () => {
+    const spec = QUALIFICATION_EXPERIMENT_SPECS.find((s) => s.id === 'rules-isolation')
+    expect(spec).toBeDefined()
+    expect(spec!.mandatory).toBe(true)
+  })
+
+  it('has adversarial-git-matrix as mandatory', () => {
+    const spec = QUALIFICATION_EXPERIMENT_SPECS.find((s) => s.id === 'adversarial-git-matrix')
     expect(spec).toBeDefined()
     expect(spec!.mandatory).toBe(true)
   })

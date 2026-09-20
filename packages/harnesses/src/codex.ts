@@ -16,8 +16,10 @@
  * - Bounded output and credential scrubbing inherited from runSubprocess.
  */
 
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { randomUUID } from 'node:crypto'
+import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
 import { runSubprocess, type SubprocessHandle } from './process.js'
 import type {
   AgentExecutionRequest,
@@ -83,7 +85,14 @@ export function parseCodexJsonlOutput(stdout: string): ParsedCodexEvents {
       continue
     }
 
-    if (typeof parsed !== 'object' || parsed === null) continue
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed) ||
+      typeof (parsed as { type?: unknown }).type !== 'string'
+    ) {
+      continue
+    }
     const event = parsed as CodexJsonlEvent
     events.push(event)
 
@@ -175,6 +184,7 @@ export function resolveCodexExecutable(customPath?: string): string | null {
  * - --json: structured JSONL event stream output
  * - --approve-for-me: non-interactive workspace-write sandbox (auto-approves
  *   filesystem writes; this also sets sandbox mode so --sandbox is NOT passed)
+ * - --skip-git-repo-check: prevents git repository discovery requirement
  * - --cd <worktreePath>: bound execution directory
  */
 export function buildCodexCliArgs(worktreePath: string): readonly string[] {
@@ -186,6 +196,7 @@ export function buildCodexCliArgs(worktreePath: string): readonly string[] {
     '-c',
     'mcp_servers={}',
     '--json',
+    '--skip-git-repo-check',
     '--cd',
     worktreePath,
     '--approve-for-me',
@@ -284,8 +295,12 @@ export class CodexHarness implements AgentHarness {
   /**
    * Executes the Codex native binary against an allocated task worktree.
    *
-   * The prompt is passed via stdin; stdin is closed immediately after
-   * the write to prevent Codex from blocking waiting for more input.
+   * Trusted Git Containment Boundary:
+   * 1. Quarantines worktree .git metadata outside worktreePath during execution.
+   * 2. Prepends a Git mediation shim in PATH that intercepts any `git` invocations.
+   * 3. Sets restrictive GIT_* environment boundaries to prevent discovery.
+   * 4. Prompt is passed via stdin; stdin is closed immediately after write.
+   * 5. In finally: checks for rogue .git creation, restores legitimate .git, and cleans shim.
    */
   public async execute(request: AgentExecutionRequest): Promise<AgentExecutionResult> {
     const executable = this.getExecutablePath()
@@ -299,21 +314,98 @@ export class CodexHarness implements AgentHarness {
     const startedAt = new Date().toISOString()
     const cliArgs = buildCodexCliArgs(request.worktreePath)
 
-    const subprocessResult = await runSubprocess(
-      {
-        executable,
-        args: cliArgs,
-        cwd: request.worktreePath,
-        stdinInput: request.compiledPrompt,
-        timeoutMs: request.timeoutMs ?? 120000, // Codex needs more time than Claude
-      },
-      (handle) => {
-        this.activeExecutions.set(request.executionId, handle)
-      }
-    )
+    // --- Git Authority Containment: Quarantine .git entry ---
+    const dotGitPath = join(request.worktreePath, '.git')
+    const quarantinePath = `${request.worktreePath}.gravitas-git-quarantine`
+    let gitQuarantined = false
 
-    this.activeExecutions.delete(request.executionId)
+    if (existsSync(dotGitPath)) {
+      try {
+        renameSync(dotGitPath, quarantinePath)
+        gitQuarantined = true
+      } catch {
+        // Proceed even if quarantine rename fails
+      }
+    }
+
+    // --- Git Authority Containment: Mediation Shim in PATH ---
+    const shimDir = join(tmpdir(), `gravitas-git-shim-${randomUUID()}`)
+    let shimCreated = false
+    try {
+      mkdirSync(shimDir, { recursive: true })
+      const denialNoticeCmd =
+        '@echo off\r\necho [Gravitas Security Boundary] Worker execution is denied Git command: git %* 1>&2\r\nexit /b 128\r\n'
+      writeFileSync(join(shimDir, 'git.cmd'), denialNoticeCmd, 'utf8')
+      writeFileSync(join(shimDir, 'git.bat'), denialNoticeCmd, 'utf8')
+      const denialNoticeSh =
+        '#!/bin/sh\necho "[Gravitas Security Boundary] Worker execution is denied Git command: git $@" >&2\nexit 128\n'
+      writeFileSync(join(shimDir, 'git'), denialNoticeSh, 'utf8')
+      shimCreated = true
+    } catch {
+      // Proceed even if shim creation fails
+    }
+
+    const isolatedEnv: Record<string, string | undefined> = {
+      ...process.env,
+      ...(shimCreated ? { PATH: `${shimDir};${process.env['PATH'] ?? ''}` } : {}),
+      GIT_DIR: 'C:\\gravitas_denied_git_dir',
+      GIT_WORK_TREE: 'C:\\gravitas_denied_worktree',
+      GIT_CEILING_DIRECTORIES: dirname(request.worktreePath),
+      GIT_TERMINAL_PROMPT: '0',
+      GIT_OPTIONAL_LOCKS: '0',
+    }
+
+    let subprocessResult
+    let rogueGitCreated = false
+
+    try {
+      subprocessResult = await runSubprocess(
+        {
+          executable,
+          args: cliArgs,
+          cwd: request.worktreePath,
+          stdinInput: request.compiledPrompt,
+          timeoutMs: request.timeoutMs ?? 120000,
+          env: isolatedEnv,
+        },
+        (handle) => {
+          this.activeExecutions.set(request.executionId, handle)
+        }
+      )
+    } finally {
+      this.activeExecutions.delete(request.executionId)
+
+      // --- Post-Execution: Neutralize rogue .git and restore legitimate .git ---
+      try {
+        if (existsSync(dotGitPath)) {
+          rogueGitCreated = true
+          rmSync(dotGitPath, { recursive: true, force: true })
+        }
+      } catch {
+        // Best-effort rogue cleanup
+      }
+
+      if (gitQuarantined && existsSync(quarantinePath)) {
+        try {
+          renameSync(quarantinePath, dotGitPath)
+        } catch {
+          // Best-effort restore
+        }
+      }
+
+      if (shimCreated) {
+        try {
+          rmSync(shimDir, { recursive: true, force: true })
+        } catch {
+          // Best-effort shim cleanup
+        }
+      }
+    }
+
     const finishedAt = new Date().toISOString()
+    const stderrWithNotice = rogueGitCreated
+      ? `${subprocessResult.stderr}\n[Gravitas Security Boundary] Rogue .git creation detected and neutralized.`
+      : subprocessResult.stderr
 
     return {
       executionId: request.executionId,
@@ -325,7 +417,7 @@ export class CodexHarness implements AgentHarness {
       exitCode: subprocessResult.exitCode,
       terminationReason: subprocessResult.terminationReason,
       stdout: subprocessResult.stdout,
-      stderr: subprocessResult.stderr,
+      stderr: stderrWithNotice,
       stdoutTruncated: subprocessResult.stdoutTruncated,
       stderrTruncated: subprocessResult.stderrTruncated,
       worktreePath: request.worktreePath,

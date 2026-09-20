@@ -12,6 +12,7 @@ import {
   resolveCodexExecutable,
   CodexHarness,
 } from './codex.js'
+import { isPathWithinScope } from './mutation.js'
 
 // ─── parseCodexJsonlOutput ────────────────────────────────────────────────────
 
@@ -86,6 +87,20 @@ describe('parseCodexJsonlOutput', () => {
     expect(result.inputTokens).toBe(0)
     expect(result.outputTokens).toBe(0)
   })
+
+  it('ignores valid JSON that is not an object with a type string (arrays, primitives, untyped objects)', () => {
+    const raw = [
+      JSON.stringify([1, 2, 3]),
+      JSON.stringify(42),
+      JSON.stringify('hello'),
+      JSON.stringify({ notType: 'foo' }),
+      JSON.stringify({ type: 123 }),
+      JSON.stringify({ type: 'turn.completed' }),
+    ].join('\n')
+    const result = parseCodexJsonlOutput(raw)
+    expect(result.events).toHaveLength(1)
+    expect(result.turnCompleted).toBe(true)
+  })
 })
 
 // ─── buildCodexCliArgs ────────────────────────────────────────────────────────
@@ -133,6 +148,11 @@ describe('buildCodexCliArgs', () => {
     const idx = args.indexOf('--cd')
     expect(idx).toBeGreaterThan(-1)
     expect(args[idx + 1]).toBe('/my/worktree')
+  })
+
+  it('includes --skip-git-repo-check flag', () => {
+    const args = buildCodexCliArgs('/tmp/worktree')
+    expect(args).toContain('--skip-git-repo-check')
   })
 
   it('does NOT include --sandbox (mutually exclusive with --approve-for-me)', () => {
@@ -196,5 +216,24 @@ describe('CodexHarness', () => {
         compiledPrompt: 'hello',
       })
     ).rejects.toThrow(/Codex native binary is not available/)
+  })
+})
+
+// ─── isPathWithinScope ───────────────────────────────────────────────────────
+
+describe('isPathWithinScope', () => {
+  it('returns true for files directly inside base directory', () => {
+    expect(isPathWithinScope('foo.txt', process.cwd())).toBe(true)
+    expect(isPathWithinScope('src/index.ts', process.cwd())).toBe(true)
+  })
+
+  it('returns false for path traversal escaping base directory', () => {
+    expect(isPathWithinScope('../outside.txt', process.cwd())).toBe(false)
+    expect(isPathWithinScope('../../etc/passwd', process.cwd())).toBe(false)
+  })
+
+  it('returns false for paths on different roots or outside base', () => {
+    expect(isPathWithinScope('C:\\Windows\\System32\\cmd.exe', 'C:\\app\\project')).toBe(false)
+    expect(isPathWithinScope('/etc/shadow', '/home/user/repo')).toBe(false)
   })
 })

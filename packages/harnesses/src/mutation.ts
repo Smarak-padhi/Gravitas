@@ -9,6 +9,7 @@
  */
 
 import { createHash } from 'node:crypto'
+import { isAbsolute, relative, resolve } from 'node:path'
 import { executeGit, inspectRepository } from '@gravitas/git'
 import type { MutationCapture, WorktreeSnapshot } from './types.js'
 
@@ -41,6 +42,27 @@ export async function takeWorktreeSnapshot(worktreePath: string): Promise<Worktr
  */
 export function normalizePathForScope(p: string): string {
   return p.replace(/\\/g, '/').replace(/^\.\//, '').trim()
+}
+
+/**
+ * Validates that candidatePath resolves strictly within basePath.
+ * Rejects path traversal (../), absolute paths, and Windows drive escapes.
+ */
+export function isPathWithinScope(candidatePath: string, basePath: string): boolean {
+  if (!candidatePath || typeof candidatePath !== 'string') return false
+  const trimmed = candidatePath.trim()
+  if (!trimmed) return false
+
+  // Absolute paths (e.g. /etc/passwd or C:\Windows\...) are not allowed relative task paths
+  if (isAbsolute(trimmed) || /^[a-zA-Z]:[\\/]/.test(trimmed)) {
+    return false
+  }
+
+  const resolvedBase = resolve(basePath)
+  const resolvedTarget = resolve(resolvedBase, trimmed)
+  const rel = relative(resolvedBase, resolvedTarget)
+
+  return !rel.startsWith('..') && !isAbsolute(rel) && rel !== ''
 }
 
 /**
@@ -97,7 +119,9 @@ export async function captureWorktreeMutation(
   const unexpectedChanges: string[] = []
 
   for (const file of changedFiles) {
-    if (normalizedAllowed.has(file)) {
+    if (!isPathWithinScope(file, worktreePath)) {
+      unexpectedChanges.push(file)
+    } else if (normalizedAllowed.has(file)) {
       allowedChanges.push(file)
     } else {
       unexpectedChanges.push(file)

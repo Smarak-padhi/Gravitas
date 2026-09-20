@@ -43,6 +43,7 @@ export {
   takeWorktreeSnapshot,
   captureWorktreeMutation,
   normalizePathForScope,
+  isPathWithinScope,
 } from './mutation.js'
 
 // Claude Code harness adapter (Official)
