@@ -17,6 +17,12 @@ import type {
 } from '@gravitas/prompts'
 import type { MutationCapture } from '@gravitas/harnesses'
 import type { EvidenceManifest, VerificationPlan, VerificationResult } from '@gravitas/verifier'
+import type { RunPlan, TaskPlanDefinition } from '@gravitas/orchestrator'
+
+export type {
+  RunPlan,
+  TaskPlanDefinition,
+} from '@gravitas/orchestrator'
 
 // Re-export prompt types for server API consumers
 export type {
@@ -77,6 +83,9 @@ export interface CreateRunInput {
    * Must NOT contain secrets, API keys, or credential-bearing material.
    */
   readonly projectContext?: ProjectPromptContext | undefined
+  readonly maxConcurrency?: number | undefined
+  readonly tasks?: readonly TaskPlanDefinition[] | undefined
+  readonly plan?: RunPlan | undefined
 }
 
 /**

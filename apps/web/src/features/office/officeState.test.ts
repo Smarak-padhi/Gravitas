@@ -168,4 +168,54 @@ describe('Office State Derivation Invariants (officeState.test.ts)', () => {
     expect(stations[0]!.attentionLevel).toBe('CRITICAL')
     expect(stations[1]!.state).toBe('FAILED')
   })
+
+  it('derives multiple concurrent worker stations when multiple tasks execute simultaneously', () => {
+    const task1: Task = {
+      id: 't-1',
+      runId: 'run-1',
+      title: 'First parallel task',
+      objective: 'Build component A',
+      state: 'RUNNING',
+      dependencies: [],
+      acceptanceCriteria: [],
+      createdAt: '2026-09-20T00:00:00Z',
+      updatedAt: '2026-09-20T00:00:00Z',
+    }
+    const task2: Task = {
+      id: 't-2',
+      runId: 'run-1',
+      title: 'Second parallel task',
+      objective: 'Build component B',
+      state: 'VERIFYING',
+      dependencies: [],
+      acceptanceCriteria: [],
+      createdAt: '2026-09-20T00:00:00Z',
+      updatedAt: '2026-09-20T00:00:00Z',
+    }
+
+    const stations = deriveOfficeState({
+      run: null,
+      tasks: [task1, task2],
+      activeTask: task1,
+      harness: dummyHarness,
+    })
+
+    // Expect 2 worker stations + 1 verifier + 1 astra = 4 stations
+    expect(stations).toHaveLength(4)
+    expect(stations[0]!.id).toBe('worker-slot-1')
+    expect(stations[0]!.state).toBe('WORKING')
+    expect(stations[0]!.currentTaskId).toBe('t-1')
+
+    expect(stations[1]!.id).toBe('worker-slot-2')
+    expect(stations[1]!.state).toBe('WORKING')
+    expect(stations[1]!.currentTaskId).toBe('t-2')
+
+    // Verifier is verifying task 2
+    expect(stations[2]!.id).toBe('gate-verifier')
+    expect(stations[2]!.state).toBe('VERIFYING')
+    expect(stations[2]!.currentTaskId).toBe('t-2')
+
+    // Astra station
+    expect(stations[3]!.id).toBe('worker-astra')
+  })
 })

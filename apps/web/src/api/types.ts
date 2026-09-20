@@ -20,6 +20,11 @@ import type {
   TaskPromptResponse,
 } from '@gravitas/prompts'
 
+import type {
+  RunPlan,
+  TaskPlanDefinition,
+} from '@gravitas/orchestrator'
+
 export type {
   ExecutionContract,
   GravitasEvent,
@@ -30,8 +35,10 @@ export type {
   PromptPreviewRequest,
   PromptPreviewResponse,
   Run,
+  RunPlan,
   RunStatus,
   Task,
+  TaskPlanDefinition,
   TaskPromptResponse,
   TaskState,
 }
@@ -143,6 +150,9 @@ export interface CreateRunInput {
   readonly requiredEvidence?: readonly RequiredEvidenceInput[] | undefined
   readonly requiresApproval?: boolean | undefined
   readonly projectContext?: ProjectPromptContext | undefined
+  readonly maxConcurrency?: number | undefined
+  readonly tasks?: readonly TaskPlanDefinition[] | undefined
+  readonly plan?: RunPlan | undefined
 }
 
 export interface CreateRunResponse {

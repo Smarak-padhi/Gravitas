@@ -276,8 +276,6 @@ export class FreeClaudeCodeHarness implements AgentHarness {
         mcpConfigFile: effectiveMcpConfigFile,
       })
 
-      let currentHandle: SubprocessHandle | undefined
-
       const subprocessResult = await runSubprocess(
         {
           executable: launcher,
@@ -287,7 +285,6 @@ export class FreeClaudeCodeHarness implements AgentHarness {
           timeoutMs: request.timeoutMs ?? 60000,
         },
         (handle) => {
-          currentHandle = handle
           this.activeExecutions.set(request.executionId, handle)
         }
       )

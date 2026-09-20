@@ -47,13 +47,14 @@ export const App: React.FC = () => {
   const [acknowledgedInboxIds, setAcknowledgedInboxIds] = useState<Set<string>>(new Set())
   const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>(null)
 
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+
   // Initial load
   const loadInitialData = useCallback(async () => {
     try {
       const summary = await api.getState()
       setStateSummary(summary)
       setRuns(summary.runs)
-
       if (summary.runs.length > 0 && !selectedRunId) {
         setSelectedRunId(summary.runs[0]!.id)
       }
@@ -67,21 +68,54 @@ export const App: React.FC = () => {
     void loadInitialData()
   }, [loadInitialData])
 
+  // Load specific task details and diff
+  const loadTaskDetails = useCallback(async (runId: string, taskId: string) => {
+    setSelectedTaskId(taskId)
+    try {
+      const tDetail = await api.getTask(runId, taskId)
+      setTaskDetail(tDetail)
+
+      if (tDetail.evidenceAvailable) {
+        setIsLoadingDiff(true)
+        try {
+          const diffData = await api.getEvidenceDiff(runId, taskId)
+          setDiff(diffData.diff)
+        } catch {
+          setDiff('')
+        } finally {
+          setIsLoadingDiff(false)
+        }
+      } else {
+        setDiff('')
+      }
+    } catch (err) {
+      console.error(`Failed to load task detail for ${taskId}:`, err)
+    }
+  }, [])
+
   // Fetch full details when selected run changes
   const loadRunDetails = useCallback(async (runId: string) => {
     try {
       const detail = await api.getRun(runId)
       setRunDetail(detail)
 
-      const firstTask = detail.tasks[0]
-      if (firstTask) {
-        const tDetail = await api.getTask(runId, firstTask.id)
+      const currentlySelected = selectedTaskId ? detail.tasks.find((t) => t.id === selectedTaskId) : null
+      const isCurrentTerminal = currentlySelected && (currentlySelected.state === 'APPROVED' || currentlySelected.state === 'SUCCEEDED')
+
+      const targetTask =
+        (!isCurrentTerminal && currentlySelected ? currentlySelected : null) ??
+        detail.tasks.find((t) => t.state === 'WAITING_APPROVAL' || t.state === 'RUNNING' || t.state === 'VERIFYING') ??
+        detail.tasks[0]
+
+      if (targetTask) {
+        setSelectedTaskId(targetTask.id)
+        const tDetail = await api.getTask(runId, targetTask.id)
         setTaskDetail(tDetail)
 
         if (tDetail.evidenceAvailable) {
           setIsLoadingDiff(true)
           try {
-            const diffData = await api.getEvidenceDiff(runId, firstTask.id)
+            const diffData = await api.getEvidenceDiff(runId, targetTask.id)
             setDiff(diffData.diff)
           } catch {
             setDiff('')
@@ -98,7 +132,7 @@ export const App: React.FC = () => {
     } catch (err) {
       console.error('Failed to load run detail:', err)
     }
-  }, [])
+  }, [selectedTaskId])
 
   useEffect(() => {
     if (selectedRunId) {
@@ -106,6 +140,7 @@ export const App: React.FC = () => {
     } else {
       setRunDetail(null)
       setTaskDetail(null)
+      setSelectedTaskId(null)
       setDiff('')
     }
   }, [selectedRunId, loadRunDetails])
@@ -495,6 +530,13 @@ export const App: React.FC = () => {
                 task={currentTask}
                 taskDetail={taskDetail}
                 runStatus={currentRunStatus}
+                tasks={runDetail?.tasks ?? []}
+                selectedTaskId={selectedTaskId ?? currentTask?.id}
+                onSelectTask={(taskId) => {
+                  if (selectedRunId) {
+                    void loadTaskDetails(selectedRunId, taskId)
+                  }
+                }}
               />
               <TaskInspector
                 task={currentTask}

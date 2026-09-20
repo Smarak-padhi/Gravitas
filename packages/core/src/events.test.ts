@@ -2,7 +2,13 @@ import { describe, it, expect } from 'vitest'
 import {
   createExecutionContractCreatedEvent,
   createRunCreatedEvent,
+  createRunPlanCreatedEvent,
+  createTaskApprovedEvent,
+  createTaskCompositionConflictEvent,
   createTaskCreatedEvent,
+  createTaskReadyEvent,
+  createTaskResultMaterializedEvent,
+  createTaskScheduledEvent,
   createTaskStateChangedEvent,
   generateEventId,
   InMemoryEventCollector,
@@ -119,6 +125,36 @@ describe('Gravitas Event Model', () => {
       expect(event.payload['fromState']).toBe('RUNNING')
       expect(event.payload['toState']).toBe('VERIFYING')
       expect(event.payload['reason']).toBe('Worker finished execution')
+    })
+
+    it('creates multi-task orchestration events with full envelope', () => {
+      const planEvt = createRunPlanCreatedEvent('run_123', { taskCount: 3 })
+      expect(planEvt.type).toBe('RUN_PLAN_CREATED')
+      expect(planEvt.runId).toBe('run_123')
+      expect(planEvt.payload['taskCount']).toBe(3)
+
+      const readyEvt = createTaskReadyEvent('run_123', 'task_1')
+      expect(readyEvt.type).toBe('TASK_READY')
+      expect(readyEvt.runId).toBe('run_123')
+      expect(readyEvt.taskId).toBe('task_1')
+
+      const schedEvt = createTaskScheduledEvent('run_123', 'task_1', 1)
+      expect(schedEvt.type).toBe('TASK_SCHEDULED')
+      expect(schedEvt.runId).toBe('run_123')
+      expect(schedEvt.taskId).toBe('task_1')
+      expect(schedEvt.payload['slot']).toBe(1)
+
+      const matEvt = createTaskResultMaterializedEvent('run_123', 'task_1', 'abc1234')
+      expect(matEvt.type).toBe('TASK_RESULT_MATERIALIZED')
+      expect(matEvt.runId).toBe('run_123')
+      expect(matEvt.taskId).toBe('task_1')
+      expect(matEvt.payload['commitSha']).toBe('abc1234')
+
+      const confEvt = createTaskCompositionConflictEvent('run_123', 'task_1', { conflict: true })
+      expect(confEvt.type).toBe('TASK_COMPOSITION_CONFLICT')
+      expect(confEvt.runId).toBe('run_123')
+      expect(confEvt.taskId).toBe('task_1')
+      expect(confEvt.payload['conflict']).toBe(true)
     })
   })
 

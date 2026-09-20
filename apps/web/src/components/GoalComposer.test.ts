@@ -182,4 +182,57 @@ describe('GoalComposer Form Logic & Validation (GoalComposer.test.ts)', () => {
       expect(result.payload.projectContext).toBeUndefined()
     }
   })
+
+  it('validates and constructs multi-task DAG payload when mode is DAG', () => {
+    const validDagTasks = JSON.stringify([
+      {
+        id: 't-1',
+        title: 'Task 1',
+        objective: 'Objective 1',
+        dependencies: [],
+        requiresApproval: true,
+      },
+      {
+        id: 't-2',
+        title: 'Task 2',
+        objective: 'Objective 2',
+        dependencies: ['t-1'],
+        requiresApproval: true,
+      },
+    ])
+
+    const state: ComposerFormState = {
+      ...baseValidState,
+      mode: 'DAG',
+      maxConcurrency: 3,
+      dagTasksJson: validDagTasks,
+    }
+
+    const result = validateAndBuildCreateRunPayload(state)
+    expect(result.valid).toBe(true)
+    if (result.valid) {
+      expect(result.payload.maxConcurrency).toBe(3)
+      expect(result.payload.tasks).toHaveLength(2)
+      expect(result.payload.tasks![0]!.id).toBe('t-1')
+      expect(result.payload.tasks![1]!.dependencies).toEqual(['t-1'])
+    }
+  })
+
+  it('rejects invalid JSON or incomplete tasks in DAG mode', () => {
+    const invalidJsonState: ComposerFormState = {
+      ...baseValidState,
+      mode: 'DAG',
+      dagTasksJson: '{ invalid json',
+    }
+    const res1 = validateAndBuildCreateRunPayload(invalidJsonState)
+    expect(res1.valid).toBe(false)
+
+    const incompleteTaskState: ComposerFormState = {
+      ...baseValidState,
+      mode: 'DAG',
+      dagTasksJson: JSON.stringify([{ id: 't-1', title: 'Task 1' }]), // missing objective
+    }
+    const res2 = validateAndBuildCreateRunPayload(incompleteTaskState)
+    expect(res2.valid).toBe(false)
+  })
 })

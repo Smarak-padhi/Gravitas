@@ -63,8 +63,17 @@ import {
   type VerificationPlan,
 } from '@gravitas/verifier'
 import {
+  BoundedScheduler,
+  PlanValidationError,
+  extractDependencyIds,
+  validateRunPlan,
+  type RunPlan,
+  type TaskPlanDefinition,
+} from '@gravitas/orchestrator'
+import {
   InvalidRequestError,
   NotFoundError,
+  RunAlreadyExecutingError,
   TaskStateConflictError,
 } from './errors.js'
 import type { EventHub } from './events.js'
@@ -100,6 +109,8 @@ export class RunService {
   private readonly defaultRepository?: string | undefined
   private readonly defaultVerificationPlan?: VerificationPlan | undefined
   private cachedHarnessAvailability?: { status: string; message?: string | undefined; timestamp: number } | undefined
+  private readonly activeSchedulers = new Map<string, BoundedScheduler>()
+  private readonly runPlans = new Map<string, RunPlan>()
 
   public constructor(options: RunServiceOptions) {
     this.registry = options.registry
@@ -124,7 +135,7 @@ export class RunService {
     }
 
     const runId = `run_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-    const taskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    const defaultTaskId = `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 
     const acceptanceCriteria = input.acceptanceCriteria !== undefined
       ? input.acceptanceCriteria.map((ac, idx) => ({
@@ -177,28 +188,92 @@ export class RunService {
     const contractId = `contract_${runId}`
     this.registry.addContract(contractId, contract)
 
-    const now = new Date().toISOString()
-
-    const task: Task = {
-      id: taskId,
-      runId,
-      title: `Execute: ${input.goal.slice(0, 60)}`,
-      objective: input.goal,
-      state: 'READY',
-      dependencies: [],
-      acceptanceCriteria: contract.acceptanceCriteria,
-      requiresApproval: input.requiresApproval ?? true,
-      createdAt: now,
-      updatedAt: now,
+    // Build or extract RunPlan
+    let plan: RunPlan
+    if (input.plan) {
+      plan = {
+        ...input.plan,
+        runId,
+        repository,
+        baseBranch: input.baseBranch ?? 'HEAD',
+        defaultVerificationPlan: input.verificationPlan ?? this.defaultVerificationPlan,
+      }
+    } else if (input.tasks && input.tasks.length > 0) {
+      plan = {
+        runId,
+        goal: input.goal.trim(),
+        repository,
+        baseBranch: input.baseBranch ?? 'HEAD',
+        constraints: input.constraints ?? [],
+        maxConcurrency: input.maxConcurrency ?? 2,
+        tasks: input.tasks,
+        projectContext: input.projectContext,
+        defaultVerificationPlan: input.verificationPlan ?? this.defaultVerificationPlan,
+      }
+    } else {
+      plan = {
+        runId,
+        goal: input.goal.trim(),
+        repository,
+        baseBranch: input.baseBranch ?? 'HEAD',
+        constraints: input.constraints ?? [],
+        maxConcurrency: 1,
+        tasks: [
+          {
+            id: defaultTaskId,
+            title: `Execute: ${input.goal.slice(0, 60)}`,
+            objective: input.goal,
+            dependencies: [],
+            acceptanceCriteria: contract.acceptanceCriteria,
+            requiresApproval: input.requiresApproval ?? true,
+          },
+        ],
+        projectContext: input.projectContext,
+        defaultVerificationPlan: input.verificationPlan ?? this.defaultVerificationPlan,
+      }
     }
-    this.registry.addTask(task)
+
+    try {
+      validateRunPlan(plan)
+    } catch (err) {
+      if (err instanceof PlanValidationError) {
+        throw new InvalidRequestError('INVALID_PLAN', err.message)
+      }
+      throw err
+    }
+
+    this.runPlans.set(runId, plan)
+
+    const now = new Date().toISOString()
+    const createdTasks: Task[] = []
+
+    for (const taskDef of plan.tasks) {
+      const depIds = extractDependencyIds(taskDef)
+      const dependencies = depIds.map((d) => ({ taskId: d }))
+
+      const task: Task = {
+        id: taskDef.id,
+        runId,
+        title: taskDef.title,
+        objective: taskDef.objective,
+        state: depIds.length === 0 ? 'READY' : 'BLOCKED',
+        dependencies,
+        acceptanceCriteria: taskDef.acceptanceCriteria ?? contract.acceptanceCriteria,
+        requiresApproval: taskDef.requiresApproval ?? input.requiresApproval ?? true,
+        ...(taskDef.role ? { role: taskDef.role } : {}),
+        createdAt: now,
+        updatedAt: now,
+      }
+      this.registry.addTask(task)
+      createdTasks.push(task)
+    }
 
     const run: Run = {
       id: runId,
       goal: input.goal,
       status: 'PENDING',
       contractId,
-      taskIds: [taskId],
+      taskIds: createdTasks.map((t) => t.id),
       createdAt: now,
       updatedAt: now,
     }
@@ -208,7 +283,6 @@ export class RunService {
       this.registry.setVerificationPlan(runId, input.verificationPlan)
     }
 
-    // Store project context for prompt compilation
     if (input.projectContext) {
       this.registry.setProjectContext(runId, input.projectContext)
     }
@@ -216,18 +290,20 @@ export class RunService {
     // Publish creation events through EventHub
     this.eventHub.publish(createRunCreatedEvent(run))
     this.eventHub.publish(createExecutionContractCreatedEvent(runId, contract))
-    this.eventHub.publish(createTaskCreatedEvent(task))
+    for (const t of createdTasks) {
+      this.eventHub.publish(createTaskCreatedEvent(t))
+    }
 
     return {
       runId,
       contractId,
-      tasks: [task],
+      tasks: createdTasks,
       run,
     }
   }
 
   /**
-   * Executes the Golden Loop for a given run's single task.
+   * Executes the Golden Loop for a run's tasks using the BoundedScheduler.
    */
   public async executeRun(runId: string, options?: ExecuteRunOptions | undefined): Promise<Task> {
     const run = this.registry.getRun(runId)
@@ -235,17 +311,23 @@ export class RunService {
       throw new NotFoundError('Run', runId)
     }
 
+    if (this.activeSchedulers.has(runId) || run.status === 'RUNNING') {
+      throw new RunAlreadyExecutingError(runId)
+    }
+
     const tasks = this.registry.listTasksForRun(runId)
-    const task = tasks[0]
-    if (!task) {
+    if (tasks.length === 0) {
       throw new InvalidRequestError('NO_TASKS', `Run '${runId}' has no tasks to execute.`)
     }
 
-    if (task.state !== 'READY') {
-      throw new TaskStateConflictError(`Task '${task.id}' is in '${task.state}' state, expected 'READY'.`)
+    const anyReady = tasks.some((t) => t.state === 'READY')
+    if (!anyReady) {
+      const activeTask = tasks.find((t) => t.state === 'WAITING_APPROVAL' || t.state === 'RUNNING')
+      if (activeTask) {
+        return activeTask
+      }
+      throw new TaskStateConflictError(`Run '${runId}' has no tasks eligible for execution (none in READY state).`)
     }
-
-    let currentTask: Task = task
 
     const contract = this.registry.getContract(run.contractId)
     const repository = contract?.repository ?? this.defaultRepository
@@ -256,231 +338,96 @@ export class RunService {
     const runtimeRoot = options?.runtimeRoot ?? this.runtimeRoot
     const baseBranch = contract?.baseBranch ?? 'HEAD'
 
+    // Retrieve or construct RunPlan
+    let plan = this.runPlans.get(runId)
+    if (!plan) {
+      plan = {
+        runId,
+        goal: run.goal,
+        repository,
+        baseBranch,
+        constraints: contract?.constraints ?? [],
+        tasks: tasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          objective: t.objective,
+          dependencies: t.dependencies.map((d) => d.taskId),
+          acceptanceCriteria: t.acceptanceCriteria,
+          requiresApproval: t.requiresApproval ?? true,
+          role: t.role,
+        })),
+        projectContext: this.registry.getProjectContext(runId),
+        defaultVerificationPlan: this.registry.getVerificationPlan(runId) ?? this.defaultVerificationPlan,
+      }
+    }
+
     // Transition run to RUNNING
     const prevRunStatus = run.status
     this.registry.updateRun({ ...run, status: 'RUNNING', updatedAt: new Date().toISOString() })
     this.eventHub.publish(createRunStateChangedEvent(run.id, prevRunStatus, 'RUNNING'))
 
-    // 1. Allocate isolated task worktree
-    const worktreeAlloc = await allocateWorktree({
-      repository,
-      runId: run.id,
-      taskId: currentTask.id,
-      baseRef: baseBranch,
+    const scheduler = new BoundedScheduler({
+      runId,
+      plan,
+      repositoryRoot: repository,
+      baseBranch,
       runtimeRoot,
+      harness: this.harness,
+      defaultVerificationPlan: this.registry.getVerificationPlan(runId) ?? this.defaultVerificationPlan,
+      autoPauseOnWaitingApproval: true,
+      onEvent: (event) => {
+        this.eventHub.publish(event)
+      },
+      onTaskUpdated: (updatedTask) => {
+        this.registry.updateTask(updatedTask)
+      },
+      onMutation: (taskId, mutation) => {
+        this.registry.setMutation(taskId, mutation)
+      },
+      onVerification: (taskId, verification) => {
+        this.registry.setVerification(taskId, verification)
+      },
+      onEvidence: (taskId, evidenceRef) => {
+        this.registry.setEvidenceRef(taskId, evidenceRef)
+      },
+      onCompiledPrompt: (taskId, compiledPrompt) => {
+        this.registry.setCompiledPrompt(taskId, compiledPrompt)
+      },
     })
 
-    let cleanupWorktree = true
+    this.activeSchedulers.set(runId, scheduler)
 
     try {
-      // 2. Take pre-execution snapshot
-      const beforeSnapshot = await takeWorktreeSnapshot(worktreeAlloc.worktreePath)
+      const result = await scheduler.execute()
 
-      // 3. Task transitions READY -> RUNNING
-      const prevTaskState = currentTask.state
-      currentTask = { ...currentTask, state: 'RUNNING', updatedAt: new Date().toISOString() }
-      this.registry.updateTask(currentTask)
-      this.eventHub.publish(
-        createTaskStateChangedEvent({
-          runId: run.id,
-          taskId: currentTask.id,
-          fromState: prevTaskState,
-          toState: 'RUNNING',
-        })
-      )
-      this.eventHub.publish(createWorkerStartedEvent(run.id, currentTask.id, { harnessId: this.harness.id }))
-
-      // 4. Compile managed prompt via Prompt Manager
-      // RunService delegates prompt compilation entirely to @gravitas/prompts.
-      // The exact CompiledPrompt.text is what the harness receives — no secondary transformation.
-      const projectContext = this.registry.getProjectContext(run.id)
-      const compiledAt = new Date().toISOString()
-      const managedPrompt: ManagedCompiledPrompt = compilePrompt({
-        projectContext,
-        contract: contract ?? {
-          version: '1.0.0',
-          goal: run.goal,
-          repository: repository,
-          baseBranch: baseBranch,
-          constraints: [],
-          acceptanceCriteria: currentTask.acceptanceCriteria,
-          requiredEvidence: [],
-        },
-        task: currentTask,
-        role: 'IMPLEMENTER', // Default role; future waves may add per-task role selection
-        runtimeContext: {
-          runId: run.id,
-          taskId: currentTask.id,
-          worktreePath: worktreeAlloc.worktreePath,
-          taskBranch: worktreeAlloc.branch,
-          baseSha: worktreeAlloc.baseSha,
-          allowedPaths: contract?.constraints ?? [],
-          harnessId: this.harness.id,
-          compiledAt,
-        },
+      // Update run status based on execution outcome
+      const updatedRunStatus = result.status
+      const currentRun = this.registry.getRun(runId) ?? run
+      this.registry.updateRun({
+        ...currentRun,
+        status: updatedRunStatus,
+        updatedAt: new Date().toISOString(),
       })
 
-      // Store compiled prompt in registry for later retrieval
-      this.registry.setCompiledPrompt(currentTask.id, managedPrompt)
-
-      const executionResult = await this.harness.execute({
-        executionId: generateEventId('exec'),
-        runId: run.id,
-        taskId: currentTask.id,
-        worktreePath: worktreeAlloc.worktreePath,
-        compiledPrompt: managedPrompt.text,   // EXACT bytes from compiled prompt
-        permissions: { allowFileEdits: true },
-        timeoutMs: options?.timeoutMs ?? 60000,
-      })
-
-      this.eventHub.publish(
-        createWorkerFinishedEvent(run.id, currentTask.id, {
-          exitCode: executionResult.exitCode,
-          terminationReason: executionResult.terminationReason,
-          durationMs: executionResult.durationMs,
-        })
-      )
-
-      // 5. Capture Worktree Mutation
-      const allowedPaths = contract?.constraints ?? []
-      const mutation = await captureWorktreeMutation(
-        worktreeAlloc.worktreePath,
-        beforeSnapshot,
-        allowedPaths
-      )
-      this.registry.setMutation(currentTask.id, mutation)
-
-      // 6. Transition Task RUNNING -> VERIFYING
-      currentTask = { ...currentTask, state: 'VERIFYING', updatedAt: new Date().toISOString() }
-      this.registry.updateTask(currentTask)
-      this.eventHub.publish(
-        createTaskStateChangedEvent({
-          runId: run.id,
-          taskId: currentTask.id,
-          fromState: 'RUNNING',
-          toState: 'VERIFYING',
-        })
-      )
-      this.eventHub.publish(createVerificationStartedEvent(run.id, currentTask.id))
-
-      // 7. Execute Independent Verifier
-      const plan =
-        this.registry.getVerificationPlan(run.id) ??
-        this.defaultVerificationPlan ?? {
-          id: 'plan_default',
-          commands: [
-            {
-              id: 'cmd_default_check',
-              executable: process.execPath,
-              args: ['-e', 'process.exit(0)'],
-              mandatory: true,
-            },
-          ],
-        }
-
-      const verification = await executeVerification({
-        worktreePath: worktreeAlloc.worktreePath,
-        plan,
-      })
-      this.registry.setVerification(currentTask.id, verification)
-
-      const passedCommands = verification.commands.filter((c) => c.exitCode === 0).length
-      const failedCommands = verification.commands.filter((c) => c.exitCode !== 0).length
-
-      this.eventHub.publish(
-        createVerificationFinishedEvent(run.id, currentTask.id, {
-          status: verification.status,
-          totalCommands: verification.commands.length,
-          passedCommands,
-          failedCommands,
-        })
-      )
-
-      // 8. Apply Verification Outcome
-      const outcome = applyVerificationOutcome({
-        task: currentTask,
-        mutation,
-        verification,
-      })
-      currentTask = outcome.task
-      this.registry.updateTask(currentTask)
-
-      // 9. Write Evidence Bundle
-      // Uses managedPrompt.sha256 — the hash of the EXACT bytes sent to the worker.
-      // Also records compiler/policy/role versions for full prompt provenance.
-      const bundleResult = await writeEvidenceBundle({
-        runtimeRoot,
-        runId: run.id,
-        taskId: currentTask.id,
-        goal: run.goal,
-        repositoryPath: repository,
-        baseBranch,
-        baseSha: worktreeAlloc.baseSha,
-        taskBranch: worktreeAlloc.branch,
-        worktreePath: worktreeAlloc.worktreePath,
-        worker: {
-          harnessId: this.harness.id,
-          executionId: executionResult.executionId,
-          exitCode: executionResult.exitCode,
-          terminationReason: executionResult.terminationReason,
-          durationMs: executionResult.durationMs,
-          promptSha256: managedPrompt.sha256,
-          compilerVersion: managedPrompt.compilerVersion,
-          globalPolicyVersion: managedPrompt.globalPolicyVersion,
-          roleTemplateVersion: managedPrompt.roleTemplateVersion,
-          compiledPromptText: managedPrompt.text,
-          rawResult: executionResult,
-        },
-        mutation,
-        verification,
-        finalTaskState: currentTask.state,
-      })
-
-      const evidenceRef: TaskEvidenceRef = {
-        runId: run.id,
-        taskId: currentTask.id,
-        evidenceDir: bundleResult.bundleDir,
-        manifestPath: join(bundleResult.bundleDir, 'evidence-manifest.json'),
-        artifactFiles: Object.keys(bundleResult.artifactPaths),
-        createdAt: new Date().toISOString(),
-      }
-      this.registry.setEvidenceRef(currentTask.id, evidenceRef)
-      this.eventHub.publish(
-        createEvidenceCreatedEvent(run.id, currentTask.id, {
-          bundleDir: bundleResult.bundleDir,
-          manifestSha256: bundleResult.manifestSha256,
-        })
-      )
-
-      // 10. Emit State Change & Trigger Events
-      this.eventHub.publish(outcome.event)
-
-      if (currentTask.state === 'WAITING_APPROVAL') {
-        this.eventHub.publish(createApprovalRequiredEvent(run.id, currentTask.id))
-        this.registry.updateRun({ ...run, status: 'WAITING_APPROVAL', updatedAt: new Date().toISOString() })
-        this.eventHub.publish(createRunStateChangedEvent(run.id, 'RUNNING', 'WAITING_APPROVAL'))
-      } else if (currentTask.state === 'SUCCEEDED') {
-        this.registry.updateRun({ ...run, status: 'COMPLETED', updatedAt: new Date().toISOString() })
-        this.eventHub.publish(createRunStateChangedEvent(run.id, 'RUNNING', 'COMPLETED'))
-        this.eventHub.publish(createRunCompletedEvent(run.id))
-      } else if (currentTask.state === 'FAILED') {
-        this.registry.updateRun({ ...run, status: 'FAILED', updatedAt: new Date().toISOString() })
-        this.eventHub.publish(createRunStateChangedEvent(run.id, 'RUNNING', 'FAILED'))
-        this.eventHub.publish(createRunFailedEvent(run.id, { reason: verification.failureReason }))
+      if (updatedRunStatus !== 'RUNNING') {
+        this.eventHub.publish(createRunStateChangedEvent(runId, 'RUNNING', updatedRunStatus))
       }
 
-      return currentTask
+      if (updatedRunStatus === 'COMPLETED') {
+        this.eventHub.publish(createRunCompletedEvent(runId))
+        this.activeSchedulers.delete(runId)
+      } else if (updatedRunStatus === 'FAILED') {
+        this.eventHub.publish(createRunFailedEvent(runId))
+        this.activeSchedulers.delete(runId)
+      }
+
+      const activeOrFirstTask =
+        result.tasks.find((t) => t.state === 'WAITING_APPROVAL' || t.state === 'RUNNING') ??
+        result.tasks[0]!
+      return activeOrFirstTask
     } catch (err) {
-      cleanupWorktree = false
+      this.activeSchedulers.delete(runId)
       throw err
-    } finally {
-      if (cleanupWorktree) {
-        try {
-          await removeWorktree(worktreeAlloc.worktreePath)
-        } catch {
-          // Best effort cleanup — uncommitted changes or failure preserved
-        }
-      }
     }
   }
 
@@ -504,6 +451,44 @@ export class RunService {
       )
     }
 
+    const scheduler = this.activeSchedulers.get(runId)
+    if (scheduler) {
+      task = await scheduler.approveTask(taskId, input?.reviewer)
+      this.registry.updateTask(task)
+
+      // Evaluate overall run status
+      const allTasks = this.registry.listTasksForRun(runId)
+      const allTerminal = allTasks.every((t) =>
+        ['COMPLETED', 'APPROVED', 'FAILED', 'CANCELLED'].includes(t.state)
+      )
+
+      if (allTerminal) {
+        const hasFailed = allTasks.some((t) => t.state === 'FAILED')
+        const hasCancelled = allTasks.some((t) => t.state === 'CANCELLED')
+        const finalRunStatus = hasFailed ? 'FAILED' : (hasCancelled ? 'CANCELLED' : 'COMPLETED')
+        const currentRun = this.registry.getRun(runId) ?? run
+        this.registry.updateRun({ ...currentRun, status: finalRunStatus, updatedAt: new Date().toISOString() })
+        this.eventHub.publish(createRunStateChangedEvent(runId, currentRun.status, finalRunStatus))
+        if (finalRunStatus === 'COMPLETED') {
+          this.eventHub.publish(createRunCompletedEvent(runId))
+        } else if (finalRunStatus === 'FAILED') {
+          this.eventHub.publish(createRunFailedEvent(runId))
+        }
+        this.activeSchedulers.delete(runId)
+      } else {
+        const anyWaiting = allTasks.some((t) => t.state === 'WAITING_APPROVAL')
+        const anyRunning = allTasks.some((t) => t.state === 'RUNNING' || t.state === 'VERIFYING')
+        const newRunStatus = anyWaiting ? 'WAITING_APPROVAL' : (anyRunning ? 'RUNNING' : 'RUNNING')
+        const currentRun = this.registry.getRun(runId) ?? run
+        if (currentRun.status !== newRunStatus) {
+          this.registry.updateRun({ ...currentRun, status: newRunStatus, updatedAt: new Date().toISOString() })
+          this.eventHub.publish(createRunStateChangedEvent(runId, currentRun.status, newRunStatus))
+        }
+      }
+      return task
+    }
+
+    // Fallback if no scheduler registered (direct approval)
     const transitionResult = transitionTask(task, 'APPROVED')
     task = transitionResult.task
     this.registry.updateTask(task)
@@ -555,6 +540,20 @@ export class RunService {
       )
     }
 
+    const scheduler = this.activeSchedulers.get(runId)
+    if (scheduler) {
+      task = await scheduler.rejectTask(taskId, input?.reason)
+      this.registry.updateTask(task)
+
+      const currentRun = this.registry.getRun(runId) ?? run
+      this.registry.updateRun({ ...currentRun, status: 'FAILED', updatedAt: new Date().toISOString() })
+      this.eventHub.publish(createRunStateChangedEvent(runId, currentRun.status, 'FAILED'))
+      this.eventHub.publish(createRunFailedEvent(runId, { reason: input?.reason }))
+      this.activeSchedulers.delete(runId)
+      return task
+    }
+
+    // Fallback if no scheduler registered
     const transitionResult = transitionTask(task, 'FAILED', { reason: input?.reason })
     task = transitionResult.task
     this.registry.updateTask(task)

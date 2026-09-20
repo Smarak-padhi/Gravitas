@@ -69,4 +69,42 @@ describe('Activity Timeline Derivation Invariants (timelineDerivation.test.ts)',
     expect(timeline[0]!.rawEvent).toBe(rawEvents[0])
     expect(timeline[0]!.title).toContain('Worker Dispatched')
   })
+
+  it('formats Wave 8 multi-task events (RUN_PLAN_CREATED, TASK_SCHEDULED, RESULT_MATERIALIZED)', () => {
+    const planEvent: GravitasEvent = {
+      eventId: 'evt_plan',
+      runId: 'run_1',
+      type: 'RUN_PLAN_CREATED',
+      timestamp: '2026-09-20T00:00:00Z',
+      payload: { taskCount: 3, maxConcurrency: 2, initialReadyCount: 1 },
+    }
+    const planItem = formatEventToMilestone(planEvent)
+    expect(planItem.title).toContain('3 Tasks')
+    expect(planItem.title).toContain('Concurrency: 2')
+    expect(planItem.badgeText).toBe('PLAN_CREATED')
+
+    const schedEvent: GravitasEvent = {
+      eventId: 'evt_sched',
+      runId: 'run_1',
+      taskId: 't-1',
+      type: 'TASK_SCHEDULED',
+      timestamp: '2026-09-20T00:01:00Z',
+      payload: { slot: 2 },
+    }
+    const schedItem = formatEventToMilestone(schedEvent)
+    expect(schedItem.badgeText).toBe('SLOT_2')
+    expect(schedItem.title).toContain('Task Scheduled [t-1]')
+
+    const matEvent: GravitasEvent = {
+      eventId: 'evt_mat',
+      runId: 'run_1',
+      taskId: 't-1',
+      type: 'TASK_RESULT_MATERIALIZED',
+      timestamp: '2026-09-20T00:02:00Z',
+      payload: { commitSha: 'a1b2c3d4e5f6' },
+    }
+    const matItem = formatEventToMilestone(matEvent)
+    expect(matItem.badgeText).toBe('COMMITTED')
+    expect(matItem.description).toContain('a1b2c3d4')
+  })
 })

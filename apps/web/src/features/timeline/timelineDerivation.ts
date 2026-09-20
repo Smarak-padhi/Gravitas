@@ -122,6 +122,46 @@ export function formatEventToMilestone(event: GravitasEvent): {
         badgeVariant: 'success',
       }
 
+    case 'RUN_PLAN_CREATED':
+      return {
+        title: `Run Plan Declared (${p.taskCount ?? 0} Tasks, Concurrency: ${p.maxConcurrency ?? 1})`,
+        description: `Initial ready tasks: ${p.initialReadyCount ?? 0}`,
+        badgeText: 'PLAN_CREATED',
+        badgeVariant: 'ready',
+      }
+
+    case 'TASK_READY':
+      return {
+        title: `Task Ready for Dispatch [${event.taskId ?? 'Task'}]`,
+        description: `All upstream dependencies satisfied. Queued for worker slot.`,
+        badgeText: 'READY',
+        badgeVariant: 'ready',
+      }
+
+    case 'TASK_SCHEDULED':
+      return {
+        title: `Task Scheduled [${event.taskId ?? 'Task'}]`,
+        description: `Assigned to concurrent worker slot #${p.slot ?? 1}`,
+        badgeText: `SLOT_${p.slot ?? 1}`,
+        badgeVariant: 'running',
+      }
+
+    case 'TASK_RESULT_MATERIALIZED':
+      return {
+        title: `Verified Result Materialized [${event.taskId ?? 'Task'}]`,
+        description: `Commit: ${p.commitSha ? String(p.commitSha).slice(0, 8) : 'unknown'}`,
+        badgeText: 'COMMITTED',
+        badgeVariant: 'success',
+      }
+
+    case 'TASK_COMPOSITION_CONFLICT':
+      return {
+        title: `Composition Conflict [${event.taskId ?? 'Task'}]`,
+        description: `Conflict composing parent results: ${p.conflictDetails ?? 'Cherry-pick conflict'}`,
+        badgeText: 'CONFLICT',
+        badgeVariant: 'failure',
+      }
+
     case 'RUN_FAILED':
       return {
         title: `Run Failed`,

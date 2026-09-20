@@ -19,6 +19,31 @@ export interface UseEventsResult {
   readonly clearEvents: () => void
 }
 
+const ALL_EVENT_TYPES = [
+  'RUN_CREATED',
+  'RUN_STATE_CHANGED',
+  'RUN_COMPLETED',
+  'RUN_FAILED',
+  'EXECUTION_CONTRACT_CREATED',
+  'TASK_CREATED',
+  'TASK_STATE_CHANGED',
+  'TASK_APPROVED',
+  'TASK_REJECTED',
+  'APPROVAL_REQUIRED',
+  'WORKER_STARTED',
+  'WORKER_OUTPUT',
+  'WORKER_FINISHED',
+  'VERIFICATION_STARTED',
+  'VERIFICATION_OUTPUT',
+  'VERIFICATION_FINISHED',
+  'EVIDENCE_CREATED',
+  'RUN_PLAN_CREATED',
+  'TASK_READY',
+  'TASK_SCHEDULED',
+  'TASK_RESULT_MATERIALIZED',
+  'TASK_COMPOSITION_CONFLICT',
+] as const
+
 export function useEvents(options?: UseEventsOptions): UseEventsResult {
   const [events, setEvents] = useState<GravitasEvent[]>([])
   const [status, setStatus] = useState<ConnectionStatus>('connecting')
@@ -40,7 +65,7 @@ export function useEvents(options?: UseEventsOptions): UseEventsResult {
         setStatus('connected')
       }
 
-      es.onmessage = (messageEvent) => {
+      const handleMessage = (messageEvent: MessageEvent) => {
         try {
           const raw = JSON.parse(messageEvent.data) as GravitasEvent
           if (!raw || !raw.eventId) return
@@ -65,6 +90,11 @@ export function useEvents(options?: UseEventsOptions): UseEventsResult {
         } catch {
           // Ignore parse errors on ping/comments
         }
+      }
+
+      es.onmessage = handleMessage
+      for (const eventType of ALL_EVENT_TYPES) {
+        es.addEventListener(eventType, handleMessage as EventListener)
       }
 
       es.onerror = () => {

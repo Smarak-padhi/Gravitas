@@ -292,6 +292,74 @@ export function createRunFailedEvent(
 }
 
 /**
+ * Emits a RUN_PLAN_CREATED event.
+ */
+export function createRunPlanCreatedEvent(
+  runId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('RUN_PLAN_CREATED', runId, payload, options)
+}
+
+/**
+ * Emits a TASK_READY event.
+ */
+export function createTaskReadyEvent(
+  runId: string,
+  taskId: string,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('TASK_READY', runId, {}, { ...options, taskId })
+}
+
+/**
+ * Emits a TASK_SCHEDULED event.
+ */
+export function createTaskScheduledEvent(
+  runId: string,
+  taskId: string,
+  slot: number,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent('TASK_SCHEDULED', runId, { slot }, { ...options, taskId })
+}
+
+/**
+ * Emits a TASK_RESULT_MATERIALIZED event.
+ */
+export function createTaskResultMaterializedEvent(
+  runId: string,
+  taskId: string,
+  commitSha: string,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'TASK_RESULT_MATERIALIZED',
+    runId,
+    { commitSha },
+    { ...options, taskId }
+  )
+}
+
+/**
+ * Emits a TASK_COMPOSITION_CONFLICT event.
+ */
+export function createTaskCompositionConflictEvent(
+  runId: string,
+  taskId: string,
+  payload: Record<string, unknown>,
+  options?: EventCreationOptions | undefined
+): GravitasEvent {
+  return createGravitasEvent(
+    'TASK_COMPOSITION_CONFLICT',
+    runId,
+    payload,
+    { ...options, taskId }
+  )
+}
+
+/**
  * In-memory event collector for testing domain behaviors and event sequences.
  */
 export class InMemoryEventCollector {

@@ -41,3 +41,10 @@ export class PayloadTooLargeError extends ApiError {
     this.name = 'PayloadTooLargeError'
   }
 }
+
+export class RunAlreadyExecutingError extends ApiError {
+  public constructor(runId: string) {
+    super('RUN_ALREADY_EXECUTING', `Run '${runId}' is already actively executing.`, 409)
+    this.name = 'RunAlreadyExecutingError'
+  }
+}

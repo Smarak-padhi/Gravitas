@@ -74,6 +74,13 @@ export const OfficeFloor: React.FC<OfficeFloorProps> = ({
 
         {/* Telemetry Pills */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+          <div data-testid="concurrency-pill" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ color: 'var(--text-muted)' }}>CONCURRENCY:</span>
+            <span style={{ color: activeCount > 0 ? 'var(--state-running-fg)' : 'var(--text-secondary)', fontWeight: 700 }}>
+              {activeCount} ACTIVE
+            </span>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ color: 'var(--text-muted)' }}>ACTIVE:</span>
             <span style={{ color: activeCount > 0 ? 'var(--state-running-fg)' : 'var(--text-secondary)', fontWeight: 700 }}>

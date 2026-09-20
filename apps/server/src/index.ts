@@ -23,6 +23,7 @@ export {
   TaskStateConflictError,
   InvalidRequestError,
   PayloadTooLargeError,
+  RunAlreadyExecutingError,
 } from './errors.js'
 export type {
   ApiErrorEnvelope,

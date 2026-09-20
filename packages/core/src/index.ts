@@ -93,5 +93,10 @@ export {
   createTaskRejectedEvent,
   createRunCompletedEvent,
   createRunFailedEvent,
+  createRunPlanCreatedEvent,
+  createTaskReadyEvent,
+  createTaskScheduledEvent,
+  createTaskResultMaterializedEvent,
+  createTaskCompositionConflictEvent,
   InMemoryEventCollector,
 } from './events.js'

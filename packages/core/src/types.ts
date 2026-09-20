@@ -162,6 +162,11 @@ export type GravitasEventType =
   | 'TASK_REJECTED'
   | 'RUN_COMPLETED'
   | 'RUN_FAILED'
+  | 'RUN_PLAN_CREATED'
+  | 'TASK_READY'
+  | 'TASK_SCHEDULED'
+  | 'TASK_RESULT_MATERIALIZED'
+  | 'TASK_COMPOSITION_CONFLICT'
 
 /**
  * Standard Gravitas Event envelope.

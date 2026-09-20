@@ -12,7 +12,7 @@ import { mkdir } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { WorktreeAllocationError, WorktreeRemovalError } from './errors.js'
 import { inspectRepository } from './inspector.js'
-import { executeGit, runGit } from './process.js'
+import { executeGit } from './process.js'
 import { buildTaskBranchName, validateIdentifier } from './ref-safety.js'
 import type {
   WorktreeAllocation,

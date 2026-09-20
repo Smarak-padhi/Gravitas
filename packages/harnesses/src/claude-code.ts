@@ -161,8 +161,6 @@ export class ClaudeCodeHarness implements AgentHarness {
       outputFormat: 'json',
     })
 
-    let currentHandle: SubprocessHandle | undefined
-
     const subprocessResult = await runSubprocess(
       {
         executable: this.getExecutablePath(),
@@ -172,7 +170,6 @@ export class ClaudeCodeHarness implements AgentHarness {
         timeoutMs: request.timeoutMs ?? 60000,
       },
       (handle) => {
-        currentHandle = handle
         this.activeExecutions.set(request.executionId, handle)
       }
     )

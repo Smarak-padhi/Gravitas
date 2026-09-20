@@ -392,4 +392,71 @@ test('adds numbers correctly', () => {
     await page.screenshot({ path: join(screenshotsDir, '10-failed-state.png') })
     await page.screenshot({ path: join(screenshotsDir, '06-failed-or-rejected.png') })
   })
+
+  test('composes and executes multi-task DAG, renders Run DAG with dependency nodes, and unblocks downstream tasks', async ({ page }: { page: Page }) => {
+    test.setTimeout(90000)
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('http://127.0.0.1:5173/')
+    await expect(page.getByText('CONNECTED')).toBeVisible()
+
+    // 1. Open Goal Composer
+    await page.click('button:has-text("+ New Run")')
+    await expect(page.locator('[data-testid="composer-tab-dag"]')).toBeVisible()
+
+    // 2. Switch to Multi-Task DAG (Wave 8) mode
+    await page.click('[data-testid="composer-tab-dag"]')
+    await expect(page.getByText('DAG TASK DEFINITIONS (JSON)')).toBeVisible()
+
+    // Fill goal and criteria
+    await page.fill('#composer-goal', 'Multi-task DAG orchestrated feature')
+    await page.fill('[data-testid="criterion-desc-0"]', 'All tasks pass verification')
+
+    // Submit multi-task run
+    await page.click('button:has-text("Create Run")')
+
+    // 3. Switch to GRAPH view to verify Run DAG visualization
+    await page.click('button[role="tab"]:has-text("GRAPH")')
+    const dagView = page.locator('[data-testid="run-dag-view"]')
+    await expect(dagView).toBeVisible({ timeout: 5000 })
+    await expect(page.locator('[data-testid="dag-task-node-task-1"]')).toBeVisible()
+    await expect(page.locator('[data-testid="dag-task-node-task-2"]')).toBeVisible()
+
+    // Capture Run DAG screenshot
+    await page.screenshot({ path: join(screenshotsDir, '11-run-dag-initial.png') })
+
+    // 4. Switch back to OFFICE view to verify concurrency counter
+    await page.click('button[role="tab"]:has-text("OFFICE")')
+    await expect(page.locator('[data-testid="concurrency-pill"]')).toBeVisible()
+
+    // 5. Execute Run
+    await page.click('button:has-text("Execute Golden Loop")')
+
+    // 6. Wait for task-1 to reach WAITING_APPROVAL
+    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 15000 })
+
+    // Check GRAPH view during approval
+    await page.click('button[role="tab"]:has-text("GRAPH")')
+    await page.screenshot({ path: join(screenshotsDir, '12-run-dag-waiting-approval.png') })
+
+    // Approve task-1
+    await page.click('button:has-text("Approve & Merge")')
+
+    // 7. Wait for task-1 to be APPROVED in DAG view
+    await expect(page.locator('[data-testid="dag-task-node-task-1"]')).toContainText('APPROVED', { timeout: 15000 })
+
+    // 8. Wait for task-2 to execute, pass verification, and reach WAITING_APPROVAL in DAG view
+    await expect(page.locator('[data-testid="dag-task-node-task-2"]')).toContainText('WAITING_APPROVAL', { timeout: 35000 })
+
+    // 9. Focus task-2 in inspector
+    await page.click('[data-testid="dag-task-node-task-2"]')
+    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 10000 })
+
+    // 10. Approve task-2 to complete the run
+    await page.click('button:has-text("Approve & Merge")')
+    await expect(page.locator('[data-testid="dag-task-node-task-2"]')).toContainText('APPROVED', { timeout: 15000 })
+    await expect(page.locator('[data-testid="approval-action-box"]')).not.toBeVisible()
+
+    // Final screenshot of completed multi-task run
+    await page.screenshot({ path: join(screenshotsDir, '13-run-dag-completed.png') })
+  })
 })

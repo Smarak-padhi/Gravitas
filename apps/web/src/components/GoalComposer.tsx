@@ -25,6 +25,9 @@ export interface ComposerFormState {
   readonly projectSummary?: string | undefined
   readonly technicalConstraints?: string | undefined
   readonly projectInstructions?: string | undefined
+  readonly mode?: 'SINGLE' | 'DAG' | undefined
+  readonly maxConcurrency?: number | undefined
+  readonly dagTasksJson?: string | undefined
 }
 
 export function addCriterion(
@@ -98,6 +101,27 @@ export function validateAndBuildCreateRunPayload(
     ...(state.projectInstructions?.trim() ? { projectInstructions: state.projectInstructions.trim() } : {}),
   }
 
+  let parsedTasks: any[] = []
+  if (state.mode === 'DAG') {
+    if (!state.dagTasksJson?.trim()) {
+      return { valid: false, error: 'DAG tasks JSON is required in Multi-Task DAG mode.' }
+    }
+    try {
+      parsedTasks = JSON.parse(state.dagTasksJson)
+      if (!Array.isArray(parsedTasks) || parsedTasks.length === 0) {
+        return { valid: false, error: 'DAG tasks must be a non-empty JSON array.' }
+      }
+      for (let i = 0; i < parsedTasks.length; i++) {
+        const t = parsedTasks[i]
+        if (!t || !t.id || !t.title || !t.objective) {
+          return { valid: false, error: `DAG task #${i + 1} must include 'id', 'title', and 'objective'.` }
+        }
+      }
+    } catch {
+      return { valid: false, error: 'Invalid JSON syntax in DAG tasks.' }
+    }
+  }
+
   return {
     valid: true,
     payload: {
@@ -118,9 +142,92 @@ export function validateAndBuildCreateRunPayload(
       })),
       requiresApproval: state.requiresApproval,
       ...(Object.keys(projectContext).length > 0 ? { projectContext } : {}),
+      ...(state.mode === 'DAG'
+        ? {
+            tasks: parsedTasks,
+            maxConcurrency: state.maxConcurrency ?? 2,
+          }
+        : {}),
     },
   }
 }
+
+const LINEAR_PRESET = JSON.stringify(
+  [
+    {
+      id: 'task-1',
+      title: 'Step 1: Core Implementation',
+      objective: 'Implement base functionality in src/math.js',
+      dependencies: [],
+      requiresApproval: true,
+    },
+    {
+      id: 'task-2',
+      title: 'Step 2: Verification and Polish',
+      objective: 'Add verification test in test/math.test.js',
+      dependencies: ['task-1'],
+      requiresApproval: true,
+    },
+  ],
+  null,
+  2
+)
+
+const DIAMOND_PRESET = JSON.stringify(
+  [
+    {
+      id: 'task-root',
+      title: 'Root: Foundation',
+      objective: 'Create foundation files',
+      dependencies: [],
+      requiresApproval: true,
+    },
+    {
+      id: 'task-branch-a',
+      title: 'Branch A: Feature Alpha',
+      objective: 'Implement Alpha in src/alpha.js',
+      dependencies: ['task-root'],
+      requiresApproval: true,
+    },
+    {
+      id: 'task-branch-b',
+      title: 'Branch B: Feature Beta',
+      objective: 'Implement Beta in src/beta.js',
+      dependencies: ['task-root'],
+      requiresApproval: true,
+    },
+    {
+      id: 'task-join',
+      title: 'Join: Integration',
+      objective: 'Compose and integrate Alpha and Beta',
+      dependencies: ['task-branch-a', 'task-branch-b'],
+      requiresApproval: true,
+    },
+  ],
+  null,
+  2
+)
+
+const FANOUT_PRESET = JSON.stringify(
+  [
+    {
+      id: 'task-a',
+      title: 'Worker A: Module 1',
+      objective: 'Build module 1',
+      dependencies: [],
+      requiresApproval: true,
+    },
+    {
+      id: 'task-b',
+      title: 'Worker B: Module 2',
+      objective: 'Build module 2',
+      dependencies: [],
+      requiresApproval: true,
+    },
+  ],
+  null,
+  2
+)
 
 export const GoalComposer: React.FC<GoalComposerProps> = ({
   isOpen,
@@ -128,6 +235,10 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const [composerMode, setComposerMode] = useState<'SINGLE' | 'DAG'>('SINGLE')
+  const [maxConcurrency, setMaxConcurrency] = useState<number>(2)
+  const [dagTasksJson, setDagTasksJson] = useState<string>(LINEAR_PRESET)
+
   const [goal, setGoal] = useState('')
   const [repository, setRepository] = useState('')
   const [baseBranch, setBaseBranch] = useState('HEAD')
@@ -204,6 +315,9 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
       projectSummary,
       technicalConstraints,
       projectInstructions,
+      mode: composerMode,
+      maxConcurrency,
+      dagTasksJson,
     })
 
     if (!validation.valid) {
@@ -280,6 +394,62 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
           </button>
         </div>
 
+        {/* Mode Selector Tabs */}
+        <div
+          style={{
+            padding: '8px 20px',
+            backgroundColor: 'var(--bg-panel-subtle)',
+            borderBottom: '1px solid var(--border-subtle)',
+            display: 'flex',
+            gap: '8px',
+          }}
+        >
+          <button
+            type="button"
+            data-testid="composer-tab-single"
+            onClick={() => setComposerMode('SINGLE')}
+            style={{
+              padding: '4px 12px',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              borderRadius: 'var(--radius-sm)',
+              border:
+                composerMode === 'SINGLE'
+                  ? '1px solid var(--accent-primary)'
+                  : '1px solid var(--border-subtle)',
+              backgroundColor:
+                composerMode === 'SINGLE' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+              color: composerMode === 'SINGLE' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              cursor: 'pointer',
+            }}
+          >
+            Single Goal (Golden Loop)
+          </button>
+          <button
+            type="button"
+            data-testid="composer-tab-dag"
+            onClick={() => setComposerMode('DAG')}
+            style={{
+              padding: '4px 12px',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              borderRadius: 'var(--radius-sm)',
+              border:
+                composerMode === 'DAG'
+                  ? '1px solid var(--accent-primary)'
+                  : '1px solid var(--border-subtle)',
+              backgroundColor:
+                composerMode === 'DAG' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+              color: composerMode === 'DAG' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              cursor: 'pointer',
+            }}
+          >
+            Multi-Task DAG (Wave 8)
+          </button>
+        </div>
+
         {/* Form Body (Scrollable) */}
         <form
           onSubmit={handleSubmit}
@@ -335,6 +505,143 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
               required
             />
           </div>
+
+          {/* Multi-Task DAG Section */}
+          {composerMode === 'DAG' && (
+            <div
+              style={{
+                padding: '12px 14px',
+                backgroundColor: 'var(--bg-panel-elevated)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 700,
+                    color: 'var(--accent-primary)',
+                  }}
+                >
+                  DAG TASK DEFINITIONS (JSON)
+                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label
+                    htmlFor="max-concurrency-input"
+                    style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}
+                  >
+                    CONCURRENCY LIMIT:
+                  </label>
+                  <input
+                    id="max-concurrency-input"
+                    type="number"
+                    min={1}
+                    max={8}
+                    value={maxConcurrency}
+                    onChange={(e) => setMaxConcurrency(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                    style={{
+                      width: '45px',
+                      padding: '2px 4px',
+                      fontSize: '11px',
+                      fontFamily: 'var(--font-mono)',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-xs)',
+                      color: 'var(--text-primary)',
+                      textAlign: 'center',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Template Presets */}
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  PRESETS:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDagTasksJson(LINEAR_PRESET)
+                    setMaxConcurrency(2)
+                  }}
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '2px 8px',
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-xs)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Linear (2-step)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDagTasksJson(DIAMOND_PRESET)
+                    setMaxConcurrency(2)
+                  }}
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '2px 8px',
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-xs)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Diamond (4-step)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDagTasksJson(FANOUT_PRESET)
+                    setMaxConcurrency(3)
+                  }}
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '2px 8px',
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-xs)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Fan-Out (Parallel)
+                </button>
+              </div>
+
+              <textarea
+                value={dagTasksJson}
+                onChange={(e) => setDagTasksJson(e.target.value)}
+                rows={6}
+                placeholder="JSON array of task definitions"
+                style={{
+                  padding: '8px 10px',
+                  backgroundColor: 'var(--bg-app)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--text-primary)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  resize: 'vertical',
+                }}
+              />
+            </div>
+          )}
 
           {/* Repository & Branch */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

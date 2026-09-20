@@ -123,22 +123,53 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
     failureReason: activeTask?.state === 'FAILED' ? 'Execution or Verification failed' : undefined,
   }
 
+  // Multi-Task Concurrent Orchestration Support:
+  // If multiple tasks are actively executing (RUNNING, VERIFYING, or WAITING_APPROVAL),
+  // derive dedicated concurrent worker stations for each active task slot.
+  const executingTasks = input.tasks.filter(
+    (t) => t.state === 'RUNNING' || t.state === 'VERIFYING' || t.state === 'WAITING_APPROVAL'
+  )
+
+  let workerStations: WorkerPresentation[] = [primaryWorker]
+
+  if (executingTasks.length > 1) {
+    workerStations = executingTasks.map((task, idx) => {
+      const slotNum = idx + 1
+      const visualState = mapTaskStateToWorkerState(task.state)
+      const attention = mapTaskStateToAttentionLevel(task.state)
+      return {
+        id: `worker-slot-${slotNum}`,
+        displayName: `Worker ${slotNum} (${task.id})`,
+        role: task.role ? `${task.role} (Slot ${slotNum})` : `Concurrent Worker (Slot ${slotNum})`,
+        capabilities: ['Task Worktree Mutation', 'Deterministic Implementation', 'Evidence Generation'],
+        state: visualState,
+        currentTaskId: task.id,
+        currentTaskTitle: task.title,
+        currentTaskObjective: task.objective,
+        attentionLevel: attention,
+        accentColor: idx % 2 === 0 ? '#38bdf8' : '#60a5fa',
+        failureReason: task.state === 'FAILED' ? 'Task execution failed' : undefined,
+      }
+    })
+  }
+
   // 2. Independent Verifier Station
   let verifierState: WorkerVisualState = 'IDLE'
   let verifierAttention: AttentionLevel = 'NONE'
+  const verifyingTask = input.tasks.find((t) => t.state === 'VERIFYING') ?? activeTask
 
-  if (activeTask) {
-    if (activeTask.state === 'VERIFYING') {
+  if (verifyingTask) {
+    if (verifyingTask.state === 'VERIFYING') {
       verifierState = 'VERIFYING'
       verifierAttention = 'LOW'
     } else if (
-      activeTask.state === 'WAITING_APPROVAL' ||
-      activeTask.state === 'APPROVED' ||
-      activeTask.state === 'SUCCEEDED'
+      verifyingTask.state === 'WAITING_APPROVAL' ||
+      verifyingTask.state === 'APPROVED' ||
+      verifyingTask.state === 'SUCCEEDED'
     ) {
       verifierState = 'DONE'
       verifierAttention = 'NONE'
-    } else if (activeTask.state === 'FAILED') {
+    } else if (verifyingTask.state === 'FAILED') {
       verifierState = 'FAILED'
       verifierAttention = 'CRITICAL'
     }
@@ -150,8 +181,8 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
     role: 'Deterministic Verification & Evidence Gate',
     capabilities: ['Clean Worktree Inspection', 'Shell-Free Command Execution', 'Mutation Scope Enforcement', 'Diff Hashing'],
     state: verifierState,
-    currentTaskId: activeTask?.id,
-    currentTaskTitle: activeTask ? `Verifying: ${activeTask.title}` : undefined,
+    currentTaskId: verifyingTask?.id,
+    currentTaskTitle: verifyingTask ? `Verifying: ${verifyingTask.title}` : undefined,
     attentionLevel: verifierAttention,
     accentColor: '#10b981',
   }
@@ -167,5 +198,5 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
     accentColor: '#a855f7',
   }
 
-  return [primaryWorker, verifierStation, astraStation]
+  return [...workerStations, verifierStation, astraStation]
 }
