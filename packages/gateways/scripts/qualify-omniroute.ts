@@ -3,10 +3,30 @@
  *
  * Usage:
  *   npx tsx packages/gateways/scripts/qualify-omniroute.ts [--dry-run] [--url <url>] [--port <port>]
+ *
+ * Modes:
+ *   --dry-run: Deterministic simulation using in-process mock server (CI-safe, marks evidence DRY).
+ *   (default): Real qualification against host-installed OmniRoute binary (marks evidence REAL).
  */
 
 import http from 'node:http';
+import { spawnSync } from 'node:child_process';
 import { OmniRouteQualificationRunner, type ExperimentResult } from '../src/qualification.js';
+
+function findOmniRouteExecutable(): string | null {
+  try {
+    const isWindows = process.platform === 'win32';
+    const cmd = isWindows ? 'where.exe' : 'which';
+    const res = spawnSync(cmd, ['omniroute'], { encoding: 'utf8' });
+    if (res.status === 0 && res.stdout) {
+      const line = res.stdout.trim().split(/\r?\n/)[0];
+      return line && line.length > 0 ? line : null;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -16,15 +36,31 @@ async function main() {
 
   let baseUrl = urlArgIdx !== -1 && args[urlArgIdx + 1] ? args[urlArgIdx + 1] : undefined;
   let mockServer: http.Server | null = null;
+  let realExePath: string | null = null;
 
   console.log('============================================================');
   console.log('GRAVITAS — OMNIROUTE GATEWAY QUALIFICATION SUITE');
   console.log('Security Profile: wave11.2-isolated');
-  console.log(`Mode: ${isDryRun ? 'MOCK / DRY-RUN' : 'LIVE GATEWAY EVALUATION'}`);
+  console.log(`Mode: ${isDryRun ? 'DRY QUALIFICATION REHEARSAL (CI-Safe / Mock Gateway)' : 'REAL OMNIROUTE QUALIFICATION'}`);
   console.log('============================================================\n');
 
-  if (!baseUrl) {
-    // Spin up deterministic mock server on a disposable port
+  if (!isDryRun && !baseUrl) {
+    realExePath = findOmniRouteExecutable();
+    if (!realExePath) {
+      console.error('============================================================');
+      console.error('WAVE 11.2 — BLOCKED');
+      console.error('reason: REAL_OMNIROUTE_NOT_INSTALLED');
+      console.error('No OmniRoute executable was found on host PATH or system.');
+      console.error('Operator authorization is required to install external dependencies.');
+      console.error('Run "npm run qualify:omniroute:dry" for deterministic rehearsal.');
+      console.error('============================================================\n');
+      process.exitCode = 2;
+      return;
+    }
+  }
+
+  if (isDryRun || !baseUrl) {
+    // Spin up deterministic mock server on a disposable port for dry-run
     const port = portArgIdx !== -1 && args[portArgIdx + 1] ? parseInt(args[portArgIdx + 1], 10) : 20129;
     baseUrl = `http://127.0.0.1:${port}`;
 
@@ -73,13 +109,13 @@ async function main() {
             // pass
           }
 
-          if (bodyObj.model === 'force-500-model') {
+          if (bodyObj['model'] === 'force-500-model') {
             res.writeHead(500, { 'content-type': 'application/json' });
             res.end(JSON.stringify({ error: { message: 'Internal provider simulated failure', type: 'server_error' } }));
             return;
           }
 
-          if (bodyObj.model === 'force-429-quota-model') {
+          if (bodyObj['model'] === 'force-429-quota-model') {
             res.writeHead(429, { 'content-type': 'application/json' });
             res.end(JSON.stringify({ error: { message: 'Rate limit / quota exceeded', type: 'quota_error' } }));
             return;
@@ -90,7 +126,7 @@ async function main() {
             JSON.stringify({
               id: `chatcmpl_${Date.now()}`,
               object: 'chat.completion',
-              model: typeof bodyObj.model === 'string' ? bodyObj.model : 'gpt-4o-mini',
+              model: typeof bodyObj['model'] === 'string' ? bodyObj['model'] : 'gpt-4o-mini',
               choices: [
                 {
                   index: 0,
@@ -120,8 +156,10 @@ async function main() {
   }
 
   const runner = new OmniRouteQualificationRunner({
-    baseUrl,
+    baseUrl: baseUrl!,
     isDryRun,
+    qualificationMode: isDryRun ? 'DRY' : 'REAL',
+    runtimeExecutable: realExePath ?? undefined,
     evidenceOutputPath: './omniroute-qualification.json',
     onExperimentResult: (res: ExperimentResult) => {
       const mark = res.passed ? '✓' : '✗';
@@ -142,9 +180,13 @@ async function main() {
 
   console.log('\n============================================================');
   console.log(`QUALIFICATION DECISION: ${summary.decision}`);
+  console.log(`Qualification Mode: ${summary.evidence.qualificationMode}`);
   console.log(`Passed: ${summary.evidence.experimentsPassed} / ${summary.evidence.experimentsTotal}`);
   console.log(`Config Integrity Maintained: ${summary.evidence.configIntegrityMaintained}`);
   console.log(`Evidence Saved: ./omniroute-qualification.json`);
+  if (summary.evidence.qualificationMode === 'DRY') {
+    console.log(`Note: DRY qualification evidence is for rehearsal only and cannot transition gateway to READY in production.`);
+  }
   console.log('============================================================\n');
 
   process.exitCode = summary.decision === 'APPROVED' ? 0 : 1;

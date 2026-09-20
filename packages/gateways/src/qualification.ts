@@ -17,13 +17,16 @@ import {
 } from './types.js';
 
 export interface QualificationRunnerOptions {
-  readonly gatewayId?: string;
+  readonly gatewayId?: string | undefined;
   readonly baseUrl: string;
-  readonly gatewayVersion?: string;
-  readonly evidenceOutputPath?: string;
-  readonly isDryRun?: boolean;
-  readonly mockUpstreamPort?: number;
-  readonly onExperimentResult?: (result: ExperimentResult) => void;
+  readonly gatewayVersion?: string | undefined;
+  readonly evidenceOutputPath?: string | undefined;
+  readonly isDryRun?: boolean | undefined;
+  readonly qualificationMode?: 'DRY' | 'REAL' | undefined;
+  readonly runtimeExecutable?: string | undefined;
+  readonly runtimeIdentity?: string | undefined;
+  readonly mockUpstreamPort?: number | undefined;
+  readonly onExperimentResult?: ((result: ExperimentResult) => void) | undefined;
 }
 
 export interface ExperimentResult {
@@ -46,6 +49,9 @@ export class OmniRouteQualificationRunner {
   private readonly gatewayVersion: string;
   private readonly evidenceOutputPath: string;
   readonly isDryRun: boolean;
+  readonly qualificationMode: 'DRY' | 'REAL';
+  readonly runtimeExecutable?: string | undefined;
+  readonly runtimeIdentity?: string | undefined;
   private readonly adapter: OmniRouteAdapter;
   private readonly onResult?: ((result: ExperimentResult) => void) | undefined;
 
@@ -55,6 +61,9 @@ export class OmniRouteQualificationRunner {
     this.gatewayVersion = options.gatewayVersion ?? '3.8.50';
     this.evidenceOutputPath = resolve(options.evidenceOutputPath ?? './omniroute-qualification.json');
     this.isDryRun = options.isDryRun ?? false;
+    this.qualificationMode = this.isDryRun ? 'DRY' : (options.qualificationMode ?? 'REAL');
+    this.runtimeExecutable = options.runtimeExecutable;
+    this.runtimeIdentity = options.runtimeIdentity;
     this.onResult = options.onExperimentResult;
     this.adapter = new OmniRouteAdapter({
       id: this.gatewayId,
@@ -443,15 +452,21 @@ export class OmniRouteQualificationRunner {
 
     const evidence: GatewayQualificationEvidence = {
       schemaVersion: GATEWAY_QUALIFICATION_SCHEMA_VERSION,
+      qualificationMode: this.qualificationMode,
       gatewayId: this.gatewayId,
       gatewayVersion: this.gatewayVersion,
       securityProfile: GATEWAY_SECURITY_PROFILE_VERSION,
+      adapterSecurityProfile: GATEWAY_SECURITY_PROFILE_VERSION,
+      policyVersion: '1.0.0',
       qualifiedAt: new Date().toISOString(),
       decision: allPassed ? 'APPROVED' : 'REJECTED',
       experimentsPassed,
       experimentsTotal,
       transparentModeDigest,
+      configurationDigest: transparentModeDigest,
       boundAddress: this.baseUrl,
+      runtimeExecutable: this.runtimeExecutable ?? (this.isDryRun ? 'internal-dry-mock' : undefined),
+      runtimeIdentity: this.runtimeIdentity ?? (this.isDryRun ? 'mock-server' : undefined),
       experiments,
       userConfigHashesBefore: hashesBefore,
       userConfigHashesAfter: hashesAfter,

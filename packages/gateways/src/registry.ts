@@ -90,8 +90,16 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
 
       // Validation gates
       const isSchemaMatch = evidence.schemaVersion === GATEWAY_QUALIFICATION_SCHEMA_VERSION;
-      const isSecurityProfileMatch = evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION;
+      const isRealMode = evidence.qualificationMode === 'REAL';
+      const isSecurityProfileMatch =
+        evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION &&
+        (!evidence.adapterSecurityProfile || evidence.adapterSecurityProfile === GATEWAY_SECURITY_PROFILE_VERSION);
       const isGatewayIdMatch = evidence.gatewayId === id;
+      const isVersionMatch = !descriptor.version || evidence.gatewayVersion === descriptor.version;
+      const isConfigDigestMatch =
+        !descriptor.configurationDigest ||
+        evidence.configurationDigest === descriptor.configurationDigest ||
+        evidence.transparentModeDigest === descriptor.configurationDigest;
       const isApproved = evidence.decision === 'APPROVED';
       const isConfigIntact = evidence.configIntegrityMaintained === true;
       const isTproxyInactive = evidence.tproxyRemainedInactive === true;
@@ -100,8 +108,11 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
 
       const isValid =
         isSchemaMatch &&
+        isRealMode &&
         isSecurityProfileMatch &&
         isGatewayIdMatch &&
+        isVersionMatch &&
+        isConfigDigestMatch &&
         isApproved &&
         isConfigIntact &&
         isTproxyInactive &&
@@ -117,8 +128,10 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
         state: newState,
         version: evidence.gatewayVersion,
         securityProfile: evidence.securityProfile,
+        configurationDigest: evidence.configurationDigest ?? evidence.transparentModeDigest,
         qualifiedAt: evidence.qualifiedAt,
         qualificationDecision: evidence.decision,
+        qualificationMode: evidence.qualificationMode,
       });
 
       return evidence;
@@ -145,6 +158,7 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
       const evidence = this.evidenceMap.get(id);
       const isReady =
         evidence &&
+        evidence.qualificationMode === 'REAL' &&
         evidence.decision === 'APPROVED' &&
         evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION;
 

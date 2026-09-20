@@ -16,8 +16,10 @@ export interface GatewayDescriptor {
   readonly version?: string | undefined;
   readonly baseUrl: string;
   readonly securityProfile: string;
+  readonly configurationDigest?: string | undefined;
   readonly qualifiedAt?: string | undefined;
   readonly qualificationDecision?: 'APPROVED' | 'REJECTED' | undefined;
+  readonly qualificationMode?: 'DRY' | 'REAL' | undefined;
 }
 
 export interface GatewayHealth {
@@ -99,15 +101,22 @@ export const GATEWAY_SECURITY_PROFILE_VERSION = 'wave11.2-isolated';
 
 export const GatewayQualificationEvidenceSchema = z.object({
   schemaVersion: z.literal(GATEWAY_QUALIFICATION_SCHEMA_VERSION),
+  qualificationMode: z.enum(['DRY', 'REAL']),
   gatewayId: z.string().min(1),
   gatewayVersion: z.string().min(1),
+  gatewayCommit: z.string().optional(),
   securityProfile: z.literal(GATEWAY_SECURITY_PROFILE_VERSION),
+  adapterSecurityProfile: z.string().optional(),
+  policyVersion: z.string().optional(),
   qualifiedAt: z.string().datetime(),
   decision: z.enum(['APPROVED', 'REJECTED']),
   experimentsPassed: z.number().int().nonnegative(),
   experimentsTotal: z.number().int().positive(),
   transparentModeDigest: z.string().min(1),
+  configurationDigest: z.string().optional(),
   boundAddress: z.string().min(1),
+  runtimeExecutable: z.string().optional(),
+  runtimeIdentity: z.string().optional(),
   experiments: z.array(
     z.object({
       id: z.string(),
