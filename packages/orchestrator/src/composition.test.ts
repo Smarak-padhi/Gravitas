@@ -191,4 +191,67 @@ describe('Worktree Composition & Verified Result Materialization (composition.ts
       })
     ).rejects.toThrow(CompositionConflictError)
   })
+
+  it('preserves RunPlan dependency declaration ordering over commit SHA lexical ordering', async () => {
+    repo = await createTestRepo()
+    runtimeRoot = await mkdtemp(join(tmpdir(), 'gravitas-runtime-'))
+
+    // Parent A modifies file_ord_a.txt
+    const allocA = await allocateWorktree({
+      repository: repo.dir,
+      runId: 'run_order',
+      taskId: 'task_ord_a',
+      baseRef: repo.defaultBranch,
+      runtimeRoot,
+    })
+    await writeFile(join(allocA.worktreePath, 'file_ord_a.txt'), 'order a\n', 'utf8')
+    const shaA = await materializeVerifiedResult({ worktreePath: allocA.worktreePath, taskId: 'task_ord_a' })
+    await removeWorktree(allocA.worktreePath)
+
+    // Parent B modifies file_ord_b.txt
+    const allocB = await allocateWorktree({
+      repository: repo.dir,
+      runId: 'run_order',
+      taskId: 'task_ord_b',
+      baseRef: repo.defaultBranch,
+      runtimeRoot,
+    })
+    await writeFile(join(allocB.worktreePath, 'file_ord_b.txt'), 'order b\n', 'utf8')
+    const shaB = await materializeVerifiedResult({ worktreePath: allocB.worktreePath, taskId: 'task_ord_b' })
+    await removeWorktree(allocB.worktreePath)
+
+    // Determine which SHA is lexically larger
+    const [lexicallyFirst, lexicallySecond] = [shaA, shaB].sort()
+    expect(lexicallyFirst).not.toBe(lexicallySecond)
+
+    // TEST CASE 1: Pass [lexicallySecond, lexicallyFirst] (reversed from lexical order)
+    // RunPlan declaration order specifies lexicallySecond as primary parent, lexicallyFirst as secondary
+    const allocReversed = await composeTaskWorktree({
+      repositoryRoot: repo.dir,
+      runId: 'run_order',
+      taskId: 'task_child_rev',
+      baseRef: repo.defaultBranch,
+      parentCommitShas: [lexicallySecond!, lexicallyFirst!],
+      runtimeRoot,
+    })
+
+    // In declaration order, primary base commit MUST be lexicallySecond (HEAD~1)
+    const baseCommitRev = await runGit({
+      cwd: allocReversed.worktreePath,
+      args: ['rev-parse', 'HEAD~1'],
+    })
+    expect(baseCommitRev.stdout.trim()).toBe(lexicallySecond)
+
+    // And cherry-picked top commit MUST be from lexicallyFirst
+    const topCommitSubject = await runGit({
+      cwd: allocReversed.worktreePath,
+      args: ['log', '-1', '--format=%s'],
+    })
+    // The cherry-picked commit message corresponds to the second declared dependency
+    const expectedSubjectTask = lexicallyFirst === shaA ? 'task_ord_a' : 'task_ord_b'
+    expect(topCommitSubject.stdout.trim()).toBe(`gravitas: verified result ${expectedSubjectTask}`)
+
+    await removeWorktree(allocReversed.worktreePath)
+  })
 })
+

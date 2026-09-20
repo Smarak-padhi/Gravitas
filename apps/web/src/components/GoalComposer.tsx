@@ -567,6 +567,7 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
                 </span>
                 <button
                   type="button"
+                  data-testid="composer-preset-linear"
                   onClick={() => {
                     setDagTasksJson(LINEAR_PRESET)
                     setMaxConcurrency(2)
@@ -586,6 +587,7 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
                 </button>
                 <button
                   type="button"
+                  data-testid="composer-preset-diamond"
                   onClick={() => {
                     setDagTasksJson(DIAMOND_PRESET)
                     setMaxConcurrency(2)
@@ -605,6 +607,7 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
                 </button>
                 <button
                   type="button"
+                  data-testid="composer-preset-fanout"
                   onClick={() => {
                     setDagTasksJson(FANOUT_PRESET)
                     setMaxConcurrency(3)
@@ -625,6 +628,7 @@ export const GoalComposer: React.FC<GoalComposerProps> = ({
               </div>
 
               <textarea
+                data-testid="composer-dag-json"
                 value={dagTasksJson}
                 onChange={(e) => setDagTasksJson(e.target.value)}
                 rows={6}

@@ -153,12 +153,18 @@ export const InboxDrawer: React.FC<InboxDrawerProps> = ({
       >
         {(['ALL', 'ACTION_REQUIRED', 'CRITICAL', 'IMPORTANT', 'FYI'] as const).map((filter) => {
           const isSelected = activeFilter === filter
+          const count =
+            filter === 'ALL'
+              ? items.length
+              : items.filter((it) => it.severity === filter).length
+
           return (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
+              data-testid={`inbox-filter-${filter.toLowerCase()}`}
               style={{
-                padding: '2px 8px',
+                padding: '3px 8px',
                 borderRadius: 'var(--radius-sm)',
                 fontSize: '10px',
                 fontFamily: 'var(--font-mono)',
@@ -169,9 +175,13 @@ export const InboxDrawer: React.FC<InboxDrawerProps> = ({
                 color: isSelected ? '#ffffff' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
             >
-              {filter}
+              <span>{filter}</span>
+              <span style={{ opacity: 0.7, fontSize: '9px' }}>({count})</span>
             </button>
           )
         })}

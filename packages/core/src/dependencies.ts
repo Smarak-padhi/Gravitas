@@ -137,3 +137,58 @@ export function resolveInitialTaskState(
   const evalResult = evaluateTaskReadiness(dummyTask, taskLookup)
   return evalResult.status === 'READY' ? 'READY' : 'BLOCKED'
 }
+
+export interface TaskWithDependencies {
+  readonly id: string
+  readonly dependencies: readonly (string | { readonly taskId: string })[]
+}
+
+/**
+ * Computes the topological level/rank (0, 1, 2...) for each task in a DAG.
+ * Roots (0 dependencies) have rank 0.
+ * Downstream tasks have rank max(dependency ranks) + 1.
+ * Returns a Map of taskId -> rank.
+ */
+export function computeTopologicalRanks(
+  tasks: readonly TaskWithDependencies[]
+): Map<string, number> {
+  const ranks = new Map<string, number>()
+  const taskMap = new Map<string, TaskWithDependencies>()
+  for (const t of tasks) {
+    taskMap.set(t.id, t)
+  }
+
+  const getRank = (taskId: string, visiting = new Set<string>()): number => {
+    if (ranks.has(taskId)) return ranks.get(taskId)!
+    if (visiting.has(taskId)) return 0 // cycle guard
+
+    visiting.add(taskId)
+    const task = taskMap.get(taskId)
+    if (!task || task.dependencies.length === 0) {
+      ranks.set(taskId, 0)
+      visiting.delete(taskId)
+      return 0
+    }
+
+    let maxDepRank = -1
+    for (const dep of task.dependencies) {
+      const depId = typeof dep === 'string' ? dep : dep.taskId
+      const dRank = getRank(depId, visiting)
+      if (dRank > maxDepRank) {
+        maxDepRank = dRank
+      }
+    }
+
+    const rank = maxDepRank + 1
+    ranks.set(taskId, rank)
+    visiting.delete(taskId)
+    return rank
+  }
+
+  for (const t of tasks) {
+    getRank(t.id)
+  }
+
+  return ranks
+}
+

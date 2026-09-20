@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { GravitasEvent } from '../../api/types.js'
 import { deriveTimelineItems } from './timelineDerivation.js'
 import { Badge } from '../../design-system/components/Badge.js'
@@ -12,11 +12,45 @@ export interface ActivityTimelineProps {
 export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ events, onClear }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEventType, setSelectedEventType] = useState<string>('ALL')
+  const [selectedTaskId, setSelectedTaskId] = useState<string>('ALL')
+  const [attentionFilter, setAttentionFilter] = useState<'ALL' | 'ATTENTION' | 'MUTATION' | 'VERIFY'>('ALL')
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null)
+
+  const distinctTaskIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const evt of events) {
+      if (evt.taskId) {
+        ids.add(evt.taskId)
+      }
+    }
+    return Array.from(ids).sort()
+  }, [events])
 
   const items = deriveTimelineItems(events)
 
   const filteredItems = items.filter((item) => {
+    if (selectedTaskId !== 'ALL' && item.taskId !== selectedTaskId) {
+      return false
+    }
+
+    if (attentionFilter === 'ATTENTION') {
+      const isAttention =
+        item.badgeVariant === 'waiting' ||
+        item.badgeVariant === 'failure' ||
+        item.eventType.includes('APPROVAL') ||
+        item.eventType.includes('FAILED') ||
+        item.eventType.includes('CONFLICT')
+      if (!isAttention) return false
+    } else if (attentionFilter === 'MUTATION') {
+      const isMutation =
+        item.eventType.includes('MUTATION') ||
+        item.eventType.includes('EVIDENCE') ||
+        item.eventType.includes('DIFF')
+      if (!isMutation) return false
+    } else if (attentionFilter === 'VERIFY') {
+      if (!item.eventType.includes('VERIF')) return false
+    }
+
     if (selectedEventType !== 'ALL') {
       if (selectedEventType === 'RUN' && !item.eventType.startsWith('RUN_')) return false
       if (selectedEventType === 'TASK' && !item.eventType.startsWith('TASK_')) return false
@@ -100,8 +134,57 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ events, onCl
             }}
           />
 
+          {/* Task Filter */}
+          {distinctTaskIds.length > 0 && (
+            <select
+              data-testid="timeline-task-filter"
+              value={selectedTaskId}
+              onChange={(e) => setSelectedTaskId(e.target.value)}
+              style={{
+                padding: '5px 8px',
+                backgroundColor: 'var(--bg-app)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-secondary)',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              <option value="ALL">All Tasks</option>
+              {distinctTaskIds.map((tId: string) => (
+                <option key={tId} value={tId}>
+                  Task: {tId}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Attention Filter */}
+          <select
+            data-testid="timeline-attention-filter"
+            value={attentionFilter}
+            onChange={(e) =>
+              setAttentionFilter(e.target.value as 'ALL' | 'ATTENTION' | 'MUTATION' | 'VERIFY')
+            }
+            style={{
+              padding: '5px 8px',
+              backgroundColor: 'var(--bg-app)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-secondary)',
+              fontSize: '11px',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            <option value="ALL">All Attention</option>
+            <option value="ATTENTION">⚠ Attention (Approvals/Failures)</option>
+            <option value="MUTATION">📝 Mutations &amp; Diffs</option>
+            <option value="VERIFY">✓ Verification</option>
+          </select>
+
           {/* Filter Type */}
           <select
+            data-testid="timeline-category-filter"
             value={selectedEventType}
             onChange={(e) => setSelectedEventType(e.target.value)}
             style={{

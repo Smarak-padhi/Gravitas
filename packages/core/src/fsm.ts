@@ -167,6 +167,7 @@ export function transitionTask(
     ...task,
     state: to,
     updatedAt: now,
+    ...(options?.reason ? { failureReason: options.reason, statusMessage: options.reason } : {}),
   }
 
   const event: GravitasEvent = {

@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { computeTopologicalRanks } from '@gravitas/core'
 import type { Task, TaskDetailResponse } from '../api/types.js'
 
 export interface ExecutionGraphProps {
@@ -151,6 +152,13 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({
 
   const getNodeColors = (status: NodeStatus | string) => {
     switch (status) {
+      case 'COMPOSITION_CONFLICT':
+        return {
+          fg: '#fb7185',
+          bg: 'rgba(225, 29, 72, 0.15)',
+          border: '#e11d48',
+          pulse: true,
+        }
       case 'RUNNING':
         return {
           fg: 'var(--state-running-fg)',
@@ -207,6 +215,94 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({
         }
     }
   }
+
+  const getTaskVisualBadge = (t: Task): string => {
+    const raw = t as unknown as { readonly failureReason?: string; readonly statusMessage?: string }
+    if (
+      t.state === 'FAILED' &&
+      (raw.statusMessage?.includes('COMPOSITION') || raw.failureReason?.includes('COMPOSITION'))
+    ) {
+      return 'COMPOSITION_CONFLICT'
+    }
+    return t.state
+  }
+
+  const colWidth = 230
+  const colGap = 56
+  const nodeHeight = 92
+  const nodeGap = 14
+  const headerHeight = 28
+
+  const dagLayout = useMemo(() => {
+    if (tasks.length === 0) {
+      return { levels: [], edges: [], canvasWidth: 300, canvasHeight: 120, colWidth, colGap }
+    }
+
+    const ranks = computeTopologicalRanks(
+      tasks.map((t) => ({
+        id: t.id,
+        dependencies: t.dependencies.map((d) => (typeof d === 'string' ? d : d.taskId)),
+      }))
+    )
+
+    const maxRank = Math.max(...Array.from(ranks.values()), 0)
+    const levels: Task[][] = Array.from({ length: maxRank + 1 }, () => [])
+
+    for (const t of tasks) {
+      const r = ranks.get(t.id) ?? 0
+      levels[r]!.push(t)
+    }
+
+    const nodePositions = new Map<string, { x: number; y: number }>()
+
+    levels.forEach((lvlTasks, colIdx) => {
+      const colX = colIdx * (colWidth + colGap) + 20
+      lvlTasks.forEach((t, rowIdx) => {
+        const rowY = headerHeight + rowIdx * (nodeHeight + nodeGap)
+        nodePositions.set(t.id, { x: colX, y: rowY })
+      })
+    })
+
+    interface DagEdge {
+      readonly id: string
+      readonly fromX: number
+      readonly fromY: number
+      readonly toX: number
+      readonly toY: number
+      readonly isBlocked: boolean
+    }
+
+    const edges: DagEdge[] = []
+
+    for (const t of tasks) {
+      const targetPos = nodePositions.get(t.id)
+      if (!targetPos) continue
+
+      const depIds = t.dependencies.map((d) => (typeof d === 'string' ? d : d.taskId))
+      for (const depId of depIds) {
+        const sourcePos = nodePositions.get(depId)
+        if (!sourcePos) continue
+
+        const depTask = tasks.find((item) => item.id === depId)
+        const isBlocked = depTask ? depTask.state !== 'APPROVED' && depTask.state !== 'SUCCEEDED' : true
+
+        edges.push({
+          id: `${depId}->${t.id}`,
+          fromX: sourcePos.x + colWidth,
+          fromY: sourcePos.y + nodeHeight / 2,
+          toX: targetPos.x,
+          toY: targetPos.y + nodeHeight / 2,
+          isBlocked,
+        })
+      }
+    }
+
+    const maxRows = Math.max(...levels.map((lvl) => lvl.length), 1)
+    const canvasHeight = Math.max(headerHeight + maxRows * (nodeHeight + nodeGap) + 30, 160)
+    const canvasWidth = Math.max(levels.length * (colWidth + colGap) + 40, 560)
+
+    return { levels, edges, canvasWidth, canvasHeight, colWidth, colGap }
+  }, [tasks])
 
   return (
     <div
@@ -308,16 +404,16 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({
         </div>
       </div>
 
-      {/* VIEW 1: RUN DAG */}
+      {/* VIEW 1: RUN DAG (TOPOLOGICAL LEVEL COLUMNS & DIRECTED EDGES) */}
       {viewMode === 'DAG' && (
         <div
           data-testid="run-dag-view"
           style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            alignItems: 'stretch',
-            minHeight: '80px',
+            position: 'relative',
+            minHeight: `${dagLayout.canvasHeight}px`,
+            minWidth: `${dagLayout.canvasWidth}px`,
+            overflowX: 'auto',
+            padding: '16px 0',
           }}
         >
           {tasks.length === 0 ? (
@@ -325,103 +421,188 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({
               No tasks declared in this run plan yet.
             </div>
           ) : (
-            tasks.map((t) => {
-              const isSelected = (selectedTaskId ?? task?.id) === t.id
-              const colors = getNodeColors(t.state)
-              const depIds = t.dependencies.map((d) => (typeof d === 'string' ? d : d.taskId))
+            <>
+              {/* SVG Connecting Directed Arrows Layer */}
+              <svg
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: `${dagLayout.canvasWidth}px`,
+                  height: `${dagLayout.canvasHeight}px`,
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                }}
+              >
+                <defs>
+                  <marker
+                    id="dag-arrow"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--border-focus)" />
+                  </marker>
+                </defs>
+                {dagLayout.edges.map((edge) => (
+                  <path
+                    key={edge.id}
+                    d={`M ${edge.fromX} ${edge.fromY} C ${edge.fromX + 36} ${edge.fromY}, ${edge.toX - 36} ${edge.toY}, ${edge.toX} ${edge.toY}`}
+                    stroke="var(--border-focus)"
+                    strokeWidth="2"
+                    strokeDasharray={edge.isBlocked ? '4 3' : 'none'}
+                    fill="none"
+                    markerEnd="url(#dag-arrow)"
+                    opacity={edge.isBlocked ? 0.4 : 0.85}
+                  />
+                ))}
+              </svg>
 
-              return (
-                <div
-                  key={t.id}
-                  onClick={() => onSelectTask?.(t.id)}
-                  data-testid={`dag-task-node-${t.id}`}
-                  style={{
-                    flex: '1 1 200px',
-                    maxWidth: '280px',
-                    padding: '10px 12px',
-                    backgroundColor: isSelected ? 'var(--bg-panel-elevated)' : colors.bg,
-                    border: isSelected
-                      ? '2px solid var(--accent-primary)'
-                      : `1px solid ${colors.border}`,
-                    borderRadius: 'var(--radius-md)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: isSelected ? '0 0 12px rgba(56, 189, 248, 0.3)' : 'none',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
+              {/* Column Rank Headers & Task Nodes */}
+              {dagLayout.levels.map((level, colIdx) => {
+                const colX = colIdx * (dagLayout.colWidth + dagLayout.colGap) + 20
+                const levelLabel =
+                  colIdx === 0
+                    ? 'LEVEL 0 (ROOT)'
+                    : colIdx === dagLayout.levels.length - 1 && dagLayout.levels.length > 2
+                      ? `LEVEL ${colIdx} (JOIN)`
+                      : `LEVEL ${colIdx} (PARALLEL)`
+
+                return (
                   <div
+                    key={colIdx}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '8px',
+                      position: 'absolute',
+                      left: `${colX}px`,
+                      top: 0,
+                      width: `${dagLayout.colWidth}px`,
+                      zIndex: 2,
                     }}
                   >
-                    <span
+                    <div
                       style={{
+                        fontSize: '10px',
                         fontFamily: 'var(--font-mono)',
-                        fontSize: '11px',
                         fontWeight: 700,
-                        color: colors.fg,
+                        color: 'var(--text-secondary)',
+                        letterSpacing: '0.4px',
+                        marginBottom: '8px',
+                        paddingBottom: '4px',
+                        borderBottom: '1px solid var(--border-subtle)',
+                        textTransform: 'uppercase',
                       }}
                     >
-                      {t.id}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '9px',
-                        fontFamily: 'var(--font-mono)',
-                        padding: '1px 5px',
-                        borderRadius: 'var(--radius-xs)',
-                        backgroundColor: colors.bg,
-                        color: colors.fg,
-                        border: `1px solid ${colors.border}`,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {t.state}
-                    </span>
-                  </div>
+                      {levelLabel}
+                    </div>
 
-                  <div
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      lineHeight: '1.3',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                    title={t.title}
-                  >
-                    {t.title}
-                  </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {level.map((t) => {
+                        const isSelected = (selectedTaskId ?? task?.id) === t.id
+                        const displayState = getTaskVisualBadge(t)
+                        const colors = getNodeColors(displayState)
+                        const depIds = t.dependencies.map((d) => (typeof d === 'string' ? d : d.taskId))
 
-                  {/* Dependency relationships */}
-                  <div
-                    style={{
-                      fontSize: '9px',
-                      fontFamily: 'var(--font-mono)',
-                      color: 'var(--text-muted)',
-                      marginTop: 'auto',
-                      paddingTop: '4px',
-                      borderTop: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    {depIds.length === 0 ? (
-                      <span>Root Task (No Deps)</span>
-                    ) : (
-                      <span>Depends on: {depIds.join(', ')}</span>
-                    )}
+                        return (
+                          <div
+                            key={t.id}
+                            onClick={() => onSelectTask?.(t.id)}
+                            data-testid={`dag-task-node-${t.id}`}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              backgroundColor: isSelected ? 'var(--bg-panel-elevated)' : colors.bg,
+                              border: isSelected
+                                ? '2px solid var(--accent-primary)'
+                                : `1px solid ${colors.border}`,
+                              borderRadius: 'var(--radius-md)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              boxShadow: isSelected
+                                ? '0 0 14px rgba(56, 189, 248, 0.35)'
+                                : 'none',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '6px',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontFamily: 'var(--font-mono)',
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  color: colors.fg,
+                                }}
+                              >
+                                {t.id}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '9px',
+                                  fontFamily: 'var(--font-mono)',
+                                  padding: '1px 5px',
+                                  borderRadius: 'var(--radius-xs)',
+                                  backgroundColor: colors.bg,
+                                  color: colors.fg,
+                                  border: `1px solid ${colors.border}`,
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {displayState}
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                color: 'var(--text-primary)',
+                                lineHeight: '1.3',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                              title={t.title}
+                            >
+                              {t.title}
+                            </div>
+
+                            {/* Dependency relationships */}
+                            <div
+                              style={{
+                                fontSize: '9px',
+                                fontFamily: 'var(--font-mono)',
+                                color: 'var(--text-muted)',
+                                marginTop: 'auto',
+                                paddingTop: '4px',
+                                borderTop: '1px solid var(--border-subtle)',
+                              }}
+                            >
+                              {depIds.length === 0 ? (
+                                <span>Root Task (No Deps)</span>
+                              ) : (
+                                <span>Depends on: {depIds.join(', ')}</span>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              )
-            })
+                )
+              })}
+            </>
           )}
         </div>
       )}

@@ -186,6 +186,7 @@ export const PromptManager: React.FC<PromptManagerProps> = ({
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        flexShrink: 0,
       }}
     >
       {/* Header */}

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  computeTopologicalRanks,
   evaluateTaskReadiness,
   isDependencyBroken,
   isDependencySatisfied,
@@ -209,6 +210,34 @@ describe('Dependency Evaluation & Semantics', () => {
       }
       const state = resolveInitialTaskState([{ taskId: 'dep_1' }], (id) => tasks[id])
       expect(state).toBe('BLOCKED')
+    })
+  })
+
+  describe('computeTopologicalRanks', () => {
+    it('computes ranks for diamond DAG: T1(0) -> T2(1), T3(1) -> T4(2)', () => {
+      const tasks = [
+        { id: 'T1', dependencies: [] },
+        { id: 'T2', dependencies: ['T1'] },
+        { id: 'T3', dependencies: ['T1'] },
+        { id: 'T4', dependencies: ['T2', 'T3'] },
+      ]
+      const ranks = computeTopologicalRanks(tasks)
+      expect(ranks.get('T1')).toBe(0)
+      expect(ranks.get('T2')).toBe(1)
+      expect(ranks.get('T3')).toBe(1)
+      expect(ranks.get('T4')).toBe(2)
+    })
+
+    it('computes ranks for linear chain: T1(0) -> T2(1) -> T3(2)', () => {
+      const tasks = [
+        { id: 'T1', dependencies: [] },
+        { id: 'T2', dependencies: ['T1'] },
+        { id: 'T3', dependencies: ['T2'] },
+      ]
+      const ranks = computeTopologicalRanks(tasks)
+      expect(ranks.get('T1')).toBe(0)
+      expect(ranks.get('T2')).toBe(1)
+      expect(ranks.get('T3')).toBe(2)
     })
   })
 })

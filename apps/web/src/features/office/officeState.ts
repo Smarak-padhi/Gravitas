@@ -120,7 +120,7 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
     currentTaskObjective: activeTask?.objective,
     attentionLevel: primaryAttention,
     accentColor: '#38bdf8',
-    failureReason: activeTask?.state === 'FAILED' ? 'Execution or Verification failed' : undefined,
+    failureReason: activeTask?.failureReason ?? (activeTask?.state === 'FAILED' ? 'Execution or Verification failed' : undefined),
   }
 
   // Multi-Task Concurrent Orchestration Support:
@@ -133,7 +133,10 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
   let workerStations: WorkerPresentation[] = [primaryWorker]
 
   if (executingTasks.length > 1) {
-    workerStations = executingTasks.map((task, idx) => {
+    const executingIds = new Set(executingTasks.map((t) => t.id))
+    const standbyTasks = input.tasks.filter((t) => !executingIds.has(t.id))
+
+    const activeSlots = executingTasks.map((task, idx) => {
       const slotNum = idx + 1
       const visualState = mapTaskStateToWorkerState(task.state)
       const attention = mapTaskStateToAttentionLevel(task.state)
@@ -148,9 +151,49 @@ export function deriveOfficeState(input: DeriveOfficeStateInput): readonly Worke
         currentTaskObjective: task.objective,
         attentionLevel: attention,
         accentColor: idx % 2 === 0 ? '#38bdf8' : '#60a5fa',
-        failureReason: task.state === 'FAILED' ? 'Task execution failed' : undefined,
+        failureReason: task.failureReason ?? (task.state === 'FAILED' ? 'Task execution failed' : undefined),
       }
     })
+
+    const standbyStations = standbyTasks.map((task) => {
+      const visualState = mapTaskStateToWorkerState(task.state)
+      const attention = mapTaskStateToAttentionLevel(task.state)
+      return {
+        id: `worker-${task.id}`,
+        displayName: `Worker (${task.id})`,
+        role: task.role ?? 'Standby Worker',
+        capabilities: ['Task Worktree Mutation', 'Deterministic Implementation', 'Evidence Generation'],
+        state: visualState,
+        currentTaskId: task.id,
+        currentTaskTitle: task.title,
+        currentTaskObjective: task.objective,
+        attentionLevel: attention,
+        accentColor: '#94a3b8',
+        failureReason: task.failureReason ?? (task.state === 'FAILED' ? 'Task execution failed' : undefined),
+      }
+    })
+
+    workerStations = [...activeSlots, ...standbyStations]
+  } else if (input.tasks.length > 1) {
+    const otherTasks = input.tasks.filter((t) => t.id !== activeTask?.id)
+    const standbyStations = otherTasks.map((task) => {
+      const visualState = mapTaskStateToWorkerState(task.state)
+      const attention = mapTaskStateToAttentionLevel(task.state)
+      return {
+        id: `worker-${task.id}`,
+        displayName: `Worker (${task.id})`,
+        role: task.role ?? 'Standby Worker',
+        capabilities: ['Task Worktree Mutation', 'Deterministic Implementation', 'Evidence Generation'],
+        state: visualState,
+        currentTaskId: task.id,
+        currentTaskTitle: task.title,
+        currentTaskObjective: task.objective,
+        attentionLevel: attention,
+        accentColor: '#94a3b8',
+        failureReason: task.failureReason ?? (task.state === 'FAILED' ? 'Task execution failed' : undefined),
+      }
+    })
+    workerStations = [primaryWorker, ...standbyStations]
   }
 
   // 2. Independent Verifier Station

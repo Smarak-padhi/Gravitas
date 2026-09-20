@@ -104,6 +104,8 @@ export interface Task {
   readonly requiresApproval?: boolean | undefined
   readonly createdAt: string
   readonly updatedAt: string
+  readonly failureReason?: string | undefined
+  readonly statusMessage?: string | undefined
 }
 
 /**

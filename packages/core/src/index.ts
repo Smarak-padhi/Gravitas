@@ -53,6 +53,8 @@ export {
   isDependencyBroken,
   evaluateTaskReadiness,
   resolveInitialTaskState,
+  computeTopologicalRanks,
+  type TaskWithDependencies,
   type TaskReadinessStatus,
   type TaskReadinessEvaluation,
 } from './dependencies.js'
@@ -100,3 +102,11 @@ export {
   createTaskCompositionConflictEvent,
   InMemoryEventCollector,
 } from './events.js'
+
+// Notification boundary
+export {
+  deriveNotificationFromEvent,
+  type NotificationSeverity,
+  type GravitasNotification,
+  type NotificationAdapter,
+} from './notifications.js'

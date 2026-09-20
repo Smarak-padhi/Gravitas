@@ -5,8 +5,11 @@
  * 1. Workers NEVER commit directly to Git.
  * 2. Gravitas creates verified result commits: "gravitas: verified result <task-id>".
  * 3. Dependent tasks compose from upstream verified result commit SHAs.
- * 4. Multi-parent composition uses deterministic cherry-pick; conflicts fail safely
- *    with CompositionConflictError (COMPOSITION_CONFLICT).
+ * 4. Multi-parent composition ordering is strictly governed by RunPlan dependency
+ *    declaration order (NOT commit SHA lexical order). The first declared dependency
+ *    forms the base branch; subsequent dependencies are cherry-picked in declared sequence.
+ * 5. Cherry-pick conflicts fail safely with CompositionConflictError (COMPOSITION_CONFLICT)
+ *    with zero guessing or corrupted worktree state.
  */
 
 import {
@@ -120,14 +123,16 @@ export async function composeTaskWorktree(options: ComposeTaskWorktreeOptions): 
   }
 
   // Case C: Multi-parent composition (e.g. diamond DAG)
-  // Sort parent SHAs to enforce deterministic ordering
-  const sortedParentShas = [...parentCommitShas].sort()
-  const primaryParent = sortedParentShas[0]
+  // Invariant: Composition ordering is strictly governed by the RunPlan dependency
+  // declaration order, NOT incidental Git commit SHA lexical ordering.
+  // The first declared dependency provides the primary parent branch, and subsequent
+  // dependencies are cherry-picked sequentially in declared order.
+  const primaryParent = parentCommitShas[0]
   if (!primaryParent) {
     throw new OrchestratorExecutionError(`Missing primary parent commit SHA for task '${taskId}'`)
   }
 
-  // 1. Allocate worktree from primary parent
+  // 1. Allocate worktree from primary parent (first declared dependency)
   const allocation = await allocateWorktree({
     repository: repositoryRoot,
     runId,
@@ -136,9 +141,9 @@ export async function composeTaskWorktree(options: ComposeTaskWorktreeOptions): 
     runtimeRoot,
   })
 
-  // 2. Cherry-pick each subsequent parent commit in deterministic order
-  for (let i = 1; i < sortedParentShas.length; i++) {
-    const nextParentSha = sortedParentShas[i]
+  // 2. Cherry-pick each subsequent parent commit in declared dependency order
+  for (let i = 1; i < parentCommitShas.length; i++) {
+    const nextParentSha = parentCommitShas[i]
     if (!nextParentSha) continue
 
     const cherryPickResult = await executeGit({
@@ -164,7 +169,7 @@ export async function composeTaskWorktree(options: ComposeTaskWorktreeOptions): 
 
       throw new CompositionConflictError(
         taskId,
-        sortedParentShas,
+        parentCommitShas,
         cherryPickResult.stderr || cherryPickResult.stdout
       )
     }

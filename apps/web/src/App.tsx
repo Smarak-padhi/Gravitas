@@ -237,6 +237,13 @@ export const App: React.FC = () => {
   const currentTask: Task | null = taskDetail?.task ?? runDetail?.tasks[0] ?? null
   const currentRunStatus = runDetail?.run.status ?? null
 
+  const waitingApprovalTask = useMemo(() => {
+    return (
+      runDetail?.tasks.find((t) => t.state === 'WAITING_APPROVAL') ??
+      (currentTask?.state === 'WAITING_APPROVAL' ? currentTask : null)
+    )
+  }, [runDetail?.tasks, currentTask])
+
   // Living Office Stations Derivation
   const officeStations = useMemo(() => {
     return deriveOfficeState({
@@ -246,6 +253,18 @@ export const App: React.FC = () => {
       harness: stateSummary?.harness ?? { id: 'free-claude-code', status: 'UNKNOWN' },
     })
   }, [runDetail, currentTask, stateSummary?.harness])
+
+  // Bidirectional sync: keep selectedWorkerId aligned with selectedTaskId
+  useEffect(() => {
+    if (selectedTaskId) {
+      const match = officeStations.find(
+        (w) => w.currentTaskId === selectedTaskId || w.id === selectedTaskId
+      )
+      if (match) {
+        setSelectedWorkerId(match.id)
+      }
+    }
+  }, [selectedTaskId, officeStations])
 
   // Combined events: live SSE events merged with authoritative run history
   const allEvents = useMemo(() => {
@@ -367,6 +386,36 @@ export const App: React.FC = () => {
         run: () => void handleApprove('operator'),
       },
       {
+        id: 'jump-approval',
+        title: 'Jump to Task Needing Approval',
+        subtitle: waitingApprovalTask
+          ? `Focus task [${waitingApprovalTask.id}] awaiting human review`
+          : 'No task currently awaiting approval',
+        category: 'NAVIGATION',
+        disabled: !waitingApprovalTask,
+        run: () => {
+          if (waitingApprovalTask && selectedRunId) {
+            void loadTaskDetails(selectedRunId, waitingApprovalTask.id)
+            setActiveView('OFFICE')
+          }
+        },
+      },
+      {
+        id: 'jump-active',
+        title: 'Jump to Active Executing Task',
+        subtitle: 'Focus current running or verifying task in inspector',
+        category: 'NAVIGATION',
+        run: () => {
+          const active = runDetail?.tasks.find(
+            (t) => t.state === 'RUNNING' || t.state === 'VERIFYING'
+          )
+          if (active && selectedRunId) {
+            void loadTaskDetails(selectedRunId, active.id)
+            setActiveView('OFFICE')
+          }
+        },
+      },
+      {
         id: 'act-clear-events',
         title: 'Clear Event Stream',
         subtitle: 'Reset in-memory SSE event history',
@@ -374,7 +423,7 @@ export const App: React.FC = () => {
         run: () => clearEvents(),
       },
     ]
-  }, [inboxItems.length, currentTask?.state, isActing])
+  }, [inboxItems.length, currentTask?.state, isActing, waitingApprovalTask, selectedRunId, runDetail?.tasks, loadTaskDetails])
 
   // Inbox Action Handler
   const handleInboxActionClick = (item: InboxItem) => {
@@ -490,18 +539,24 @@ export const App: React.FC = () => {
                 selectedWorkerId={selectedWorkerId}
                 onSelectWorker={(wId) => {
                   setSelectedWorkerId(wId)
+                  const station = officeStations.find((w) => w.id === wId)
+                  if (station?.currentTaskId && selectedRunId) {
+                    void loadTaskDetails(selectedRunId, station.currentTaskId)
+                  }
                 }}
                 onExecuteTask={currentTask?.state === 'READY' ? handleExecuteRun : undefined}
                 onApproveTask={currentTask?.state === 'WAITING_APPROVAL' ? () => void handleApprove('operator') : undefined}
                 onInspectEvidence={() => setActiveView('EVIDENCE')}
                 isActing={isActing}
                 onNewRunClick={() => setIsComposerOpen(true)}
+                waitingApprovalTask={waitingApprovalTask}
               />
 
               {/* Task Details & Inspector underneath Office Floor */}
               <div
                 style={{
-                  height: '45%',
+                  flex: '0 0 45%',
+                  minHeight: 0,
                   borderTop: '1px solid var(--border-color)',
                   display: 'flex',
                   flexDirection: 'column',

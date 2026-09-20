@@ -99,10 +99,18 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
     )
   }
 
+  const isCompositionConflict =
+    task.state === 'FAILED' &&
+    Boolean(
+      (task as unknown as { readonly failureReason?: string; readonly statusMessage?: string }).failureReason?.includes('COMPOSITION') ||
+        (task as unknown as { readonly failureReason?: string; readonly statusMessage?: string }).statusMessage?.includes('COMPOSITION')
+    )
+
   return (
     <div
       style={{
         flex: 1,
+        minHeight: 0,
         overflowY: 'auto',
         padding: '20px',
         display: 'flex',
@@ -118,6 +126,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
           justifyContent: 'space-between',
           paddingBottom: '16px',
           borderBottom: '1px solid var(--border-color)',
+          flexShrink: 0,
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -131,7 +140,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
             >
               TASK: {task.id}
             </span>
-            {getStatusBadge(task.state)}
+            {getStatusBadge(isCompositionConflict ? 'COMPOSITION_CONFLICT' : task.state)}
           </div>
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>
             {task.title}
@@ -165,199 +174,98 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
         )}
       </div>
 
-      {/* WAITING_APPROVAL Action Box (MANDATORY GATE) */}
-      {isWaitingApproval && (
+      {/* COMPOSITION CONFLICT UX BANNER */}
+      {isCompositionConflict && (
         <div
-          data-testid="approval-action-box"
+          data-testid="composition-conflict-banner"
           style={{
             padding: '16px 20px',
-            backgroundColor: 'var(--state-waiting-bg)',
-            border: '2px solid var(--state-waiting-border)',
+            backgroundColor: 'rgba(225, 29, 72, 0.12)',
+            border: '2px solid #e11d48',
             borderRadius: 'var(--radius-lg)',
-            boxShadow: '0 0 16px rgba(234, 179, 8, 0.25)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '18px' }}>⚠</span>
-            <div>
-              <div
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: 'var(--state-waiting-fg)',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                HUMAN REVIEW REQUIRED
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                Independent verifier passed all criteria. Verify the git diff below before approving mutation.
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              flexWrap: 'wrap',
-              marginTop: '4px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <label
-                htmlFor="reviewer-input"
-                style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
-              >
-                Reviewer:
-              </label>
-              <input
-                id="reviewer-input"
-                type="text"
-                value={reviewer}
-                onChange={(e) => setReviewer(e.target.value)}
-                style={{
-                  padding: '5px 8px',
-                  backgroundColor: 'var(--bg-app)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)',
-                  fontSize: '12px',
-                  fontFamily: 'var(--font-mono)',
-                  width: '140px',
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() => void onApprove(reviewer)}
-              disabled={isActing}
-              style={{
-                padding: '7px 18px',
-                backgroundColor: 'var(--state-success-border)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 700,
-                fontSize: '12px',
-                cursor: isActing ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              ✓ Approve & Merge
-            </button>
-
-            <button
-              onClick={() => setShowRejectBox(!showRejectBox)}
-              disabled={isActing}
-              style={{
-                padding: '7px 14px',
-                backgroundColor: 'var(--bg-panel-elevated)',
-                border: '1px solid var(--state-failure-border)',
-                color: 'var(--state-failure-fg)',
-                borderRadius: 'var(--radius-md)',
-                fontWeight: 600,
-                fontSize: '12px',
-                cursor: isActing ? 'not-allowed' : 'pointer',
-              }}
-            >
-              Reject Task
-            </button>
-          </div>
-
-          {showRejectBox && (
-            <div
-              style={{
-                marginTop: '8px',
-                padding: '12px',
-                backgroundColor: 'rgba(69, 10, 10, 0.4)',
-                border: '1px solid var(--state-failure-border)',
-                borderRadius: 'var(--radius-sm)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <label
-                htmlFor="reject-reason"
-                style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
-              >
-                Rejection Reason:
-              </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  id="reject-reason"
-                  type="text"
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="Reason for rejecting mutation"
-                  style={{
-                    flex: 1,
-                    padding: '5px 8px',
-                    backgroundColor: 'var(--bg-app)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: 'var(--text-primary)',
-                    fontSize: '12px',
-                  }}
-                />
-                <button
-                  onClick={() => void onReject(rejectReason)}
-                  disabled={isActing}
-                  style={{
-                    padding: '5px 14px',
-                    backgroundColor: 'var(--state-failure-border)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm)',
-                    fontWeight: 600,
-                    fontSize: '12px',
-                    cursor: isActing ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  Confirm Reject
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Grid: Mutation Scope & Verification Summary */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '16px',
-        }}
-      >
-        {/* Mutation Scope Card */}
-        <div
-          style={{
-            padding: '14px',
-            backgroundColor: 'var(--bg-panel)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 0 16px rgba(225, 29, 72, 0.25)',
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
           }}
         >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '18px', color: '#f43f5e' }}>⚠</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#f43f5e', letterSpacing: '0.5px' }}>
+                COMPOSITION CONFLICT DETECTED
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                A Git merge or cherry-pick conflict occurred while composing upstream parent commits into this task&apos;s isolated worktree.
+                Verification was safely aborted before execution because clean rebase onto upstream dependencies was not possible.
+              </div>
+            </div>
+          </div>
           <div
             style={{
               fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.5px',
-              color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-mono)',
+              padding: '8px 12px',
+              backgroundColor: 'var(--bg-app)',
+              border: '1px solid rgba(225, 29, 72, 0.3)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-primary)',
             }}
           >
-            CHANGE SCOPE INSPECTION
+            Resolution: Reconcile upstream branch divergence or update RunPlan dependencies to establish strict sequential precedence.
+          </div>
+        </div>
+      )}
+
+      {/* 3 VISUALLY DISTINCT AUTHORITY SECTIONS */}
+      {/* SECTIONS 1 & 2: 2-COLUMN RESPONSIVE GRID */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '12px',
+          flexShrink: 0,
+        }}
+      >
+        {/* AUTHORITY SECTION 1: WORKER CLAIM (MUTATION CAPTURE) */}
+        <div
+          data-testid="authority-section-worker"
+          style={{
+            padding: '14px 16px',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingBottom: '8px',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}
+          >
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.4px' }}>
+              SECTION 1 · WORKER CLAIM: MUTATION CAPTURE
+            </div>
+            <span
+              style={{
+                fontSize: '9px',
+                fontFamily: 'var(--font-mono)',
+                padding: '2px 6px',
+                borderRadius: 'var(--radius-xs)',
+                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                color: 'var(--state-running-fg)',
+                fontWeight: 700,
+              }}
+            >
+              AUTHORITY: WORKER CLAIM
+            </span>
           </div>
 
           {taskDetail?.mutationSummary ? (
@@ -451,27 +359,45 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
           )}
         </div>
 
-        {/* Verification Summary Card */}
+        {/* AUTHORITY SECTION 2: INDEPENDENT DETERMINISTIC VERIFIER */}
         <div
+          data-testid="authority-section-verifier"
           style={{
-            padding: '14px',
+            padding: '14px 16px',
             backgroundColor: 'var(--bg-panel)',
             border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: 'var(--radius-lg)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '10px',
           }}
         >
           <div
             style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.5px',
-              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingBottom: '8px',
+              borderBottom: '1px solid var(--border-subtle)',
             }}
           >
-            DETERMINISTIC VERIFICATION
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.4px' }}>
+              SECTION 2 · INDEPENDENT VERIFIER: VERIFIED EVIDENCE
+            </div>
+            <span
+              style={{
+                fontSize: '9px',
+                fontFamily: 'var(--font-mono)',
+                padding: '2px 6px',
+                borderRadius: 'var(--radius-xs)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: 'var(--state-success-fg)',
+                fontWeight: 700,
+              }}
+            >
+              AUTHORITY: INDEPENDENT VERIFIER
+            </span>
           </div>
 
           {taskDetail?.verificationSummary ? (
@@ -522,6 +448,259 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
         </div>
       </div>
 
+      {/* AUTHORITY SECTION 3: HUMAN OPERATOR REVIEW GATE */}
+      {isWaitingApproval ? (
+        <div
+          data-testid="authority-section-human"
+          style={{
+            padding: '14px 16px',
+            backgroundColor: 'var(--state-waiting-bg)',
+            border: '1px solid var(--state-waiting-border)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingBottom: '8px',
+              borderBottom: '1px solid var(--state-waiting-border)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: 'var(--state-waiting-fg)',
+                letterSpacing: '0.4px',
+              }}
+            >
+              SECTION 3 · OPERATOR GATE: APPROVAL / REJECTION
+            </div>
+            <span
+              style={{
+                fontSize: '9px',
+                fontFamily: 'var(--font-mono)',
+                padding: '2px 6px',
+                borderRadius: 'var(--radius-xs)',
+                backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                border: '1px solid var(--state-waiting-border)',
+                color: 'var(--state-waiting-fg)',
+                fontWeight: 700,
+              }}
+            >
+              AUTHORITY: HUMAN OPERATOR
+            </span>
+          </div>
+
+          <div
+            data-testid="approval-action-box"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '18px' }}>⚠</span>
+              <div>
+                <div
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: 'var(--state-waiting-fg)',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  HUMAN REVIEW REQUIRED
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  Independent verifier passed all criteria. Verify the git diff below before approving mutation.
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap',
+                marginTop: '4px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label
+                  htmlFor="reviewer-input"
+                  style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                >
+                  Reviewer:
+                </label>
+                <input
+                  id="reviewer-input"
+                  type="text"
+                  value={reviewer}
+                  onChange={(e) => setReviewer(e.target.value)}
+                  style={{
+                    padding: '5px 8px',
+                    backgroundColor: 'var(--bg-app)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-sm)',
+                    color: 'var(--text-primary)',
+                    fontSize: '12px',
+                    fontFamily: 'var(--font-mono)',
+                    width: '140px',
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={() => void onApprove(reviewer)}
+                disabled={isActing}
+                style={{
+                  padding: '7px 18px',
+                  backgroundColor: 'var(--state-success-border)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  cursor: isActing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                ✓ Approve &amp; Merge
+              </button>
+
+              <button
+                onClick={() => setShowRejectBox(!showRejectBox)}
+                disabled={isActing}
+                style={{
+                  padding: '7px 14px',
+                  backgroundColor: 'var(--bg-panel-elevated)',
+                  border: '1px solid var(--state-failure-border)',
+                  color: 'var(--state-failure-fg)',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                  cursor: isActing ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Reject Task
+              </button>
+            </div>
+
+            {showRejectBox && (
+              <div
+                style={{
+                  marginTop: '8px',
+                  padding: '12px',
+                  backgroundColor: 'rgba(69, 10, 10, 0.4)',
+                  border: '1px solid var(--state-failure-border)',
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <label
+                  htmlFor="reject-reason"
+                  style={{ fontSize: '11px', color: 'var(--text-secondary)' }}
+                >
+                  Rejection Reason:
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    id="reject-reason"
+                    type="text"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Reason for rejecting mutation"
+                    style={{
+                      flex: 1,
+                      padding: '5px 8px',
+                      backgroundColor: 'var(--bg-app)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <button
+                    onClick={() => void onReject(rejectReason)}
+                    disabled={isActing}
+                    style={{
+                      padding: '5px 14px',
+                      backgroundColor: 'var(--state-failure-border)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 'var(--radius-sm)',
+                      fontWeight: 600,
+                      fontSize: '12px',
+                      cursor: isActing ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    Confirm Reject
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div
+          data-testid="authority-section-human"
+          style={{
+            padding: '8px 14px',
+            backgroundColor: 'var(--bg-panel)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+            <span style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>
+              SECTION 3 · OPERATOR GATE:
+            </span>
+            <span style={{ color: 'var(--text-muted)' }}>
+              {task.state === 'APPROVED'
+                ? 'Task was explicitly reviewed and authorized by human operator. Mutation materialized to repository.'
+                : task.state === 'SUCCEEDED'
+                  ? 'Task completed successfully and met all deterministic verification criteria.'
+                  : task.state === 'FAILED'
+                    ? 'Task failed verification, composition, or was rejected by human operator.'
+                    : 'Human review gate unlocks once independent verifier successfully passes.'}
+            </span>
+          </div>
+          <span
+            style={{
+              fontSize: '9px',
+              fontFamily: 'var(--font-mono)',
+              padding: '2px 6px',
+              borderRadius: 'var(--radius-xs)',
+              backgroundColor: 'var(--bg-app)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            AUTHORITY: HUMAN OPERATOR
+          </span>
+        </div>
+      )}
+
       {/* Prompt Manager (Canonical Compilation & Provenance) */}
       <PromptManager
         runId={task.runId}
@@ -530,7 +709,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
       />
 
       {/* Diff Viewer */}
-      <div>
+      <div style={{ flexShrink: 0 }}>
         <DiffViewer diff={diff} isLoading={isLoadingDiff} />
       </div>
     </div>
