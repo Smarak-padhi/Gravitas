@@ -90,4 +90,54 @@
   --z-modal: 100;
   --z-palette: 200;
   --z-tooltip: 300;
+
+  /* ==========================================================================
+     Living HQ · The Tactile Atelier Tokens
+     Warm cream/stone canvas, parchment surfaces, warm woods, calm mineral accents
+     ========================================================================== */
+  --hq-canvas: #F7F5F0;
+  --hq-canvas-subtle: #EFECE6;
+  --hq-surface-base: #FFFFFF;
+  --hq-surface-parchment: #FCFAF6;
+  --hq-surface-panel: #F4F1EA;
+  --hq-surface-hover: #EBE7DD;
+  --hq-surface-active: #E3DEC3;
+
+  --hq-border-subtle: #E3DFD5;
+  --hq-border-strong: #C8C2B4;
+  --hq-border-dark: #8C8474;
+
+  --hq-text-primary: #1C1E21;
+  --hq-text-secondary: #555B66;
+  --hq-text-muted: #848B98;
+
+  --hq-wood-oak: #8C6D53;
+  --hq-wood-walnut: #5A4231;
+  --hq-metal-brass: #D97706;
+  --hq-metal-steel: #64748B;
+
+  --hq-mineral-blue: #2B59C3;
+  --hq-mineral-blue-bg: #EFF4FE;
+  --hq-mineral-blue-border: #93B4F5;
+
+  --hq-mineral-sage: #3D7A68;
+  --hq-mineral-sage-bg: #EBF5F1;
+  --hq-mineral-sage-border: #A3D4C4;
+
+  --hq-mineral-amber: #B45309;
+  --hq-mineral-amber-bg: #FEF7ED;
+  --hq-mineral-amber-border: #FCD34D;
+
+  --hq-mineral-iris: #6B46C1;
+  --hq-mineral-iris-bg: #F5F0FF;
+  --hq-mineral-iris-border: #D6BCFA;
+
+  --hq-mineral-crimson: #B91C1C;
+  --hq-mineral-crimson-bg: #FEF2F2;
+  --hq-mineral-crimson-border: #FECACA;
+
+  --hq-shadow-tactile: 0 2px 4px rgba(60, 50, 40, 0.06), 0 8px 16px rgba(60, 50, 40, 0.04);
+  --hq-shadow-float: 0 6px 12px rgba(60, 50, 40, 0.08), 0 16px 32px rgba(60, 50, 40, 0.06);
+  --hq-shadow-deep: 0 12px 24px rgba(60, 50, 40, 0.12), 0 24px 48px rgba(60, 50, 40, 0.08);
 }
+

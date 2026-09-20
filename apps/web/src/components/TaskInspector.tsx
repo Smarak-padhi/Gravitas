@@ -576,7 +576,7 @@ export const TaskInspector: React.FC<TaskInspectorProps> = ({
                   gap: '6px',
                 }}
               >
-                ✓ Approve &amp; Merge
+                ✓ Approve Result
               </button>
 
               <button

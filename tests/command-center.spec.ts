@@ -254,20 +254,38 @@ test('adds numbers correctly', () => {
     await expect(page.getByText('No runs yet')).toBeVisible()
     await expect(page.getByText('RUNS (0)')).toBeVisible()
 
-    // 1440x900 Screenshot (01-office-empty)
+    // 1920x1080 Screenshot (01-empty-hq-1920.png)
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    await page.screenshot({ path: join(screenshotsDir, '01-empty-hq-1920.png') })
+    await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1920x1080.png') })
+    await page.screenshot({ path: join(screenshotsDir, 'viewport-1920x1080.png') })
+
+    // Focus Astra Studio (09-astra-studio.png)
+    const astraStudio = page.locator('[data-testid="astra-studio-floor"]')
+    if (await astraStudio.isVisible()) {
+      await astraStudio.scrollIntoViewIfNeeded()
+      await page.screenshot({ path: join(screenshotsDir, '09-astra-studio.png') })
+    }
+
+    // Focus Verification Lab (10-verification-lab.png)
+    const verificationLab = page.locator('[data-testid="verification-lab-floor"]')
+    if (await verificationLab.isVisible()) {
+      await verificationLab.scrollIntoViewIfNeeded()
+      await page.screenshot({ path: join(screenshotsDir, '10-verification-lab.png') })
+    }
+
+    // 1440x900 Screenshot (15-hq-1440.png)
     await page.setViewportSize({ width: 1440, height: 900 })
+    await page.locator('[data-testid="engineering-floor"]').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: join(screenshotsDir, '15-hq-1440.png') })
     await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1440x900.png') })
     await page.screenshot({ path: join(screenshotsDir, '01-office-empty.png') })
     await page.screenshot({ path: join(screenshotsDir, '01-empty-command-center.png') })
     await page.screenshot({ path: join(screenshotsDir, 'viewport-1440x900.png') })
 
-    // 1920x1080 Screenshot
-    await page.setViewportSize({ width: 1920, height: 1080 })
-    await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1920x1080.png') })
-    await page.screenshot({ path: join(screenshotsDir, 'viewport-1920x1080.png') })
-
-    // 1024x768 Screenshot & overflow check
+    // 1024x768 Screenshot & overflow check (16-hq-1024.png)
     await page.setViewportSize({ width: 1024, height: 768 })
+    await page.screenshot({ path: join(screenshotsDir, '16-hq-1024.png') })
     await page.screenshot({ path: join(screenshotsDir, '01-office-empty-1024x768.png') })
     await page.screenshot({ path: join(screenshotsDir, 'viewport-1024x768.png') })
 
@@ -346,9 +364,10 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="worker-station-fake-deterministic-worker"]')).toBeVisible()
     await expect(page.locator('[data-testid="worker-station-fake-deterministic-worker"]')).toContainText('ASSIGNED')
 
-    // Capture 02-office-ready
+    // Capture 02-office-ready & 02-engineering-idle
     await page.screenshot({ path: join(screenshotsDir, '02-office-ready.png') })
     await page.screenshot({ path: join(screenshotsDir, '02-ready-run.png') })
+    await page.screenshot({ path: join(screenshotsDir, '02-engineering-idle.png') })
 
     // Inspect Prompt Manager in READY state: preview compiled prompt
     const promptManager = page.locator('[data-testid="prompt-manager"]')
@@ -365,6 +384,8 @@ test('adds numbers correctly', () => {
     await page.waitForTimeout(200)
     await page.screenshot({ path: join(screenshotsDir, '03-office-working.png') })
     await page.screenshot({ path: join(screenshotsDir, '03-running-execution.png') })
+    await page.screenshot({ path: join(screenshotsDir, '03-worker-running.png') })
+    await page.screenshot({ path: join(screenshotsDir, '04-verification-handoff.png') })
 
     // 5. Wait for WAITING_APPROVAL state
     const approvalBox = page.locator('[data-testid="approval-action-box"]')
@@ -379,6 +400,8 @@ test('adds numbers correctly', () => {
     await expect(workerStation).toContainText('NEEDS_YOU')
     await page.screenshot({ path: join(screenshotsDir, '05-office-needs-you.png') })
     await page.screenshot({ path: join(screenshotsDir, '04-waiting-approval.png') })
+    await page.screenshot({ path: join(screenshotsDir, '05-verifier-active.png') })
+    await page.screenshot({ path: join(screenshotsDir, '06-operator-approval.png') })
 
     // 6. Test Human Inbox Drawer
     await page.click('[data-testid="human-inbox-trigger"]')
@@ -410,10 +433,11 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
 
     // 9. Approve the task
-    await page.click('button:has-text("Approve & Merge")')
+    await page.click('button:has-text("Approve Result")')
     await expect(page.getByText('APPROVED', { exact: true }).first()).toBeVisible({ timeout: 5000 })
     await expect(page.getByText('COMPLETED')).toBeVisible()
     await expect(approvalBox).not.toBeVisible()
+    await page.screenshot({ path: join(screenshotsDir, '07-approved-result.png') })
   })
 
   test('executes second run and supports explicit human rejection into FAILED state', async ({ page }: { page: Page }) => {
@@ -452,6 +476,7 @@ test('adds numbers correctly', () => {
     await expect(inboxDrawer.locator('[data-testid^="inbox-item-"]').getByText('CRITICAL')).toBeVisible()
     await page.screenshot({ path: join(screenshotsDir, '10-failed-state.png') })
     await page.screenshot({ path: join(screenshotsDir, '06-failed-or-rejected.png') })
+    await page.screenshot({ path: join(screenshotsDir, '08-failed-task.png') })
   })
 
   test('composes and executes multi-task DAG, renders Run DAG with dependency nodes, and unblocks downstream tasks', async ({ page }: { page: Page }) => {
@@ -500,7 +525,7 @@ test('adds numbers correctly', () => {
     await page.screenshot({ path: join(screenshotsDir, '12-run-dag-waiting-approval.png') })
 
     // Approve task-1
-    await page.click('button:has-text("Approve & Merge")')
+    await page.click('button:has-text("Approve Result")')
 
     // 7. Wait for task-1 to be APPROVED in DAG view
     await expect(page.locator('[data-testid="dag-task-node-task-1"]')).toContainText('APPROVED', { timeout: 15000 })
@@ -513,7 +538,7 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 10000 })
 
     // 10. Approve task-2 to complete the run
-    await page.click('button:has-text("Approve & Merge")')
+    await page.click('button:has-text("Approve Result")')
     await expect(page.locator('[data-testid="dag-task-node-task-2"]')).toContainText('APPROVED', { timeout: 15000 })
     await expect(page.locator('[data-testid="approval-action-box"]')).not.toBeVisible()
 
@@ -580,7 +605,7 @@ test('adds numbers correctly', () => {
     // Focus and approve task-root to unblock parallel branches task-branch-a and task-branch-b
     await page.click('[data-testid="dag-task-node-task-root"]')
     await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 10000 })
-    await page.click('[data-testid="approval-action-box"] button:has-text("Approve & Merge")')
+    await page.click('[data-testid="approval-action-box"] button:has-text("Approve Result")')
     await expect(page.locator('[data-testid="dag-task-node-task-root"]')).toContainText('APPROVED', {
       timeout: 15000,
     })
@@ -609,7 +634,7 @@ test('adds numbers correctly', () => {
     await page.screenshot({ path: join(screenshotsDir, '14-verification.png') })
 
     // 9. Approve task-branch-a
-    await page.click('[data-testid="approval-action-box"] button:has-text("Approve & Merge")')
+    await page.click('[data-testid="approval-action-box"] button:has-text("Approve Result")')
     await expect(page.locator('[data-testid="dag-task-node-task-branch-a"]')).toContainText('APPROVED', {
       timeout: 15000,
     })
@@ -620,7 +645,7 @@ test('adds numbers correctly', () => {
     })
     await page.click('[data-testid="dag-task-node-task-branch-b"]')
     await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 10000 })
-    await page.click('[data-testid="approval-action-box"] button:has-text("Approve & Merge")')
+    await page.click('[data-testid="approval-action-box"] button:has-text("Approve Result")')
     await expect(page.locator('[data-testid="dag-task-node-task-branch-b"]')).toContainText('APPROVED', {
       timeout: 15000,
     })
@@ -636,7 +661,7 @@ test('adds numbers correctly', () => {
     await page.screenshot({ path: join(screenshotsDir, '15-composition.png') })
 
     // Approve task-join to complete the diamond DAG run
-    await page.click('[data-testid="approval-action-box"] button:has-text("Approve & Merge")')
+    await page.click('[data-testid="approval-action-box"] button:has-text("Approve Result")')
     await expect(page.locator('[data-testid="dag-task-node-task-join"]')).toContainText('APPROVED', {
       timeout: 15000,
     })
@@ -816,6 +841,7 @@ test('adds numbers correctly', () => {
     await page.click('button[role="tab"]:has-text("OFFICE")')
     await expect(page.locator('[data-testid="office-standby-shelf"]')).toBeVisible({ timeout: 10000 })
     await page.screenshot({ path: join(screenshotsDir, '20-office-8-tasks.png') })
+    await page.screenshot({ path: join(screenshotsDir, '11-five-task-density.png') })
 
     // ----------------------------------------------------
     // 2. 15 Tasks Scale (Compact Standby Shelf)
@@ -840,6 +866,7 @@ test('adds numbers correctly', () => {
     await page.click('button[role="tab"]:has-text("OFFICE")')
     await expect(page.locator('[data-testid="office-standby-shelf"]')).toBeVisible({ timeout: 10000 })
     await page.screenshot({ path: join(screenshotsDir, '21-office-15-tasks.png') })
+    await page.screenshot({ path: join(screenshotsDir, '12-fifteen-task-density.png') })
 
     // ----------------------------------------------------
     // 3. 30 Tasks Scale (Execution Graph Topological Grid)
@@ -867,9 +894,10 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="dag-task-node-task-30scale-1"]')).toBeVisible()
     await expect(page.locator('[data-testid="dag-task-node-task-30scale-30"]')).toBeVisible()
     await page.screenshot({ path: join(screenshotsDir, '22-graph-30-tasks.png') })
+    await page.screenshot({ path: join(screenshotsDir, '13-thirty-task-density.png') })
 
     // ----------------------------------------------------
-    // 4. Responsive Viewports Check (Zero Horizontal Overflow)
+    // 4. Responsive Viewports & Reduced Motion Check
     // ----------------------------------------------------
     const viewports = [
       { width: 1920, height: 1080 },
@@ -885,5 +913,10 @@ test('adds numbers correctly', () => {
       })
       expect(noOverflow).toBe(true)
     }
+
+    // Emulate reduced motion
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.screenshot({ path: join(screenshotsDir, '14-reduced-motion.png') })
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
   })
 })

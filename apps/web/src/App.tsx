@@ -379,7 +379,7 @@ export const App: React.FC = () => {
       },
       {
         id: 'act-approve',
-        title: 'Approve Task & Merge Mutation',
+        title: 'Approve Result',
         subtitle: currentTask?.state === 'WAITING_APPROVAL' ? 'Approve verified mutation' : 'Task not awaiting approval',
         category: 'EXECUTION',
         disabled: currentTask?.state !== 'WAITING_APPROVAL' || isActing,
@@ -550,6 +550,15 @@ export const App: React.FC = () => {
                 isActing={isActing}
                 onNewRunClick={() => setIsComposerOpen(true)}
                 waitingApprovalTask={waitingApprovalTask}
+                run={runDetail?.run ?? null}
+                tasks={runDetail?.tasks ?? []}
+                activeTask={currentTask}
+                harness={stateSummary?.harness}
+                onSelectTask={(taskId) => {
+                  if (selectedRunId) {
+                    void loadTaskDetails(selectedRunId, taskId)
+                  }
+                }}
               />
 
               {/* Task Details & Inspector underneath Office Floor */}
