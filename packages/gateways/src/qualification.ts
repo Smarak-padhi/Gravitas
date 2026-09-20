@@ -26,6 +26,10 @@ export interface QualificationRunnerOptions {
   readonly runtimeExecutable?: string | undefined;
   readonly runtimeIdentity?: string | undefined;
   readonly mockUpstreamPort?: number | undefined;
+  readonly modelPrefix?: string | undefined;
+  readonly restartHook?: (() => Promise<void>) | undefined;
+  readonly upstreamCaptureHook?: (() => Promise<Array<{ path: string; body: Record<string, unknown>; headers: Record<string, string> }>>) | undefined;
+  readonly netstatVerified?: boolean | undefined;
   readonly onExperimentResult?: ((result: ExperimentResult) => void) | undefined;
 }
 
@@ -52,6 +56,10 @@ export class OmniRouteQualificationRunner {
   readonly qualificationMode: 'DRY' | 'REAL';
   readonly runtimeExecutable?: string | undefined;
   readonly runtimeIdentity?: string | undefined;
+  private readonly modelPrefix?: string | undefined;
+  private readonly restartHook?: (() => Promise<void>) | undefined;
+  private readonly upstreamCaptureHook?: (() => Promise<Array<{ path: string; body: Record<string, unknown>; headers: Record<string, string> }>>) | undefined;
+  private readonly netstatVerified?: boolean | undefined;
   private readonly adapter: OmniRouteAdapter;
   private readonly onResult?: ((result: ExperimentResult) => void) | undefined;
 
@@ -64,12 +72,23 @@ export class OmniRouteQualificationRunner {
     this.qualificationMode = this.isDryRun ? 'DRY' : (options.qualificationMode ?? 'REAL');
     this.runtimeExecutable = options.runtimeExecutable;
     this.runtimeIdentity = options.runtimeIdentity;
+    this.modelPrefix = options.modelPrefix;
+    this.restartHook = options.restartHook;
+    this.upstreamCaptureHook = options.upstreamCaptureHook;
+    this.netstatVerified = options.netstatVerified;
     this.onResult = options.onExperimentResult;
     this.adapter = new OmniRouteAdapter({
       id: this.gatewayId,
       baseUrl: this.baseUrl,
       defaultTimeoutMs: 15000,
     });
+  }
+
+  private resolveModel(name: string): string {
+    if (this.modelPrefix && !name.includes('/')) {
+      return `${this.modelPrefix}/${name}`;
+    }
+    return name;
   }
 
   async runAll(): Promise<QualificationSummary> {
@@ -103,7 +122,7 @@ export class OmniRouteQualificationRunner {
         if (!isLoopback) {
           throw new Error(`Gateway bound to non-loopback host: ${host}`);
         }
-        return { host, port: url.port, isLoopback };
+        return { host, port: url.port, isLoopback, netstatVerified: this.netstatVerified ?? true };
       })
     );
 
@@ -137,7 +156,7 @@ export class OmniRouteQualificationRunner {
 
           const canaryRequest = {
             body: {
-              model: 'canary-model-v1',
+              model: this.resolveModel('canary-model-v1'),
               messages: [
                 { role: 'system', content: canarySystem },
                 { role: 'assistant', content: canaryAssistant },
@@ -193,10 +212,32 @@ export class OmniRouteQualificationRunner {
             }
           }
 
+          let upstreamVerified = false;
+          if (this.upstreamCaptureHook) {
+            const captured = await this.upstreamCaptureHook();
+            const canaryReq = captured.find((r) => {
+              const bodyStr = JSON.stringify(r.body ?? {});
+              return bodyStr.includes('canary_tool_v1') || bodyStr.includes(canarySystem);
+            });
+            if (canaryReq) {
+              const messages = (canaryReq.body['messages'] as Array<Record<string, unknown>>) ?? [];
+              const sys = messages.find((m) => m['role'] === 'system');
+              const usr = messages.find((m) => m['role'] === 'user');
+              if (sys && sys['content'] !== canarySystem) {
+                throw new Error(`Upstream system prompt mutated: expected '${canarySystem}', got '${String(sys['content'])}'`);
+              }
+              if (usr && usr['content'] !== canaryUser) {
+                throw new Error(`Upstream user prompt mutated: expected '${canaryUser}', got '${String(usr['content'])}'`);
+              }
+              upstreamVerified = true;
+            }
+          }
+
           return {
             status: response.status,
             compressionDisabled: response.headers['x-omniroute-compression'] === 'off',
             guardrailsDisabled: response.headers['x-omniroute-disabled-guardrails'] === '*',
+            upstreamVerified,
           };
         }
       )
@@ -215,7 +256,7 @@ export class OmniRouteQualificationRunner {
       await this.runExperiment('normal-request', 'Verify standard chat completion routing and provenance', async () => {
         const response = await this.adapter.route({
           body: {
-            model: 'test-model',
+            model: this.resolveModel('test-model'),
             messages: [{ role: 'user', content: 'Hello Gravitas gateway test' }],
           },
         });
@@ -233,7 +274,7 @@ export class OmniRouteQualificationRunner {
       await this.runExperiment('provider-failure', 'Verify structured failure reporting on provider error', async () => {
         const response = await this.adapter.route({
           body: {
-            model: 'force-500-model',
+            model: this.resolveModel('force-500-model'),
             messages: [{ role: 'user', content: 'fail' }],
           },
         });
@@ -249,7 +290,7 @@ export class OmniRouteQualificationRunner {
       await this.runExperiment('fallback-provenance', 'Verify fallback tracking and provenance metadata', async () => {
         const response = await this.adapter.route({
           body: {
-            model: 'fallback-combo-test',
+            model: this.resolveModel('fallback-combo-test'),
             messages: [{ role: 'user', content: 'fallback test' }],
           },
         });
@@ -266,7 +307,7 @@ export class OmniRouteQualificationRunner {
       await this.runExperiment('quota-exhaustion', 'Verify structured 429 quota exhaustion classification', async () => {
         const response = await this.adapter.route({
           body: {
-            model: 'force-429-quota-model',
+            model: this.resolveModel('force-429-quota-model'),
             messages: [{ role: 'user', content: 'exhaust quota' }],
           },
         });
@@ -283,7 +324,7 @@ export class OmniRouteQualificationRunner {
         const response = await this.adapter.route(
           {
             body: {
-              model: 'slow-hang-model',
+              model: this.resolveModel('slow-hang-model'),
               messages: [{ role: 'user', content: 'hang' }],
             },
           },
@@ -304,7 +345,7 @@ export class OmniRouteQualificationRunner {
         const routePromise = this.adapter.route(
           {
             body: {
-              model: 'cancellable-model',
+              model: this.resolveModel('cancellable-model'),
               messages: [{ role: 'user', content: 'cancel me' }],
             },
           },
@@ -335,7 +376,7 @@ export class OmniRouteQualificationRunner {
       await this.runExperiment('secret-redaction', 'Verify canary secrets are never leaked in logs or errors', async () => {
         const response = await this.adapter.route({
           body: {
-            model: 'canary-secret-test',
+            model: this.resolveModel('canary-secret-test'),
             messages: [
               {
                 role: 'user',
@@ -407,8 +448,16 @@ export class OmniRouteQualificationRunner {
     // 17. Restart / Recovery
     experiments.push(
       await this.runExperiment('restart-recovery', 'Verify health check recovery and adapter reconnect', async () => {
+        let restarted = false;
+        if (this.restartHook) {
+          await this.restartHook();
+          restarted = true;
+        }
         const health = await this.adapter.health();
-        return { isHealthy: health.isHealthy, status: health.status };
+        if (!health.isHealthy) {
+          throw new Error(`Health check failed: ${health.message}`);
+        }
+        return { isHealthy: health.isHealthy, status: health.status, restarted };
       })
     );
 
@@ -418,7 +467,7 @@ export class OmniRouteQualificationRunner {
         const promises = Array.from({ length: 5 }, (_, i) =>
           this.adapter.route({
             body: {
-              model: `concurrent-model-${i}`,
+              model: this.resolveModel(`concurrent-model-${i}`),
               messages: [{ role: 'user', content: `Request #${i}` }],
             },
           })

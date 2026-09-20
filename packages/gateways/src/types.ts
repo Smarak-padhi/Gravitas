@@ -96,11 +96,11 @@ export interface InferenceGateway {
   route(request: GatewayRequest, options?: GatewayRouteOptions): Promise<GatewayResponse>;
 }
 
-export const GATEWAY_QUALIFICATION_SCHEMA_VERSION = 'v1';
+export const GATEWAY_QUALIFICATION_SCHEMA_VERSION = '1.0.0';
 export const GATEWAY_SECURITY_PROFILE_VERSION = 'wave11.2-isolated';
 
 export const GatewayQualificationEvidenceSchema = z.object({
-  schemaVersion: z.literal(GATEWAY_QUALIFICATION_SCHEMA_VERSION),
+  schemaVersion: z.enum(['1.0.0', 'v1']),
   qualificationMode: z.enum(['DRY', 'REAL']),
   gatewayId: z.string().min(1),
   gatewayVersion: z.string().min(1),

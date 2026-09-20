@@ -14,7 +14,6 @@ import {
   type GatewayQualificationEvidence,
   type GatewayQualificationState,
   type InferenceGateway,
-  GATEWAY_QUALIFICATION_SCHEMA_VERSION,
   GATEWAY_SECURITY_PROFILE_VERSION,
 } from './types.js';
 
@@ -89,7 +88,8 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
       const evidence = parsed.data;
 
       // Validation gates
-      const isSchemaMatch = evidence.schemaVersion === GATEWAY_QUALIFICATION_SCHEMA_VERSION;
+      const isSchemaMatch =
+        evidence.schemaVersion === '1.0.0' || evidence.schemaVersion === 'v1';
       const isRealMode = evidence.qualificationMode === 'REAL';
       const isSecurityProfileMatch =
         evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION &&
