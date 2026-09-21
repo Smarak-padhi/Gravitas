@@ -212,7 +212,16 @@ export function buildCodexCliArgs(
 
   if (options?.gatewayBaseUrl) {
     const url = options.gatewayBaseUrl.replace(/\/+$/, '')
-    args.push('-c', `model_providers.openai.base_url="${url}/v1"`)
+    args.push(
+      '-c',
+      'model_provider="gateway"',
+      '-c',
+      'model_providers.gateway.name="Gateway"',
+      '-c',
+      `model_providers.gateway.base_url="${url}/v1"`,
+      '-c',
+      'model_providers.gateway.wire_api="responses"'
+    )
   }
 
   if (options?.requestedModel) {

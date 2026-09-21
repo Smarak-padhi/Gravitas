@@ -159,6 +159,18 @@ describe('buildCodexCliArgs', () => {
     const args = buildCodexCliArgs('/tmp/worktree')
     expect(args).not.toContain('--sandbox')
   })
+
+  it('configures custom model_provider for gateway redirection', () => {
+    const args = buildCodexCliArgs('/tmp/worktree', {
+      gatewayBaseUrl: 'http://127.0.0.1:20139',
+      requestedModel: 'gpt-4o',
+    })
+    expect(args).toContain('model_provider="gateway"')
+    expect(args).toContain('model_providers.gateway.name="Gateway"')
+    expect(args).toContain('model_providers.gateway.base_url="http://127.0.0.1:20139/v1"')
+    expect(args).toContain('model_providers.gateway.wire_api="responses"')
+    expect(args).toContain('model="gpt-4o"')
+  })
 })
 
 // ─── resolveCodexExecutable ───────────────────────────────────────────────────
