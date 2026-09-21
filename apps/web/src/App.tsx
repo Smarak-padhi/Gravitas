@@ -25,6 +25,7 @@ import { ActivityTimeline } from './features/timeline/ActivityTimeline.js'
 import { AgentRegistryView } from './features/agents/AgentRegistryView.js'
 import { CommandPalette } from './features/command-palette/CommandPalette.js'
 import type { CommandItem } from './features/command-palette/commandPaletteState.js'
+import { LivingHqCanvas3D } from './hq3d/LivingHqCanvas3D.js'
 import './styles/theme.css'
 import './design-system/tokens.css'
 import './design-system/motion.css'
@@ -41,8 +42,32 @@ export const App: React.FC = () => {
   const [isActing, setIsActing] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // Wave 7.5 Experience Controls
-  const [activeView, setActiveView] = useState<WorkspaceView>('OFFICE')
+  // Wave 7.5 Experience Controls & Wave 12B 3D HQ
+  const [activeView, setActiveView] = useState<WorkspaceView>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('gravitas:activeView') as WorkspaceView | null
+        if (saved && ['HQ3D', 'OFFICE', 'GRAPH', 'EVIDENCE', 'TIMELINE', 'AGENTS'].includes(saved)) {
+          return saved
+        }
+      } catch {
+        // Fallback on storage errors
+      }
+    }
+    return 'HQ3D'
+  })
+
+  const handleViewChange = useCallback((newView: WorkspaceView) => {
+    setActiveView(newView)
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('gravitas:activeView', newView)
+      } catch {
+        // Ignore storage errors
+      }
+    }
+  }, [])
+
   const [isInboxOpen, setIsInboxOpen] = useState<boolean>(false)
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false)
   const [acknowledgedInboxIds, setAcknowledgedInboxIds] = useState<Set<string>>(new Set())
@@ -323,12 +348,20 @@ export const App: React.FC = () => {
   const paletteCommands: CommandItem[] = useMemo(() => {
     return [
       {
+        id: 'nav-hq3d',
+        title: 'Open 3D Headquarters (HQ3D)',
+        subtitle: 'Switch workspace view to living 3D architectural operations headquarters',
+        category: 'NAVIGATION',
+        shortcut: 'Ctrl+0',
+        run: () => handleViewChange('HQ3D'),
+      },
+      {
         id: 'nav-office',
         title: 'Open Living Office Floor',
         subtitle: 'Switch workspace view to active spatial worker stations',
         category: 'NAVIGATION',
         shortcut: 'Ctrl+1',
-        run: () => setActiveView('OFFICE'),
+        run: () => handleViewChange('OFFICE'),
       },
       {
         id: 'nav-graph',
@@ -336,7 +369,7 @@ export const App: React.FC = () => {
         subtitle: 'View deterministic execution pipeline and gates',
         category: 'NAVIGATION',
         shortcut: 'Ctrl+2',
-        run: () => setActiveView('GRAPH'),
+        run: () => handleViewChange('GRAPH'),
       },
       {
         id: 'nav-evidence',
@@ -344,7 +377,7 @@ export const App: React.FC = () => {
         subtitle: 'Inspect change scope, verifier runner, and unified git diff',
         category: 'NAVIGATION',
         shortcut: 'Ctrl+3',
-        run: () => setActiveView('EVIDENCE'),
+        run: () => handleViewChange('EVIDENCE'),
       },
       {
         id: 'nav-timeline',
@@ -352,7 +385,7 @@ export const App: React.FC = () => {
         subtitle: 'Review operational chronological stream from SSE events',
         category: 'NAVIGATION',
         shortcut: 'Ctrl+4',
-        run: () => setActiveView('TIMELINE'),
+        run: () => handleViewChange('TIMELINE'),
       },
       {
         id: 'nav-agents',
@@ -360,7 +393,7 @@ export const App: React.FC = () => {
         subtitle: 'Inspect registered agents, qualifications, and capability grants',
         category: 'NAVIGATION',
         shortcut: 'Ctrl+5',
-        run: () => setActiveView('AGENTS'),
+        run: () => handleViewChange('AGENTS'),
       },
       {
         id: 'toggle-inbox',
@@ -476,7 +509,7 @@ export const App: React.FC = () => {
           }
         }
         currentView={activeView}
-        onViewChange={(v) => setActiveView(v)}
+        onViewChange={handleViewChange}
         inboxCount={inboxItems.length}
         onToggleInbox={() => setIsInboxOpen(!isInboxOpen)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
@@ -540,6 +573,14 @@ export const App: React.FC = () => {
             backgroundColor: 'var(--bg-app)',
           }}
         >
+          {/* VIEW: 3D HEADQUARTERS FOUNDATION */}
+          {activeView === 'HQ3D' && (
+            <LivingHqCanvas3D
+              isViewActive={activeView === 'HQ3D'}
+              onFallbackTo2D={() => handleViewChange('OFFICE')}
+            />
+          )}
+
           {/* VIEW: LIVING OFFICE FLOOR */}
           {activeView === 'OFFICE' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>

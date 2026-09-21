@@ -3,7 +3,7 @@ import type { ConnectionStatus } from '../api/useEvents.js'
 import { Tabs, type TabItem } from '../design-system/components/Tabs.js'
 import { Button } from '../design-system/components/Button.js'
 
-export type WorkspaceView = 'OFFICE' | 'GRAPH' | 'EVIDENCE' | 'TIMELINE' | 'AGENTS'
+export type WorkspaceView = 'HQ3D' | 'OFFICE' | 'GRAPH' | 'EVIDENCE' | 'TIMELINE' | 'AGENTS'
 
 export interface TopBarProps {
   readonly connectionStatus: ConnectionStatus
@@ -32,7 +32,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   harness,
   gateways,
   onNewRunClick,
-  currentView = 'OFFICE',
+  currentView = 'HQ3D',
   onViewChange,
   inboxCount = 0,
   onToggleInbox,
@@ -61,6 +61,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   }
 
   const viewTabs: TabItem<WorkspaceView>[] = [
+    { id: 'HQ3D', label: '🏛️ HQ 3D' },
     { id: 'OFFICE', label: 'OFFICE' },
     { id: 'GRAPH', label: 'GRAPH' },
     { id: 'EVIDENCE', label: 'EVIDENCE' },
