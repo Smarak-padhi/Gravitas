@@ -1,6 +1,8 @@
 /**
- * Static Prototype Geometric Scale Reference Figures for Gravitas 3D Headquarters
- * Strictly static composition references. Zero fake typing, zero wandering.
+ * Architectural Miniature Scale Figures for Gravitas 3D Headquarters
+ * Stylized geometric mannequin silhouettes with articulated limbs, tailored
+ * suiting palettes, and natural seated/standing postures.
+ * Strictly static scale references. Zero fake activity or animations.
  */
 
 import * as THREE from 'three'
@@ -10,44 +12,52 @@ import type { CharacterId } from '../types.js'
 export class HqCharacters {
   public readonly group: THREE.Group
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
+  private readonly materials: MaterialLibrary
 
   constructor(materials: MaterialLibrary) {
+    this.materials = materials
     this.group = new THREE.Group()
     this.group.name = 'hq-characters'
 
-    // 1. Codex Prototype (Seated at Workstation 01)
-    this.buildFigure({
+    // 1. Codex Prototype Figure (Seated at Workstation 01)
+    this.buildMiniatureFigure({
       id: 'char-codex',
       name: 'Codex (Static Prototype)',
       role: 'Engineering Specialist',
-      position: [-7.0, 0.0, 0.5],
-      rotationY: 0.0,
-      accentMaterial: materials.charCodex,
-      baseMaterial: materials.gunmetal,
+      room: 'Agent Operations',
+      position: [-6.5, 0.0, 1.85],
+      rotationY: Math.PI, // Facing forward towards desk
+      accentMaterial: materials.charCodex, // Muted slate-teal
+      suitMaterial: materials.charSuitDark,
+      skinMaterial: materials.charSkin,
       isSeated: true,
     })
 
-    // 2. FCC Prototype (Seated at Workstation 02)
-    this.buildFigure({
+    // 2. FCC Prototype Figure (Seated at Workstation 02)
+    this.buildMiniatureFigure({
       id: 'char-fcc',
       name: 'Claude / FCC (Static Prototype)',
       role: 'Architectural Reasoning',
-      position: [-1.0, 0.0, 0.5],
-      rotationY: 0.0,
-      accentMaterial: materials.charFcc,
-      baseMaterial: materials.gunmetal,
+      room: 'Agent Operations',
+      position: [-1.8, 0.0, 1.85],
+      rotationY: Math.PI, // Facing forward towards desk
+      accentMaterial: materials.charFcc, // Muted warm terracotta
+      suitMaterial: materials.charSuitDark,
+      skinMaterial: materials.charSkin,
       isSeated: true,
     })
 
-    // 3. Independent Verifier Prototype (Standing at Cleanroom Bench)
-    this.buildFigure({
+    // 3. Independent Verifier Figure (Standing inside Cleanroom at Console)
+    this.buildMiniatureFigure({
       id: 'char-verifier',
       name: 'Independent Verifier (Static Prototype)',
       role: 'Deterministic Gate Authority',
-      position: [6.0, 0.0, 5.8],
-      rotationY: 0.0,
-      accentMaterial: materials.charVerifier,
-      baseMaterial: materials.gunmetal,
+      room: 'Verification Cleanroom',
+      position: [6.0, 0.1, 5.75],
+      rotationY: 0.0, // Facing console
+      accentMaterial: materials.charVerifier, // Muted sage / deep spruce
+      suitMaterial: materials.charSuitDark,
+      skinMaterial: materials.charSkin,
       isSeated: false,
     })
   }
@@ -57,93 +67,159 @@ export class HqCharacters {
     return geom
   }
 
-  private buildFigure(opts: {
+  private buildMiniatureFigure(opts: {
     readonly id: CharacterId
     readonly name: string
     readonly role: string
+    readonly room: string
     readonly position: readonly [number, number, number]
     readonly rotationY: number
     readonly accentMaterial: THREE.Material
-    readonly baseMaterial: THREE.Material
+    readonly suitMaterial: THREE.Material
+    readonly skinMaterial: THREE.Material
     readonly isSeated: boolean
   }): void {
     const charGroup = new THREE.Group()
     charGroup.position.set(...opts.position)
     charGroup.rotation.y = opts.rotationY
     charGroup.name = `character:${opts.id}`
-    charGroup.userData = { type: 'character', id: opts.id, name: opts.name, role: opts.role }
+    charGroup.userData = {
+      type: 'character',
+      id: opts.id,
+      name: opts.name,
+      role: opts.role,
+      room: opts.room,
+    }
 
-    const yOffset = opts.isSeated ? 0.45 : 0.0
+    const yBase = opts.isSeated ? 0.46 : 0.0
 
-    // 1. Head (faceted miniature stylized head)
-    const headGeo = this.track(new THREE.CylinderGeometry(0.12, 0.1, 0.22, 8))
-    const head = new THREE.Mesh(headGeo, opts.accentMaterial)
-    head.position.set(0.0, yOffset + 1.25, 0.0)
+    // 1. Head (Sculpted miniature architectural mannequin head)
+    const headGeo = this.track(new THREE.SphereGeometry(0.1, 16, 12))
+    const head = new THREE.Mesh(headGeo, opts.skinMaterial)
+    head.scale.set(0.9, 1.15, 0.95)
+    head.position.set(0.0, yBase + 0.96, 0.0)
     head.castShadow = true
     charGroup.add(head)
 
-    // Stylized glasses / brow line
-    const browGeo = this.track(new THREE.BoxGeometry(0.18, 0.04, 0.06))
-    const brow = new THREE.Mesh(browGeo, opts.baseMaterial)
-    brow.position.set(0.0, yOffset + 1.25, 0.1)
-    charGroup.add(brow)
+    // Brushed brass architectural brow visor band
+    const visorGeo = this.track(new THREE.BoxGeometry(0.15, 0.04, 0.08))
+    const visor = new THREE.Mesh(visorGeo, this.materials.brass)
+    visor.position.set(0.0, yBase + 0.98, 0.075)
+    charGroup.add(visor)
 
-    // 2. Torso (tapered tailored jacket silhouette)
-    const torsoGeo = this.track(new THREE.BoxGeometry(0.38, 0.5, 0.24))
-    const torso = new THREE.Mesh(torsoGeo, opts.accentMaterial)
-    torso.position.set(0.0, yOffset + 0.85, 0.0)
+    // Neck collar
+    const neckGeo = this.track(new THREE.CylinderGeometry(0.05, 0.06, 0.08, 8))
+    const neck = new THREE.Mesh(neckGeo, opts.accentMaterial)
+    neck.position.set(0.0, yBase + 0.84, 0.0)
+    charGroup.add(neck)
+
+    // 2. Torso (Tailored jacket with accent lapel)
+    const torsoGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 0.22))
+    const torso = new THREE.Mesh(torsoGeo, opts.suitMaterial)
+    torso.position.set(0.0, yBase + 0.62, 0.0)
     torso.castShadow = true
     charGroup.add(torso)
 
-    // 3. Arms (relaxed resting posture)
-    const armGeo = this.track(new THREE.BoxGeometry(0.09, 0.42, 0.1))
-    // Left arm
-    const leftArm = new THREE.Mesh(armGeo, opts.accentMaterial)
-    leftArm.position.set(-0.24, yOffset + 0.82, opts.isSeated ? 0.1 : 0.0)
-    if (opts.isSeated) leftArm.rotation.x = -0.4
-    leftArm.castShadow = true
-    charGroup.add(leftArm)
+    // Chest accent tie / lapel strip
+    const lapelGeo = this.track(new THREE.BoxGeometry(0.1, 0.32, 0.02))
+    const lapel = new THREE.Mesh(lapelGeo, opts.accentMaterial)
+    lapel.position.set(0.0, yBase + 0.64, 0.112)
+    charGroup.add(lapel)
 
-    // Right arm
-    const rightArm = new THREE.Mesh(armGeo, opts.accentMaterial)
-    rightArm.position.set(0.24, yOffset + 0.82, opts.isSeated ? 0.1 : 0.0)
-    if (opts.isSeated) rightArm.rotation.x = -0.4
-    rightArm.castShadow = true
-    charGroup.add(rightArm)
-
-    // 4. Legs
+    // 3. Articulated Arms
     if (opts.isSeated) {
-      // Seated thighs
-      const thighGeo = this.track(new THREE.BoxGeometry(0.14, 0.12, 0.42))
-      const leftThigh = new THREE.Mesh(thighGeo, opts.baseMaterial)
-      leftThigh.position.set(-0.1, 0.52, 0.18)
-      charGroup.add(leftThigh)
+      // Seated posture: Upper arms vertical, forearms forward resting toward desk
+      const upperArmGeo = this.track(new THREE.BoxGeometry(0.08, 0.26, 0.09))
+      const armLeft = new THREE.Mesh(upperArmGeo, opts.suitMaterial)
+      armLeft.position.set(-0.22, yBase + 0.62, 0.0)
+      charGroup.add(armLeft)
 
-      const rightThigh = new THREE.Mesh(thighGeo, opts.baseMaterial)
-      rightThigh.position.set(0.1, 0.52, 0.18)
-      charGroup.add(rightThigh)
+      const armRight = new THREE.Mesh(upperArmGeo, opts.suitMaterial)
+      armRight.position.set(0.22, yBase + 0.62, 0.0)
+      charGroup.add(armRight)
 
-      // Lower shins
-      const shinGeo = this.track(new THREE.BoxGeometry(0.12, 0.45, 0.12))
-      const leftShin = new THREE.Mesh(shinGeo, opts.baseMaterial)
-      leftShin.position.set(-0.1, 0.225, 0.35)
-      charGroup.add(leftShin)
+      // Forearms extending forward
+      const forearmGeo = this.track(new THREE.BoxGeometry(0.07, 0.07, 0.28))
+      const forearmLeft = new THREE.Mesh(forearmGeo, opts.suitMaterial)
+      forearmLeft.position.set(-0.2, yBase + 0.49, 0.14)
+      charGroup.add(forearmLeft)
 
-      const rightShin = new THREE.Mesh(shinGeo, opts.baseMaterial)
-      rightShin.position.set(0.1, 0.225, 0.35)
-      charGroup.add(rightShin)
+      const forearmRight = new THREE.Mesh(forearmGeo, opts.suitMaterial)
+      forearmRight.position.set(0.2, yBase + 0.49, 0.14)
+      charGroup.add(forearmRight)
+
+      // Stylized hands near keyboard
+      const handGeo = this.track(new THREE.BoxGeometry(0.06, 0.04, 0.08))
+      const handLeft = new THREE.Mesh(handGeo, opts.skinMaterial)
+      handLeft.position.set(-0.16, yBase + 0.49, 0.28)
+      charGroup.add(handLeft)
+
+      const handRight = new THREE.Mesh(handGeo, opts.skinMaterial)
+      handRight.position.set(0.16, yBase + 0.49, 0.28)
+      charGroup.add(handRight)
+
+      // 4. Seated Legs
+      // Horizontal thighs
+      const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
+      const thighLeft = new THREE.Mesh(thighGeo, opts.suitMaterial)
+      thighLeft.position.set(-0.1, yBase + 0.36, 0.17)
+      charGroup.add(thighLeft)
+
+      const thighRight = new THREE.Mesh(thighGeo, opts.suitMaterial)
+      thighRight.position.set(0.1, yBase + 0.36, 0.17)
+      charGroup.add(thighRight)
+
+      // Vertical lower legs down to floor
+      const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
+      const shinLeft = new THREE.Mesh(shinGeo, opts.suitMaterial)
+      shinLeft.position.set(-0.1, 0.21, 0.34)
+      charGroup.add(shinLeft)
+
+      const shinRight = new THREE.Mesh(shinGeo, opts.suitMaterial)
+      shinRight.position.set(0.1, 0.21, 0.34)
+      charGroup.add(shinRight)
+
+      // Shoes
+      const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
+      const shoeLeft = new THREE.Mesh(shoeGeo, opts.suitMaterial)
+      shoeLeft.position.set(-0.1, 0.03, 0.38)
+      charGroup.add(shoeLeft)
+
+      const shoeRight = new THREE.Mesh(shoeGeo, opts.suitMaterial)
+      shoeRight.position.set(0.1, 0.03, 0.38)
+      charGroup.add(shoeRight)
     } else {
-      // Standing legs
-      const legGeo = this.track(new THREE.BoxGeometry(0.14, 0.6, 0.14))
-      const leftLeg = new THREE.Mesh(legGeo, opts.baseMaterial)
-      leftLeg.position.set(-0.1, 0.3, 0.0)
-      leftLeg.castShadow = true
-      charGroup.add(leftLeg)
+      // Standing posture (Independent Verifier)
+      const armGeo = this.track(new THREE.BoxGeometry(0.08, 0.46, 0.09))
+      const armLeft = new THREE.Mesh(armGeo, opts.suitMaterial)
+      armLeft.position.set(-0.22, yBase + 0.54, 0.04)
+      charGroup.add(armLeft)
 
-      const rightLeg = new THREE.Mesh(legGeo, opts.baseMaterial)
-      rightLeg.position.set(0.1, 0.3, 0.0)
-      rightLeg.castShadow = true
-      charGroup.add(rightLeg)
+      const armRight = new THREE.Mesh(armGeo, opts.suitMaterial)
+      armRight.position.set(0.22, yBase + 0.54, 0.04)
+      charGroup.add(armRight)
+
+      // Standing trouser legs
+      const legGeo = this.track(new THREE.BoxGeometry(0.13, 0.62, 0.14))
+      const legLeft = new THREE.Mesh(legGeo, opts.suitMaterial)
+      legLeft.position.set(-0.1, yBase + 0.31, 0.0)
+      legLeft.castShadow = true
+      charGroup.add(legLeft)
+
+      const legRight = new THREE.Mesh(legGeo, opts.suitMaterial)
+      legRight.position.set(0.1, yBase + 0.31, 0.0)
+      legRight.castShadow = true
+      charGroup.add(legRight)
+
+      // Shoes
+      const shoeGeo = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
+      const shoeLeft = new THREE.Mesh(shoeGeo, opts.suitMaterial)
+      shoeLeft.position.set(-0.1, yBase + 0.03, 0.03)
+      charGroup.add(shoeLeft)
+
+      const shoeRight = new THREE.Mesh(shoeGeo, opts.suitMaterial)
+      shoeRight.position.set(0.1, yBase + 0.03, 0.03)
+      charGroup.add(shoeRight)
     }
 
     this.group.add(charGroup)

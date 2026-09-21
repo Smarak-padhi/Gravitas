@@ -1,6 +1,9 @@
 /**
- * Scene Graph & Lighting Assembly for Gravitas 3D Headquarters
- * Assembles architectural structure, furniture, servers, scale figures, and 3-point architectural illumination.
+ * Scene Graph & Architectural Lighting Assembly for Gravitas 3D Headquarters
+ * Features soft architectural-model lighting:
+ * - Soft readable directional key with filtered shadow radius (no harsh black voids)
+ * - Elevated hemisphere fill illuminating shadow interiors
+ * - Dedicated local architectural pools for Mission Control, Operations, Cleanroom, QA, Infrastructure, and Approval Mezzanine
  */
 
 import * as THREE from 'three'
@@ -20,60 +23,93 @@ export class HqScene {
 
   // Lights
   private readonly keyLight: THREE.DirectionalLight
+  private readonly fillLight: THREE.DirectionalLight
   private readonly ambientLight: THREE.HemisphereLight
   private readonly spotPlanning: THREE.SpotLight
+  private readonly spotOperations: THREE.SpotLight
   private readonly spotCleanroom: THREE.SpotLight
+  private readonly spotBrowserQa: THREE.SpotLight
+  private readonly spotInfrastructure: THREE.SpotLight
   private readonly spotApproval: THREE.SpotLight
 
   constructor() {
     this.scene = new THREE.Scene()
-    this.scene.background = new THREE.Color(0x0e1117)
+    // Architectural dark slate environment matching Gravitas application shell
+    this.scene.background = new THREE.Color(0x0e1219)
 
     // Instantiate Material Library
     this.materials = new MaterialLibrary()
 
-    // 1. Lighting Setup (VISUAL_DIRECTION.md)
-    // Key Directional Light: Warm architectural sunlight creating crisp diagonal shadows
-    this.keyLight = new THREE.DirectionalLight(0xfff6ea, 1.8)
-    this.keyLight.position.set(-18.0, 26.0, -12.0)
+    // 1. Soft Museum Key Directional Light
+    this.keyLight = new THREE.DirectionalLight(0xfff6ec, 1.35)
+    this.keyLight.position.set(-14.0, 22.0, -10.0)
     this.keyLight.castShadow = true
     this.keyLight.shadow.mapSize.width = 2048
     this.keyLight.shadow.mapSize.height = 2048
     this.keyLight.shadow.camera.near = 5.0
-    this.keyLight.shadow.camera.far = 70.0
-    this.keyLight.shadow.camera.left = -22.0
-    this.keyLight.shadow.camera.right = 22.0
-    this.keyLight.shadow.camera.top = 22.0
-    this.keyLight.shadow.camera.bottom = -22.0
-    this.keyLight.shadow.bias = -0.0004
+    this.keyLight.shadow.camera.far = 55.0
+    this.keyLight.shadow.camera.left = -16.0
+    this.keyLight.shadow.camera.right = 16.0
+    this.keyLight.shadow.camera.top = 16.0
+    this.keyLight.shadow.camera.bottom = -16.0
+    this.keyLight.shadow.bias = -0.0003
+    this.keyLight.shadow.radius = 2.0
     this.scene.add(this.keyLight)
 
-    // Hemisphere Light: Natural skylight fill vs deep slate floor bounce
-    this.ambientLight = new THREE.HemisphereLight(0x94b4cf, 0x1e2430, 0.75)
+    // 2. Opposing Soft Architectural Fill Light (illuminates shadow faces, prevents unreadable silhouettes)
+    this.fillLight = new THREE.DirectionalLight(0x8faec7, 0.8)
+    this.fillLight.position.set(16.0, 18.0, 14.0)
+    this.fillLight.target.position.set(0, 0, 0)
+    this.scene.add(this.fillLight)
+
+    // 3. High-Ambiance Natural Skylight Fill
+    this.ambientLight = new THREE.HemisphereLight(0xb8d2ec, 0x2b3442, 0.95)
     this.scene.add(this.ambientLight)
 
-    // Dedicated Architectural Spot 1: Planning Table (Zone A)
-    this.spotPlanning = new THREE.SpotLight(0xffeedd, 2.2, 14.0, Math.PI / 4, 0.4, 1.2)
-    this.spotPlanning.position.set(-4.0, 7.5, 7.0)
-    this.spotPlanning.target.position.set(-4.0, 0.85, 7.0)
+    // 4. Dedicated Architectural Spotlight Pools
+    // Zone A: Mission Planning Table
+    this.spotPlanning = new THREE.SpotLight(0xffeedb, 2.0, 14.0, Math.PI / 4, 0.5, 1.1)
+    this.spotPlanning.position.set(-4.5, 6.5, 5.5)
+    this.spotPlanning.target.position.set(-4.5, 0.85, 5.5)
     this.scene.add(this.spotPlanning)
     this.scene.add(this.spotPlanning.target)
 
-    // Dedicated Architectural Spot 2: Verification Cleanroom (Zone C)
-    this.spotCleanroom = new THREE.SpotLight(0xccf0ff, 2.5, 14.0, Math.PI / 3.5, 0.3, 1.2)
-    this.spotCleanroom.position.set(6.0, 7.5, 6.0)
-    this.spotCleanroom.target.position.set(6.0, 1.0, 6.0)
+    // Zone B: Agent Operations Desk Pods
+    this.spotOperations = new THREE.SpotLight(0xe2eeff, 1.8, 14.0, Math.PI / 3.5, 0.5, 1.1)
+    this.spotOperations.position.set(-4.2, 6.8, 1.2)
+    this.spotOperations.target.position.set(-4.2, 0.85, 1.2)
+    this.scene.add(this.spotOperations)
+    this.scene.add(this.spotOperations.target)
+
+    // Zone C: Verification Cleanroom
+    this.spotCleanroom = new THREE.SpotLight(0xd4f4ff, 2.2, 12.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotCleanroom.position.set(6.0, 6.5, 6.2)
+    this.spotCleanroom.target.position.set(6.0, 1.1, 6.2)
     this.scene.add(this.spotCleanroom)
     this.scene.add(this.spotCleanroom.target)
 
-    // Dedicated Architectural Spot 3: Approval Plinth Mezzanine (Zone F)
-    this.spotApproval = new THREE.SpotLight(0xffd59e, 2.0, 12.0, Math.PI / 4, 0.4, 1.2)
-    this.spotApproval.position.set(0.0, 8.5, 12.5)
-    this.spotApproval.target.position.set(0.0, 3.2, 12.5)
+    // Zone D: Browser QA Lab Matrix (aimed forward onto device screens and bench)
+    this.spotBrowserQa = new THREE.SpotLight(0xc2f0e8, 2.0, 12.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotBrowserQa.position.set(5.5, 6.0, 0.8)
+    this.spotBrowserQa.target.position.set(6.2, 1.2, -1.2)
+    this.scene.add(this.spotBrowserQa)
+    this.scene.add(this.spotBrowserQa.target)
+
+    // Zone E: Infrastructure Server Bay (aimed at front cabinet faceplates)
+    this.spotInfrastructure = new THREE.SpotLight(0xa5c6e8, 2.0, 12.0, Math.PI / 3.5, 0.5, 1.1)
+    this.spotInfrastructure.position.set(-7.5, 5.5, -3.2)
+    this.spotInfrastructure.target.position.set(-8.8, 1.3, -5.8)
+    this.scene.add(this.spotInfrastructure)
+    this.scene.add(this.spotInfrastructure.target)
+
+    // Zone F: Approval Control Mezzanine Plinth
+    this.spotApproval = new THREE.SpotLight(0xffdfa8, 2.0, 12.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotApproval.position.set(0.0, 7.0, 7.5)
+    this.spotApproval.target.position.set(0.0, 3.1, 8.5)
     this.scene.add(this.spotApproval)
     this.scene.add(this.spotApproval.target)
 
-    // 2. Build World Geometries
+    // 4. Build World Geometries
     this.architecture = new HqArchitecture(this.materials)
     this.scene.add(this.architecture.group)
 

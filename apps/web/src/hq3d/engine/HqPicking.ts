@@ -1,7 +1,7 @@
 /**
- * Raycasting and Interactive Entity Picking for Gravitas 3D Headquarters
- * Provides accurate raycasting for stations, static characters, and rooms,
- * rendering an architectural selection ring at the picked entity.
+ * Architectural Raycasting & Entity Picking for Gravitas 3D Headquarters
+ * Features restrained architectural corner bracket indicators with subtle base
+ * underlay illumination, replacing garish game-like circular rings.
  */
 
 import * as THREE from 'three'
@@ -12,34 +12,71 @@ import type { MaterialLibrary } from '../materials/materials.js'
 
 export class HqPicking {
   private readonly raycaster: THREE.Raycaster
-  private readonly selectionRingMesh: THREE.Mesh
-  private readonly ringGeometry: THREE.RingGeometry
+  private readonly indicatorGroup: THREE.Group
+  private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private selectedEntity: SelectedEntity | null = null
 
   constructor(materials: MaterialLibrary) {
     this.raycaster = new THREE.Raycaster()
+    this.indicatorGroup = new THREE.Group()
+    this.indicatorGroup.name = 'architectural-selection-indicator'
+    this.indicatorGroup.visible = false
 
-    // Elegant architectural selection indicator ring
-    this.ringGeometry = new THREE.RingGeometry(1.2, 1.32, 48)
-    this.ringGeometry.rotateX(-Math.PI / 2) // Orient horizontally flat on XZ plane
+    // Build architectural locator brackets: 4 corner ticks [   ]
+    // Inner footprint: 2.6m x 1.8m
+    const halfW = 1.3
+    const halfD = 0.9
+    const bracketLen = 0.35
+    const bracketThick = 0.02
 
-    this.selectionRingMesh = new THREE.Mesh(this.ringGeometry, materials.selectionRing)
-    this.selectionRingMesh.name = 'selection-ring-indicator'
-    this.selectionRingMesh.visible = false
-    this.selectionRingMesh.position.set(0, 0.05, 0)
+    const corners = [
+      { x: -halfW, z: -halfD, dx: 1, dz: 1 },
+      { x: halfW, z: -halfD, dx: -1, dz: 1 },
+      { x: -halfW, z: halfD, dx: 1, dz: -1 },
+      { x: halfW, z: halfD, dx: -1, dz: -1 },
+    ]
+
+    for (const c of corners) {
+      // X-arm of corner bracket
+      const xArmGeo = this.track(new THREE.BoxGeometry(bracketLen, 0.015, bracketThick))
+      const xArm = new THREE.Mesh(xArmGeo, materials.selectionBracket)
+      xArm.position.set(c.x + (c.dx * bracketLen) / 2, 0.02, c.z)
+      this.indicatorGroup.add(xArm)
+
+      // Z-arm of corner bracket
+      const zArmGeo = this.track(new THREE.BoxGeometry(bracketThick, 0.015, bracketLen))
+      const zArm = new THREE.Mesh(zArmGeo, materials.selectionBracket)
+      zArm.position.set(c.x, 0.02, c.z + (c.dz * bracketLen) / 2)
+      this.indicatorGroup.add(zArm)
+    }
+
+    // Subtle translucent cyan underlay plane
+    const planeGeo = this.track(new THREE.PlaneGeometry(halfW * 2, halfD * 2))
+    planeGeo.rotateX(-Math.PI / 2)
+    const underlayMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.12,
+      depthWrite: false,
+    })
+    const underlayMesh = new THREE.Mesh(planeGeo, underlayMat)
+    underlayMesh.position.set(0.0, 0.015, 0.0)
+    this.indicatorGroup.add(underlayMesh)
   }
 
-  public getSelectionMesh(): THREE.Mesh {
-    return this.selectionRingMesh
+  private track<T extends THREE.BufferGeometry>(geom: T): T {
+    this.geometriesToDispose.push(geom)
+    return geom
+  }
+
+  public getSelectionMesh(): THREE.Object3D {
+    return this.indicatorGroup
   }
 
   public getSelectedEntity(): SelectedEntity | null {
     return this.selectedEntity
   }
 
-  /**
-   * Raycasts from normalized pointer coordinates (NDC: [-1, 1])
-   */
   public pick(
     ndcX: number,
     ndcY: number,
@@ -48,16 +85,18 @@ export class HqPicking {
   ): SelectedEntity | null {
     this.raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera)
 
-    // Raycast against all interactive objects
     const intersects = this.raycaster.intersectObjects(scene.children, true)
 
     for (const hit of intersects) {
-      // Ignore the selection ring itself and helper objects
-      if (hit.object === this.selectionRingMesh || hit.object.name === 'ground-floor-slab') {
+      // Ignore helper indicator itself or floor slab
+      if (
+        hit.object === this.indicatorGroup ||
+        hit.object.name === 'ground-floor-slab' ||
+        hit.object.parent === this.indicatorGroup
+      ) {
         continue
       }
 
-      // Climb hierarchy looking for an interactive entity marker
       let curr: THREE.Object3D | null = hit.object
       while (curr && curr !== scene) {
         const u = curr.userData
@@ -130,24 +169,26 @@ export class HqPicking {
   public setSelection(entity: SelectedEntity | null, targetObject?: THREE.Object3D): void {
     this.selectedEntity = entity
     if (!entity || !targetObject) {
-      this.selectionRingMesh.visible = false
+      this.indicatorGroup.visible = false
       return
     }
 
-    // Position selection ring around the entity
     const worldPos = new THREE.Vector3()
     targetObject.getWorldPosition(worldPos)
-    this.selectionRingMesh.position.set(worldPos.x, worldPos.y + 0.04, worldPos.z)
-    this.selectionRingMesh.visible = true
+    this.indicatorGroup.position.set(worldPos.x, worldPos.y + 0.02, worldPos.z)
+    this.indicatorGroup.visible = true
   }
 
   public clearSelection(): void {
     this.selectedEntity = null
-    this.selectionRingMesh.visible = false
+    this.indicatorGroup.visible = false
   }
 
   public dispose(): void {
-    this.ringGeometry.dispose()
+    for (const geom of this.geometriesToDispose) {
+      geom.dispose()
+    }
+    this.geometriesToDispose.length = 0
     this.selectedEntity = null
   }
 }

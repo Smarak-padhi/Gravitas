@@ -1,6 +1,7 @@
 /**
  * Furniture & Prototype Station Geometry Generator for Gravitas 3D Headquarters
- * Creates truthful workstation models without fake progress timers or simulated activity.
+ * Architectural miniature furniture with chamfered edges, dual curved monitors,
+ * multi-device QA matrix, ergonomic task chairs, and dormant technical displays.
  */
 
 import * as THREE from 'three'
@@ -15,11 +16,11 @@ export class HqFurniture {
     this.group = new THREE.Group()
     this.group.name = 'hq-furniture'
 
-    this.buildPlanningTable(materials)
-    this.buildWorkstations(materials)
-    this.buildVerifierConsole(materials)
-    this.buildDeviceMatrixWall(materials)
-    this.buildApprovalPlinth(materials)
+    this.buildMissionPlanningTable(materials)
+    this.buildAgentWorkstations(materials)
+    this.buildVerificationConsole(materials)
+    this.buildBrowserQaDeviceMatrix(materials)
+    this.buildApprovalMezzaninePlinth(materials)
     this.buildRepositoryVault(materials)
   }
 
@@ -29,296 +30,474 @@ export class HqFurniture {
   }
 
   /**
-   * Zone A: Mission Control Planning Table (3.2m x 1.6m x 0.85m)
+   * Zone A: Mission Control Planning Table (4.0m x 2.2m x 0.85m)
+   * The architectural planning heart: chamfered walnut frame, illuminated vellum blueprint DAG.
    */
-  private buildPlanningTable(materials: MaterialLibrary): void {
+  private buildMissionPlanningTable(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['planning-table']
     const tableGroup = new THREE.Group()
-    tableGroup.position.set(...station.position)
+    tableGroup.position.set(-4.5, 0.0, 5.5)
     tableGroup.name = 'station:planning-table'
     tableGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Walnut table frame
-    const frameGeo = this.track(new THREE.BoxGeometry(3.2, 0.12, 1.6))
-    const frame = new THREE.Mesh(frameGeo, materials.walnut)
-    frame.position.set(0.0, 0.8, 0.0)
-    frame.castShadow = true
-    frame.receiveShadow = true
-    tableGroup.add(frame)
+    // Chamfered walnut table base frame
+    const baseGeo = this.track(new THREE.BoxGeometry(3.6, 0.14, 2.0))
+    const base = new THREE.Mesh(baseGeo, materials.walnut)
+    base.position.set(0.0, 0.78, 0.0)
+    base.castShadow = true
+    base.receiveShadow = true
+    tableGroup.add(base)
 
-    // Illuminated translucent vellum light-surface inlay
-    const surfaceGeo = this.track(new THREE.BoxGeometry(2.9, 0.02, 1.3))
+    // Brushed brass beveled perimeter rim
+    const rimGeo = this.track(new THREE.BoxGeometry(3.66, 0.04, 2.06))
+    const rim = new THREE.Mesh(rimGeo, materials.brass)
+    rim.position.set(0.0, 0.85, 0.0)
+    rim.castShadow = true
+    tableGroup.add(rim)
+
+    // Illuminated Blueprint DAG Grid Surface
+    const surfaceGeo = this.track(new THREE.BoxGeometry(3.4, 0.02, 1.8))
     const surface = new THREE.Mesh(surfaceGeo, materials.vellum)
     surface.position.set(0.0, 0.87, 0.0)
     surface.receiveShadow = true
     tableGroup.add(surface)
 
-    // Solid walnut table legs
-    const legGeo = this.track(new THREE.BoxGeometry(0.12, 0.8, 0.12))
+    // Architectural angled walnut pedestal legs
     const legPositions = [
-      [-1.45, 0.4, -0.65],
-      [1.45, 0.4, -0.65],
-      [-1.45, 0.4, 0.65],
-      [1.45, 0.4, 0.65],
+      [-1.4, 0.38, -0.75],
+      [1.4, 0.38, -0.75],
+      [-1.4, 0.38, 0.75],
+      [1.4, 0.38, 0.75],
     ]
-    for (const pos of legPositions) {
+
+    for (const [lx, ly, lz] of legPositions) {
+      const legGeo = this.track(new THREE.BoxGeometry(0.18, 0.76, 0.18))
       const leg = new THREE.Mesh(legGeo, materials.walnut)
-      leg.position.set(pos[0]!, pos[1]!, pos[2]!)
+      leg.position.set(lx!, ly!, lz!)
       leg.castShadow = true
+      leg.receiveShadow = true
       tableGroup.add(leg)
+
+      // Brass foot pad
+      const footGeo = this.track(new THREE.BoxGeometry(0.22, 0.04, 0.22))
+      const foot = new THREE.Mesh(footGeo, materials.brass)
+      foot.position.set(lx!, 0.02, lz!)
+      tableGroup.add(foot)
     }
 
-    // Brass edge trim
-    const trimGeo = this.track(new THREE.BoxGeometry(3.24, 0.02, 1.64))
-    const trim = new THREE.Mesh(trimGeo, materials.brass)
-    trim.position.set(0.0, 0.74, 0.0)
-    tableGroup.add(trim)
+    // Peripheral dormant interface slates (inactive tablets resting on table corners)
+    const slate1Geo = this.track(new THREE.BoxGeometry(0.35, 0.015, 0.24))
+    const slate1 = new THREE.Mesh(slate1Geo, materials.terminalScreen)
+    slate1.position.set(-1.3, 0.88, 0.65)
+    slate1.rotation.y = 0.25
+    tableGroup.add(slate1)
+
+    const slate2 = new THREE.Mesh(slate1Geo, materials.terminalScreenAmber)
+    slate2.position.set(1.25, 0.88, -0.6)
+    slate2.rotation.y = -0.3
+    tableGroup.add(slate2)
 
     this.group.add(tableGroup)
   }
 
   /**
-   * Zone B: Agent Operations Workstations (Codex, FCC, Expansion Bays)
+   * Zone B: Agent Operations Workstations (Codex, FCC, Expansion Bays 03 & 04)
+   * Premium modular drafting stations with dual curved monitors, cable management,
+   * ergonomic task chairs, and personal desk dividers.
    */
-  private buildWorkstations(materials: MaterialLibrary): void {
-    const workstationIds = [
-      'codex-workstation',
-      'fcc-workstation',
-      'expansion-bay-3',
-      'expansion-bay-4',
-    ] as const
+  private buildAgentWorkstations(materials: MaterialLibrary): void {
+    const stationsConfig = [
+      {
+        id: 'codex-workstation',
+        pos: [-6.5, 0.0, 1.2],
+        matColor: materials.terminalScreen, // Slate cyan code display
+      },
+      {
+        id: 'fcc-workstation',
+        pos: [-1.8, 0.0, 1.2],
+        matColor: materials.terminalScreenAmber, // Warm amber architectural display
+      },
+      {
+        id: 'expansion-bay-3',
+        pos: [-6.5, 0.0, -2.4],
+        matColor: materials.terminalScreenEmerald, // Standby telemetry display
+      },
+      {
+        id: 'expansion-bay-4',
+        pos: [-1.8, 0.0, -2.4],
+        matColor: materials.terminalScreen, // Standby display
+      },
+    ]
 
-    for (const stId of workstationIds) {
-      const station = STATION_DEFINITIONS[stId]
-      const deskGroup = new THREE.Group()
-      deskGroup.position.set(...station.position)
-      deskGroup.name = `station:${station.id}`
-      deskGroup.userData = { type: 'station', id: station.id, name: station.name }
+    for (const cfg of stationsConfig) {
+      const stationDef = STATION_DEFINITIONS[cfg.id as keyof typeof STATION_DEFINITIONS]
+      const podGroup = new THREE.Group()
+      podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
+      podGroup.name = `station:${stationDef.id}`
+      podGroup.userData = { type: 'station', id: stationDef.id, name: stationDef.name }
 
-      // Desktop walnut surface (2.2m x 1.1m x 0.08m)
-      const topGeo = this.track(new THREE.BoxGeometry(2.2, 0.08, 1.1))
-      const top = new THREE.Mesh(topGeo, materials.walnut)
-      top.position.set(0.0, 0.8, 0.0)
-      top.castShadow = true
-      top.receiveShadow = true
-      deskGroup.add(top)
+      // 1. Walnut Desktop Slab (2.2m x 1.0m x 0.08m)
+      const deskGeo = this.track(new THREE.BoxGeometry(2.2, 0.08, 1.0))
+      const desk = new THREE.Mesh(deskGeo, materials.walnut)
+      desk.position.set(0.0, 0.72, 0.0)
+      desk.castShadow = true
+      desk.receiveShadow = true
+      podGroup.add(desk)
 
-      // Desk blotter / pad
-      const padGeo = this.track(new THREE.BoxGeometry(1.6, 0.01, 0.7))
-      const pad = new THREE.Mesh(padGeo, materials.limestoneDark)
-      pad.position.set(0.0, 0.845, 0.05)
-      pad.receiveShadow = true
-      deskGroup.add(pad)
+      // Brass front edge chamfer trim
+      const trimGeo = this.track(new THREE.BoxGeometry(2.22, 0.02, 0.04))
+      const trim = new THREE.Mesh(trimGeo, materials.brass)
+      trim.position.set(0.0, 0.75, 0.49)
+      podGroup.add(trim)
 
-      // Solid walnut legs / pedestal supports
-      const legGeo = this.track(new THREE.BoxGeometry(0.1, 0.8, 0.9))
-      const leftLeg = new THREE.Mesh(legGeo, materials.walnut)
-      leftLeg.position.set(-0.95, 0.4, 0.0)
-      leftLeg.castShadow = true
-      deskGroup.add(leftLeg)
+      // Desk frame trestle legs (gunmetal steel)
+      const legLeftGeo = this.track(new THREE.BoxGeometry(0.08, 0.7, 0.8))
+      const legLeft = new THREE.Mesh(legLeftGeo, materials.gunmetal)
+      legLeft.position.set(-0.95, 0.35, 0.0)
+      legLeft.castShadow = true
+      podGroup.add(legLeft)
 
-      const rightLeg = new THREE.Mesh(legGeo, materials.walnut)
-      rightLeg.position.set(0.95, 0.4, 0.0)
-      rightLeg.castShadow = true
-      deskGroup.add(rightLeg)
+      const legRight = new THREE.Mesh(legLeftGeo, materials.gunmetal)
+      legRight.position.set(0.95, 0.35, 0.0)
+      legRight.castShadow = true
+      podGroup.add(legRight)
 
-      // Dual monitor arm & display screens
-      const standGeo = this.track(new THREE.CylinderGeometry(0.025, 0.025, 0.4, 8))
-      const stand = new THREE.Mesh(standGeo, materials.brass)
-      stand.position.set(0.0, 1.0, -0.35)
-      deskGroup.add(stand)
+      // Rear acoustic modesty panel (walnut)
+      const panelGeo = this.track(new THREE.BoxGeometry(1.9, 0.38, 0.04))
+      const panel = new THREE.Mesh(panelGeo, materials.walnut)
+      panel.position.set(0.0, 0.5, -0.42)
+      podGroup.add(panel)
 
-      // Primary display screen (widescreen, neutral standby)
-      const screen1Geo = this.track(new THREE.BoxGeometry(0.8, 0.45, 0.04))
-      const screen1 = new THREE.Mesh(screen1Geo, materials.terminalScreen)
-      screen1.position.set(-0.42, 1.18, -0.32)
-      screen1.rotation.y = 0.08
-      screen1.castShadow = true
-      deskGroup.add(screen1)
+      // 2. Dual Beveled Monitors
+      // Primary center display
+      const mon1FrameGeo = this.track(new THREE.BoxGeometry(0.9, 0.52, 0.04))
+      const mon1Frame = new THREE.Mesh(mon1FrameGeo, materials.gunmetal)
+      mon1Frame.position.set(-0.35, 1.15, -0.28)
+      mon1Frame.castShadow = true
+      podGroup.add(mon1Frame)
 
-      // Secondary display screen
-      const screen2Geo = this.track(new THREE.BoxGeometry(0.8, 0.45, 0.04))
-      const screen2 = new THREE.Mesh(screen2Geo, materials.terminalScreen)
-      screen2.position.set(0.42, 1.18, -0.32)
-      screen2.rotation.y = -0.08
-      screen2.castShadow = true
-      deskGroup.add(screen2)
+      const mon1ScreenGeo = this.track(new THREE.BoxGeometry(0.86, 0.48, 0.01))
+      const mon1Screen = new THREE.Mesh(mon1ScreenGeo, cfg.matColor)
+      mon1Screen.position.set(-0.35, 1.15, -0.255)
+      podGroup.add(mon1Screen)
 
-      // Architectural chair block
+      // Secondary angled display
+      const mon2Frame = new THREE.Mesh(mon1FrameGeo, materials.gunmetal)
+      mon2Frame.position.set(0.55, 1.15, -0.24)
+      mon2Frame.rotation.y = -0.26
+      mon2Frame.castShadow = true
+      podGroup.add(mon2Frame)
+
+      const mon2Screen = new THREE.Mesh(mon1ScreenGeo, materials.terminalScreen)
+      mon2Screen.position.set(0.55, 1.15, -0.215)
+      mon2Screen.rotation.y = -0.26
+      podGroup.add(mon2Screen)
+
+      // Articulated monitor mounting arms (brass & gunmetal)
+      const armGeo = this.track(new THREE.CylinderGeometry(0.025, 0.025, 0.38, 8))
+      const arm = new THREE.Mesh(armGeo, materials.brass)
+      arm.position.set(0.0, 0.95, -0.32)
+      podGroup.add(arm)
+
+      // Compact keyboard & precision mouse mat
+      const matGeo = this.track(new THREE.BoxGeometry(0.85, 0.005, 0.32))
+      const mat = new THREE.Mesh(matGeo, materials.limestoneDark)
+      mat.position.set(0.0, 0.765, 0.18)
+      podGroup.add(mat)
+
+      const kbGeo = this.track(new THREE.BoxGeometry(0.42, 0.012, 0.14))
+      const kb = new THREE.Mesh(kbGeo, materials.gunmetal)
+      kb.position.set(-0.1, 0.772, 0.18)
+      podGroup.add(kb)
+
+      // 3. Ergonomic Task Chair
       const chairGroup = new THREE.Group()
       chairGroup.position.set(0.0, 0.0, 0.65)
-      const seatGeo = this.track(new THREE.BoxGeometry(0.55, 0.08, 0.5))
-      const seat = new THREE.Mesh(seatGeo, materials.gunmetal)
-      seat.position.set(0.0, 0.45, 0.0)
+
+      // Star base with casters
+      const baseHubGeo = this.track(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 8))
+      const baseHub = new THREE.Mesh(baseHubGeo, materials.gunmetal)
+      baseHub.position.set(0.0, 0.1, 0.0)
+      chairGroup.add(baseHub)
+
+      const gasCylinderGeo = this.track(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8))
+      const gasCylinder = new THREE.Mesh(gasCylinderGeo, materials.brass)
+      gasCylinder.position.set(0.0, 0.28, 0.0)
+      chairGroup.add(gasCylinder)
+
+      // Contoured seat cushion
+      const seatGeo = this.track(new THREE.BoxGeometry(0.48, 0.06, 0.46))
+      const seat = new THREE.Mesh(seatGeo, materials.charSuitDark)
+      seat.position.set(0.0, 0.46, 0.0)
       seat.castShadow = true
       chairGroup.add(seat)
 
-      const backGeo = this.track(new THREE.BoxGeometry(0.55, 0.5, 0.06))
-      const back = new THREE.Mesh(backGeo, materials.walnut)
-      back.position.set(0.0, 0.72, 0.22)
+      // Curved ergonomic lumbar backrest
+      const backGeo = this.track(new THREE.BoxGeometry(0.44, 0.48, 0.05))
+      const back = new THREE.Mesh(backGeo, materials.charSuitDark)
+      back.position.set(0.0, 0.74, 0.21)
       back.castShadow = true
       chairGroup.add(back)
 
-      const chairLegGeo = this.track(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8))
-      const chairLeg = new THREE.Mesh(chairLegGeo, materials.brass)
-      chairLeg.position.set(0.0, 0.225, 0.0)
-      chairGroup.add(chairLeg)
-      deskGroup.add(chairGroup)
+      // Armrests
+      const armrestGeo = this.track(new THREE.BoxGeometry(0.06, 0.18, 0.26))
+      const armLeft = new THREE.Mesh(armrestGeo, materials.gunmetal)
+      armLeft.position.set(-0.25, 0.56, 0.05)
+      chairGroup.add(armLeft)
 
-      this.group.add(deskGroup)
+      const armRight = new THREE.Mesh(armrestGeo, materials.gunmetal)
+      armRight.position.set(0.25, 0.56, 0.05)
+      chairGroup.add(armRight)
+
+      podGroup.add(chairGroup)
+      this.group.add(podGroup)
     }
   }
 
   /**
-   * Zone C: Verification Cleanroom Inspection Console
+   * Zone C: Verification Cleanroom Console & Inspection Bench
    */
-  private buildVerifierConsole(materials: MaterialLibrary): void {
+  private buildVerificationConsole(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['verifier-console']
     const consoleGroup = new THREE.Group()
-    consoleGroup.position.set(...station.position)
+    consoleGroup.position.set(6.0, 0.1, 6.5)
     consoleGroup.name = 'station:verifier-console'
     consoleGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Cleanroom white/walnut composite inspection bench (2.8m x 1.1m x 0.85m)
-    const topGeo = this.track(new THREE.BoxGeometry(2.8, 0.1, 1.1))
-    const top = new THREE.Mesh(topGeo, materials.limestone)
-    top.position.set(0.0, 0.8, 0.0)
-    top.castShadow = true
-    top.receiveShadow = true
-    consoleGroup.add(top)
+    // Honed mineral cleanroom console bench (3.2m x 0.9m x 0.95m standing height)
+    const benchGeo = this.track(new THREE.BoxGeometry(3.2, 0.1, 0.9))
+    const bench = new THREE.Mesh(benchGeo, materials.limestonePlinth)
+    bench.position.set(0.0, 0.95, 0.0)
+    bench.castShadow = true
+    bench.receiveShadow = true
+    consoleGroup.add(bench)
 
-    const baseGeo = this.track(new THREE.BoxGeometry(2.6, 0.75, 0.9))
-    const base = new THREE.Mesh(baseGeo, materials.walnut)
-    base.position.set(0.0, 0.375, 0.0)
-    base.castShadow = true
-    consoleGroup.add(base)
+    // Brushed brass perimeter channel
+    const trimGeo = this.track(new THREE.BoxGeometry(3.24, 0.03, 0.94))
+    const trim = new THREE.Mesh(trimGeo, materials.brass)
+    trim.position.set(0.0, 0.99, 0.0)
+    consoleGroup.add(trim)
 
-    // Digital diff comparison monitor
-    const monitorGeo = this.track(new THREE.BoxGeometry(1.2, 0.6, 0.05))
-    const monitor = new THREE.Mesh(monitorGeo, materials.terminalScreen)
-    monitor.position.set(0.0, 1.25, -0.3)
-    monitor.castShadow = true
-    consoleGroup.add(monitor)
+    // Solid pedestal supports (dark graphite)
+    const pedGeo = this.track(new THREE.BoxGeometry(0.7, 0.9, 0.7))
+    const pedLeft = new THREE.Mesh(pedGeo, materials.gunmetal)
+    pedLeft.position.set(-1.1, 0.45, 0.0)
+    pedLeft.castShadow = true
+    consoleGroup.add(pedLeft)
 
-    // Optical audit scanner plate
-    const plateGeo = this.track(new THREE.BoxGeometry(0.8, 0.02, 0.5))
-    const plate = new THREE.Mesh(plateGeo, materials.brass)
-    plate.position.set(0.0, 0.86, 0.1)
-    consoleGroup.add(plate)
+    const pedRight = new THREE.Mesh(pedGeo, materials.gunmetal)
+    pedRight.position.set(1.1, 0.45, 0.0)
+    pedRight.castShadow = true
+    consoleGroup.add(pedRight)
+
+    // Triple Verification Displays (Diff view, Test Execution, Mutation Gate)
+    const screenOffsets = [-0.95, 0.0, 0.95]
+    for (let i = 0; i < screenOffsets.length; i++) {
+      const sx = screenOffsets[i]!
+      const rot = i === 0 ? 0.18 : i === 2 ? -0.18 : 0.0
+
+      const monFrameGeo = this.track(new THREE.BoxGeometry(0.82, 0.5, 0.04))
+      const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+      monFrame.position.set(sx, 1.38, 0.22)
+      monFrame.rotation.y = -rot
+      monFrame.castShadow = true
+      consoleGroup.add(monFrame)
+
+      const screenMat = i === 1 ? materials.terminalScreenEmerald : materials.terminalScreen
+      const monScreenGeo = this.track(new THREE.BoxGeometry(0.78, 0.46, 0.01))
+      const monScreen = new THREE.Mesh(monScreenGeo, screenMat)
+      monScreen.position.set(sx, 1.38, 0.195)
+      monScreen.rotation.y = -rot
+      consoleGroup.add(monScreen)
+    }
 
     this.group.add(consoleGroup)
   }
 
   /**
-   * Zone D: Browser QA Device Matrix Wall
+   * Zone D: Browser QA Multi-Device Matrix Wall & Test Rig
+   * REPLACES the monolithic black block with recognizable physical device viewports:
+   * 1. Ultrawide Desktop (34-inch ratio)
+   * 2. Laptop display (15-inch ratio)
+   * 3. Tablet in portrait
+   * 4. Smartphone in portrait
+   * Mounted onto an architectural testing rig frame with observation bench.
    */
-  private buildDeviceMatrixWall(materials: MaterialLibrary): void {
+  private buildBrowserQaDeviceMatrix(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['browser-qa-matrix']
-    const matrixGroup = new THREE.Group()
-    matrixGroup.position.set(...station.position)
-    matrixGroup.name = 'station:browser-qa-matrix'
-    matrixGroup.userData = { type: 'station', id: station.id, name: station.name }
+    const qaGroup = new THREE.Group()
+    qaGroup.position.set(6.2, 0.1, -0.5)
+    qaGroup.name = 'station:browser-qa-matrix'
+    qaGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Vertical mounting backboard (3.2m wide x 2.2m high x 0.12m thick)
-    const backboardGeo = this.track(new THREE.BoxGeometry(3.2, 2.2, 0.12))
-    const backboard = new THREE.Mesh(backboardGeo, materials.walnut)
-    backboard.position.set(0.0, 1.5, 0.0)
-    backboard.castShadow = true
-    backboard.receiveShadow = true
-    matrixGroup.add(backboard)
+    // Architectural aluminum / graphite test rig armature frame
+    const rigFrameGeo = this.track(new THREE.BoxGeometry(4.8, 2.2, 0.08))
+    const rigFrame = new THREE.Mesh(rigFrameGeo, materials.gunmetal)
+    rigFrame.position.set(0.0, 1.4, -1.2)
+    rigFrame.castShadow = true
+    qaGroup.add(rigFrame)
 
-    // Base equipment credenza
-    const benchGeo = this.track(new THREE.BoxGeometry(3.2, 0.6, 0.6))
-    const bench = new THREE.Mesh(benchGeo, materials.gunmetal)
-    bench.position.set(0.0, 0.3, 0.25)
+    // Brass accent mounting rails across rig
+    for (const ry of [0.75, 1.4, 2.1]) {
+      const railGeo = this.track(new THREE.BoxGeometry(4.84, 0.03, 0.12))
+      const rail = new THREE.Mesh(railGeo, materials.brass)
+      rail.position.set(0.0, ry, -1.2)
+      qaGroup.add(rail)
+    }
+
+    // 1. Device A: Ultrawide Desktop Monitor (Left, 1.4m x 0.6m)
+    const dtFrameGeo = this.track(new THREE.BoxGeometry(1.4, 0.62, 0.04))
+    const dtFrame = new THREE.Mesh(dtFrameGeo, materials.gunmetal)
+    dtFrame.position.set(-1.4, 1.7, -1.1)
+    dtFrame.castShadow = true
+    qaGroup.add(dtFrame)
+
+    const dtScreenGeo = this.track(new THREE.BoxGeometry(1.36, 0.58, 0.01))
+    const dtScreen = new THREE.Mesh(dtScreenGeo, materials.deviceDesktop)
+    dtScreen.position.set(-1.4, 1.7, -1.075)
+    qaGroup.add(dtScreen)
+
+    // 2. Device B: Laptop Frame (Center-Right, 0.75m x 0.5m)
+    const ltFrameGeo = this.track(new THREE.BoxGeometry(0.8, 0.52, 0.03))
+    const ltFrame = new THREE.Mesh(ltFrameGeo, materials.gunmetal)
+    ltFrame.position.set(0.45, 1.7, -1.1)
+    ltFrame.castShadow = true
+    qaGroup.add(ltFrame)
+
+    const ltScreenGeo = this.track(new THREE.BoxGeometry(0.76, 0.48, 0.01))
+    const ltScreen = new THREE.Mesh(ltScreenGeo, materials.deviceLaptop)
+    ltScreen.position.set(0.45, 1.7, -1.08)
+    qaGroup.add(ltScreen)
+
+    // 3. Device C: Tablet in Portrait (Right, 0.45m x 0.6m)
+    const tabFrameGeo = this.track(new THREE.BoxGeometry(0.45, 0.6, 0.02))
+    const tabFrame = new THREE.Mesh(tabFrameGeo, materials.gunmetal)
+    tabFrame.position.set(1.5, 1.7, -1.1)
+    tabFrame.castShadow = true
+    qaGroup.add(tabFrame)
+
+    const tabScreenGeo = this.track(new THREE.BoxGeometry(0.41, 0.56, 0.01))
+    const tabScreen = new THREE.Mesh(tabScreenGeo, materials.deviceTablet)
+    tabScreen.position.set(1.5, 1.7, -1.085)
+    qaGroup.add(tabScreen)
+
+    // 4. Device D: Smartphone in Portrait (Below laptop, 0.22m x 0.42m)
+    const phFrameGeo = this.track(new THREE.BoxGeometry(0.24, 0.44, 0.02))
+    const phFrame = new THREE.Mesh(phFrameGeo, materials.gunmetal)
+    phFrame.position.set(0.45, 0.95, -1.1)
+    phFrame.castShadow = true
+    qaGroup.add(phFrame)
+
+    const phScreenGeo = this.track(new THREE.BoxGeometry(0.21, 0.41, 0.01))
+    const phScreen = new THREE.Mesh(phScreenGeo, materials.devicePhone)
+    phScreen.position.set(0.45, 0.95, -1.085)
+    qaGroup.add(phScreen)
+
+    // QA Technician Observation & Control Bench (2.8m x 0.75m x 0.72m)
+    const benchGeo = this.track(new THREE.BoxGeometry(2.8, 0.08, 0.75))
+    const bench = new THREE.Mesh(benchGeo, materials.walnut)
+    bench.position.set(-0.5, 0.72, 0.1)
     bench.castShadow = true
-    matrixGroup.add(bench)
+    bench.receiveShadow = true
+    qaGroup.add(bench)
 
-    // Device 1: Desktop Viewport (1.3m x 0.75m screen)
-    const desktopGeo = this.track(new THREE.BoxGeometry(1.3, 0.75, 0.03))
-    const desktop = new THREE.Mesh(desktopGeo, materials.terminalScreen)
-    desktop.position.set(-0.7, 1.6, 0.08)
-    matrixGroup.add(desktop)
+    // Steel leg frame
+    const legGeo = this.track(new THREE.BoxGeometry(0.06, 0.7, 0.65))
+    const leg1 = new THREE.Mesh(legGeo, materials.gunmetal)
+    leg1.position.set(-1.7, 0.35, 0.1)
+    qaGroup.add(leg1)
 
-    // Device 2: Tablet Viewport (0.5m x 0.65m portrait screen)
-    const tabletGeo = this.track(new THREE.BoxGeometry(0.5, 0.65, 0.03))
-    const tablet = new THREE.Mesh(tabletGeo, materials.terminalScreen)
-    tablet.position.set(0.4, 1.7, 0.08)
-    matrixGroup.add(tablet)
+    const leg2 = new THREE.Mesh(legGeo, materials.gunmetal)
+    leg2.position.set(0.7, 0.35, 0.1)
+    qaGroup.add(leg2)
 
-    // Device 3: Mobile Viewport (0.28m x 0.52m phone screen)
-    const mobileGeo = this.track(new THREE.BoxGeometry(0.28, 0.52, 0.03))
-    const mobile = new THREE.Mesh(mobileGeo, materials.terminalScreen)
-    mobile.position.set(1.05, 1.7, 0.08)
-    matrixGroup.add(mobile)
-
-    this.group.add(matrixGroup)
+    this.group.add(qaGroup)
   }
 
   /**
-   * Zone F: Approval Control Mezzanine Plinth
+   * Zone F: Approval Control Mezzanine Plinth & Review Console
+   * Dedicated human operator governance station with ergonomic seating and clear sightlines.
    */
-  private buildApprovalPlinth(materials: MaterialLibrary): void {
+  private buildApprovalMezzaninePlinth(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['approval-plinth']
     const plinthGroup = new THREE.Group()
-    plinthGroup.position.set(...station.position)
+    plinthGroup.position.set(0.0, 2.95, 8.5)
     plinthGroup.name = 'station:approval-plinth'
     plinthGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Pedestal base (solid walnut block 1.2m x 0.9m x 0.85m)
-    const baseGeo = this.track(new THREE.BoxGeometry(1.2, 0.85, 0.9))
-    const base = new THREE.Mesh(baseGeo, materials.walnut)
-    base.position.set(0.0, 0.425, 0.0)
-    base.castShadow = true
-    base.receiveShadow = true
-    plinthGroup.add(base)
+    // Chamfered walnut governance console (2.4m x 0.9m x 0.9m)
+    const consoleGeo = this.track(new THREE.BoxGeometry(2.4, 0.85, 0.9))
+    const consoleMesh = new THREE.Mesh(consoleGeo, materials.walnut)
+    consoleMesh.position.set(0.0, 0.425, 0.0)
+    consoleMesh.castShadow = true
+    consoleMesh.receiveShadow = true
+    plinthGroup.add(consoleMesh)
 
-    // Brushed brass top plate
-    const topGeo = this.track(new THREE.BoxGeometry(1.24, 0.04, 0.94))
-    const top = new THREE.Mesh(topGeo, materials.brass)
-    top.position.set(0.0, 0.87, 0.0)
-    top.castShadow = true
-    top.receiveShadow = true
-    plinthGroup.add(top)
+    // Brushed brass perimeter bevel rim
+    const rimGeo = this.track(new THREE.BoxGeometry(2.46, 0.04, 0.96))
+    const rim = new THREE.Mesh(rimGeo, materials.brass)
+    rim.position.set(0.0, 0.87, 0.0)
+    plinthGroup.add(rim)
 
-    // Archival candidate tablet resting on plinth
-    const tabletGeo = this.track(new THREE.BoxGeometry(0.7, 0.02, 0.5))
+    // Angled frosted glass evidence tablet inlay
+    const tabletGeo = this.track(new THREE.BoxGeometry(1.6, 0.02, 0.6))
     const tablet = new THREE.Mesh(tabletGeo, materials.vellum)
     tablet.position.set(0.0, 0.9, 0.0)
-    tablet.receiveShadow = true
     plinthGroup.add(tablet)
 
+    // Executive Operator review chair (deliberately empty because user is operator)
+    const chairGroup = new THREE.Group()
+    chairGroup.position.set(0.0, 0.0, 0.85)
+
+    const chairBaseGeo = this.track(new THREE.CylinderGeometry(0.06, 0.06, 0.38, 8))
+    const chairBase = new THREE.Mesh(chairBaseGeo, materials.brass)
+    chairBase.position.set(0.0, 0.19, 0.0)
+    chairGroup.add(chairBase)
+
+    const chairSeatGeo = this.track(new THREE.BoxGeometry(0.55, 0.08, 0.52))
+    const chairSeat = new THREE.Mesh(chairSeatGeo, materials.charSuitDark)
+    chairSeat.position.set(0.0, 0.42, 0.0)
+    chairSeat.castShadow = true
+    chairGroup.add(chairSeat)
+
+    const chairBackGeo = this.track(new THREE.BoxGeometry(0.5, 0.6, 0.06))
+    const chairBack = new THREE.Mesh(chairBackGeo, materials.charSuitDark)
+    chairBack.position.set(0.0, 0.74, 0.24)
+    chairBack.castShadow = true
+    chairGroup.add(chairBack)
+
+    plinthGroup.add(chairGroup)
     this.group.add(plinthGroup)
   }
 
   /**
-   * Repository Vault Dock (Base branch landing station)
+   * Repository Vault Terminal Dock in Verification Lab
    */
   private buildRepositoryVault(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['repository-vault']
     const vaultGroup = new THREE.Group()
-    vaultGroup.position.set(...station.position)
+    vaultGroup.position.set(10.2, 0.1, 4.0)
     vaultGroup.name = 'station:repository-vault'
     vaultGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Sleek flush floor transit dock (1.6m x 0.04m x 1.6m)
-    const dockGeo = this.track(new THREE.BoxGeometry(1.6, 0.04, 1.6))
-    const dock = new THREE.Mesh(dockGeo, materials.gunmetal)
-    dock.position.set(0.0, 0.02, 0.0)
-    dock.receiveShadow = true
-    vaultGroup.add(dock)
+    // Vault pedestal pillar (dark graphite & brushed brass)
+    const vaultGeo = this.track(new THREE.BoxGeometry(0.85, 1.1, 0.85))
+    const vault = new THREE.Mesh(vaultGeo, materials.gunmetal)
+    vault.position.set(0.0, 0.55, 0.0)
+    vault.castShadow = true
+    vault.receiveShadow = true
+    vaultGroup.add(vault)
 
-    // Brass edge boundary
-    const borderGeo = this.track(new THREE.BoxGeometry(1.64, 0.02, 1.64))
-    const border = new THREE.Mesh(borderGeo, materials.brass)
-    border.position.set(0.0, 0.03, 0.0)
-    vaultGroup.add(border)
+    const capGeo = this.track(new THREE.BoxGeometry(0.9, 0.05, 0.9))
+    const cap = new THREE.Mesh(capGeo, materials.brass)
+    cap.position.set(0.0, 1.125, 0.0)
+    vaultGroup.add(cap)
 
-    // Solid emerald confirmation indicator line
-    const ledGeo = this.track(new THREE.BoxGeometry(1.4, 0.02, 0.08))
-    const led = new THREE.Mesh(ledGeo, materials.statusSuccess)
-    led.position.set(0.0, 0.045, -0.6)
-    vaultGroup.add(led)
+    // Glowing Git Commit dock slot
+    const slotGeo = this.track(new THREE.BoxGeometry(0.5, 0.02, 0.35))
+    const slot = new THREE.Mesh(slotGeo, materials.terminalScreenEmerald)
+    slot.position.set(0.0, 1.155, 0.0)
+    vaultGroup.add(slot)
 
     this.group.add(vaultGroup)
   }

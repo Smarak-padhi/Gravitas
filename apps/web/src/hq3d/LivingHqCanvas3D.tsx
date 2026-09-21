@@ -272,31 +272,35 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
           }}
         />
 
-        {/* Floating Room Shortcut Pills at Top */}
+        {/* Sleek Architectural Quick Navigation Bar */}
         <nav
           aria-label="3D Room Quick Navigation"
           style={{
             position: 'absolute',
             top: '12px',
             left: '16px',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
-            flexWrap: 'wrap',
+            gap: '2px',
+            padding: '3px',
+            backgroundColor: 'rgba(14, 18, 26, 0.8)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '6px',
             zIndex: 5,
             pointerEvents: 'auto',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           }}
         >
           <button
             onClick={handleResetOverview}
             data-testid="hq-nav-overview-pill"
             style={{
-              padding: '4px 10px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: '#e2e8f0',
+              padding: '3px 8px',
+              borderRadius: '4px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#cbd5e1',
               fontSize: '11px',
               fontWeight: 600,
               cursor: 'pointer',
@@ -307,8 +311,10 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
           >
             <span>🏛️</span>
             <span>Overview</span>
-            <span style={{ fontSize: '10px', color: '#94a3b8' }}>[0]</span>
+            <span style={{ fontSize: '10px', color: '#64748b' }}>[0]</span>
           </button>
+
+          <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '0 2px' }} />
 
           {Object.values(ROOM_DEFINITIONS).map((room) => (
             <button
@@ -316,12 +322,11 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
               onClick={() => handleSelectRoom(room.id)}
               data-testid={`hq-nav-room-${room.numberKey}`}
               style={{
-                padding: '4px 8px',
-                borderRadius: '20px',
-                backgroundColor: 'rgba(15, 23, 42, 0.75)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
+                padding: '3px 7px',
+                borderRadius: '4px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
                 fontSize: '11px',
                 cursor: 'pointer',
                 display: 'flex',
@@ -329,7 +334,9 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
                 gap: '4px',
               }}
             >
-              <span style={{ color: room.accentColor, fontWeight: 700 }}>{room.numberKey}</span>
+              <span style={{ fontFamily: 'var(--font-mono, monospace)', color: room.accentColor, fontWeight: 700 }}>
+                {room.numberKey}
+              </span>
               <span>{room.name}</span>
             </button>
           ))}
@@ -338,11 +345,12 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
             <span
               style={{
                 fontSize: '10px',
-                padding: '2px 8px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(234, 179, 8, 0.2)',
-                border: '1px solid rgba(234, 179, 8, 0.4)',
-                color: '#fde047',
+                padding: '2px 6px',
+                marginLeft: '4px',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(234, 179, 8, 0.15)',
+                border: '1px solid rgba(234, 179, 8, 0.3)',
+                color: '#fbbf24',
                 fontFamily: 'monospace',
               }}
             >

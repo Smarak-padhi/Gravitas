@@ -1,7 +1,8 @@
 /**
  * Infrastructure Room Geometry Generator for Gravitas 3D Headquarters
- * Represents OmniRoute gateways, model provider racks, and transport relays.
- * STRICT MANDATE: Gateways and models are infrastructure; never humanoid.
+ * Represents OmniRoute gateways and model provider racks with recognizable physical
+ * details: 42U server slots, vertical rails, ventilation, cable ladder trays, and PDU base.
+ * Strictly non-humanoid infrastructure.
  */
 
 import * as THREE from 'three'
@@ -27,52 +28,88 @@ export class HqInfrastructure {
   private buildServerRacks(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['omniroute-rack']
     const rackGroup = new THREE.Group()
-    rackGroup.position.set(...station.position)
+    rackGroup.position.set(-8.8, 0.0, -5.8)
     rackGroup.name = 'station:omniroute-rack'
     rackGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Dual 42U Server Cabinets (Rack 1: OmniRoute, Rack 2: Model Providers)
-    const rackOffsets = [-1.0, 1.0]
+    // Raised Equipment Pad / PDU Plinth (dark graphite with brass rim)
+    const plinthGeo = this.track(new THREE.BoxGeometry(3.6, 0.12, 1.8))
+    const plinth = new THREE.Mesh(plinthGeo, materials.limestoneDark)
+    plinth.position.set(0.0, 0.06, 0.0)
+    plinth.receiveShadow = true
+    rackGroup.add(plinth)
 
+    const plinthRimGeo = this.track(new THREE.BoxGeometry(3.66, 0.02, 1.86))
+    const plinthRim = new THREE.Mesh(plinthRimGeo, materials.brass)
+    plinthRim.position.set(0.0, 0.12, 0.0)
+    rackGroup.add(plinthRim)
+
+    // Dual 42U Server Cabinets: Rack 01 (OmniRoute Gateway), Rack 02 (Model Providers)
+    const rackOffsets = [-0.85, 0.85]
     for (let i = 0; i < rackOffsets.length; i++) {
-      const xOffset = rackOffsets[i]!
+      const rx = rackOffsets[i]!
       const cabinetGroup = new THREE.Group()
-      cabinetGroup.position.set(xOffset, 0.0, 0.0)
+      cabinetGroup.position.set(rx, 0.12, 0.0)
 
-      // Main 42U cabinet frame (0.9m wide x 2.4m high x 1.0m deep)
-      const frameGeo = this.track(new THREE.BoxGeometry(0.9, 2.4, 1.0))
+      // 1. 42U Steel Cabinet Outer Housing (1.1m wide x 2.3m high x 1.1m deep)
+      const frameGeo = this.track(new THREE.BoxGeometry(1.1, 2.3, 1.1))
       const frame = new THREE.Mesh(frameGeo, materials.gunmetal)
-      frame.position.set(0.0, 1.2, 0.0)
+      frame.position.set(0.0, 1.15, 0.0)
       frame.castShadow = true
       frame.receiveShadow = true
       cabinetGroup.add(frame)
 
-      // Perforated mesh front door (dark glass / mesh look)
-      const doorGeo = this.track(new THREE.BoxGeometry(0.82, 2.25, 0.03))
-      const door = new THREE.Mesh(doorGeo, materials.terminalScreen)
-      door.position.set(0.0, 1.2, 0.51)
+      // Top Cable Ingress Cowl / Vent Hood
+      const cowlGeo = this.track(new THREE.BoxGeometry(1.14, 0.06, 1.14))
+      const cowl = new THREE.Mesh(cowlGeo, materials.gunmetal)
+      cowl.position.set(0.0, 2.33, 0.0)
+      cowl.castShadow = true
+      cabinetGroup.add(cowl)
+
+      // 2. Front Server Face with procedural 1U/2U server slots & ventilation
+      const faceGeo = this.track(new THREE.BoxGeometry(0.96, 2.14, 0.02))
+      const face = new THREE.Mesh(faceGeo, materials.serverRackFace)
+      face.position.set(0.0, 1.15, 0.555)
+      cabinetGroup.add(face)
+
+      // Vertical Brushed Brass Mounting Rails
+      const railGeo = this.track(new THREE.BoxGeometry(0.04, 2.16, 0.03))
+      const railLeft = new THREE.Mesh(railGeo, materials.brass)
+      railLeft.position.set(-0.48, 1.15, 0.57)
+      cabinetGroup.add(railLeft)
+
+      const railRight = new THREE.Mesh(railGeo, materials.brass)
+      railRight.position.set(0.48, 1.15, 0.57)
+      cabinetGroup.add(railRight)
+
+      // Smoked Glass Door with Dark Frame
+      const doorGeo = this.track(new THREE.BoxGeometry(0.98, 2.18, 0.02))
+      const door = new THREE.Mesh(doorGeo, materials.glassDark)
+      door.position.set(0.0, 1.15, 0.6)
       cabinetGroup.add(door)
 
-      // Vertical fiber-optic LED indicator strips
-      const ledGeo = this.track(new THREE.BoxGeometry(0.03, 2.0, 0.01))
-      const led = new THREE.Mesh(ledGeo, materials.statusRunning)
-      led.position.set(0.35, 1.2, 0.53)
-      cabinetGroup.add(led)
-
-      // Top exhaust cowl
-      const cowlGeo = this.track(new THREE.BoxGeometry(0.94, 0.08, 1.04))
-      const cowl = new THREE.Mesh(cowlGeo, materials.walnut)
-      cowl.position.set(0.0, 2.44, 0.0)
-      cabinetGroup.add(cowl)
+      // Brass door handle
+      const handleGeo = this.track(new THREE.CylinderGeometry(0.015, 0.015, 0.4, 8))
+      const handle = new THREE.Mesh(handleGeo, materials.brass)
+      handle.position.set(0.42, 1.15, 0.62)
+      cabinetGroup.add(handle)
 
       rackGroup.add(cabinetGroup)
     }
 
-    // Floor cable tray / conduit connection
-    const trayGeo = this.track(new THREE.BoxGeometry(3.2, 0.04, 0.4))
-    const tray = new THREE.Mesh(trayGeo, materials.brass)
-    tray.position.set(0.0, 0.02, -0.7)
+    // Overhead Cable Ladder Tray bridging from rack top to main floor conduit
+    const trayGeo = this.track(new THREE.BoxGeometry(3.2, 0.08, 0.5))
+    const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
+    tray.position.set(0.0, 2.5, 0.0)
+    tray.castShadow = true
     rackGroup.add(tray)
+
+    const trayStrutGeo = this.track(new THREE.BoxGeometry(0.03, 0.04, 0.48))
+    for (let tx = -1.4; tx <= 1.4; tx += 0.35) {
+      const strut = new THREE.Mesh(trayStrutGeo, materials.brass)
+      strut.position.set(tx, 2.52, 0.0)
+      rackGroup.add(strut)
+    }
 
     this.group.add(rackGroup)
   }
