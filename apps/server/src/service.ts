@@ -61,6 +61,10 @@ import {
 import {
   DefaultGatewayRegistry,
   OmniRouteAdapter,
+  CURRENT_GATEWAY_VERSION,
+  CURRENT_GATEWAY_NEXT_VERSION,
+  GATEWAY_SECURITY_PROFILE_VERSION,
+  computeRuntimeDependencyDigest,
   type GatewayDescriptor,
   type GatewayRegistry,
 } from '@gravitas/gateways'
@@ -134,11 +138,19 @@ export class RunService {
     this.gatewayRegistry = options.gatewayRegistry ?? new DefaultGatewayRegistry()
     if (!options.gatewayRegistry) {
       const omnirouteAdapter = new OmniRouteAdapter({ baseUrl: 'http://127.0.0.1:20128' })
+      const runtimeDependencyDigest = computeRuntimeDependencyDigest(
+        CURRENT_GATEWAY_VERSION,
+        CURRENT_GATEWAY_NEXT_VERSION,
+        GATEWAY_SECURITY_PROFILE_VERSION
+      )
       this.gatewayRegistry.registerGateway(omnirouteAdapter, {
         id: 'omniroute-local',
         name: 'OmniRoute Local Gateway',
         baseUrl: 'http://127.0.0.1:20128',
-        securityProfile: 'wave11.2-isolated',
+        version: CURRENT_GATEWAY_VERSION,
+        nextVersion: CURRENT_GATEWAY_NEXT_VERSION,
+        runtimeDependencyDigest,
+        securityProfile: GATEWAY_SECURITY_PROFILE_VERSION,
       })
       this.gatewayRegistry.loadEvidence('omniroute-local', './omniroute-qualification.json')
     }

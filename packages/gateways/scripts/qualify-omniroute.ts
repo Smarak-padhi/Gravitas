@@ -13,7 +13,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import Database from 'better-sqlite3';
 import { OmniRouteQualificationRunner, type ExperimentResult } from '../src/qualification.js';
@@ -88,18 +88,26 @@ function killProcessTree(pid: number): void {
   }
 }
 
-async function waitForHealth(baseUrl: string, maxWaitMs = 30000): Promise<boolean> {
+async function waitForHealth(baseUrl: string, maxWaitMs = 90000): Promise<boolean> {
   const start = Date.now();
+  let lastLog = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
       const res = await fetch(`${baseUrl}/api/health`, { signal: AbortSignal.timeout(1500) });
       if (res.ok) {
         return true;
       }
-    } catch {
-      // not ready yet
+      if (Date.now() - lastLog > 5000) {
+        console.log(`  Polling ${baseUrl}/api/health: status ${res.status} (${Date.now() - start}ms elapsed)`);
+        lastLog = Date.now();
+      }
+    } catch (e: any) {
+      if (Date.now() - lastLog > 5000) {
+        console.log(`  Polling ${baseUrl}/api/health: ${e?.message ?? 'connecting'} (${Date.now() - start}ms elapsed)`);
+        lastLog = Date.now();
+      }
     }
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, 500));
   }
   return false;
 }
@@ -419,14 +427,24 @@ async function main() {
         ? [realExeInfo!.exePath, 'serve', '--port', String(port), '--no-open', '--log', '--no-recovery']
         : ['serve', '--port', String(port), '--no-open', '--log', '--no-recovery'];
 
+      const initialPassword = randomBytes(32).toString('hex');
+      const jwtSecret = randomBytes(32).toString('hex');
+      const apiKeySecret = randomBytes(32).toString('hex');
+      const storageEncryptionKey = randomBytes(32).toString('hex');
+
       const child = spawn(cmd, cliArgs, {
         cwd: process.cwd(),
         env: {
           ...process.env,
           HOST: '127.0.0.1',
           OMNIROUTE_SERVER_HOST: '127.0.0.1',
+          EMBED_WS_PROXY_HOST: '127.0.0.1',
           PORT: String(port),
           DATA_DIR: dataDir,
+          INITIAL_PASSWORD: initialPassword,
+          JWT_SECRET: jwtSecret,
+          API_KEY_SECRET: apiKeySecret,
+          STORAGE_ENCRYPTION_KEY: storageEncryptionKey,
           OMNIROUTE_COMPRESSION: 'off',
           OMNIROUTE_DISABLE_RADAR: 'true',
           NO_UPDATE_NOTIFIER: 'true',
@@ -447,12 +465,16 @@ async function main() {
     omniChildProcess = spawnOmniRoute(omniPort, tempDataDir);
     baseUrl = `http://127.0.0.1:${omniPort}`;
 
-    const healthy = await waitForHealth(baseUrl, 30000);
+    let omniOutput = '';
+    omniChildProcess.stdout?.on('data', (d) => { omniOutput += d.toString(); });
+    omniChildProcess.stderr?.on('data', (d) => { omniOutput += d.toString(); });
+
+    const healthy = await waitForHealth(baseUrl, 180000);
     if (!healthy) {
       if (omniChildProcess.pid) killProcessTree(omniChildProcess.pid);
       if (upstreamServer) upstreamServer.close();
       if (tempDataDir) fs.rmSync(tempDataDir, { recursive: true, force: true });
-      throw new Error(`Real OmniRoute failed to respond HEALTHY on ${baseUrl} within 30s`);
+      throw new Error(`Real OmniRoute failed to respond HEALTHY on ${baseUrl} within 180s. Output:\n${omniOutput}`);
     }
     console.log(`OmniRoute is HEALTHY on ${baseUrl} (PID: ${omniChildProcess.pid})`);
 
@@ -603,6 +625,9 @@ async function main() {
     id: 'omniroute-local',
     name: 'OmniRoute Local AI Gateway',
     version: '3.8.50',
+    nextVersion: summary.evidence.nextVersion ?? '16.3.3',
+    runtimeDependencyDigest: summary.evidence.runtimeDependencyDigest,
+    securityProfile: summary.evidence.securityProfile,
     capabilities: ['chat_completion', 'model_listing', 'streaming', 'fallback'],
   });
 

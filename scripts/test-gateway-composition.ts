@@ -24,6 +24,7 @@ import { createRequire } from 'node:module';
 import {
   DefaultGatewayRegistry,
   OmniRouteAdapter,
+  computeRuntimeDependencyDigest,
 } from '../packages/gateways/src/index.js';
 import { BoundedScheduler } from '../packages/orchestrator/src/scheduler.js';
 import type { RunPlan } from '../packages/orchestrator/src/types.js';
@@ -207,6 +208,11 @@ async function main() {
   const mjsPath = path.resolve('node_modules/omniroute/bin/omniroute.mjs');
 
   console.log(`Starting real OmniRoute 3.8.50 on 127.0.0.1:${omniPort} (DATA_DIR: ${tempDataDir})...`);
+  const initialPassword = randomBytes(32).toString('hex');
+  const jwtSecret = randomBytes(32).toString('hex');
+  const apiKeySecret = randomBytes(32).toString('hex');
+  const storageEncryptionKey = randomBytes(32).toString('hex');
+
   const omniChildProcess = spawn(
     process.execPath,
     [mjsPath, 'serve', '--port', String(omniPort), '--no-open', '--log', '--no-recovery'],
@@ -216,8 +222,13 @@ async function main() {
         ...process.env,
         HOST: '127.0.0.1',
         OMNIROUTE_SERVER_HOST: '127.0.0.1',
+        EMBED_WS_PROXY_HOST: '127.0.0.1',
         PORT: String(omniPort),
         DATA_DIR: tempDataDir,
+        INITIAL_PASSWORD: initialPassword,
+        JWT_SECRET: jwtSecret,
+        API_KEY_SECRET: apiKeySecret,
+        STORAGE_ENCRYPTION_KEY: storageEncryptionKey,
         OMNIROUTE_COMPRESSION: 'off',
         OMNIROUTE_DISABLE_RADAR: 'true',
         NO_UPDATE_NOTIFIER: 'true',
@@ -278,6 +289,8 @@ async function main() {
     id: 'omniroute-local',
     name: 'OmniRoute Local AI Gateway',
     version: '3.8.50',
+    nextVersion: '16.3.3',
+    runtimeDependencyDigest: computeRuntimeDependencyDigest('3.8.50', '16.3.3', 'wave11.2-isolated'),
     baseUrl: `http://127.0.0.1:${omniPort}`,
     securityProfile: 'wave11.2-isolated',
     capabilities: ['chat_completion', 'model_listing', 'streaming', 'fallback'],

@@ -6,6 +6,7 @@
  */
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -31,6 +32,11 @@ export class OmniRouteProcessManager {
   private stderrBuffer: string[] = [];
   private readonly maxLogLines = 2000;
   private started = false;
+  private readonly initialPassword: string;
+  private readonly jwtSecret: string;
+  private readonly apiKeySecret: string;
+  private readonly storageEncryptionKey: string;
+  private readonly generatedSecrets: string[];
 
   constructor(options: OmniRouteProcessOptions) {
     this.options = {
@@ -43,6 +49,25 @@ export class OmniRouteProcessManager {
       extraEnv: options.extraEnv ?? {},
       cleanupDataDirOnStop: options.cleanupDataDirOnStop ?? false,
     };
+
+    this.initialPassword = options.extraEnv?.['INITIAL_PASSWORD'] ?? randomBytes(32).toString('hex');
+    this.jwtSecret = options.extraEnv?.['JWT_SECRET'] ?? randomBytes(32).toString('hex');
+    this.apiKeySecret = options.extraEnv?.['API_KEY_SECRET'] ?? randomBytes(32).toString('hex');
+    this.storageEncryptionKey = options.extraEnv?.['STORAGE_ENCRYPTION_KEY'] ?? randomBytes(32).toString('hex');
+    this.generatedSecrets = [
+      this.initialPassword,
+      this.jwtSecret,
+      this.apiKeySecret,
+      this.storageEncryptionKey,
+    ].filter((s) => typeof s === 'string' && s.length > 0);
+  }
+
+  getInitialPassword(): string {
+    return this.initialPassword;
+  }
+
+  getGeneratedSecrets(): readonly string[] {
+    return this.generatedSecrets;
   }
 
   getBaseUrl(): string {
@@ -76,6 +101,11 @@ export class OmniRouteProcessManager {
       NO_UPDATE_NOTIFIER: 'true',
       OMNIROUTE_DISABLE_SD_NOTIFY: 'true',
       NODE_ENV: 'production',
+      EMBED_WS_PROXY_HOST: this.options.host,
+      INITIAL_PASSWORD: this.initialPassword,
+      JWT_SECRET: this.jwtSecret,
+      API_KEY_SECRET: this.apiKeySecret,
+      STORAGE_ENCRYPTION_KEY: this.storageEncryptionKey,
       ...this.options.extraEnv,
     };
 
@@ -180,7 +210,13 @@ export class OmniRouteProcessManager {
   }
 
   private appendLog(buffer: string[], text: string) {
-    const lines = text.split(/\r?\n/);
+    let sanitized = text;
+    for (const secret of this.generatedSecrets) {
+      if (secret && sanitized.includes(secret)) {
+        sanitized = sanitized.replaceAll(secret, '[REDACTED_SECRET]');
+      }
+    }
+    const lines = sanitized.split(/\r?\n/);
     for (const line of lines) {
       if (!line) continue;
       buffer.push(line);

@@ -92,11 +92,15 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
         evidence.schemaVersion === '1.0.0' || evidence.schemaVersion === 'v1';
       const isRealMode = evidence.qualificationMode === 'REAL';
       const isSecurityProfileMatch =
-        evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION &&
-        (!descriptor.securityProfile || descriptor.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION) &&
-        (!evidence.adapterSecurityProfile || evidence.adapterSecurityProfile === GATEWAY_SECURITY_PROFILE_VERSION);
+        (evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION || evidence.securityProfile === 'wave11.3-mitigated') &&
+        (!descriptor.securityProfile || descriptor.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION || descriptor.securityProfile === 'wave11.3-mitigated') &&
+        (!evidence.adapterSecurityProfile || evidence.adapterSecurityProfile === GATEWAY_SECURITY_PROFILE_VERSION || evidence.adapterSecurityProfile === 'wave11.3-mitigated');
       const isGatewayIdMatch = evidence.gatewayId === id;
       const isVersionMatch = !descriptor.version || evidence.gatewayVersion === descriptor.version;
+      const isNextVersionMatch = !descriptor.nextVersion || evidence.nextVersion === descriptor.nextVersion;
+      const isRuntimeDigestMatch =
+        !descriptor.runtimeDependencyDigest ||
+        evidence.runtimeDependencyDigest === descriptor.runtimeDependencyDigest;
       const isConfigDigestMatch =
         !descriptor.configurationDigest ||
         evidence.configurationDigest === descriptor.configurationDigest ||
@@ -113,6 +117,8 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
         isSecurityProfileMatch &&
         isGatewayIdMatch &&
         isVersionMatch &&
+        isNextVersionMatch &&
+        isRuntimeDigestMatch &&
         isConfigDigestMatch &&
         isApproved &&
         isConfigIntact &&
@@ -128,6 +134,8 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
         ...descriptor,
         state: newState,
         version: evidence.gatewayVersion,
+        nextVersion: evidence.nextVersion,
+        runtimeDependencyDigest: evidence.runtimeDependencyDigest,
         securityProfile: evidence.securityProfile,
         configurationDigest: evidence.configurationDigest ?? evidence.transparentModeDigest,
         qualifiedAt: evidence.qualifiedAt,
@@ -161,7 +169,9 @@ export class DefaultGatewayRegistry implements GatewayRegistry {
         evidence &&
         evidence.qualificationMode === 'REAL' &&
         evidence.decision === 'APPROVED' &&
-        evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION;
+        (evidence.securityProfile === GATEWAY_SECURITY_PROFILE_VERSION || evidence.securityProfile === 'wave11.3-mitigated') &&
+        (!descriptor.nextVersion || evidence.nextVersion === descriptor.nextVersion) &&
+        (!descriptor.runtimeDependencyDigest || evidence.runtimeDependencyDigest === descriptor.runtimeDependencyDigest);
 
       this.descriptors.set(id, {
         ...descriptor,

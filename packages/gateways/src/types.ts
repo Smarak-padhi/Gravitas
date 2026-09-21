@@ -5,6 +5,7 @@
  * Inference gateways transport requests; Gravitas governs tasks, worktrees, and verification.
  */
 
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
 export type GatewayQualificationState = 'UNQUALIFIED' | 'READY' | 'DEGRADED' | 'DISABLED';
@@ -14,6 +15,8 @@ export interface GatewayDescriptor {
   readonly name: string;
   readonly state: GatewayQualificationState;
   readonly version?: string | undefined;
+  readonly nextVersion?: string | undefined;
+  readonly runtimeDependencyDigest?: string | undefined;
   readonly baseUrl: string;
   readonly securityProfile: string;
   readonly configurationDigest?: string | undefined;
@@ -98,14 +101,28 @@ export interface InferenceGateway {
 
 export const GATEWAY_QUALIFICATION_SCHEMA_VERSION = '1.0.0';
 export const GATEWAY_SECURITY_PROFILE_VERSION = 'wave11.2-isolated';
+export const CURRENT_GATEWAY_VERSION = '3.8.50';
+export const CURRENT_GATEWAY_NEXT_VERSION = '16.3.3';
+
+export function computeRuntimeDependencyDigest(
+  omnirouteVersion: string = CURRENT_GATEWAY_VERSION,
+  nextVersion: string = CURRENT_GATEWAY_NEXT_VERSION,
+  securityProfile: string = GATEWAY_SECURITY_PROFILE_VERSION
+): string {
+  return createHash('sha256')
+    .update(`omniroute:${omnirouteVersion}|next:${nextVersion}|profile:${securityProfile}`)
+    .digest('hex');
+}
 
 export const GatewayQualificationEvidenceSchema = z.object({
   schemaVersion: z.enum(['1.0.0', 'v1']),
   qualificationMode: z.enum(['DRY', 'REAL']),
   gatewayId: z.string().min(1),
   gatewayVersion: z.string().min(1),
+  nextVersion: z.string().optional(),
+  runtimeDependencyDigest: z.string().optional(),
   gatewayCommit: z.string().optional(),
-  securityProfile: z.literal(GATEWAY_SECURITY_PROFILE_VERSION),
+  securityProfile: z.enum(['wave11.2-isolated', 'wave11.3-mitigated']).or(z.literal(GATEWAY_SECURITY_PROFILE_VERSION)),
   adapterSecurityProfile: z.string().optional(),
   policyVersion: z.string().optional(),
   qualifiedAt: z.string().datetime(),

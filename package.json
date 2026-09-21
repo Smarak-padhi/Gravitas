@@ -8,6 +8,11 @@
     "packages/*",
     "apps/*"
   ],
+  "overrides": {
+    "omniroute": {
+      "next": "16.3.3"
+    }
+  },
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",

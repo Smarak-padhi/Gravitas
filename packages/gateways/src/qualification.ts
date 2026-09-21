@@ -14,12 +14,15 @@ import {
   type GatewayQualificationEvidence,
   GATEWAY_QUALIFICATION_SCHEMA_VERSION,
   GATEWAY_SECURITY_PROFILE_VERSION,
+  CURRENT_GATEWAY_NEXT_VERSION,
+  computeRuntimeDependencyDigest,
 } from './types.js';
 
 export interface QualificationRunnerOptions {
   readonly gatewayId?: string | undefined;
   readonly baseUrl: string;
   readonly gatewayVersion?: string | undefined;
+  readonly nextVersion?: string | undefined;
   readonly evidenceOutputPath?: string | undefined;
   readonly isDryRun?: boolean | undefined;
   readonly qualificationMode?: 'DRY' | 'REAL' | undefined;
@@ -51,6 +54,7 @@ export class OmniRouteQualificationRunner {
   private readonly gatewayId: string;
   private readonly baseUrl: string;
   private readonly gatewayVersion: string;
+  readonly nextVersion: string;
   private readonly evidenceOutputPath: string;
   readonly isDryRun: boolean;
   readonly qualificationMode: 'DRY' | 'REAL';
@@ -67,6 +71,7 @@ export class OmniRouteQualificationRunner {
     this.gatewayId = options.gatewayId ?? 'omniroute-local';
     this.baseUrl = options.baseUrl.replace(/\/+$/, '');
     this.gatewayVersion = options.gatewayVersion ?? '3.8.50';
+    this.nextVersion = options.nextVersion ?? CURRENT_GATEWAY_NEXT_VERSION;
     this.evidenceOutputPath = resolve(options.evidenceOutputPath ?? './omniroute-qualification.json');
     this.isDryRun = options.isDryRun ?? false;
     this.qualificationMode = this.isDryRun ? 'DRY' : (options.qualificationMode ?? 'REAL');
@@ -499,11 +504,19 @@ export class OmniRouteQualificationRunner {
       .update('OMNIROUTE_COMPRESSION=off|x-omniroute-compression:off|x-omniroute-disabled-guardrails:*')
       .digest('hex');
 
+    const runtimeDependencyDigest = computeRuntimeDependencyDigest(
+      this.gatewayVersion,
+      this.nextVersion,
+      GATEWAY_SECURITY_PROFILE_VERSION
+    );
+
     const evidence: GatewayQualificationEvidence = {
       schemaVersion: GATEWAY_QUALIFICATION_SCHEMA_VERSION,
       qualificationMode: this.qualificationMode,
       gatewayId: this.gatewayId,
       gatewayVersion: this.gatewayVersion,
+      nextVersion: this.nextVersion,
+      runtimeDependencyDigest,
       securityProfile: GATEWAY_SECURITY_PROFILE_VERSION,
       adapterSecurityProfile: GATEWAY_SECURITY_PROFILE_VERSION,
       policyVersion: '1.0.0',
