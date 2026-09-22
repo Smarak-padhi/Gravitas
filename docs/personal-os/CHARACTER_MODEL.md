@@ -61,3 +61,13 @@ Each character operates under a strict 4-state visual lifecycle tied directly to
   │ 4. DISPATCH (Dossier placed on outbound tray / plinth) │
   └────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 4. Implementation Status (Wave 12D Foundation)
+
+The Minimal Role-Based Character Foundation was formally implemented and verified in **Wave 12D**:
+- Code implementation: `apps/web/src/hq3d/roles/` and `apps/web/src/hq3d/geometry/characters.ts`.
+- Unit test verification: `apps/web/src/hq3d/roles/rolePresentation.test.ts`.
+- End-to-end and visual proof: `tests/hq3d-roles.spec.ts` capturing 10 deterministic screenshots in `docs/3d-hq/evidence/wave12d/`.
+- Full verification report: [WAVE_12D_REPORT.md](../3d-hq/WAVE_12D_REPORT.md).

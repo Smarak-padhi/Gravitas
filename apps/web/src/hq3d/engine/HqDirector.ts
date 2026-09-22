@@ -6,6 +6,7 @@
  */
 
 import type { RoomId, SelectedEntity, PerformanceStats } from '../types.js'
+import type { RoleId } from '../roles/types.js'
 import type { WorldState } from '../world/worldState.js'
 import { ROOM_DEFINITIONS, getRoomByKey } from '../world/rooms.js'
 import { HqScene } from './HqScene.js'
@@ -115,7 +116,9 @@ export class HqDirector {
   }
 
   private startLoop(): void {
-    const loop = (): void => {
+    const loop = (timestamp: number): void => {
+      const timeSeconds = timestamp * 0.001
+      this.scene.update(timeSeconds, this.reducedMotion)
       this.cameraRig.update()
       this.renderer.render(this.scene.scene, this.cameraRig.camera)
       this.rafId = requestAnimationFrame(loop)
@@ -242,6 +245,33 @@ export class HqDirector {
     if (this.onEntitySelected) {
       this.onEntitySelected(null)
     }
+  }
+
+  /**
+   * Accessible Role Selection (Wave 12D)
+   * Selects character figure, activating corner brackets and inspector metadata.
+   */
+  public selectRole(roleId: RoleId): SelectedEntity | null {
+    const fig = this.scene.characters.getFigure(roleId)
+    if (!fig) return null
+
+    const u = fig.userData
+    const entity: SelectedEntity = {
+      id: roleId,
+      type: 'character',
+      name: (u.name as string) || 'Role Character',
+      room: (u.room as string) || 'Agent Operations',
+      role: (u.role as string) || (u.name as string) || 'Reasoning Role',
+      status: (u.status as string) || 'IDLE',
+      description: (u.description as string) || '',
+      roleMetadata: u.roleMetadata,
+    }
+
+    this.picking.setSelection(entity, fig)
+    if (this.onEntitySelected) {
+      this.onEntitySelected(entity)
+    }
+    return entity
   }
 
   public getPerformanceStats(): PerformanceStats {

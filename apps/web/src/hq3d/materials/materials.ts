@@ -36,6 +36,16 @@ export class MaterialLibrary {
   public readonly charFcc: THREE.MeshStandardMaterial
   public readonly charVerifier: THREE.MeshStandardMaterial
 
+  // Wave 12D Role-Based Tailored Materials
+  public readonly charPlannerSuit: THREE.MeshStandardMaterial
+  public readonly charPlannerAccent: THREE.MeshStandardMaterial
+  public readonly charFrontendSuit: THREE.MeshStandardMaterial
+  public readonly charFrontendAccent: THREE.MeshStandardMaterial
+  public readonly charBackendSuit: THREE.MeshStandardMaterial
+  public readonly charBackendAccent: THREE.MeshStandardMaterial
+  public readonly charReviewerSuit: THREE.MeshStandardMaterial
+  public readonly charReviewerAccent: THREE.MeshStandardMaterial
+
   // Interactive / Selection
   public readonly selectionRing: THREE.MeshBasicMaterial
   public readonly selectionBracket: THREE.MeshStandardMaterial
@@ -285,6 +295,71 @@ export class MaterialLibrary {
         color: 0x275246,
         roughness: 0.75,
         metalness: 0.05,
+      })
+    )
+
+    // Wave 12D Role Tailored Materials:
+    // Chief Planner: Dark graphite tailoring with warm brass / vellum accent
+    this.charPlannerSuit = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x22262d,
+        roughness: 0.8,
+        metalness: 0.08,
+      })
+    )
+    this.charPlannerAccent = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        roughness: 0.35,
+        metalness: 0.7,
+      })
+    )
+
+    // Frontend Engineer: Deep indigo workwear with vibrant cobalt / cyan accent
+    this.charFrontendSuit = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.75,
+        metalness: 0.05,
+      })
+    )
+    this.charFrontendAccent = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        roughness: 0.4,
+        metalness: 0.2,
+      })
+    )
+
+    // Backend Engineer: Charcoal / forest-neutral workwear with emerald terminal accent
+    this.charBackendSuit = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x242d28,
+        roughness: 0.78,
+        metalness: 0.05,
+      })
+    )
+    this.charBackendAccent = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x34d399,
+        roughness: 0.4,
+        metalness: 0.2,
+      })
+    )
+
+    // Independent Reviewer: Cleanroom dark spruce coat with pale sage accent
+    this.charReviewerSuit = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2c3e38,
+        roughness: 0.75,
+        metalness: 0.05,
+      })
+    )
+    this.charReviewerAccent = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xa7f3d0,
+        roughness: 0.5,
+        metalness: 0.1,
       })
     )
 

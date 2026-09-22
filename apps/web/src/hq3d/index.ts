@@ -3,6 +3,9 @@
  */
 
 export * from './types.js'
+export * from './roles/types.js'
+export * from './roles/roles.js'
+export * from './roles/roleStationMapping.js'
 export * from './world/rooms.js'
 export * from './world/stations.js'
 export * from './world/navigation.js'

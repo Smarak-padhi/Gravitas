@@ -117,17 +117,33 @@ describe('3D Headquarters — Materials & Geometry Assembly', () => {
     materials.dispose()
   })
 
-  it('constructs static scale reference figures (Codex, FCC, Verifier)', () => {
+  it('constructs role-based figures (Chief Planner, Frontend, Backend, Reviewer) and legacy aliases', () => {
     const materials = new MaterialLibrary()
     const chars = new HqCharacters(materials)
 
+    // Verify all 4 authoritative reasoning roles
+    const planner = chars.group.getObjectByName('character:role:strategy:chief-planner')
+    expect(planner).toBeDefined()
+    expect(planner?.userData.type).toBe('character')
+    expect(planner?.userData.id).toBe('role:strategy:chief-planner')
+
+    const fe = chars.group.getObjectByName('character:role:engineering:frontend-engineer')
+    expect(fe).toBeDefined()
+    expect(fe?.userData.id).toBe('role:engineering:frontend-engineer')
+
+    const be = chars.group.getObjectByName('character:role:engineering:backend-engineer')
+    expect(be).toBeDefined()
+    expect(be?.userData.id).toBe('role:engineering:backend-engineer')
+
+    const reviewer = chars.group.getObjectByName('character:role:quality:independent-reviewer')
+    expect(reviewer).toBeDefined()
+    expect(reviewer?.userData.id).toBe('role:quality:independent-reviewer')
+
+    // Legacy aliases preserved
     const codex = chars.group.getObjectByName('character:char-codex')
     expect(codex).toBeDefined()
-    expect(codex?.userData.type).toBe('character')
-
     const fcc = chars.group.getObjectByName('character:char-fcc')
     expect(fcc).toBeDefined()
-
     const verifier = chars.group.getObjectByName('character:char-verifier')
     expect(verifier).toBeDefined()
 
@@ -263,15 +279,16 @@ describe('3D Headquarters — Scene Graph & Lighting Assembly', () => {
     expect(rackLed).toBeDefined()
     expect(rackLed.material).toBe(hqScene.materials.statusRunning)
 
-    // FCC figure should be visible
+    // FCC figure should be focused (Wave 12D permanent presence with in-place status)
     const fccFig = hqScene.characters.figureMap.get('char-fcc')
-    expect(fccFig?.visible).toBe(true)
+    expect(fccFig).toBeDefined()
+    expect(fccFig?.userData.status).toBe('FOCUSED')
 
-    // Empty state should clear activity
+    // Empty state should clear activity to IDLE
     const stateA = deriveWorldState(FIXTURE_A_EMPTY)
     hqScene.reconcileWorld(stateA)
     expect(rackLed.material).toBe(hqScene.materials.gunmetal)
-    expect(fccFig?.visible).toBe(false)
+    expect(fccFig?.userData.status).toBe('IDLE')
 
     hqScene.dispose()
   })

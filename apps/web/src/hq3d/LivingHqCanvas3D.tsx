@@ -7,6 +7,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { HqDirector } from './engine/HqDirector.js'
 import type { PerformanceStats, RoomId, SelectedEntity } from './types.js'
+import type { RoleId } from './roles/types.js'
 import { Hq3dInspector } from './ui/Hq3dInspector.js'
 import { ROOM_DEFINITIONS } from './world/rooms.js'
 import { deriveWorldState, type WorldState } from './world/worldState.js'
@@ -53,6 +54,13 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
     return () => mql.removeEventListener('change', handler)
   }, [])
 
+  const onFallbackRef = useRef(onFallbackTo2D)
+  useEffect(() => {
+    onFallbackRef.current = onFallbackTo2D
+  }, [onFallbackTo2D])
+
+  const lastWorldStateRef = useRef<WorldState | null>(null)
+
   // 2. Initialize Three.js HqDirector
   useEffect(() => {
     const canvas = canvasRef.current
@@ -79,7 +87,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         onContextLost: () => {
           console.warn('WebGL context lost — invoking graceful fallback to 2D OfficeFloor')
           setWebglError('WebGL context lost')
-          onFallbackTo2D()
+          onFallbackRef.current()
         },
       })
 
@@ -89,18 +97,27 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
       // Initial size
       const { clientWidth, clientHeight } = canvas
       director.handleResize(clientWidth, clientHeight)
+
+      // Reconcile any existing world state immediately
+      if (lastWorldStateRef.current) {
+        director.updateWorldState(lastWorldStateRef.current)
+      } else if (overrideWorldState) {
+        director.updateWorldState(overrideWorldState)
+      } else if (initialWorldState) {
+        director.updateWorldState(initialWorldState)
+      }
     } catch (err) {
       console.error('Failed to initialize Gravitas 3D Headquarters:', err)
       const msg = err instanceof Error ? err.message : 'WebGL initialization failed'
       setWebglError(msg)
-      onFallbackTo2D()
+      onFallbackRef.current()
     }
 
     return () => {
       directorRef.current?.dispose()
       directorRef.current = null
     }
-  }, [onFallbackTo2D])
+  }, []) // Mount once
 
   // 3. React to isViewActive changes (Dual-condition render loop suspension)
   useEffect(() => {
@@ -125,7 +142,24 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         tasks: summary.tasks ?? [],
         run: activeRun ? { id: activeRun.id, status: activeRun.status } : null,
       })
+      lastWorldStateRef.current = worldState
       directorRef.current?.updateWorldState(worldState)
+      setSelectedEntity((prev) => {
+        if (!prev || prev.type !== 'character') return prev
+        const fig = directorRef.current?.scene.characters.getFigure(prev.id as RoleId)
+        if (!fig?.userData) return prev
+        const u = fig.userData
+        return {
+          id: prev.id,
+          type: 'character',
+          name: (u.name as string) || prev.name,
+          room: (u.room as string) || prev.room,
+          role: (u.role as string) || prev.role,
+          status: (u.status as string) || prev.status,
+          description: (u.description as string) || prev.description,
+          roleMetadata: u.roleMetadata,
+        }
+      })
     } catch (err) {
       console.warn('Failed to fetch authoritative state for 3D HQ:', err)
     }
@@ -134,8 +168,10 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   // Update world state on mount, view activation, or override change
   useEffect(() => {
     if (overrideWorldState) {
+      lastWorldStateRef.current = overrideWorldState
       directorRef.current?.updateWorldState(overrideWorldState)
     } else if (initialWorldState) {
+      lastWorldStateRef.current = initialWorldState
       directorRef.current?.updateWorldState(initialWorldState)
     } else if (isViewActive) {
       void fetchAuthoritativeState()
@@ -231,6 +267,14 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   const handleResetOverview = () => {
     directorRef.current?.resetToOverview()
     setAnnouncement('Reset camera to Headquarters Overview')
+  }
+
+  const handleSelectRole = (roleId: RoleId) => {
+    const entity = directorRef.current?.selectRole(roleId)
+    if (entity) {
+      setSelectedEntity(entity)
+      setAnnouncement(`Selected Role: ${entity.name}`)
+    }
   }
 
   if (webglError) {
@@ -418,6 +462,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         showPerformance={showPerformance}
         onTogglePerformance={() => setShowPerformance(!showPerformance)}
         onSelectRoom={handleSelectRoom}
+        onSelectRole={handleSelectRole}
         onResetOverview={handleResetOverview}
         onClose={() => {
           setSelectedEntity(null)

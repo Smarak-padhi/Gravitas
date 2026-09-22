@@ -1,18 +1,48 @@
 /**
- * Architectural Miniature Scale Figures for Gravitas 3D Headquarters
- * Stylized geometric mannequin silhouettes with articulated limbs, tailored
- * suiting palettes, and natural seated/standing postures.
- * Strictly static scale references. Zero fake activity or animations.
+ * Architectural Role-Based Miniature Scale Figures for Gravitas 3D Headquarters (Wave 12D)
+ *
+ * Implements the minimal role-based character foundation:
+ * - Exactly four reasoning-role characters (Chief Planner, Frontend Engineer, Backend Engineer, Independent Reviewer)
+ * - Coherent, refined architectural silhouettes with tailored suiting palettes and physical accessories
+ * - Zero locomotion: all characters remain anchored at their home stations
+ * - Subtle ambient breathing cycles & state-driven postures (IDLE, FOCUSED, VERIFYING, WAITING, etc.)
+ * - Full support for prefers-reduced-motion (instant pose snaps, zero interpolation)
+ * - In-place reconciliation from authoritative WorldState via RolePresentationState
  */
 
 import * as THREE from 'three'
 import type { MaterialLibrary } from '../materials/materials.js'
 import type { CharacterId } from '../types.js'
+import type { CharacterPresentationState, RoleId, RolePresentationState } from '../roles/types.js'
+import {
+  FROZEN_ROLES,
+  ROLE_HOME_POSITIONS,
+  ROLE_HOME_ROTATIONS,
+} from '../roles/roles.js'
+import { buildRoleInspectorMetadata } from '../roles/roleStationMapping.js'
+
+interface FigureController {
+  readonly roleId: RoleId
+  readonly rootGroup: THREE.Group
+  readonly torsoGroup: THREE.Group
+  readonly headMesh: THREE.Mesh
+  readonly armsLeftGroup: THREE.Group
+  readonly armsRightGroup: THREE.Group
+  readonly accessoryMesh: THREE.Object3D | null
+  readonly statusRing: THREE.Mesh
+  readonly statusMaterial: THREE.MeshBasicMaterial
+  readonly baseTorsoY: number
+  readonly isSeated: boolean
+  readonly phaseOffset: number
+  characterState: CharacterPresentationState
+}
 
 export class HqCharacters {
   public readonly group: THREE.Group
   public readonly figureMap = new Map<CharacterId, THREE.Group>()
+  private readonly controllers = new Map<RoleId, FigureController>()
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
+  private readonly materialsToDispose: THREE.Material[] = []
   private readonly materials: MaterialLibrary
 
   constructor(materials: MaterialLibrary) {
@@ -20,47 +50,11 @@ export class HqCharacters {
     this.group = new THREE.Group()
     this.group.name = 'hq-characters'
 
-    // 1. Codex Prototype Figure (Seated at Workstation 01)
-    this.buildMiniatureFigure({
-      id: 'char-codex',
-      name: 'Codex (Static Prototype)',
-      role: 'Engineering Specialist',
-      room: 'Agent Operations',
-      position: [-6.5, 0.0, 1.85],
-      rotationY: Math.PI, // Facing forward towards desk
-      accentMaterial: materials.charCodex, // Muted slate-teal
-      suitMaterial: materials.charSuitDark,
-      skinMaterial: materials.charSkin,
-      isSeated: true,
-    })
-
-    // 2. FCC Prototype Figure (Seated at Workstation 02)
-    this.buildMiniatureFigure({
-      id: 'char-fcc',
-      name: 'Claude / FCC (Static Prototype)',
-      role: 'Architectural Reasoning',
-      room: 'Agent Operations',
-      position: [-1.8, 0.0, 1.85],
-      rotationY: Math.PI, // Facing forward towards desk
-      accentMaterial: materials.charFcc, // Muted warm terracotta
-      suitMaterial: materials.charSuitDark,
-      skinMaterial: materials.charSkin,
-      isSeated: true,
-    })
-
-    // 3. Independent Verifier Figure (Standing inside Cleanroom at Console)
-    this.buildMiniatureFigure({
-      id: 'char-verifier',
-      name: 'Independent Verifier (Static Prototype)',
-      role: 'Deterministic Gate Authority',
-      room: 'Verification Cleanroom',
-      position: [6.0, 0.1, 5.75],
-      rotationY: 0.0, // Facing console
-      accentMaterial: materials.charVerifier, // Muted sage / deep spruce
-      suitMaterial: materials.charSuitDark,
-      skinMaterial: materials.charSkin,
-      isSeated: false,
-    })
+    // Build the four frozen role characters
+    for (let i = 0; i < FROZEN_ROLES.length; i++) {
+      const role = FROZEN_ROLES[i]
+      this.buildRoleFigure(role.roleId, i * 1.57)
+    }
   }
 
   private track<T extends THREE.BufferGeometry>(geom: T): T {
@@ -68,170 +62,477 @@ export class HqCharacters {
     return geom
   }
 
-  private buildMiniatureFigure(opts: {
-    readonly id: CharacterId
-    readonly name: string
-    readonly role: string
-    readonly room: string
-    readonly position: readonly [number, number, number]
-    readonly rotationY: number
-    readonly accentMaterial: THREE.Material
-    readonly suitMaterial: THREE.Material
-    readonly skinMaterial: THREE.Material
-    readonly isSeated: boolean
-  }): void {
-    const charGroup = new THREE.Group()
-    charGroup.position.set(...opts.position)
-    charGroup.rotation.y = opts.rotationY
-    charGroup.name = `character:${opts.id}`
-    charGroup.userData = {
-      type: 'character',
-      id: opts.id,
-      name: opts.name,
-      role: opts.role,
-      room: opts.room,
-    }
-
-    const yBase = opts.isSeated ? 0.46 : 0.0
-
-    // 1. Head (Sculpted miniature architectural mannequin head)
-    const headGeo = this.track(new THREE.SphereGeometry(0.1, 16, 12))
-    const head = new THREE.Mesh(headGeo, opts.skinMaterial)
-    head.scale.set(0.9, 1.15, 0.95)
-    head.position.set(0.0, yBase + 0.96, 0.0)
-    head.castShadow = true
-    charGroup.add(head)
-
-    // Brushed brass architectural brow visor band
-    const visorGeo = this.track(new THREE.BoxGeometry(0.15, 0.04, 0.08))
-    const visor = new THREE.Mesh(visorGeo, this.materials.brass)
-    visor.position.set(0.0, yBase + 0.98, 0.075)
-    charGroup.add(visor)
-
-    // Neck collar
-    const neckGeo = this.track(new THREE.CylinderGeometry(0.05, 0.06, 0.08, 8))
-    const neck = new THREE.Mesh(neckGeo, opts.accentMaterial)
-    neck.position.set(0.0, yBase + 0.84, 0.0)
-    charGroup.add(neck)
-
-    // 2. Torso (Tailored jacket with accent lapel)
-    const torsoGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 0.22))
-    const torso = new THREE.Mesh(torsoGeo, opts.suitMaterial)
-    torso.position.set(0.0, yBase + 0.62, 0.0)
-    torso.castShadow = true
-    charGroup.add(torso)
-
-    // Chest accent tie / lapel strip
-    const lapelGeo = this.track(new THREE.BoxGeometry(0.1, 0.32, 0.02))
-    const lapel = new THREE.Mesh(lapelGeo, opts.accentMaterial)
-    lapel.position.set(0.0, yBase + 0.64, 0.112)
-    charGroup.add(lapel)
-
-    // 3. Articulated Arms
-    if (opts.isSeated) {
-      // Seated posture: Upper arms vertical, forearms forward resting toward desk
-      const upperArmGeo = this.track(new THREE.BoxGeometry(0.08, 0.26, 0.09))
-      const armLeft = new THREE.Mesh(upperArmGeo, opts.suitMaterial)
-      armLeft.position.set(-0.22, yBase + 0.62, 0.0)
-      charGroup.add(armLeft)
-
-      const armRight = new THREE.Mesh(upperArmGeo, opts.suitMaterial)
-      armRight.position.set(0.22, yBase + 0.62, 0.0)
-      charGroup.add(armRight)
-
-      // Forearms extending forward
-      const forearmGeo = this.track(new THREE.BoxGeometry(0.07, 0.07, 0.28))
-      const forearmLeft = new THREE.Mesh(forearmGeo, opts.suitMaterial)
-      forearmLeft.position.set(-0.2, yBase + 0.49, 0.14)
-      charGroup.add(forearmLeft)
-
-      const forearmRight = new THREE.Mesh(forearmGeo, opts.suitMaterial)
-      forearmRight.position.set(0.2, yBase + 0.49, 0.14)
-      charGroup.add(forearmRight)
-
-      // Stylized hands near keyboard
-      const handGeo = this.track(new THREE.BoxGeometry(0.06, 0.04, 0.08))
-      const handLeft = new THREE.Mesh(handGeo, opts.skinMaterial)
-      handLeft.position.set(-0.16, yBase + 0.49, 0.28)
-      charGroup.add(handLeft)
-
-      const handRight = new THREE.Mesh(handGeo, opts.skinMaterial)
-      handRight.position.set(0.16, yBase + 0.49, 0.28)
-      charGroup.add(handRight)
-
-      // 4. Seated Legs
-      // Horizontal thighs
-      const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
-      const thighLeft = new THREE.Mesh(thighGeo, opts.suitMaterial)
-      thighLeft.position.set(-0.1, yBase + 0.36, 0.17)
-      charGroup.add(thighLeft)
-
-      const thighRight = new THREE.Mesh(thighGeo, opts.suitMaterial)
-      thighRight.position.set(0.1, yBase + 0.36, 0.17)
-      charGroup.add(thighRight)
-
-      // Vertical lower legs down to floor
-      const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
-      const shinLeft = new THREE.Mesh(shinGeo, opts.suitMaterial)
-      shinLeft.position.set(-0.1, 0.21, 0.34)
-      charGroup.add(shinLeft)
-
-      const shinRight = new THREE.Mesh(shinGeo, opts.suitMaterial)
-      shinRight.position.set(0.1, 0.21, 0.34)
-      charGroup.add(shinRight)
-
-      // Shoes
-      const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
-      const shoeLeft = new THREE.Mesh(shoeGeo, opts.suitMaterial)
-      shoeLeft.position.set(-0.1, 0.03, 0.38)
-      charGroup.add(shoeLeft)
-
-      const shoeRight = new THREE.Mesh(shoeGeo, opts.suitMaterial)
-      shoeRight.position.set(0.1, 0.03, 0.38)
-      charGroup.add(shoeRight)
-    } else {
-      // Standing posture (Independent Verifier)
-      const armGeo = this.track(new THREE.BoxGeometry(0.08, 0.46, 0.09))
-      const armLeft = new THREE.Mesh(armGeo, opts.suitMaterial)
-      armLeft.position.set(-0.22, yBase + 0.54, 0.04)
-      charGroup.add(armLeft)
-
-      const armRight = new THREE.Mesh(armGeo, opts.suitMaterial)
-      armRight.position.set(0.22, yBase + 0.54, 0.04)
-      charGroup.add(armRight)
-
-      // Standing trouser legs
-      const legGeo = this.track(new THREE.BoxGeometry(0.13, 0.62, 0.14))
-      const legLeft = new THREE.Mesh(legGeo, opts.suitMaterial)
-      legLeft.position.set(-0.1, yBase + 0.31, 0.0)
-      legLeft.castShadow = true
-      charGroup.add(legLeft)
-
-      const legRight = new THREE.Mesh(legGeo, opts.suitMaterial)
-      legRight.position.set(0.1, yBase + 0.31, 0.0)
-      legRight.castShadow = true
-      charGroup.add(legRight)
-
-      // Shoes
-      const shoeGeo = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-      const shoeLeft = new THREE.Mesh(shoeGeo, opts.suitMaterial)
-      shoeLeft.position.set(-0.1, yBase + 0.03, 0.03)
-      charGroup.add(shoeLeft)
-
-      const shoeRight = new THREE.Mesh(shoeGeo, opts.suitMaterial)
-      shoeRight.position.set(0.1, yBase + 0.03, 0.03)
-      charGroup.add(shoeRight)
-    }
-
-    this.group.add(charGroup)
-    this.figureMap.set(opts.id, charGroup)
+  private trackMat<T extends THREE.Material>(mat: T): T {
+    this.materialsToDispose.push(mat)
+    return mat
   }
 
-  public setCharacterVisibility(id: CharacterId, visible: boolean): void {
-    const fig = this.figureMap.get(id)
-    if (fig) {
-      fig.visible = visible
+  private buildRoleFigure(roleId: RoleId, phaseOffset: number): void {
+    const pos = ROLE_HOME_POSITIONS[roleId]
+    const rotY = ROLE_HOME_ROTATIONS[roleId]
+
+    const rootGroup = new THREE.Group()
+    rootGroup.position.set(...pos)
+    rootGroup.rotation.y = rotY
+    rootGroup.name = `character:${roleId}`
+
+    const isSeated = roleId === 'role:engineering:frontend-engineer' || roleId === 'role:engineering:backend-engineer'
+    const yBase = isSeated ? 0.46 : 0.0
+
+    // Material selection per role
+    let suitMat = this.materials.charSuitDark
+    let accentMat: THREE.Material = this.materials.brass
+    let roomName = 'Agent Operations'
+    let roleName = 'Engineer'
+
+    if (roleId === 'role:strategy:chief-planner') {
+      suitMat = this.materials.charPlannerSuit
+      accentMat = this.materials.charPlannerAccent
+      roomName = 'Mission Control'
+      roleName = 'Chief Planner'
+    } else if (roleId === 'role:engineering:frontend-engineer') {
+      suitMat = this.materials.charFrontendSuit
+      accentMat = this.materials.charFrontendAccent
+      roomName = 'Agent Operations'
+      roleName = 'Frontend Engineer'
+    } else if (roleId === 'role:engineering:backend-engineer') {
+      suitMat = this.materials.charBackendSuit
+      accentMat = this.materials.charBackendAccent
+      roomName = 'Agent Operations'
+      roleName = 'Backend Engineer'
+    } else if (roleId === 'role:quality:independent-reviewer') {
+      suitMat = this.materials.charReviewerSuit
+      accentMat = this.materials.charReviewerAccent
+      roomName = 'Verification Cleanroom'
+      roleName = 'Independent Reviewer'
     }
+
+    // 0. Status Underlay Ring (Floor disk indicating active status)
+    const ringGeo = this.track(new THREE.RingGeometry(0.25, 0.38, 24))
+    ringGeo.rotateX(-Math.PI / 2)
+    const statusMaterial = this.trackMat(
+      new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.0, // Faint / invisible when idle
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      })
+    )
+    const statusRing = new THREE.Mesh(ringGeo, statusMaterial)
+    statusRing.position.set(0.0, 0.015, 0.0)
+    rootGroup.add(statusRing)
+
+    // 1. Torso Group (Articulated for breathing and posture shifts)
+    const torsoGroup = new THREE.Group()
+    torsoGroup.position.set(0.0, yBase + 0.62, 0.0)
+
+    // Tailored jacket / coat
+    const torsoGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 0.22))
+    const torso = new THREE.Mesh(torsoGeo, suitMat)
+    torso.castShadow = true
+    torsoGroup.add(torso)
+
+    // Accent tie / lapel strip
+    const lapelGeo = this.track(new THREE.BoxGeometry(0.09, 0.32, 0.02))
+    const lapel = new THREE.Mesh(lapelGeo, accentMat)
+    lapel.position.set(0.0, 0.02, 0.112)
+    torsoGroup.add(lapel)
+
+    // Collar
+    const collarGeo = this.track(new THREE.CylinderGeometry(0.05, 0.06, 0.07, 8))
+    const collar = new THREE.Mesh(collarGeo, accentMat)
+    collar.position.set(0.0, 0.22, 0.0)
+    torsoGroup.add(collar)
+
+    // 2. Sculpted Architectural Mannequin Head
+    const headGeo = this.track(new THREE.SphereGeometry(0.1, 16, 12))
+    const head = new THREE.Mesh(headGeo, this.materials.charSkin)
+    head.scale.set(0.9, 1.15, 0.95)
+    head.position.set(0.0, 0.34, 0.0)
+    head.castShadow = true
+    torsoGroup.add(head)
+
+    // Architectural brow visor band (refined brass / accent)
+    const visorGeo = this.track(new THREE.BoxGeometry(0.15, 0.038, 0.08))
+    const visor = new THREE.Mesh(visorGeo, accentMat)
+    visor.position.set(0.0, 0.36, 0.075)
+    torsoGroup.add(visor)
+
+    // 3. Articulated Arms & Physical Accessories
+    const armsLeftGroup = new THREE.Group()
+    const armsRightGroup = new THREE.Group()
+    let accessoryMesh: THREE.Object3D | null = null
+
+    if (isSeated) {
+      // Seated Posture: Upper arms down, forearms forward resting toward desk
+      const upperArmGeo = this.track(new THREE.BoxGeometry(0.08, 0.26, 0.09))
+      const armL = new THREE.Mesh(upperArmGeo, suitMat)
+      armL.position.set(-0.22, 0.0, 0.0)
+      armsLeftGroup.add(armL)
+
+      const armR = new THREE.Mesh(upperArmGeo, suitMat)
+      armR.position.set(0.22, 0.0, 0.0)
+      armsRightGroup.add(armR)
+
+      const forearmGeo = this.track(new THREE.BoxGeometry(0.07, 0.07, 0.26))
+      const forearmL = new THREE.Mesh(forearmGeo, suitMat)
+      forearmL.position.set(-0.2, -0.13, 0.13)
+      armsLeftGroup.add(forearmL)
+
+      const forearmR = new THREE.Mesh(forearmGeo, suitMat)
+      forearmR.position.set(0.2, -0.13, 0.13)
+      armsRightGroup.add(forearmR)
+
+      const handGeo = this.track(new THREE.BoxGeometry(0.06, 0.04, 0.07))
+      const handL = new THREE.Mesh(handGeo, this.materials.charSkin)
+      handL.position.set(-0.16, -0.13, 0.27)
+      armsLeftGroup.add(handL)
+
+      const handR = new THREE.Mesh(handGeo, this.materials.charSkin)
+      handR.position.set(0.16, -0.13, 0.27)
+      armsRightGroup.add(handR)
+
+      // Accessory per engineering role
+      if (roleId === 'role:engineering:frontend-engineer') {
+        // Design tablet resting on desk
+        const tabletGeo = this.track(new THREE.BoxGeometry(0.22, 0.015, 0.16))
+        accessoryMesh = new THREE.Mesh(tabletGeo, this.materials.deviceTablet)
+        accessoryMesh.position.set(0.0, -0.12, 0.32)
+        accessoryMesh.rotation.x = -0.1
+        torsoGroup.add(accessoryMesh)
+      } else {
+        // Backend Engineer: Systems terminal / notebook
+        const notebookGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.17))
+        accessoryMesh = new THREE.Mesh(notebookGeo, this.materials.terminalScreenEmerald)
+        accessoryMesh.position.set(0.0, -0.12, 0.32)
+        accessoryMesh.rotation.x = -0.08
+        torsoGroup.add(accessoryMesh)
+      }
+
+      // Seated Legs (horizontal thighs + vertical shins + shoes)
+      const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
+      const thighL = new THREE.Mesh(thighGeo, suitMat)
+      thighL.position.set(-0.1, yBase + 0.36, 0.17)
+      rootGroup.add(thighL)
+
+      const thighR = new THREE.Mesh(thighGeo, suitMat)
+      thighR.position.set(0.1, yBase + 0.36, 0.17)
+      rootGroup.add(thighR)
+
+      const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
+      const shinL = new THREE.Mesh(shinGeo, suitMat)
+      shinL.position.set(-0.1, 0.21, 0.34)
+      rootGroup.add(shinL)
+
+      const shinR = new THREE.Mesh(shinGeo, suitMat)
+      shinR.position.set(0.1, 0.21, 0.34)
+      rootGroup.add(shinR)
+
+      const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
+      const shoeL = new THREE.Mesh(shoeGeo, suitMat)
+      shoeL.position.set(-0.1, 0.03, 0.38)
+      rootGroup.add(shoeL)
+
+      const shoeR = new THREE.Mesh(shoeGeo, suitMat)
+      shoeR.position.set(0.1, 0.03, 0.38)
+      rootGroup.add(shoeR)
+    } else {
+      // Standing Posture (Chief Planner & Independent Reviewer)
+      const armGeo = this.track(new THREE.BoxGeometry(0.08, 0.44, 0.09))
+      const armL = new THREE.Mesh(armGeo, suitMat)
+      armL.position.set(-0.22, -0.08, 0.04)
+      armsLeftGroup.add(armL)
+
+      const armR = new THREE.Mesh(armGeo, suitMat)
+      armR.position.set(0.22, -0.08, 0.04)
+      armsRightGroup.add(armR)
+
+      if (roleId === 'role:strategy:chief-planner') {
+        // Chief Planner: Planning tablet / folio held at waist level
+        const folioGeo = this.track(new THREE.BoxGeometry(0.26, 0.02, 0.18))
+        accessoryMesh = new THREE.Mesh(folioGeo, this.materials.brass)
+        accessoryMesh.position.set(0.0, -0.15, 0.22)
+        accessoryMesh.rotation.x = -0.3
+        torsoGroup.add(accessoryMesh)
+
+        // Arms forward holding folio
+        armL.rotation.x = -0.35
+        armL.position.set(-0.18, -0.06, 0.12)
+        armR.rotation.x = -0.35
+        armR.position.set(0.18, -0.06, 0.12)
+      } else if (roleId === 'role:quality:independent-reviewer') {
+        // Independent Reviewer: Verification slate held at chest height
+        const slateGeo = this.track(new THREE.BoxGeometry(0.24, 0.015, 0.18))
+        accessoryMesh = new THREE.Mesh(slateGeo, this.materials.terminalScreenEmerald)
+        accessoryMesh.position.set(0.0, -0.05, 0.24)
+        accessoryMesh.rotation.x = -0.45
+        torsoGroup.add(accessoryMesh)
+
+        // Arms angled holding slate
+        armL.rotation.x = -0.55
+        armL.position.set(-0.16, -0.02, 0.14)
+        armR.rotation.x = -0.55
+        armR.position.set(0.16, -0.02, 0.14)
+      }
+
+      // Standing Trousers & Shoes
+      const legGeo = this.track(new THREE.BoxGeometry(0.13, 0.62, 0.14))
+      const legL = new THREE.Mesh(legGeo, suitMat)
+      legL.position.set(-0.1, yBase + 0.31, 0.0)
+      legL.castShadow = true
+      rootGroup.add(legL)
+
+      const legR = new THREE.Mesh(legGeo, suitMat)
+      legR.position.set(0.1, yBase + 0.31, 0.0)
+      legR.castShadow = true
+      rootGroup.add(legR)
+
+      const shoeGeo = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
+      const shoeL = new THREE.Mesh(shoeGeo, suitMat)
+      shoeL.position.set(-0.1, yBase + 0.03, 0.03)
+      rootGroup.add(shoeL)
+
+      const shoeR = new THREE.Mesh(shoeGeo, suitMat)
+      shoeR.position.set(0.1, yBase + 0.03, 0.03)
+      rootGroup.add(shoeR)
+    }
+
+    torsoGroup.add(armsLeftGroup)
+    torsoGroup.add(armsRightGroup)
+    rootGroup.add(torsoGroup)
+
+    // Initial User Data for Picking
+    const initialMeta = buildRoleInspectorMetadata({
+      roleId,
+      departmentId:
+        roleId === 'role:strategy:chief-planner'
+          ? 'CONTROL_STRATEGY'
+          : roleId === 'role:quality:independent-reviewer'
+            ? 'QUALITY'
+            : 'ENGINEERING',
+      displayName: roleName,
+      characterState: 'IDLE',
+      isSeated,
+      stationId:
+        roleId === 'role:strategy:chief-planner'
+          ? 'planning-table'
+          : roleId === 'role:quality:independent-reviewer'
+            ? 'verifier-console'
+            : roleId === 'role:engineering:frontend-engineer'
+              ? 'engineering-workstation-01'
+              : 'engineering-workstation-02',
+      stationAlias:
+        roleId === 'role:strategy:chief-planner'
+          ? 'planning-table'
+          : roleId === 'role:quality:independent-reviewer'
+            ? 'verifier-console'
+            : roleId === 'role:engineering:frontend-engineer'
+              ? 'codex-workstation'
+              : 'fcc-workstation',
+      currentTaskId: null,
+      currentTaskTitle: null,
+      currentHarness: 'UNKNOWN',
+      transport: 'UNKNOWN',
+      provider: 'UNKNOWN',
+      model: 'UNKNOWN',
+      isFixtureOnly: false,
+      homePosition: pos,
+    })
+
+    rootGroup.userData = {
+      type: 'character',
+      id: roleId,
+      name: roleName,
+      role: roleName,
+      room: roomName,
+      status: 'IDLE',
+      description: `${roleName} at home station.`,
+      roleMetadata: initialMeta,
+    }
+
+    this.group.add(rootGroup)
+    this.figureMap.set(roleId, rootGroup)
+    if (roleId === 'role:engineering:frontend-engineer') {
+      this.figureMap.set('char-codex', rootGroup)
+      const aliasNode = new THREE.Object3D()
+      aliasNode.name = 'character:char-codex'
+      aliasNode.userData = rootGroup.userData
+      rootGroup.add(aliasNode)
+    } else if (roleId === 'role:engineering:backend-engineer') {
+      this.figureMap.set('char-fcc', rootGroup)
+      const aliasNode = new THREE.Object3D()
+      aliasNode.name = 'character:char-fcc'
+      aliasNode.userData = rootGroup.userData
+      rootGroup.add(aliasNode)
+    } else if (roleId === 'role:quality:independent-reviewer') {
+      this.figureMap.set('char-verifier', rootGroup)
+      const aliasNode = new THREE.Object3D()
+      aliasNode.name = 'character:char-verifier'
+      aliasNode.userData = rootGroup.userData
+      rootGroup.add(aliasNode)
+    }
+
+    this.controllers.set(roleId, {
+      roleId,
+      rootGroup,
+      torsoGroup,
+      headMesh: head,
+      armsLeftGroup,
+      armsRightGroup,
+      accessoryMesh,
+      statusRing,
+      statusMaterial,
+      baseTorsoY: yBase + 0.62,
+      isSeated,
+      phaseOffset,
+      characterState: 'IDLE',
+    })
+  }
+
+  /**
+   * Continuous animation update loop (Wave 12D)
+   * Evaluates subtle breathing cycles and posture orientation.
+   * Snaps instantly to static postures if reducedMotion is active.
+   */
+  public update(timeSeconds: number, reducedMotion: boolean): void {
+    for (const ctrl of this.controllers.values()) {
+      const { torsoGroup, headMesh, baseTorsoY, phaseOffset, characterState } = ctrl
+
+      if (reducedMotion) {
+        // Reduced motion: static upright / focused posture without continuous sine oscillation
+        torsoGroup.position.y = baseTorsoY
+        headMesh.position.y = 0.34
+        headMesh.rotation.x = characterState === 'VERIFYING' ? 0.12 : characterState === 'FOCUSED' ? 0.06 : 0.0
+        torsoGroup.rotation.x = characterState === 'FOCUSED' ? 0.06 : 0.0
+        continue
+      }
+
+      // Subtle natural breathing cycle (low amplitude: ±0.005m, ~1.5 rad/s)
+      const breath = Math.sin(timeSeconds * 1.5 + phaseOffset)
+
+      if (characterState === 'IDLE') {
+        torsoGroup.position.y = baseTorsoY + breath * 0.005
+        torsoGroup.rotation.x = 0.0
+        headMesh.rotation.x = breath * 0.015
+      } else if (characterState === 'FOCUSED') {
+        // Focused posture: slightly tilted forward toward screen/work surface
+        torsoGroup.position.y = baseTorsoY + breath * 0.003
+        torsoGroup.rotation.x = 0.07
+        headMesh.rotation.x = 0.06 + breath * 0.01
+      } else if (characterState === 'VERIFYING') {
+        // Verifying posture: precise examination posture directed at inspection device
+        torsoGroup.position.y = baseTorsoY + breath * 0.002
+        torsoGroup.rotation.x = 0.04
+        headMesh.rotation.x = 0.12 + breath * 0.008
+      } else if (characterState === 'WAITING') {
+        // Waiting posture: composed steady posture
+        torsoGroup.position.y = baseTorsoY + breath * 0.004
+        torsoGroup.rotation.x = -0.02
+        headMesh.rotation.x = 0.0
+      } else if (characterState === 'SUCCESS') {
+        // Success posture: upright confident posture
+        torsoGroup.position.y = baseTorsoY + breath * 0.005
+        torsoGroup.rotation.x = -0.04
+        headMesh.rotation.x = -0.04
+      } else if (characterState === 'FAILURE' || characterState === 'ATTENTION') {
+        // Attention / Failure posture: alert posture
+        torsoGroup.position.y = baseTorsoY + breath * 0.006
+        torsoGroup.rotation.x = 0.05
+        headMesh.rotation.x = 0.03
+      }
+    }
+  }
+
+  /**
+   * Authoritative In-Place Role Reconciliation (Wave 12D)
+   *
+   * Reconciles character presentation states derived from WorldState without
+   * rebuilding meshes or altering stationary coordinates.
+   */
+  public reconcileRoles(roleStates: Map<RoleId, RolePresentationState>): void {
+    for (const [roleId, presentation] of roleStates.entries()) {
+      const ctrl = this.controllers.get(roleId)
+      if (!ctrl) continue
+
+      ctrl.characterState = presentation.characterState
+
+      // Update status ring color & opacity
+      const ringMat = ctrl.statusMaterial
+      switch (presentation.characterState) {
+        case 'FOCUSED':
+          ringMat.color.setHex(0x38bdf8) // Vibrant cobalt / cyan
+          ringMat.opacity = 0.7
+          break
+        case 'VERIFYING':
+          ringMat.color.setHex(0x34d399) // Emerald verification
+          ringMat.opacity = 0.75
+          break
+        case 'WAITING':
+          ringMat.color.setHex(0xf59e0b) // Amber review
+          ringMat.opacity = 0.65
+          break
+        case 'ATTENTION':
+          ringMat.color.setHex(0xf97316) // Attention orange
+          ringMat.opacity = 0.8
+          break
+        case 'SUCCESS':
+          ringMat.color.setHex(0x22c55e) // Success green
+          ringMat.opacity = 0.8
+          break
+        case 'FAILURE':
+          ringMat.color.setHex(0xef4444) // Failure red
+          ringMat.opacity = 0.8
+          break
+        case 'IDLE':
+        default:
+          ringMat.opacity = 0.08 // Subdued ambient presence
+          ringMat.color.setHex(0x475569)
+          break
+      }
+
+      // Update Picking UserData with rich decoupled RoleInspectorMetadata
+      const inspectorMeta = buildRoleInspectorMetadata(presentation)
+      ctrl.rootGroup.userData = {
+        type: 'character',
+        id: roleId,
+        name: presentation.displayName,
+        role: presentation.displayName,
+        room:
+          roleId === 'role:strategy:chief-planner'
+            ? 'Mission Control'
+            : roleId === 'role:quality:independent-reviewer'
+              ? 'Verification Cleanroom'
+              : 'Agent Operations',
+        status: presentation.characterState,
+        description: `${presentation.displayName} (${presentation.departmentId}). Station: ${presentation.stationId}. Status: ${presentation.characterState}. Harness: ${presentation.currentHarness}.`,
+        roleMetadata: inspectorMeta,
+      }
+    }
+  }
+
+  /**
+   * Backwards-compatible visibility toggle (preserves compatibility with legacy callers)
+   */
+  public setCharacterVisibility(id: CharacterId, visible: boolean): void {
+    // Map legacy IDs to new Role IDs
+    let targetRoleId: RoleId | undefined
+    if (id === 'char-codex') targetRoleId = 'role:engineering:frontend-engineer'
+    else if (id === 'char-fcc') targetRoleId = 'role:engineering:backend-engineer'
+    else if (id === 'char-verifier') targetRoleId = 'role:quality:independent-reviewer'
+    else if (this.figureMap.has(id as RoleId)) targetRoleId = id as RoleId
+
+    if (targetRoleId) {
+      const fig = this.figureMap.get(targetRoleId)
+      if (fig) fig.visible = visible
+    }
+  }
+
+  public getFigure(id: CharacterId): THREE.Group | undefined {
+    if (id === 'char-codex') return this.figureMap.get('role:engineering:frontend-engineer')
+    if (id === 'char-fcc') return this.figureMap.get('role:engineering:backend-engineer')
+    if (id === 'char-verifier') return this.figureMap.get('role:quality:independent-reviewer')
+    return this.figureMap.get(id as RoleId)
   }
 
   public dispose(): void {
@@ -239,6 +540,13 @@ export class HqCharacters {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
+
+    for (const mat of this.materialsToDispose) {
+      mat.dispose()
+    }
+    this.materialsToDispose.length = 0
+
     this.figureMap.clear()
+    this.controllers.clear()
   }
 }

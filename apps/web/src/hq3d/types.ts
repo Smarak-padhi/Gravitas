@@ -23,7 +23,9 @@ export type StationId =
   | 'approval-plinth'
   | 'repository-vault'
 
-export type CharacterId = 'char-codex' | 'char-fcc' | 'char-verifier'
+import type { RoleId, RoleInspectorMetadata } from './roles/types.js'
+
+export type CharacterId = RoleId | 'char-codex' | 'char-fcc' | 'char-verifier'
 
 export type EntityType = 'room' | 'station' | 'character'
 
@@ -35,6 +37,7 @@ export interface SelectedEntity {
   readonly role?: string | undefined
   readonly status: string
   readonly description?: string | undefined
+  readonly roleMetadata?: RoleInspectorMetadata | undefined
 }
 
 export interface CameraFramingPreset {

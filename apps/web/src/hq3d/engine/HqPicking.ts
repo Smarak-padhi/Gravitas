@@ -140,12 +140,14 @@ export class HqPicking {
       return {
         id: id || 'character',
         type: 'character',
-        name: (u.name as string) || 'Scale Prototype Character',
+        name: (u.name as string) || 'Role Character',
         room: (u.room as string) || 'Agent Operations',
-        role: (u.role as string) || 'Geometric Reference',
-        status: 'Static Reference',
+        role: (u.role as string) || (u.name as string) || 'Reasoning Role',
+        status: (u.status as string) || 'IDLE',
         description:
-          'Authoritative static scale figure for architectural depth. Dynamic character locomotion begins in Wave 12C+.',
+          (u.description as string) ||
+          'Authoritative role-based scale figure anchored at home station. Wave 12D role foundation.',
+        roleMetadata: u.roleMetadata,
       }
     }
 

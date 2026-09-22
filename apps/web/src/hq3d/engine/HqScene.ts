@@ -14,6 +14,7 @@ import { HqInfrastructure } from '../geometry/infrastructure.js'
 import { HqCharacters } from '../geometry/characters.js'
 import { HqTaskDossiers } from '../geometry/dossiers.js'
 import type { WorldState } from '../world/worldState.js'
+import { deriveRolePresentationStates } from '../roles/roleStationMapping.js'
 
 export class HqScene {
   public readonly scene: THREE.Scene
@@ -147,15 +148,13 @@ export class HqScene {
       }
     }
 
-    // 3. Reconcile scale figure visibility strictly by workstation occupancy
-    // Unknown workers stay in NEUTRAL_HOLD and do not occupy Codex/FCC
-    const codexActive = worldState.stations['codex-workstation']?.status === 'ACTIVE'
-    const fccActive = worldState.stations['fcc-workstation']?.status === 'ACTIVE'
-    const verifierActive = worldState.stations['verifier-console']?.status === 'VERIFYING'
+    // 3. Reconcile role presentation states & characters (Wave 12D)
+    const roleStates = deriveRolePresentationStates(worldState)
+    this.characters.reconcileRoles(roleStates)
+  }
 
-    this.characters.setCharacterVisibility('char-codex', codexActive)
-    this.characters.setCharacterVisibility('char-fcc', fccActive)
-    this.characters.setCharacterVisibility('char-verifier', verifierActive)
+  public update(timeSeconds: number, reducedMotion: boolean): void {
+    this.characters.update(timeSeconds, reducedMotion)
   }
 
   public dispose(): void {

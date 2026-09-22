@@ -68,6 +68,10 @@ export const App: React.FC = () => {
     }
   }, [])
 
+  const handleFallbackTo2D = useCallback(() => {
+    handleViewChange('OFFICE')
+  }, [handleViewChange])
+
   const [isInboxOpen, setIsInboxOpen] = useState<boolean>(false)
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false)
   const [acknowledgedInboxIds, setAcknowledgedInboxIds] = useState<Set<string>>(new Set())
@@ -577,7 +581,7 @@ export const App: React.FC = () => {
           {activeView === 'HQ3D' && (
             <LivingHqCanvas3D
               isViewActive={activeView === 'HQ3D'}
-              onFallbackTo2D={() => handleViewChange('OFFICE')}
+              onFallbackTo2D={handleFallbackTo2D}
             />
           )}
 

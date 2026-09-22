@@ -1,11 +1,14 @@
 /**
- * Docked 2D Inspector Panel for 3D Headquarters
- * Displays authoritative static metadata for selected stations, scale figures, and rooms.
+ * Docked 2D Inspector Panel for 3D Headquarters (Wave 12D)
+ * Displays authoritative metadata for selected stations, role scale figures, and rooms.
+ * Strictly separates Role, Department, Status, Task, Harness, Transport, Provider, and Model.
  */
 
 import React from 'react'
 import type { PerformanceStats, RoomId, SelectedEntity } from '../types.js'
+import type { RoleId } from '../roles/types.js'
 import { ROOM_DEFINITIONS } from '../world/rooms.js'
+import { FROZEN_ROLES } from '../roles/roles.js'
 
 export interface Hq3dInspectorProps {
   readonly entity: SelectedEntity | null
@@ -13,6 +16,7 @@ export interface Hq3dInspectorProps {
   readonly showPerformance: boolean
   readonly onTogglePerformance: () => void
   readonly onSelectRoom: (roomId: RoomId) => void
+  readonly onSelectRole?: ((roleId: RoleId) => void) | undefined
   readonly onResetOverview: () => void
   readonly onClose: () => void
 }
@@ -23,6 +27,7 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
   showPerformance,
   onTogglePerformance,
   onSelectRoom,
+  onSelectRole,
   onResetOverview,
   onClose,
 }) => {
@@ -119,76 +124,181 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
             </span>
           </div>
 
-          <div>
-            <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Zone / Room</div>
-            <div style={{ fontWeight: 600, marginTop: '2px' }}>{entity.room}</div>
-          </div>
-
-          {entity.role && (
-            <div>
-              <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Function</div>
-              <div style={{ fontWeight: 600, marginTop: '2px' }}>{entity.role}</div>
-            </div>
-          )}
-
-          <div>
-            <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Status</div>
+          {/* Role Presentation Domain Breakdown (B7) */}
+          {entity.roleMetadata ? (
             <div
+              data-testid="role-inspector-details"
               style={{
-                fontWeight: 600,
-                color: '#38bdf8',
-                marginTop: '2px',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <span
-                style={{
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: '#38bdf8',
-                }}
-              />
-              {entity.status}
-            </div>
-          </div>
-
-          {entity.description && (
-            <div
-              style={{
-                padding: '10px',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '12px',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                backgroundColor: 'rgba(15, 23, 42, 0.7)',
                 border: '1px solid var(--border-color, #232b3e)',
-                lineHeight: '1.45',
-                color: 'var(--text-secondary, #cbd5e1)',
               }}
             >
-              {entity.description}
-            </div>
-          )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>LOGICAL ROLE</span>
+                {entity.roleMetadata.isFixtureOnly && (
+                  <span
+                    data-testid="fixture-only-badge"
+                    style={{
+                      fontSize: '9px',
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                      color: '#fbbf24',
+                      border: '1px solid rgba(234, 179, 8, 0.4)',
+                    }}
+                  >
+                    FIXTURE ONLY
+                  </span>
+                )}
+              </div>
 
-          <div
-            style={{
-              padding: '8px 10px',
-              borderRadius: '6px',
-              backgroundColor: 'rgba(56, 189, 248, 0.08)',
-              border: '1px dashed rgba(56, 189, 248, 0.3)',
-              fontSize: '11px',
-              color: '#38bdf8',
-            }}
-          >
-            ℹ️ <strong>Truthful Prototype</strong>: Wave 12B verifies scene geometry, camera rig,
-            and lighting. Live agent orchestration runs in Wave 12C+.
-          </div>
+              <div data-testid="inspector-role-name" style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                {entity.roleMetadata.roleName}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>DEPARTMENT</div>
+                  <div data-testid="inspector-department" style={{ fontWeight: 600, color: '#e2e8f0' }}>
+                    {entity.roleMetadata.department}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>CURRENT STATUS</div>
+                  <div
+                    data-testid="inspector-status"
+                    style={{
+                      fontWeight: 600,
+                      color:
+                        entity.roleMetadata.status === 'FOCUSED'
+                          ? '#38bdf8'
+                          : entity.roleMetadata.status === 'VERIFYING'
+                            ? '#34d399'
+                            : entity.roleMetadata.status === 'WAITING'
+                              ? '#f59e0b'
+                              : entity.roleMetadata.status === 'SUCCESS'
+                                ? '#22c55e'
+                                : entity.roleMetadata.status === 'FAILURE'
+                                  ? '#ef4444'
+                                  : '#94a3b8',
+                    }}
+                  >
+                    {entity.roleMetadata.status}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>CURRENT TASK</div>
+                <div data-testid="inspector-current-task" style={{ fontWeight: 600, color: '#e2e8f0', wordBreak: 'break-all' }}>
+                  {entity.roleMetadata.currentTaskTitle
+                    ? `${entity.roleMetadata.currentTaskTitle} (${entity.roleMetadata.currentTaskId})`
+                    : entity.roleMetadata.currentTaskId ?? 'NONE'}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>CURRENT HARNESS</div>
+                  <div data-testid="inspector-current-harness" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.currentHarness}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>TRANSPORT</div>
+                  <div data-testid="inspector-transport" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.transport}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>PROVIDER</div>
+                  <div data-testid="inspector-provider" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.provider}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>MODEL</div>
+                  <div data-testid="inspector-model" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.model}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HOME STATION</div>
+                <div data-testid="inspector-station" style={{ fontWeight: 600, color: '#94a3b8' }}>
+                  {entity.roleMetadata.stationName}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Zone / Room</div>
+                <div style={{ fontWeight: 600, marginTop: '2px' }}>{entity.room}</div>
+              </div>
+
+              {entity.role && (
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Function</div>
+                  <div style={{ fontWeight: 600, marginTop: '2px' }}>{entity.role}</div>
+                </div>
+              )}
+
+              <div>
+                <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px' }}>Status</div>
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: '#38bdf8',
+                    marginTop: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: '#38bdf8',
+                    }}
+                  />
+                  {entity.status}
+                </div>
+              </div>
+
+              {entity.description && (
+                <div
+                  style={{
+                    padding: '10px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    border: '1px solid var(--border-color, #232b3e)',
+                    lineHeight: '1.45',
+                    color: 'var(--text-secondary, #cbd5e1)',
+                  }}
+                >
+                  {entity.description}
+                </div>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <p style={{ color: 'var(--text-secondary, #cbd5e1)', margin: 0, lineHeight: '1.5' }}>
             Interactive 3D Headquarters Foundation. Orbit with pointer, zoom with wheel, or select a
-            room preset below.
+            reasoning role or room preset below.
           </p>
           <div
             style={{
@@ -218,6 +328,72 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
           </div>
         </div>
       )}
+
+      {/* Accessible Reasoning Role Roster (B20) */}
+      <div
+        data-testid="role-roster-section"
+        style={{
+          padding: '16px',
+          borderTop: '1px solid var(--border-color, #232b3e)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '11px',
+            color: 'var(--text-muted, #94a3b8)',
+          }}
+        >
+          <span>REASONING ROLES (ACCESSIBLE DOM)</span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {FROZEN_ROLES.map((r) => {
+            const isSelected = entity?.id === r.roleId
+            return (
+              <button
+                key={r.roleId}
+                onClick={() => onSelectRole?.(r.roleId)}
+                data-testid={`role-btn-${r.displayName.toLowerCase().replace(/\s+/g, '-')}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: isSelected ? 'rgba(56, 189, 248, 0.15)' : 'var(--bg-panel-elevated, #171e2c)',
+                  border: isSelected ? '1px solid #38bdf8' : '1px solid var(--border-color, #232b3e)',
+                  color: isSelected ? '#38bdf8' : 'var(--text-secondary, #cbd5e1)',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600 }}>{r.displayName}</div>
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted, #94a3b8)' }}>{r.departmentId}</div>
+                </div>
+                <span
+                  style={{
+                    fontSize: '9px',
+                    fontFamily: 'monospace',
+                    padding: '2px 4px',
+                    borderRadius: '2px',
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                  }}
+                >
+                  {r.stationAlias}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       {/* Room Preset Direct Framing */}
       <div
