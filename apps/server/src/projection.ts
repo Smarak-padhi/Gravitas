@@ -30,6 +30,17 @@ export interface RuntimeBrowserQaProjection {
   readonly status: 'RUNNING' | 'PASSED' | 'FAILED'
 }
 
+export interface RuntimeHandoffProjection {
+  readonly handoffId: string
+  readonly kind: 'DEPENDENCY' | 'REVIEW' | 'INTEGRATION' | 'VERIFICATION' | 'APPROVAL'
+  readonly sourceTaskId: string
+  readonly targetTaskId: string
+  readonly sourceRoleId?: string | undefined
+  readonly targetRoleId?: string | undefined
+  readonly state: 'BLOCKED' | 'READY' | 'IN_PROGRESS' | 'SATISFIED' | 'FAILED'
+  readonly reasonCode?: string | undefined
+}
+
 export interface RuntimeTaskProjection {
   readonly taskId: string
   readonly phase: RuntimeExecutionPhase
@@ -46,6 +57,7 @@ export interface RuntimeProjectionSnapshot {
   readonly epoch: string
   readonly revision: number
   readonly activeTasks: readonly RuntimeTaskProjection[]
+  readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
 }
 
 /**
@@ -57,6 +69,7 @@ export class RuntimeProjectionStore {
   private readonly epoch: string
   private revision: number = 0
   private readonly tasks = new Map<string, RuntimeTaskProjection>()
+  private readonly handoffs = new Map<string, RuntimeHandoffProjection>()
   private readonly terminalTaskIds = new Set<string>()
 
   public constructor(epochId?: string) {
@@ -422,11 +435,38 @@ export class RuntimeProjectionStore {
             }
           : {}),
       })),
+      handoffs: Array.from(this.handoffs.values()).map((h) => ({
+        handoffId: h.handoffId,
+        kind: h.kind,
+        sourceTaskId: h.sourceTaskId,
+        targetTaskId: h.targetTaskId,
+        ...(h.sourceRoleId ? { sourceRoleId: h.sourceRoleId } : {}),
+        ...(h.targetRoleId ? { targetRoleId: h.targetRoleId } : {}),
+        state: h.state,
+        ...(h.reasonCode ? { reasonCode: h.reasonCode } : {}),
+      })),
     }
+  }
+
+  public setHandoff(handoff: RuntimeHandoffProjection): void {
+    this.handoffs.set(handoff.handoffId, handoff)
+    this.revision++
+  }
+
+  public setHandoffs(handoffs: readonly RuntimeHandoffProjection[]): void {
+    for (const h of handoffs) {
+      this.handoffs.set(h.handoffId, h)
+    }
+    this.revision++
+  }
+
+  public getHandoffs(): readonly RuntimeHandoffProjection[] {
+    return Array.from(this.handoffs.values())
   }
 
   public clear(): void {
     this.tasks.clear()
+    this.handoffs.clear()
     this.terminalTaskIds.clear()
     this.revision = 0
   }

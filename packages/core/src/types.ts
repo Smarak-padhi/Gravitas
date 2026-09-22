@@ -1,4 +1,5 @@
 import type { RoleAssignment, TaskRoleRequirement } from './roles.js'
+import type { TaskHandoff, TaskArtifactRef } from './handoff.js'
 
 /**
  * Task states in Gravitas.
@@ -209,6 +210,8 @@ export interface Task {
   readonly role?: AgentRole | undefined
   readonly roleRequirement?: TaskRoleRequirement | undefined
   readonly roleAssignment?: RoleAssignment | undefined
+  readonly handoffs?: readonly TaskHandoff[] | undefined
+  readonly artifacts?: readonly TaskArtifactRef[] | undefined
   /**
    * If true, successful verification leads to WAITING_APPROVAL.
    * If false (default), successful verification leads directly to SUCCEEDED.

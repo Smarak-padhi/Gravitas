@@ -763,4 +763,28 @@ describe('Server & Deterministic Fixture Integration Tests (Section 9, 10, 15, 1
     // Old task is cleaned up
     expect(summaryB.projection.activeTasks.find((t: any) => t.taskId === 'task-fe-codex')).toBeUndefined()
   })
+
+  it('12. Projection snapshot retains canonical handoffs and survives event buffer eviction', () => {
+    const projectionStore = new RuntimeProjectionStore('epoch-test-handoff')
+    projectionStore.setHandoff({
+      handoffId: 'handoff-fe-to-rev',
+      kind: 'REVIEW',
+      sourceTaskId: 'task-fe',
+      targetTaskId: 'task-rev',
+      sourceRoleId: 'role:engineering:frontend-engineer',
+      targetRoleId: 'role:quality:independent-reviewer',
+      state: 'SATISFIED',
+      reasonCode: 'REVIEW_PASSED',
+    })
+
+    const snapshot = projectionStore.getSnapshot()
+    expect(snapshot.handoffs).toBeDefined()
+    expect(snapshot.handoffs).toHaveLength(1)
+    expect(snapshot.handoffs![0]?.handoffId).toBe('handoff-fe-to-rev')
+    expect(snapshot.handoffs![0]?.kind).toBe('REVIEW')
+    expect(snapshot.handoffs![0]?.sourceRoleId).toBe('role:engineering:frontend-engineer')
+    expect(snapshot.handoffs![0]?.targetRoleId).toBe('role:quality:independent-reviewer')
+    expect(snapshot.handoffs![0]?.state).toBe('SATISFIED')
+    expect(snapshot.handoffs![0]?.reasonCode).toBe('REVIEW_PASSED')
+  })
 })

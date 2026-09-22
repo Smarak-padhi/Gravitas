@@ -111,12 +111,28 @@ export interface WorldRevisionIdentity {
   readonly canonicalTaskFingerprint: string // deterministic client cache key only
 }
 
+// ─── World Handoff State (Wave 12F) ──────────────────────────────────────────
+
+export interface WorldHandoffState {
+  readonly id: string
+  readonly kind: 'DEPENDENCY' | 'REVIEW' | 'INTEGRATION' | 'VERIFICATION' | 'APPROVAL'
+  readonly sourceTaskId: string
+  readonly targetTaskId: string
+  readonly sourceStationId?: StationId | null | undefined
+  readonly targetStationId?: StationId | null | undefined
+  readonly sourceRoleId?: string | null | undefined
+  readonly targetRoleId?: string | null | undefined
+  readonly state: 'BLOCKED' | 'READY' | 'IN_PROGRESS' | 'SATISFIED' | 'FAILED'
+  readonly reasonCode?: string | undefined
+}
+
 // ─── World State (Presentation-Only Domain Contract) ──────────────────────────
 
 export interface WorldState {
   readonly revisionIdentity: WorldRevisionIdentity
   readonly stations: Readonly<Record<StationId, WorldStationState>>
   readonly tasks: Readonly<Record<string, WorldTaskState>>
+  readonly handoffs: readonly WorldHandoffState[]
   readonly infrastructure: WorldInfraState
   readonly alertLevel: 'NORMAL' | 'ELEVATED' | 'CRITICAL'
 }
@@ -499,7 +515,79 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     }
   }
 
-  // 5. Alert Level Determination
+  // 5. Derive canonical handoffs
+  const worldHandoffs: WorldHandoffState[] = []
+  if (projection?.handoffs && projection.handoffs.length > 0) {
+    for (const h of projection.handoffs) {
+      const sourceStationId = h.sourceRoleId
+        ? ((getStationForCanonicalRole(h.sourceRoleId) as StationId) ?? null)
+        : null
+      const targetStationId = h.targetRoleId
+        ? ((getStationForCanonicalRole(h.targetRoleId) as StationId) ?? null)
+        : null
+
+      worldHandoffs.push({
+        id: h.handoffId,
+        kind: h.kind,
+        sourceTaskId: h.sourceTaskId,
+        targetTaskId: h.targetTaskId,
+        sourceStationId,
+        targetStationId,
+        sourceRoleId: h.sourceRoleId,
+        targetRoleId: h.targetRoleId,
+        state: h.state,
+        reasonCode: h.reasonCode,
+      })
+    }
+  } else {
+    for (const task of tasks) {
+      if (task.dependencies && task.dependencies.length > 0) {
+        for (const dep of task.dependencies) {
+          const upstreamTask = canonicalTaskMap.get(dep.taskId)
+          const sourceRoleId = (upstreamTask?.roleAssignment?.roleId ?? upstreamTask?.role) as
+            | string
+            | undefined
+          const targetRoleId = (task.roleAssignment?.roleId ?? task.role) as string | undefined
+          const isUpstreamSatisfied =
+            upstreamTask &&
+            (upstreamTask.state === 'SUCCEEDED' || upstreamTask.state === 'APPROVED')
+          const isUpstreamFailed =
+            upstreamTask && (upstreamTask.state === 'FAILED' || upstreamTask.state === 'CANCELLED')
+          const handoffState = isUpstreamSatisfied
+            ? 'SATISFIED'
+            : isUpstreamFailed
+              ? 'FAILED'
+              : 'BLOCKED'
+
+          worldHandoffs.push({
+            id: `handoff_${dep.taskId}_to_${task.id}`,
+            kind:
+              targetRoleId === 'role:integration:integration-engineer'
+                ? 'INTEGRATION'
+                : 'DEPENDENCY',
+            sourceTaskId: dep.taskId,
+            targetTaskId: task.id,
+            sourceStationId: sourceRoleId
+              ? ((getStationForCanonicalRole(sourceRoleId) as StationId) ?? null)
+              : null,
+            targetStationId: targetRoleId
+              ? ((getStationForCanonicalRole(targetRoleId) as StationId) ?? null)
+              : null,
+            sourceRoleId,
+            targetRoleId,
+            state: handoffState,
+            reasonCode: isUpstreamSatisfied
+              ? 'UPSTREAM_SATISFIED'
+              : isUpstreamFailed
+                ? 'UPSTREAM_FAILED'
+                : 'UPSTREAM_PENDING',
+          })
+        }
+      }
+    }
+  }
+
+  // 6. Alert Level Determination
   let alertLevel: 'NORMAL' | 'ELEVATED' | 'CRITICAL' = 'NORMAL'
   const hasFailedTask = Object.values(worldTasks).some(
     (t) => t.canonicalState === 'FAILED'
@@ -510,7 +598,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     alertLevel = 'ELEVATED'
   }
 
-  // 6. Build Immutable WorldState with Revision Identity
+  // 7. Build Immutable WorldState with Revision Identity
   const canonicalTaskFingerprint = computeCanonicalTaskFingerprint(tasks)
 
   const revisionIdentity: WorldRevisionIdentity = Object.freeze({
@@ -523,6 +611,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     revisionIdentity,
     stations: Object.freeze(stations),
     tasks: Object.freeze(worldTasks),
+    handoffs: Object.freeze(worldHandoffs),
     infrastructure: Object.freeze({
       gateways: Object.freeze(finalGateways),
     }),

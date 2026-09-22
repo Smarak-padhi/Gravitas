@@ -13,6 +13,7 @@ import { HqFurniture } from '../geometry/furniture.js'
 import { HqInfrastructure } from '../geometry/infrastructure.js'
 import { HqCharacters } from '../geometry/characters.js'
 import { HqTaskDossiers } from '../geometry/dossiers.js'
+import { HandoffConduitManager } from '../geometry/handoffConduits.js'
 import type { WorldState } from '../world/worldState.js'
 import { deriveRolePresentationStates } from '../roles/roleStationMapping.js'
 
@@ -24,6 +25,7 @@ export class HqScene {
   public readonly infrastructure: HqInfrastructure
   public readonly characters: HqCharacters
   public readonly dossiers: HqTaskDossiers
+  public readonly handoffs: HandoffConduitManager
 
   // Lights
   private readonly keyLight: THREE.DirectionalLight
@@ -128,6 +130,9 @@ export class HqScene {
 
     this.dossiers = new HqTaskDossiers(this.materials)
     this.scene.add(this.dossiers.group)
+
+    this.handoffs = new HandoffConduitManager()
+    this.scene.add(this.handoffs.getGroup())
   }
 
   /**
@@ -151,6 +156,9 @@ export class HqScene {
     // 3. Reconcile role presentation states & characters (Wave 12D)
     const roleStates = deriveRolePresentationStates(worldState)
     this.characters.reconcileRoles(roleStates)
+
+    // 4. Reconcile architectural handoffs & custody markers (Wave 12F)
+    this.handoffs.updateHandoffs(worldState.handoffs)
   }
 
   public update(timeSeconds: number, reducedMotion: boolean): void {
@@ -163,6 +171,7 @@ export class HqScene {
     this.infrastructure.dispose()
     this.characters.dispose()
     this.dossiers.dispose()
+    this.handoffs.dispose()
     this.materials.dispose()
 
     this.scene.clear()

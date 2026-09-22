@@ -96,11 +96,23 @@ export interface RuntimeTaskProjection {
   }
 }
 
+export interface RuntimeHandoffProjection {
+  readonly handoffId: string
+  readonly kind: 'DEPENDENCY' | 'REVIEW' | 'INTEGRATION' | 'VERIFICATION' | 'APPROVAL'
+  readonly sourceTaskId: string
+  readonly targetTaskId: string
+  readonly sourceRoleId?: string | null | undefined
+  readonly targetRoleId?: string | null | undefined
+  readonly state: 'BLOCKED' | 'READY' | 'IN_PROGRESS' | 'SATISFIED' | 'FAILED'
+  readonly reasonCode?: string | undefined
+}
+
 export interface RuntimeProjectionSnapshot {
   readonly schemaVersion: string
   readonly epoch: string
   readonly revision: number
   readonly activeTasks: readonly RuntimeTaskProjection[]
+  readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
 }
 
 export interface RunDetailResponse {

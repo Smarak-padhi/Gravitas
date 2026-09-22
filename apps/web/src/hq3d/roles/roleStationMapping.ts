@@ -151,6 +151,37 @@ export function deriveRolePresentationStates(
     const model = route?.actualModel || 'UNKNOWN'
     const roleSource = activeTask?.roleSource ?? (activeTask ? 'LEGACY_COMPATIBILITY' : undefined)
 
+    const currentTaskId = override?.currentTaskId ?? (activeTask ? activeTask.id : null)
+    let handoffsIn: { readonly id: string; readonly sourceTaskId: string; readonly state: string }[] | undefined
+    let handoffsOut: { readonly id: string; readonly targetTaskId: string; readonly state: string }[] | undefined
+    let upstreamTasks: string[] | undefined
+    let downstreamTasks: string[] | undefined
+    let artifactCustody: string[] | undefined
+
+    if (currentTaskId && worldState.handoffs) {
+      const inList = worldState.handoffs.filter((h) => h.targetTaskId === currentTaskId)
+      if (inList.length > 0) {
+        handoffsIn = inList.map((h) => ({ id: h.id, sourceTaskId: h.sourceTaskId, state: h.state }))
+        upstreamTasks = Array.from(new Set(inList.map((h) => h.sourceTaskId)))
+      }
+
+      const outList = worldState.handoffs.filter((h) => h.sourceTaskId === currentTaskId)
+      if (outList.length > 0) {
+        handoffsOut = outList.map((h) => ({ id: h.id, targetTaskId: h.targetTaskId, state: h.state }))
+        downstreamTasks = Array.from(new Set(outList.map((h) => h.targetTaskId)))
+      }
+
+      if (
+        activeTask &&
+        (activeTask.canonicalState === 'RUNNING' ||
+          activeTask.canonicalState === 'VERIFYING' ||
+          activeTask.canonicalState === 'SUCCEEDED' ||
+          activeTask.canonicalState === 'APPROVED')
+      ) {
+        artifactCustody = [`artifact_${currentTaskId}`]
+      }
+    }
+
     const state: RolePresentationState = {
       roleId,
       displayName: role.displayName,
@@ -160,7 +191,7 @@ export function deriveRolePresentationStates(
       stationAlias: role.stationAlias,
       homePosition,
       isSeated: role.visualIdentity.isSeatedDefault,
-      currentTaskId: override?.currentTaskId ?? (activeTask ? activeTask.id : null),
+      currentTaskId,
       currentTaskTitle: override?.currentTaskTitle ?? (activeTask ? activeTask.title : null),
       currentHarness: override?.currentHarness ?? currentHarness,
       transport: override?.transport ?? transport,
@@ -168,6 +199,13 @@ export function deriveRolePresentationStates(
       model: override?.model ?? model,
       roleSource: override?.roleSource ?? roleSource,
       isFixtureOnly: override?.isFixtureOnly ?? false,
+      handoffsIn: override?.handoffsIn ?? handoffsIn,
+      handoffsOut: override?.handoffsOut ?? handoffsOut,
+      upstreamTasks: override?.upstreamTasks ?? upstreamTasks,
+      downstreamTasks: override?.downstreamTasks ?? downstreamTasks,
+      artifactCustody: override?.artifactCustody ?? artifactCustody,
+      reviewStatus: override?.reviewStatus,
+      integrationStatus: override?.integrationStatus,
     }
 
     result.set(roleId, state)
@@ -199,5 +237,12 @@ export function buildRoleInspectorMetadata(
     stationName: role ? `${role.displayName} Home Station` : presentation.stationId,
     roleSource: presentation.roleSource,
     isFixtureOnly: presentation.isFixtureOnly ?? false,
+    handoffsIn: presentation.handoffsIn,
+    handoffsOut: presentation.handoffsOut,
+    upstreamTasks: presentation.upstreamTasks,
+    downstreamTasks: presentation.downstreamTasks,
+    artifactCustody: presentation.artifactCustody,
+    reviewStatus: presentation.reviewStatus,
+    integrationStatus: presentation.integrationStatus,
   }
 }

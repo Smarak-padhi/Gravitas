@@ -61,6 +61,13 @@ export interface RolePresentationState {
   readonly model: string
   readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null
   readonly isFixtureOnly?: boolean
+  readonly handoffsIn?: readonly { readonly id: string; readonly sourceTaskId: string; readonly state: string }[] | undefined
+  readonly handoffsOut?: readonly { readonly id: string; readonly targetTaskId: string; readonly state: string }[] | undefined
+  readonly upstreamTasks?: readonly string[] | undefined
+  readonly downstreamTasks?: readonly string[] | undefined
+  readonly artifactCustody?: readonly string[] | undefined
+  readonly reviewStatus?: string | undefined
+  readonly integrationStatus?: string | undefined
 }
 
 export interface RoleInspectorMetadata {
@@ -78,4 +85,11 @@ export interface RoleInspectorMetadata {
   readonly stationName: string
   readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null
   readonly isFixtureOnly: boolean
+  readonly handoffsIn?: readonly { readonly id: string; readonly sourceTaskId: string; readonly state: string }[] | undefined
+  readonly handoffsOut?: readonly { readonly id: string; readonly targetTaskId: string; readonly state: string }[] | undefined
+  readonly upstreamTasks?: readonly string[] | undefined
+  readonly downstreamTasks?: readonly string[] | undefined
+  readonly artifactCustody?: readonly string[] | undefined
+  readonly reviewStatus?: string | undefined
+  readonly integrationStatus?: string | undefined
 }

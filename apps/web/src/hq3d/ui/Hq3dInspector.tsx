@@ -257,6 +257,81 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Wave 12F Handoff & Custody Panels */}
+              {entity.roleMetadata.handoffsIn && entity.roleMetadata.handoffsIn.length > 0 && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HANDOFFS IN</div>
+                  <div data-testid="inspector-handoffs-in" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+                    {entity.roleMetadata.handoffsIn.map((h) => (
+                      <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
+                        <span style={{ color: '#94a3b8' }}>← from {h.sourceTaskId}</span>
+                        <span style={{ fontWeight: 600, color: h.state === 'SATISFIED' ? '#10b981' : h.state === 'FAILED' ? '#ef4444' : '#38bdf8' }}>{h.state}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.handoffsOut && entity.roleMetadata.handoffsOut.length > 0 && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HANDOFFS OUT</div>
+                  <div data-testid="inspector-handoffs-out" style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px' }}>
+                    {entity.roleMetadata.handoffsOut.map((h) => (
+                      <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
+                        <span style={{ color: '#94a3b8' }}>→ to {h.targetTaskId}</span>
+                        <span style={{ fontWeight: 600, color: h.state === 'SATISFIED' ? '#10b981' : h.state === 'FAILED' ? '#ef4444' : '#38bdf8' }}>{h.state}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.upstreamTasks && entity.roleMetadata.upstreamTasks.length > 0 && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>UPSTREAM TASKS</div>
+                  <div data-testid="inspector-upstream-tasks" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.upstreamTasks.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.downstreamTasks && entity.roleMetadata.downstreamTasks.length > 0 && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>DOWNSTREAM TASKS</div>
+                  <div data-testid="inspector-downstream-tasks" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.downstreamTasks.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.artifactCustody && entity.roleMetadata.artifactCustody.length > 0 && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>ARTIFACT CUSTODY</div>
+                  <div data-testid="inspector-artifact-custody" style={{ fontWeight: 600, color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>📦</span>
+                    <span>{entity.roleMetadata.artifactCustody.join(', ')}</span>
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.reviewStatus && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>REVIEW STATUS</div>
+                  <div data-testid="inspector-review-status" style={{ fontWeight: 600, color: '#38bdf8' }}>
+                    {entity.roleMetadata.reviewStatus}
+                  </div>
+                </div>
+              )}
+
+              {entity.roleMetadata.integrationStatus && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>INTEGRATION STATUS</div>
+                  <div data-testid="inspector-integration-status" style={{ fontWeight: 600, color: '#38bdf8' }}>
+                    {entity.roleMetadata.integrationStatus}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

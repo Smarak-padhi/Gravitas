@@ -3,6 +3,7 @@
  * Detects unknown dependencies, duplicates, self-references, and cycles.
  */
 
+import { checkReviewerIndependence } from '@gravitas/core'
 import { PlanValidationError } from './errors.js'
 import type { RunPlan, TaskPlanDefinition } from './types.js'
 
@@ -93,6 +94,27 @@ export function validateRunPlan(plan: RunPlan): void {
         )
       }
       adjacency.get(cleanId)!.push(depId)
+    }
+
+    if (task.reviewOfTaskId) {
+      const targetId = task.reviewOfTaskId.trim()
+      if (targetId === cleanId) {
+        throw new PlanValidationError(`Task '${cleanId}' cannot review itself (self-review).`)
+      }
+      if (!taskIds.has(targetId)) {
+        throw new PlanValidationError(
+          `Task '${cleanId}' reviewOfTaskId references unknown task '${targetId}'. Available tasks: ${Array.from(taskIds).join(', ')}`
+        )
+      }
+      const reviewedTask = plan.tasks.find((t) => t.id.trim() === targetId)
+      const reviewerRole = task.roleId ?? (task.role as string)
+      const authorRole = reviewedTask?.roleId ?? (reviewedTask?.role as string)
+      if (reviewerRole && authorRole) {
+        const indep = checkReviewerIndependence(authorRole, reviewerRole)
+        if (!indep.allowed) {
+          throw new PlanValidationError(indep.reason ?? 'Reviewer independence violation')
+        }
+      }
     }
   }
 

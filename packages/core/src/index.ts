@@ -158,3 +158,20 @@ export {
   type DeterministicServiceId,
   type DeterministicServiceDescriptor,
 } from './roles.js'
+
+// Canonical Task Handoff, Artifact Custody & Review/Integration Model (Wave 12F)
+export {
+  createTaskHandoff,
+  validateArtifactCustody,
+  createArtifactRef,
+  type HandoffKind,
+  type HandoffState,
+  type HandoffReasonCode,
+  type TaskHandoff,
+  type TaskArtifactRef,
+  type ReviewVerdict,
+  type ReviewFinding,
+  type IndependentReviewResult,
+  type IntegrationDisposition,
+  type IntegrationPreparationResult,
+} from './handoff.js'

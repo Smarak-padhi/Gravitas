@@ -44,6 +44,7 @@ function createEmptyWorldState(): WorldState {
         },
       },
     },
+    handoffs: [],
     alertLevel: 'NORMAL',
   }
 }

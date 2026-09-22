@@ -51,16 +51,26 @@ import {
   createGatewayRouteCompletedEvent,
   createGatewayRouteFailedEvent,
   createTransportFallbackOccurredEvent,
+  createArtifactRef,
+  createTaskHandoff,
+  validateArtifactCustody,
   evaluateTaskReadiness,
   generateEventId,
   isTerminalState,
   transitionTask,
+  type AgentRoleId,
   type BrowserQaResult,
   type ExecutionContract,
   type GravitasEvent,
+  type IndependentReviewResult,
+  type IntegrationPreparationResult,
+  type RoleAssignment,
   type RunStatus,
   type Task,
+  type TaskArtifactRef,
   type TaskDependency,
+  type TaskHandoff,
+  type TaskRoleRequirement,
   type TaskState,
 } from '@gravitas/core'
 import { executeGit, removeWorktree, type WorktreeAllocation } from '@gravitas/git'
@@ -92,6 +102,8 @@ export interface BoundedSchedulerOptions {
   readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
   readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
   readonly onRouteResolved?: ((taskId: string, route: ResolvedInferenceRoute) => void) | undefined
+  readonly onHandoffUpdated?: ((handoff: TaskHandoff) => void) | undefined
+  readonly onArtifactCreated?: ((artifact: TaskArtifactRef) => void) | undefined
   readonly agentRegistry?: AgentRegistry | undefined
   readonly gatewayRegistry?: GatewayRegistry | undefined
   readonly router?: InferenceRouter | undefined
@@ -121,9 +133,16 @@ export class BoundedScheduler {
   private readonly agentRegistry?: AgentRegistry | undefined
   private readonly gatewayRegistry?: GatewayRegistry | undefined
   private readonly router?: InferenceRouter | undefined
+  private readonly onHandoffUpdated?: ((handoff: TaskHandoff) => void) | undefined
+  private readonly onArtifactCreated?: ((artifact: TaskArtifactRef) => void) | undefined
 
   private readonly tasks = new Map<string, Task>()
   private readonly taskDefinitions = new Map<string, TaskPlanDefinition>()
+  private readonly handoffs = new Map<string, TaskHandoff>()
+  private readonly artifacts = new Map<string, TaskArtifactRef>()
+  private readonly reviewResults = new Map<string, IndependentReviewResult>()
+  private readonly integrationResults = new Map<string, IntegrationPreparationResult>()
+
   private readonly readyQueue: string[] = []
   private readonly activeTasks = new Map<string, Promise<void>>()
   private readonly activeAllocations = new Map<string, WorktreeAllocation>()
@@ -157,6 +176,8 @@ export class BoundedScheduler {
     this.onCompiledPrompt = options.onCompiledPrompt
     this.onBrowserQa = options.onBrowserQa
     this.onRouteResolved = options.onRouteResolved
+    this.onHandoffUpdated = options.onHandoffUpdated
+    this.onArtifactCreated = options.onArtifactCreated
     this.agentRegistry = options.agentRegistry
     this.gatewayRegistry = options.gatewayRegistry
     this.router =
@@ -181,6 +202,18 @@ export class BoundedScheduler {
       const depIds = extractDependencyIds(taskDef)
       const dependencies: TaskDependency[] = depIds.map((depId) => ({ taskId: depId }))
 
+      const roleId = taskDef.roleId ?? (taskDef.role as AgentRoleId | undefined)
+      const roleRequirement: TaskRoleRequirement | undefined =
+        taskDef.roleRequirement ?? (roleId ? { requiredRoleId: roleId, reason: 'Declared in plan' } : undefined)
+      const roleAssignment: RoleAssignment | undefined = roleId
+        ? {
+            taskId: taskDef.id,
+            roleId,
+            assignedAt: now,
+            source: 'PLAN',
+          }
+        : undefined
+
       const task: Task = {
         id: taskDef.id,
         runId: this.runId,
@@ -191,6 +224,8 @@ export class BoundedScheduler {
         acceptanceCriteria: taskDef.acceptanceCriteria ?? [],
         requiresApproval: taskDef.requiresApproval ?? true,
         ...(taskDef.role ? { role: taskDef.role } : {}),
+        ...(roleRequirement ? { roleRequirement } : {}),
+        ...(roleAssignment ? { roleAssignment } : {}),
         ...(taskDef.requiredCapabilities ? { requiredCapabilities: taskDef.requiredCapabilities } : {}),
         ...(taskDef.browserQa ? { browserQa: taskDef.browserQa } : {}),
         createdAt: now,
@@ -199,11 +234,60 @@ export class BoundedScheduler {
       this.tasks.set(task.id, task)
     }
 
+    // Build canonical TaskHandoff records
+    for (const taskDef of this.plan.tasks) {
+      const targetTaskId = taskDef.id
+      const targetRole = taskDef.roleId ?? (taskDef.role as AgentRoleId | undefined)
+
+      if (taskDef.reviewOfTaskId) {
+        const sourceTaskId = taskDef.reviewOfTaskId
+        const sourceDef = this.taskDefinitions.get(sourceTaskId)
+        const sourceRole = sourceDef?.roleId ?? (sourceDef?.role as AgentRoleId | undefined)
+
+        const handoff = createTaskHandoff({
+          kind: 'REVIEW',
+          sourceTaskId,
+          targetTaskId,
+          sourceRoleId: sourceRole,
+          targetRoleId: targetRole,
+          requiredArtifactIds: taskDef.requiredArtifacts ?? [],
+          state: 'BLOCKED',
+          reasonCode: 'REVIEW_REQUIRED',
+        })
+        this.handoffs.set(handoff.id, handoff)
+      }
+
+      const depIds = extractDependencyIds(taskDef)
+      for (const depId of depIds) {
+        if (taskDef.reviewOfTaskId === depId) continue
+
+        const sourceDef = this.taskDefinitions.get(depId)
+        const sourceRole = sourceDef?.roleId ?? (sourceDef?.role as AgentRoleId | undefined)
+        const isIntegration = targetRole === 'role:integration:integration-engineer'
+
+        const handoff = createTaskHandoff({
+          kind: isIntegration ? 'INTEGRATION' : 'DEPENDENCY',
+          sourceTaskId: depId,
+          targetTaskId,
+          sourceRoleId: sourceRole,
+          targetRoleId: targetRole,
+          requiredArtifactIds: taskDef.requiredArtifacts ?? [],
+          state: 'BLOCKED',
+          reasonCode: isIntegration ? 'INTEGRATION_PENDING' : 'UPSTREAM_PENDING',
+        })
+        this.handoffs.set(handoff.id, handoff)
+      }
+    }
+
     // Evaluate initial readiness: tasks with 0 dependencies become READY immediately
     for (const [id, task] of this.tasks.entries()) {
       const evaluation = evaluateTaskReadiness(task, (depId) => this.tasks.get(depId))
+      const incomingHandoffs = this.getIncomingHandoffs(id)
+      const allHandoffsSatisfied =
+        incomingHandoffs.length === 0 || incomingHandoffs.every((h) => h.state === 'SATISFIED')
+
       let initialTask: Task
-      if (evaluation.status === 'READY') {
+      if (evaluation.status === 'READY' && allHandoffsSatisfied) {
         initialTask = { ...task, state: 'READY', updatedAt: new Date().toISOString() }
         this.readyQueue.push(id)
       } else {
@@ -214,6 +298,95 @@ export class BoundedScheduler {
 
     // Sort ready queue by task ID for deterministic ordering
     this.readyQueue.sort()
+  }
+
+  public getHandoffs(): readonly TaskHandoff[] {
+    return Object.freeze(Array.from(this.handoffs.values()))
+  }
+
+  public getArtifacts(): readonly TaskArtifactRef[] {
+    return Object.freeze(Array.from(this.artifacts.values()))
+  }
+
+  public getReviewResults(): readonly IndependentReviewResult[] {
+    return Object.freeze(Array.from(this.reviewResults.values()))
+  }
+
+  public getIntegrationResults(): readonly IntegrationPreparationResult[] {
+    return Object.freeze(Array.from(this.integrationResults.values()))
+  }
+
+  public getIncomingHandoffs(taskId: string): readonly TaskHandoff[] {
+    const list: TaskHandoff[] = []
+    for (const handoff of this.handoffs.values()) {
+      if (handoff.targetTaskId === taskId) {
+        list.push(handoff)
+      }
+    }
+    return Object.freeze(list)
+  }
+
+  public getOutgoingHandoffs(taskId: string): readonly TaskHandoff[] {
+    const list: TaskHandoff[] = []
+    for (const handoff of this.handoffs.values()) {
+      if (handoff.sourceTaskId === taskId) {
+        list.push(handoff)
+      }
+    }
+    return Object.freeze(list)
+  }
+
+  public recordReviewResult(result: IndependentReviewResult): void {
+    this.reviewResults.set(result.reviewerTaskId, result)
+    for (const [hId, handoff] of this.handoffs.entries()) {
+      if (handoff.kind === 'REVIEW' && handoff.sourceTaskId === result.reviewedTaskId) {
+        if (result.verdict === 'PASS') {
+          const updated: TaskHandoff = {
+            ...handoff,
+            state: 'SATISFIED',
+            reasonCode: 'REVIEW_PASSED',
+          }
+          this.handoffs.set(hId, updated)
+          this.onHandoffUpdated?.(updated)
+        } else if (result.verdict === 'CHANGES_REQUIRED') {
+          const updated: TaskHandoff = {
+            ...handoff,
+            state: 'FAILED',
+            reasonCode: 'REVIEW_CHANGES_REQUIRED',
+            details: result.findings.map((f) => `[${f.severity}] ${f.message}`).join('; '),
+          }
+          this.handoffs.set(hId, updated)
+          this.onHandoffUpdated?.(updated)
+        } else if (result.verdict === 'BLOCKED') {
+          const updated: TaskHandoff = {
+            ...handoff,
+            state: 'BLOCKED',
+            reasonCode: 'REVIEW_BLOCKED',
+            details: result.findings.map((f) => `[${f.severity}] ${f.message}`).join('; '),
+          }
+          this.handoffs.set(hId, updated)
+          this.onHandoffUpdated?.(updated)
+        }
+      }
+    }
+  }
+
+  public recordIntegrationResult(result: IntegrationPreparationResult): void {
+    this.integrationResults.set(result.integrationTaskId, result)
+    if (result.disposition === 'CONFLICT') {
+      for (const [hId, handoff] of this.handoffs.entries()) {
+        if (handoff.targetTaskId === result.integrationTaskId) {
+          const updated: TaskHandoff = {
+            ...handoff,
+            state: 'FAILED',
+            reasonCode: 'INTEGRATION_CONFLICT',
+            details: `Conflict in files: ${result.conflictFiles.join(', ')}`,
+          }
+          this.handoffs.set(hId, updated)
+          this.onHandoffUpdated?.(updated)
+        }
+      }
+    }
   }
 
   /**
@@ -372,6 +545,10 @@ export class BoundedScheduler {
       status: finalStatus,
       tasks: Array.from(this.tasks.values()),
       materializedCommits: this.getMaterializedCommits(),
+      handoffs: this.getHandoffs(),
+      artifacts: this.getArtifacts(),
+      reviewResults: this.getReviewResults(),
+      integrationResults: this.getIntegrationResults(),
     }
   }
 
@@ -837,6 +1014,8 @@ export class BoundedScheduler {
         this.materializedCommits.set(taskId, commitSha)
         this.onEvent(createTaskResultMaterializedEvent(this.runId, taskId, commitSha))
 
+        this.registerTaskCompletion(taskId, commitSha)
+
         // Clean up worktree
         await this.cleanWorktree(taskId)
 
@@ -844,6 +1023,7 @@ export class BoundedScheduler {
         this.unlockDownstreamTasks(taskId)
       } else if (finalTaskState === 'FAILED') {
         this.failedTasks.add(taskId)
+        this.registerTaskFailure(taskId, 'FAILED')
         await this.cleanWorktree(taskId)
         this.propagateFailure(taskId, 'DEPENDENCY_FAILED')
       }
@@ -886,6 +1066,8 @@ export class BoundedScheduler {
     this.materializedCommits.set(taskId, commitSha)
     this.onEvent(createTaskResultMaterializedEvent(this.runId, taskId, commitSha))
 
+    this.registerTaskCompletion(taskId, commitSha)
+
     // 2. Transition task to APPROVED
     this.waitingApprovalTasks.delete(taskId)
     this.approvedTasks.add(taskId)
@@ -926,6 +1108,7 @@ export class BoundedScheduler {
 
     this.waitingApprovalTasks.delete(taskId)
     this.failedTasks.add(taskId)
+    this.registerTaskFailure(taskId, reason)
     this.updateTaskState(taskId, 'FAILED', reason)
     this.onEvent(createTaskRejectedEvent(this.runId, taskId, reason))
 
@@ -948,14 +1131,127 @@ export class BoundedScheduler {
     for (const [id, task] of this.tasks.entries()) {
       if (task.state === 'BLOCKED' || task.state === 'PLANNED') {
         const evalResult = evaluateTaskReadiness(task, (depId) => this.tasks.get(depId))
-        if (evalResult.status === 'READY') {
-          this.updateTaskState(id, 'READY', 'All upstream dependencies satisfied')
+        const incomingHandoffs = this.getIncomingHandoffs(id)
+        const allHandoffsSatisfied =
+          incomingHandoffs.length === 0 || incomingHandoffs.every((h) => h.state === 'SATISFIED')
+
+        if (evalResult.status === 'READY' && allHandoffsSatisfied) {
+          this.updateTaskState(id, 'READY', 'All upstream dependencies and handoffs satisfied')
           this.onEvent(createTaskReadyEvent(this.runId, id))
           this.readyQueue.push(id)
         }
       }
     }
     this.readyQueue.sort()
+  }
+
+  private registerTaskCompletion(taskId: string, commitSha: string): void {
+    const task = this.tasks.get(taskId)
+    const taskDef = this.taskDefinitions.get(taskId)
+    const roleId =
+      task?.roleAssignment?.roleId ?? taskDef?.roleId ?? (taskDef?.role as AgentRoleId | undefined)
+
+    // 1. Create verified artifact reference
+    const defaultArtifactId = `artifact_${taskId}`
+    const artifact = createArtifactRef({
+      artifactId: defaultArtifactId,
+      sourceTaskId: taskId,
+      sourceRoleId: roleId,
+      sourceHarnessId: this.harness.id,
+      commitSha,
+      verificationState: 'VERIFIED',
+    })
+    this.artifacts.set(artifact.artifactId, artifact)
+    this.onArtifactCreated?.(artifact)
+
+    if (taskDef?.requiredArtifacts) {
+      for (const artId of taskDef.requiredArtifacts) {
+        const declaredArt = createArtifactRef({
+          artifactId: artId,
+          sourceTaskId: taskId,
+          sourceRoleId: roleId,
+          sourceHarnessId: this.harness.id,
+          commitSha,
+          verificationState: 'VERIFIED',
+        })
+        this.artifacts.set(declaredArt.artifactId, declaredArt)
+        this.onArtifactCreated?.(declaredArt)
+      }
+    }
+
+    // 2. If review task, record review result if not already recorded
+    if (taskDef?.reviewOfTaskId && roleId === 'role:quality:independent-reviewer') {
+      if (!this.reviewResults.has(taskId)) {
+        const reviewResult: IndependentReviewResult = {
+          reviewedTaskId: taskDef.reviewOfTaskId,
+          reviewerTaskId: taskId,
+          reviewerRoleId: roleId,
+          reviewerHarnessId: this.harness.id,
+          verdict: 'PASS',
+          findings: [],
+          timestamp: new Date().toISOString(),
+        }
+        this.reviewResults.set(taskId, reviewResult)
+      }
+    }
+
+    // 3. If integration task, record integration result if not already recorded
+    if (roleId === 'role:integration:integration-engineer') {
+      if (!this.integrationResults.has(taskId)) {
+        const depIds = extractDependencyIds(
+          taskDef ?? { id: taskId, title: task?.title ?? '', objective: task?.objective ?? '' }
+        )
+        const integrationResult: IntegrationPreparationResult = {
+          sourceTaskIds: depIds,
+          integrationTaskId: taskId,
+          disposition: 'READY_FOR_VERIFICATION',
+          conflictFiles: [],
+          candidateRef: commitSha,
+          timestamp: new Date().toISOString(),
+        }
+        this.integrationResults.set(taskId, integrationResult)
+      }
+    }
+
+    // 4. Update outgoing handoffs
+    for (const [hId, handoff] of this.handoffs.entries()) {
+      if (handoff.sourceTaskId === taskId) {
+        let custodySatisfied = true
+        if (handoff.requiredArtifactIds && handoff.requiredArtifactIds.length > 0) {
+          const custody = validateArtifactCustody({
+            handoff,
+            availableArtifacts: Array.from(this.artifacts.values()),
+          })
+          custodySatisfied = custody.satisfied
+        }
+
+        const nextState = custodySatisfied ? 'SATISFIED' : 'BLOCKED'
+        const nextReason = custodySatisfied ? 'UPSTREAM_SATISFIED' : 'ARTIFACT_MISSING'
+
+        const updatedHandoff: TaskHandoff = {
+          ...handoff,
+          state: nextState,
+          reasonCode: nextReason,
+        }
+        this.handoffs.set(hId, updatedHandoff)
+        this.onHandoffUpdated?.(updatedHandoff)
+      }
+    }
+  }
+
+  private registerTaskFailure(taskId: string, reason: string): void {
+    for (const [hId, handoff] of this.handoffs.entries()) {
+      if (handoff.sourceTaskId === taskId) {
+        const updatedHandoff: TaskHandoff = {
+          ...handoff,
+          state: 'FAILED',
+          reasonCode: 'UPSTREAM_FAILED',
+          details: reason,
+        }
+        this.handoffs.set(hId, updatedHandoff)
+        this.onHandoffUpdated?.(updatedHandoff)
+      }
+    }
   }
 
   /**
@@ -995,6 +1291,7 @@ export class BoundedScheduler {
 
   private failTask(taskId: string, reason: string): void {
     this.failedTasks.add(taskId)
+    this.registerTaskFailure(taskId, reason)
     this.updateTaskState(taskId, 'FAILED', reason)
     this.propagateFailure(taskId, 'DEPENDENCY_FAILED')
     void this.cleanWorktree(taskId)
