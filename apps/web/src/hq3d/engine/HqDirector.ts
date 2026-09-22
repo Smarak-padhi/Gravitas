@@ -6,6 +6,7 @@
  */
 
 import type { RoomId, SelectedEntity, PerformanceStats } from '../types.js'
+import type { WorldState } from '../world/worldState.js'
 import { ROOM_DEFINITIONS, getRoomByKey } from '../world/rooms.js'
 import { HqScene } from './HqScene.js'
 import { HqRenderer } from './HqRenderer.js'
@@ -25,6 +26,7 @@ export class HqDirector {
   public readonly cameraRig: HqCameraRig
   public readonly picking: HqPicking
 
+  private currentWorldState: WorldState | null = null
   private isViewActive = true
   private rafId: number | null = null
   private pointerDownCoord = { x: 0, y: 0 }
@@ -66,6 +68,39 @@ export class HqDirector {
       this.isViewActive = active
       this.evaluateRenderLoopState()
     }
+  }
+
+  /**
+   * Authoritative World State Update (Wave 12C)
+   *
+   * Skips scene reconciliation ONLY when the complete reconciliation identity matches:
+   * 1. projectionEpoch
+   * 2. projectionRevision
+   * 3. canonicalTaskFingerprint
+   *
+   * Returns true if reconciliation executed, false if skipped as identical.
+   */
+  public updateWorldState(next: WorldState): boolean {
+    if (this.currentWorldState) {
+      const prev = this.currentWorldState.revisionIdentity
+      const nextRev = next.revisionIdentity
+      const same =
+        prev.projectionEpoch === nextRev.projectionEpoch &&
+        prev.projectionRevision === nextRev.projectionRevision &&
+        prev.canonicalTaskFingerprint === nextRev.canonicalTaskFingerprint
+
+      if (same) {
+        return false // Skip reconciliation: exact authoritative identity match
+      }
+    }
+
+    this.currentWorldState = next
+    this.scene.reconcileWorld(next)
+    return true
+  }
+
+  public getCurrentWorldState(): WorldState | null {
+    return this.currentWorldState
   }
 
   private evaluateRenderLoopState(): void {

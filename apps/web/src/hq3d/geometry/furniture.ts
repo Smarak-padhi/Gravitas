@@ -6,13 +6,18 @@
 
 import * as THREE from 'three'
 import type { MaterialLibrary } from '../materials/materials.js'
+import type { StationId } from '../types.js'
+import type { StationStatus } from '../world/worldState.js'
 import { STATION_DEFINITIONS } from '../world/stations.js'
 
 export class HqFurniture {
   public readonly group: THREE.Group
+  public readonly stationIndicators = new Map<StationId, THREE.Mesh>()
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
+  private readonly materials: MaterialLibrary
 
   constructor(materials: MaterialLibrary) {
+    this.materials = materials
     this.group = new THREE.Group()
     this.group.name = 'hq-furniture'
 
@@ -97,6 +102,14 @@ export class HqFurniture {
     slate2.rotation.y = -0.3
     tableGroup.add(slate2)
 
+    // Authoritative Station Status Indicator Lens
+    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
+    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+    ind.position.set(0.0, 0.88, 0.96)
+    ind.name = 'station-indicator:planning-table'
+    tableGroup.add(ind)
+    this.stationIndicators.set('planning-table', ind)
+
     this.group.add(tableGroup)
   }
 
@@ -135,6 +148,14 @@ export class HqFurniture {
       podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
       podGroup.name = `station:${stationDef.id}`
       podGroup.userData = { type: 'station', id: stationDef.id, name: stationDef.name }
+
+      // Authoritative Station Status Light Lens
+      const indGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.04))
+      const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+      ind.position.set(0.0, 0.76, 0.48)
+      ind.name = `station-indicator:${stationDef.id}`
+      podGroup.add(ind)
+      this.stationIndicators.set(stationDef.id, ind)
 
       // 1. Walnut Desktop Slab (2.2m x 1.0m x 0.08m)
       const deskGeo = this.track(new THREE.BoxGeometry(2.2, 0.08, 1.0))
@@ -311,6 +332,14 @@ export class HqFurniture {
       consoleGroup.add(monScreen)
     }
 
+    // Authoritative Verifier Station Indicator
+    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
+    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+    ind.position.set(0.0, 1.01, 0.42)
+    ind.name = 'station-indicator:verifier-console'
+    consoleGroup.add(ind)
+    this.stationIndicators.set('verifier-console', ind)
+
     this.group.add(consoleGroup)
   }
 
@@ -411,6 +440,14 @@ export class HqFurniture {
     leg2.position.set(0.7, 0.35, 0.1)
     qaGroup.add(leg2)
 
+    // Authoritative Browser QA Matrix Station Indicator
+    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
+    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+    ind.position.set(0.0, 0.89, 0.48)
+    ind.name = 'station-indicator:browser-qa-matrix'
+    qaGroup.add(ind)
+    this.stationIndicators.set('browser-qa-matrix', ind)
+
     this.group.add(qaGroup)
   }
 
@@ -444,6 +481,14 @@ export class HqFurniture {
     const tablet = new THREE.Mesh(tabletGeo, materials.vellum)
     tablet.position.set(0.0, 0.9, 0.0)
     plinthGroup.add(tablet)
+
+    // Authoritative Approval Plinth Station Indicator
+    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
+    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+    ind.position.set(0.0, 0.92, 0.44)
+    ind.name = 'station-indicator:approval-plinth'
+    plinthGroup.add(ind)
+    this.stationIndicators.set('approval-plinth', ind)
 
     // Executive Operator review chair (deliberately empty because user is operator)
     const chairGroup = new THREE.Group()
@@ -499,7 +544,44 @@ export class HqFurniture {
     slot.position.set(0.0, 1.155, 0.0)
     vaultGroup.add(slot)
 
+    // Authoritative Repository Vault Station Indicator
+    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
+    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
+    ind.position.set(0.0, 1.18, 0.38)
+    ind.name = 'station-indicator:repository-vault'
+    vaultGroup.add(ind)
+    this.stationIndicators.set('repository-vault', ind)
+
     this.group.add(vaultGroup)
+  }
+
+  public setStationStatus(stationId: StationId, status: StationStatus): void {
+    const ind = this.stationIndicators.get(stationId)
+    if (!ind) return
+    switch (status) {
+      case 'ACTIVE':
+        ind.material = this.materials.statusRunning
+        break
+      case 'VERIFYING':
+        ind.material = this.materials.statusVerifying
+        break
+      case 'BROWSER_QA':
+        ind.material = this.materials.terminalScreen
+        break
+      case 'WAITING_APPROVAL':
+        ind.material = this.materials.statusWaiting
+        break
+      case 'COMPLETED':
+        ind.material = this.materials.statusSuccess
+        break
+      case 'FAILED':
+        ind.material = this.materials.statusFailure
+        break
+      case 'IDLE':
+      default:
+        ind.material = this.materials.gunmetal
+        break
+    }
   }
 
   public dispose(): void {
@@ -507,5 +589,6 @@ export class HqFurniture {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
+    this.stationIndicators.clear()
   }
 }

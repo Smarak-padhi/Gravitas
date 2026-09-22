@@ -12,6 +12,8 @@ import { HqArchitecture } from '../geometry/architecture.js'
 import { HqFurniture } from '../geometry/furniture.js'
 import { HqInfrastructure } from '../geometry/infrastructure.js'
 import { HqCharacters } from '../geometry/characters.js'
+import { HqTaskDossiers } from '../geometry/dossiers.js'
+import type { WorldState } from '../world/worldState.js'
 
 export class HqScene {
   public readonly scene: THREE.Scene
@@ -20,6 +22,7 @@ export class HqScene {
   public readonly furniture: HqFurniture
   public readonly infrastructure: HqInfrastructure
   public readonly characters: HqCharacters
+  public readonly dossiers: HqTaskDossiers
 
   // Lights
   private readonly keyLight: THREE.DirectionalLight
@@ -121,6 +124,38 @@ export class HqScene {
 
     this.characters = new HqCharacters(this.materials)
     this.scene.add(this.characters.group)
+
+    this.dossiers = new HqTaskDossiers(this.materials)
+    this.scene.add(this.dossiers.group)
+  }
+
+  /**
+   * Authoritative Scene Reconciliation (Wave 12C)
+   * Pure deterministic WorldState -> 3D Headquarters in-place updates.
+   */
+  public reconcileWorld(worldState: WorldState): void {
+    // 1. Reconcile tangible physical task dossiers
+    this.dossiers.reconcileTasks(worldState.tasks)
+
+    // 2. Reconcile architectural station indicators
+    for (const [stationId, stState] of Object.entries(worldState.stations)) {
+      if (stationId === 'omniroute-rack') {
+        const omni = worldState.infrastructure.gateways['omniroute-local']
+        this.infrastructure.setGatewayActivity(stState.status === 'ACTIVE', omni?.warningState)
+      } else {
+        this.furniture.setStationStatus(stationId as any, stState.status)
+      }
+    }
+
+    // 3. Reconcile scale figure visibility strictly by workstation occupancy
+    // Unknown workers stay in NEUTRAL_HOLD and do not occupy Codex/FCC
+    const codexActive = worldState.stations['codex-workstation']?.status === 'ACTIVE'
+    const fccActive = worldState.stations['fcc-workstation']?.status === 'ACTIVE'
+    const verifierActive = worldState.stations['verifier-console']?.status === 'VERIFYING'
+
+    this.characters.setCharacterVisibility('char-codex', codexActive)
+    this.characters.setCharacterVisibility('char-fcc', fccActive)
+    this.characters.setCharacterVisibility('char-verifier', verifierActive)
   }
 
   public dispose(): void {
@@ -128,6 +163,7 @@ export class HqScene {
     this.furniture.dispose()
     this.infrastructure.dispose()
     this.characters.dispose()
+    this.dossiers.dispose()
     this.materials.dispose()
 
     this.scene.clear()

@@ -6,6 +6,7 @@ import type {
   BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
+  GravitasEventType,
   PromptLayerName,
   Run,
   RunStatus,
@@ -30,6 +31,7 @@ export type {
   BrowserQaResult,
   ExecutionContract,
   GravitasEvent,
+  GravitasEventType,
   LayerMetadata,
   ProjectPromptContext,
   PromptLayerName,
@@ -62,6 +64,41 @@ export interface StateSummaryResponse {
     readonly status: string
     readonly message?: string | undefined
   }
+  readonly projection?: RuntimeProjectionSnapshot | undefined
+}
+
+export type RuntimeTaskPhase = 'PREPARING' | 'WORKER_RUNNING' | 'CLEANUP' | 'VERIFYING' | 'BROWSER_QA'
+
+export interface RuntimeRouteProjection {
+  readonly transport: 'DIRECT' | 'GATEWAY'
+  readonly active: boolean
+  readonly gatewayId?: string | null
+  readonly requestedProvider?: string | null
+  readonly requestedModel?: string | null
+  readonly actualProvider?: string | null
+  readonly actualModel?: string | null
+  readonly providerFallbackOccurred: boolean
+  readonly transportFallbackOccurred: boolean
+}
+
+export interface RuntimeTaskProjection {
+  readonly taskId: string
+  readonly phase: RuntimeTaskPhase
+  readonly workerIdentity?: string | null
+  readonly route?: RuntimeRouteProjection
+  readonly verification?: {
+    readonly status: 'RUNNING' | 'PASSED' | 'FAILED'
+  }
+  readonly browserQa?: {
+    readonly status: 'RUNNING' | 'PASSED' | 'FAILED'
+  }
+}
+
+export interface RuntimeProjectionSnapshot {
+  readonly schemaVersion: string
+  readonly epoch: string
+  readonly revision: number
+  readonly activeTasks: readonly RuntimeTaskProjection[]
 }
 
 export interface RunDetailResponse {

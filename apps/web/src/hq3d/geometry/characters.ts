@@ -11,6 +11,7 @@ import type { CharacterId } from '../types.js'
 
 export class HqCharacters {
   public readonly group: THREE.Group
+  public readonly figureMap = new Map<CharacterId, THREE.Group>()
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private readonly materials: MaterialLibrary
 
@@ -223,6 +224,14 @@ export class HqCharacters {
     }
 
     this.group.add(charGroup)
+    this.figureMap.set(opts.id, charGroup)
+  }
+
+  public setCharacterVisibility(id: CharacterId, visible: boolean): void {
+    const fig = this.figureMap.get(id)
+    if (fig) {
+      fig.visible = visible
+    }
   }
 
   public dispose(): void {
@@ -230,5 +239,6 @@ export class HqCharacters {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
+    this.figureMap.clear()
   }
 }

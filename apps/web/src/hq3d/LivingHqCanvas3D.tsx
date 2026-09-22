@@ -9,15 +9,22 @@ import { HqDirector } from './engine/HqDirector.js'
 import type { PerformanceStats, RoomId, SelectedEntity } from './types.js'
 import { Hq3dInspector } from './ui/Hq3dInspector.js'
 import { ROOM_DEFINITIONS } from './world/rooms.js'
+import { deriveWorldState, type WorldState } from './world/worldState.js'
+import { useEvents } from '../api/useEvents.js'
+import type { RuntimeProjectionSnapshot, StateSummaryResponse } from '../api/types.js'
 
 export interface LivingHqCanvas3DProps {
   readonly isViewActive: boolean
   readonly onFallbackTo2D: () => void
+  readonly initialWorldState?: WorldState | undefined
+  readonly overrideWorldState?: WorldState | undefined
 }
 
 export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   isViewActive,
   onFallbackTo2D,
+  initialWorldState,
+  overrideWorldState,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -99,6 +106,50 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   useEffect(() => {
     directorRef.current?.setViewActive(isViewActive)
   }, [isViewActive])
+
+  // 3b. Fetch Authoritative Server State & Reconcile (Wave 12C)
+  const fetchAuthoritativeState = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/state')
+      if (!res.ok) return
+      const summary = (await res.json()) as StateSummaryResponse
+      const projection: RuntimeProjectionSnapshot = summary.projection ?? {
+        schemaVersion: '1.0.0',
+        epoch: 'epoch_bootstrap',
+        revision: 0,
+        activeTasks: [],
+      }
+      const activeRun = summary.runs?.find((r) => r.status === 'RUNNING') ?? summary.runs?.[0]
+      const worldState = deriveWorldState({
+        projection,
+        tasks: summary.tasks ?? [],
+        run: activeRun ? { id: activeRun.id, status: activeRun.status } : null,
+      })
+      directorRef.current?.updateWorldState(worldState)
+    } catch (err) {
+      console.warn('Failed to fetch authoritative state for 3D HQ:', err)
+    }
+  }, [])
+
+  // Update world state on mount, view activation, or override change
+  useEffect(() => {
+    if (overrideWorldState) {
+      directorRef.current?.updateWorldState(overrideWorldState)
+    } else if (initialWorldState) {
+      directorRef.current?.updateWorldState(initialWorldState)
+    } else if (isViewActive) {
+      void fetchAuthoritativeState()
+    }
+  }, [isViewActive, overrideWorldState, initialWorldState, fetchAuthoritativeState])
+
+  // Pure SSE Invalidation Channel: invalidating events trigger authoritative refetch
+  useEvents({
+    onInvalidate: () => {
+      if (isViewActive && !overrideWorldState) {
+        void fetchAuthoritativeState()
+      }
+    },
+  })
 
   // 4. ResizeObserver for responsive canvas scaling
   useEffect(() => {

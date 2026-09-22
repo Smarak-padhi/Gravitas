@@ -12,8 +12,11 @@ import { STATION_DEFINITIONS } from '../world/stations.js'
 export class HqInfrastructure {
   public readonly group: THREE.Group
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
+  private readonly materials: MaterialLibrary
+  private gatewayLedMesh: THREE.Mesh | null = null
 
   constructor(materials: MaterialLibrary) {
+    this.materials = materials
     this.group = new THREE.Group()
     this.group.name = 'hq-infrastructure'
 
@@ -72,6 +75,15 @@ export class HqInfrastructure {
       face.position.set(0.0, 1.15, 0.555)
       cabinetGroup.add(face)
 
+      // If Rack 01 (OmniRoute), mount the authoritative activity LED bar
+      if (i === 0) {
+        const ledGeo = this.track(new THREE.BoxGeometry(0.88, 0.03, 0.02))
+        this.gatewayLedMesh = new THREE.Mesh(ledGeo, materials.gunmetal)
+        this.gatewayLedMesh.position.set(0.0, 2.15, 0.57)
+        this.gatewayLedMesh.name = 'omniroute-activity-led'
+        cabinetGroup.add(this.gatewayLedMesh)
+      }
+
       // Vertical Brushed Brass Mounting Rails
       const railGeo = this.track(new THREE.BoxGeometry(0.04, 2.16, 0.03))
       const railLeft = new THREE.Mesh(railGeo, materials.brass)
@@ -114,10 +126,27 @@ export class HqInfrastructure {
     this.group.add(rackGroup)
   }
 
+  public setGatewayActivity(
+    active: boolean,
+    warning?: { providerFallbackOccurred: boolean; transportFallbackOccurred: boolean }
+  ): void {
+    if (!this.gatewayLedMesh) return
+    if (active) {
+      if (warning?.providerFallbackOccurred || warning?.transportFallbackOccurred) {
+        this.gatewayLedMesh.material = this.materials.statusWaiting
+      } else {
+        this.gatewayLedMesh.material = this.materials.statusRunning
+      }
+    } else {
+      this.gatewayLedMesh.material = this.materials.gunmetal
+    }
+  }
+
   public dispose(): void {
     for (const geom of this.geometriesToDispose) {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
+    this.gatewayLedMesh = null
   }
 }

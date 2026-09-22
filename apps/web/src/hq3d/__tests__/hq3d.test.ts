@@ -244,8 +244,35 @@ describe('3D Headquarters — Scene Graph & Lighting Assembly', () => {
     expect(hqScene.scene.getObjectByName('hq-furniture')).toBeDefined()
     expect(hqScene.scene.getObjectByName('hq-infrastructure')).toBeDefined()
     expect(hqScene.scene.getObjectByName('hq-characters')).toBeDefined()
+    expect(hqScene.scene.getObjectByName('hq-task-dossiers')).toBeDefined()
 
     expect(() => hqScene.dispose()).not.toThrow()
     expect(hqScene.scene.children).toHaveLength(0)
+  })
+
+  it('reconciles authoritative world state into scene objects and station indicators', async () => {
+    const hqScene = new HqScene()
+    const { deriveWorldState } = await import('../world/worldState.js')
+    const { FIXTURE_E_WORKER_RUNNING_GATEWAY_ACTIVE, FIXTURE_A_EMPTY } = await import('../world/fixtures.js')
+
+    const stateE = deriveWorldState(FIXTURE_E_WORKER_RUNNING_GATEWAY_ACTIVE)
+    hqScene.reconcileWorld(stateE)
+
+    // Omniroute rack must be active
+    const rackLed = hqScene.scene.getObjectByName('omniroute-activity-led') as THREE.Mesh
+    expect(rackLed).toBeDefined()
+    expect(rackLed.material).toBe(hqScene.materials.statusRunning)
+
+    // FCC figure should be visible
+    const fccFig = hqScene.characters.figureMap.get('char-fcc')
+    expect(fccFig?.visible).toBe(true)
+
+    // Empty state should clear activity
+    const stateA = deriveWorldState(FIXTURE_A_EMPTY)
+    hqScene.reconcileWorld(stateA)
+    expect(rackLed.material).toBe(hqScene.materials.gunmetal)
+    expect(fccFig?.visible).toBe(false)
+
+    hqScene.dispose()
   })
 })
