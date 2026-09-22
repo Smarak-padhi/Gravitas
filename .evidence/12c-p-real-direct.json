@@ -1,0 +1,73 @@
+{
+  "_metadata": {
+    "wave": "12C-P-E",
+    "type": "REAL_DIRECT_EXECUTION",
+    "capturedAt": "2026-09-22T03:03:58.028Z",
+    "harnessId": "codex",
+    "harnessVersion": "codex-cli 0.153.4",
+    "runId": "run_1790046208960_8u9j2",
+    "taskId": "task-evidence-direct-1",
+    "serverUrl": "http://127.0.0.1:63115"
+  },
+  "harnessAvailability": {
+    "status": "AVAILABLE",
+    "installed": true,
+    "version": "codex-cli 0.153.4",
+    "executablePath": "C:\\Users\\smara\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\node_modules\\@openai\\codex-win32-x64\\vendor\\x86_64-pc-windows-msvc\\bin\\codex.exe",
+    "usableNoninteractive": true,
+    "message": "Codex is installed (codex-cli 0.153.4) and authenticated."
+  },
+  "initialSnapshot": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_b4c6c6e9-67a8-4295-b3c9-f8359dc1d851",
+    "revision": 0,
+    "activeTasks": []
+  },
+  "snapshots": [
+    {
+      "label": "poll-1-phase-WORKER_RUNNING",
+      "timestamp": "2026-09-22T03:03:36.315Z",
+      "snapshot": {
+        "schemaVersion": "1.0.0",
+        "epoch": "proj_epoch_b4c6c6e9-67a8-4295-b3c9-f8359dc1d851",
+        "revision": 4,
+        "activeTasks": [
+          {
+            "taskId": "task-evidence-direct-1",
+            "phase": "WORKER_RUNNING",
+            "workerIdentity": "codex",
+            "route": {
+              "transport": "DIRECT",
+              "active": true,
+              "gatewayId": null,
+              "requestedProvider": null,
+              "requestedModel": null,
+              "providerFallbackOccurred": false,
+              "transportFallbackOccurred": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "finalProjection": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_b4c6c6e9-67a8-4295-b3c9-f8359dc1d851",
+    "revision": 9,
+    "activeTasks": []
+  },
+  "finalCanonicalTask": {
+    "id": "task-evidence-direct-1",
+    "state": "WAITING_APPROVAL",
+    "title": "Fix add function"
+  },
+  "freshClientProjection": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_b4c6c6e9-67a8-4295-b3c9-f8359dc1d851",
+    "revision": 9,
+    "activeTasks": []
+  },
+  "phaseSequenceObserved": [
+    "WORKER_RUNNING"
+  ]
+}

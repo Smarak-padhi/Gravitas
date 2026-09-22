@@ -481,7 +481,7 @@ describe('Runtime Projection Store Unit Tests (projection.test.ts)', () => {
   })
 })
 
-describe('Server & End-to-End Integration Tests (Section 9, 10, 15, 16)', () => {
+describe('Server & Deterministic Fixture Integration Tests (Section 9, 10, 15, 16)', () => {
   let primaryRepoPath: string
   let runtimeRoot: string
   let server: GravitasServer
@@ -567,7 +567,7 @@ describe('Server & End-to-End Integration Tests (Section 9, 10, 15, 16)', () => 
     await server.stop()
   })
 
-  it('15 & 16. Real lifecycle proof (DIRECT control): PREPARING -> WORKER_RUNNING -> WAITING_APPROVAL', async () => {
+  it('15 & 16. Deterministic lifecycle integration test (fixture harness, DIRECT control): PREPARING -> WORKER_RUNNING -> WAITING_APPROVAL', async () => {
     // 1. Create Run
     const createRes = await fetch(`${serverUrl}/api/v1/runs`, {
       method: 'POST',

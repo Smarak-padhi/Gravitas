@@ -57,7 +57,7 @@ All 6 defects have been remediated in `apps/server/src/projection.ts` and `apps/
 | 12 | Independent fallbacks (`providerFallbackOccurred` vs `transportFallbackOccurred`) | PASS | `apps/server/src/projection.test.ts:217-270` |
 | 13 | Gateway ID and provider/model tracking | PASS | `apps/server/src/projection.test.ts:217-270` |
 | 14 | Terminal task removal from `activeTasks` | PASS | `apps/server/src/projection.test.ts:273-305` |
-| 15 | Real lifecycle proof (DIRECT control): `PREPARING` -> `WORKER_RUNNING` -> `WAITING_APPROVAL` | PASS | `apps/server/src/projection.test.ts:570-634` |
+| 15 | Deterministic lifecycle integration test (fixture harness, DIRECT control): `PREPARING` -> `WORKER_RUNNING` -> `WAITING_APPROVAL` | PASS | `apps/server/src/projection.test.ts:570-634` |
 | 16 | Concurrent task isolation (T1 and T2 retain independent phases/routes) | PASS | `apps/server/src/projection.test.ts:308-370` |
 | 17 | Event-history eviction independence (projection intact after buffer eviction) | PASS | `apps/server/src/projection.test.ts:636-663` |
 | 18 | Fresh-client recovery (reconstruct truthful state without SSE replay) | PASS | `apps/server/src/projection.test.ts:665-701` |
@@ -99,3 +99,22 @@ All 6 defects have been remediated in `apps/server/src/projection.ts` and `apps/
 - Wave 12C has NOT been started.
 - Three.js and `apps/web/src/hq3d/**` were NOT modified.
 - Wave 12D has NOT been started.
+
+---
+
+### 6. Wave 12C-P-E Real Execution Evidence Closure
+
+Authoritative execution traces captured live against isolated temporary environments with zero credential leakage:
+
+1. **DIRECT Control Proof (`.evidence/12c-p-real-direct.json`)**:
+   - Real `GravitasServer` + native OpenAI Codex CLI binary (`codex-cli 0.153.4`).
+   - Observed phase transitions: `PREPARING` $\to$ `WORKER_RUNNING` (`route.transport: DIRECT`) $\to$ `WAITING_APPROVAL`.
+   - Terminal cleanup confirmed: `activeTasks: []`.
+   - Fresh-client state query verified: `GET /api/v1/state` returns identical truthful projection.
+
+2. **GATEWAY Execution Proof (`.evidence/12c-p-real-gateway.json`)**:
+   - Real `GravitasServer` + qualified OmniRoute 3.8.50 sidecar daemon (`decision=APPROVED`, `state=READY`) + mock loopback upstream.
+   - Observed phase transitions: `PREPARING` $\to$ `WORKER_RUNNING` (`route.transport: GATEWAY`, `route.gatewayId: omniroute-local`, `route.active: true`) $\to$ `CLEANUP` (`route.active: false`) $\to$ `VERIFYING` (`verification.status: RUNNING`) $\to$ `WAITING_APPROVAL`.
+   - Terminal cleanup confirmed: `activeTasks: []`.
+   - Fresh-client recovery confirmed: `GET /api/v1/state` reconstructed `revision: 11`, `activeTasks: []`.
+   - Secret sanitization verified: Zero canary tokens, keys, or authorization headers leaked.

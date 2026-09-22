@@ -1,0 +1,159 @@
+{
+  "_metadata": {
+    "wave": "12C-P-E",
+    "type": "REAL_GATEWAY_EXECUTION",
+    "capturedAt": "2026-09-22T04:17:29.500Z",
+    "harnessId": "gateway-worker",
+    "harnessVersion": "1.0.0",
+    "omniRoutePid": 24680,
+    "omniRouteUrl": "http://127.0.0.1:20146",
+    "omniRouteVersion": "3.8.50",
+    "qualificationDecision": "APPROVED",
+    "qualificationMode": "REAL",
+    "gatewayState": "READY",
+    "runId": "run_1790050643006_32bxe",
+    "taskId": "task-evidence-gateway-1",
+    "serverUrl": "http://127.0.0.1:60416"
+  },
+  "initialSnapshot": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+    "revision": 0,
+    "activeTasks": []
+  },
+  "snapshots": [
+    {
+      "label": "poll-1-phase-PREPARING-transport-unknown",
+      "timestamp": "2026-09-22T04:17:23.517Z",
+      "snapshot": {
+        "schemaVersion": "1.0.0",
+        "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+        "revision": 1,
+        "activeTasks": [
+          {
+            "taskId": "task-evidence-gateway-1",
+            "phase": "PREPARING"
+          }
+        ]
+      }
+    },
+    {
+      "label": "poll-5-phase-WORKER_RUNNING-transport-GATEWAY",
+      "timestamp": "2026-09-22T04:17:25.557Z",
+      "snapshot": {
+        "schemaVersion": "1.0.0",
+        "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+        "revision": 5,
+        "activeTasks": [
+          {
+            "taskId": "task-evidence-gateway-1",
+            "phase": "WORKER_RUNNING",
+            "workerIdentity": "gateway-worker",
+            "route": {
+              "transport": "GATEWAY",
+              "active": true,
+              "gatewayId": "omniroute-local",
+              "requestedProvider": "openai",
+              "requestedModel": "gpt-4o",
+              "providerFallbackOccurred": false,
+              "transportFallbackOccurred": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "poll-10-phase-CLEANUP-transport-GATEWAY",
+      "timestamp": "2026-09-22T04:17:28.120Z",
+      "snapshot": {
+        "schemaVersion": "1.0.0",
+        "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+        "revision": 7,
+        "activeTasks": [
+          {
+            "taskId": "task-evidence-gateway-1",
+            "phase": "CLEANUP",
+            "workerIdentity": "gateway-worker",
+            "route": {
+              "transport": "GATEWAY",
+              "active": false,
+              "gatewayId": "omniroute-local",
+              "requestedProvider": "openai",
+              "requestedModel": "gpt-4o",
+              "providerFallbackOccurred": false,
+              "transportFallbackOccurred": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "poll-11-phase-VERIFYING-transport-GATEWAY",
+      "timestamp": "2026-09-22T04:17:28.639Z",
+      "snapshot": {
+        "schemaVersion": "1.0.0",
+        "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+        "revision": 9,
+        "activeTasks": [
+          {
+            "taskId": "task-evidence-gateway-1",
+            "phase": "VERIFYING",
+            "workerIdentity": "gateway-worker",
+            "route": {
+              "transport": "GATEWAY",
+              "active": false,
+              "gatewayId": "omniroute-local",
+              "requestedProvider": "openai",
+              "requestedModel": "gpt-4o",
+              "providerFallbackOccurred": false,
+              "transportFallbackOccurred": false
+            },
+            "verification": {
+              "status": "RUNNING"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "finalProjection": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+    "revision": 11,
+    "activeTasks": []
+  },
+  "finalCanonicalTask": {
+    "id": "task-evidence-gateway-1",
+    "state": "WAITING_APPROVAL",
+    "title": "Fix add via gateway"
+  },
+  "freshClientProjection": {
+    "schemaVersion": "1.0.0",
+    "epoch": "proj_epoch_9479807f-260c-4660-a20b-20b49b79ec9f",
+    "revision": 11,
+    "activeTasks": []
+  },
+  "phaseSequenceObserved": [
+    {
+      "phase": "PREPARING"
+    },
+    {
+      "phase": "WORKER_RUNNING",
+      "transport": "GATEWAY",
+      "gatewayId": "omniroute-local",
+      "active": true
+    },
+    {
+      "phase": "CLEANUP",
+      "transport": "GATEWAY",
+      "gatewayId": "omniroute-local",
+      "active": false
+    },
+    {
+      "phase": "VERIFYING",
+      "transport": "GATEWAY",
+      "gatewayId": "omniroute-local",
+      "active": false
+    }
+  ]
+}

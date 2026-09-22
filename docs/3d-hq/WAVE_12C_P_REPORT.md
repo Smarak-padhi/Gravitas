@@ -24,7 +24,7 @@ The goal of this wave was to implement a server-owned, sanitized, revisioned run
 16. **Task Ownership Clarification**: `workerIdentity` and `route.workerId` resolve the ambiguous ownership that `TASK_READY` historically caused.
 17. **Central Snapshot API Exposure**: Added the `projection` object dynamically into `getStateSummary()` response payload.
 18. **Interface Exporter Updates**: Exported new `RuntimeTaskProjection` and `RuntimeProjectionSnapshot` types inside `apps/server/src/types.ts`.
-19. **Test Suite Proof**: Ran `vitest run apps/server` verifying `golden-loop-api.test.ts`, `security.test.ts`, etc., pass without errors alongside the added projection payload.
+19. **Test Suite Proof (Deterministic Fixtures)**: Ran `vitest run apps/server` verifying `golden-loop-api.test.ts`, `security.test.ts`, etc., pass without errors alongside the added projection payload. Integration tests in `projection.test.ts` use a deterministic fixture harness (`ObservableFakeHarness`), not a qualified production worker. Real worker execution evidence is in `docs/3d-hq/WAVE_12C_P_R_REPORT.md` and `.evidence/`.
 20. **Zero FSM Side-Effects**: Respected the architectural boundary, leaving `TaskState` unaltered.
 21. **No External DB Requirement**: Implemented strictly in-memory aligned with `InMemoryRegistry`.
 22. **No Frontend Hacks Needed**: With `getStateSummary()` enriched, the client reads server truth upon reconnect.
