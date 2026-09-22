@@ -436,6 +436,9 @@ export class RunService {
       onCompiledPrompt: (taskId, compiledPrompt) => {
         this.registry.setCompiledPrompt(taskId, compiledPrompt)
       },
+      onRouteResolved: (taskId, route) => {
+        this.eventHub.projectionStore.processRouteResolved(taskId, route)
+      },
       onBrowserQa: (taskId, qaResult) => {
         this.registry.setBrowserQaResult(taskId, qaResult)
       },
@@ -815,6 +818,7 @@ export class RunService {
         status: harnessStatus,
         ...(harnessMessage ? { message: harnessMessage } : {}),
       },
+      projection: this.eventHub.projectionStore.getSnapshot(),
     }
   }
 

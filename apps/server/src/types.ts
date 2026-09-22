@@ -181,6 +181,12 @@ export interface TaskEvidenceDiffResponse {
   readonly diff: string
 }
 
+export type {
+  RuntimeExecutionPhase,
+  RuntimeTaskProjection,
+  RuntimeProjectionSnapshot,
+} from './projection.js'
+
 /**
  * State summary returned by GET /api/v1/state.
  */
@@ -194,6 +200,7 @@ export interface StateSummaryResponse {
     readonly status: string
     readonly message?: string | undefined
   }
+  readonly projection: import('./projection.js').RuntimeProjectionSnapshot
 }
 
 /**

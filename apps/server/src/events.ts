@@ -13,10 +13,12 @@
 import type { ServerResponse } from 'node:http'
 import type { GravitasEvent } from '@gravitas/core'
 import type { InMemoryRegistry } from './registry.js'
+import { RuntimeProjectionStore } from './projection.js'
 
 export class EventHub {
   private readonly subscribers = new Set<ServerResponse>()
   private readonly registry: InMemoryRegistry
+  public readonly projectionStore = new RuntimeProjectionStore()
 
   public constructor(registry: InMemoryRegistry) {
     this.registry = registry
@@ -62,6 +64,7 @@ export class EventHub {
    */
   public publish(event: GravitasEvent): void {
     this.registry.recordEvent(event)
+    this.projectionStore.processEvent(event)
 
     const payload = JSON.stringify(event)
     const sseChunk = `id: ${event.eventId}\nevent: ${event.type}\ndata: ${payload}\n\n`
