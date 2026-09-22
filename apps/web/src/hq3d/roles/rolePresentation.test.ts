@@ -385,4 +385,122 @@ describe('Wave 12D — Minimal Role-Based Character Foundation', () => {
       expect(role).toBeNull()
     })
   })
+
+  describe('Wave 12E: Canonical Role Contract & Harness Swap Proof', () => {
+    it('B12 & B13: Frontend Engineer stays at home station when swapping between Codex and FCC harnesses', () => {
+      const baseWorld = createEmptyWorldState()
+
+      // Task A: Frontend Engineer + Codex harness
+      const worldA: WorldState = {
+        ...baseWorld,
+        tasks: {
+          'task-a': {
+            id: 'task-a',
+            title: 'Build UI Navigation',
+            canonicalState: 'RUNNING',
+            physicalLocation: 'ASSIGNED_WORKSTATION',
+            assignedStationId: 'codex-workstation',
+            roleId: 'role:engineering:frontend-engineer',
+            roleSource: 'CANONICAL',
+            harnessId: 'codex-worker',
+          },
+        },
+      }
+
+      const presA = deriveRolePresentationStates(worldA)
+      const feA = presA.get('role:engineering:frontend-engineer')!
+      expect(feA.characterState).toBe('FOCUSED')
+      expect(feA.currentHarness).toBe('codex-worker')
+      expect(feA.roleSource).toBe('CANONICAL')
+      expect(feA.stationId).toBe('engineering-workstation-01')
+
+      // Task B: Frontend Engineer + FCC harness (swapped harness!)
+      const worldB: WorldState = {
+        ...baseWorld,
+        tasks: {
+          'task-b': {
+            id: 'task-b',
+            title: 'Refactor Layout Grid',
+            canonicalState: 'RUNNING',
+            physicalLocation: 'ASSIGNED_WORKSTATION',
+            assignedStationId: 'codex-workstation',
+            roleId: 'role:engineering:frontend-engineer',
+            roleSource: 'CANONICAL',
+            harnessId: 'fcc-worker',
+          },
+        },
+      }
+
+      const presB = deriveRolePresentationStates(worldB)
+      const feB = presB.get('role:engineering:frontend-engineer')!
+      expect(feB.characterState).toBe('FOCUSED')
+      expect(feB.currentHarness).toBe('fcc-worker')
+      expect(feB.roleSource).toBe('CANONICAL')
+      expect(feB.stationId).toBe('engineering-workstation-01')
+
+      // Both belong to identical role identity and home station
+      expect(feA.roleId).toBe(feB.roleId)
+      expect(feA.stationId).toBe(feB.stationId)
+      expect(feA.currentHarness).not.toBe(feB.currentHarness)
+    })
+
+    it('B10 & B12: Canonical roleId beats legacy compatibility mapping', () => {
+      const baseWorld = createEmptyWorldState()
+      // Even if legacy workstation mapping would associate fcc-workstation with backend engineer,
+      // an explicit canonical roleId of frontend-engineer routes to the Frontend Engineer
+      const world: WorldState = {
+        ...baseWorld,
+        tasks: {
+          'task-override': {
+            id: 'task-override',
+            title: 'Cross-discipline task',
+            canonicalState: 'RUNNING',
+            physicalLocation: 'ASSIGNED_WORKSTATION',
+            roleId: 'role:engineering:frontend-engineer',
+            roleSource: 'CANONICAL',
+            harnessId: 'fcc-worker',
+          },
+        },
+      }
+
+      const pres = deriveRolePresentationStates(world)
+      const fe = pres.get('role:engineering:frontend-engineer')!
+      expect(fe.characterState).toBe('FOCUSED')
+      expect(fe.roleSource).toBe('CANONICAL')
+
+      // Backend Engineer remains IDLE
+      const be = pres.get('role:engineering:backend-engineer')!
+      expect(be.characterState).toBe('IDLE')
+    })
+
+    it('B26: buildRoleInspectorMetadata exposes roleSource as CANONICAL or LEGACY_COMPATIBILITY', () => {
+      const baseWorld = createEmptyWorldState()
+      const world: WorldState = {
+        ...baseWorld,
+        tasks: {
+          'task-canonical': {
+            id: 'task-canonical',
+            title: 'Design Review System',
+            canonicalState: 'RUNNING',
+            physicalLocation: 'ASSIGNED_WORKSTATION',
+            assignedStationId: 'codex-workstation',
+            roleId: 'role:engineering:frontend-engineer',
+            roleSource: 'CANONICAL',
+            harnessId: 'codex-worker',
+          },
+        },
+      }
+
+      const pres = deriveRolePresentationStates(world)
+      const fe = pres.get('role:engineering:frontend-engineer')!
+      const meta = buildRoleInspectorMetadata(fe)
+      expect(meta.roleSource).toBe('CANONICAL')
+      expect(meta.currentHarness).toBe('codex-worker')
+    })
+
+    it('B14: Integration Engineer exists canonically without adding a 5th character in Wave 12E', () => {
+      expect(FROZEN_ROLES).toHaveLength(4)
+      expect(FROZEN_ROLES.map((r) => r.roleId)).not.toContain('role:integration:integration-engineer')
+    })
+  })
 })

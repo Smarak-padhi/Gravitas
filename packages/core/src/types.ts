@@ -1,7 +1,4 @@
-/**
- * Domain types and contracts for @gravitas/core.
- * Plain immutable data definitions — no hidden classes or runtime prototypes.
- */
+import type { RoleAssignment, TaskRoleRequirement } from './roles.js'
 
 /**
  * Task states in Gravitas.
@@ -210,6 +207,8 @@ export interface Task {
   readonly dependencies: readonly TaskDependency[]
   readonly acceptanceCriteria: readonly AcceptanceCriterion[]
   readonly role?: AgentRole | undefined
+  readonly roleRequirement?: TaskRoleRequirement | undefined
+  readonly roleAssignment?: RoleAssignment | undefined
   /**
    * If true, successful verification leads to WAITING_APPROVAL.
    * If false (default), successful verification leads directly to SUCCEEDED.

@@ -117,3 +117,16 @@ export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
   'role:engineering:backend-engineer': Math.PI, // Facing workstation 02 desk
   'role:quality:independent-reviewer': 0.0, // Facing cleanroom console
 }
+
+/**
+ * Returns the presentation station ID/alias associated with a canonical reasoning role.
+ * Note: Integration Engineer (role:integration:integration-engineer) returns null
+ * because it does not have a 3D humanoid avatar or desk in Wave 12E.
+ */
+export function getStationForCanonicalRole(roleId: string): string | null {
+  const role = ROLE_BY_ID.get(roleId as RoleId)
+  if (role) {
+    return role.stationAlias || role.stationId
+  }
+  return null
+}

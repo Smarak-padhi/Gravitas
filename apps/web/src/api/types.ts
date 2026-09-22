@@ -84,6 +84,8 @@ export interface RuntimeRouteProjection {
 export interface RuntimeTaskProjection {
   readonly taskId: string
   readonly phase: RuntimeTaskPhase
+  readonly roleId?: string | null | undefined
+  readonly harnessId?: string | null | undefined
   readonly workerIdentity?: string | null
   readonly route?: RuntimeRouteProjection
   readonly verification?: {

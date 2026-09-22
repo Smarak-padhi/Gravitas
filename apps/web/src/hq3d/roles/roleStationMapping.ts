@@ -71,15 +71,19 @@ export function deriveRolePresentationStates(
       worldState.stations[role.stationId as StationId]
 
     // Find active task associated with this station or role
-    const activeTaskId = stationState?.activeTaskId
+    // Section B12: Canonical role matching takes precedence over legacy station matching
     const taskList = Object.values(worldState.tasks)
-    const activeTask: WorldTaskState | undefined = activeTaskId
-      ? worldState.tasks[activeTaskId]
-      : taskList.find(
-          (t) =>
-            t.assignedStationId === role.stationId ||
-            t.assignedStationId === role.stationAlias
-        )
+    let activeTask: WorldTaskState | undefined = taskList.find((t) => t.roleId === roleId)
+    if (!activeTask) {
+      const activeTaskId = stationState?.activeTaskId
+      activeTask = activeTaskId
+        ? worldState.tasks[activeTaskId]
+        : taskList.find(
+            (t) =>
+              t.assignedStationId === role.stationId ||
+              t.assignedStationId === role.stationAlias
+          )
+    }
 
     let characterState: CharacterPresentationState = 'IDLE'
 
@@ -133,7 +137,7 @@ export function deriveRolePresentationStates(
 
     // Extract truthful telemetry without fabricating provider/model
     const currentHarness =
-      activeTask?.workerId || stationState?.workerIdentity || 'UNKNOWN'
+      activeTask?.harnessId || activeTask?.workerId || stationState?.workerIdentity || 'UNKNOWN'
 
     const route = activeTask?.routeProvenance ?? stationState?.activeRoute
     const transport: 'OmniRoute' | 'Direct' | 'UNKNOWN' =
@@ -145,6 +149,7 @@ export function deriveRolePresentationStates(
 
     const provider = route?.actualProvider || 'UNKNOWN'
     const model = route?.actualModel || 'UNKNOWN'
+    const roleSource = activeTask?.roleSource ?? (activeTask ? 'LEGACY_COMPATIBILITY' : undefined)
 
     const state: RolePresentationState = {
       roleId,
@@ -161,6 +166,7 @@ export function deriveRolePresentationStates(
       transport: override?.transport ?? transport,
       provider: override?.provider ?? provider,
       model: override?.model ?? model,
+      roleSource: override?.roleSource ?? roleSource,
       isFixtureOnly: override?.isFixtureOnly ?? false,
     }
 
@@ -191,6 +197,7 @@ export function buildRoleInspectorMetadata(
     model: presentation.model,
     stationId: presentation.stationId,
     stationName: role ? `${role.displayName} Home Station` : presentation.stationId,
+    roleSource: presentation.roleSource,
     isFixtureOnly: presentation.isFixtureOnly ?? false,
   }
 }

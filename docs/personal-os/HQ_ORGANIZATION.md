@@ -15,6 +15,13 @@ The 3D Headquarters reflects **what Gravitas can cryptographically prove is happ
   - ❌ Running verification cleanroom animations.
   - ❌ Walking across rooms to execute tasks without an active transition state.
 
+### 1.1 Character Projection Semantics (Wave 12E)
+- **Character = Visual Representation of ROLE**: The 3D avatar represents the canonical organizational role (`roleId`), NOT the execution harness, provider, or model.
+- **Four Visual Characters Frozen**: Wave 12D froze four visual characters (`Chief Planner`, `Frontend Engineer`, `Backend Engineer`, `Independent Reviewer`).
+- **Integration Engineer Role**: `role:integration:integration-engineer` exists canonically in runtime contracts but has NO visual avatar in Wave 12E. It will not be assigned a random existing desk.
+- **Reviewer Character Compatibility Behavior**: If the Independent Reviewer character station activates during deterministic verification in legacy flows, this is documented compatibility behavior. True semantic review is distinct from deterministic test execution (`verifier`).
+- **No Locomotion**: Character locomotion, pathfinding, and movement across rooms are strictly deferred to future waves.
+
 ---
 
 ## 2. The 10 Spatial Zones & Station Directory

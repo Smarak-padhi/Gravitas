@@ -19,6 +19,32 @@ To prevent architectural blurring, every system component in Gravitas belongs to
 
 ---
 
+## 1.1 Canonical Axioms & Non-Negotiable Invariants (Wave 12E)
+
+The following boundaries are foundational and absolute:
+
+1. **`ROLE != HARNESS`**:
+   - `ROLE` is organizational responsibility (e.g., `role:engineering:frontend-engineer`).
+   - `HARNESS` is an execution tool/runtime (e.g., `codex-worker`, `fcc-worker`).
+   - The Frontend Engineer can use Codex, FCC, or any future harness without changing role identity or presentation.
+   - A harness (e.g., Codex) can execute frontend, backend, or review tasks if capability policy permits.
+   - **Harness != Employee, Provider != Employee, Model != Employee**.
+
+2. **`REVIEWER ROLE != DETERMINISTIC VERIFIER`**:
+   - `Independent Reviewer` (`role:quality:independent-reviewer`) is a semantic reasoning role that inspects architecture, logic, and diffs.
+   - `Independent Verifier` is deterministic testing infrastructure executing concrete assertion suites and headless browser commands.
+   - Deterministic test execution is never anthropomorphized into an AI reviewer.
+
+3. **`INTEGRATOR ROLE != HUMAN APPROVAL`**:
+   - `Integration Engineer` (`role:integration:integration-engineer`) reconciles branches, resolves conflicts, and runs integration suites.
+   - It possesses **zero** authority to self-approve or auto-merge to protected branches. Human approval is strictly required.
+
+4. **`DETERMINISTIC SERVICE != AGENT ROLE`**:
+   - Services (`service:courier`, `service:scheduler`, `service:notification`, `service:file-indexer`, `service:git`, `service:verification-runner`) are deterministic, non-LLM workers. They are not assigned AI agent roles or 3D humanoid avatars.
+
+
+---
+
 ## 2. Component Classification Matrix
 
 | Component Name | Architectural Class | Primary Responsibility | Authority Scope |

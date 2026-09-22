@@ -33,6 +33,8 @@ export interface RuntimeBrowserQaProjection {
 export interface RuntimeTaskProjection {
   readonly taskId: string
   readonly phase: RuntimeExecutionPhase
+  readonly roleId?: string | undefined
+  readonly harnessId?: string | undefined
   readonly workerIdentity?: string | undefined
   readonly route?: RuntimeRouteProjection | undefined
   readonly verification?: RuntimeVerificationProjection | undefined
@@ -87,24 +89,33 @@ export class RuntimeProjectionStore {
 
     switch (event.type) {
       case 'TASK_STATE_CHANGED': {
-        const payload = event.payload as { fromState?: string; toState: string }
+        const payload = event.payload as { fromState?: string; toState: string; roleId?: string }
+        const roleId = payload.roleId ?? current?.roleId
         if (payload.toState === 'RUNNING') {
           if (!current) {
-            current = { taskId, phase: 'PREPARING' }
+            current = { taskId, phase: 'PREPARING', ...(roleId ? { roleId } : {}) }
             this.tasks.set(taskId, current)
             changed = true
           } else if (current.phase !== 'PREPARING' && current.phase !== 'WORKER_RUNNING') {
-            current = { ...current, phase: 'PREPARING' }
+            current = { ...current, phase: 'PREPARING', ...(roleId ? { roleId } : {}) }
+            this.tasks.set(taskId, current)
+            changed = true
+          } else if (roleId && current.roleId !== roleId) {
+            current = { ...current, roleId }
             this.tasks.set(taskId, current)
             changed = true
           }
         } else if (payload.toState === 'VERIFYING') {
           if (!current) {
-            current = { taskId, phase: 'VERIFYING' }
+            current = { taskId, phase: 'VERIFYING', ...(roleId ? { roleId } : {}) }
             this.tasks.set(taskId, current)
             changed = true
           } else if (current.phase !== 'VERIFYING' && current.phase !== 'BROWSER_QA') {
-            current = { ...current, phase: 'VERIFYING' }
+            current = { ...current, phase: 'VERIFYING', ...(roleId ? { roleId } : {}) }
+            this.tasks.set(taskId, current)
+            changed = true
+          } else if (roleId && current.roleId !== roleId) {
+            current = { ...current, roleId }
             this.tasks.set(taskId, current)
             changed = true
           }
@@ -125,8 +136,10 @@ export class RuntimeProjectionStore {
       }
 
       case 'WORKER_STARTED': {
-        const p = event.payload as { harnessId?: string }
+        const p = event.payload as { harnessId?: string; roleId?: string }
         const workerId = p.harnessId ?? current?.workerIdentity ?? 'unknown'
+        const roleId = p.roleId ?? current?.roleId
+        const harnessId = p.harnessId ?? current?.harnessId ?? workerId
         const existingRoute = current?.route
         const updatedRoute: RuntimeRouteProjection | undefined = existingRoute
           ? { ...existingRoute, active: true }
@@ -135,6 +148,8 @@ export class RuntimeProjectionStore {
         current = {
           ...(current ?? { taskId }),
           phase: 'WORKER_RUNNING',
+          ...(roleId ? { roleId } : {}),
+          ...(harnessId ? { harnessId } : {}),
           workerIdentity: workerId,
           route: updatedRoute,
         }
@@ -370,6 +385,8 @@ export class RuntimeProjectionStore {
       activeTasks: Array.from(this.tasks.values()).map((t) => ({
         taskId: t.taskId,
         phase: t.phase,
+        ...(t.roleId !== undefined ? { roleId: t.roleId } : {}),
+        ...(t.harnessId !== undefined ? { harnessId: t.harnessId } : {}),
         ...(t.workerIdentity !== undefined ? { workerIdentity: t.workerIdentity } : {}),
         ...(t.route !== undefined
           ? {

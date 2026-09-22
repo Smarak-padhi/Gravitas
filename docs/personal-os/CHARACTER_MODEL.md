@@ -64,10 +64,13 @@ Each character operates under a strict 4-state visual lifecycle tied directly to
 
 ---
 
-## 4. Implementation Status (Wave 12D Foundation)
+## 4. Implementation Status (Wave 12D Foundation & Wave 12E Canonical Role Runtime)
 
-The Minimal Role-Based Character Foundation was formally implemented and verified in **Wave 12D**:
-- Code implementation: `apps/web/src/hq3d/roles/` and `apps/web/src/hq3d/geometry/characters.ts`.
-- Unit test verification: `apps/web/src/hq3d/roles/rolePresentation.test.ts`.
+The Minimal Role-Based Character Foundation was implemented in **Wave 12D** and hardened in **Wave 12E**:
+- Exactly 4 humanoid characters remain visual in the 3D HQ (Chief Planner, Frontend Engineer, Backend Engineer, Independent Reviewer).
+- In Wave 12E, the **Integration Engineer** was added to `@gravitas/core` as a canonical reasoning role, but does **not** have a 5th visual avatar in the 3D scene (avoiding premature spatial expansion).
+- Characters consume canonical `roleId` directly from the runtime projection snapshot, with legacy workstation fallback marked as `LEGACY_COMPATIBILITY`.
+- Code implementation: `packages/core/src/roles.ts`, `apps/web/src/hq3d/roles/`, and `apps/web/src/hq3d/geometry/characters.ts`.
+- Unit test verification: `packages/core/src/roles.test.ts` and `apps/web/src/hq3d/roles/rolePresentation.test.ts`.
 - End-to-end and visual proof: `tests/hq3d-roles.spec.ts` capturing 10 deterministic screenshots in `docs/3d-hq/evidence/wave12d/`.
-- Full verification report: [WAVE_12D_REPORT.md](../3d-hq/WAVE_12D_REPORT.md).
+- Full verification reports: [WAVE_12D_REPORT.md](../3d-hq/WAVE_12D_REPORT.md) and [WAVE_12E_REPORT.md](../3d-hq/WAVE_12E_REPORT.md).

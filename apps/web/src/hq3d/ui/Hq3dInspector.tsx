@@ -238,6 +238,25 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                   {entity.roleMetadata.stationName}
                 </div>
               </div>
+
+              {entity.roleMetadata.roleSource && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>ROLE SOURCE</div>
+                  <div
+                    data-testid="inspector-role-source"
+                    style={{
+                      fontWeight: 600,
+                      color: entity.roleMetadata.roleSource === 'CANONICAL' ? '#38bdf8' : '#eab308',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <span>{entity.roleMetadata.roleSource === 'CANONICAL' ? '✓' : '⚠️'}</span>
+                    <span>{entity.roleMetadata.roleSource}</span>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

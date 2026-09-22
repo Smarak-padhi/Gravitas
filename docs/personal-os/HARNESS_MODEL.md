@@ -106,3 +106,19 @@ To protect the host repository and user workspace:
 2. **Snapshot Pre-Execution:** The harness captures an exact baseline hash of the worktree before launching the worker subprocess.
 3. **Out-of-Scope Mutation Detection:** Any changes outside the task's declared `changeScope` are captured as unexpected mutations.
 4. **Prohibition of Rogue Commits:** Workers are strictly forbidden from running `git commit` or mutating `HEAD`. Commits are materialized solely by the orchestrator after verification passes.
+
+---
+
+## 6. Deterministic Harness Resolution (Wave 12E)
+
+Harness selection is executed deterministically after role assignment via `resolveHarnessForRole()`.
+It is never delegated to an LLM.
+
+Order of Resolution:
+1. **Explicit Operator Override (`EXPLICIT_OPERATOR`):** Operator explicitly requests a qualified harness.
+2. **Policy Default (`POLICY_DEFAULT`):** Configured default mapping for the role.
+3. **Capability Match (`CAPABILITY_MATCH`):** First available harness satisfying 100% of task capability requirements.
+4. **Fallback Default (`POLICY_DEFAULT`):** Available qualified harness if no specific capabilities are demanded.
+5. **Rejection (`NO_QUALIFIED_HARNESS`):** Structured rejection if no available harness satisfies capability constraints.
+
+Under this model, roles like `FrontendEngineer` can swap seamlessly between `codex-worker` and `fcc-worker` without altering role identity.

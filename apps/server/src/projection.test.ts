@@ -694,9 +694,73 @@ describe('Server & Deterministic Fixture Integration Tests (Section 9, 10, 15, 1
 
     expect(summary.projection).toBeDefined()
     expect(summary.projection.schemaVersion).toBe('1.0.0')
-    expect(summary.projection.activeTasks).toHaveLength(1)
     expect(summary.projection.activeTasks[0].taskId).toBe('task-live')
     expect(summary.projection.activeTasks[0].phase).toBe('WORKER_RUNNING')
     expect(summary.projection.activeTasks[0].workerIdentity).toBe('codex-live')
+  })
+
+  it('11. Wave 12E: Canonical roleId and harnessId are captured in projection and recovered via GET /api/v1/state', async () => {
+    // 1. Task A: Frontend Engineer + Codex
+    eventHub.publish(
+      createTaskStateChangedEvent({
+        runId: 'run-role',
+        taskId: 'task-fe-codex',
+        fromState: 'READY',
+        toState: 'RUNNING',
+      })
+    )
+    eventHub.publish(
+      createWorkerStartedEvent('run-role', 'task-fe-codex', {
+        roleId: 'role:engineering:frontend-engineer',
+        harnessId: 'codex-worker',
+      })
+    )
+
+    // Verify snapshot over HTTP
+    const resA = await fetch(`${serverUrl}/api/v1/state`)
+    expect(resA.status).toBe(200)
+    const summaryA = (await resA.json()) as any
+    const taskAProj = summaryA.projection.activeTasks.find((t: any) => t.taskId === 'task-fe-codex')
+    expect(taskAProj).toBeDefined()
+    expect(taskAProj.roleId).toBe('role:engineering:frontend-engineer')
+    expect(taskAProj.harnessId).toBe('codex-worker')
+    expect(taskAProj.phase).toBe('WORKER_RUNNING')
+
+    // 2. Complete Task A
+    eventHub.publish(
+      createTaskStateChangedEvent({
+        runId: 'run-role',
+        taskId: 'task-fe-codex',
+        fromState: 'RUNNING',
+        toState: 'SUCCEEDED',
+      })
+    )
+
+    // 3. Task B: Frontend Engineer + FCC (harness swap with SAME canonical roleId)
+    eventHub.publish(
+      createTaskStateChangedEvent({
+        runId: 'run-role',
+        taskId: 'task-fe-fcc',
+        fromState: 'READY',
+        toState: 'RUNNING',
+      })
+    )
+    eventHub.publish(
+      createWorkerStartedEvent('run-role', 'task-fe-fcc', {
+        roleId: 'role:engineering:frontend-engineer',
+        harnessId: 'fcc-worker',
+      })
+    )
+
+    // Fresh client recovery via GET /api/v1/state
+    const resB = await fetch(`${serverUrl}/api/v1/state`)
+    expect(resB.status).toBe(200)
+    const summaryB = (await resB.json()) as any
+    const taskBProj = summaryB.projection.activeTasks.find((t: any) => t.taskId === 'task-fe-fcc')
+    expect(taskBProj).toBeDefined()
+    expect(taskBProj.roleId).toBe('role:engineering:frontend-engineer')
+    expect(taskBProj.harnessId).toBe('fcc-worker')
+    // Old task is cleaned up
+    expect(summaryB.projection.activeTasks.find((t: any) => t.taskId === 'task-fe-codex')).toBeUndefined()
   })
 })

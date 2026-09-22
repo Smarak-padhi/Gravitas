@@ -59,6 +59,7 @@ export interface RolePresentationState {
   readonly transport: 'OmniRoute' | 'Direct' | 'UNKNOWN'
   readonly provider: string
   readonly model: string
+  readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null
   readonly isFixtureOnly?: boolean
 }
 
@@ -75,5 +76,6 @@ export interface RoleInspectorMetadata {
   readonly model: string
   readonly stationId: string
   readonly stationName: string
+  readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null
   readonly isFixtureOnly: boolean
 }

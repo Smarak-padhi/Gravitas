@@ -133,3 +133,28 @@ export {
   type GravitasNotification,
   type NotificationAdapter,
 } from './notifications.js'
+
+// Canonical Reasoning Role Runtime Contract (Wave 12E)
+export {
+  CANONICAL_ROLE_DEFINITIONS,
+  CANONICAL_ROLES,
+  CANONICAL_ROLE_IDS,
+  CANONICAL_DETERMINISTIC_SERVICES,
+  isCanonicalRoleId,
+  getCanonicalRole,
+  checkReviewerIndependence,
+  assertIntegratorAuthority,
+  resolveHarnessForRole,
+  type AgentRoleId,
+  type DepartmentId,
+  type AuthorityClass,
+  type RoleDescriptor,
+  type TaskRoleRequirement,
+  type RoleAssignmentSource,
+  type RoleAssignment,
+  type HarnessSelectionReasonCode,
+  type HarnessSelection,
+  type AvailableHarnessInfo,
+  type DeterministicServiceId,
+  type DeterministicServiceDescriptor,
+} from './roles.js'

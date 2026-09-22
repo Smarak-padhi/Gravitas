@@ -20,6 +20,8 @@ import type {
 } from '../../api/types.js'
 import type { RoomId, StationId } from '../types.js'
 import { STATION_DEFINITIONS } from './stations.js'
+import { getStationForCanonicalRole } from '../roles/roles.js'
+import { LEGACY_ROLE_COMPATIBILITY_MAPPING } from '../roles/roleStationMapping.js'
 
 // ─── Physical Location Semantics ──────────────────────────────────────────────
 
@@ -65,6 +67,9 @@ export interface WorldTaskState {
   readonly runtimePhase?: RuntimeTaskPhase | undefined
   readonly physicalLocation: PhysicalLocation
   readonly assignedStationId?: StationId | null | undefined
+  readonly roleId?: string | null | undefined
+  readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null | undefined
+  readonly harnessId?: string | null | undefined
   readonly workerId?: string | null | undefined
   readonly routeProvenance?: WorldRouteProvenance | undefined
 }
@@ -76,6 +81,7 @@ export interface WorldStationState {
   readonly roomId: RoomId
   readonly status: StationStatus
   readonly activeTaskId?: string | null | undefined
+  readonly activeRoleId?: string | null | undefined
   readonly workerIdentity?: string | null | undefined
   readonly activeRoute?: WorldRouteProvenance | undefined
 }
@@ -197,11 +203,36 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
   for (const ct of canonicalTaskMap.values()) {
     const activeProj = activeTaskMap.get(ct.id)
     const workerId = activeProj?.workerIdentity ?? null
-    const assignedStationId = stationMapping.resolveStationId({
-      taskId: ct.id,
-      workerId,
-      role: ct.role,
-    })
+    const harnessId = activeProj?.harnessId ?? workerId
+
+    // Section B12: Canonical Role vs Legacy Mapping
+    // 1. Check for canonical role identity from active projection, task assignment, or requirement
+    const canonicalRoleId =
+      activeProj?.roleId ??
+      (ct as any).roleAssignment?.roleId ??
+      (ct as any).roleRequirement?.requiredRoleId ??
+      (typeof ct.role === 'string' && ct.role.startsWith('role:') ? ct.role : null)
+
+    let assignedStationId: StationId | null | undefined = null
+    let roleId: string | null = null
+    let roleSource: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null = null
+
+    if (canonicalRoleId) {
+      roleId = canonicalRoleId
+      roleSource = 'CANONICAL'
+      const canonicalStation = getStationForCanonicalRole(canonicalRoleId)
+      assignedStationId = (canonicalStation as StationId) ?? null
+    } else {
+      assignedStationId = stationMapping.resolveStationId({
+        taskId: ct.id,
+        workerId,
+        role: ct.role,
+      })
+      if (assignedStationId && LEGACY_ROLE_COMPATIBILITY_MAPPING[assignedStationId]) {
+        roleId = LEGACY_ROLE_COMPATIBILITY_MAPPING[assignedStationId]
+        roleSource = 'LEGACY_COMPATIBILITY'
+      }
+    }
 
     let physicalLocation: PhysicalLocation = 'NEUTRAL_HOLD'
     let routeProvenance: WorldRouteProvenance | undefined = undefined
@@ -232,6 +263,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
             ...stations[assignedStationId],
             status: 'ACTIVE',
             activeTaskId: ct.id,
+            activeRoleId: roleId,
             workerIdentity: workerId,
             activeRoute: routeProvenance,
           }
@@ -245,6 +277,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
             ...stations[assignedStationId],
             status: 'ACTIVE',
             activeTaskId: ct.id,
+            activeRoleId: roleId,
             workerIdentity: workerId,
             activeRoute: routeProvenance,
           }
@@ -258,6 +291,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
             ...stations[assignedStationId],
             status: 'ACTIVE',
             activeTaskId: ct.id,
+            activeRoleId: roleId,
             workerIdentity: workerId,
             activeRoute: routeProvenance,
           }
@@ -330,6 +364,9 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
       runtimePhase: activeProj?.phase,
       physicalLocation,
       assignedStationId: assignedStationId ?? null,
+      roleId,
+      roleSource,
+      harnessId,
       workerId,
       routeProvenance,
     }
@@ -338,10 +375,26 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
   // Also catch any orphan active projection tasks not yet in canonical list
   for (const at of activeTaskMap.values()) {
     if (!worldTasks[at.taskId]) {
-      const assignedStationId = stationMapping.resolveStationId({
-        taskId: at.taskId,
-        workerId: at.workerIdentity,
-      })
+      const canonicalRoleId = at.roleId ?? null
+      let assignedStationId: StationId | null | undefined = null
+      let roleId: string | null = null
+      let roleSource: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null = null
+
+      if (canonicalRoleId) {
+        roleId = canonicalRoleId
+        roleSource = 'CANONICAL'
+        const canonicalStation = getStationForCanonicalRole(canonicalRoleId)
+        assignedStationId = (canonicalStation as StationId) ?? null
+      } else {
+        assignedStationId = stationMapping.resolveStationId({
+          taskId: at.taskId,
+          workerId: at.workerIdentity,
+        })
+        if (assignedStationId && LEGACY_ROLE_COMPATIBILITY_MAPPING[assignedStationId]) {
+          roleId = LEGACY_ROLE_COMPATIBILITY_MAPPING[assignedStationId]
+          roleSource = 'LEGACY_COMPATIBILITY'
+        }
+      }
 
       worldTasks[at.taskId] = {
         id: at.taskId,
@@ -350,6 +403,9 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
         runtimePhase: at.phase,
         physicalLocation: assignedStationId ? 'ASSIGNED_WORKSTATION' : 'NEUTRAL_HOLD',
         assignedStationId: assignedStationId ?? null,
+        roleId,
+        roleSource,
+        harnessId: at.harnessId ?? at.workerIdentity ?? null,
         workerId: at.workerIdentity ?? null,
         routeProvenance: at.route
           ? {

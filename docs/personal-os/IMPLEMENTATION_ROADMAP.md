@@ -5,68 +5,68 @@
 This roadmap governs the disciplined implementation sequence for Gravitas from the spatial character foundation through the complete Personal Operating System. Each wave is an independently verifiable, testable milestone with explicit non-goals, security boundaries, and rollback points.
 
 ```
-Wave 12C.5: Architecture Freeze (CURRENT)
+Wave 12C.5: Architecture Freeze (CLOSED)
      │
      ▼
-Wave 12D:   Minimal Role-Based Character Foundation (4 Roles)
+Wave 12D:   Minimal Role-Based Character Foundation (4 Roles) (CLOSED in 12D-R)
      │
      ▼
-Wave 12E:   Physical Golden Loop Spatial Lifecycle & Dossiers
+Wave 12E:   Canonical Role Runtime Contract & Deterministic Resolver (CURRENT)
      │
      ▼
-Wave 13:    Role / Harness Runtime Separation Engine
+Wave 12F:   Physical Locomotion & Spatial Lifecycle Handoffs (FUTURE)
      │
      ▼
-Wave 14:    Background Job System & Courier Logistics
+Wave 13:    Background Job System & Courier Logistics
      │
      ▼
-Wave 15:    Connector SDK & Bounded External Platforms
+Wave 14:    Connector SDK & Bounded External Platforms
      │
      ▼
-Wave 16:    Multi-Class Memory & Knowledge Learning Store
+Wave 15:    Multi-Class Memory & Knowledge Learning Store
      │
      ▼
-Wave 17:    Personal Operations & Daily Rhythm Engine
+Wave 16:    Personal Operations & Daily Rhythm Engine
      │
      ▼
-Wave 18:    Business Operations & Algoryxz Pipeline
+Wave 17:    Business Operations & Algoryxz Pipeline
      │
      ▼
-Wave 19:    Mobile Companion Control Surface
+Wave 18:    Mobile Companion Control Surface
      │
      ▼
-Wave 20:    Strategic Opportunity & Cross-Domain Synthesis
+Wave 19+:   Strategic Opportunity & Cross-Domain Synthesis
 ```
 
 ---
 
 ## 2. Detailed Wave Specifications
 
-### Wave 12C.5: Architecture Freeze (CURRENT WAVE)
-- **Goal:** Author and lock the comprehensive Personal OS architectural specifications and ADRs without modifying production runtime code or adding locomotion.
-- **Dependencies:** Wave 12C authoritative world projection pass.
-- **Non-Goals:** Writing character locomotion code, adding external connectors, modifying core scheduler.
-- **Proof Required:** All existing unit/integration/typecheck/build tests pass; documentation package complete in `docs/personal-os/`.
-- **Rollback Boundary:** Discard doc commits; feature branch remains clean at Wave 12C.
+### Wave 12C.5: Architecture Freeze (CLOSED)
+- **Goal:** Author and lock the comprehensive Personal OS architectural specifications and ADRs without modifying production runtime code.
 
 ---
 
-### Wave 12D: Minimal Role-Based Character Foundation
+### Wave 12D: Minimal Role-Based Character Foundation (CLOSED in 12D-R)
 - **Goal:** Implement the initial 4-character role roster (Chief Planner, Frontend Engineer, Backend Engineer, Independent Reviewer) in the 3D Headquarters, anchored to their respective stations with subtle idle breathing animations.
-- **Dependencies:** Wave 12C.5 architecture freeze.
-- **Non-Goals:** No locomotion between rooms; no complex interactive dialog trees; no external connectors.
-- **Proof Required:** Playwright E2E test verifying character geometry mount at workstations, inspector metadata docking showing decoupled role vs. harness attributes, zero visual drift across viewports.
-- **Security Implications:** Zero network or filesystem impact (pure presentation layer).
-- **Rollback Boundary:** Revert 3D character component files in `apps/web/src/hq3d/geometry/characters.ts`.
+- **Forensic Closure:** Truthfully documented deterministic UI fixture vs real backend planner; empirical rendering telemetry recorded across 4 benchmark states.
 
 ---
 
-### Wave 12E: Physical Golden Loop Spatial Lifecycle
-- **Goal:** Project the physical task lifecycle through high-contrast dossier artifacts: task creation at Planning Table, handoff to Engineer Desk, transfer to Cleanroom Console, and elevation to Approval Plinth.
-- **Dependencies:** Wave 12D character models.
-- **Non-Goals:** Freeform humanoid walking paths; simulated typing without authoritative tasks.
-- **Proof Required:** Deterministic Playwright test suite validating dossier coordinates during a full Golden Loop run (`PLANNED` -> `SUCCEEDED` / `APPROVED`).
-- **Rollback Boundary:** Revert dossier geometry and HqDirector reconciliation logic.
+### Wave 12E: Canonical Role Runtime Contract (CURRENT WAVE)
+- **Goal:** Make ROLE a first-class authoritative runtime concept in `@gravitas/core`. Establish canonical 5-role registry, task role requirement and role assignment domain types, deterministic harness resolution (`resolveHarnessForRole`), reviewer independence invariant, integrator authority boundaries, and runtime projection exposure.
+- **Dependencies:** Wave 12D-R forensic closure.
+- **Non-Goals:** Zero locomotion, zero pathfinding, NO 5th humanoid character in 3D HQ, no external connectors.
+- **Proof Required:** 30-item test matrix passing across `@gravitas/core`, `@gravitas/server`, and `@gravitas/web`; deterministic harness swap proof (Frontend Engineer running on Codex vs FCC retaining same role identity).
+- **Security Implications:** Strict separation of role from capability grants; integrator barred from auto-merging main or bypassing human approval.
+- **Rollback Boundary:** Revert `packages/core/src/roles.ts` and associated projection mappings.
+
+---
+
+### Wave 12F: Physical Locomotion & Spatial Lifecycle Handoffs (FUTURE WAVE)
+- **Goal:** Project physical task handoffs and character locomotion across HQ zones using verified pathfinding meshes and spatial dossier artifacts.
+- **Dependencies:** Wave 12E canonical role runtime.
+- **Status:** NOT STARTED.
 
 ---
 
