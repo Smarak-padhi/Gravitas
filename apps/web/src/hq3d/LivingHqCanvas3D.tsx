@@ -93,6 +93,9 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
 
       directorRef.current = director
       director.setViewActive(isViewActive)
+      if (typeof window !== 'undefined') {
+        ;(window as any).__hqDirector = director
+      }
 
       // Initial size
       const { clientWidth, clientHeight } = canvas

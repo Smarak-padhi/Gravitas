@@ -7,7 +7,7 @@
  * 2. fixture-02-fe-focused.png: Frontend Engineer active at Station 1 (codex-workstation)
  * 3. fixture-03-be-focused.png: Backend Engineer active at Station 2 (fcc-workstation)
  * 4. fixture-04-reviewer-verifying.png: Independent Reviewer active at Station 3 (verifier-console)
- * 5. fixture-05-planner-fixture-focused.png: Chief Planner active at Planning Table with verified planner task fixture
+ * 5. fixture-05-planner-fixture-focused.png: Chief Planner fixture-focused presentation (deterministic UI fixture)
  * 6. fixture-06-fe-codex.png: Frontend Engineer running with Codex harness metadata visible in inspector
  * 7. fixture-07-fe-fcc-swap.png: Frontend Engineer running with FCC harness metadata visible (proving harness decoupling)
  * 8. fixture-08-concurrent-engineering.png: Both Frontend and Backend Engineers active concurrently
@@ -226,6 +226,8 @@ test.describe.serial('Wave 12D — Role-Based Character Foundation & Invariance 
     await expect(page.locator('[data-testid="role-btn-independent-reviewer"]')).toBeVisible()
 
     await page.waitForTimeout(600)
+    const stats01 = await page.evaluate(() => (window as any).__hqDirector?.getPerformanceStats())
+    console.log('PERF_STATE_STATS_IDLE:', JSON.stringify(stats01))
     await page.screenshot({
       path: join(evidenceDir, 'fixture-01-all-idle.png'),
       fullPage: true,
@@ -302,6 +304,8 @@ test.describe.serial('Wave 12D — Role-Based Character Foundation & Invariance 
     // Focus Verification Cleanroom
     await page.locator('[data-testid="hq-nav-room-4"]').click()
     await page.waitForTimeout(600)
+    const stats04 = await page.evaluate(() => (window as any).__hqDirector?.getPerformanceStats())
+    console.log('PERF_STATE_STATS_REVIEWER:', JSON.stringify(stats04))
 
     await page.screenshot({
       path: join(evidenceDir, 'fixture-04-reviewer-verifying.png'),
@@ -309,7 +313,7 @@ test.describe.serial('Wave 12D — Role-Based Character Foundation & Invariance 
     })
   })
 
-  test('05: fixture-05-planner-fixture-focused — Chief Planner active at Planning Table with proven task', async ({
+  test('05: fixture-05-planner-fixture-focused — Chief Planner fixture-focused presentation (deterministic UI fixture)', async ({
     page,
   }: {
     page: Page
@@ -490,6 +494,8 @@ test.describe.serial('Wave 12D — Role-Based Character Foundation & Invariance 
     await expect(page.locator('[data-testid="hq-webgl-canvas"]')).toBeVisible()
     await page.locator('[data-testid="hq-nav-room-2"]').click()
     await page.waitForTimeout(600)
+    const stats08 = await page.evaluate(() => (window as any).__hqDirector?.getPerformanceStats())
+    console.log('PERF_STATE_STATS_CONCURRENT:', JSON.stringify(stats08))
 
     await page.screenshot({
       path: join(evidenceDir, 'fixture-08-concurrent-engineering.png'),
@@ -515,6 +521,8 @@ test.describe.serial('Wave 12D — Role-Based Character Foundation & Invariance 
     await page.goto(`http://127.0.0.1:${VITE_PORT}/`)
     await expect(page.locator('[data-testid="hq-webgl-canvas"]')).toBeVisible()
     await page.waitForTimeout(600)
+    const stats09 = await page.evaluate(() => (window as any).__hqDirector?.getPerformanceStats())
+    console.log('PERF_STATE_STATS_REDUCED_MOTION:', JSON.stringify(stats09))
 
     await page.screenshot({
       path: join(evidenceDir, 'fixture-09-reduced-motion.png'),
