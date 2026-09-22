@@ -24,15 +24,15 @@ The goal of this wave was to implement a server-owned, sanitized, revisioned run
 16. **Task Ownership Clarification**: `workerIdentity` and `route.workerId` resolve the ambiguous ownership that `TASK_READY` historically caused.
 17. **Central Snapshot API Exposure**: Added the `projection` object dynamically into `getStateSummary()` response payload.
 18. **Interface Exporter Updates**: Exported new `RuntimeTaskProjection` and `RuntimeProjectionSnapshot` types inside `apps/server/src/types.ts`.
-19. **Test Suite Proof**: Ran `vitest run apps/server` guaranteeing `golden-loop-api.test.ts`, `security.test.ts`, etc., pass flawlessly alongside the added projection payload.
+19. **Test Suite Proof**: Ran `vitest run apps/server` verifying `golden-loop-api.test.ts`, `security.test.ts`, etc., pass without errors alongside the added projection payload.
 20. **Zero FSM Side-Effects**: Respected the architectural boundary, leaving `TaskState` unaltered.
 21. **No External DB Requirement**: Implemented strictly in-memory aligned with `InMemoryRegistry`.
-22. **No Frontend Hacks Needed**: With `getStateSummary()` enriched, the client can just read the server truth upon reconnect.
-23. **Robust Phase Transitions**: Evaluated corner cases where `WORKER_FINISHED` precedes `VERIFYING` and terminal state cleanups catch everything.
-24. **No Three.js Interference**: Completely avoided frontend modifications for this foundational backend ticket.
-25. **Safe Data Types**: Extracted `ResolvedInferenceRoute` carefully and selectively into `route` object for projection.
+22. **No Frontend Hacks Needed**: With `getStateSummary()` enriched, the client reads server truth upon reconnect.
+23. **Robust Phase Transitions**: Evaluated cases where `WORKER_FINISHED` precedes `VERIFYING` and terminal state cleanups catch all cases.
+24. **No Three.js Interference**: Avoided frontend modifications for this foundational backend ticket.
+25. **Safe Data Types**: Extracted `ResolvedInferenceRoute` selectively into `route` object for projection.
 26. **Correct Import Paths**: Verified correct ES modules path imports (`./projection.js`).
 27. **Complete 12C-P Baseline Match**: Followed the prompt's `DO NOT`s regarding Locust / Locomotion / 12D.
-28. **State Snapshot Robustness**: Epoch number provides a perfect cache-buster and React useEffect dependency matrix.
-29. **No "Magic Inference" Visuals**: Authoritative server telemetry will now map one-to-one to productive 3D animation.
-30. **Wave 12C Unblocked**: The architectural gap stopping Wave 12C execution has been completely filled.
+28. **State Snapshot Robustness**: Epoch and revision provide cache-busting and change detection signals.
+29. **No "Magic Inference" Visuals**: Authoritative server telemetry maps directly to 3D state.
+30. **Wave 12C Unblocked**: Architectural gaps identified in audit have been addressed. See `docs/3d-hq/WAVE_12C_P_R_REPORT.md` for full verification evidence.

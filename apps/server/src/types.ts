@@ -184,6 +184,9 @@ export interface TaskEvidenceDiffResponse {
 export type {
   RuntimeExecutionPhase,
   RuntimeTaskProjection,
+  RuntimeRouteProjection,
+  RuntimeVerificationProjection,
+  RuntimeBrowserQaProjection,
   RuntimeProjectionSnapshot,
 } from './projection.js'
 
