@@ -58,14 +58,15 @@ class Hq3dFakeHarness implements AgentHarness {
   }
 }
 
+import { getFreePort } from './test-ports.js'
+
 test.describe.serial('Gravitas 3D Headquarters Scene Foundation E2E', () => {
   let fixtureRepoPath: string
   let runtimeRoot: string
   let server: GravitasServer
   let viteServer: ViteDevServer
-
-  const SERVER_PORT = 4317
-  const VITE_PORT = 5178
+  let SERVER_PORT: number
+  let VITE_PORT: number
 
   test.beforeAll(async () => {
     await mkdir(evidenceDir, { recursive: true })
@@ -116,7 +117,9 @@ test.describe.serial('Gravitas 3D Headquarters Scene Foundation E2E', () => {
       eventHub,
     })
 
-    await server.start({ host: '127.0.0.1', port: SERVER_PORT })
+    const serverInfo = await server.start({ host: '127.0.0.1', port: 0 })
+    SERVER_PORT = serverInfo.port
+    VITE_PORT = await getFreePort()
 
     const webRoot = join(__dirname, '../apps/web')
     viteServer = await createViteServer({
@@ -125,6 +128,13 @@ test.describe.serial('Gravitas 3D Headquarters Scene Foundation E2E', () => {
         host: '127.0.0.1',
         port: VITE_PORT,
         strictPort: true,
+        proxy: {
+          '/api': {
+            target: serverInfo.url,
+            changeOrigin: false,
+            secure: false,
+          },
+        },
       },
     })
     await viteServer.listen()

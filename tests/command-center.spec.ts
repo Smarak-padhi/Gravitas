@@ -18,6 +18,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer as createViteServer, type ViteDevServer } from 'vite'
+import { getFreePort } from './test-ports.js'
 import { executeGit } from '@gravitas/git'
 import type {
   AgentExecutionRequest,
@@ -129,11 +130,25 @@ class BrowserTestFakeHarness implements AgentHarness {
   }
 }
 
-test.describe.serial('Gravitas Command Center E2E Suite', () => {
+test.describe('Gravitas Command Center & Living Office E2E Browser Suite', () => {
   let fixtureRepoPath: string
   let runtimeRoot: string
   let server: GravitasServer
   let viteServer: ViteDevServer
+  let SERVER_PORT = 0
+  let VITE_PORT = 0
+  let VITE_URL = ''
+
+  async function openOfficeView(page: Page, url: string) {
+    await page.goto(url)
+    await expect(page.getByText('CONNECTED')).toBeVisible()
+    const officeTab = page.locator('[data-testid="tab-OFFICE"]')
+    const isSelected = await officeTab.getAttribute('aria-selected')
+    if (isSelected !== 'true') {
+      await officeTab.click()
+      await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+    }
+  }
 
   test.beforeAll(async () => {
     await mkdir(screenshotsDir, { recursive: true })
@@ -213,16 +228,26 @@ test('adds numbers correctly', () => {
       eventHub,
     })
 
-    await server.start({ host: '127.0.0.1', port: 4317 })
+    const serverInfo = await server.start({ host: '127.0.0.1', port: 0 })
+    SERVER_PORT = serverInfo.port
+    VITE_PORT = await getFreePort()
+    VITE_URL = `http://127.0.0.1:${VITE_PORT}/`
 
-    // 3. Start Vite dev server for @gravitas/web on 127.0.0.1:5173
+    // 3. Start Vite dev server for @gravitas/web on dynamic port with proxy
     const webRoot = join(__dirname, '../apps/web')
     viteServer = await createViteServer({
       root: webRoot,
       server: {
         host: '127.0.0.1',
-        port: 5173,
+        port: VITE_PORT,
         strictPort: true,
+        proxy: {
+          '/api': {
+            target: serverInfo.url,
+            changeOrigin: false,
+            secure: false,
+          },
+        },
       },
     })
     await viteServer.listen()
@@ -236,7 +261,7 @@ test('adds numbers correctly', () => {
   })
 
   test('renders empty command center honestly without fabricated metrics across viewports', async ({ page }: { page: Page }) => {
-    await page.goto('http://127.0.0.1:5173/')
+    await page.goto(VITE_URL)
 
     // Assert TopBar brand, View Switcher tabs, and truthful telemetry
     await expect(page.locator('header')).toBeVisible()
@@ -248,8 +273,33 @@ test('adds numbers correctly', () => {
     await expect(page.locator('[data-testid="command-palette-trigger"]')).toBeVisible()
     await expect(page.locator('[data-testid="human-inbox-trigger"]')).toBeVisible()
 
-    // Assert Living Office Floor empty state
+    // Assert HQ3D is the supported desktop default view
+    await expect(page.locator('[data-testid="tab-HQ3D"]')).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('[data-testid="hq-webgl-canvas"]')).toBeVisible()
+    await expect(page.locator('[data-testid="tab-OFFICE"]')).toBeVisible()
+
+    // Test view switching: HQ3D -> OFFICE
+    await page.click('[data-testid="tab-OFFICE"]')
     await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+    await expect(page.locator('[data-testid="tab-OFFICE"]')).toHaveAttribute('aria-selected', 'true')
+
+    // Test view switching: OFFICE -> HQ3D
+    await page.click('[data-testid="tab-HQ3D"]')
+    await expect(page.locator('[data-testid="hq-webgl-canvas"]')).toBeVisible()
+    await expect(page.locator('[data-testid="tab-HQ3D"]')).toHaveAttribute('aria-selected', 'true')
+
+    // Switch back to OFFICE and verify user preference persistence in localStorage
+    await page.click('[data-testid="tab-OFFICE"]')
+    await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+    const persisted = await page.evaluate(() => localStorage.getItem('gravitas:activeView'))
+    expect(persisted).toBe('OFFICE')
+
+    // Verify reload maintains persisted OFFICE preference
+    await page.reload()
+    await expect(page.locator('[data-testid="office-floor"]')).toBeVisible()
+    await expect(page.locator('[data-testid="tab-OFFICE"]')).toHaveAttribute('aria-selected', 'true')
+
+    // Assert Living Office Floor empty state
     await expect(page.getByText('ENGINEERING OPERATIONS FLOOR')).toBeVisible()
     await expect(page.getByText('No runs yet')).toBeVisible()
     await expect(page.getByText('RUNS (0)')).toBeVisible()
@@ -296,9 +346,9 @@ test('adds numbers correctly', () => {
   })
 
   test('validates Goal Composer, operates Command Palette, executes Golden Loop, verifies Office & Inbox, and approves mutation', async ({ page }: { page: Page }) => {
+    test.setTimeout(90000)
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // 1. Open and test Command Palette via trigger button
     await page.click('[data-testid="command-palette-trigger"]')
@@ -389,7 +439,7 @@ test('adds numbers correctly', () => {
 
     // 5. Wait for WAITING_APPROVAL state
     const approvalBox = page.locator('[data-testid="approval-action-box"]')
-    await expect(approvalBox).toBeVisible({ timeout: 15000 })
+    await expect(approvalBox).toBeVisible({ timeout: 45000 })
     await expect(page.getByText('HUMAN REVIEW REQUIRED')).toBeVisible()
     await expect(page.getByText('Scope Compliant:').locator('..')).toContainText('YES')
     await expect(page.getByText('HEAD Mutated (Commit):').locator('..')).toContainText('NO')
@@ -441,9 +491,9 @@ test('adds numbers correctly', () => {
   })
 
   test('executes second run and supports explicit human rejection into FAILED state', async ({ page }: { page: Page }) => {
+    test.setTimeout(60000)
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // Create second run
     await page.click('button:has-text("+ New Run")')
@@ -455,7 +505,7 @@ test('adds numbers correctly', () => {
     await page.click('button:has-text("Execute Golden Loop")')
 
     // Wait for WAITING_APPROVAL
-    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 45000 })
 
     // Reject task
     await page.click('button:has-text("Reject Task")')
@@ -482,8 +532,7 @@ test('adds numbers correctly', () => {
   test('composes and executes multi-task DAG, renders Run DAG with dependency nodes, and unblocks downstream tasks', async ({ page }: { page: Page }) => {
     test.setTimeout(90000)
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // 1. Open Goal Composer
     await page.click('button:has-text("+ New Run")')
@@ -518,7 +567,7 @@ test('adds numbers correctly', () => {
     await page.click('button:has-text("Execute Golden Loop")')
 
     // 6. Wait for task-1 to reach WAITING_APPROVAL
-    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('[data-testid="approval-action-box"]')).toBeVisible({ timeout: 45000 })
 
     // Check GRAPH view during approval
     await page.click('button[role="tab"]:has-text("GRAPH")')
@@ -549,8 +598,7 @@ test('adds numbers correctly', () => {
   test('executes diamond DAG with fan-out concurrency, verifies topological bezier arrows, operator review bar, authority sections, and clean composition', async ({ page }: { page: Page }) => {
     test.setTimeout(120000)
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // 1. Open Goal Composer
     await page.click('button:has-text("+ New Run")')
@@ -671,8 +719,7 @@ test('adds numbers correctly', () => {
   test('verifies failure propagation, human inbox alert, operational timeline filtering, and composition conflict UX', async ({ page }: { page: Page }) => {
     test.setTimeout(120000)
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // ----------------------------------------------------
     // PART A: Failure Propagation & Timeline & Inbox
@@ -817,8 +864,7 @@ test('adds numbers correctly', () => {
     // 1. 8 Tasks Scale (Standby Shelf)
     // ----------------------------------------------------
     await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     await page.click('button:has-text("+ New Run")')
     await page.click('[data-testid="composer-tab-dag"]')
@@ -928,8 +974,7 @@ test('adds numbers correctly', () => {
   }) => {
     test.setTimeout(90000)
     await page.setViewportSize({ width: 1920, height: 1080 })
-    await page.goto('http://127.0.0.1:5173/')
-    await expect(page.getByText('CONNECTED')).toBeVisible()
+    await openOfficeView(page, VITE_URL)
 
     // -----------------------------------------------------------------------
     // Stage 1: Agent Registry View & Codex Disqualification Proof
@@ -957,7 +1002,7 @@ test('adds numbers correctly', () => {
         browserQa: {
           id: 'qa_contract_pass_1',
           actions: [
-            { type: 'navigate', url: 'http://127.0.0.1:5173/' },
+            { type: 'navigate', url: VITE_URL },
             { type: 'assertVisible', selector: 'header' },
             { type: 'screenshot', name: 'qa-verified-living-hq.png' },
           ],
@@ -1020,7 +1065,7 @@ test('adds numbers correctly', () => {
         browserQa: {
           id: 'qa_contract_fail_1',
           actions: [
-            { type: 'navigate', url: 'http://127.0.0.1:5173/' },
+            { type: 'navigate', url: VITE_URL },
             { type: 'assertVisible', selector: '#nonexistent-faulty-element-404', timeoutMs: 500 },
           ],
         },

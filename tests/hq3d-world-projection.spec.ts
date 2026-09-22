@@ -109,14 +109,15 @@ function fixtureToStateSummary(fixture: DeriveWorldStateInput): StateSummaryResp
   }
 }
 
+import { getFreePort } from './test-ports.js'
+
 test.describe.serial('Wave 12C — Authoritative World Projection E2E & Visual Captures', () => {
   let fixtureRepoPath: string
   let runtimeRoot: string
   let server: GravitasServer
   let viteServer: ViteDevServer
-
-  const SERVER_PORT = 4321
-  const VITE_PORT = 5181
+  let SERVER_PORT: number
+  let VITE_PORT: number
 
   test.beforeAll(async () => {
     await mkdir(evidenceDir, { recursive: true })
@@ -167,7 +168,9 @@ test.describe.serial('Wave 12C — Authoritative World Projection E2E & Visual C
       eventHub,
     })
 
-    await server.start({ host: '127.0.0.1', port: SERVER_PORT })
+    const serverInfo = await server.start({ host: '127.0.0.1', port: 0 })
+    SERVER_PORT = serverInfo.port
+    VITE_PORT = await getFreePort()
 
     const webRoot = join(__dirname, '../apps/web')
     viteServer = await createViteServer({
@@ -176,6 +179,13 @@ test.describe.serial('Wave 12C — Authoritative World Projection E2E & Visual C
         host: '127.0.0.1',
         port: VITE_PORT,
         strictPort: true,
+        proxy: {
+          '/api': {
+            target: serverInfo.url,
+            changeOrigin: false,
+            secure: false,
+          },
+        },
       },
     })
     await viteServer.listen()
