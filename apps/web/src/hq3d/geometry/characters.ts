@@ -28,11 +28,16 @@ interface FigureController {
   readonly headMesh: THREE.Mesh
   readonly armsLeftGroup: THREE.Group
   readonly armsRightGroup: THREE.Group
+  readonly legLeftGroup: THREE.Group
+  readonly legRightGroup: THREE.Group
+  readonly seatedLegsGroup: THREE.Group | null
+  readonly standingLegsGroup: THREE.Group
   readonly accessoryMesh: THREE.Object3D | null
   readonly statusRing: THREE.Mesh
   readonly statusMaterial: THREE.MeshBasicMaterial
   readonly baseTorsoY: number
-  readonly isSeated: boolean
+  readonly isSeatedDefault: boolean
+  isSeated: boolean
   readonly phaseOffset: number
   characterState: CharacterPresentationState
 }
@@ -163,6 +168,7 @@ export class HqCharacters {
     const armsLeftGroup = new THREE.Group()
     const armsRightGroup = new THREE.Group()
     let accessoryMesh: THREE.Object3D | null = null
+    let seatedLegsGroup: THREE.Group | null = null
 
     if (isSeated) {
       // Seated Posture: Upper arms down, forearms forward resting toward desk
@@ -211,32 +217,38 @@ export class HqCharacters {
       }
 
       // Seated Legs (horizontal thighs + vertical shins + shoes)
+      const seatedLegs = new THREE.Group()
+      seatedLegs.name = 'seated-legs'
+
       const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
       const thighL = new THREE.Mesh(thighGeo, suitMat)
       thighL.position.set(-0.1, yBase + 0.36, 0.17)
-      rootGroup.add(thighL)
+      seatedLegs.add(thighL)
 
       const thighR = new THREE.Mesh(thighGeo, suitMat)
       thighR.position.set(0.1, yBase + 0.36, 0.17)
-      rootGroup.add(thighR)
+      seatedLegs.add(thighR)
 
       const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
       const shinL = new THREE.Mesh(shinGeo, suitMat)
       shinL.position.set(-0.1, 0.21, 0.34)
-      rootGroup.add(shinL)
+      seatedLegs.add(shinL)
 
       const shinR = new THREE.Mesh(shinGeo, suitMat)
       shinR.position.set(0.1, 0.21, 0.34)
-      rootGroup.add(shinR)
+      seatedLegs.add(shinR)
 
       const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
       const shoeL = new THREE.Mesh(shoeGeo, suitMat)
       shoeL.position.set(-0.1, 0.03, 0.38)
-      rootGroup.add(shoeL)
+      seatedLegs.add(shoeL)
 
       const shoeR = new THREE.Mesh(shoeGeo, suitMat)
       shoeR.position.set(0.1, 0.03, 0.38)
-      rootGroup.add(shoeR)
+      seatedLegs.add(shoeR)
+
+      rootGroup.add(seatedLegs)
+      seatedLegsGroup = seatedLegs
     } else {
       // Standing Posture (Chief Planner & Independent Reviewer)
       const armGeo = this.track(new THREE.BoxGeometry(0.08, 0.44, 0.09))
@@ -275,28 +287,43 @@ export class HqCharacters {
         armR.rotation.x = -0.55
         armR.position.set(0.16, -0.02, 0.14)
       }
-
-      // Standing Trousers & Shoes
-      const legGeo = this.track(new THREE.BoxGeometry(0.13, 0.62, 0.14))
-      const legL = new THREE.Mesh(legGeo, suitMat)
-      legL.position.set(-0.1, yBase + 0.31, 0.0)
-      legL.castShadow = true
-      rootGroup.add(legL)
-
-      const legR = new THREE.Mesh(legGeo, suitMat)
-      legR.position.set(0.1, yBase + 0.31, 0.0)
-      legR.castShadow = true
-      rootGroup.add(legR)
-
-      const shoeGeo = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-      const shoeL = new THREE.Mesh(shoeGeo, suitMat)
-      shoeL.position.set(-0.1, yBase + 0.03, 0.03)
-      rootGroup.add(shoeL)
-
-      const shoeR = new THREE.Mesh(shoeGeo, suitMat)
-      shoeR.position.set(0.1, yBase + 0.03, 0.03)
-      rootGroup.add(shoeR)
     }
+
+    // Articulated Standing / Walking Legs (Present on all characters, toggled when walking/standing)
+    const standingLegsGroup = new THREE.Group()
+    standingLegsGroup.name = 'standing-legs'
+
+    const legLeftGroup = new THREE.Group()
+    legLeftGroup.position.set(-0.1, 0.62, 0.0)
+    const legGeoL = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
+    const legMeshL = new THREE.Mesh(legGeoL, suitMat)
+    legMeshL.position.set(0.0, -0.28, 0.0)
+    legMeshL.castShadow = true
+    legLeftGroup.add(legMeshL)
+    const shoeGeoL = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
+    const shoeMeshL = new THREE.Mesh(shoeGeoL, suitMat)
+    shoeMeshL.position.set(0.0, -0.59, 0.03)
+    legLeftGroup.add(shoeMeshL)
+    standingLegsGroup.add(legLeftGroup)
+
+    const legRightGroup = new THREE.Group()
+    legRightGroup.position.set(0.1, 0.62, 0.0)
+    const legGeoR = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
+    const legMeshR = new THREE.Mesh(legGeoR, suitMat)
+    legMeshR.position.set(0.0, -0.28, 0.0)
+    legMeshR.castShadow = true
+    legRightGroup.add(legMeshR)
+    const shoeGeoR = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
+    const shoeMeshR = new THREE.Mesh(shoeGeoR, suitMat)
+    shoeMeshR.position.set(0.0, -0.59, 0.03)
+    legRightGroup.add(shoeMeshR)
+    standingLegsGroup.add(legRightGroup)
+
+    if (isSeated) {
+      standingLegsGroup.visible = false
+    }
+
+    rootGroup.add(standingLegsGroup)
 
     torsoGroup.add(armsLeftGroup)
     torsoGroup.add(armsRightGroup)
@@ -380,14 +407,103 @@ export class HqCharacters {
       headMesh: head,
       armsLeftGroup,
       armsRightGroup,
+      legLeftGroup,
+      legRightGroup,
+      seatedLegsGroup,
+      standingLegsGroup,
       accessoryMesh,
       statusRing,
       statusMaterial,
       baseTorsoY: yBase + 0.62,
+      isSeatedDefault: isSeated,
       isSeated,
       phaseOffset,
       characterState: 'IDLE',
     })
+  }
+
+  /**
+   * Sets the world position and yaw of a role's character figure.
+   */
+  public setFigurePosition(
+    roleId: RoleId,
+    pos: readonly [number, number, number],
+    rotY: number
+  ): void {
+    const ctrl = this.controllers.get(roleId)
+    if (!ctrl) return
+    ctrl.rootGroup.position.set(pos[0], pos[1], pos[2])
+    ctrl.rootGroup.rotation.y = rotY
+  }
+
+  /**
+   * Gets the current world position of a role's character figure.
+   */
+  public getFigurePosition(roleId: RoleId): [number, number, number] {
+    const ctrl = this.controllers.get(roleId)
+    if (!ctrl) return [0, 0, 0]
+    return [ctrl.rootGroup.position.x, ctrl.rootGroup.position.y, ctrl.rootGroup.position.z]
+  }
+
+  /**
+   * Toggles character posture between SEATED at desk, STANDING at station, or WALKING.
+   */
+  public setFigurePose(roleId: RoleId, pose: 'SEATED' | 'STANDING' | 'WALKING'): void {
+    const ctrl = this.controllers.get(roleId)
+    if (!ctrl) return
+
+    if (pose === 'SEATED') {
+      ctrl.isSeated = true
+      if (ctrl.seatedLegsGroup) ctrl.seatedLegsGroup.visible = true
+      ctrl.standingLegsGroup.visible = false
+      ctrl.torsoGroup.position.y = ctrl.baseTorsoY
+    } else {
+      // STANDING or WALKING
+      ctrl.isSeated = false
+      if (ctrl.seatedLegsGroup) ctrl.seatedLegsGroup.visible = false
+      ctrl.standingLegsGroup.visible = true
+      ctrl.torsoGroup.position.y = 0.62
+    }
+  }
+
+  /**
+   * Applies procedural walk cycle limb swings and torso bobbing.
+   * Target walking speed: 1.25–1.45 units/s.
+   */
+  public applyWalkCycle(
+    roleId: RoleId,
+    walkPhase: number,
+    isWalking: boolean,
+    reducedMotion: boolean
+  ): void {
+    const ctrl = this.controllers.get(roleId)
+    if (!ctrl) return
+
+    if (reducedMotion || !isWalking) {
+      ctrl.legLeftGroup.rotation.x = 0.0
+      ctrl.legRightGroup.rotation.x = 0.0
+      ctrl.armsLeftGroup.rotation.x = 0.0
+      ctrl.armsRightGroup.rotation.x = 0.0
+      ctrl.torsoGroup.position.y = ctrl.isSeated ? ctrl.baseTorsoY : 0.62
+      ctrl.torsoGroup.rotation.z = 0.0
+      return
+    }
+
+    // Walking posture: switch to standing legs
+    this.setFigurePose(roleId, 'WALKING')
+
+    // Leg swings (counter-phased, amplitude ±0.45 rad)
+    const legSwing = Math.sin(walkPhase) * 0.45
+    ctrl.legLeftGroup.rotation.x = legSwing
+    ctrl.legRightGroup.rotation.x = -legSwing
+
+    // Opposing arm swings (amplitude ±0.35 rad)
+    ctrl.armsLeftGroup.rotation.x = -legSwing * 0.78
+    ctrl.armsRightGroup.rotation.x = legSwing * 0.78
+
+    // Minor hip bobbing & small torso lean (unhurried architectural pace)
+    ctrl.torsoGroup.position.y = 0.62 + Math.abs(Math.sin(walkPhase)) * 0.02
+    ctrl.torsoGroup.rotation.z = Math.sin(walkPhase) * 0.02
   }
 
   /**

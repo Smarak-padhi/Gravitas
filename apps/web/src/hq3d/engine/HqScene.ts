@@ -14,6 +14,8 @@ import { HqInfrastructure } from '../geometry/infrastructure.js'
 import { HqCharacters } from '../geometry/characters.js'
 import { HqTaskDossiers } from '../geometry/dossiers.js'
 import { HandoffConduitManager } from '../geometry/handoffConduits.js'
+import { CharacterMotionController } from '../motion/CharacterMotionController.js'
+import { deriveCharacterSpatialIntents } from '../motion/spatialIntent.js'
 import type { WorldState } from '../world/worldState.js'
 import { deriveRolePresentationStates } from '../roles/roleStationMapping.js'
 
@@ -26,6 +28,7 @@ export class HqScene {
   public readonly characters: HqCharacters
   public readonly dossiers: HqTaskDossiers
   public readonly handoffs: HandoffConduitManager
+  public readonly motion: CharacterMotionController
 
   // Lights
   private readonly keyLight: THREE.DirectionalLight
@@ -133,13 +136,17 @@ export class HqScene {
 
     this.handoffs = new HandoffConduitManager()
     this.scene.add(this.handoffs.getGroup())
+
+    this.motion = new CharacterMotionController(this.characters)
   }
 
+  private lastTimeSeconds: number | null = null
+
   /**
-   * Authoritative Scene Reconciliation (Wave 12C)
+   * Authoritative Scene Reconciliation (Wave 12C / 12G)
    * Pure deterministic WorldState -> 3D Headquarters in-place updates.
    */
-  public reconcileWorld(worldState: WorldState): void {
+  public reconcileWorld(worldState: WorldState, reducedMotion: boolean = false): void {
     // 1. Reconcile tangible physical task dossiers
     this.dossiers.reconcileTasks(worldState.tasks)
 
@@ -159,9 +166,17 @@ export class HqScene {
 
     // 4. Reconcile architectural handoffs & custody markers (Wave 12F)
     this.handoffs.updateHandoffs(worldState.handoffs)
+
+    // 5. Reconcile authoritative spatial intents & locomotion (Wave 12G)
+    const spatialIntents = deriveCharacterSpatialIntents(worldState)
+    this.motion.reconcileIntents(spatialIntents, reducedMotion)
   }
 
   public update(timeSeconds: number, reducedMotion: boolean): void {
+    const deltaTime = this.lastTimeSeconds !== null ? Math.max(timeSeconds - this.lastTimeSeconds, 0.0) : 0.016
+    this.lastTimeSeconds = timeSeconds
+
+    this.motion.update(deltaTime, reducedMotion)
     this.characters.update(timeSeconds, reducedMotion)
   }
 

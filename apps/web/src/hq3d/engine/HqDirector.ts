@@ -96,7 +96,7 @@ export class HqDirector {
     }
 
     this.currentWorldState = next
-    this.scene.reconcileWorld(next)
+    this.scene.reconcileWorld(next, this.reducedMotion)
     return true
   }
 
