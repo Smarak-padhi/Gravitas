@@ -41,6 +41,44 @@ export interface RuntimeHandoffProjection {
   readonly reasonCode?: string | undefined
 }
 
+export type ArtifactCustodyLocation =
+  | 'PRODUCER_DESK'
+  | 'REVIEW_INBOX'
+  | 'REVIEW_BENCH'
+  | 'INTEGRATION_INBOX'
+  | 'INTEGRATION_BENCH'
+  | 'APPROVAL_PLINTH'
+  | 'COMPLETED_TRAY'
+  | 'FAILURE_HOLD'
+  | 'NEUTRAL_HOLD'
+
+export interface RuntimeArtifactProjection {
+  readonly artifactId: string
+  readonly sourceTaskId: string
+  readonly sourceRoleId?: string | undefined
+  readonly sourceHarnessId?: string | undefined
+  readonly commitSha?: string | undefined
+  readonly verificationState:
+    | 'UNVERIFIED'
+    | 'VERIFYING'
+    | 'VERIFIED'
+    | 'FAILED'
+  readonly reviewState:
+    | 'NOT_REQUIRED'
+    | 'PENDING'
+    | 'IN_REVIEW'
+    | 'PASSED'
+    | 'CHANGES_REQUIRED'
+  readonly integrationState:
+    | 'NOT_READY'
+    | 'READY'
+    | 'PREPARING'
+    | 'PREPARED'
+    | 'CONFLICT'
+    | 'INTEGRATED'
+  readonly currentCustody: ArtifactCustodyLocation
+}
+
 export interface RuntimeTaskProjection {
   readonly taskId: string
   readonly phase: RuntimeExecutionPhase
@@ -58,6 +96,7 @@ export interface RuntimeProjectionSnapshot {
   readonly revision: number
   readonly activeTasks: readonly RuntimeTaskProjection[]
   readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
+  readonly artifacts?: readonly RuntimeArtifactProjection[] | undefined
 }
 
 /**
@@ -70,6 +109,7 @@ export class RuntimeProjectionStore {
   private revision: number = 0
   private readonly tasks = new Map<string, RuntimeTaskProjection>()
   private readonly handoffs = new Map<string, RuntimeHandoffProjection>()
+  private readonly artifacts = new Map<string, RuntimeArtifactProjection>()
   private readonly terminalTaskIds = new Set<string>()
 
   public constructor(epochId?: string) {
@@ -445,6 +485,17 @@ export class RuntimeProjectionStore {
         state: h.state,
         ...(h.reasonCode ? { reasonCode: h.reasonCode } : {}),
       })),
+      artifacts: Array.from(this.artifacts.values()).map((a) => ({
+        artifactId: a.artifactId,
+        sourceTaskId: a.sourceTaskId,
+        ...(a.sourceRoleId ? { sourceRoleId: a.sourceRoleId } : {}),
+        ...(a.sourceHarnessId ? { sourceHarnessId: a.sourceHarnessId } : {}),
+        ...(a.commitSha ? { commitSha: a.commitSha } : {}),
+        verificationState: a.verificationState,
+        reviewState: a.reviewState,
+        integrationState: a.integrationState,
+        currentCustody: a.currentCustody,
+      })),
     }
   }
 
@@ -464,9 +515,26 @@ export class RuntimeProjectionStore {
     return Array.from(this.handoffs.values())
   }
 
+  public setArtifact(artifact: RuntimeArtifactProjection): void {
+    this.artifacts.set(artifact.artifactId, artifact)
+    this.revision++
+  }
+
+  public setArtifacts(artifacts: readonly RuntimeArtifactProjection[]): void {
+    for (const a of artifacts) {
+      this.artifacts.set(a.artifactId, a)
+    }
+    this.revision++
+  }
+
+  public getArtifacts(): readonly RuntimeArtifactProjection[] {
+    return Array.from(this.artifacts.values())
+  }
+
   public clear(): void {
     this.tasks.clear()
     this.handoffs.clear()
+    this.artifacts.clear()
     this.terminalTaskIds.clear()
     this.revision = 0
   }

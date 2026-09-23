@@ -187,6 +187,9 @@ export type {
   RuntimeRouteProjection,
   RuntimeVerificationProjection,
   RuntimeBrowserQaProjection,
+  RuntimeHandoffProjection,
+  ArtifactCustodyLocation,
+  RuntimeArtifactProjection,
   RuntimeProjectionSnapshot,
 } from './projection.js'
 

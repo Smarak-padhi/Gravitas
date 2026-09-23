@@ -107,12 +107,51 @@ export interface RuntimeHandoffProjection {
   readonly reasonCode?: string | undefined
 }
 
+export type ArtifactCustodyLocation =
+  | 'PRODUCER_DESK'
+  | 'REVIEW_INBOX'
+  | 'REVIEW_BENCH'
+  | 'INTEGRATION_INBOX'
+  | 'INTEGRATION_BENCH'
+  | 'APPROVAL_PLINTH'
+  | 'COMPLETED_TRAY'
+  | 'FAILURE_HOLD'
+  | 'NEUTRAL_HOLD'
+
+export interface RuntimeArtifactProjection {
+  readonly artifactId: string
+  readonly sourceTaskId: string
+  readonly sourceRoleId?: string | null | undefined
+  readonly sourceHarnessId?: string | null | undefined
+  readonly commitSha?: string | null | undefined
+  readonly verificationState:
+    | 'UNVERIFIED'
+    | 'VERIFYING'
+    | 'VERIFIED'
+    | 'FAILED'
+  readonly reviewState:
+    | 'NOT_REQUIRED'
+    | 'PENDING'
+    | 'IN_REVIEW'
+    | 'PASSED'
+    | 'CHANGES_REQUIRED'
+  readonly integrationState:
+    | 'NOT_READY'
+    | 'READY'
+    | 'PREPARING'
+    | 'PREPARED'
+    | 'CONFLICT'
+    | 'INTEGRATED'
+  readonly currentCustody: ArtifactCustodyLocation
+}
+
 export interface RuntimeProjectionSnapshot {
   readonly schemaVersion: string
   readonly epoch: string
   readonly revision: number
   readonly activeTasks: readonly RuntimeTaskProjection[]
   readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
+  readonly artifacts?: readonly RuntimeArtifactProjection[] | undefined
 }
 
 export interface RunDetailResponse {

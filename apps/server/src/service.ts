@@ -456,6 +456,20 @@ export class RunService {
           ...(handoff.reasonCode ? { reasonCode: handoff.reasonCode } : {}),
         })
       },
+      onArtifactCreated: (artifact) => {
+        // Sanitization boundary: allowlisted fields only.
+        this.eventHub.projectionStore.setArtifact({
+          artifactId: artifact.artifactId,
+          sourceTaskId: artifact.sourceTaskId,
+          ...(artifact.sourceRoleId ? { sourceRoleId: artifact.sourceRoleId } : {}),
+          ...(artifact.sourceHarnessId ? { sourceHarnessId: artifact.sourceHarnessId } : {}),
+          ...(artifact.commitSha ? { commitSha: artifact.commitSha } : {}),
+          verificationState: artifact.verificationState ?? 'VERIFIED',
+          reviewState: 'PENDING',
+          integrationState: 'NOT_READY',
+          currentCustody: 'PRODUCER_DESK',
+        })
+      },
       agentRegistry: this.registry.getAgentRegistry(),
       gatewayRegistry: this.gatewayRegistry,
     })
