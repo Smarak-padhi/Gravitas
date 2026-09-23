@@ -100,7 +100,7 @@ export class HqPicking {
       let curr: THREE.Object3D | null = hit.object
       while (curr && curr !== scene) {
         const u = curr.userData
-        if (u && (u.type === 'station' || u.type === 'character' || u.type === 'room')) {
+        if (u && (u.type === 'station' || u.type === 'character' || u.type === 'room' || u.type === 'artifact')) {
           const entity = this.resolveEntity(u.type, u.id, curr)
           if (entity) {
             this.setSelection(entity, curr)
@@ -119,6 +119,20 @@ export class HqPicking {
     id: string,
     object: THREE.Object3D
   ): SelectedEntity | null {
+    if (type === 'artifact') {
+      const u = object.userData
+      return {
+        id: id || (u.artifactId as string) || 'artifact',
+        type: 'artifact',
+        name: (u.name as string) || `Work Product Dossier (${id})`,
+        room: (u.room as string) || 'HQ Workspace',
+        status: (u.status as string) || 'CUSTODY_HELD',
+        description:
+          (u.description as string) ||
+          'Authoritative work product dossier in physical headquarters custody.',
+        artifactMetadata: u.artifactMetadata,
+      }
+    }
     if (type === 'station') {
       const stationDef = STATION_DEFINITIONS[id as keyof typeof STATION_DEFINITIONS]
       if (stationDef) {

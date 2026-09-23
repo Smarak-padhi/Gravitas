@@ -16,6 +16,8 @@ import { HqTaskDossiers } from '../geometry/dossiers.js'
 import { HandoffConduitManager } from '../geometry/handoffConduits.js'
 import { CharacterMotionController } from '../motion/CharacterMotionController.js'
 import { deriveCharacterSpatialIntents } from '../motion/spatialIntent.js'
+import { ArtifactMotionController } from '../custody/ArtifactMotionController.js'
+import { deriveArtifactCustody } from '../custody/artifactCustody.js'
 import type { WorldState } from '../world/worldState.js'
 import { deriveRolePresentationStates } from '../roles/roleStationMapping.js'
 
@@ -29,6 +31,7 @@ export class HqScene {
   public readonly dossiers: HqTaskDossiers
   public readonly handoffs: HandoffConduitManager
   public readonly motion: CharacterMotionController
+  public readonly custodyMotion: ArtifactMotionController
 
   // Lights
   private readonly keyLight: THREE.DirectionalLight
@@ -138,12 +141,15 @@ export class HqScene {
     this.scene.add(this.handoffs.getGroup())
 
     this.motion = new CharacterMotionController(this.characters)
+
+    this.custodyMotion = new ArtifactMotionController()
+    this.scene.add(this.custodyMotion.getGroup())
   }
 
   private lastTimeSeconds: number | null = null
 
   /**
-   * Authoritative Scene Reconciliation (Wave 12C / 12G)
+   * Authoritative Scene Reconciliation (Wave 12C / 12G / 12H)
    * Pure deterministic WorldState -> 3D Headquarters in-place updates.
    */
   public reconcileWorld(worldState: WorldState, reducedMotion: boolean = false): void {
@@ -170,6 +176,19 @@ export class HqScene {
     // 5. Reconcile authoritative spatial intents & locomotion (Wave 12G)
     const spatialIntents = deriveCharacterSpatialIntents(worldState)
     this.motion.reconcileIntents(spatialIntents, reducedMotion)
+
+    // 6. Reconcile authoritative artifact custody & visual transit (Wave 12H)
+    const custodyStates = deriveArtifactCustody({
+      projection: {
+        schemaVersion: '1.0.0',
+        epoch: worldState.revisionIdentity.projectionEpoch,
+        revision: worldState.revisionIdentity.projectionRevision,
+        activeTasks: [],
+        handoffs: worldState.handoffs as any,
+      },
+      worldState,
+    })
+    this.custodyMotion.reconcileCustody(custodyStates, reducedMotion)
   }
 
   public update(timeSeconds: number, reducedMotion: boolean): void {
@@ -178,6 +197,7 @@ export class HqScene {
 
     this.motion.update(deltaTime, reducedMotion)
     this.characters.update(timeSeconds, reducedMotion)
+    this.custodyMotion.update(deltaTime, reducedMotion)
   }
 
   public dispose(): void {
@@ -187,6 +207,7 @@ export class HqScene {
     this.characters.dispose()
     this.dossiers.dispose()
     this.handoffs.dispose()
+    this.custodyMotion.dispose()
     this.materials.dispose()
 
     this.scene.clear()

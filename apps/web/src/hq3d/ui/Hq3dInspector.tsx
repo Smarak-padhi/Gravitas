@@ -101,13 +101,17 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                     ? 'rgba(56, 189, 248, 0.15)'
                     : entity.type === 'character'
                       ? 'rgba(194, 155, 56, 0.15)'
-                      : 'rgba(139, 92, 246, 0.15)',
+                      : entity.type === 'artifact'
+                        ? 'rgba(16, 185, 129, 0.15)'
+                        : 'rgba(139, 92, 246, 0.15)',
                 color:
                   entity.type === 'station'
                     ? '#38bdf8'
                     : entity.type === 'character'
                       ? '#eab308'
-                      : '#a78bfa',
+                      : entity.type === 'artifact'
+                        ? '#10b981'
+                        : '#a78bfa',
                 border: '1px solid currentColor',
               }}
             >
@@ -376,6 +380,174 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                   <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>EPOCH / REV</div>
                   <div data-testid="inspector-projection-rev" style={{ fontWeight: 600, color: '#94a3b8' }}>
                     {entity.roleMetadata.projectionEpoch ? `r${entity.roleMetadata.projectionRevision}` : 'bootstrap'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : entity.artifactMetadata ? (
+            <div
+              data-testid="artifact-inspector-details"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '12px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(15, 23, 42, 0.7)',
+                border: '1px solid var(--border-color, #232b3e)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>WORK PRODUCT ARTIFACT</span>
+                <span
+                  data-testid="inspector-artifact-human-approval"
+                  style={{
+                    fontSize: '9px',
+                    padding: '1px 5px',
+                    borderRadius: '3px',
+                    backgroundColor: entity.artifactMetadata.requiresHumanApproval
+                      ? 'rgba(234, 179, 8, 0.2)'
+                      : 'rgba(56, 189, 248, 0.1)',
+                    color: entity.artifactMetadata.requiresHumanApproval ? '#fbbf24' : '#38bdf8',
+                    border: '1px solid currentColor',
+                  }}
+                >
+                  {entity.artifactMetadata.requiresHumanApproval ? 'APPROVAL REQUIRED' : 'NO APPROVAL NEEDED'}
+                </span>
+              </div>
+
+              <div data-testid="inspector-artifact-id" style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', wordBreak: 'break-all' }}>
+                {entity.artifactMetadata.artifactId}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>SOURCE TASK</div>
+                  <div data-testid="inspector-artifact-source-task" style={{ fontWeight: 600, color: '#e2e8f0', wordBreak: 'break-all' }}>
+                    {entity.artifactMetadata.sourceTaskId}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>SOURCE ROLE</div>
+                  <div data-testid="inspector-artifact-source-role" style={{ fontWeight: 600, color: '#38bdf8' }}>
+                    {entity.artifactMetadata.sourceRoleId ?? 'NONE'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>SOURCE HARNESS</div>
+                  <div data-testid="inspector-artifact-source-harness" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.artifactMetadata.sourceHarnessId ?? 'deterministic'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>TARGET ROLE</div>
+                  <div data-testid="inspector-artifact-target-role" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.artifactMetadata.targetRoleId ?? 'NONE'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HANDOFF ID</div>
+                  <div data-testid="inspector-artifact-handoff-id" style={{ fontWeight: 600, color: '#cbd5e1', wordBreak: 'break-all' }}>
+                    {entity.artifactMetadata.handoffId ?? 'NONE'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HANDOFF KIND / STATE</div>
+                  <div data-testid="inspector-artifact-handoff-state" style={{ fontWeight: 600, color: '#10b981' }}>
+                    {entity.artifactMetadata.handoffKind ? `${entity.artifactMetadata.handoffKind} (${entity.artifactMetadata.handoffState ?? 'ACTIVE'})` : 'NONE'}
+                  </div>
+                </div>
+              </div>
+
+              {entity.artifactMetadata.reasonCode && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>REASON CODE</div>
+                  <div data-testid="inspector-artifact-reason-code" style={{ fontWeight: 600, color: '#f59e0b' }}>
+                    {entity.artifactMetadata.reasonCode}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>VERIFICATION STATE</div>
+                  <div
+                    data-testid="inspector-artifact-verification-state"
+                    style={{
+                      fontWeight: 600,
+                      color:
+                        entity.artifactMetadata.verificationState === 'VERIFIED'
+                          ? '#10b981'
+                          : entity.artifactMetadata.verificationState === 'FAILED'
+                            ? '#ef4444'
+                            : '#38bdf8',
+                    }}
+                  >
+                    {entity.artifactMetadata.verificationState}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>REVIEW STATE</div>
+                  <div
+                    data-testid="inspector-artifact-review-state"
+                    style={{
+                      fontWeight: 600,
+                      color:
+                        entity.artifactMetadata.reviewState === 'PASSED'
+                          ? '#10b981'
+                          : entity.artifactMetadata.reviewState === 'CHANGES_REQUIRED'
+                            ? '#ef4444'
+                            : '#38bdf8',
+                    }}
+                  >
+                    {entity.artifactMetadata.reviewState}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>INTEGRATION STATE</div>
+                  <div
+                    data-testid="inspector-artifact-integration-state"
+                    style={{
+                      fontWeight: 600,
+                      color:
+                        entity.artifactMetadata.integrationState === 'INTEGRATED' || entity.artifactMetadata.integrationState === 'PREPARED'
+                          ? '#10b981'
+                          : entity.artifactMetadata.integrationState === 'CONFLICT'
+                            ? '#ef4444'
+                            : '#38bdf8',
+                    }}
+                  >
+                    {entity.artifactMetadata.integrationState}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>CUSTODY LOCATION</div>
+                  <div data-testid="inspector-artifact-custody-location" style={{ fontWeight: 600, color: '#eab308' }}>
+                    {entity.artifactMetadata.custodyLocation}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>COMMIT SHA</div>
+                  <div data-testid="inspector-artifact-commit-sha" style={{ fontWeight: 600, color: '#94a3b8', fontFamily: 'monospace' }}>
+                    {entity.artifactMetadata.commitSha ? entity.artifactMetadata.commitSha.slice(0, 7) : 'NONE'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>EPOCH / REV</div>
+                  <div data-testid="inspector-artifact-revision" style={{ fontWeight: 600, color: '#94a3b8' }}>
+                    {entity.artifactMetadata.projectionEpoch ? `r${entity.artifactMetadata.projectionRevision}` : 'bootstrap'}
                   </div>
                 </div>
               </div>

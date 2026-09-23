@@ -27,7 +27,27 @@ import type { RoleId, RoleInspectorMetadata } from './roles/types.js'
 
 export type CharacterId = RoleId | 'char-codex' | 'char-fcc' | 'char-verifier'
 
-export type EntityType = 'room' | 'station' | 'character'
+export type EntityType = 'room' | 'station' | 'character' | 'artifact'
+
+export interface ArtifactInspectorMetadata {
+  readonly artifactId: string
+  readonly sourceTaskId: string
+  readonly sourceRoleId?: string | undefined
+  readonly sourceHarnessId?: string | undefined
+  readonly targetRoleId?: string | undefined
+  readonly handoffId?: string | undefined
+  readonly handoffKind?: string | undefined
+  readonly handoffState?: string | undefined
+  readonly reasonCode?: string | undefined
+  readonly verificationState: string
+  readonly reviewState: string
+  readonly integrationState: string
+  readonly custodyLocation: string
+  readonly commitSha?: string | undefined
+  readonly requiresHumanApproval: boolean
+  readonly projectionEpoch?: string | undefined
+  readonly projectionRevision?: number | undefined
+}
 
 export interface SelectedEntity {
   readonly id: string
@@ -38,6 +58,7 @@ export interface SelectedEntity {
   readonly status: string
   readonly description?: string | undefined
   readonly roleMetadata?: RoleInspectorMetadata | undefined
+  readonly artifactMetadata?: ArtifactInspectorMetadata | undefined
 }
 
 export interface CameraFramingPreset {
