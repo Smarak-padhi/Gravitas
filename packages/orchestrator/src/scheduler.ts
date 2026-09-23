@@ -255,6 +255,7 @@ export class BoundedScheduler {
           reasonCode: 'REVIEW_REQUIRED',
         })
         this.handoffs.set(handoff.id, handoff)
+        this.onHandoffUpdated?.(handoff)
       }
 
       const depIds = extractDependencyIds(taskDef)
@@ -276,6 +277,7 @@ export class BoundedScheduler {
           reasonCode: isIntegration ? 'INTEGRATION_PENDING' : 'UPSTREAM_PENDING',
         })
         this.handoffs.set(handoff.id, handoff)
+        this.onHandoffUpdated?.(handoff)
       }
     }
 

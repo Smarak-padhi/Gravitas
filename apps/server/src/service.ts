@@ -442,6 +442,20 @@ export class RunService {
       onBrowserQa: (taskId, qaResult) => {
         this.registry.setBrowserQaResult(taskId, qaResult)
       },
+      onHandoffUpdated: (handoff) => {
+        // Sanitization boundary: only allowlisted projection fields.
+        // No prompt bytes, API keys, auth tokens, worktree paths, or provider credentials.
+        this.eventHub.projectionStore.setHandoff({
+          handoffId: handoff.id,
+          kind: handoff.kind,
+          sourceTaskId: handoff.sourceTaskId,
+          targetTaskId: handoff.targetTaskId,
+          ...(handoff.sourceRoleId ? { sourceRoleId: handoff.sourceRoleId } : {}),
+          ...(handoff.targetRoleId ? { targetRoleId: handoff.targetRoleId } : {}),
+          state: handoff.state,
+          ...(handoff.reasonCode ? { reasonCode: handoff.reasonCode } : {}),
+        })
+      },
       agentRegistry: this.registry.getAgentRegistry(),
       gatewayRegistry: this.gatewayRegistry,
     })
