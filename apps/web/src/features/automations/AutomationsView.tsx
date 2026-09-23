@@ -96,6 +96,24 @@ export const AutomationsView: React.FC = () => {
     }
   }
 
+  const handleApproveRun = async (jobId: string, runId: string) => {
+    try {
+      await api.approveJobRun(jobId, runId)
+      await fetchData()
+    } catch (err) {
+      alert(`Approval failed: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleRejectRun = async (jobId: string, runId: string) => {
+    try {
+      await api.rejectJobRun(jobId, runId, 'Rejected from Sovereign Automations Console')
+      await fetchData()
+    } catch (err) {
+      alert(`Rejection failed: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
   const handleMarkNotificationRead = async (id: string) => {
     try {
       await api.markNotificationRead(id)
@@ -121,45 +139,47 @@ export const AutomationsView: React.FC = () => {
       let action: any
       if (formPreset === 'REMINDER') {
         action = {
-          kind: 'EMIT_NOTIFICATION',
+          type: 'EMIT_NOTIFICATION',
           title: formActionTitle,
           message: formActionMessage,
-          severity: 'FYI',
+          severity: 'INFO',
         }
       } else if (formPreset === 'REPO_CHECK') {
         action = {
-          kind: 'REPOSITORY_CHECK',
+          type: 'REPOSITORY_CHECK',
           repositoryId: 'repo:core',
+          checkType: 'STATUS',
         }
       } else if (formPreset === 'FILE_STAT') {
         action = {
-          kind: 'FILE_OPERATION',
+          type: 'FILE_OPERATION',
           operation: 'STAT',
           path: formFilePath,
         }
       } else {
         action = {
-          kind: 'RUN_COMMAND',
-          command: 'echo "Zero Mutation Ping"',
+          type: 'NOOP',
+          message: 'Zero Mutation Ping',
         }
       }
 
       let trigger: any
       if (formTriggerType === 'INTERVAL') {
         trigger = {
-          kind: 'INTERVAL',
+          type: 'INTERVAL',
           intervalSeconds: Math.max(60, Number(formIntervalSec) || 3600),
+          anchorAt: new Date().toISOString(),
           timezone: 'UTC',
         }
       } else if (formTriggerType === 'CRON') {
         trigger = {
-          kind: 'CRON',
-          cronExpression: formCron || '0 14 * * *',
+          type: 'CRON',
+          expression: formCron || '0 14 * * *',
           timezone: 'UTC',
         }
       } else {
         trigger = {
-          kind: 'MANUAL',
+          type: 'MANUAL',
         }
       }
 
@@ -731,6 +751,7 @@ export const AutomationsView: React.FC = () => {
                       <th style={{ padding: '8px 12px', fontWeight: 600 }}>Tokens / Cost</th>
                       <th style={{ padding: '8px 12px', fontWeight: 600 }}>Result Summary</th>
                       <th style={{ padding: '8px 12px', fontWeight: 600 }}>Finished At</th>
+                      <th style={{ padding: '8px 12px', fontWeight: 600, textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -792,6 +813,45 @@ export const AutomationsView: React.FC = () => {
                         </td>
                         <td style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: '11px' }}>
                           {run.finishedAt ? new Date(run.finishedAt).toLocaleTimeString() : 'In Progress'}
+                        </td>
+                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                          {run.status === 'WAITING_APPROVAL' ? (
+                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                              <button
+                                data-testid={`approve-btn-${run.id}`}
+                                onClick={() => handleApproveRun(run.jobId, run.id)}
+                                style={{
+                                  padding: '3px 8px',
+                                  fontSize: '11px',
+                                  backgroundColor: 'var(--state-success-bg, rgba(34, 197, 94, 0.2))',
+                                  color: 'var(--state-success-fg, #22c55e)',
+                                  border: '1px solid var(--state-success-fg, #22c55e)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  cursor: 'pointer',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                ✓ Approve
+                              </button>
+                              <button
+                                data-testid={`reject-btn-${run.id}`}
+                                onClick={() => handleRejectRun(run.jobId, run.id)}
+                                style={{
+                                  padding: '3px 8px',
+                                  fontSize: '11px',
+                                  backgroundColor: 'transparent',
+                                  color: 'var(--state-failure-fg, #ef4444)',
+                                  border: '1px solid var(--state-failure-border, rgba(239, 68, 68, 0.3))',
+                                  borderRadius: 'var(--radius-sm)',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                ✕ Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>—</span>
+                          )}
                         </td>
                       </tr>
                     ))}

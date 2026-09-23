@@ -191,8 +191,16 @@ export class JobScheduler {
     })
 
     if (!claim.claimed || !claim.run) {
-      // Idempotency: return existing run if double-submitted with same command ID
-      const existingRuns = this.store.getRunsForJob(jobId, 10)
+      // Idempotency: look up claimed occurrence and return existing run
+      const existingClaim = this.store.getOccurrenceClaim(jobId, occurrenceKey)
+      if (existingClaim) {
+        const existingRun = this.store.getRun(existingClaim.runId)
+        if (existingRun) {
+          return existingRun
+        }
+      }
+      // Fallback scan
+      const existingRuns = this.store.getRunsForJob(jobId, 50)
       const existing = existingRuns.find((r) => r.occurrenceKey === occurrenceKey)
       if (existing) {
         return existing
@@ -202,5 +210,41 @@ export class JobScheduler {
 
     // Execute run synchronously or asynchronously
     return this.runner.executeRun(job, claim.run)
+  }
+
+  /**
+   * Sovereign Operator Approval:
+   * Approves and executes a run waiting for approval.
+   */
+  public async approveRun(jobId: string, runId: string): Promise<JobRun> {
+    const job = this.store.getJob(jobId)
+    if (!job) {
+      throw new Error(`JOB_NOT_FOUND: Background job ${jobId} not found`)
+    }
+
+    const run = this.store.getRun(runId)
+    if (!run || run.jobId !== jobId) {
+      throw new Error(`RUN_NOT_FOUND: Run ${runId} not found for job ${jobId}`)
+    }
+
+    return this.runner.approveRun(job, run)
+  }
+
+  /**
+   * Sovereign Operator Rejection:
+   * Rejects a run waiting for approval. Action executes zero times.
+   */
+  public async rejectRun(jobId: string, runId: string, reason?: string): Promise<JobRun> {
+    const job = this.store.getJob(jobId)
+    if (!job) {
+      throw new Error(`JOB_NOT_FOUND: Background job ${jobId} not found`)
+    }
+
+    const run = this.store.getRun(runId)
+    if (!run || run.jobId !== jobId) {
+      throw new Error(`RUN_NOT_FOUND: Run ${runId} not found for job ${jobId}`)
+    }
+
+    return this.runner.rejectRun(job, run, reason)
   }
 }

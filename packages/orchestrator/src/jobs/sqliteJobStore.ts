@@ -53,6 +53,7 @@ export class SqliteJobStore implements JobStore {
   private initPragmas(): void {
     this.db.exec('PRAGMA foreign_keys = ON;')
     this.db.exec('PRAGMA journal_mode = WAL;')
+    this.db.exec('PRAGMA busy_timeout = 5000;')
   }
 
   private runMigrations(): void {
@@ -339,6 +340,19 @@ export class SqliteJobStore implements JobStore {
       // Constraint violation (duplicate occurrence key) or error
       this.db.exec('ROLLBACK;')
       return { claimed: false }
+    }
+  }
+
+  public getOccurrenceClaim(jobId: string, occurrenceKey: string): { runId: string; claimedAt: string } | null {
+    const row = this.db.prepare(`
+      SELECT run_id, claimed_at FROM occurrence_claims
+      WHERE job_id = ? AND occurrence_key = ?
+    `).get(jobId, occurrenceKey) as { run_id: string; claimed_at: string } | undefined
+
+    if (!row) return null
+    return {
+      runId: row.run_id,
+      claimedAt: row.claimed_at,
     }
   }
 

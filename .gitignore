@@ -42,3 +42,14 @@ logs/
 
 # OS artifacts
 Thumbs.db
+
+# SQLite runtime databases & journal files — NEVER commit runtime DBs
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+jobs.db
+gravitas.db

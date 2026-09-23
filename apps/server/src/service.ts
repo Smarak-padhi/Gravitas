@@ -1168,6 +1168,30 @@ export class RunService {
     return this.jobStore.getRunsForJob(jobId, limit)
   }
 
+  public async approveJobRun(jobId: string, runId: string): Promise<JobRun> {
+    const job = this.jobStore.getJob(jobId)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', jobId)
+    }
+    const run = this.jobStore.getRun(runId)
+    if (!run || run.jobId !== jobId) {
+      throw new NotFoundError('JobRun', runId)
+    }
+    return this.jobScheduler.approveRun(jobId, runId)
+  }
+
+  public async rejectJobRun(jobId: string, runId: string, reason?: string): Promise<JobRun> {
+    const job = this.jobStore.getJob(jobId)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', jobId)
+    }
+    const run = this.jobStore.getRun(runId)
+    if (!run || run.jobId !== jobId) {
+      throw new NotFoundError('JobRun', runId)
+    }
+    return this.jobScheduler.rejectRun(jobId, runId, reason)
+  }
+
   public listNotifications(filter?: { unreadOnly?: boolean; limit?: number }): PersonalOsNotification[] {
     return this.jobStore.listNotifications(filter)
   }

@@ -236,6 +236,23 @@ export const api = {
     return request<readonly JobRun[]>(`/api/v1/jobs/${encodeURIComponent(jobId)}/runs${qs}`)
   },
 
+  approveJobRun(jobId: string, runId: string): Promise<{ jobRun: JobRun }> {
+    return request<{ jobRun: JobRun }>(
+      `/api/v1/jobs/${encodeURIComponent(jobId)}/runs/${encodeURIComponent(runId)}/approve`,
+      { method: 'POST' }
+    )
+  },
+
+  rejectJobRun(jobId: string, runId: string, reason?: string): Promise<{ jobRun: JobRun }> {
+    return request<{ jobRun: JobRun }>(
+      `/api/v1/jobs/${encodeURIComponent(jobId)}/runs/${encodeURIComponent(runId)}/reject`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      }
+    )
+  },
+
   // Personal OS Notifications
   listNotifications(filter?: { unreadOnly?: boolean; limit?: number }): Promise<readonly PersonalOsNotification[]> {
     const params = new URLSearchParams()

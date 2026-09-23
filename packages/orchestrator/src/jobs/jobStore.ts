@@ -71,6 +71,11 @@ export interface JobStore {
   claimOccurrence(params: ClaimOccurrenceParams): ClaimOccurrenceResult
 
   /**
+   * Look up an existing occurrence claim by jobId and occurrenceKey.
+   */
+  getOccurrenceClaim(jobId: string, occurrenceKey: string): { runId: string; claimedAt: string } | null
+
+  /**
    * Retrieve a JobRun by ID.
    */
   getRun(id: string): JobRun | null

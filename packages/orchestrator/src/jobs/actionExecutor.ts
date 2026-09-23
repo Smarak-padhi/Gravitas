@@ -206,22 +206,31 @@ export class ActionExecutor {
 
   private executeFileOperation(action: FileOperationAction): ActionResult {
     // 1. Path Traversal & Root Security Validation
-    const resolvedPath = path.resolve(action.path)
-
-    // Check against path traversal patterns
-    if (action.path.includes('..') || action.path.startsWith('\\\\')) {
+    const rawPath = action.path
+    if (
+      !rawPath ||
+      rawPath.includes('..') ||
+      rawPath.startsWith('\\\\') ||
+      rawPath.startsWith('//') ||
+      rawPath.includes('%') ||
+      rawPath.includes('$')
+    ) {
       return {
         success: false,
-        resultSummary: `Path traversal or UNC path rejected: ${action.path}`,
+        resultSummary: `Path traversal, UNC, or variable path rejected: ${rawPath}`,
         errorCode: 'AUTHORITY_DENIED',
         reasoningUsed: false,
       }
     }
 
-    // Verify inside at least one allowed root
+    const resolvedPath = path.resolve(rawPath)
+
+    // Verify inside at least one allowed root (case-insensitive for Windows)
     const isAllowed = this.allowedRoots.some((root) => {
-      const relative = path.relative(root, resolvedPath)
-      return !relative.startsWith('..') && !path.isAbsolute(relative)
+      const normalizedRoot = root.toLowerCase()
+      const normalizedPath = resolvedPath.toLowerCase()
+      const relative = path.relative(normalizedRoot, normalizedPath)
+      return !relative.startsWith('..') && !path.isAbsolute(relative) && !relative.includes('..')
     })
 
     if (!isAllowed) {
@@ -230,6 +239,28 @@ export class ActionExecutor {
         resultSummary: `Path outside allowed roots: ${resolvedPath}. Allowed roots: [${this.allowedRoots.join(', ')}]`,
         errorCode: 'AUTHORITY_DENIED',
         reasoningUsed: false,
+      }
+    }
+
+    // Check for symlink / junction escape if path exists
+    if (fs.existsSync(resolvedPath)) {
+      try {
+        const realTarget = fs.realpathSync(resolvedPath).toLowerCase()
+        const isRealAllowed = this.allowedRoots.some((root) => {
+          const normalizedRoot = fs.existsSync(root) ? fs.realpathSync(root).toLowerCase() : root.toLowerCase()
+          const relative = path.relative(normalizedRoot, realTarget)
+          return !relative.startsWith('..') && !path.isAbsolute(relative)
+        })
+        if (!isRealAllowed) {
+          return {
+            success: false,
+            resultSummary: `Symlink/junction escape rejected: ${resolvedPath} resolves to ${realTarget}`,
+            errorCode: 'AUTHORITY_DENIED',
+            reasoningUsed: false,
+          }
+        }
+      } catch {
+        // Continue with normal error handling
       }
     }
 

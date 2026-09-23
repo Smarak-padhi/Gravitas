@@ -85,6 +85,7 @@ export interface ParsedCron {
 }
 
 export function parseCronExpression(expression: string): ParsedCron | null {
+  if (!expression || typeof expression !== 'string') return null
   const tokens = expression.trim().split(/\s+/)
   if (tokens.length !== 5) return null
 
@@ -199,9 +200,8 @@ export function calculateNextRunAt(
     case 'ONE_TIME': {
       const targetMs = new Date(trigger.runAt).getTime()
       if (isNaN(targetMs)) return undefined
-      // If already ran or in the past, no further occurrences
+      // If already ran, no further occurrences
       if (lastRunAt) return undefined
-      if (targetMs < nowMs) return undefined
       return new Date(targetMs).toISOString()
     }
 
@@ -223,11 +223,14 @@ export function calculateNextRunAt(
     }
 
     case 'CRON': {
-      const parsed = parseCronExpression(trigger.expression)
+      const expr = trigger.expression ?? (trigger as any).cronExpression ?? (trigger as any).cron
+      if (!expr || typeof expr !== 'string') return undefined
+      const parsed = parseCronExpression(expr)
       if (!parsed) return undefined
-      if (!isValidTimezone(trigger.timezone)) return undefined
+      const tz = trigger.timezone ?? 'UTC'
+      if (!isValidTimezone(tz)) return undefined
 
-      return findNextCronOccurrence(parsed, trigger.timezone, now)
+      return findNextCronOccurrence(parsed, tz, now)
     }
 
     default:

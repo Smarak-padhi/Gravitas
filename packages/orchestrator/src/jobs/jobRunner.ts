@@ -254,6 +254,138 @@ export class JobRunner {
     return false
   }
 
+  /**
+   * Sovereign Operator Approval:
+   * Executes the approved action for a run in WAITING_APPROVAL state.
+   * Idempotent: returns existing run if already SUCCEEDED.
+   */
+  public async approveRun(job: BackgroundJob, run: JobRun): Promise<JobRun> {
+    if (run.status === 'SUCCEEDED') {
+      return run
+    }
+
+    if (run.status !== 'WAITING_APPROVAL') {
+      throw new Error(`RUN_NOT_WAITING_APPROVAL: Run ${run.id} is not waiting for approval (status: ${run.status})`)
+    }
+
+    const startedAt = this.clock.now().toISOString()
+    let currentRun: JobRun = {
+      ...run,
+      status: 'RUNNING',
+      startedAt,
+      errorCode: undefined,
+    }
+    this.store.updateRun(currentRun)
+
+    const abortController = new AbortController()
+    this.activeAbortControllers.set(run.id, abortController)
+    this.activeRunCount++
+
+    try {
+      const actionResult = await this.executor.execute(job.action, abortController.signal)
+      const finishedAt = this.clock.now().toISOString()
+
+      if (actionResult.success) {
+        const createdNotifs: string[] = []
+        if (actionResult.notificationToEmit) {
+          const notif = await this.notificationBus.publish({
+            severity: (actionResult.notificationToEmit.severity as any) ?? 'INFO',
+            title: actionResult.notificationToEmit.title,
+            body: actionResult.notificationToEmit.message,
+            source: { type: 'JOB', id: job.id, runId: run.id },
+            jobId: job.id,
+            runId: run.id,
+            deliveryPolicy: job.notificationPolicy.deliveryPolicy,
+            quietHours: job.notificationPolicy.quietHours,
+            dedupeKey: `job:${job.id}:${run.occurrenceKey}:approved`,
+          })
+          createdNotifs.push(notif.id)
+        }
+
+        currentRun = {
+          ...currentRun,
+          status: 'SUCCEEDED',
+          finishedAt,
+          resultCode: actionResult.resultCode ?? 'SUCCESS',
+          resultSummary: `Approved by operator. ${actionResult.resultSummary}`,
+          errorCode: undefined,
+          reasoningUsed: actionResult.reasoningUsed,
+          roleId: actionResult.roleId,
+          harnessId: actionResult.harnessId,
+          tokenUsage: actionResult.tokenUsage,
+          monetaryCost: actionResult.monetaryCost,
+          createdNotificationIds: createdNotifs,
+        }
+
+        this.store.updateRun(currentRun)
+        this.recordAttempt(currentRun, startedAt, finishedAt, 'SUCCEEDED')
+
+        this.store.updateJob(job.id, {
+          lastRunAt: finishedAt,
+        })
+      } else {
+        currentRun = {
+          ...currentRun,
+          status: 'FAILED',
+          finishedAt,
+          resultCode: actionResult.resultCode,
+          resultSummary: `Approved execution failed: ${actionResult.resultSummary}`,
+          errorCode: actionResult.errorCode ?? 'ACTION_ERROR',
+          reasoningUsed: actionResult.reasoningUsed,
+        }
+
+        this.store.updateRun(currentRun)
+        this.recordAttempt(currentRun, startedAt, finishedAt, 'FAILED', actionResult.resultSummary)
+      }
+
+      this.finalizeRunCleanup(run.id)
+      return currentRun
+    } catch (err) {
+      const finishedAt = this.clock.now().toISOString()
+      currentRun = {
+        ...currentRun,
+        status: 'FAILED',
+        finishedAt,
+        errorCode: 'INTERNAL_ERROR',
+        resultSummary: `Execution error after approval: ${(err as Error).message}`,
+      }
+
+      this.store.updateRun(currentRun)
+      this.recordAttempt(currentRun, startedAt, finishedAt, 'FAILED', currentRun.resultSummary)
+      this.finalizeRunCleanup(run.id)
+      return currentRun
+    }
+  }
+
+  /**
+   * Sovereign Operator Rejection:
+   * Rejects the proposed execution. The action executes ZERO times.
+   * Idempotent: returns existing run if already CANCELLED.
+   */
+  public async rejectRun(job: BackgroundJob, run: JobRun, reason?: string): Promise<JobRun> {
+    if (run.status === 'CANCELLED') {
+      return run
+    }
+
+    if (run.status !== 'WAITING_APPROVAL') {
+      throw new Error(`RUN_NOT_WAITING_APPROVAL: Run ${run.id} is not waiting for approval (status: ${run.status})`)
+    }
+
+    const finishedAt = this.clock.now().toISOString()
+    const summary = reason ?? `Execution of "${job.title}" rejected by sovereign operator.`
+    const currentRun: JobRun = {
+      ...run,
+      status: 'CANCELLED',
+      finishedAt,
+      errorCode: 'AUTHORITY_DENIED',
+      resultSummary: summary,
+    }
+
+    this.store.updateRun(currentRun)
+    this.recordAttempt(currentRun, run.startedAt ?? finishedAt, finishedAt, 'CANCELLED', summary)
+    return currentRun
+  }
+
   public shutdown(): void {
     for (const controller of this.activeAbortControllers.values()) {
       controller.abort()

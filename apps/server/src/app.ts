@@ -212,14 +212,54 @@ export function createRequestListener(deps: AppDependencies) {
             sendError(res, 400, 'INVALID_REQUEST', 'Missing required fields for background job (title, trigger, action).', requestId)
             return
           }
+
+          // Normalize trigger & action (accept kind or type)
+          const trigger = {
+            ...body.trigger,
+            type: body.trigger.type ?? body.trigger.kind,
+            ...(body.trigger.type === 'CRON' || body.trigger.kind === 'CRON'
+              ? {
+                  expression: body.trigger.expression ?? body.trigger.cronExpression ?? body.trigger.cron,
+                  timezone: body.trigger.timezone ?? 'UTC',
+                }
+              : {}),
+          }
+          const action = {
+            ...body.action,
+            type: body.action.type ?? body.action.kind,
+          }
+
+          if (action.type === 'INVOKE_ROLE') {
+            sendError(
+              res,
+              403,
+              'AUTHORITY_DENIED',
+              'INVOKE_ROLE is INTERNAL_NOT_READY in Wave 12I-R. Autonomous reasoning loops are restricted from public automation creation surface until capability and harness verification boundaries are sealed.',
+              requestId
+            )
+            return
+          }
+
+          const allowedActions = ['EMIT_NOTIFICATION', 'REPOSITORY_CHECK', 'FILE_OPERATION', 'NOOP']
+          if (!allowedActions.includes(action.type)) {
+            sendError(
+              res,
+              400,
+              'INVALID_REQUEST',
+              `Unsupported action type '${action.type}'. Wave 12I-R supports: [${allowedActions.join(', ')}].`,
+              requestId
+            )
+            return
+          }
+
           const fullJob: BackgroundJob = {
             id: body.id || `job_${randomUUID()}`,
             title: body.title,
             description: body.description ?? '',
             kind: body.kind || 'MAINTENANCE',
             status: body.status || 'ENABLED',
-            trigger: body.trigger,
-            action: body.action,
+            trigger,
+            action,
             autonomyLevel: body.autonomyLevel || 'L1',
             requiredAuthority: body.requiredAuthority || body.authorityClass || 'READ',
             contextDomains: body.contextDomains || ['system'],
@@ -265,18 +305,54 @@ export function createRequestListener(deps: AppDependencies) {
             return
           }
           if (action === 'run') {
-            let body: { runCommandId?: string } = {}
+            let body: { runCommandId?: string; idempotencyKey?: string } = {}
             try {
-              body = await readJsonBody<{ runCommandId?: string }>(req, requestId)
+              body = await readJsonBody<{ runCommandId?: string; idempotencyKey?: string }>(req, requestId)
             } catch {
               // Body is optional for manual run
             }
-            const run = await service.triggerManualJobRun(jobId, body?.runCommandId)
+            const idempotencyKey =
+              (req.headers['idempotency-key'] as string) ||
+              (req.headers['x-idempotency-key'] as string) ||
+              body?.idempotencyKey ||
+              body?.runCommandId
+
+            const run = await service.triggerManualJobRun(jobId, idempotencyKey)
             sendJson(res, 200, { jobRun: run })
             return
           }
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on job action.`, requestId)
+        return
+      }
+
+      // --- Job Run Approval / Rejection: POST /api/v1/jobs/:jobId/runs/:runId/(approve|reject) ---
+      const jobRunApprovalMatch = pathname.match(/^\/api\/v1\/jobs\/([^/]+)\/runs\/([^/]+)\/(approve|reject)$/)
+      if (jobRunApprovalMatch) {
+        if (method === 'POST') {
+          const [, jobId, runId, subAction] = jobRunApprovalMatch
+          if (!jobId || !runId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing jobId or runId.', requestId)
+            return
+          }
+          if (subAction === 'approve') {
+            const run = await service.approveJobRun(jobId, runId)
+            sendJson(res, 200, { jobRun: run })
+            return
+          }
+          if (subAction === 'reject') {
+            let body: { reason?: string } = {}
+            try {
+              body = await readJsonBody<{ reason?: string }>(req, requestId)
+            } catch {
+              // Body is optional
+            }
+            const run = await service.rejectJobRun(jobId, runId, body?.reason)
+            sendJson(res, 200, { jobRun: run })
+            return
+          }
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on job run approval.`, requestId)
         return
       }
 
@@ -299,7 +375,7 @@ export function createRequestListener(deps: AppDependencies) {
         return
       }
 
-      // --- Individual Job Detail / Update: GET, PATCH /api/v1/jobs/:id ---
+      // --- Individual Job Detail / Update / Archive: GET, PATCH, DELETE /api/v1/jobs/:id ---
       const jobDetailMatch = pathname.match(/^\/api\/v1\/jobs\/([^/]+)$/)
       if (jobDetailMatch) {
         const jobId = jobDetailMatch[1]
@@ -320,6 +396,18 @@ export function createRequestListener(deps: AppDependencies) {
           const updates = await readJsonBody<Partial<BackgroundJob>>(req, requestId)
           const updated = service.updateJob(jobId, updates)
           sendJson(res, 200, updated)
+          return
+        }
+        if (method === 'DELETE') {
+          const job = service.getJob(jobId)
+          if (!job) {
+            sendError(res, 404, 'NOT_FOUND', `Background job ${jobId} not found.`, requestId)
+            return
+          }
+          // Physical deletion forbidden: soft-delete archives the job definition,
+          // retaining all occurrence claims, run attempts, and audit logs.
+          const cancelled = service.cancelJob(jobId)
+          sendJson(res, 200, { archived: true, job: cancelled })
           return
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/jobs/:id.`, requestId)

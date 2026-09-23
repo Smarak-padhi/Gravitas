@@ -166,7 +166,7 @@ async function main() {
     console.log(`Mock upstream listening on 127.0.0.1:${upstreamPort}`)
 
     // Pre-seed provider in pre-migrated sqlite DB
-    const omniDataDir = 'C:\\Users\\smara\\AppData\\Local\\Temp\\omni-test'
+    const omniDataDir = join(tmpdir(), 'omni-test')
     const dbPath = join(omniDataDir, 'storage.sqlite')
     if (existsSync(dbPath)) {
       const db = new Database(dbPath)
