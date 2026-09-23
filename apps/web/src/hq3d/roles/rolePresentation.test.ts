@@ -29,6 +29,7 @@ function createEmptyWorldState(): WorldState {
       'omniroute-rack': { id: 'omniroute-rack', roomId: 'INFRASTRUCTURE_ROOM', status: 'IDLE' },
       'approval-plinth': { id: 'approval-plinth', roomId: 'APPROVAL_MEZZANINE', status: 'IDLE' },
       'repository-vault': { id: 'repository-vault', roomId: 'APPROVAL_MEZZANINE', status: 'IDLE' },
+      'dispatch-console': { id: 'dispatch-console', roomId: 'INFRASTRUCTURE_ROOM', status: 'IDLE' },
     },
     infrastructure: {
       gateways: {

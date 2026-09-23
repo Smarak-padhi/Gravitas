@@ -22,6 +22,7 @@ export type StationId =
   | 'omniroute-rack'
   | 'approval-plinth'
   | 'repository-vault'
+  | 'dispatch-console'
 
 import type { RoleId, RoleInspectorMetadata } from './roles/types.js'
 

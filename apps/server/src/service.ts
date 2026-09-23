@@ -12,6 +12,7 @@
  */
 
 import { createHash } from 'node:crypto'
+import { mkdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -42,7 +43,21 @@ import {
   type GravitasEvent,
   type Run,
   type Task,
+  type BackgroundJob,
+  type JobRun,
+  type PersonalOsNotification,
+  type Clock,
+  SystemClock,
 } from '@gravitas/core'
+import {
+  type JobStore,
+  type JobFilter,
+  SqliteJobStore,
+  ActionExecutor,
+  NotificationBus,
+  JobRunner,
+  JobScheduler,
+} from '@gravitas/orchestrator'
 import { CANONICAL_CAPABILITIES, type AgentDescriptor } from '@gravitas/agents'
 import {
   compilePrompt,
@@ -113,6 +128,11 @@ export interface RunServiceOptions {
   readonly runtimeRoot?: string | undefined
   readonly defaultRepository?: string | undefined
   readonly defaultVerificationPlan?: VerificationPlan | undefined
+  readonly jobStore?: JobStore | undefined
+  readonly jobScheduler?: JobScheduler | undefined
+  readonly notificationBus?: NotificationBus | undefined
+  readonly clock?: Clock | undefined
+  readonly jobDbPath?: string | undefined
 }
 
 export class RunService {
@@ -127,6 +147,11 @@ export class RunService {
   private readonly activeSchedulers = new Map<string, BoundedScheduler>()
   private readonly runPlans = new Map<string, RunPlan>()
 
+  public readonly jobStore: JobStore
+  public readonly jobScheduler: JobScheduler
+  public readonly notificationBus: NotificationBus
+  private readonly clock: Clock
+
   public constructor(options: RunServiceOptions) {
     this.registry = options.registry
     this.eventHub = options.eventHub
@@ -134,6 +159,45 @@ export class RunService {
     this.runtimeRoot = options.runtimeRoot ?? join(tmpdir(), 'gravitas-runtime')
     this.defaultRepository = options.defaultRepository
     this.defaultVerificationPlan = options.defaultVerificationPlan
+    this.clock = options.clock ?? new SystemClock()
+
+    mkdirSync(this.runtimeRoot, { recursive: true })
+    const dbPath = options.jobDbPath ?? join(this.runtimeRoot, 'jobs.db')
+    this.jobStore = options.jobStore ?? new SqliteJobStore(dbPath)
+
+    // Critical recovery: reconcile interrupted runs from dead processes
+    this.jobStore.reconcileInterruptedRuns()
+
+    this.notificationBus =
+      options.notificationBus ??
+      new NotificationBus(this.jobStore, this.clock)
+
+    const actionExecutor = new ActionExecutor({
+      allowedFileRoots: [this.runtimeRoot, process.cwd()],
+      registeredRepositories: {
+        'repo:core': process.cwd(),
+        'repo:default': process.cwd(),
+      },
+    })
+
+    const jobRunner = new JobRunner({
+      store: this.jobStore,
+      executor: actionExecutor,
+      notificationBus: this.notificationBus,
+      clock: this.clock,
+    })
+
+    this.jobScheduler =
+      options.jobScheduler ??
+      new JobScheduler({
+        store: this.jobStore,
+        runner: jobRunner,
+        clock: this.clock,
+        tickIntervalMs: 1000,
+      })
+
+    // Start background job scheduler
+    this.jobScheduler.start()
 
     this.gatewayRegistry = options.gatewayRegistry ?? new DefaultGatewayRegistry()
     if (!options.gatewayRegistry) {
@@ -836,6 +900,11 @@ export class RunService {
       }
     }
 
+    const jobs = this.jobStore.listJobs()
+    const recentRuns = this.jobStore.listRecentRuns(20)
+    const notifications = this.jobStore.listNotifications({ unreadOnly: false })
+    this.eventHub.projectionStore.setJobsState(jobs, recentRuns, notifications)
+
     return {
       service: 'gravitas',
       version: GRAVITAS_VERSION,
@@ -1021,6 +1090,98 @@ export class RunService {
     }
     // Other agents do not currently have durable qualification evidence
     return null
+  }
+
+  // ==========================================================================
+  // Personal OS Background Jobs & Notification Control Plane
+  // ==========================================================================
+
+  private isSchedulerStopped = false
+
+  public async stopScheduler(): Promise<void> {
+    if (this.isSchedulerStopped) return
+    this.isSchedulerStopped = true
+    this.jobScheduler.stop()
+    await this.jobScheduler.waitForActiveRuns()
+    this.jobStore.close()
+  }
+
+  public listJobs(filter?: JobFilter): BackgroundJob[] {
+    return this.jobStore.listJobs(filter)
+  }
+
+  public getJob(id: string): BackgroundJob | null {
+    return this.jobStore.getJob(id)
+  }
+
+  public createJob(job: BackgroundJob): BackgroundJob {
+    this.jobStore.saveJob(job)
+    return job
+  }
+
+  public updateJob(id: string, updates: Partial<BackgroundJob>): BackgroundJob {
+    const existing = this.jobStore.getJob(id)
+    if (!existing) {
+      throw new NotFoundError('BackgroundJob', id)
+    }
+    this.jobStore.updateJob(id, updates)
+    const updated = this.jobStore.getJob(id)
+    return updated!
+  }
+
+  public pauseJob(id: string): BackgroundJob {
+    const job = this.jobStore.getJob(id)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', id)
+    }
+    this.jobStore.updateJob(id, { status: 'PAUSED' })
+    return this.jobStore.getJob(id)!
+  }
+
+  public resumeJob(id: string): BackgroundJob {
+    const job = this.jobStore.getJob(id)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', id)
+    }
+    this.jobStore.updateJob(id, { status: 'ENABLED' })
+    return this.jobStore.getJob(id)!
+  }
+
+  public cancelJob(id: string): BackgroundJob {
+    const job = this.jobStore.getJob(id)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', id)
+    }
+    this.jobStore.updateJob(id, { status: 'CANCELLED', nextRunAt: undefined })
+    return this.jobStore.getJob(id)!
+  }
+
+  public async triggerManualJobRun(id: string, runCommandId?: string): Promise<JobRun> {
+    const job = this.jobStore.getJob(id)
+    if (!job) {
+      throw new NotFoundError('BackgroundJob', id)
+    }
+    return this.jobScheduler.triggerManualRun(id, runCommandId)
+  }
+
+  public getJobRuns(jobId: string, limit?: number): JobRun[] {
+    return this.jobStore.getRunsForJob(jobId, limit)
+  }
+
+  public listNotifications(filter?: { unreadOnly?: boolean; limit?: number }): PersonalOsNotification[] {
+    return this.jobStore.listNotifications(filter)
+  }
+
+  public markNotificationRead(id: string): void {
+    const notif = this.jobStore.getNotification(id)
+    if (!notif) {
+      throw new NotFoundError('PersonalOsNotification', id)
+    }
+    this.jobStore.markNotificationRead(id)
+  }
+
+  public markAllNotificationsRead(): void {
+    this.jobStore.markAllNotificationsRead()
   }
 }
 

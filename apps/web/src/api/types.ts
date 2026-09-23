@@ -12,6 +12,15 @@ import type {
   RunStatus,
   Task,
   TaskState,
+  BackgroundJob,
+  JobRun,
+  PersonalOsNotification,
+  JobDefinitionStatus,
+  JobRunStatus,
+  JobTrigger,
+  JobAction,
+  NotificationSeverity,
+  NotificationDeliveryState,
 } from '@gravitas/core'
 import type {
   LayerMetadata,
@@ -45,6 +54,15 @@ export type {
   TaskPlanDefinition,
   TaskPromptResponse,
   TaskState,
+  BackgroundJob,
+  JobRun,
+  PersonalOsNotification,
+  JobDefinitionStatus,
+  JobRunStatus,
+  JobTrigger,
+  JobAction,
+  NotificationSeverity,
+  NotificationDeliveryState,
 }
 
 export interface HealthResponse {
@@ -152,6 +170,9 @@ export interface RuntimeProjectionSnapshot {
   readonly activeTasks: readonly RuntimeTaskProjection[]
   readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
   readonly artifacts?: readonly RuntimeArtifactProjection[] | undefined
+  readonly backgroundJobs?: readonly BackgroundJob[] | undefined
+  readonly recentJobRuns?: readonly JobRun[] | undefined
+  readonly personalNotifications?: readonly PersonalOsNotification[] | undefined
 }
 
 export interface RunDetailResponse {

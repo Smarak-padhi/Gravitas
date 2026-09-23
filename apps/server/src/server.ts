@@ -24,11 +24,13 @@ export interface GravitasServerDependencies {
 
 export class GravitasServer {
   private readonly server: Server
+  private readonly service: RunService
   private readonly eventHub: EventHub
   private readonly sockets = new Set<Socket>()
   private addressInfo?: ServerAddressInfo | undefined
 
   public constructor(deps: GravitasServerDependencies) {
+    this.service = deps.service
     this.eventHub = deps.eventHub
     const requestListener = createRequestListener(deps)
     this.server = createServer(requestListener)
@@ -82,6 +84,9 @@ export class GravitasServer {
    * Stops the server, closes all SSE streams, and destroys pending sockets.
    */
   public async stop(): Promise<void> {
+    // 0. Stop background scheduler and close job store
+    await this.service.stopScheduler()
+
     // 1. Close all active SSE streams
     this.eventHub.close()
 

@@ -5,10 +5,11 @@
  * pointer interaction, room framing shortcuts, and clean resource teardown.
  */
 
-import type { RoomId, SelectedEntity, PerformanceStats } from '../types.js'
+import type { RoomId, StationId, SelectedEntity, PerformanceStats } from '../types.js'
 import type { RoleId } from '../roles/types.js'
 import type { WorldState } from '../world/worldState.js'
 import { ROOM_DEFINITIONS, getRoomByKey } from '../world/rooms.js'
+import { STATION_DEFINITIONS } from '../world/stations.js'
 import { HqScene } from './HqScene.js'
 import { HqRenderer } from './HqRenderer.js'
 import { HqCameraRig } from './HqCamera.js'
@@ -268,6 +269,34 @@ export class HqDirector {
     }
 
     this.picking.setSelection(entity, fig)
+    if (this.onEntitySelected) {
+      this.onEntitySelected(entity)
+    }
+    return entity
+  }
+
+  /**
+   * Accessible Station Selection
+   */
+  public selectStation(stationId: StationId): SelectedEntity | null {
+    const stationObj =
+      this.scene.infrastructure.group.getObjectByName(`station:${stationId}`) ||
+      this.scene.furniture.group.getObjectByName(`station:${stationId}`)
+    const stationDef = STATION_DEFINITIONS[stationId]
+    if (!stationDef) return null
+    const room = ROOM_DEFINITIONS[stationDef.roomId]
+    const entity: SelectedEntity = {
+      id: stationDef.id,
+      type: 'station',
+      name: stationDef.name,
+      room: room ? room.name : stationDef.roomId,
+      role: stationDef.role,
+      status: stationDef.status,
+      description: stationDef.description,
+    }
+    if (stationObj) {
+      this.picking.setSelection(entity, stationObj)
+    }
     if (this.onEntitySelected) {
       this.onEntitySelected(entity)
     }

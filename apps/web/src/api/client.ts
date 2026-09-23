@@ -21,6 +21,9 @@ import type {
   TaskEvidenceDiffResponse,
   TaskEvidenceResponse,
   TaskPromptResponse,
+  BackgroundJob,
+  JobRun,
+  PersonalOsNotification,
 } from './types.js'
 
 export class GravitasApiError extends Error {
@@ -174,5 +177,83 @@ export const api = {
 
   getAgentQualification(agentId: string): Promise<unknown> {
     return request<unknown>(`/api/v1/agents/${encodeURIComponent(agentId)}/qualification`)
+  },
+
+  // Personal OS Background Jobs
+  listJobs(filter?: { status?: string; kind?: string }): Promise<readonly BackgroundJob[]> {
+    const params = new URLSearchParams()
+    if (filter?.status) params.set('status', filter.status)
+    if (filter?.kind) params.set('kind', filter.kind)
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<readonly BackgroundJob[]>(`/api/v1/jobs${qs}`)
+  },
+
+  createJob(job: BackgroundJob): Promise<BackgroundJob> {
+    return request<BackgroundJob>('/api/v1/jobs', {
+      method: 'POST',
+      body: JSON.stringify(job),
+    })
+  },
+
+  getJob(jobId: string): Promise<BackgroundJob> {
+    return request<BackgroundJob>(`/api/v1/jobs/${encodeURIComponent(jobId)}`)
+  },
+
+  updateJob(jobId: string, updates: Partial<BackgroundJob>): Promise<BackgroundJob> {
+    return request<BackgroundJob>(`/api/v1/jobs/${encodeURIComponent(jobId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    })
+  },
+
+  pauseJob(jobId: string): Promise<BackgroundJob> {
+    return request<BackgroundJob>(`/api/v1/jobs/${encodeURIComponent(jobId)}/pause`, {
+      method: 'POST',
+    })
+  },
+
+  resumeJob(jobId: string): Promise<BackgroundJob> {
+    return request<BackgroundJob>(`/api/v1/jobs/${encodeURIComponent(jobId)}/resume`, {
+      method: 'POST',
+    })
+  },
+
+  cancelJob(jobId: string): Promise<BackgroundJob> {
+    return request<BackgroundJob>(`/api/v1/jobs/${encodeURIComponent(jobId)}/cancel`, {
+      method: 'POST',
+    })
+  },
+
+  triggerJobRun(jobId: string, runCommandId?: string): Promise<{ jobRun: JobRun }> {
+    return request<{ jobRun: JobRun }>(`/api/v1/jobs/${encodeURIComponent(jobId)}/run`, {
+      method: 'POST',
+      body: JSON.stringify({ runCommandId }),
+    })
+  },
+
+  getJobRuns(jobId: string, limit?: number): Promise<readonly JobRun[]> {
+    const qs = limit ? `?limit=${limit}` : ''
+    return request<readonly JobRun[]>(`/api/v1/jobs/${encodeURIComponent(jobId)}/runs${qs}`)
+  },
+
+  // Personal OS Notifications
+  listNotifications(filter?: { unreadOnly?: boolean; limit?: number }): Promise<readonly PersonalOsNotification[]> {
+    const params = new URLSearchParams()
+    if (filter?.unreadOnly !== undefined) params.set('unreadOnly', String(filter.unreadOnly))
+    if (filter?.limit) params.set('limit', String(filter.limit))
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<readonly PersonalOsNotification[]>(`/api/v1/notifications${qs}`)
+  },
+
+  markNotificationRead(id: string): Promise<{ success: boolean }> {
+    return request<{ success: boolean }>(`/api/v1/notifications/${encodeURIComponent(id)}/read`, {
+      method: 'POST',
+    })
+  },
+
+  markAllNotificationsRead(): Promise<{ success: boolean }> {
+    return request<{ success: boolean }>('/api/v1/notifications/read-all', {
+      method: 'POST',
+    })
   },
 }

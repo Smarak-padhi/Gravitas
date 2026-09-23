@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto'
-import { type GravitasEvent } from '@gravitas/core'
+import {
+  type GravitasEvent,
+  type BackgroundJob,
+  type JobRun,
+  type PersonalOsNotification,
+} from '@gravitas/core'
 import type { ResolvedInferenceRoute } from '@gravitas/gateways'
 
 export type RuntimeExecutionPhase =
@@ -97,6 +102,9 @@ export interface RuntimeProjectionSnapshot {
   readonly activeTasks: readonly RuntimeTaskProjection[]
   readonly handoffs?: readonly RuntimeHandoffProjection[] | undefined
   readonly artifacts?: readonly RuntimeArtifactProjection[] | undefined
+  readonly backgroundJobs?: readonly BackgroundJob[] | undefined
+  readonly recentJobRuns?: readonly JobRun[] | undefined
+  readonly personalNotifications?: readonly PersonalOsNotification[] | undefined
 }
 
 /**
@@ -111,6 +119,9 @@ export class RuntimeProjectionStore {
   private readonly handoffs = new Map<string, RuntimeHandoffProjection>()
   private readonly artifacts = new Map<string, RuntimeArtifactProjection>()
   private readonly terminalTaskIds = new Set<string>()
+  private backgroundJobs: readonly BackgroundJob[] = []
+  private recentJobRuns: readonly JobRun[] = []
+  private personalNotifications: readonly PersonalOsNotification[] = []
 
   public constructor(epochId?: string) {
     this.epoch = epochId ?? `proj_epoch_${randomUUID()}`
@@ -496,7 +507,33 @@ export class RuntimeProjectionStore {
         integrationState: a.integrationState,
         currentCustody: a.currentCustody,
       })),
+      backgroundJobs: this.backgroundJobs,
+      recentJobRuns: this.recentJobRuns,
+      personalNotifications: this.personalNotifications,
     }
+  }
+
+  public setJobsState(
+    jobs: readonly BackgroundJob[],
+    runs: readonly JobRun[],
+    notifications: readonly PersonalOsNotification[]
+  ): void {
+    this.backgroundJobs = jobs
+    this.recentJobRuns = runs
+    this.personalNotifications = notifications
+    this.revision++
+  }
+
+  public getBackgroundJobs(): readonly BackgroundJob[] {
+    return this.backgroundJobs
+  }
+
+  public getRecentJobRuns(): readonly JobRun[] {
+    return this.recentJobRuns
+  }
+
+  public getPersonalNotifications(): readonly PersonalOsNotification[] {
+    return this.personalNotifications
   }
 
   public setHandoff(handoff: RuntimeHandoffProjection): void {

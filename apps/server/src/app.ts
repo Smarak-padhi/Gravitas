@@ -9,7 +9,8 @@
  */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { GRAVITAS_VERSION } from '@gravitas/core'
+import { randomUUID } from 'node:crypto'
+import { GRAVITAS_VERSION, type BackgroundJob } from '@gravitas/core'
 import {
   ApiError,
   InvalidRequestError,
@@ -193,6 +194,177 @@ export function createRequestListener(deps: AppDependencies) {
           return
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/runs.`, requestId)
+        return
+      }
+
+      // --- Personal OS Background Jobs Collection: /api/v1/jobs ---
+      if (pathname === '/api/v1/jobs') {
+        if (method === 'GET') {
+          const status = url.searchParams.get('status') as any
+          const kind = url.searchParams.get('kind') as any
+          const jobs = service.listJobs({ status: status || undefined, kind: kind || undefined })
+          sendJson(res, 200, jobs)
+          return
+        }
+        if (method === 'POST') {
+          const body = await readJsonBody<any>(req, requestId)
+          if (!body || !body.title || !body.trigger || !body.action) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing required fields for background job (title, trigger, action).', requestId)
+            return
+          }
+          const fullJob: BackgroundJob = {
+            id: body.id || `job_${randomUUID()}`,
+            title: body.title,
+            description: body.description ?? '',
+            kind: body.kind || 'MAINTENANCE',
+            status: body.status || 'ENABLED',
+            trigger: body.trigger,
+            action: body.action,
+            autonomyLevel: body.autonomyLevel || 'L1',
+            requiredAuthority: body.requiredAuthority || body.authorityClass || 'READ',
+            contextDomains: body.contextDomains || ['system'],
+            executionBudget: body.executionBudget || body.budget || { maxRuntimeMs: 60000, maxAttempts: 3 },
+            retryPolicy: body.retryPolicy || { mode: 'NONE', maxAttempts: 1, delayMs: 1000 },
+            notificationPolicy: body.notificationPolicy || {
+              deliveryPolicy: body.deferDuringQuietHours ? 'QUIET_HOURS_AWARE' : 'IMMEDIATE',
+            },
+            createdAt: body.createdAt || new Date().toISOString(),
+            updatedAt: body.updatedAt || new Date().toISOString(),
+            nextRunAt: body.nextRunAt,
+          }
+          const created = service.createJob(fullJob)
+          sendJson(res, 201, created)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/jobs.`, requestId)
+        return
+      }
+
+      // --- Job Actions: POST /api/v1/jobs/:id/(pause|resume|cancel|run) ---
+      const jobActionMatch = pathname.match(/^\/api\/v1\/jobs\/([^/]+)\/(pause|resume|cancel|run)$/)
+      if (jobActionMatch) {
+        if (method === 'POST') {
+          const [, jobId, action] = jobActionMatch
+          if (!jobId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing jobId.', requestId)
+            return
+          }
+          if (action === 'pause') {
+            const updated = service.pauseJob(jobId)
+            sendJson(res, 200, updated)
+            return
+          }
+          if (action === 'resume') {
+            const updated = service.resumeJob(jobId)
+            sendJson(res, 200, updated)
+            return
+          }
+          if (action === 'cancel') {
+            const updated = service.cancelJob(jobId)
+            sendJson(res, 200, updated)
+            return
+          }
+          if (action === 'run') {
+            let body: { runCommandId?: string } = {}
+            try {
+              body = await readJsonBody<{ runCommandId?: string }>(req, requestId)
+            } catch {
+              // Body is optional for manual run
+            }
+            const run = await service.triggerManualJobRun(jobId, body?.runCommandId)
+            sendJson(res, 200, { jobRun: run })
+            return
+          }
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on job action.`, requestId)
+        return
+      }
+
+      // --- Job Runs Collection: GET /api/v1/jobs/:id/runs ---
+      const jobRunsMatch = pathname.match(/^\/api\/v1\/jobs\/([^/]+)\/runs$/)
+      if (jobRunsMatch) {
+        if (method === 'GET') {
+          const jobId = jobRunsMatch[1]
+          if (!jobId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing jobId.', requestId)
+            return
+          }
+          const limitStr = url.searchParams.get('limit')
+          const limit = limitStr ? parseInt(limitStr, 10) : 50
+          const runs = service.getJobRuns(jobId, limit)
+          sendJson(res, 200, runs)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/jobs/:id/runs.`, requestId)
+        return
+      }
+
+      // --- Individual Job Detail / Update: GET, PATCH /api/v1/jobs/:id ---
+      const jobDetailMatch = pathname.match(/^\/api\/v1\/jobs\/([^/]+)$/)
+      if (jobDetailMatch) {
+        const jobId = jobDetailMatch[1]
+        if (!jobId) {
+          sendError(res, 400, 'INVALID_REQUEST', 'Missing jobId.', requestId)
+          return
+        }
+        if (method === 'GET') {
+          const job = service.getJob(jobId)
+          if (!job) {
+            sendError(res, 404, 'NOT_FOUND', `Background job ${jobId} not found.`, requestId)
+            return
+          }
+          sendJson(res, 200, job)
+          return
+        }
+        if (method === 'PATCH') {
+          const updates = await readJsonBody<Partial<BackgroundJob>>(req, requestId)
+          const updated = service.updateJob(jobId, updates)
+          sendJson(res, 200, updated)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/jobs/:id.`, requestId)
+        return
+      }
+
+      // --- Personal OS Notifications: /api/v1/notifications ---
+      if (pathname === '/api/v1/notifications') {
+        if (method === 'GET') {
+          const unreadOnly = url.searchParams.get('unreadOnly') === 'true'
+          const limitStr = url.searchParams.get('limit')
+          const limit = limitStr ? parseInt(limitStr, 10) : 50
+          const notifs = service.listNotifications({ unreadOnly, limit })
+          sendJson(res, 200, notifs)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/notifications.`, requestId)
+        return
+      }
+
+      // --- Mark All Notifications Read: POST /api/v1/notifications/read-all ---
+      if (pathname === '/api/v1/notifications/read-all') {
+        if (method === 'POST') {
+          service.markAllNotificationsRead()
+          sendJson(res, 200, { success: true })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/notifications/read-all.`, requestId)
+        return
+      }
+
+      // --- Mark Single Notification Read: POST /api/v1/notifications/:id/read ---
+      const notifReadMatch = pathname.match(/^\/api\/v1\/notifications\/([^/]+)\/read$/)
+      if (notifReadMatch) {
+        if (method === 'POST') {
+          const notifId = notifReadMatch[1]
+          if (!notifId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing notification id.', requestId)
+            return
+          }
+          service.markNotificationRead(notifId)
+          sendJson(res, 200, { success: true })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/notifications/:id/read.`, requestId)
         return
       }
 

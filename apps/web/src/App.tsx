@@ -23,6 +23,7 @@ import { InboxDrawer } from './features/inbox/InboxDrawer.js'
 import { browserNotifier } from './features/inbox/browserNotifier.js'
 import { ActivityTimeline } from './features/timeline/ActivityTimeline.js'
 import { AgentRegistryView } from './features/agents/AgentRegistryView.js'
+import { AutomationsView } from './features/automations/AutomationsView.js'
 import { CommandPalette } from './features/command-palette/CommandPalette.js'
 import type { CommandItem } from './features/command-palette/commandPaletteState.js'
 import { LivingHqCanvas3D } from './hq3d/LivingHqCanvas3D.js'
@@ -47,7 +48,7 @@ export const App: React.FC = () => {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('gravitas:activeView') as WorkspaceView | null
-        if (saved && ['HQ3D', 'OFFICE', 'GRAPH', 'EVIDENCE', 'TIMELINE', 'AGENTS'].includes(saved)) {
+        if (saved && ['HQ3D', 'OFFICE', 'GRAPH', 'EVIDENCE', 'TIMELINE', 'AGENTS', 'AUTOMATIONS'].includes(saved)) {
           return saved
         }
       } catch {
@@ -693,6 +694,11 @@ export const App: React.FC = () => {
           {/* VIEW: AGENT CAPABILITY REGISTRY V0 */}
           {activeView === 'AGENTS' && (
             <AgentRegistryView />
+          )}
+
+          {/* VIEW: PERSONAL OS AUTOMATIONS & BACKGROUND SCHEDULER */}
+          {activeView === 'AUTOMATIONS' && (
+            <AutomationsView />
           )}
         </main>
 

@@ -25,6 +25,18 @@ export type {
   TaskPlanDefinition,
 } from '@gravitas/orchestrator'
 
+export type {
+  BackgroundJob,
+  JobRun,
+  PersonalOsNotification,
+  JobDefinitionStatus,
+  JobRunStatus,
+  JobTrigger,
+  JobAction,
+  NotificationSeverity,
+  NotificationDeliveryState,
+} from '@gravitas/core'
+
 // Re-export prompt types for server API consumers
 export type {
   ProjectPromptContext,

@@ -106,4 +106,14 @@ export const STATION_DEFINITIONS: Record<StationId, StationDefinition> = {
     status: 'Git Archive Dock',
     description: 'Sleek terminal dock where approved commits are materialized into the primary base branch.',
   },
+  'dispatch-console': {
+    id: 'dispatch-console',
+    name: 'Personal OS Dispatch Console',
+    roomId: 'INFRASTRUCTURE_ROOM',
+    position: [-6.8, 0.0, -4.5],
+    rotationY: Math.PI / 4,
+    role: 'Background Job Dispatch & Kernel Scheduler',
+    status: 'Operational Kernel',
+    description: 'Deterministic Background Job Execution Console. Dispatches cron, interval, and one-time tasks with zero persistent inference loops.',
+  },
 }

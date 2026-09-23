@@ -46,9 +46,9 @@ describe('3D Headquarters — Architectural World & Stations', () => {
     }
   })
 
-  it('defines 10 authoritative prototype stations mapped to rooms', () => {
+  it('defines 11 authoritative prototype stations mapped to rooms', () => {
     const stations = Object.values(STATION_DEFINITIONS)
-    expect(stations).toHaveLength(10)
+    expect(stations).toHaveLength(11)
 
     for (const st of stations) {
       expect(ROOM_DEFINITIONS[st.roomId]).toBeDefined()
@@ -60,6 +60,10 @@ describe('3D Headquarters — Architectural World & Stations', () => {
     // Crucial check: OmniRoute and server racks are infrastructure, not humanoids
     expect(STATION_DEFINITIONS['omniroute-rack'].roomId).toBe('INFRASTRUCTURE_ROOM')
     expect(STATION_DEFINITIONS['omniroute-rack'].role).toBe('Inference Infrastructure')
+
+    // Crucial check: Personal OS Dispatch Console is in Infrastructure Server Bay
+    expect(STATION_DEFINITIONS['dispatch-console'].roomId).toBe('INFRASTRUCTURE_ROOM')
+    expect(STATION_DEFINITIONS['dispatch-console'].role).toBe('Background Job Dispatch & Kernel Scheduler')
   })
 })
 
@@ -112,6 +116,11 @@ describe('3D Headquarters — Materials & Geometry Assembly', () => {
     expect(rack).toBeDefined()
     expect(rack?.userData.type).toBe('station')
     expect(rack?.userData.id).toBe('omniroute-rack')
+
+    const dispatch = infra.group.getObjectByName('station:dispatch-console')
+    expect(dispatch).toBeDefined()
+    expect(dispatch?.userData.type).toBe('station')
+    expect(dispatch?.userData.id).toBe('dispatch-console')
 
     expect(() => infra.dispose()).not.toThrow()
     materials.dispose()

@@ -161,6 +161,8 @@ export class HqScene {
       if (stationId === 'omniroute-rack') {
         const omni = worldState.infrastructure.gateways['omniroute-local']
         this.infrastructure.setGatewayActivity(stState.status === 'ACTIVE', omni?.warningState)
+      } else if (stationId === 'dispatch-console') {
+        this.infrastructure.setDispatchActivity(stState.status)
       } else {
         this.furniture.setStationStatus(stationId as any, stState.status)
       }

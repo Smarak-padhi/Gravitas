@@ -515,6 +515,37 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     }
   }
 
+  // Update dispatch-console station status based on background jobs & runs
+  const recentRuns = projection?.recentJobRuns ?? []
+  const backgroundJobs = projection?.backgroundJobs ?? []
+  const runningRun = recentRuns.find((r) => r.status === 'RUNNING')
+  const waitingRun = recentRuns.find((r) => r.status === 'WAITING_APPROVAL')
+  const hasFailedRun = recentRuns.some((r) => r.status === 'FAILED')
+
+  if (runningRun) {
+    stations['dispatch-console'] = {
+      ...stations['dispatch-console'],
+      status: 'ACTIVE',
+      activeTaskId: runningRun.jobId,
+    }
+  } else if (waitingRun) {
+    stations['dispatch-console'] = {
+      ...stations['dispatch-console'],
+      status: 'WAITING_APPROVAL',
+      activeTaskId: waitingRun.jobId,
+    }
+  } else if (hasFailedRun) {
+    stations['dispatch-console'] = {
+      ...stations['dispatch-console'],
+      status: 'FAILED',
+    }
+  } else if (backgroundJobs.some((j) => j.status === 'ENABLED')) {
+    stations['dispatch-console'] = {
+      ...stations['dispatch-console'],
+      status: 'IDLE',
+    }
+  }
+
   // 5. Derive canonical handoffs
   const worldHandoffs: WorldHandoffState[] = []
   if (projection?.handoffs && projection.handoffs.length > 0) {

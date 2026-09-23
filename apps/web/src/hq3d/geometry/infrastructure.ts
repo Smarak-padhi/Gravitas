@@ -14,6 +14,7 @@ export class HqInfrastructure {
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private readonly materials: MaterialLibrary
   private gatewayLedMesh: THREE.Mesh | null = null
+  private dispatchLedMesh: THREE.Mesh | null = null
 
   constructor(materials: MaterialLibrary) {
     this.materials = materials
@@ -21,6 +22,7 @@ export class HqInfrastructure {
     this.group.name = 'hq-infrastructure'
 
     this.buildServerRacks(materials)
+    this.buildDispatchConsole(materials)
   }
 
   private track<T extends THREE.BufferGeometry>(geom: T): T {
@@ -126,6 +128,67 @@ export class HqInfrastructure {
     this.group.add(rackGroup)
   }
 
+  private buildDispatchConsole(materials: MaterialLibrary): void {
+    const station = STATION_DEFINITIONS['dispatch-console']
+    const consoleGroup = new THREE.Group()
+    consoleGroup.position.set(station.position[0], station.position[1], station.position[2])
+    consoleGroup.rotation.y = station.rotationY
+    consoleGroup.name = 'station:dispatch-console'
+    consoleGroup.userData = { type: 'station', id: station.id, name: station.name }
+
+    // 1. Plinth Base
+    const baseGeo = this.track(new THREE.BoxGeometry(1.4, 0.12, 1.0))
+    const baseMesh = new THREE.Mesh(baseGeo, materials.limestoneDark)
+    baseMesh.position.set(0.0, 0.06, 0.0)
+    baseMesh.receiveShadow = true
+    consoleGroup.add(baseMesh)
+
+    const baseRimGeo = this.track(new THREE.BoxGeometry(1.44, 0.02, 1.04))
+    const baseRim = new THREE.Mesh(baseRimGeo, materials.brass)
+    baseRim.position.set(0.0, 0.12, 0.0)
+    consoleGroup.add(baseRim)
+
+    // 2. Heavy Gunmetal Console Column/Pedestal
+    const columnGeo = this.track(new THREE.BoxGeometry(1.1, 0.82, 0.7))
+    const column = new THREE.Mesh(columnGeo, materials.gunmetal)
+    column.position.set(0.0, 0.54, 0.0)
+    column.castShadow = true
+    column.receiveShadow = true
+    consoleGroup.add(column)
+
+    // 3. Tilted Control Deck / Console Surface (angled towards operator)
+    const deckGroup = new THREE.Group()
+    deckGroup.position.set(0.0, 0.95, 0.0)
+    deckGroup.rotation.x = -0.35
+
+    const deckGeo = this.track(new THREE.BoxGeometry(1.2, 0.06, 0.75))
+    const deck = new THREE.Mesh(deckGeo, materials.gunmetal)
+    deck.castShadow = true
+    deckGroup.add(deck)
+
+    // Brass edge trim on desk surface
+    const deckTrimGeo = this.track(new THREE.BoxGeometry(1.24, 0.02, 0.04))
+    const deckTrim = new THREE.Mesh(deckTrimGeo, materials.brass)
+    deckTrim.position.set(0.0, 0.03, 0.38)
+    deckGroup.add(deckTrim)
+
+    // Terminal Monitor / HUD display screen face
+    const screenGeo = this.track(new THREE.BoxGeometry(1.0, 0.01, 0.45))
+    const screen = new THREE.Mesh(screenGeo, materials.glassDark)
+    screen.position.set(0.0, 0.035, -0.05)
+    deckGroup.add(screen)
+
+    // Status LED indicator bar across the top of screen
+    const ledGeo = this.track(new THREE.BoxGeometry(0.9, 0.02, 0.03))
+    this.dispatchLedMesh = new THREE.Mesh(ledGeo, materials.statusReady)
+    this.dispatchLedMesh.position.set(0.0, 0.045, -0.3)
+    this.dispatchLedMesh.name = 'dispatch-console-led'
+    deckGroup.add(this.dispatchLedMesh)
+
+    consoleGroup.add(deckGroup)
+    this.group.add(consoleGroup)
+  }
+
   public setGatewayActivity(
     active: boolean,
     warning?: { providerFallbackOccurred: boolean; transportFallbackOccurred: boolean }
@@ -142,11 +205,25 @@ export class HqInfrastructure {
     }
   }
 
+  public setDispatchActivity(status: string): void {
+    if (!this.dispatchLedMesh) return
+    if (status === 'ACTIVE') {
+      this.dispatchLedMesh.material = this.materials.statusRunning
+    } else if (status === 'WAITING_APPROVAL') {
+      this.dispatchLedMesh.material = this.materials.statusWaiting
+    } else if (status === 'FAILED') {
+      this.dispatchLedMesh.material = this.materials.statusFailure
+    } else {
+      this.dispatchLedMesh.material = this.materials.statusReady
+    }
+  }
+
   public dispose(): void {
     for (const geom of this.geometriesToDispose) {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
     this.gatewayLedMesh = null
+    this.dispatchLedMesh = null
   }
 }

@@ -604,6 +604,43 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                   {entity.description}
                 </div>
               )}
+
+              {entity.id === 'dispatch-console' && (
+                <div
+                  data-testid="dispatch-console-telemetry"
+                  style={{
+                    padding: '12px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '10px', color: '#38bdf8', fontWeight: 700, letterSpacing: '0.5px' }}>
+                      PERSONAL OS KERNEL
+                    </span>
+                    <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
+                      ZERO INFERENCE
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    Deterministic background scheduler executing cron, interval, and one-time tasks without persistent LLM loops.
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                    <div style={{ flex: 1, padding: '6px 8px', borderRadius: '4px', backgroundColor: 'rgba(15, 23, 42, 0.8)' }}>
+                      <div style={{ fontSize: '9px', color: '#64748b' }}>EXECUTION SUBSTRATE</div>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#f8fafc' }}>SQLite WAL + Cron</div>
+                    </div>
+                    <div style={{ flex: 1, padding: '6px 8px', borderRadius: '4px', backgroundColor: 'rgba(15, 23, 42, 0.8)' }}>
+                      <div style={{ fontSize: '9px', color: '#64748b' }}>SOVEREIGN APPROVAL</div>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#f59e0b' }}>Required on Mutate</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
