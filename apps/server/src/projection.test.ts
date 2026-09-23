@@ -59,6 +59,7 @@ import { GravitasServer } from './server.js'
 import { RunService } from './service.js'
 import { deriveWorldState } from '../../web/src/hq3d/world/worldState.js'
 import { deriveCharacterSpatialIntents } from '../../web/src/hq3d/motion/spatialIntent.js'
+import { deriveArtifactCustody } from '../../web/src/hq3d/custody/artifactCustody.js'
 
 describe('Runtime Projection Store Unit Tests (projection.test.ts)', () => {
   let store: RuntimeProjectionStore
@@ -1309,6 +1310,280 @@ describe('Wave 12G — Real Runtime Causal Locomotion Proof (Section 25)', () =>
       expect('prompt' in feIntent).toBe(false)
       expect('token' in feIntent).toBe(false)
       expect('apiKey' in feIntent).toBe(false)
+    } finally {
+      await server.stop()
+    }
+  }, 45000)
+
+  it('28. Wave 12H Real Runtime Causal Proof: End-to-end custody flow from scheduler to deriveArtifactCustody', async () => {
+    const testBaseDir = await mkdtemp(join(tmpdir(), 'gravitas-wave12h-proof-'))
+    const primaryRepoPath = join(testBaseDir, 'repo')
+    const runtimeRoot = join(testBaseDir, 'runtime')
+    await mkdir(primaryRepoPath, { recursive: true })
+    await mkdir(runtimeRoot, { recursive: true })
+
+    await executeGit({ cwd: primaryRepoPath, args: ['init', '-b', 'main'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.name', 'Gravitas Causal Custody'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.email', 'custody@gravitas.internal'] })
+    await writeFile(join(primaryRepoPath, 'README.md'), '# Wave 12H Custody Causal Repo\n')
+    await executeGit({ cwd: primaryRepoPath, args: ['add', '.'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['commit', '-m', 'Initial commit for Wave 12H custody proof'] })
+
+    const registry = new InMemoryRegistry()
+    const eventHub = new EventHub(registry)
+
+    class FastCustodyFakeHarness {
+      public readonly id = 'fast-custody-fake-harness'
+      async availability() {
+        return { status: 'AVAILABLE' as const, installed: true, usableNoninteractive: true }
+      }
+      async execute(req: any) {
+        return {
+          durationMs: 15,
+          exitCode: 0,
+          terminationReason: 'COMPLETED' as const,
+          stdout: 'work product authored for review',
+          stderr: '',
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          worktreePath: req.worktreePath,
+        }
+      }
+    }
+
+    const service = new RunService({
+      registry,
+      eventHub,
+      harness: new FastCustodyFakeHarness() as any,
+      defaultRepository: primaryRepoPath,
+      defaultBaseBranch: 'main',
+      runtimeRoot,
+    })
+    const server = new GravitasServer({ service, eventHub })
+    const addr = await server.start({ host: '127.0.0.1', port: 0 })
+
+    try {
+      // Create run: FE produces artifact -> Reviewer reviews
+      const createRes = await fetch(`${addr.url}/api/v1/runs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: 'Wave 12H real runtime causal artifact custody proof',
+          repository: primaryRepoPath,
+          baseBranch: 'main',
+          tasks: [
+            {
+              id: 'task_fe_custody',
+              title: 'Frontend Authoring Task',
+              objective: 'Generate work product for review',
+              dependencies: [],
+              role: 'role:engineering:frontend-engineer',
+              requiresApproval: false,
+            },
+            {
+              id: 'task_rev_custody',
+              title: 'Reviewer Inspection Task',
+              objective: 'Perform independent architectural review',
+              dependencies: ['task_fe_custody'],
+              role: 'role:quality:independent-reviewer',
+              requiresApproval: false,
+            },
+          ],
+        }),
+      })
+      expect(createRes.status).toBe(201)
+      const { runId } = (await createRes.json()) as { runId: string }
+
+      // Execute run
+      await fetch(`${addr.url}/api/v1/runs/${runId}/execute`, { method: 'POST' })
+
+      // Poll until projection captures state with handoff or completed task
+      let stateSnapshot: any = null
+      for (let i = 0; i < 60; i++) {
+        await new Promise((r) => setTimeout(r, 150))
+        const res = await fetch(`${addr.url}/api/v1/state`)
+        stateSnapshot = await res.json()
+        if (stateSnapshot?.projection?.revision > 0) break
+      }
+
+      expect(stateSnapshot).toBeDefined()
+      expect(stateSnapshot.projection).toBeDefined()
+
+      // Feed snapshot into deriveWorldState
+      const worldState = deriveWorldState({
+        projection: stateSnapshot.projection,
+        tasks: stateSnapshot.tasks ?? [],
+      })
+
+      // Feed worldState into pure deriveArtifactCustody
+      const custodyStates = deriveArtifactCustody({
+        projection: stateSnapshot.projection,
+        tasks: stateSnapshot.tasks ?? [],
+        worldState,
+      })
+
+      expect(custodyStates.length).toBeGreaterThanOrEqual(1)
+
+      // Validate sanitized custody fields
+      const custody = custodyStates[0]
+      expect(custody.artifactId).toBeDefined()
+      expect(custody.taskId).toBeDefined()
+      expect(custody.custodyLocation).toBeDefined()
+      expect(['PRODUCER_DESK', 'REVIEW_INBOX', 'REVIEW_BENCH', 'INTEGRATION_INBOX', 'COMPLETED_TRAY']).toContain(
+        custody.custodyLocation
+      )
+      expect(custody.projectionEpoch).toBe(stateSnapshot.projection.epoch)
+      expect(custody.projectionRevision).toBe(stateSnapshot.projection.revision)
+
+      // Strict sanitization audit: zero secrets / prompt content
+      expect((custody as any).prompt).toBeUndefined()
+      expect((custody as any).token).toBeUndefined()
+      expect((custody as any).apiKey).toBeUndefined()
+      expect((custody as any).authorization).toBeUndefined()
+    } finally {
+      await server.stop()
+    }
+  }, 45000)
+
+  it('29. Wave 12H Real Runtime Approval Causal Proof: WAITING_APPROVAL -> Approval Plinth -> real approve API -> snapshot update', async () => {
+    const testBaseDir = await mkdtemp(join(tmpdir(), 'gravitas-wave12h-approval-'))
+    const primaryRepoPath = join(testBaseDir, 'repo')
+    const runtimeRoot = join(testBaseDir, 'runtime')
+    await mkdir(primaryRepoPath, { recursive: true })
+    await mkdir(runtimeRoot, { recursive: true })
+
+    await executeGit({ cwd: primaryRepoPath, args: ['init', '-b', 'main'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.name', 'Gravitas Approval Proof'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.email', 'approval@gravitas.internal'] })
+    await writeFile(join(primaryRepoPath, 'README.md'), '# Wave 12H Approval Causal Repo\n')
+    await executeGit({ cwd: primaryRepoPath, args: ['add', '.'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['commit', '-m', 'Initial commit for Wave 12H approval proof'] })
+
+    const registry = new InMemoryRegistry()
+    const eventHub = new EventHub(registry)
+
+    class FastApprovalFakeHarness {
+      public readonly id = 'fast-approval-fake-harness'
+      async availability() {
+        return { status: 'AVAILABLE' as const, installed: true, usableNoninteractive: true }
+      }
+      async execute(req: any) {
+        return {
+          durationMs: 10,
+          exitCode: 0,
+          terminationReason: 'COMPLETED' as const,
+          stdout: 'candidate release prepared for human operator',
+          stderr: '',
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          worktreePath: req.worktreePath,
+        }
+      }
+    }
+
+    const service = new RunService({
+      registry,
+      eventHub,
+      harness: new FastApprovalFakeHarness() as any,
+      defaultRepository: primaryRepoPath,
+      defaultBaseBranch: 'main',
+      runtimeRoot,
+    })
+    const server = new GravitasServer({ service, eventHub })
+    const addr = await server.start({ host: '127.0.0.1', port: 0 })
+
+    try {
+      // 1. Create run with task requiring human approval
+      const createRes = await fetch(`${addr.url}/api/v1/runs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: 'Wave 12H real approval causal proof',
+          repository: primaryRepoPath,
+          baseBranch: 'main',
+          tasks: [
+            {
+              id: 'task_approval_proof',
+              title: 'Candidate Release Task',
+              objective: 'Stage release candidate awaiting human approval',
+              dependencies: [],
+              role: 'role:engineering:frontend-engineer',
+              requiresApproval: true,
+            },
+          ],
+        }),
+      })
+      expect(createRes.status).toBe(201)
+      const { runId } = (await createRes.json()) as { runId: string }
+
+      // 2. Execute run
+      await fetch(`${addr.url}/api/v1/runs/${runId}/execute`, { method: 'POST' })
+
+      // 3. Poll until task reaches WAITING_APPROVAL
+      let stateSnapshot: any = null
+      for (let i = 0; i < 60; i++) {
+        await new Promise((r) => setTimeout(r, 150))
+        const res = await fetch(`${addr.url}/api/v1/state`)
+        stateSnapshot = await res.json()
+        const candidateTask = stateSnapshot?.tasks?.find((t: any) => t.id === 'task_approval_proof')
+        if (candidateTask && candidateTask.state === 'WAITING_APPROVAL') {
+          break
+        }
+      }
+
+      // Verify WAITING_APPROVAL state reached
+      const candidateTask = stateSnapshot.tasks.find((t: any) => t.id === 'task_approval_proof')
+      expect(candidateTask).toBeDefined()
+      expect(candidateTask.state).toBe('WAITING_APPROVAL')
+
+      // Derive custody before human approval
+      const worldStateBefore = deriveWorldState({
+        projection: stateSnapshot.projection,
+        tasks: stateSnapshot.tasks,
+      })
+      const custodyBefore = deriveArtifactCustody({
+        projection: stateSnapshot.projection,
+        tasks: stateSnapshot.tasks,
+        worldState: worldStateBefore,
+      })
+      expect(custodyBefore.length).toBeGreaterThanOrEqual(1)
+      const artifactBefore = custodyBefore.find((a) => a.taskId === 'task_approval_proof')!
+      expect(artifactBefore).toBeDefined()
+      expect(artifactBefore.custodyLocation).toBe('APPROVAL_PLINTH')
+      expect(artifactBefore.requiresHumanApproval).toBe(true)
+
+      // 4. Operator calls actual approve API
+      const approveRes = await fetch(
+        `${addr.url}/api/v1/runs/${runId}/tasks/task_approval_proof/approve`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reviewer: 'sovereign-human-operator' }),
+        }
+      )
+      expect(approveRes.status).toBe(200)
+
+      // 5. Fetch fresh state snapshot after backend acknowledgment
+      const freshRes = await fetch(`${addr.url}/api/v1/state`)
+      const freshSnapshot = await freshRes.json()
+
+      const approvedTask = freshSnapshot.tasks.find((t: any) => t.id === 'task_approval_proof')
+      expect(approvedTask.state).toBe('APPROVED')
+
+      // 6. Derive custody on fresh snapshot: artifact now in COMPLETED_TRAY
+      const worldStateAfter = deriveWorldState({
+        projection: freshSnapshot.projection,
+        tasks: freshSnapshot.tasks,
+      })
+      const custodyAfter = deriveArtifactCustody({
+        projection: freshSnapshot.projection,
+        tasks: freshSnapshot.tasks,
+        worldState: worldStateAfter,
+      })
+      const artifactAfter = custodyAfter.find((a) => a.taskId === 'task_approval_proof')!
+      expect(artifactAfter).toBeDefined()
+      expect(artifactAfter.custodyLocation).toBe('COMPLETED_TRAY')
+      expect(artifactAfter.requiresHumanApproval).toBe(false)
     } finally {
       await server.stop()
     }
