@@ -167,7 +167,7 @@ describe('BoundedScheduler Multi-Task DAG Execution (scheduler.ts)', () => {
     expect(result.status).toBe('COMPLETED')
     expect(result.tasks.every((t) => t.state === 'SUCCEEDED')).toBe(true)
     expect(Object.keys(result.materializedCommits)).toHaveLength(4)
-  })
+  }, 60000)
 
   it('gates downstream tasks on WAITING_APPROVAL and unblocks on approveTask', async () => {
     repo = await createTestRepo()

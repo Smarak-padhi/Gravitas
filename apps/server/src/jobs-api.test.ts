@@ -398,4 +398,179 @@ describe('Personal OS Jobs & Notifications API Integration (Wave 12I)', () => {
       await newServer.stop()
     }
   })
+
+  // ==========================================================================
+  // WAVE 12I-R API CONTRACT ENFORCEMENT & APPROVAL TESTS
+  // ==========================================================================
+
+  it('proves POST /api/v1/jobs/:jobId/runs/:runId/approve executes run and duplicate is idempotent', async () => {
+    // 1. Create a job requiring elevated authority (e.g. EXTERNAL_WRITE)
+    const elevatedJob = {
+      ...createSampleJob('job-approval-api'),
+      requiredAuthority: 'EXTERNAL_WRITE',
+    }
+    const createRes = await fetch(`${baseUrl}/api/v1/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(elevatedJob),
+    })
+    expect(createRes.status).toBe(201)
+
+    // 2. Trigger run -> should enter WAITING_APPROVAL
+    const runRes = await fetch(`${baseUrl}/api/v1/jobs/job-approval-api/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    expect(runRes.status).toBe(200)
+    const runBody = await runRes.json()
+    const runId = runBody.jobRun.id
+    expect(runBody.jobRun.status).toBe('WAITING_APPROVAL')
+
+    // 3. Approve run via POST /api/v1/jobs/:jobId/runs/:runId/approve
+    const approveRes = await fetch(`${baseUrl}/api/v1/jobs/job-approval-api/runs/${runId}/approve`, {
+      method: 'POST',
+    })
+    expect(approveRes.status).toBe(200)
+    const approvedBody = await approveRes.json()
+    expect(approvedBody.jobRun.status).toBe('SUCCEEDED')
+    expect(approvedBody.jobRun.finishedAt).toBeDefined()
+
+    // 4. Duplicate approve request is idempotent
+    const dupApproveRes = await fetch(`${baseUrl}/api/v1/jobs/job-approval-api/runs/${runId}/approve`, {
+      method: 'POST',
+    })
+    expect(dupApproveRes.status).toBe(200)
+    const dupBody = await dupApproveRes.json()
+    expect(dupBody.jobRun.status).toBe('SUCCEEDED')
+    expect(dupBody.jobRun.id).toBe(runId)
+  })
+
+  it('proves POST /api/v1/jobs/:jobId/runs/:runId/reject cancels run without executing action', async () => {
+    const elevatedJob = {
+      ...createSampleJob('job-reject-api'),
+      requiredAuthority: 'DESTRUCTIVE',
+    }
+    await fetch(`${baseUrl}/api/v1/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(elevatedJob),
+    })
+
+    const runRes = await fetch(`${baseUrl}/api/v1/jobs/job-reject-api/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const runBody = await runRes.json()
+    const runId = runBody.jobRun.id
+    expect(runBody.jobRun.status).toBe('WAITING_APPROVAL')
+
+    // Reject run
+    const rejectRes = await fetch(`${baseUrl}/api/v1/jobs/job-reject-api/runs/${runId}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: 'Operator rejected destructive action' }),
+    })
+    expect(rejectRes.status).toBe(200)
+    const rejectBody = await rejectRes.json()
+    expect(rejectBody.jobRun.status).toBe('CANCELLED')
+    expect(rejectBody.jobRun.errorCode).toBe('AUTHORITY_DENIED')
+
+    // Verify 0 notifications were created
+    const notifs = await (await fetch(`${baseUrl}/api/v1/notifications`)).json()
+    const matching = notifs.filter((n: any) => n.runId === runId)
+    expect(matching.length).toBe(0)
+  })
+
+  it('proves DELETE /api/v1/jobs/:id soft-deletes and retains all execution runs and history', async () => {
+    const job = createSampleJob('job-delete-api')
+    await fetch(`${baseUrl}/api/v1/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job),
+    })
+
+    // Run the job once
+    await fetch(`${baseUrl}/api/v1/jobs/job-delete-api/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    // DELETE /api/v1/jobs/:id
+    const delRes = await fetch(`${baseUrl}/api/v1/jobs/job-delete-api`, {
+      method: 'DELETE',
+    })
+    expect(delRes.status).toBe(200)
+    const delBody = await delRes.json()
+    expect(delBody.archived).toBe(true)
+    expect(delBody.job.status).toBe('CANCELLED')
+
+    // Job definition is preserved in CANCELLED state
+    const jobRes = await fetch(`${baseUrl}/api/v1/jobs/job-delete-api`)
+    expect(jobRes.status).toBe(200)
+    const preservedJob = await jobRes.json()
+    expect(preservedJob.status).toBe('CANCELLED')
+
+    // Runs are strictly retained
+    const runsRes = await fetch(`${baseUrl}/api/v1/jobs/job-delete-api/runs`)
+    expect(runsRes.status).toBe(200)
+    const runs = await runsRes.json()
+    expect(runs.length).toBe(1)
+  })
+
+  it('proves header-based Idempotency-Key on POST /api/v1/jobs/:id/run returns same execution', async () => {
+    const job = createSampleJob('job-header-idemp')
+    await fetch(`${baseUrl}/api/v1/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job),
+    })
+
+    const key = 'req-header-idemp-123'
+    const res1 = await fetch(`${baseUrl}/api/v1/jobs/job-header-idemp/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': key,
+      },
+    })
+    expect(res1.status).toBe(200)
+    const body1 = await res1.json()
+
+    // Second request with same Idempotency-Key header
+    const res2 = await fetch(`${baseUrl}/api/v1/jobs/job-header-idemp/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': key,
+      },
+    })
+    expect(res2.status).toBe(200)
+    const body2 = await res2.json()
+
+    expect(body2.jobRun.id).toBe(body1.jobRun.id)
+    expect(body2.jobRun.occurrenceKey).toBe(body1.jobRun.occurrenceKey)
+  })
+
+  it('proves INVOKE_ROLE is rejected on public API creation with 403 AUTHORITY_DENIED', async () => {
+    const roleJob = {
+      ...createSampleJob('job-invoke-role'),
+      action: {
+        type: 'INVOKE_ROLE',
+        roleId: 'backend-dev',
+        taskTemplateId: 'tmpl-1',
+        inputRef: 'ref-1',
+      },
+    }
+
+    const res = await fetch(`${baseUrl}/api/v1/jobs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(roleJob),
+    })
+
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error.code).toBe('AUTHORITY_DENIED')
+    expect(body.error.message).toContain('INVOKE_ROLE is INTERNAL_NOT_READY')
+  })
 })

@@ -1,0 +1,96 @@
+{
+  "proofVersion": "Wave-12I-R-v1",
+  "generatedAt": "2026-09-23T15:58:00.582Z",
+  "verdict": "PASS",
+  "assertions": {
+    "jobSurvivesRestart": true,
+    "runSurvivesRestart": true,
+    "notificationSurvivesRestart": true,
+    "sameOccurrenceNeverExecutesTwice": true,
+    "oneTimeJobTerminalScheduleConfirmed": true,
+    "manualRunIdempotencyConfirmed": true,
+    "zeroInferenceCost": true,
+    "sqliteDriver": "node:sqlite DatabaseSync (Node.js v24 native)"
+  },
+  "causalTrace": [
+    {
+      "step": "SERVER_A_STARTED",
+      "timestamp": "2026-09-23T15:57:56.718Z",
+      "details": {
+        "port": 64383,
+        "dbPath": "[SANITIZED_TEMP]/jobs_restart_proof.db"
+      }
+    },
+    {
+      "step": "JOB_CREATED_ON_SERVER_A",
+      "timestamp": "2026-09-23T15:57:56.747Z",
+      "details": {
+        "httpStatus": 201,
+        "jobId": "job-onetime-restart-proof",
+        "triggerType": "ONE_TIME",
+        "runAt": "2026-09-23T15:57:57.118Z"
+      }
+    },
+    {
+      "step": "OCCURRENCE_EXECUTED_ON_SERVER_A",
+      "timestamp": "2026-09-23T15:57:57.983Z",
+      "details": {
+        "runId": "run_job-onetime-restart-proof_1790179077710_veqx0",
+        "status": "SUCCEEDED",
+        "occurrenceKey": "job-onetime-restart-proof:2026-09-23T15:57:57.118Z",
+        "notificationId": "notif_1790179077718_vnz3y",
+        "lastRunAt": "2026-09-23T15:57:57.718Z",
+        "nextRunAt": null,
+        "terminalScheduleConfirmed": true
+      }
+    },
+    {
+      "step": "SERVER_A_STOPPED",
+      "timestamp": "2026-09-23T15:57:57.988Z",
+      "details": {
+        "gracefulShutdown": true
+      }
+    },
+    {
+      "step": "SERVER_B_STARTED",
+      "timestamp": "2026-09-23T15:57:57.997Z",
+      "details": {
+        "port": 64387,
+        "reloadedSameDatabase": true
+      }
+    },
+    {
+      "step": "SERVER_B_STATE_VERIFIED",
+      "timestamp": "2026-09-23T15:57:58.010Z",
+      "details": {
+        "jobFound": true,
+        "jobStatus": "ENABLED",
+        "jobLastRunAt": "2026-09-23T15:57:57.718Z",
+        "jobNextRunAt": null,
+        "totalRunsOnB": 1,
+        "firstRunStatus": "SUCCEEDED",
+        "firstRunOccurrenceKey": "job-onetime-restart-proof:2026-09-23T15:57:57.118Z",
+        "matchingNotificationsCount": 1
+      }
+    },
+    {
+      "step": "DUPLICATE_OCCURRENCE_PREVENTION_VERIFIED",
+      "timestamp": "2026-09-23T15:58:00.535Z",
+      "details": {
+        "schedulerTicksObserved": 2,
+        "totalRunsAfterTicks": 1,
+        "totalMatchingNotifsAfterTicks": 1,
+        "zeroDuplicateExecutionConfirmed": true
+      }
+    },
+    {
+      "step": "MANUAL_IDEMPOTENCY_VERIFIED_ON_SERVER_B",
+      "timestamp": "2026-09-23T15:58:00.568Z",
+      "details": {
+        "run1Id": "run_job-onetime-restart-proof_1790179080539_l7g6w",
+        "run2Id": "run_job-onetime-restart-proof_1790179080539_l7g6w",
+        "manualIdempotencyConfirmed": true
+      }
+    }
+  ]
+}

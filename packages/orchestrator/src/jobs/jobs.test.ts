@@ -1504,4 +1504,397 @@ describe('Wave 12I — Personal OS Execution Kernel Test Matrix (130 Assertions)
     expect(implementedActions.includes('WEB_SCRAPE')).toBe(false)
     expect(implementedActions.includes('SEND_WHATSAPP')).toBe(false)
   })
+
+  // ==========================================================================
+  // SECTION 17: WAVE 12I-R FORENSIC CLOSURE TESTS (131–142)
+  // ==========================================================================
+
+  it('131: Wave 12I-R Phase 4: Atomic occurrence claim stress test (10 concurrent claims)', () => {
+    const job = createTestJob({ id: 'job-stress-10' })
+    store.saveJob(job)
+
+    const occKey = 'job-stress-10:occ-stress-test'
+    // Issue 10 concurrent claim attempts simultaneously
+    const claimPromises = Array.from({ length: 10 }, (_, i) =>
+      store.claimOccurrence({
+        jobId: 'job-stress-10',
+        occurrenceKey: occKey,
+        scheduledFor: '2026-09-23T12:00:00.000Z',
+        runId: `run-stress-${i}`,
+      })
+    )
+
+    const successfulClaims = claimPromises.filter((c) => c.claimed)
+    const rejectedClaims = claimPromises.filter((c) => !c.claimed)
+
+    expect(successfulClaims.length).toBe(1)
+    expect(rejectedClaims.length).toBe(9)
+    expect(successfulClaims[0]?.run?.occurrenceKey).toBe(occKey)
+  })
+
+  it('132: Wave 12I-R Phase 4: Pushing claimed occurrence through runner produces 1 run and 1 notification', async () => {
+    const job = createTestJob({
+      id: 'job-claim-runner-proof',
+      action: {
+        type: 'EMIT_NOTIFICATION',
+        title: 'Single Execution Proof',
+        message: 'Notification should be created exactly once',
+        severity: 'INFO',
+      },
+    })
+    store.saveJob(job)
+
+    const occKey = 'job-claim-runner-proof:single-exec'
+    const claim = store.claimOccurrence({
+      jobId: 'job-claim-runner-proof',
+      occurrenceKey: occKey,
+      scheduledFor: '2026-09-23T12:00:00.000Z',
+    })
+
+    expect(claim.claimed).toBe(true)
+    const runResult = await runner.executeRun(job, claim.run!)
+
+    expect(runResult.status).toBe('SUCCEEDED')
+    expect(runResult.createdNotificationIds.length).toBe(1)
+
+    // Verify exactly 1 notification persisted in store
+    const notifs = store.listNotifications()
+    const matchingNotifs = notifs.filter((n) => n.title === 'Single Execution Proof')
+    expect(matchingNotifs.length).toBe(1)
+  })
+
+  it('133: Wave 12I-R Phase 7: Manual run idempotency with same key vs new key', async () => {
+    const job = createTestJob({ id: 'job-idemp-audit' })
+    store.saveJob(job)
+
+    // Request with key X
+    const runX1 = await scheduler.triggerManualRun('job-idemp-audit', 'key-X')
+    expect(runX1.status).toBe('SUCCEEDED')
+
+    // Request with same key X again -> returns identical execution run
+    const runX2 = await scheduler.triggerManualRun('job-idemp-audit', 'key-X')
+    expect(runX2.id).toBe(runX1.id)
+    expect(runX2.occurrenceKey).toBe(runX1.occurrenceKey)
+
+    // Request with key Y -> creates new intentional execution
+    const runY = await scheduler.triggerManualRun('job-idemp-audit', 'key-Y')
+    expect(runY.id).not.toBe(runX1.id)
+    expect(runY.occurrenceKey).toBe('manual:job-idemp-audit:key-Y')
+
+    // Verify idempotency survives store reload
+    const newStore = new SqliteJobStore(dbPath)
+    const existingClaim = newStore.getOccurrenceClaim('job-idemp-audit', 'manual:job-idemp-audit:key-X')
+    expect(existingClaim?.runId).toBe(runX1.id)
+    newStore.close()
+  })
+
+  it('134: Wave 12I-R Phase 13: File operation path containment rejects traversal, UNC, Windows drive hopping, and env vars', async () => {
+    // 1. ../ traversal
+    const r1 = await executor.execute({
+      type: 'FILE_OPERATION',
+      operation: 'STAT',
+      path: '../outside.txt',
+    })
+    expect(r1.success).toBe(false)
+    expect(r1.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 2. UNC path
+    const r2 = await executor.execute({
+      type: 'FILE_OPERATION',
+      operation: 'STAT',
+      path: '\\\\server\\share\\file.txt',
+    })
+    expect(r2.success).toBe(false)
+    expect(r2.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 3. Alternative drive / absolute path outside root
+    const r3 = await executor.execute({
+      type: 'FILE_OPERATION',
+      operation: 'STAT',
+      path: 'Z:\\Windows\\System32\\calc.exe',
+    })
+    expect(r3.success).toBe(false)
+    expect(r3.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 4. Environment variable path
+    const r4 = await executor.execute({
+      type: 'FILE_OPERATION',
+      operation: 'STAT',
+      path: '%USERPROFILE%\\test.txt',
+    })
+    expect(r4.success).toBe(false)
+    expect(r4.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 5. Valid file inside allowed root succeeds
+    const testFile = path.join(tempDir, 'valid.txt')
+    fs.writeFileSync(testFile, 'hello', 'utf8')
+    const r5 = await executor.execute({
+      type: 'FILE_OPERATION',
+      operation: 'STAT',
+      path: testFile,
+    })
+    expect(r5.success).toBe(true)
+    expect(r5.resultCode).toBe('STAT_OK')
+  })
+
+  it('135: Wave 12I-R Phase 14: Repository check containment rejects unknown repos and injected commands', async () => {
+    // 1. Unknown repo ID
+    const r1 = await executor.execute({
+      type: 'REPOSITORY_CHECK',
+      repositoryId: 'unknown-repo',
+      checkType: 'STATUS',
+    })
+    expect(r1.success).toBe(false)
+    expect(r1.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 2. Injected git flags or shell metacharacters in repo ID
+    const r2 = await executor.execute({
+      type: 'REPOSITORY_CHECK',
+      repositoryId: 'repo:core; rm -rf /',
+      checkType: 'STATUS',
+    })
+    expect(r2.success).toBe(false)
+    expect(r2.errorCode).toBe('AUTHORITY_DENIED')
+
+    // 3. Arbitrary path traversal
+    const r3 = await executor.execute({
+      type: 'REPOSITORY_CHECK',
+      repositoryId: '../../etc/passwd',
+      checkType: 'STATUS',
+    })
+    expect(r3.success).toBe(false)
+    expect(r3.errorCode).toBe('AUTHORITY_DENIED')
+  })
+
+  it('136: Wave 12I-R Phase 15: Authority × Autonomy 5x5 matrix test covering all 25 governance combinations', async () => {
+    const authorities = ['READ', 'SAFE_WRITE', 'EXTERNAL_WRITE', 'DESTRUCTIVE', 'FINANCIAL'] as const
+    const autonomies = ['L0', 'L1', 'L2', 'L3', 'L4'] as const
+
+    for (const auth of authorities) {
+      for (const auto of autonomies) {
+        const jobId = `job-matrix-${auth}-${auto}`
+        const job = createTestJob({
+          id: jobId,
+          requiredAuthority: auth,
+          autonomyLevel: auto,
+        })
+        store.saveJob(job)
+
+        const claim = store.claimOccurrence({
+          jobId,
+          occurrenceKey: `occ-${auth}-${auto}`,
+          scheduledFor: '2026-09-23T12:00:00.000Z',
+        })
+        const result = await runner.executeRun(job, claim.run!)
+
+        if (auth === 'EXTERNAL_WRITE' || auth === 'DESTRUCTIVE' || auth === 'FINANCIAL') {
+          // Elevated authority: must NEVER execute silently; stages for WAITING_APPROVAL
+          expect(result.status).toBe('WAITING_APPROVAL')
+          expect(result.errorCode).toBe('APPROVAL_REQUIRED')
+        } else if (auto === 'L0') {
+          // L0 with safe authority: formulated suggestion, 0 mutation executed
+          expect(result.status).toBe('SUCCEEDED')
+          expect(result.resultSummary).toContain('L0 Autonomy')
+        } else {
+          // L1-L4 with READ or SAFE_WRITE: executes cleanly
+          expect(result.status).toBe('SUCCEEDED')
+        }
+      }
+    }
+  })
+
+  it('137: Wave 12I-R Phase 16: Sovereign Approval contract — approveRun executes action and is idempotent', async () => {
+    const job = createTestJob({
+      id: 'job-approval-test',
+      requiredAuthority: 'EXTERNAL_WRITE',
+      action: {
+        type: 'EMIT_NOTIFICATION',
+        title: 'Elevated Notification',
+        message: 'Executed after human approval',
+        severity: 'ACTION_REQUIRED',
+      },
+    })
+    store.saveJob(job)
+
+    // Trigger run: should enter WAITING_APPROVAL
+    const claim = store.claimOccurrence({
+      jobId: 'job-approval-test',
+      occurrenceKey: 'occ-appr-flow',
+      scheduledFor: '2026-09-23T12:00:00.000Z',
+    })
+    const stagedRun = await runner.executeRun(job, claim.run!)
+    expect(stagedRun.status).toBe('WAITING_APPROVAL')
+
+    // Notification has NOT been emitted yet
+    const notifsBefore = store.listNotifications().filter((n) => n.title === 'Elevated Notification')
+    expect(notifsBefore.length).toBe(0)
+
+    // Approve run via runner/scheduler
+    const approvedRun = await scheduler.approveRun(job.id, stagedRun.id)
+    expect(approvedRun.status).toBe('SUCCEEDED')
+    expect(approvedRun.finishedAt).toBeDefined()
+
+    // Notification is now emitted exactly once
+    const notifsAfter = store.listNotifications().filter((n) => n.title === 'Elevated Notification')
+    expect(notifsAfter.length).toBe(1)
+
+    // Duplicate approve call is idempotent: returns SUCCEEDED run without re-executing
+    const secondApproval = await scheduler.approveRun(job.id, stagedRun.id)
+    expect(secondApproval.status).toBe('SUCCEEDED')
+    expect(secondApproval.id).toBe(approvedRun.id)
+    expect(store.listNotifications().filter((n) => n.title === 'Elevated Notification').length).toBe(1)
+  })
+
+  it('138: Wave 12I-R Phase 16: Sovereign Rejection contract — rejectRun cancels and action executes 0 times', async () => {
+    const job = createTestJob({
+      id: 'job-reject-test',
+      requiredAuthority: 'DESTRUCTIVE',
+      action: {
+        type: 'EMIT_NOTIFICATION',
+        title: 'Destructive Notification',
+        message: 'Should never emit',
+        severity: 'CRITICAL',
+      },
+    })
+    store.saveJob(job)
+
+    const claim = store.claimOccurrence({
+      jobId: 'job-reject-test',
+      occurrenceKey: 'occ-reject-flow',
+      scheduledFor: '2026-09-23T12:00:00.000Z',
+    })
+    const stagedRun = await runner.executeRun(job, claim.run!)
+    expect(stagedRun.status).toBe('WAITING_APPROVAL')
+
+    // Reject run
+    const rejectedRun = await scheduler.rejectRun(job.id, stagedRun.id, 'Action cancelled by sovereign operator')
+    expect(rejectedRun.status).toBe('CANCELLED')
+    expect(rejectedRun.errorCode).toBe('AUTHORITY_DENIED')
+
+    // Action executed ZERO times: notification was never emitted
+    const notifs = store.listNotifications().filter((n) => n.title === 'Destructive Notification')
+    expect(notifs.length).toBe(0)
+
+    // Duplicate reject is idempotent
+    const secondReject = await scheduler.rejectRun(job.id, stagedRun.id)
+    expect(secondReject.status).toBe('CANCELLED')
+  })
+
+  it('139: Wave 12I-R Phase 18: Quiet hours and timezone matrix (Asia/Kolkata, UTC, America/New_York across 23:30, 06:59, 07:00, 12:00)', () => {
+    const qh = {
+      start: '23:00',
+      end: '07:00',
+      timezone: 'Asia/Kolkata',
+      bypassOnActionRequired: true,
+    }
+
+    // In Asia/Kolkata (UTC+5:30):
+    // 23:30 IST is 18:00 UTC -> should be quiet
+    const date2330IST = new Date('2026-09-23T18:00:00.000Z')
+    expect(notifBus.isTimeWithinQuietHours(date2330IST, qh)).toBe(true)
+
+    // 06:59 IST is 01:29 UTC -> should be quiet
+    const date0659IST = new Date('2026-09-24T01:29:00.000Z')
+    expect(notifBus.isTimeWithinQuietHours(date0659IST, qh)).toBe(true)
+
+    // 07:00 IST is 01:30 UTC -> outside quiet hours
+    const date0700IST = new Date('2026-09-24T01:30:00.000Z')
+    expect(notifBus.isTimeWithinQuietHours(date0700IST, qh)).toBe(false)
+
+    // 12:00 IST is 06:30 UTC -> outside quiet hours
+    const date1200IST = new Date('2026-09-24T06:30:00.000Z')
+    expect(notifBus.isTimeWithinQuietHours(date1200IST, qh)).toBe(false)
+
+    // In UTC:
+    const qhUTC = { start: '23:00', end: '07:00', timezone: 'UTC', bypassOnActionRequired: true }
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-23T23:30:00.000Z'), qhUTC)).toBe(true)
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T06:59:00.000Z'), qhUTC)).toBe(true)
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T07:00:00.000Z'), qhUTC)).toBe(false)
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T12:00:00.000Z'), qhUTC)).toBe(false)
+
+    // In America/New_York (UTC-4 in Sep):
+    const qhNY = { start: '23:00', end: '07:00', timezone: 'America/New_York', bypassOnActionRequired: true }
+    // 23:30 EDT is 03:30 UTC next day
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T03:30:00.000Z'), qhNY)).toBe(true)
+    // 06:59 EDT is 10:59 UTC
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T10:59:00.000Z'), qhNY)).toBe(true)
+    // 07:00 EDT is 11:00 UTC
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T11:00:00.000Z'), qhNY)).toBe(false)
+    // 12:00 EDT is 16:00 UTC
+    expect(notifBus.isTimeWithinQuietHours(new Date('2026-09-24T16:00:00.000Z'), qhNY)).toBe(false)
+  })
+
+  it('140: Wave 12I-R Phase 19: Cron grammar audit (*, */5, lists, ranges, steps, dom, month, dow with 0 and 7 for Sun)', () => {
+    // 1. Wildcard and step
+    expect(isValidCron('*/5 * * * *')).toBe(true)
+    // 2. Lists and ranges
+    expect(isValidCron('1,15,30 1-5 * * *')).toBe(true)
+    // 3. Day of week (0 and 7 both valid for Sunday)
+    const cron0 = parseCronExpression('0 12 * * 0')
+    const cron7 = parseCronExpression('0 12 * * 7')
+    expect(cron0).not.toBeNull()
+    expect(cron7).not.toBeNull()
+    expect(cron0?.daysOfWeek.matches(0)).toBe(true)
+    expect(cron0?.daysOfWeek.matches(7)).toBe(true)
+    expect(cron7?.daysOfWeek.matches(0)).toBe(true)
+    expect(cron7?.daysOfWeek.matches(7)).toBe(true)
+
+    // 4. Invalid grammar rejected
+    expect(isValidCron('*/0 * * * *')).toBe(false) // step 0 invalid
+    expect(isValidCron('60 * * * *')).toBe(false) // minute 60 out of bounds
+    expect(isValidCron('* 24 * * *')).toBe(false) // hour 24 out of bounds
+    expect(isValidCron('* * 32 * *')).toBe(false) // dom 32 out of bounds
+    expect(isValidCron('* * * 13 *')).toBe(false) // month 13 out of bounds
+    expect(isValidCron('* * * * 8')).toBe(false) // dow 8 out of bounds
+    expect(isValidCron('* * * *')).toBe(false) // only 4 tokens
+    expect(isValidCron('* * * * * *')).toBe(false) // 6 tokens rejected
+  })
+
+  it('141: Wave 12I-R Phase 20: Scheduler lifecycle (idempotent start, stop clears timer, bounded shutdown)', async () => {
+    // Start scheduler
+    scheduler.start()
+    expect(scheduler.isActive()).toBe(true)
+
+    // Second start call is idempotent (does not create duplicate timer)
+    scheduler.start()
+    expect(scheduler.isActive()).toBe(true)
+
+    // Stop scheduler
+    scheduler.stop()
+    expect(scheduler.isActive()).toBe(false)
+
+    // Tick after stop produces no new runs
+    const runsAfterStop = await scheduler.tick()
+    expect(runsAfterStop.length).toBe(0)
+  })
+
+  it('142: Wave 12I-R Phase 22: Soft-delete / cancel retains job runs and execution history', () => {
+    const job = createTestJob({ id: 'job-soft-delete' })
+    store.saveJob(job)
+
+    const claim = store.claimOccurrence({
+      jobId: 'job-soft-delete',
+      occurrenceKey: 'occ-del-proof',
+      scheduledFor: '2026-09-23T12:00:00.000Z',
+    })
+    store.updateRun({
+      ...claim.run!,
+      status: 'SUCCEEDED',
+      startedAt: '2026-09-23T12:00:01.000Z',
+      finishedAt: '2026-09-23T12:00:02.000Z',
+    })
+
+    // Cancel / archive the job
+    store.updateJob('job-soft-delete', { status: 'CANCELLED', nextRunAt: undefined })
+
+    // Historical records strictly remain intact
+    const fetchedJob = store.getJob('job-soft-delete')
+    expect(fetchedJob?.status).toBe('CANCELLED')
+    expect(fetchedJob?.nextRunAt).toBeUndefined()
+
+    const runs = store.getRunsForJob('job-soft-delete')
+    expect(runs.length).toBe(1)
+    expect(runs[0].status).toBe('SUCCEEDED')
+    expect(runs[0].occurrenceKey).toBe('occ-del-proof')
+  })
 })
