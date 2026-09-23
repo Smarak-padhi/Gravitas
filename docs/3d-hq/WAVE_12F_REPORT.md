@@ -224,7 +224,12 @@ disposition=CONFLICT → all incoming handoffs to integration task: state=FAILED
 
 ---
 
-## 7. Wave 12G Prerequisites
+## 7. Wave 12G Prerequisites & Production Projection Gap Note
+
+> [!IMPORTANT]
+> **Wave 12F Production Projection Note (Closed in Wave 12F-R):**
+> - **Before Wave 12F-R:** While Wave 12F established the canonical scheduler handoff domain model and contract, `apps/server/src/service.ts` did not wire `BoundedScheduler.onHandoffUpdated` into `RuntimeProjectionStore`. Scheduler handoff truth existed, but was not exposed in the production `GET /api/v1/state` snapshot (`projection.handoffs` remained empty in production).
+> - **After Wave 12F-R:** Handoff truth is wired into the production runtime via `onHandoffUpdated` in `service.ts` with initial seed propagation in `scheduler.ts`, retained in the authoritative `RuntimeProjectionSnapshot`, and recoverable without SSE history. See [WAVE_12F_R_REPORT.md](file:///C:/Users/smara/Desktop/Multi-agent/docs/3d-hq/WAVE_12F_R_REPORT.md) for full closure proof.
 
 Wave 12F delivers the complete handoff foundation. Wave 12G can now build on:
 1. Canonical handoff registry available via `scheduler.getHandoffs()`
