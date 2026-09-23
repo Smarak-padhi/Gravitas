@@ -66,7 +66,7 @@ export interface WorldTaskState {
   readonly canonicalState: TaskState
   readonly runtimePhase?: RuntimeTaskPhase | undefined
   readonly physicalLocation: PhysicalLocation
-  readonly assignedStationId?: StationId | null | undefined
+  readonly assignedStationId?: StationId | string | null | undefined
   readonly roleId?: string | null | undefined
   readonly roleSource?: 'CANONICAL' | 'LEGACY_COMPATIBILITY' | null | undefined
   readonly harnessId?: string | null | undefined
@@ -237,7 +237,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
       roleId = canonicalRoleId
       roleSource = 'CANONICAL'
       const canonicalStation = getStationForCanonicalRole(canonicalRoleId)
-      assignedStationId = (canonicalStation as StationId) ?? null
+      assignedStationId = ((ct as any).assignedStationId as StationId) ?? (canonicalStation as StationId) ?? null
     } else {
       assignedStationId = stationMapping.resolveStationId({
         taskId: ct.id,

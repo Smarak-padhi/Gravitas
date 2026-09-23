@@ -126,7 +126,7 @@ export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
 export function getStationForCanonicalRole(roleId: string): string | null {
   const role = ROLE_BY_ID.get(roleId as RoleId)
   if (role) {
-    return role.stationAlias || role.stationId
+    return role.stationId || role.stationAlias
   }
   return null
 }

@@ -68,6 +68,15 @@ export interface RolePresentationState {
   readonly artifactCustody?: readonly string[] | undefined
   readonly reviewStatus?: string | undefined
   readonly integrationStatus?: string | undefined
+  readonly spatialState?: string | undefined
+  readonly destinationStationId?: string | undefined
+  readonly destinationStationName?: string | undefined
+  readonly handoffId?: string | undefined
+  readonly handoffState?: string | undefined
+  readonly runtimePhase?: string | undefined
+  readonly gateway?: string | undefined
+  readonly projectionEpoch?: string | undefined
+  readonly projectionRevision?: number | undefined
 }
 
 export interface RoleInspectorMetadata {
@@ -92,4 +101,13 @@ export interface RoleInspectorMetadata {
   readonly artifactCustody?: readonly string[] | undefined
   readonly reviewStatus?: string | undefined
   readonly integrationStatus?: string | undefined
+  readonly spatialState?: string | undefined
+  readonly destinationStationId?: string | undefined
+  readonly destinationStationName?: string | undefined
+  readonly handoffId?: string | undefined
+  readonly handoffState?: string | undefined
+  readonly runtimePhase?: string | undefined
+  readonly gateway?: string | undefined
+  readonly projectionEpoch?: string | undefined
+  readonly projectionRevision?: number | undefined
 }

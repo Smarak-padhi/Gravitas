@@ -332,6 +332,53 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Wave 12G Spatial Intent & Locomotion Telemetry */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>SPATIAL STATE</div>
+                  <div data-testid="inspector-spatial-state" style={{ fontWeight: 600, color: entity.roleMetadata.spatialState?.includes('MOVING') ? '#eab308' : '#38bdf8' }}>
+                    {entity.roleMetadata.spatialState ?? 'AT_HOME'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>RUNTIME PHASE</div>
+                  <div data-testid="inspector-runtime-phase" style={{ fontWeight: 600, color: '#cbd5e1' }}>
+                    {entity.roleMetadata.runtimePhase ?? 'IDLE'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>DESTINATION STATION</div>
+                <div data-testid="inspector-destination-station" style={{ fontWeight: 600, color: '#94a3b8' }}>
+                  {entity.roleMetadata.destinationStationName || entity.roleMetadata.destinationStationId || entity.roleMetadata.stationName}
+                </div>
+              </div>
+
+              {entity.roleMetadata.handoffId && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>ACTIVE HANDOFF</div>
+                  <div data-testid="inspector-active-handoff" style={{ fontWeight: 600, color: '#10b981' }}>
+                    {entity.roleMetadata.handoffId} ({entity.roleMetadata.handoffState ?? 'ACTIVE'})
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>GATEWAY</div>
+                  <div data-testid="inspector-gateway" style={{ fontWeight: 600, color: '#94a3b8' }}>
+                    {entity.roleMetadata.gateway ?? 'DIRECT'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>EPOCH / REV</div>
+                  <div data-testid="inspector-projection-rev" style={{ fontWeight: 600, color: '#94a3b8' }}>
+                    {entity.roleMetadata.projectionEpoch ? `r${entity.roleMetadata.projectionRevision}` : 'bootstrap'}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <>

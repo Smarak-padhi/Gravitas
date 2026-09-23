@@ -206,6 +206,15 @@ export function deriveRolePresentationStates(
       artifactCustody: override?.artifactCustody ?? artifactCustody,
       reviewStatus: override?.reviewStatus,
       integrationStatus: override?.integrationStatus,
+      spatialState: override?.spatialState ?? (activeTask && (activeTask.canonicalState === 'RUNNING' || activeTask.canonicalState === 'VERIFYING') ? 'AT_ASSIGNMENT' : 'AT_HOME'),
+      destinationStationId: override?.destinationStationId ?? (activeTask?.assignedStationId || role.stationAlias || role.stationId),
+      destinationStationName: override?.destinationStationName ?? (activeTask?.assignedStationId ? `${activeTask.assignedStationId} Station` : `${role.displayName} Home Station`),
+      handoffId: override?.handoffId ?? (handoffsIn?.[0]?.id || handoffsOut?.[0]?.id),
+      handoffState: override?.handoffState ?? (handoffsIn?.[0]?.state || handoffsOut?.[0]?.state),
+      runtimePhase: override?.runtimePhase ?? (activeTask ? activeTask.canonicalState : 'IDLE'),
+      gateway: override?.gateway ?? (transport === 'OmniRoute' ? 'OmniRoute Gateway' : 'DIRECT'),
+      projectionEpoch: override?.projectionEpoch ?? worldState.revisionIdentity.projectionEpoch,
+      projectionRevision: override?.projectionRevision ?? worldState.revisionIdentity.projectionRevision,
     }
 
     result.set(roleId, state)
@@ -244,5 +253,14 @@ export function buildRoleInspectorMetadata(
     artifactCustody: presentation.artifactCustody,
     reviewStatus: presentation.reviewStatus,
     integrationStatus: presentation.integrationStatus,
+    spatialState: presentation.spatialState,
+    destinationStationId: presentation.destinationStationId,
+    destinationStationName: presentation.destinationStationName,
+    handoffId: presentation.handoffId,
+    handoffState: presentation.handoffState,
+    runtimePhase: presentation.runtimePhase,
+    gateway: presentation.gateway,
+    projectionEpoch: presentation.projectionEpoch,
+    projectionRevision: presentation.projectionRevision,
   }
 }
