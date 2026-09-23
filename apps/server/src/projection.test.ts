@@ -58,6 +58,7 @@ import { InMemoryRegistry } from './registry.js'
 import { GravitasServer } from './server.js'
 import { RunService } from './service.js'
 import { deriveWorldState } from '../../web/src/hq3d/world/worldState.js'
+import { deriveCharacterSpatialIntents } from '../../web/src/hq3d/motion/spatialIntent.js'
 
 describe('Runtime Projection Store Unit Tests (projection.test.ts)', () => {
   let store: RuntimeProjectionStore
@@ -1182,4 +1183,134 @@ describe('Wave 12F-R — Authoritative Handoff Projection Closure (projection.te
     expect(wh.kind).toBeDefined()
     expect(wh.state).toBeDefined()
   })
+})
+
+describe('Wave 12G — Real Runtime Causal Locomotion Proof (Section 25)', () => {
+  it('W12G-1. Real runtime causal proof: POST run -> scheduler execution -> projection snapshot -> web deriveWorldState -> deriveCharacterSpatialIntents -> character destination & presentation state', async () => {
+    // Proves the complete causal chain from real server execution to frontend spatial intent:
+    // POST run → role assignment → scheduler → WORKER_STARTED → projection snapshot
+    // → GET /api/v1/state → deriveWorldState → deriveCharacterSpatialIntents
+    const primaryRepoPath = await mkdtemp(join(tmpdir(), 'gravitas-12g-repo-'))
+    const runtimeRoot = await mkdtemp(join(tmpdir(), 'gravitas-12g-rt-'))
+
+    await executeGit({ cwd: primaryRepoPath, args: ['init', '-b', 'main'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.name', 'Wave12G Tester'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['config', 'user.email', 'wave12g@gravitas.local'] })
+    await writeFile(
+      join(primaryRepoPath, 'package.json'),
+      JSON.stringify({ name: 'wave12g-fixture', type: 'module', version: '1.0.0' }, null, 2),
+      'utf8'
+    )
+    await mkdir(join(primaryRepoPath, 'src'), { recursive: true })
+    await writeFile(join(primaryRepoPath, 'src', 'index.js'), 'export const wave = "12G";\n', 'utf8')
+    await executeGit({ cwd: primaryRepoPath, args: ['add', '.'] })
+    await executeGit({ cwd: primaryRepoPath, args: ['commit', '-m', 'initial 12g fixture'] })
+
+    const registry = new InMemoryRegistry()
+    const eventHub = new EventHub(registry)
+
+    class FastFakeHarness12G {
+      public readonly id = 'fake-12g-harness'
+      async availability() { return { status: 'AVAILABLE' as const, installed: true, usableNoninteractive: true } }
+      async execute(req: any) {
+        await writeFile(join(req.worktreePath, 'src', 'index.js'), 'export const wave = "12G-executed";\n', 'utf8')
+        return {
+          executionId: req.executionId, harnessId: this.id,
+          startedAt: new Date().toISOString(), finishedAt: new Date().toISOString(),
+          durationMs: 10, exitCode: 0, terminationReason: 'COMPLETED' as const,
+          stdout: 'locomotion verified', stderr: '', stdoutTruncated: false, stderrTruncated: false,
+          worktreePath: req.worktreePath,
+        }
+      }
+    }
+
+    const service = new RunService({
+      registry,
+      eventHub,
+      harness: new FastFakeHarness12G() as any,
+      defaultRepository: primaryRepoPath,
+      defaultBaseBranch: 'main',
+      runtimeRoot,
+    })
+    const server = new GravitasServer({ service, eventHub })
+    const addr = await server.start({ host: '127.0.0.1', port: 0 })
+
+    try {
+      // Create a run with explicit role assignment: FE -> Reviewer
+      const createRes = await fetch(`${addr.url}/api/v1/runs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: 'Wave 12G real runtime causal locomotion proof',
+          repository: primaryRepoPath,
+          baseBranch: 'main',
+          tasks: [
+            {
+              id: 'task_fe_locomotion',
+              title: 'Frontend Locomotion Task',
+              objective: 'Prove authoritative spatial intent generation',
+              dependencies: [],
+              role: 'role:engineering:frontend-engineer',
+              requiresApproval: false,
+            },
+            {
+              id: 'task_rev_locomotion',
+              title: 'Reviewer Locomotion Task',
+              objective: 'Prove review handoff spatial intent generation',
+              dependencies: ['task_fe_locomotion'],
+              role: 'role:quality:independent-reviewer',
+              requiresApproval: false,
+            },
+          ],
+        }),
+      })
+      expect(createRes.status).toBe(201)
+      const { runId } = (await createRes.json()) as { runId: string }
+
+      // Execute the run
+      await fetch(`${addr.url}/api/v1/runs/${runId}/execute`, { method: 'POST' })
+
+      // Poll until projection captures active state or terminal state
+      let stateSnapshot: any = null
+      for (let i = 0; i < 60; i++) {
+        await new Promise((r) => setTimeout(r, 150))
+        const res = await fetch(`${addr.url}/api/v1/state`)
+        stateSnapshot = await res.json()
+        if (stateSnapshot?.projection?.handoffs?.length > 0) break
+      }
+
+      expect(stateSnapshot).toBeDefined()
+      expect(stateSnapshot.projection).toBeDefined()
+
+      // Feed snapshot directly into frontend deriveWorldState
+      const worldState = deriveWorldState({
+        projection: stateSnapshot.projection,
+        tasks: stateSnapshot.tasks ?? [],
+      })
+
+      // Feed worldState into pure deriveCharacterSpatialIntents
+      const spatialIntents = deriveCharacterSpatialIntents(worldState)
+      expect(spatialIntents.size).toBe(4) // 4 frozen roles
+
+      // Prove Frontend Engineer has truthful causal spatial intent
+      const feIntent = spatialIntents.get('role:engineering:frontend-engineer')!
+      expect(feIntent.roleId).toBe('role:engineering:frontend-engineer')
+      expect(feIntent.destinationStationId).toBe('engineering-workstation-01')
+      expect(['MOVING_TO_ASSIGNMENT', 'AT_ASSIGNMENT', 'RETURNING_HOME', 'AT_HOME']).toContain(feIntent.spatialState)
+      expect(['TASK_ASSIGNMENT', 'ACTIVE_EXECUTION', 'RETURN_HOME']).toContain(feIntent.reason)
+      expect(feIntent.projectionEpoch).toBe(stateSnapshot.projection.epoch)
+
+      // Prove Independent Reviewer has truthful causal review intent or handoff link
+      const revIntent = spatialIntents.get('role:quality:independent-reviewer')!
+      expect(revIntent.roleId).toBe('role:quality:independent-reviewer')
+      expect(revIntent.destinationStationId).toBe('verification-lab-console')
+
+      // Sanitization audit: ensure no prompt body or secrets are exposed in intent
+      expect('prompt' in feIntent).toBe(false)
+      expect('token' in feIntent).toBe(false)
+      expect('apiKey' in feIntent).toBe(false)
+    } finally {
+      await server.stop()
+    }
+  }, 45000)
 })
