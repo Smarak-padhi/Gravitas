@@ -63,3 +63,29 @@ The 3D Headquarters reflects **what Gravitas can cryptographically prove is happ
 │ - Viewport light bands    │   │ - Active Route Status LEDs│   │ - Study Nook Terminal     │
 └───────────────────────────┘   └───────────────────────────┘   └───────────────────────────┘
 ```
+
+---
+
+## 3. Wave 12H Authoritative Artifact Custody & Conduits
+
+### Custody Locations
+- `PRODUCER_DESK`: Author workstation desk ($Y = 0.76\text{m}$).
+- `REVIEW_INBOX`: Verification lab intake table ($X = 4.2\text{m}, Y = 0.76\text{m}, Z = 4.5\text{m}$).
+- `REVIEW_BENCH`: Verification lab review desk ($X = 5.0\text{m}, Y = 0.76\text{m}, Z = 2.0\text{m}$).
+- `INTEGRATION_INBOX`: Dev workroom integration staging dock ($X = -3.5\text{m}, Y = 0.76\text{m}, Z = -4.5\text{m}$).
+- `INTEGRATION_BENCH`: Dev workroom integration desk ($X = -5.0\text{m}, Y = 0.76\text{m}, Z = -2.0\text{m}$).
+- `APPROVAL_PLINTH`: Central governance plinth in Executive Office ($X = 0.0\text{m}, Y = 0.88\text{m}, Z = 2.5\text{m}$).
+- `COMPLETED_TRAY`: Executive output credenza tray ($X = 1.8\text{m}, Y = 0.76\text{m}, Z = 4.2\text{m}$).
+- `FAILURE_HOLD`: Isolated quarantine desk ($X = 6.0\text{m}, Y = 0.76\text{m}, Z = 6.0\text{m}$).
+- `NEUTRAL_HOLD`: Central office neutral table ($X = 0.0\text{m}, Y = 0.76\text{m}, Z = 0.0\text{m}`).
+
+### Core Invariants
+- `ARTIFACT CUSTODY != CHARACTER POSITION`
+- `HANDOFF READY != HANDOFF SATISFIED`
+- `VISUAL ARRIVAL != BACKEND TRANSITION`
+- `REVIEW PASSED != INTEGRATED`
+- `INTEGRATION PREPARED != MERGED`
+- `WAITING_APPROVAL != APPROVED`
+- `APPROVAL ANIMATION != APPROVAL AUTHORITY`
+- `HUMAN OPERATOR != NPC`
+- `ROLE != HARNESS`

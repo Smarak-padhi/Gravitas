@@ -29,10 +29,13 @@ Wave 12F:   Canonical Multi-Agent Handoffs & Integration Pipeline (CLOSED)
 Wave 12F-R: Production Handoff Projection Closure (CLOSED)
      │
      ▼
-Wave 12G:   Authoritative Role Locomotion & Spatial Reconciliation (SEALED)
+Wave 12G:   Authoritative Role Locomotion & Spatial Reconciliation (CLOSED)
      │
      ▼
-Wave 12H:   Physical Custody Transitions & Approval Flow Gestures (NOT STARTED)
+Wave 12H:   Authoritative Artifact Custody + Handoff Visualization + Human Approval Flow (SEALED)
+     │
+     ▼
+Wave 12I:   Personal OS Operations Foundation (NOT STARTED)
      │
      ▼
 Wave 13:    Background Job System & Courier Logistics
@@ -73,4 +76,17 @@ Wave 19+:   Strategic Opportunity & Cross-Domain Synthesis
   - 18 deterministic fixtures (A through R) and 60 explicit unit tests.
   - Real runtime causal proof (`W12G-1`) verifying scheduler $\rightarrow$ projection $\rightarrow$ web spatial intent.
   - 14 visual screenshots captured in `docs/3d-hq/evidence/wave12g/`.
-- **Status:** **WAVE 12G — GO** | **WAVE 12H — NOT STARTED**.
+- **Status:** **WAVE 12G — GO** | **WAVE 12H — CLOSED**.
+
+### Wave 12H: Authoritative Artifact Custody + Handoff Visualization + Human Approval Flow (SEALED)
+- **Goal:** Work product itself has tangible custody in the 3D Headquarters, truthfully reflecting verification, independent review, branch integration, and sovereign human approval.
+- **Achievements:**
+  - Extended `RuntimeArtifactProjection` exposed over `GET /api/v1/state`.
+  - Pure, deterministic `deriveArtifactCustody` and `deriveArtifactVisualIntents`.
+  - Physical dossier mesh (`PhysicalDossierMesh`) with bond paper, brass clasp, verification seals, and approval tabs.
+  - 9 authoritative custody locations and elevated conduit routes with deterministic corridor lane offsets.
+  - Sovereign Approval Plinth governance with causal backend-acknowledged mechanical clasp gesture.
+  - Complete 21-fixture matrix (A through U) and 70 passing assertions in `custody.test.ts`.
+  - Real runtime causal proofs 28 and 29 passing in `projection.test.ts`.
+  - 16 visual evidence screenshots in `docs/3d-hq/evidence/wave12h/`.
+- **Status:** **WAVE 12H — GO** | **WAVE 12I — NOT STARTED**.

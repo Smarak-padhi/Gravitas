@@ -28,4 +28,18 @@
 1. **Browser QA Lab (Device Matrix Wall)**: A 9-screen display wall in Room 4 displaying live viewport frames. It has ZERO humanoid avatars.
 2. **OmniRoute Gateway Rack**: Dual 42U server rack in Room 5 routing inference requests. It has ZERO humanoid avatars.
 3. **Approval Plinth**: Command plinth in Room 6 where task dossiers await sovereign human authorization. It has ZERO human operator NPCs.
-4. **Integration Engineer**: `role:integration:integration-engineer` is an automated orchestrator composition pipeline in Wave 12G. It receives NO humanoid avatar in Wave 12G (`NOT_READY_FOR_VISUALIZATION`).
+4. **Integration Engineer**: `role:integration:integration-engineer` is an automated orchestrator composition pipeline. In Wave 12H, the verdict remains `INTEGRATION_ENGINEER_VISUALIZATION_NOT_READY`. Integration Bench is physically present with triple monitors, but receives NO humanoid avatar.
+
+---
+
+## 3. Wave 12H Core Invariants
+
+- `ARTIFACT CUSTODY != CHARACTER POSITION`
+- `HANDOFF READY != HANDOFF SATISFIED`
+- `VISUAL ARRIVAL != BACKEND TRANSITION`
+- `REVIEW PASSED != INTEGRATED`
+- `INTEGRATION PREPARED != MERGED`
+- `WAITING_APPROVAL != APPROVED`
+- `APPROVAL ANIMATION != APPROVAL AUTHORITY`
+- `HUMAN OPERATOR != NPC`
+- `ROLE != HARNESS`

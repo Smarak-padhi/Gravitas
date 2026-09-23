@@ -67,3 +67,13 @@ The following operations strictly require explicit human authorization before ex
 1. **3D Headquarters Mezzanine (Room 6: Approval Control):** The spatial plinth illuminates with an amber glow when any task enters `WAITING_APPROVAL`. Clicking the plinth docks the inspector, displaying the diff, evidence manifest, and `Approve` / `Reject` buttons.
 2. **2D Command Center Operator Review Bar:** A persistent, high-contrast review bar docks at the top of the command center whenever approvals are pending, complete with one-click diff inspection.
 3. **Mobile Companion Action Drawer:** Displays push notification cards with biometric authorization (TouchID/FaceID) to sign off on non-breaking candidate integrations remotely.
+
+---
+
+## 5. Wave 12H Visual Invariants & Sovereign Boundaries
+
+- `WAITING_APPROVAL != APPROVED`: Rest on the Approval Plinth does not permit speculative advancement.
+- `APPROVAL ANIMATION != APPROVAL AUTHORITY`: Mechanical seal gesture executes strictly after confirmed backend HTTP 200 response.
+- `HUMAN OPERATOR != NPC`: No avatar impersonates human authority or operates the plinth.
+- `INTEGRATION PREPARED != MERGED`: Preparation stages candidate diffs; only confirmed operator approval permits materialization.
+- `REJECTION SOVEREIGNTY`: Rejected candidate routes immediately to `FAILURE_HOLD` with zero approval styling.

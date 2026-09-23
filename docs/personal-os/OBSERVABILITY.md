@@ -48,3 +48,31 @@ When clicking a character in the 3D Headquarters, the DOM Inspector presents san
 | `PROJECTION REVISION` | `projectionRevision` | Monotonic snapshot sequence number | None |
 
 **NEVER EXPOSED**: Raw prompts, token signatures, auth tokens, API keys, filesystem secrets, or environment variables.
+
+---
+
+## 3. Artifact Inspector Telemetry Contract (Wave 12H)
+
+Clicking a physical work product dossier in the 3D Headquarters reveals sanitized, decoupled custody metadata:
+
+| Telemetry Field | Source | Description |
+| :--- | :--- | :--- |
+| `ARTIFACT ID` | `artifactId` | Authoritative artifact identifier |
+| `SOURCE TASK` | `taskId` | Producing task ID |
+| `SOURCE ROLE` | `sourceRoleId` | Canonical producing role (`frontend_developer`, etc.) |
+| `SOURCE HARNESS` | `sourceHarnessId` | Producing harness ID |
+| `TARGET ROLE` | `targetRoleId` | Intended receiving role (`independent_reviewer`, etc.) |
+| `HANDOFF ID` | `handoffId` | Linked canonical handoff ID |
+| `HANDOFF KIND` | `handoffKind` | `DEPENDENCY`, `REVIEW`, `INTEGRATION`, `VERIFICATION`, `APPROVAL` |
+| `HANDOFF STATE` | `handoffState` | `BLOCKED`, `READY`, `IN_PROGRESS`, `SATISFIED`, `FAILED` |
+| `REASON CODE` | `reasonCode` | Canonical reason code if failed/blocked |
+| `VERIFICATION STATE` | `verificationState` | `UNVERIFIED`, `VERIFYING`, `VERIFIED`, `FAILED` |
+| `REVIEW STATE` | `reviewState` | `NOT_REQUIRED`, `PENDING`, `IN_REVIEW`, `PASSED`, `CHANGES_REQUIRED` |
+| `INTEGRATION STATE` | `integrationState` | `NOT_READY`, `READY`, `PREPARING`, `PREPARED`, `CONFLICT`, `INTEGRATED` |
+| `CUSTODY LOCATION` | `custodyLocation` | `PRODUCER_DESK`, `REVIEW_INBOX`, `REVIEW_BENCH`, `APPROVAL_PLINTH`, etc. |
+| `COMMIT SHA` | `commitSha` | Sanitized git commit hash |
+| `REQUIRES HUMAN APPROVAL` | `requiresHumanApproval` | `YES` / `NO` sovereign gate status |
+| `PROJECTION EPOCH` | `projectionEpoch` | Snapshot epoch identifier |
+| `PROJECTION REVISION` | `projectionRevision` | Snapshot monotonic revision |
+
+**NEVER EXPOSED**: Raw prompts, completion strings, patch bodies, auth headers, secret paths, or environment variables.

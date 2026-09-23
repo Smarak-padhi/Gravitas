@@ -70,3 +70,37 @@ To prevent speculative worker assignment:
    - A `WORKER_STARTED` event arrives with worker metadata, OR
    - The authoritative run snapshot (`GET /api/v1/runs/:id`) returns a task with an explicit worker mapping.
 3. If an active run has multiple ready tasks and only 1 worker, only the task in active execution moves to the worker desk; remaining tasks stay at the planning table.
+
+---
+
+## 4. Wave 12H Authoritative Artifact Custody & Invariants
+
+```
+CANONICAL TASK / HANDOFF / ARTIFACT / REVIEW / INTEGRATION STATE
+                          ↓
+             RuntimeProjectionSnapshot
+                          ↓
+                 deriveWorldState()
+                          ↓
+             ArtifactCustodyProjection
+                          ↓
+              CustodyVisualIntent
+                          ↓
+       Presentation-only artifact animation
+                          ↓
+                    Three.js scene
+```
+
+### Core Invariants
+- `ARTIFACT CUSTODY != CHARACTER POSITION`
+- `HANDOFF READY != HANDOFF SATISFIED`
+- `VISUAL ARRIVAL != BACKEND TRANSITION`
+- `REVIEW PASSED != INTEGRATED`
+- `INTEGRATION PREPARED != MERGED`
+- `WAITING_APPROVAL != APPROVED`
+- `APPROVAL ANIMATION != APPROVAL AUTHORITY`
+- `HUMAN OPERATOR != NPC`
+- `ROLE != HARNESS`
+
+### Snapshot Invalidation Policy
+SSE events never drive custody directly. SSE events signal snapshot invalidation; the web client refetches `GET /api/v1/state` and invokes `deriveArtifactCustody()`. All in-flight visual animations reconcile to the superseding authoritative revision.

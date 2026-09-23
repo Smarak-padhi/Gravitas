@@ -51,3 +51,29 @@ Snapshot (GET /api/v1/state)
 - **Stale Revision Cancellation**: If the authoritative backend projection updates while an avatar is in motion (e.g., task failure or cancellation), the old path is immediately aborted. The avatar calculates a new path to its updated authoritative destination.
 - **Prefers-Reduced-Motion**: Under `prefers-reduced-motion: reduce`, all walking animations and transit interpolations are bypassed. The character snaps instantly to its authoritative destination and posture.
 - **RAF Loop Discipline**: The animation loop is active strictly when `activeView === 'HQ3D'` and `document.visibilityState !== 'hidden'`. Inactive views or background tabs execute 0 continuous RAF frames.
+
+---
+
+## 4. Artifact Motion Controller & Custody Conduits (Wave 12H)
+
+Artifact motion is controlled exclusively by `ArtifactMotionController`:
+
+```text
+Snapshot (GET /api/v1/state)
+  → deriveArtifactCustody
+  → deriveArtifactVisualIntents
+  → ArtifactMotionController.reconcileCustody(...)
+  → elevated conduit trajectory (Y = 0.85m, corridor X = -3.6m)
+  → deterministic interpolation / reduced-motion snap
+```
+
+### Invariants:
+- `ARTIFACT CUSTODY != CHARACTER POSITION`
+- `HANDOFF READY != HANDOFF SATISFIED`
+- `VISUAL ARRIVAL != BACKEND TRANSITION`
+- `REVIEW PASSED != INTEGRATED`
+- `INTEGRATION PREPARED != MERGED`
+- `WAITING_APPROVAL != APPROVED`
+- `APPROVAL ANIMATION != APPROVAL AUTHORITY`
+- `HUMAN OPERATOR != NPC`
+- `ROLE != HARNESS`

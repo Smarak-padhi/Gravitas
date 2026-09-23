@@ -78,3 +78,21 @@ graph TD
 2. **Staircase Traversal**: Access to the elevated Approval Mezzanine at $Y = 2.95\text{m}$ strictly follows the staircase trajectory (`NODE_STAIR_ENTRY` $\rightarrow$ `NODE_STAIR_MID` $\rightarrow$ `NODE_STAIR_LANDING`).
 3. **No Furniture Collisions**: Desks, drafting tables, and server racks are surrounded by clearance buffers; waypoints are placed in clear transit aisles.
 4. **Deterministic Routing**: Pathfinding uses pure A* with Euclidean distance heuristic and lexicographic node tie-breaking (`pathfinding.ts`).
+
+---
+
+## 3. Artifact Conduit Network & Corridor Separation (Wave 12H)
+
+Artifact transit routes independently from character pedestrian navigation through an elevated conduit network:
+- **Conduit Elevation:** Fixed at $Y = 0.85\text{m}$ (above desks and character hips).
+- **Corridor Separation:** Waypoints in shared corridors route at $X = -3.6\text{m}$, creating deterministic lateral clearance from avatar walking lanes ($X = -4.0\text{m}$ to $-3.8\text{m}$).
+- **Invariants:**
+  - `ARTIFACT CUSTODY != CHARACTER POSITION`
+  - `HANDOFF READY != HANDOFF SATISFIED`
+  - `VISUAL ARRIVAL != BACKEND TRANSITION`
+  - `REVIEW PASSED != INTEGRATED`
+  - `INTEGRATION PREPARED != MERGED`
+  - `WAITING_APPROVAL != APPROVED`
+  - `APPROVAL ANIMATION != APPROVAL AUTHORITY`
+  - `HUMAN OPERATOR != NPC`
+  - `ROLE != HARNESS`
