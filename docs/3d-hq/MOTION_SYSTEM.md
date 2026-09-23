@@ -1,86 +1,53 @@
 # GRAVITAS 3D HEADQUARTERS — MOTION SYSTEM & KINETIC GRAMMAR
-## Spatial Motion, Interface Transitions & Zero-Fake-Activity Rules
+## Spatial Motion, Interface Transitions & Zero-Fake-Activity Rules (Wave 12G)
 
-> **FUNDAMENTAL LAW OF MOTION**: Motion in Gravitas communicates causality, custody, and system state.  
-> It is NEVER decorative filler.  
-> **NO FAKE PRODUCTIVE ACTIVITY**: Characters type only when an authoritative task is executing. Packets transit only when real files or contracts move.
+> **CORE CONCEPTUAL INVARIANTS**:
+> - **LOCOMOTION != EXECUTION**: Character motion communicates spatial intent only, never backend compilation, prompt execution, or testing.
+> - **ARRIVAL != HANDOFF SATISFACTION**: Physical arrival at a station does not satisfy handoffs.
+> - **CHARACTER POSITION != ARTIFACT CUSTODY**: Avatar coordinates are decoupled from artifact dossier custody.
+> - **ANIMATION != TASK STATE**: Animations do not mutate or advance task FSM state.
+> - **CAMERA != AUTHORITY**: Camera position does not dictate scheduler priority or execution.
+> - **HUMAN OPERATOR != NPC**: There is NO fake operator NPC avatar at the Approval Plinth.
+> - **ROLE != HARNESS**: Avatars represent organizational roles, never harnesses.
 
 ---
 
-## 1. Motion Ownership Boundary: 3D World vs. 2D DOM
+## 1. Zero-Fake-Activity Rules
 
-To avoid architectural corruption and synchronization bugs, motion systems are strictly separated by rendering medium:
+1. **NO Idle Wandering**: Characters never roam around the office for visual entertainment. If no authoritative assignment exists, characters remain stationary at their canonical home stations.
+2. **NO Fake Typing**: Characters do not simulate keyboard chatter or finger tapping. When working, characters enter a focused posture with subtle respiratory micro-animation.
+3. **NO Fake Conversations**: Characters never stand facing each other simulating idle chit-chat.
+4. **NO Simulated Operator**: The Approval Plinth remains strictly an unattended human checkpoint. No humanoid avatar stands at the plinth pretending to approve tasks.
 
+---
+
+## 2. Motion Controller Architecture (`CharacterMotionController`)
+
+Character locomotion is owned by a single, centralized, presentation-only controller:
+
+```text
+Snapshot (GET /api/v1/state)
+  → deriveWorldState
+  → deriveCharacterSpatialIntents
+  → CharacterMotionController.reconcileIntents(...)
+  → A* Path along NavigationGraph
+  → Procedural Walk Cycle Interpolation
 ```
-+-----------------------------------------------------------------------------------+
-| 3D SCENE GRAPH MOTION (Owned by Three.js / WebGL RAF Loop)                       |
-| - Character skeletal locomotion, posture blends, and typing loops                 |
-| - Spline-based packet gliding along recessed optical conduits                     |
-| - Vertical carriage lift travel                                                   |
-| - Camera pan, tilt, and slerp transitions                                         |
-| - Driven by: Three.js AnimationMixer, Vector3.lerp, Quaternion.slerp              |
-+-----------------------------------------------------------------------------------+
-                                        | (Zero DOM libraries crossing into WebGL)
-                                        v
-+-----------------------------------------------------------------------------------+
-| 2D INTERFACE MOTION (Owned by CSS / Web Animations API / Anime.js)                |
-| - TaskInspector side-drawer slide-out and dock transitions                        |
-| - TopBar telemetry pill color cross-fades                                         |
-| - Unified git diff accordion expansions                                           |
-| - Modal overlays (GoalComposer, CommandPalette)                                   |
-| - Driven by: CSS custom properties, var(--motion-ease-standard), WAAPI            |
-+-----------------------------------------------------------------------------------+
-```
+
+### Presentation States
+- `IDLE`: Station in standby; neutral resting posture.
+- `STAND_UP`: Procedural blend transitioning from chair to transit footing.
+- `WALK`: Active locomotion along waypoints at 1.25–1.45 units/sec.
+- `ARRIVE`: Orientation alignment and posture settle.
+- `FOCUSED`: Seated/standing focused posture at assigned workstation.
+- `REVIEWING`: Focused inspection stance at verification bench.
+- `RETURNING`: Walking back to canonical home station.
+- `SIT_DOWN`: Procedural blend settling into station chair.
 
 ---
 
-## 2. Motion Duration Families & Easing Curves
+## 3. Stale Revision & Reduced Motion Discipline
 
-All animations adhere to three unified duration tiers:
-
-| Tier | Duration | Easing Function | Application |
-| :--- | :--- | :--- | :--- |
-| **Micro (Instant Feedback)** | `120ms - 180ms` | `cubic-bezier(0.2, 0.0, 0.0, 1.0)` (Snap In) | Raycast hover highlight, LED pulse trigger, button click depress. |
-| **Standard (State Transitions)** | `280ms - 380ms` | `cubic-bezier(0.4, 0.0, 0.2, 1.0)` (Standard Ease) | Character sit/stand, packet open/close, camera room focus shift. |
-| **Macro / Spatial Transit** | `600ms - 1200ms` | `cubic-bezier(0.25, 1.0, 0.5, 1.0)` (Smooth Decel) | Packet gliding along transit spline, vertical lift ascent, full HQ camera framing. |
-
----
-
-## 3. Kinetic Catalog by Motion Class
-
-### 3.1 World Motion (3D Spatial Layer)
-
-| Motion Entity | Authoritative Trigger | Duration / Curve | Interruptibility | Visual Mechanics | Reduced-Motion Fallback |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Character Locomotion** | `TASK_SCHEDULED` / Authoritative assignment \(\rightarrow\) Worker moves to desk. | \(d / 1.4\text{s}\) (Linear with \(150\text{ms}\) ease) | **Interruptible**: If task cancelled, character returns to standby. | Natural walking gait; spine tilt slightly forward; packet held in hand. | Instant snap to destination chair with brief cross-fade. |
-| **Typing / Work Execution** | `WORKER_STARTED` \(\rightarrow\) `WORKER_FINISHED` | Continuous Loop until finished | **Immediate Halt** upon `WORKER_FINISHED` or `FAILED`. | Alternating hands on drafting console; occasional head glance at CRT monitor. | Static seated posture with illuminated desk halo. |
-| **Packet Spline Glide** | `TASK_SCHEDULED` or `VERIFICATION_STARTED` | `800ms` (Cubic ease-in-out) | **Uninterruptible** (Fixed topological transit). | Folio travels along Catmull-Rom curve with soft directional tilt. | Instant teleportation to destination station. |
-| **Vertical Lift Ascent** | `APPROVAL_REQUIRED` | `800ms` (Linear with ease-out) | **Queued**: Waits until top before plinth transfer. | Lift carriage ascends with glowing base ring; arrives at Mezzanine level. | Packet appears directly on Mezzanine plinth. |
-| **Approval Seal Deboss** | `TASK_APPROVED` | `250ms` (Subtle deboss) | **Uninterruptible**. | Gold embossed verification seal appears on packet. | Seal appears immediately without drop motion. |
-| **Camera Orbit Slerp** | Room focus click or keyboard preset | `500ms` (Spherical slerp) | **Interruptible**: New click re-targets immediately. | Smooth pan/zoom arc preserving horizon stability. | Instant camera repositioning (0ms). |
-
----
-
-### 3.2 Ambient Motion (Quiet Environmental Life)
-
-To prevent the 3D scene from looking like a dead screenshot during idle periods, subtle ambient physics are applied:
-1. **Character Breathing**: Subtle vertical chest oscillation (\(\pm 3\text{mm}\), \(0.3\text{Hz}\) frequency).
-2. **Infrastructure Fan Rotation**: Slow, steady rotation of cooling fan blades inside the server racks (\(2.0\text{rad/s}\)).
-3. **Optical Conduit Indicator Trickle**: Low-intensity amber LED pulse traveling along inactive conduits once every \(8\text{s}\).
-4. **Natural Skylight Shift**: Ambient sky fill angle rotates by \(1^{\circ}\) every 5 minutes to simulate real-world time passing.
-
----
-
-## 4. `prefers-reduced-motion` Behavioral Specification
-
-When the user enables `prefers-reduced-motion: reduce` in their operating system:
-
-1. **Camera Transitions**:
-   - Zero panning or zoom slerps. The camera cuts instantly to the target framing preset.
-2. **Character Animations**:
-   - Locomotion walk cycles are disabled. Characters transition between postures via instantaneous pose swaps.
-   - Continuous typing loops are replaced by a static, focused seated pose with steady workstation lighting.
-3. **Work Packet Transits**:
-   - Packets do not glide along transit splines; they unmount from the source station and immediately mount at the destination station.
-4. **2D Interface**:
-   - All CSS transitions collapse to `0ms`; sidebars and drawers toggle with instant visibility switches.
+- **Stale Revision Cancellation**: If the authoritative backend projection updates while an avatar is in motion (e.g., task failure or cancellation), the old path is immediately aborted. The avatar calculates a new path to its updated authoritative destination.
+- **Prefers-Reduced-Motion**: Under `prefers-reduced-motion: reduce`, all walking animations and transit interpolations are bypassed. The character snaps instantly to its authoritative destination and posture.
+- **RAF Loop Discipline**: The animation loop is active strictly when `activeView === 'HQ3D'` and `document.visibilityState !== 'hidden'`. Inactive views or background tabs execute 0 continuous RAF frames.

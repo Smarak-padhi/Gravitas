@@ -1,4 +1,15 @@
-# Gravitas 3D Headquarters Spatial Organization & Artifact Model (Wave 12C.5)
+# Gravitas 3D Headquarters Spatial Organization & Artifact Model (Wave 12G)
+
+> **CORE CONCEPTUAL INVARIANTS**:
+> - **LOCOMOTION != EXECUTION**: Character locomotion does not execute tasks, compile code, or invoke gateways.
+> - **ARRIVAL != HANDOFF SATISFACTION**: Character arrival at a workstation or console does not satisfy or advance handoffs.
+> - **CHARACTER POSITION != ARTIFACT CUSTODY**: Avatar coordinates are decoupled from artifact dossier custody.
+> - **ANIMATION != TASK STATE**: An animation starting, stopping, hitching, or failing cannot mutate task FSM state.
+> - **CAMERA != AUTHORITY**: Viewport framing presets have no semantic authority over task execution.
+> - **HUMAN OPERATOR != NPC**: There is strictly NO humanoid NPC avatar impersonating the sovereign human operator.
+> - **ROLE != HARNESS**: Characters represent organizational roles (`Frontend Engineer`, `Backend Engineer`, `Independent Reviewer`, `Chief Planner`), never execution harnesses (`codex-worker`, `fcc-worker`), providers, or models.
+
+---
 
 ## 1. The Core Headquarters Authority Rule
 
@@ -12,34 +23,35 @@ The 3D Headquarters reflects **what Gravitas can cryptographically prove is happ
   - ❌ Typing on keyboards.
   - ❌ Flipping through dossiers.
   - ❌ Exchanging files or celebratory high-fives.
-  - ❌ Running verification cleanroom animations.
-  - ❌ Walking across rooms to execute tasks without an active transition state.
+  - ❌ Running verification cleanroom animations without authoritative verification state.
+  - ❌ Idle wandering across rooms without an authoritative assignment.
 
-### 1.1 Character Projection Semantics (Wave 12E)
-- **Character = Visual Representation of ROLE**: The 3D avatar represents the canonical organizational role (`roleId`), NOT the execution harness, provider, or model.
-- **Four Visual Characters Frozen**: Wave 12D froze four visual characters (`Chief Planner`, `Frontend Engineer`, `Backend Engineer`, `Independent Reviewer`).
-- **Integration Engineer Role**: `role:integration:integration-engineer` exists canonically in runtime contracts but has NO visual avatar in Wave 12E. It will not be assigned a random existing desk.
-- **Reviewer Character Compatibility Behavior**: If the Independent Reviewer character station activates during deterministic verification in legacy flows, this is documented compatibility behavior. True semantic review is distinct from deterministic test execution (`verifier`).
-- **No Locomotion**: Character locomotion, pathfinding, and movement across rooms are strictly deferred to future waves.
+### 1.1 Authoritative Locomotion Semantics (Wave 12G)
+- **Deterministic Presentation Locomotion**: Characters navigate between canonical home stations and assigned workstations via a 24-waypoint topological graph (`apps/web/src/hq3d/motion/navigationGraph.ts`).
+- **Airlock Boundary**: Cleanroom entry strictly navigates through the airlock at `[0.6, 0.1, 3.65]` (`NODE_CLEANROOM_ENTRY`), preventing glass collision.
+- **Staircase Traversal**: Mezzanine access routes smoothly through dedicated staircase waypoints.
+- **Four Visual Characters Frozen**: Chief Planner, Frontend Engineer, Backend Engineer, and Independent Reviewer.
+- **Integration Engineer Role**: Non-humanoid in Wave 12G (`NOT_READY_FOR_VISUALIZATION`).
+- **Stale-Revision Cancellation**: New snapshot revisions immediately abort obsolete paths and retarget to truthful destinations.
 
 ---
 
-## 2. The 10 Spatial Zones & Station Directory
+## 2. Spatial Zones & Station Directory
 
 ```
                                ┌─────────────────────────────┐
                                │   ZONE 6: APPROVAL MEZZANINE│
                                │   - Approval Plinth         │
                                └──────────────┬──────────────┘
-                                              │ Overlooks floor
+                                              │ Staircase route
        ┌──────────────────────────────────────┼──────────────────────────────────────┐
        │                                      │                                      │
        ▼                                      ▼                                      ▼
 ┌───────────────────────────┐   ┌───────────────────────────┐   ┌───────────────────────────┐
 │ ZONE 1: MISSION CONTROL   │   │ ZONE 2: OPERATIONS FLOOR  │   │ ZONE 3: CLEANROOM LAB     │
-│ - Holographic Plan Table  │   │ - Desk 1 (Codex station)  │   │ - Verification Bench      │
-│ - Dependency projector    │   │ - Desk 2 (FCC station)    │   │ - Console display         │
-│                           │   │ - Desk 3 (Systems station)│   │                           │
+│ - Holographic Plan Table  │   │ - Desk 1 (FE station)     │   │ - Verification Bench      │
+│ - Dependency projector    │   │ - Desk 2 (BE station)     │   │ - Console display         │
+│                           │   │ - Bay 3 & 4 (Expansion)   │   │ - Cleanroom Airlock       │
 └──────────────┬────────────┘   └─────────────┬─────────────┘   └─────────────┬─────────────┘
                │                              │                               │
        ┌───────┴──────────────────────────────┼───────────────────────────────┴───────┐
@@ -51,32 +63,3 @@ The 3D Headquarters reflects **what Gravitas can cryptographically prove is happ
 │ - Viewport light bands    │   │ - Active Route Status LEDs│   │ - Study Nook Terminal     │
 └───────────────────────────┘   └───────────────────────────┘   └───────────────────────────┘
 ```
-
-| Zone & Space Name | Purpose | Occupants / Assigned Roles | Interactive Stations | Authoritative Trigger |
-| :--- | :--- | :--- | :--- | :--- |
-| **1. Mission Control** | Strategic goal planning & DAG visualization. | `ChiefPlanner`, `ProjectScout` | Holographic Planning Table | Task in `PLANNED` or `READY`. |
-| **2. Operations Floor**| Core software implementation. | `FrontendEngineer`, `BackendEngineer`, `SystemsEngineer` | `codex-workstation`, `fcc-workstation`, `systems-workstation` | Task in `PREPARING` or `WORKER_RUNNING`. |
-| **3. Verification Cleanroom**| Independent test execution & mutation gates. | `IndependentReviewer`, Independent Verifier | `verification-bench`, cleanroom console | Task in `VERIFYING` (non-browser). |
-| **4. Browser QA Lab** | Visual regression & Playwright headless browser runs. | Browser QA Runner | `browser-qa-matrix` (9-screen device wall) | Task in `VERIFYING` with browser assertions. |
-| **5. Infrastructure Bay**| Inference routing & gateway monitoring. | Infrastructure Services | `omniroute-rack` server stack | Task active with `gatewayRoute = ACTIVE`. |
-| **6. Approval Mezzanine**| Human governance over consequential actions. | Human Operator | `approval-plinth` (illuminated pedestal) | Any task in `WAITING_APPROVAL`. |
-| **7. Knowledge Library**| Syllabus tracking, research folios, flashcard study. | `Researcher`, `LearningCoach` | `research-desk`, `study-nook` | Study session or research task active. |
-| **8. Personal Ops Lounge**| Daily rhythm review, workload balancing. | `PersonalCoach` | `personal-ops-terminal` | Personal operations review active. |
-| **9. Business Suite** | Market intelligence, lead dossiers, outreach drafting. | `LeadResearcher`, `OpportunityAnalyst`, `OutreachDrafter` | `market-intel-station`, `communications-desk` | Algoryxz business pipeline active. |
-| **10. Courier Logistics**| Asset downloads, file intake, hash checks. | Courier Service | `courier-intake-shelf` | Active `DownloadJob` / `CloneJob`. |
-
----
-
-## 3. Physical Task Artifact Taxonomy
-
-Tasks moving through the headquarters are represented physically by stylized, high-contrast **Dossier Artifacts**:
-
-| Artifact Family | Physical Appearance in 3D HQ | Associated Subsystem | Typical Contents |
-| :--- | :--- | :--- | :--- |
-| **Engineering Work Dossier** | Sleek graphite folder with glowing blue telemetry strip | Engineering Floor | Target branch, file diff count, unit test command. |
-| **Research Folio** | Deep navy leather-bound binder with brass clasp | Knowledge Library | Citations, executive summary, API contract spec. |
-| **Study Notebook** | Warm amber spiral notebook with topic tabs | Knowledge Library | Concept flashcards, mistake log, retention graph. |
-| **Business Lead Dossier** | Obsidian black portfolio with gold corner brackets | Business Suite | Verified company facts, observed technical gaps. |
-| **Correspondence Packet** | High-contrast off-white courier envelope with red seal | Business / Communications | Candidate email draft, recipient details, tone analysis. |
-| **Logistics Package** | Industrial aluminum container with barcode label | Courier Logistics | Target download URL, byte count, SHA256 checksum. |
-| **Schedule Briefing Sheet** | Translucent frosted glass clipboard with glowing text | Mission Control / Mezzanine | Morning briefing summary, today's time blocks. |

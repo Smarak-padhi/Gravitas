@@ -1,4 +1,15 @@
-# Gravitas Observability & Audit Trail Architecture (Wave 12C.5)
+# Gravitas Observability & Audit Trail Architecture (Wave 12G)
+
+> **CORE CONCEPTUAL INVARIANTS**:
+> - **LOCOMOTION != EXECUTION**: Character locomotion does not execute tasks, compile code, or invoke gateways.
+> - **ARRIVAL != HANDOFF SATISFACTION**: Character arrival at a workstation or console does not satisfy or advance handoffs.
+> - **CHARACTER POSITION != ARTIFACT CUSTODY**: Avatar coordinates are decoupled from artifact dossier custody.
+> - **ANIMATION != TASK STATE**: An animation starting, stopping, hitching, or failing cannot mutate task FSM state.
+> - **CAMERA != AUTHORITY**: Viewport framing presets have no semantic authority over task execution.
+> - **HUMAN OPERATOR != NPC**: There is strictly NO humanoid NPC avatar impersonating the sovereign human operator.
+> - **ROLE != HARNESS**: Characters represent organizational roles (`Frontend Engineer`, `Backend Engineer`, `Independent Reviewer`, `Chief Planner`), never execution harnesses (`codex-worker`, `fcc-worker`), providers, or models.
+
+---
 
 ## 1. Traceability Principles
 
@@ -9,34 +20,31 @@ $$\text{Action Trace} = \text{Run} \rightarrow \text{Task} \rightarrow \text{Rol
 ### Core Invariants:
 1. **End-to-End Correlation:** A single user-facing result can be traced back to the exact compiled prompt bytes, worker stdout stream, git commit SHA, and human approval timestamp.
 2. **Strict Redaction Before Archival:** Diagnostic logs, stdout buffers, and evidence files are filtered to redact API keys and bearer tokens prior to persistence.
+3. **Decoupled 3D Presentation Telemetry:** 3D viewport interactions expose sanitized spatial telemetry without leaking sensitive credentials or prompts.
 
 ---
 
-## 2. The Universal Audit Log Entity Correlation
+## 2. Character Inspector Telemetry Contract (Wave 12G)
 
-| Entity Level | Identifiers Captured | Telemetry Captured |
-| :--- | :--- | :--- |
-| **Run** | `runId` | Initiator, goal string, execution budget, overall duration. |
-| **Task** | `taskId`, `runId` | Task kind, FSM state history, dependencies satisfied, change scope. |
-| **Role** | `roleId` | Assigned organizational role, declared context scopes, required capabilities. |
-| **Harness** | `harnessId`, `workerProcessId` | Subprocess PID, execution duration, peak RAM usage, exit code. |
-| **Gateway / Route** | `routeId`, `transportType` | `DIRECT` vs. `OMNIROUTE_HTTP`, retry count, upstream latency. |
-| **Provider & Model** | `providerId`, `modelId` | Prompt token count, completion token count, monetary cost in cents. |
-| **Capabilities** | `grantId`, `capabilityId[]` | Resource paths accessed, permissions exercised. |
-| **Verifier** | `verificationExecutionId` | Test command exit codes, assertion results, worktree mutation diff. |
-| **Approval** | `approvalToken`, `approverId` | Human actor identifier, approval timestamp, decision (`APPROVED`/`REJECTED`). |
-| **Evidence** | `evidenceSha256`, `archiveUri` | Cryptographic manifest hash, zip bundle location. |
+When clicking a character in the 3D Headquarters, the DOM Inspector presents sanitized, decoupled telemetry:
 
----
-
-## 3. Cost & Resource Tiering Model
-
-Gravitas ensures that the system costs **effectively zero dollars while idle**:
-- Background services (cron scheduler, reminder queue, courier downloads, git status checks) run natively on host CPU without making LLM inference requests.
-- When an inference task is scheduled, it is routed to the optimal resource tier:
-
-| Resource Tier | Target Workloads | Model Class | Cost Profile |
+| Telemetry Field | Source | Description | Redaction Level |
 | :--- | :--- | :--- | :--- |
-| **`LIGHT`** | Title generation, email header categorization, task classification. | Fast / Small (e.g. GPT-4o-mini, Claude 3.5 Haiku) | ~$0.001 - $0.005 |
-| **`STANDARD`** | Feature authoring, bug fixing, research synthesis. | Balanced (e.g. GPT-4o, Claude 3.5 Sonnet) | ~$0.02 - $0.15 |
-| **`DEEP`** | Multi-file architectural refactoring, complex mathematical proofs. | High-Reasoning (e.g. Claude 3.7 Sonnet Thinking, o1) | ~$0.30 - $1.50 |
+| `ROLE` | `roleId` | Canonical organizational role | None (Public Domain) |
+| `DEPARTMENT` | `department` | Organizational division (e.g. Engineering, Quality) | None (Public Domain) |
+| `ROLE SOURCE` | `roleSource` | `CANONICAL` vs `LEGACY_COMPATIBILITY` | None (Public Domain) |
+| `CURRENT TASK` | `activeTaskId` | Authoritative task identifier | None |
+| `TASK STATE` | `canonicalState` | Backend TaskState (`READY`, `RUNNING`, `VERIFYING`, etc.) | None |
+| `RUNTIME PHASE` | `runtimePhase` | Engine phase (`PREPARING`, `WORKER_RUNNING`, etc.) | None |
+| `SPATIAL STATE` | `spatialState` | Presentation locomotion state (`AT_ASSIGNMENT`, etc.) | None |
+| `CURRENT STATION` | `stationId` | Current physical/canonical station | None |
+| `DESTINATION STATION` | `destinationStationId` | Target transit station | None |
+| `ACTIVE HANDOFF` | `handoffId` | Linked task handoff identifier | None |
+| `HANDOFF STATE` | `handoffState` | `BLOCKED`, `READY`, `IN_PROGRESS`, `SATISFIED` | None |
+| `HARNESS` | `harnessId` | Bound execution harness (`codex-worker`, `fcc-worker`) | None |
+| `TRANSPORT` | `transport` | `DIRECT` vs `OMNIROUTE_HTTP` | None |
+| `GATEWAY` | `gateway` | OmniRoute gateway instance | None |
+| `PROJECTION EPOCH` | `projectionEpoch` | Authoritative projection snapshot epoch | None |
+| `PROJECTION REVISION` | `projectionRevision` | Monotonic snapshot sequence number | None |
+
+**NEVER EXPOSED**: Raw prompts, token signatures, auth tokens, API keys, filesystem secrets, or environment variables.

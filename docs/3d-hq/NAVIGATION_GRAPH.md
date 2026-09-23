@@ -1,116 +1,80 @@
 # GRAVITAS 3D HEADQUARTERS — NAVIGATION GRAPH & PATHING
-## Deterministic Spatial Topology, Waypoints & Transit Dynamics
+## Deterministic Spatial Topology, Waypoints & Transit Dynamics (Wave 12G)
 
-> **CORE PRINCIPLE**: Navigation in Gravitas is 100% deterministic and topological.  
-> We do NOT begin with continuous AI pathfinding (such as Recast navmeshes or dynamic A* over arbitrary grids). Characters and packets move along predefined, authoritative navigation vectors between fixed architectural waypoints.
+> **CORE CONCEPTUAL INVARIANTS**:
+> - **LOCOMOTION != EXECUTION**: Character movement along waypoints does not execute code, advance tasks, or invoke harnesses.
+> - **ARRIVAL != HANDOFF SATISFACTION**: Reaching a station waypoint does NOT satisfy or advance handoffs.
+> - **CHARACTER POSITION != ARTIFACT CUSTODY**: Avatar location is decoupled from artifact docket custody.
+> - **ANIMATION != TASK STATE**: Path traversal does not advance backend task FSM state.
+> - **CAMERA != AUTHORITY**: Viewport framing does not alter navigation or scheduling.
+> - **HUMAN OPERATOR != NPC**: There is NO fake operator avatar at the Approval Plinth.
+> - **ROLE != HARNESS**: Waypoints belong to canonical organizational roles, never harnesses.
 
 ---
 
 ## 1. Waypoint Topology & Node Roster
 
-The Headquarters contains 18 canonical waypoints located in 3D scene space (\(X, Y, Z\) in meters):
+The Headquarters navigation system (`apps/web/src/hq3d/motion/navigationGraph.ts`) implements a deterministic 24-waypoint directed network with strict clearance buffers:
 
 ```mermaid
 graph TD
     subgraph MissionControl [Mission Control Zone]
-        N_MC_CENTER["MC_CENTER<br>[-4.0, 0.0, 7.0]"]
-        N_PLAN_TABLE["PLANNING_TABLE<br>[-4.0, 0.8, 7.0]"]
-        N_MC_DISPATCH["MC_DISPATCH_RAMP<br>[-2.0, 0.8, 6.0]"]
+        N_PLAN_TABLE["NODE_PLAN_TABLE<br>[-4.5, 0.0, 5.5]"]
+        N_PLAN_APPROACH["NODE_PLANNING_APPROACH<br>[-4.5, 0.0, 4.0]"]
+        N_MISSION_ENTRY["NODE_MISSION_ENTRY<br>[-4.0, 0.0, 2.5]"]
     end
 
     subgraph OperationsFloor [Agent Operations Floor]
-        N_OPS_CORRIDOR["OPS_CENTRAL_AISLE<br>[-4.0, 0.0, 0.0]"]
-        N_CODEX_DESK["CODEX_DESK<br>[-7.0, 0.8, 1.0]"]
-        N_CODEX_SEAT["CODEX_SEAT<br>[-7.0, 0.0, -0.2]"]
-        N_FCC_DESK["FCC_DESK<br>[-1.0, 0.8, 1.0]"]
-        N_FCC_SEAT["FCC_SEAT<br>[-1.0, 0.0, -0.2]"]
-        N_BAY3_DESK["BAY3_ASTRA_DESK<br>[-7.0, 0.8, -4.0]"]
-        N_BAY4_DESK["BAY4_EXPANSION_DESK<br>[-1.0, 0.8, -4.0]"]
+        N_CORRIDOR["NODE_CORRIDOR_CROSSING<br>[-4.0, 0.0, 0.0]"]
+        N_OPS_AISLE_N["NODE_OPS_AISLE_N<br>[-4.0, 0.0, 1.2]"]
+        N_OPS_AISLE_S["NODE_OPS_AISLE_S<br>[-4.0, 0.0, -2.4]"]
+        N_FE_HOME["NODE_FE_HOME<br>[-6.5, 0.0, 1.2]"]
+        N_BE_HOME["NODE_BE_HOME<br>[-1.8, 0.0, 1.2]"]
+        N_BAY3_HOME["NODE_BAY3_HOME<br>[-6.5, 0.0, -2.4]"]
+        N_BAY4_HOME["NODE_BAY4_HOME<br>[-1.8, 0.0, -2.4]"]
     end
 
-    subgraph VerificationZone [Verification & QA Lab]
-        N_VERIF_AIRLOCK["VERIF_AIRLOCK<br>[1.0, 0.0, 5.0]"]
-        N_VERIF_BENCH["VERIFIER_BENCH<br>[6.0, 0.8, 7.0]"]
-        N_VERIF_SEAT["VERIFIER_STAND<br>[6.0, 0.0, 5.8]"]
-        N_BQA_WALL["BROWSER_QA_WALL<br>[6.0, 1.2, 0.0]"]
-        N_BQA_BENCH["BROWSER_QA_BENCH<br>[6.0, 0.8, 0.0]"]
+    subgraph VerificationZone [Verification & Cleanroom Lab]
+        N_VERIF_AIRLOCK_EXT["NODE_VERIF_AIRLOCK_EXT<br>[0.0, 0.0, 2.0]"]
+        N_CLEANROOM_ENTRY["NODE_CLEANROOM_ENTRY<br>[0.6, 0.1, 3.65]"]
+        N_VERIF_CENTRAL["NODE_VERIF_CENTRAL<br>[4.5, 0.1, 3.65]"]
+        N_REV_HOME["NODE_REV_HOME<br>[7.2, 0.1, 4.0]"]
+        N_QA_APPROACH["NODE_QA_APPROACH<br>[4.5, 0.1, 0.5]"]
+        N_QA_MATRIX["NODE_QA_MATRIX<br>[7.0, 0.1, 0.5]"]
     end
 
     subgraph InfrastructureZone [Infrastructure Room]
-        N_INFRA_AIRLOCK["INFRA_AIRLOCK<br>[-8.0, 0.0, -8.0]"]
-        N_INFRA_RACK["OMNIROUTE_RACK<br>[-13.0, 0.0, -9.0]"]
+        N_INFRA_AIRLOCK_EXT["NODE_INFRA_AIRLOCK_EXT<br>[-6.0, 0.0, -4.5]"]
+        N_INFRA_ENTRY["NODE_INFRA_ENTRY<br>[-6.5, 0.0, -4.8]"]
+        N_OMNIROUTE_RACK["NODE_OMNIROUTE_RACK<br>[-8.8, 0.0, -5.8]"]
     end
 
     subgraph MezzanineZone [Approval Control Mezzanine]
-        N_LIFT_GROUND["LIFT_GROUND<br>[0.0, 0.0, 11.0]"]
-        N_LIFT_ELEVATED["LIFT_ELEVATED<br>[0.0, 3.2, 11.0]"]
-        N_MEZZ_CORRIDOR["MEZZ_CORRIDOR<br>[0.0, 3.2, 12.0]"]
-        N_APPROVAL_PLINTH["APPROVAL_PLINTH<br>[0.0, 4.0, 12.5]"]
+        N_STAIR_ENTRY["NODE_STAIR_ENTRY<br>[-2.0, 0.0, 3.5]"]
+        N_STAIR_MID["NODE_STAIR_MID<br>[-1.0, 1.5, 5.0]"]
+        N_STAIR_LANDING["NODE_STAIR_LANDING<br>[0.0, 2.95, 6.5]"]
+        N_MEZZANINE_WALKWAY["NODE_MEZZANINE_WALKWAY<br>[0.0, 2.95, 7.5]"]
+        N_APPROVAL_PLINTH["NODE_APPROVAL_PLINTH<br>[0.0, 2.95, 8.5]"]
     end
 
-    N_PLAN_TABLE --> N_MC_DISPATCH
-    N_MC_DISPATCH --> N_OPS_CORRIDOR
-    N_OPS_CORRIDOR --> N_CODEX_SEAT
-    N_CODEX_SEAT --> N_CODEX_DESK
-    N_OPS_CORRIDOR --> N_FCC_SEAT
-    N_FCC_SEAT --> N_FCC_DESK
-    N_OPS_CORRIDOR --> N_BAY3_DESK
-    N_OPS_CORRIDOR --> N_BAY4_DESK
-    N_OPS_CORRIDOR --> N_VERIF_AIRLOCK
-    N_VERIF_AIRLOCK --> N_VERIF_BENCH
-    N_VERIF_BENCH --> N_BQA_BENCH
-    N_VERIF_BENCH --> N_LIFT_GROUND
-    N_LIFT_GROUND -.->|Vertical Lift Y=+3.2m| N_LIFT_ELEVATED
-    N_LIFT_ELEVATED --> N_MEZZ_CORRIDOR
-    N_MEZZ_CORRIDOR --> N_APPROVAL_PLINTH
-    N_OPS_CORRIDOR --> N_INFRA_AIRLOCK
-    N_INFRA_AIRLOCK --> N_INFRA_RACK
+    N_PLAN_TABLE <--> N_PLAN_APPROACH <--> N_MISSION_ENTRY <--> N_OPS_AISLE_N
+    N_OPS_AISLE_N <--> N_FE_HOME
+    N_OPS_AISLE_N <--> N_BE_HOME
+    N_OPS_AISLE_N <--> N_CORRIDOR <--> N_OPS_AISLE_S
+    N_OPS_AISLE_S <--> N_BAY3_HOME
+    N_OPS_AISLE_S <--> N_BAY4_HOME
+    N_CORRIDOR <--> N_VERIF_AIRLOCK_EXT <--> N_CLEANROOM_ENTRY <--> N_VERIF_CENTRAL
+    N_VERIF_CENTRAL <--> N_REV_HOME
+    N_VERIF_CENTRAL <--> N_QA_APPROACH <--> N_QA_MATRIX
+    N_OPS_AISLE_S <--> N_INFRA_AIRLOCK_EXT <--> N_INFRA_ENTRY <--> N_OMNIROUTE_RACK
+    N_OPS_AISLE_N <--> N_STAIR_ENTRY <--> N_STAIR_MID <--> N_STAIR_LANDING <--> N_MEZZANINE_WALKWAY <--> N_APPROVAL_PLINTH
 ```
 
 ---
 
-## 2. Waypoint Coordinates & Orientation Catalog
+## 2. Collision & Boundary Disciplines
 
-| Node ID | Zone | \(X\) (m) | \(Y\) (m) | \(Z\) (m) | Default Yaw (\(^{\circ}\)) | Node Purpose |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `NODE_MC_PLANNING` | Mission Control | -4.0 | 0.85 | 7.0 | 0° (North) | Work packet origins; DAG layout table |
-| `NODE_MC_DISPATCH` | Mission Control | -2.0 | 0.85 | 5.5 | 180° (South) | Intake ramp for optical conduit |
-| `NODE_OPS_AISLE_N` | Agent Operations | -4.0 | 0.00 | 4.0 | 180° (South) | North entrance to central operations corridor |
-| `NODE_OPS_AISLE_C` | Agent Operations | -4.0 | 0.00 | 0.0 | 180° (South) | Central interchange point for worker desks |
-| `NODE_OPS_AISLE_S` | Agent Operations | -4.0 | 0.00 | -4.0 | 180° (South) | South entrance connecting to expansion bays |
-| `NODE_CODEX_STAND` | Agent Operations | -6.0 | 0.00 | 0.0 | 90° (East) | Codex character standing position |
-| `NODE_CODEX_CHAIR` | Agent Operations | -7.0 | 0.00 | 0.8 | 0° (North) | Codex seated working position |
-| `NODE_CODEX_DESK` | Agent Operations | -7.0 | 0.85 | 1.4 | 0° (North) | Codex workstation packet docking plinth |
-| `NODE_FCC_STAND` | Agent Operations | -2.0 | 0.00 | 0.0 | 270° (West) | FCC character standing position |
-| `NODE_FCC_CHAIR` | Agent Operations | -1.0 | 0.00 | 0.8 | 0° (North) | FCC seated working position |
-| `NODE_FCC_DESK` | Agent Operations | -1.0 | 0.85 | 1.4 | 0° (North) | FCC workstation packet docking plinth |
-| `NODE_VERIF_PORTAL`| Verification Lab | 1.5 | 0.00 | 5.0 | 90° (East) | Glass sliding airlock entrance |
-| `NODE_VERIF_STAND` | Verification Lab | 6.0 | 0.00 | 5.8 | 0° (North) | Independent Verifier character position |
-| `NODE_VERIF_BENCH` | Verification Lab | 6.0 | 0.85 | 7.0 | 0° (North) | Digital diff console & test packet dock |
-| `NODE_BQA_BENCH` | Browser QA Lab | 6.0 | 0.85 | 0.0 | 90° (East) | Playwright test device matrix station |
-| `NODE_LIFT_BASE` | Central Atrium | 0.0 | 0.00 | 10.5 | 0° (North) | Vertical lift ground terminal |
-| `NODE_LIFT_TOP` | Mezzanine | 0.0 | 3.20 | 10.5 | 0° (North) | Vertical lift mezzanine arrival terminal |
-| `NODE_MEZZ_PLINTH` | Mezzanine | 0.0 | 4.00 | 12.5 | 0° (North) | Human authorization plinth under spotlight |
-
----
-
-## 3. Transit Dynamics & Motion Velocities
-
-To maintain an unhurried, architectural rhythm:
-1. **Character Walking Speed**: Constant \(1.4\text{m/s}\) with smooth acceleration/deceleration curves (duration = \(\text{distance} / 1.4\text{s}\)).
-2. **Packet Conduit Velocity**: Constant \(3.0\text{m/s}\) along smooth 3D Catmull-Rom cubic splines connecting station plinths.
-3. **Vertical Lift Velocity**: Constant \(2.0\text{m/s}\) vertical ascent/descent (\(3.2\text{m}\) travel in \(1.6\text{s}\)).
-4. **Collision Avoidance**: Because waypoints are dedicated to specific stations, two workers never share the same corridor destination simultaneously. If both Codex and FCC transit simultaneously, their parallel corridors are spaced \(5.0\text{m}\) apart, eliminating collision hazards.
-
----
-
-## 4. Evaluation of Future Dynamic NavMesh Justification
-
-When would a dynamic 3D Navigation Mesh (e.g., Three-Pathfinding or Recast.js) become technically justified in Gravitas?
-
-- **Current Architecture (Wave 12)**: **NOT JUSTIFIED**.
-  - With a fixed architectural layout, dedicated workstations, and fixed furniture, a static waypoint graph is faster, uses zero CPU per frame, has zero memory overhead, and guarantees 100% deterministic, repeatable paths with zero edge clipping.
-- **Future Justification Triggers**:
-  - If Gravitas implements **customizable user-built headquarter layouts** (drag-and-drop desk positioning).
-  - If concurrent worker density scales beyond **20 simultaneous moving agents** on the same floor with dynamic obstacle avoidance.
-  - Until those requirements exist, the deterministic waypoint graph is strictly superior.
+1. **Airlock Boundary Enforcement**: Entry into the Verification Lab requires passing through `NODE_CLEANROOM_ENTRY` at `[0.6, 0.1, 3.65]`. Characters cannot cut across the glass partition.
+2. **Staircase Traversal**: Access to the elevated Approval Mezzanine at $Y = 2.95\text{m}$ strictly follows the staircase trajectory (`NODE_STAIR_ENTRY` $\rightarrow$ `NODE_STAIR_MID` $\rightarrow$ `NODE_STAIR_LANDING`).
+3. **No Furniture Collisions**: Desks, drafting tables, and server racks are surrounded by clearance buffers; waypoints are placed in clear transit aisles.
+4. **Deterministic Routing**: Pathfinding uses pure A* with Euclidean distance heuristic and lexicographic node tie-breaking (`pathfinding.ts`).
