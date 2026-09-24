@@ -13,6 +13,7 @@ import { STATION_DEFINITIONS } from '../world/stations.js'
 export class HqFurniture {
   public readonly group: THREE.Group
   public readonly stationIndicators = new Map<StationId, THREE.Mesh>()
+  public readonly stationScreens = new Map<StationId, THREE.Mesh[]>()
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private readonly materials: MaterialLibrary
 
@@ -27,6 +28,7 @@ export class HqFurniture {
     this.buildBrowserQaDeviceMatrix(materials)
     this.buildApprovalMezzaninePlinth(materials)
     this.buildRepositoryVault(materials)
+    this.buildOfficeLifeProps(materials)
   }
 
   private track<T extends THREE.BufferGeometry>(geom: T): T {
@@ -230,6 +232,64 @@ export class HqFurniture {
       const kb = new THREE.Mesh(kbGeo, materials.gunmetal)
       kb.position.set(-0.1, 0.772, 0.18)
       podGroup.add(kb)
+
+      // Modern Ultra-Thin Laptop (clamshell open at 110 deg)
+      const laptopBaseGeo = this.track(new THREE.BoxGeometry(0.34, 0.012, 0.23))
+      const laptopBase = new THREE.Mesh(laptopBaseGeo, materials.gunmetal)
+      laptopBase.position.set(0.65, 0.768, 0.15)
+      laptopBase.rotation.y = -0.18
+      podGroup.add(laptopBase)
+
+      const laptopKbGeo = this.track(new THREE.BoxGeometry(0.30, 0.005, 0.11))
+      const laptopKb = new THREE.Mesh(laptopKbGeo, materials.structureGraphite)
+      laptopKb.position.set(0.65, 0.775, 0.12)
+      laptopKb.rotation.y = -0.18
+      podGroup.add(laptopKb)
+
+      const laptopLidGeo = this.track(new THREE.BoxGeometry(0.34, 0.22, 0.01))
+      const laptopLid = new THREE.Mesh(laptopLidGeo, materials.gunmetal)
+      laptopLid.position.set(0.65, 0.88, 0.035)
+      laptopLid.rotation.y = -0.18
+      laptopLid.rotation.x = -0.22
+      podGroup.add(laptopLid)
+
+      const laptopScreenGeo = this.track(new THREE.BoxGeometry(0.32, 0.20, 0.002))
+      const laptopScreen = new THREE.Mesh(laptopScreenGeo, materials.deviceLaptop)
+      laptopScreen.position.set(0.65, 0.88, 0.042)
+      laptopScreen.rotation.y = -0.18
+      laptopLid.rotation.x = -0.22
+      podGroup.add(laptopScreen)
+
+      this.stationScreens.set(stationDef.id, [mon1Screen, mon2Screen, laptopScreen])
+
+      // Ceramic Coffee Mug
+      const mugGeo = this.track(new THREE.CylinderGeometry(0.038, 0.034, 0.085, 12))
+      const mug = new THREE.Mesh(mugGeo, materials.planterCeramic)
+      mug.position.set(-0.75, 0.805, 0.25)
+      podGroup.add(mug)
+
+      // Brass Desk Task Lamp with warm glow
+      const lampBaseGeo = this.track(new THREE.CylinderGeometry(0.065, 0.065, 0.015, 12))
+      const lampBase = new THREE.Mesh(lampBaseGeo, materials.champagneBrass)
+      lampBase.position.set(-0.85, 0.768, -0.24)
+      podGroup.add(lampBase)
+
+      const lampArmGeo = this.track(new THREE.CylinderGeometry(0.008, 0.008, 0.36, 8))
+      const lampArm = new THREE.Mesh(lampArmGeo, materials.champagneBrass)
+      lampArm.position.set(-0.82, 0.94, -0.2)
+      lampArm.rotation.z = -0.2
+      podGroup.add(lampArm)
+
+      const lampShadeGeo = this.track(new THREE.ConeGeometry(0.07, 0.11, 12))
+      const lampShade = new THREE.Mesh(lampShadeGeo, materials.champagneBrass)
+      lampShade.position.set(-0.76, 1.1, -0.15)
+      lampShade.rotation.z = Math.PI - 0.3
+      podGroup.add(lampShade)
+
+      const bulbGeo = this.track(new THREE.SphereGeometry(0.02, 8, 8))
+      const bulb = new THREE.Mesh(bulbGeo, materials.lampWarmGlow)
+      bulb.position.set(-0.76, 1.08, -0.15)
+      podGroup.add(bulb)
 
       // 3. Ergonomic Task Chair
       const chairGroup = new THREE.Group()
@@ -555,32 +615,286 @@ export class HqFurniture {
     this.group.add(vaultGroup)
   }
 
+  /**
+   * Procedural Office Life Props
+   * Plants, cozy lounge seating, coffee tables, architectural shelving,
+   * whiteboard, framed blueprints, and desk accessories.
+   */
+  private buildOfficeLifeProps(materials: MaterialLibrary): void {
+    const propsGroup = new THREE.Group()
+    propsGroup.name = 'office-life-props'
+
+    // 1. Tall Potted Ficus / Fig Trees
+    const tree1Group = this.buildPottedTree(materials, [-8.6, 0.0, 7.6], 2.2)
+    propsGroup.add(tree1Group)
+
+    const tree2Group = this.buildPottedTree(materials, [-11.6, 0.0, 2.8], 2.4)
+    propsGroup.add(tree2Group)
+
+    const tree3Group = this.buildPottedTree(materials, [1.2, 0.0, 8.6], 2.0)
+    propsGroup.add(tree3Group)
+
+    // 2. Low Planter Trough with Snake Plants (Corridor divider between Ops & Central Spine)
+    const troughGroup = new THREE.Group()
+    troughGroup.position.set(-0.8, 0.0, -1.0)
+
+    const boxGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 3.4))
+    const box = new THREE.Mesh(boxGeo, materials.walnut)
+    box.position.set(0.0, 0.21, 0.0)
+    box.castShadow = true
+    troughGroup.add(box)
+
+    const boxRimGeo = this.track(new THREE.BoxGeometry(0.38, 0.03, 3.44))
+    const boxRim = new THREE.Mesh(boxRimGeo, materials.champagneBrass)
+    boxRim.position.set(0.0, 0.43, 0.0)
+    troughGroup.add(boxRim)
+
+    // Snake plant blades
+    for (let pz = -1.4; pz <= 1.4; pz += 0.35) {
+      const bladeGeo = this.track(new THREE.BoxGeometry(0.04, 0.65 + Math.sin(pz) * 0.15, 0.16))
+      const blade = new THREE.Mesh(bladeGeo, materials.foliageDark)
+      blade.position.set((Math.random() - 0.5) * 0.1, 0.7, pz)
+      blade.rotation.y = (Math.random() - 0.5) * 0.5
+      troughGroup.add(blade)
+    }
+    propsGroup.add(troughGroup)
+
+    // 3. Cozy Lounge Nook (South corridor between Ops & Browser QA)
+    const loungeGroup = new THREE.Group()
+    loungeGroup.position.set(0.8, 0.0, -5.8)
+
+    // Sofa Base
+    const sofaBaseGeo = this.track(new THREE.BoxGeometry(2.4, 0.12, 0.9))
+    const sofaBase = new THREE.Mesh(sofaBaseGeo, materials.walnut)
+    sofaBase.position.set(0.0, 0.14, 0.0)
+    sofaBase.castShadow = true
+    loungeGroup.add(sofaBase)
+
+    // Brass sofa legs
+    const sLegCorners = [
+      [-1.1, -0.38],
+      [1.1, -0.38],
+      [-1.1, 0.38],
+      [1.1, 0.38],
+    ]
+    for (const [lx, lz] of sLegCorners) {
+      const legGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.14, 8))
+      const leg = new THREE.Mesh(legGeo, materials.champagneBrass)
+      leg.position.set(lx!, 0.07, lz!)
+      loungeGroup.add(leg)
+    }
+
+    // Sofa Seat Cushions (3 cushions)
+    for (let cx = -0.75; cx <= 0.75; cx += 0.75) {
+      const seatGeo = this.track(new THREE.BoxGeometry(0.72, 0.22, 0.8))
+      const seat = new THREE.Mesh(seatGeo, materials.couchFabricWarm)
+      seat.position.set(cx, 0.31, 0.02)
+      seat.castShadow = true
+      loungeGroup.add(seat)
+    }
+
+    // Sofa Backrest
+    const backGeo = this.track(new THREE.BoxGeometry(2.36, 0.46, 0.16))
+    const back = new THREE.Mesh(backGeo, materials.couchFabricWarm)
+    back.position.set(0.0, 0.62, -0.34)
+    back.castShadow = true
+    loungeGroup.add(back)
+
+    // Sofa Armrests
+    for (const ax of [-1.15, 1.15]) {
+      const armGeo = this.track(new THREE.BoxGeometry(0.14, 0.32, 0.84))
+      const arm = new THREE.Mesh(armGeo, materials.couchFabricWarm)
+      arm.position.set(ax, 0.48, 0.0)
+      loungeGroup.add(arm)
+    }
+
+    // Throw Cushions
+    const c1Geo = this.track(new THREE.BoxGeometry(0.32, 0.32, 0.1))
+    const c1 = new THREE.Mesh(c1Geo, materials.couchCushion)
+    c1.position.set(-0.95, 0.45, -0.15)
+    c1.rotation.y = 0.4
+    c1.rotation.z = -0.15
+    loungeGroup.add(c1)
+
+    const c2 = new THREE.Mesh(c1Geo, materials.couchCushion)
+    c2.position.set(0.95, 0.45, -0.15)
+    c2.rotation.y = -0.4
+    c2.rotation.z = 0.15
+    loungeGroup.add(c2)
+
+    // Low Walnut Coffee Table
+    const tableTopGeo = this.track(new THREE.BoxGeometry(1.3, 0.04, 0.65))
+    const tableTop = new THREE.Mesh(tableTopGeo, materials.walnut)
+    tableTop.position.set(0.0, 0.35, 1.1)
+    tableTop.castShadow = true
+    loungeGroup.add(tableTop)
+
+    for (const [tx, tz] of [[-0.55, 0.85], [0.55, 0.85], [-0.55, 1.35], [0.55, 1.35]]) {
+      const tLegGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.33, 8))
+      const tLeg = new THREE.Mesh(tLegGeo, materials.champagneBrass)
+      tLeg.position.set(tx!, 0.165, tz!)
+      loungeGroup.add(tLeg)
+    }
+
+    // Magazine on coffee table
+    const magGeo = this.track(new THREE.BoxGeometry(0.24, 0.01, 0.3))
+    const mag = new THREE.Mesh(magGeo, materials.bookSpineAmber)
+    mag.position.set(-0.25, 0.375, 1.1)
+    mag.rotation.y = 0.15
+    loungeGroup.add(mag)
+
+    // Arched Floor Standing Lamp
+    const lampGroup = new THREE.Group()
+    lampGroup.position.set(1.6, 0.0, -0.4)
+
+    const fBaseGeo = this.track(new THREE.CylinderGeometry(0.18, 0.18, 0.03, 16))
+    const fBase = new THREE.Mesh(fBaseGeo, materials.champagneBrass)
+    fBase.position.set(0.0, 0.015, 0.0)
+    lampGroup.add(fBase)
+
+    const fStemGeo = this.track(new THREE.CylinderGeometry(0.015, 0.015, 2.2, 8))
+    const fStem = new THREE.Mesh(fStemGeo, materials.champagneBrass)
+    fStem.position.set(0.0, 1.1, 0.0)
+    lampGroup.add(fStem)
+
+    const fShadeGeo = this.track(new THREE.ConeGeometry(0.18, 0.22, 16))
+    const fShade = new THREE.Mesh(fShadeGeo, materials.champagneBrass)
+    fShade.position.set(-0.35, 2.15, 0.2)
+    fShade.rotation.z = Math.PI - 0.4
+    lampGroup.add(fShade)
+
+    const fBulbGeo = this.track(new THREE.SphereGeometry(0.05, 8, 8))
+    const fBulb = new THREE.Mesh(fBulbGeo, materials.lampWarmGlow)
+    fBulb.position.set(-0.35, 2.08, 0.2)
+    lampGroup.add(fBulb)
+
+    loungeGroup.add(lampGroup)
+    propsGroup.add(loungeGroup)
+
+    // 4. Mission Control Strategy Whiteboard
+    const wbGroup = new THREE.Group()
+    wbGroup.position.set(-7.8, 1.8, 8.1)
+
+    const wbGeo = this.track(new THREE.BoxGeometry(2.8, 1.35, 0.03))
+    const wb = new THREE.Mesh(wbGeo, materials.whiteboardSurface)
+    wb.position.set(0.0, 0.0, 0.0)
+    wbGroup.add(wb)
+
+    const wbFrameGeo = this.track(new THREE.BoxGeometry(2.84, 1.39, 0.02))
+    const wbFrame = new THREE.Mesh(wbFrameGeo, materials.champagneBrass)
+    wbFrame.position.set(0.0, 0.0, -0.01)
+    wbGroup.add(wbFrame)
+
+    const trayGeo = this.track(new THREE.BoxGeometry(2.2, 0.02, 0.08))
+    const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
+    tray.position.set(0.0, -0.68, 0.04)
+    wbGroup.add(tray)
+    propsGroup.add(wbGroup)
+
+    // 5. Architectural Shelving Unit in Agent Operations
+    const shelfGroup = new THREE.Group()
+    shelfGroup.position.set(-12.8, 1.2, -1.5)
+
+    const shelfFrameGeo = this.track(new THREE.BoxGeometry(0.35, 2.4, 2.0))
+    const shelfFrame = new THREE.Mesh(shelfFrameGeo, materials.walnut)
+    shelfGroup.add(shelfFrame)
+
+    // Books and binders on shelves
+    for (let sy = -0.8; sy <= 0.8; sy += 0.5) {
+      for (let sz = -0.7; sz <= 0.7; sz += 0.35) {
+        const bookGeo = this.track(new THREE.BoxGeometry(0.24, 0.28, 0.06))
+        const bookMat = (Math.abs(sz + sy) < 0.4)
+          ? materials.bookSpineNavy
+          : (sz > 0 ? materials.bookSpineAmber : materials.bookSpineTeal)
+        const book = new THREE.Mesh(bookGeo, bookMat)
+        book.position.set(0.02, sy + 0.15, sz)
+        shelfGroup.add(book)
+      }
+    }
+    propsGroup.add(shelfGroup)
+
+    this.group.add(propsGroup)
+  }
+
+  private buildPottedTree(materials: MaterialLibrary, pos: [number, number, number], height: number): THREE.Group {
+    const treeGroup = new THREE.Group()
+    treeGroup.position.set(...pos)
+
+    const planterGeo = this.track(new THREE.CylinderGeometry(0.32, 0.25, 0.52, 16))
+    const planter = new THREE.Mesh(planterGeo, materials.planterCeramic)
+    planter.position.set(0.0, 0.26, 0.0)
+    planter.castShadow = true
+    treeGroup.add(planter)
+
+    const soilGeo = this.track(new THREE.CylinderGeometry(0.28, 0.28, 0.04, 16))
+    const soil = new THREE.Mesh(soilGeo, materials.limestoneDark)
+    soil.position.set(0.0, 0.5, 0.0)
+    treeGroup.add(soil)
+
+    const trunkGeo = this.track(new THREE.CylinderGeometry(0.035, 0.045, height, 8))
+    const trunk = new THREE.Mesh(trunkGeo, materials.walnut)
+    trunk.position.set(0.0, height / 2 + 0.4, 0.0)
+    trunk.castShadow = true
+    treeGroup.add(trunk)
+
+    const leafClusters = [
+      [0.0, height + 0.3, 0.0, 0.42],
+      [-0.15, height + 0.1, 0.12, 0.35],
+      [0.18, height + 0.15, -0.1, 0.36],
+      [0.1, height - 0.2, 0.15, 0.3],
+      [-0.12, height - 0.25, -0.15, 0.32],
+    ]
+    for (let i = 0; i < leafClusters.length; i++) {
+      const [lx, ly, lz, r] = leafClusters[i]!
+      const leafGeo = this.track(new THREE.SphereGeometry(r!, 8, 8))
+      const leafMat = i % 2 === 0 ? materials.foliageGreen : materials.foliageDark
+      const foliage = new THREE.Mesh(leafGeo, leafMat)
+      foliage.position.set(lx!, ly!, lz!)
+      foliage.castShadow = true
+      treeGroup.add(foliage)
+    }
+
+    return treeGroup
+  }
+
   public setStationStatus(stationId: StationId, status: StationStatus): void {
     const ind = this.stationIndicators.get(stationId)
-    if (!ind) return
-    switch (status) {
-      case 'ACTIVE':
-        ind.material = this.materials.statusRunning
-        break
-      case 'VERIFYING':
-        ind.material = this.materials.statusVerifying
-        break
-      case 'BROWSER_QA':
-        ind.material = this.materials.terminalScreen
-        break
-      case 'WAITING_APPROVAL':
-        ind.material = this.materials.statusWaiting
-        break
-      case 'COMPLETED':
-        ind.material = this.materials.statusSuccess
-        break
-      case 'FAILED':
-        ind.material = this.materials.statusFailure
-        break
-      case 'IDLE':
-      default:
-        ind.material = this.materials.gunmetal
-        break
+    if (ind) {
+      switch (status) {
+        case 'ACTIVE':
+          ind.material = this.materials.statusRunning
+          break
+        case 'VERIFYING':
+          ind.material = this.materials.statusVerifying
+          break
+        case 'BROWSER_QA':
+          ind.material = this.materials.terminalScreen
+          break
+        case 'WAITING_APPROVAL':
+          ind.material = this.materials.statusWaiting
+          break
+        case 'COMPLETED':
+          ind.material = this.materials.statusSuccess
+          break
+        case 'FAILED':
+          ind.material = this.materials.statusFailure
+          break
+        case 'IDLE':
+        default:
+          ind.material = this.materials.gunmetal
+          break
+      }
+    }
+
+    // Toggle workstation screen brightness between active and idle standby
+    const screens = this.stationScreens.get(stationId)
+    if (screens) {
+      const isActive = status === 'ACTIVE' || status === 'VERIFYING'
+      for (const scr of screens) {
+        if (scr.material && 'emissiveIntensity' in scr.material) {
+          ;(scr.material as THREE.MeshStandardMaterial).emissiveIntensity = isActive ? 0.65 : 0.08
+        }
+      }
     }
   }
 
@@ -590,5 +904,6 @@ export class HqFurniture {
     }
     this.geometriesToDispose.length = 0
     this.stationIndicators.clear()
+    this.stationScreens.clear()
   }
 }

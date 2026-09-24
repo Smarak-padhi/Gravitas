@@ -8,12 +8,27 @@
 import type { RoomId, StationId, SelectedEntity, PerformanceStats } from '../types.js'
 import type { RoleId } from '../roles/types.js'
 import type { WorldState } from '../world/worldState.js'
-import { ROOM_DEFINITIONS, getRoomByKey } from '../world/rooms.js'
+import {
+  ROOM_DEFINITIONS,
+  getRoomByKey,
+  ELEVATOR_PRESET,
+  WORKSTATION_PRESETS,
+  CHARACTER_PRESETS,
+} from '../world/rooms.js'
 import { STATION_DEFINITIONS } from '../world/stations.js'
-import { HqScene } from './HqScene.js'
+import { HqScene, type AtmosphereMode } from './HqScene.js'
 import { HqRenderer } from './HqRenderer.js'
 import { HqCameraRig } from './HqCamera.js'
 import { HqPicking } from './HqPicking.js'
+
+export interface ElevatorTransition {
+  readonly targetRoomId: RoomId
+  readonly startTime: number
+  readonly duration: number
+  readonly startHeight: number
+  readonly targetHeight: number
+  readonly onComplete?: (() => void) | undefined
+}
 
 export interface HqDirectorOptions {
   canvas: HTMLCanvasElement
@@ -34,6 +49,8 @@ export class HqDirector {
   private pointerDownCoord = { x: 0, y: 0 }
   private isPointerDown = false
   private reducedMotion = false
+  private elevatorTransition: ElevatorTransition | null = null
+  private onElevatorChange?: ((active: boolean) => void) | undefined
 
   private readonly canvas: HTMLCanvasElement
   private readonly onEntitySelected?: (entity: SelectedEntity | null) => void
@@ -119,6 +136,39 @@ export class HqDirector {
   private startLoop(): void {
     const loop = (timestamp: number): void => {
       const timeSeconds = timestamp * 0.001
+
+      // Advance spatial elevator transition if active
+      if (this.elevatorTransition) {
+        const now = performance.now()
+        const elapsed = now - this.elevatorTransition.startTime
+        const t = Math.min(1.0, Math.max(0.0, elapsed / this.elevatorTransition.duration))
+
+        if (t < 0.2) {
+          const doorProgress = 1.0 - t / 0.2
+          this.scene.architecture.setElevatorDoorOpen(doorProgress)
+        } else if (t < 0.75) {
+          this.scene.architecture.setElevatorDoorOpen(0.0)
+          const moveT = (t - 0.2) / 0.55
+          const smoothT = moveT * moveT * (3 - 2 * moveT)
+          const currentY =
+            this.elevatorTransition.startHeight +
+            (this.elevatorTransition.targetHeight - this.elevatorTransition.startHeight) * smoothT
+          this.scene.architecture.setElevatorHeight(currentY)
+        } else if (t < 0.9) {
+          this.scene.architecture.setElevatorHeight(this.elevatorTransition.targetHeight)
+          const doorProgress = (t - 0.75) / 0.15
+          this.scene.architecture.setElevatorDoorOpen(doorProgress)
+        } else {
+          this.scene.architecture.setElevatorDoorOpen(1.0)
+          this.scene.architecture.setElevatorHeight(this.elevatorTransition.targetHeight)
+          const trans = this.elevatorTransition
+          this.elevatorTransition = null
+          if (this.onElevatorChange) this.onElevatorChange(false)
+          this.frameRoom(trans.targetRoomId)
+          if (trans.onComplete) trans.onComplete()
+        }
+      }
+
       this.scene.update(timeSeconds, this.reducedMotion)
       this.cameraRig.update()
       this.renderer.render(this.scene.scene, this.cameraRig.camera)
@@ -241,10 +291,89 @@ export class HqDirector {
    * Reset camera to full overview
    */
   public resetToOverview(): void {
+    if (this.elevatorTransition) {
+      this.skipElevator()
+    }
     this.cameraRig.resetToOverview(this.reducedMotion)
     this.picking.clearSelection()
     if (this.onEntitySelected) {
       this.onEntitySelected(null)
+    }
+  }
+
+  public isElevatorActive(): boolean {
+    return this.elevatorTransition !== null
+  }
+
+  public setOnElevatorChange(cb?: ((active: boolean) => void) | undefined): void {
+    this.onElevatorChange = cb
+  }
+
+  /**
+   * Spatial Elevator Navigation
+   * Approaching elevator -> doors close -> bounded vertical transit -> selected floor -> doors open -> room framing.
+   */
+  public navigateToFloorWithElevator(roomId: RoomId, onComplete?: () => void): void {
+    const targetHeight = roomId === 'APPROVAL_MEZZANINE' ? 2.95 : 0.0
+    const startHeight = this.scene.architecture.getElevatorHeight()
+
+    if (this.reducedMotion) {
+      // Instantaneous cut for accessibility
+      this.scene.architecture.setElevatorHeight(targetHeight)
+      this.scene.architecture.setElevatorDoorOpen(1.0)
+      this.frameRoom(roomId)
+      if (onComplete) onComplete()
+      return
+    }
+
+    this.cameraRig.setFraming(ELEVATOR_PRESET, false)
+    this.elevatorTransition = {
+      targetRoomId: roomId,
+      startTime: performance.now(),
+      duration: 1300,
+      startHeight,
+      targetHeight,
+      onComplete,
+    }
+    if (this.onElevatorChange) this.onElevatorChange(true)
+  }
+
+  /**
+   * Immediately skips elevator transition and settles in target room.
+   */
+  public skipElevator(): void {
+    if (!this.elevatorTransition) return
+    const trans = this.elevatorTransition
+    this.elevatorTransition = null
+    this.scene.architecture.setElevatorHeight(trans.targetHeight)
+    this.scene.architecture.setElevatorDoorOpen(1.0)
+    if (this.onElevatorChange) this.onElevatorChange(false)
+    this.frameRoom(trans.targetRoomId)
+    if (trans.onComplete) trans.onComplete()
+  }
+
+  /**
+   * Day / Evening / Night Atmosphere Lighting Controls
+   */
+  public setAtmosphere(mode: AtmosphereMode): void {
+    this.scene.setAtmosphere(mode)
+  }
+
+  public getAtmosphere(): AtmosphereMode {
+    return this.scene.getAtmosphere()
+  }
+
+  public frameWorkstation(key: keyof typeof WORKSTATION_PRESETS): void {
+    const preset = WORKSTATION_PRESETS[key]
+    if (preset) {
+      this.cameraRig.setFraming(preset, this.reducedMotion)
+    }
+  }
+
+  public frameCharacter(key: keyof typeof CHARACTER_PRESETS): void {
+    const preset = CHARACTER_PRESETS[key]
+    if (preset) {
+      this.cameraRig.setFraming(preset, this.reducedMotion)
     }
   }
 

@@ -150,19 +150,99 @@ export class HqCharacters {
     collar.position.set(0.0, 0.22, 0.0)
     torsoGroup.add(collar)
 
-    // 2. Sculpted Architectural Mannequin Head
-    const headGeo = this.track(new THREE.SphereGeometry(0.1, 16, 12))
+    // 2. Sculpted Stylized Mascot Head
+    const headGeo = this.track(new THREE.SphereGeometry(0.12, 16, 14))
     const head = new THREE.Mesh(headGeo, this.materials.charSkin)
-    head.scale.set(0.9, 1.15, 0.95)
-    head.position.set(0.0, 0.34, 0.0)
+    head.scale.set(0.96, 1.08, 0.98)
+    head.position.set(0.0, 0.35, 0.0)
     head.castShadow = true
     torsoGroup.add(head)
 
     // Architectural brow visor band (refined brass / accent)
-    const visorGeo = this.track(new THREE.BoxGeometry(0.15, 0.038, 0.08))
+    const visorGeo = this.track(new THREE.BoxGeometry(0.16, 0.038, 0.08))
     const visor = new THREE.Mesh(visorGeo, accentMat)
-    visor.position.set(0.0, 0.36, 0.075)
+    visor.position.set(0.0, 0.37, 0.082)
     torsoGroup.add(visor)
+
+    // Role-specific sculpted hair & mascot accessories
+    if (roleId === 'role:engineering:frontend-engineer') {
+      // Stylized sculpted ponytail for Frontend Engineer
+      const hairCapGeo = this.track(new THREE.SphereGeometry(0.126, 14, 12))
+      const hairCap = new THREE.Mesh(hairCapGeo, this.materials.hairPonytail)
+      hairCap.scale.set(0.98, 1.05, 1.02)
+      hairCap.position.set(0.0, 0.37, -0.015)
+      torsoGroup.add(hairCap)
+
+      // Ponytail scrunchie / tie band
+      const tieGeo = this.track(new THREE.CylinderGeometry(0.024, 0.024, 0.035, 12))
+      const tie = new THREE.Mesh(tieGeo, this.materials.charFrontendAccent)
+      tie.rotation.x = Math.PI / 4
+      tie.position.set(0.0, 0.38, -0.14)
+      torsoGroup.add(tie)
+
+      // Sculpted arched ponytail tail
+      const tailGeo = this.track(new THREE.CylinderGeometry(0.018, 0.036, 0.28, 10))
+      const tail = new THREE.Mesh(tailGeo, this.materials.hairPonytail)
+      tail.position.set(0.0, 0.24, -0.19)
+      tail.rotation.x = 0.38
+      tail.castShadow = true
+      torsoGroup.add(tail)
+
+      // Wireless over-ear headphones
+      const hpBandGeo = this.track(new THREE.TorusGeometry(0.13, 0.01, 8, 16, Math.PI))
+      const hpBand = new THREE.Mesh(hpBandGeo, this.materials.champagneBrass)
+      hpBand.rotation.z = Math.PI
+      hpBand.rotation.y = Math.PI / 2
+      hpBand.position.set(0.0, 0.38, 0.0)
+      torsoGroup.add(hpBand)
+
+      for (const earpadX of [-0.13, 0.13]) {
+        const cupGeo = this.track(new THREE.CylinderGeometry(0.032, 0.032, 0.022, 12))
+        const cup = new THREE.Mesh(cupGeo, this.materials.charFrontendAccent)
+        cup.rotation.z = Math.PI / 2
+        cup.position.set(earpadX, 0.35, 0.0)
+        torsoGroup.add(cup)
+      }
+    } else if (roleId === 'role:strategy:chief-planner') {
+      // Chief Planner: Sculpted slick hair crown
+      const hairCrownGeo = this.track(new THREE.BoxGeometry(0.21, 0.08, 0.21))
+      const hairCrown = new THREE.Mesh(hairCrownGeo, this.materials.hairPlanner)
+      hairCrown.position.set(0.0, 0.44, -0.01)
+      torsoGroup.add(hairCrown)
+
+      // Architect wireframe glasses
+      const frameGeo = this.track(new THREE.BoxGeometry(0.18, 0.028, 0.015))
+      const frame = new THREE.Mesh(frameGeo, this.materials.champagneBrass)
+      frame.position.set(0.0, 0.365, 0.118)
+      torsoGroup.add(frame)
+    } else if (roleId === 'role:engineering:backend-engineer') {
+      // Backend Engineer: Structured dark technician cap / hair
+      const capGeo = this.track(new THREE.BoxGeometry(0.22, 0.09, 0.22))
+      const cap = new THREE.Mesh(capGeo, this.materials.hairBackend)
+      cap.position.set(0.0, 0.43, -0.02)
+      torsoGroup.add(cap)
+
+      // Diagnostic boom headset
+      const boomGeo = this.track(new THREE.CylinderGeometry(0.005, 0.005, 0.14, 6))
+      const boom = new THREE.Mesh(boomGeo, this.materials.champagneBrass)
+      boom.position.set(0.09, 0.31, 0.08)
+      boom.rotation.x = 0.5
+      boom.rotation.z = -0.3
+      torsoGroup.add(boom)
+    } else if (roleId === 'role:quality:independent-reviewer') {
+      // Independent Reviewer: Tailored cleanroom hood
+      const hoodGeo = this.track(new THREE.SphereGeometry(0.134, 14, 12))
+      const hood = new THREE.Mesh(hoodGeo, this.materials.hairReviewer)
+      hood.position.set(0.0, 0.36, -0.02)
+      torsoGroup.add(hood)
+
+      // Optical diff magnifier loupe visor
+      const loupeGeo = this.track(new THREE.CylinderGeometry(0.025, 0.03, 0.06, 12))
+      const loupe = new THREE.Mesh(loupeGeo, this.materials.charReviewerAccent)
+      loupe.rotation.x = Math.PI / 2
+      loupe.position.set(0.06, 0.37, 0.13)
+      torsoGroup.add(loupe)
+    }
 
     // 3. Articulated Arms & Physical Accessories
     const armsLeftGroup = new THREE.Group()
@@ -518,44 +598,68 @@ export class HqCharacters {
       if (reducedMotion) {
         // Reduced motion: static upright / focused posture without continuous sine oscillation
         torsoGroup.position.y = baseTorsoY
-        headMesh.position.y = 0.34
-        headMesh.rotation.x = characterState === 'VERIFYING' ? 0.12 : characterState === 'FOCUSED' ? 0.06 : 0.0
-        torsoGroup.rotation.x = characterState === 'FOCUSED' ? 0.06 : 0.0
+        headMesh.position.y = 0.35
+        headMesh.rotation.x = characterState === 'VERIFYING' ? 0.14 : characterState === 'FOCUSED' ? 0.08 : 0.0
+        torsoGroup.rotation.x = characterState === 'FOCUSED' ? 0.07 : 0.0
+        headMesh.rotation.y = 0.0
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
         continue
       }
 
-      // Subtle natural breathing cycle (low amplitude: ±0.005m, ~1.5 rad/s)
+      // Subtle natural breathing cycle (low amplitude: ±0.003m, ~1.5 rad/s)
       const breath = Math.sin(timeSeconds * 1.5 + phaseOffset)
 
       if (characterState === 'IDLE') {
-        torsoGroup.position.y = baseTorsoY + breath * 0.005
-        torsoGroup.rotation.x = 0.0
-        headMesh.rotation.x = breath * 0.015
-      } else if (characterState === 'FOCUSED') {
-        // Focused posture: slightly tilted forward toward screen/work surface
+        // Idle: relaxed ambient presence, arms still, gentle head glance over 7s
         torsoGroup.position.y = baseTorsoY + breath * 0.003
-        torsoGroup.rotation.x = 0.07
-        headMesh.rotation.x = 0.06 + breath * 0.01
+        torsoGroup.rotation.x = 0.0
+        headMesh.rotation.x = breath * 0.008
+        headMesh.rotation.y = Math.sin(timeSeconds * 0.32 + phaseOffset) * 0.04
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
+      } else if (characterState === 'FOCUSED') {
+        // Working / Focused posture: tilted forward toward screen
+        torsoGroup.position.y = baseTorsoY + breath * 0.002
+        torsoGroup.rotation.x = 0.08
+        headMesh.rotation.x = 0.08 + breath * 0.006
+        headMesh.rotation.y = 0.0
+
+        // Active typing micro-motion only when authoritative state is WORKING / FOCUSED
+        if (ctrl.isSeated) {
+          const typeMotion = Math.sin(timeSeconds * 7.5) * 0.004
+          ctrl.armsLeftGroup.position.y = typeMotion
+          ctrl.armsRightGroup.position.y = -typeMotion
+        }
       } else if (characterState === 'VERIFYING') {
         // Verifying posture: precise examination posture directed at inspection device
         torsoGroup.position.y = baseTorsoY + breath * 0.002
-        torsoGroup.rotation.x = 0.04
-        headMesh.rotation.x = 0.12 + breath * 0.008
+        torsoGroup.rotation.x = 0.06
+        headMesh.rotation.x = 0.14 + breath * 0.008
+        headMesh.rotation.y = 0.0
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
       } else if (characterState === 'WAITING') {
-        // Waiting posture: composed steady posture
-        torsoGroup.position.y = baseTorsoY + breath * 0.004
+        torsoGroup.position.y = baseTorsoY + breath * 0.003
         torsoGroup.rotation.x = -0.02
         headMesh.rotation.x = 0.0
+        headMesh.rotation.y = 0.0
       } else if (characterState === 'SUCCESS') {
-        // Success posture: upright confident posture
-        torsoGroup.position.y = baseTorsoY + breath * 0.005
+        torsoGroup.position.y = baseTorsoY + breath * 0.004
         torsoGroup.rotation.x = -0.04
         headMesh.rotation.x = -0.04
+        headMesh.rotation.y = 0.0
       } else if (characterState === 'FAILURE' || characterState === 'ATTENTION') {
-        // Attention / Failure posture: alert posture
-        torsoGroup.position.y = baseTorsoY + breath * 0.006
+        torsoGroup.position.y = baseTorsoY + breath * 0.005
         torsoGroup.rotation.x = 0.05
         headMesh.rotation.x = 0.03
+        headMesh.rotation.y = 0.0
       }
     }
   }

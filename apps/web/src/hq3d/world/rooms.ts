@@ -7,9 +7,71 @@ import type { CameraFramingPreset, RoomDefinition, RoomId } from '../types.js'
 
 export const HQ_OVERVIEW_PRESET: CameraFramingPreset = {
   id: 'HQ_OVERVIEW',
-  target: [0.0, 1.2, 1.5],
-  position: [-19.0, 15.0, -17.0],
-  description: 'Headquarters Full Overview Framing',
+  target: [0.0, 2.6, 1.2],
+  position: [-18.5, 13.0, -17.5],
+  description: 'Headquarters Full Vertical Cutaway Overview',
+}
+
+// Wave 12K Focused Workstation & Character Camera Presets
+export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
+  WS_FRONTEND: {
+    id: 'WS_FRONTEND',
+    target: [-6.5, 1.0, 1.2],
+    position: [-8.4, 2.2, 3.2],
+    description: 'Frontend Engineer Workstation & Laptop Focus',
+  },
+  WS_BACKEND: {
+    id: 'WS_BACKEND',
+    target: [-1.8, 1.0, 1.2],
+    position: [-3.8, 2.2, 3.2],
+    description: 'Backend Engineer Workstation & Telemetry Focus',
+  },
+  WS_PLANNING: {
+    id: 'WS_PLANNING',
+    target: [-4.5, 0.9, 5.5],
+    position: [-6.5, 2.5, 7.5],
+    description: 'Mission Control Planning Table Focus',
+  },
+  WS_VERIFIER: {
+    id: 'WS_VERIFIER',
+    target: [6.0, 1.1, 6.5],
+    position: [4.0, 2.4, 4.5],
+    description: 'Independent Verification Console & Cleanroom Bench',
+  },
+}
+
+export const CHARACTER_PRESETS: Record<string, CameraFramingPreset> = {
+  CHAR_FRONTEND: {
+    id: 'CHAR_FRONTEND',
+    target: [-6.5, 1.05, 1.2],
+    position: [-7.8, 1.8, 2.6],
+    description: 'Frontend Engineer Mascot & Stylized Ponytail Focus',
+  },
+  CHAR_BACKEND: {
+    id: 'CHAR_BACKEND',
+    target: [-1.8, 1.05, 1.2],
+    position: [-3.1, 1.8, 2.6],
+    description: 'Backend Engineer Mascot & Headset Focus',
+  },
+  CHAR_PLANNER: {
+    id: 'CHAR_PLANNER',
+    target: [-4.5, 1.1, 4.6],
+    position: [-6.0, 1.9, 6.2],
+    description: 'Chief Planner Mascot & Drafting Folio Focus',
+  },
+  CHAR_REVIEWER: {
+    id: 'CHAR_REVIEWER',
+    target: [6.0, 1.1, 6.0],
+    position: [4.2, 2.0, 4.8],
+    description: 'Independent Reviewer Mascot & Inspection Loupe Focus',
+  },
+}
+
+export const ELEVATOR_PRESET: CameraFramingPreset = {
+  id: 'ELEVATOR_VIEW',
+  target: [0.0, 2.4, 9.8],
+  position: [0.0, 3.2, 4.2],
+  description: 'Vertical Elevator Shaft & Articulated Carriage Transit',
 }
 
 export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
@@ -100,5 +162,9 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
 }
 
 export function getRoomByKey(key: string): RoomDefinition | undefined {
-  return Object.values(ROOM_DEFINITIONS).find((r) => r.numberKey === key)
+  const norm = key.toUpperCase()
+  if (norm === 'M') {
+    return ROOM_DEFINITIONS.APPROVAL_MEZZANINE
+  }
+  return Object.values(ROOM_DEFINITIONS).find((r) => r.numberKey === norm)
 }

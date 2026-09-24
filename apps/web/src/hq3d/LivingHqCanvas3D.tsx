@@ -6,10 +6,11 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { HqDirector } from './engine/HqDirector.js'
+import type { AtmosphereMode } from './engine/HqScene.js'
 import type { PerformanceStats, RoomId, SelectedEntity } from './types.js'
 import type { RoleId } from './roles/types.js'
 import { Hq3dInspector } from './ui/Hq3dInspector.js'
-import { ROOM_DEFINITIONS } from './world/rooms.js'
+import { ROOM_DEFINITIONS, WORKSTATION_PRESETS, CHARACTER_PRESETS, getRoomByKey } from './world/rooms.js'
 import { deriveWorldState, type WorldState } from './world/worldState.js'
 import { useEvents } from '../api/useEvents.js'
 import type { RuntimeProjectionSnapshot, StateSummaryResponse } from '../api/types.js'
@@ -37,6 +38,15 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   const [reducedMotion, setReducedMotion] = useState(false)
   const [announcement, setAnnouncement] = useState<string>('')
   const [webglError, setWebglError] = useState<string | null>(null)
+  const [atmosphere, setAtmosphere] = useState<AtmosphereMode>(() => {
+    if (typeof window === 'undefined') return 'DAY'
+    const hour = new Date().getHours()
+    if (hour >= 6 && hour < 17) return 'DAY'
+    if (hour >= 17 && hour < 21) return 'EVENING'
+    return 'NIGHT'
+  })
+  const [isElevatorActive, setIsElevatorActive] = useState(false)
+  const [activeTaskCount, setActiveTaskCount] = useState(0)
 
   // 1. Accessibility: Detect prefers-reduced-motion
   useEffect(() => {
@@ -92,6 +102,10 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
       })
 
       directorRef.current = director
+      director.setOnElevatorChange((active) => {
+        setIsElevatorActive(active)
+      })
+      director.setAtmosphere(atmosphere)
       director.setViewActive(isViewActive)
       if (typeof window !== 'undefined') {
         ;(window as any).__hqDirector = director
@@ -147,6 +161,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
       })
       lastWorldStateRef.current = worldState
       directorRef.current?.updateWorldState(worldState)
+      setActiveTaskCount(projection.activeTasks?.length ?? 0)
       setSelectedEntity((prev) => {
         if (!prev || prev.type !== 'character') return prev
         const fig = directorRef.current?.scene.characters.getFigure(prev.id as RoleId)
@@ -173,9 +188,17 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
     if (overrideWorldState) {
       lastWorldStateRef.current = overrideWorldState
       directorRef.current?.updateWorldState(overrideWorldState)
+      const count = Object.values(overrideWorldState.stations).filter(
+        (s) => s.status === 'ACTIVE' || s.status === 'VERIFYING'
+      ).length
+      setActiveTaskCount(count)
     } else if (initialWorldState) {
       lastWorldStateRef.current = initialWorldState
       directorRef.current?.updateWorldState(initialWorldState)
+      const count = Object.values(initialWorldState.stations).filter(
+        (s) => s.status === 'ACTIVE' || s.status === 'VERIFYING'
+      ).length
+      setActiveTaskCount(count)
     } else if (isViewActive) {
       void fetchAuthoritativeState()
     }
@@ -221,7 +244,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
     return () => clearInterval(interval)
   }, [isViewActive, showPerformance])
 
-  // 6. Keyboard navigation (Keys 1-6 for rooms, 0/Space for overview)
+  // 6. Keyboard navigation (Keys 1-6 / M for rooms, 0 for overview, Space for skip/overview)
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isViewActive) return
@@ -237,21 +260,24 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         return
       }
 
-      if (e.key >= '1' && e.key <= '6') {
-        const framed = directorRef.current?.frameRoomByKey(e.key)
-        if (framed) {
-          const room = Object.values(ROOM_DEFINITIONS).find((r) => r.numberKey === e.key)
-          if (room) {
-            setAnnouncement(`Framing Room: ${room.name} (Key ${room.numberKey})`)
-          }
+      if ((e.key >= '1' && e.key <= '6') || e.key === 'm' || e.key === 'M') {
+        const room = getRoomByKey(e.key)
+        if (room) {
+          directorRef.current?.navigateToFloorWithElevator(room.id)
+          setAnnouncement(`Elevator moving to: ${room.name} (Floor ${room.numberKey})`)
         }
       } else if (e.key === '0' || e.key === ' ') {
         e.preventDefault()
-        directorRef.current?.resetToOverview()
-        setAnnouncement('Reset camera to Headquarters Overview')
+        if (isElevatorActive) {
+          directorRef.current?.skipElevator()
+          setAnnouncement('Elevator transit skipped')
+        } else {
+          directorRef.current?.resetToOverview()
+          setAnnouncement('Reset camera to Headquarters Overview')
+        }
       }
     },
-    [isViewActive]
+    [isViewActive, isElevatorActive]
   )
 
   useEffect(() => {
@@ -260,10 +286,37 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   }, [handleKeyDown])
 
   const handleSelectRoom = (roomId: RoomId) => {
-    directorRef.current?.frameRoom(roomId)
     const room = ROOM_DEFINITIONS[roomId]
     if (room) {
-      setAnnouncement(`Framing Room: ${room.name}`)
+      setAnnouncement(`Navigating to ${room.name} via spatial elevator`)
+    }
+    directorRef.current?.navigateToFloorWithElevator(roomId)
+  }
+
+  const handleSkipElevator = () => {
+    directorRef.current?.skipElevator()
+    setAnnouncement('Elevator transit skipped')
+  }
+
+  const handleSetAtmosphere = (mode: AtmosphereMode) => {
+    setAtmosphere(mode)
+    directorRef.current?.setAtmosphere(mode)
+    setAnnouncement(`Atmosphere preset changed to ${mode}`)
+  }
+
+  const handleSelectWorkstation = (key: keyof typeof WORKSTATION_PRESETS) => {
+    directorRef.current?.frameWorkstation(key)
+    const preset = WORKSTATION_PRESETS[key]
+    if (preset) {
+      setAnnouncement(`Framing workstation: ${preset.description}`)
+    }
+  }
+
+  const handleSelectCharacterPreset = (key: keyof typeof CHARACTER_PRESETS) => {
+    directorRef.current?.frameCharacter(key)
+    const preset = CHARACTER_PRESETS[key]
+    if (preset) {
+      setAnnouncement(`Framing character: ${preset.description}`)
     }
   }
 
@@ -331,7 +384,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         height: '100%',
         overflow: 'hidden',
         display: 'flex',
-        backgroundColor: '#0e1117',
+        backgroundColor: '#0c0f14',
       }}
     >
       {/* Screen Reader Live Region */}
@@ -370,92 +423,345 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
           }}
         />
 
-        {/* Sleek Architectural Quick Navigation Bar */}
-        <nav
-          aria-label="3D Room Quick Navigation"
+        {/* Top Floating Glass Navigation & Atmosphere Bar */}
+        <header
+          aria-label="3D HQ Navigation and Controls"
           style={{
             position: 'absolute',
             top: '12px',
             left: '16px',
-            display: 'inline-flex',
+            right: '16px',
+            display: 'flex',
             alignItems: 'center',
-            gap: '2px',
-            padding: '3px',
-            backgroundColor: 'rgba(14, 18, 26, 0.8)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '6px',
-            zIndex: 5,
-            pointerEvents: 'auto',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            justifyContent: 'space-between',
+            pointerEvents: 'none',
+            zIndex: 10,
           }}
         >
-          <button
-            onClick={handleResetOverview}
-            data-testid="hq-nav-overview-pill"
+          {/* Left: Quick Floors / Rooms Navigation */}
+          <nav
+            aria-label="3D Room Quick Navigation"
             style={{
-              padding: '3px 8px',
-              borderRadius: '4px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: '#cbd5e1',
-              fontSize: '11px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '2px',
+              padding: '3px 4px',
+              backgroundColor: 'rgba(15, 20, 28, 0.85)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              pointerEvents: 'auto',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
             }}
           >
-            <span>🏛️</span>
-            <span>Overview</span>
-            <span style={{ fontSize: '10px', color: '#64748b' }}>[0]</span>
-          </button>
-
-          <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255, 255, 255, 0.1)', margin: '0 2px' }} />
-
-          {Object.values(ROOM_DEFINITIONS).map((room) => (
             <button
-              key={room.id}
-              onClick={() => handleSelectRoom(room.id)}
-              data-testid={`hq-nav-room-${room.numberKey}`}
+              onClick={handleResetOverview}
+              data-testid="hq-nav-overview-pill"
+              title="Full Building Cutaway Overview (Key: 0)"
               style={{
-                padding: '3px 7px',
-                borderRadius: '4px',
+                padding: '4px 8px',
+                borderRadius: '5px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: 'none',
+                color: '#e2e8f0',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <span>🏛️</span>
+              <span>Building</span>
+              <span style={{ fontSize: '10px', color: '#64748b' }}>[0]</span>
+            </button>
+
+            <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255, 255, 255, 0.12)', margin: '0 3px' }} />
+
+            {Object.values(ROOM_DEFINITIONS).map((room) => {
+              const label = room.id === 'APPROVAL_MEZZANINE' ? 'M Mezzanine' : `F${room.numberKey} ${room.name.split(' ')[0]}`
+              return (
+                <button
+                  key={room.id}
+                  onClick={() => handleSelectRoom(room.id)}
+                  data-testid={`hq-nav-room-${room.numberKey}`}
+                  title={`${room.name} (Key: ${room.numberKey})`}
+                  style={{
+                    padding: '4px 7px',
+                    borderRadius: '5px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#94a3b8',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <span style={{ fontFamily: 'var(--font-mono, monospace)', color: room.accentColor, fontWeight: 700 }}>
+                    {room.numberKey}
+                  </span>
+                  <span>{label}</span>
+                </button>
+              )
+            })}
+
+            <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255, 255, 255, 0.12)', margin: '0 3px' }} />
+
+            {/* Quick Workstation Focus Dropdown / Buttons */}
+            <button
+              onClick={() => handleSelectWorkstation('WS_FRONTEND')}
+              data-testid="hq-nav-ws-frontend"
+              title="Focus Frontend Engineer Workstation (Ponytail & Laptop)"
+              style={{
+                padding: '4px 6px',
+                borderRadius: '5px',
                 backgroundColor: 'transparent',
                 border: 'none',
-                color: '#94a3b8',
+                color: '#60a5fa',
                 fontSize: '11px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '3px',
               }}
             >
-              <span style={{ fontFamily: 'var(--font-mono, monospace)', color: room.accentColor, fontWeight: 700 }}>
-                {room.numberKey}
-              </span>
-              <span>{room.name}</span>
+              <span>💻</span>
+              <span style={{ fontSize: '10px' }}>Frontend</span>
             </button>
-          ))}
-
-          {reducedMotion && (
-            <span
+            <button
+              onClick={() => handleSelectWorkstation('WS_BACKEND')}
+              data-testid="hq-nav-ws-backend"
+              title="Focus Backend Engineer Workstation"
               style={{
-                fontSize: '10px',
-                padding: '2px 6px',
-                marginLeft: '4px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(234, 179, 8, 0.15)',
-                border: '1px solid rgba(234, 179, 8, 0.3)',
-                color: '#fbbf24',
-                fontFamily: 'monospace',
+                padding: '4px 6px',
+                borderRadius: '5px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#38bdf8',
+                fontSize: '11px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
               }}
             >
-              Reduced Motion: Instant Cuts
-            </span>
-          )}
-        </nav>
+              <span>⚙️</span>
+              <span style={{ fontSize: '10px' }}>Backend</span>
+            </button>
+            <button
+              onClick={() => handleSelectCharacterPreset('CHAR_FRONTEND')}
+              data-testid="hq-nav-char-frontend"
+              title="Focus Frontend Mascot (Stylized Ponytail)"
+              style={{
+                padding: '4px 6px',
+                borderRadius: '5px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#f472b6',
+                fontSize: '11px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+              }}
+            >
+              <span>👱‍♀️</span>
+              <span style={{ fontSize: '10px' }}>Ponytail</span>
+            </button>
+
+            {reducedMotion && (
+              <span
+                style={{
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  marginLeft: '4px',
+                  borderRadius: '4px',
+                  backgroundColor: 'rgba(234, 179, 8, 0.15)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  color: '#fbbf24',
+                  fontFamily: 'monospace',
+                }}
+              >
+                Reduced Motion: Instant Cuts
+              </span>
+            )}
+          </nav>
+
+          {/* Right: Lighting Atmosphere Controls & Compact Live Activity Badge */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              pointerEvents: 'auto',
+            }}
+          >
+            {/* Atmosphere Presets Pill */}
+            <div
+              data-testid="hq-atmosphere-pill"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                padding: '3px',
+                backgroundColor: 'rgba(15, 20, 28, 0.85)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+              }}
+            >
+              <button
+                onClick={() => handleSetAtmosphere('DAY')}
+                data-testid="hq-atmosphere-day"
+                title="Soft Daylight Sky & Natural Illumination"
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  backgroundColor: atmosphere === 'DAY' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
+                  border: atmosphere === 'DAY' ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid transparent',
+                  color: atmosphere === 'DAY' ? '#38bdf8' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: atmosphere === 'DAY' ? 700 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>☀️</span>
+                <span>Day</span>
+              </button>
+
+              <button
+                onClick={() => handleSetAtmosphere('EVENING')}
+                data-testid="hq-atmosphere-evening"
+                title="Warm Golden Amber Horizon"
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  backgroundColor: atmosphere === 'EVENING' ? 'rgba(251, 146, 60, 0.2)' : 'transparent',
+                  border: atmosphere === 'EVENING' ? '1px solid rgba(251, 146, 60, 0.5)' : '1px solid transparent',
+                  color: atmosphere === 'EVENING' ? '#fb923c' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: atmosphere === 'EVENING' ? 700 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>🌅</span>
+                <span>Eve</span>
+              </button>
+
+              <button
+                onClick={() => handleSetAtmosphere('NIGHT')}
+                data-testid="hq-atmosphere-night"
+                title="Subdued Midnight Exterior with Warm Architectural Interior Pools"
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  backgroundColor: atmosphere === 'NIGHT' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                  border: atmosphere === 'NIGHT' ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid transparent',
+                  color: atmosphere === 'NIGHT' ? '#c084fc' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: atmosphere === 'NIGHT' ? 700 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>🌙</span>
+                <span>Night</span>
+              </button>
+            </div>
+
+            {/* Authoritative Live Activity Telemetry Badge (Proves no fake activity) */}
+            <div
+              data-testid="hq-live-activity-badge"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                backgroundColor: 'rgba(15, 20, 28, 0.85)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono, monospace)',
+                color: activeTaskCount > 0 ? '#4ade80' : '#94a3b8',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+              }}
+            >
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: activeTaskCount > 0 ? '#22c55e' : '#64748b',
+                  boxShadow: activeTaskCount > 0 ? '0 0 8px #22c55e' : 'none',
+                }}
+              />
+              <span>
+                {activeTaskCount > 0
+                  ? `${activeTaskCount} Agent${activeTaskCount > 1 ? 's' : ''} Working`
+                  : 'Idle (Honest Standby)'}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Spatial Elevator In-Transit Dynamic Overlay */}
+        {isElevatorActive && (
+          <aside
+            data-testid="hq-elevator-transit-pill"
+            aria-label="Elevator Transit in Progress"
+            style={{
+              position: 'absolute',
+              top: '64px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '6px 14px',
+              backgroundColor: 'rgba(15, 23, 42, 0.92)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              borderRadius: '24px',
+              color: '#f8fafc',
+              fontSize: '12px',
+              fontWeight: 500,
+              zIndex: 15,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2)',
+            }}
+          >
+            <span style={{ fontSize: '14px', animation: 'pulse 1s infinite' }}>🛗</span>
+            <span>Elevator in transit to floor...</span>
+            <button
+              onClick={handleSkipElevator}
+              data-testid="elevator-skip-btn"
+              style={{
+                padding: '2px 8px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#38bdf8',
+                fontSize: '10px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Skip
+            </button>
+          </aside>
+        )}
       </div>
 
       {/* Docked 2D Inspector on Right Side */}

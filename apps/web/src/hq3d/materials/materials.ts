@@ -19,6 +19,40 @@ export class MaterialLibrary {
   public readonly glassDark: THREE.MeshStandardMaterial
   public readonly vellum: THREE.MeshStandardMaterial
 
+  // Wave 12K Long-Session Architectural Cutaway Materials
+  public readonly structureGraphite: THREE.MeshStandardMaterial
+  public readonly facadeCharcoal: THREE.MeshStandardMaterial
+  public readonly cutawaySlabEdge: THREE.MeshStandardMaterial
+  public readonly wallPlaster: THREE.MeshStandardMaterial
+  public readonly wallPlasterWarm: THREE.MeshStandardMaterial
+  public readonly ceilingPanel: THREE.MeshStandardMaterial
+  public readonly architecturalGlass: THREE.MeshStandardMaterial
+  public readonly champagneBrass: THREE.MeshStandardMaterial
+
+  // Wave 12K Office Life & Props Materials
+  public readonly foliageGreen: THREE.MeshStandardMaterial
+  public readonly foliageDark: THREE.MeshStandardMaterial
+  public readonly planterTerracotta: THREE.MeshStandardMaterial
+  public readonly planterCeramic: THREE.MeshStandardMaterial
+  public readonly couchFabricWarm: THREE.MeshStandardMaterial
+  public readonly couchCushion: THREE.MeshStandardMaterial
+  public readonly chairMeshDark: THREE.MeshStandardMaterial
+  public readonly lampWarmGlow: THREE.MeshStandardMaterial
+  public readonly whiteboardSurface: THREE.MeshStandardMaterial
+  public readonly bookSpineNavy: THREE.MeshStandardMaterial
+  public readonly bookSpineAmber: THREE.MeshStandardMaterial
+  public readonly bookSpineTeal: THREE.MeshStandardMaterial
+
+  // Wave 12K Elevator Materials
+  public readonly elevatorGuideRail: THREE.MeshStandardMaterial
+  public readonly elevatorCabInterior: THREE.MeshStandardMaterial
+
+  // Wave 12K Mascot Character Hair & Accessories
+  public readonly hairPonytail: THREE.MeshStandardMaterial
+  public readonly hairPlanner: THREE.MeshStandardMaterial
+  public readonly hairBackend: THREE.MeshStandardMaterial
+  public readonly hairReviewer: THREE.MeshStandardMaterial
+
   // Technical Displays & Server Enclosures
   public readonly serverRackFace: THREE.MeshStandardMaterial
   public readonly terminalScreen: THREE.MeshStandardMaterial
@@ -80,7 +114,7 @@ export class MaterialLibrary {
     // 2. Architectural Stone Floor (Warm mineral slate tone matching Gravitas shell)
     this.limestone = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x242a35,
+        color: 0x2a303c,
         map: stoneTex,
         roughness: 0.72,
         metalness: 0.04,
@@ -89,7 +123,7 @@ export class MaterialLibrary {
 
     this.limestoneDark = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x161a22,
+        color: 0x1c202a,
         roughness: 0.85,
         metalness: 0.05,
       })
@@ -97,9 +131,214 @@ export class MaterialLibrary {
 
     this.limestonePlinth = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x1c212b,
+        color: 0x222733,
         roughness: 0.6,
         metalness: 0.08,
+      })
+    )
+
+    // Wave 12K Architectural Cutaway Materials
+    this.structureGraphite = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x222631,
+        roughness: 0.52,
+        metalness: 0.35,
+      })
+    )
+
+    this.facadeCharcoal = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x181c24,
+        roughness: 0.75,
+        metalness: 0.15,
+      })
+    )
+
+    this.cutawaySlabEdge = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x5a5045,
+        roughness: 0.85,
+        metalness: 0.05,
+      })
+    )
+
+    this.wallPlaster = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xd9d3c7,
+        roughness: 0.92,
+        metalness: 0.0,
+      })
+    )
+
+    this.wallPlasterWarm = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xe8e3d8,
+        roughness: 0.90,
+        metalness: 0.0,
+      })
+    )
+
+    this.ceilingPanel = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2d3340,
+        roughness: 0.80,
+        metalness: 0.05,
+      })
+    )
+
+    this.architecturalGlass = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xc2d9e8,
+        roughness: 0.08,
+        metalness: 0.12,
+        transparent: true,
+        opacity: 0.24,
+      })
+    )
+
+    this.champagneBrass = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xbfa366,
+        roughness: 0.36,
+        metalness: 0.74,
+      })
+    )
+
+    // Wave 12K Office Life Props Materials
+    this.foliageGreen = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2a593a,
+        roughness: 0.65,
+        metalness: 0.0,
+      })
+    )
+
+    this.foliageDark = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1d432b,
+        roughness: 0.6,
+        metalness: 0.0,
+      })
+    )
+
+    this.planterTerracotta = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xa84e2a,
+        roughness: 0.86,
+        metalness: 0.0,
+      })
+    )
+
+    this.planterCeramic = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xe9e5dc,
+        roughness: 0.42,
+        metalness: 0.05,
+      })
+    )
+
+    this.couchFabricWarm = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2e3544,
+        roughness: 0.88,
+        metalness: 0.0,
+      })
+    )
+
+    this.couchCushion = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xcfc5b4,
+        roughness: 0.92,
+        metalness: 0.0,
+      })
+    )
+
+    this.chairMeshDark = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1b1f28,
+        roughness: 0.72,
+        metalness: 0.25,
+      })
+    )
+
+    this.lampWarmGlow = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xfff7ed,
+        emissive: 0xfde68a,
+        emissiveIntensity: 0.9,
+        roughness: 0.2,
+      })
+    )
+
+    this.whiteboardSurface = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.18,
+        metalness: 0.04,
+      })
+    )
+
+    this.bookSpineNavy = this.track(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.7 })
+    )
+
+    this.bookSpineAmber = this.track(
+      new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 })
+    )
+
+    this.bookSpineTeal = this.track(
+      new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.7 })
+    )
+
+    // Wave 12K Elevator Materials
+    this.elevatorGuideRail = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x828b9a,
+        roughness: 0.22,
+        metalness: 0.88,
+      })
+    )
+
+    this.elevatorCabInterior = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x4a5568,
+        roughness: 0.35,
+        metalness: 0.5,
+        emissive: 0x1e293b,
+        emissiveIntensity: 0.2,
+      })
+    )
+
+    // Wave 12K Mascot Character Hair & Accessories
+    this.hairPonytail = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2b1c14,
+        roughness: 0.52,
+        metalness: 0.08,
+      })
+    )
+
+    this.hairPlanner = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x363d49,
+        roughness: 0.62,
+        metalness: 0.05,
+      })
+    )
+
+    this.hairBackend = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x211a18,
+        roughness: 0.55,
+        metalness: 0.05,
+      })
+    )
+
+    this.hairReviewer = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x32404d,
+        roughness: 0.58,
+        metalness: 0.05,
       })
     )
 
