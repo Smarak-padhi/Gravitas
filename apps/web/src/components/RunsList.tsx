@@ -53,6 +53,7 @@ export const RunsList: React.FC<RunsListProps> = ({
 
   return (
     <aside
+      className="runs-list-sidebar"
       style={{
         width: '280px',
         flexShrink: 0,

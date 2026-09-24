@@ -5,6 +5,7 @@ import type {
   JobRun,
   PersonalOsNotification,
 } from '../../api/types.js'
+import { Icons } from '../../design-system/components/Icons.js'
 
 export const AutomationsView: React.FC = () => {
   const [jobs, setJobs] = useState<readonly BackgroundJob[]>([])
@@ -297,26 +298,28 @@ export const AutomationsView: React.FC = () => {
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '20px' }}>⚡</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Icons.Automation size={20} color="var(--brand-primary, #60a5fa)" />
             <h1
               data-testid="automations-title"
               style={{
-                fontSize: '18px',
+                fontFamily: 'var(--font-display, "Space Grotesk", sans-serif)',
+                fontSize: '20px',
                 fontWeight: 700,
-                letterSpacing: '-0.3px',
+                letterSpacing: '-0.02em',
                 margin: 0,
+                color: 'var(--text-primary, #f8fafc)',
               }}
             >
               Personal OS Background Automations & Scheduler
             </h1>
             {isLoading && (
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted, #64748b)', fontFamily: 'var(--font-mono)' }}>
                 [SYNCING]
               </span>
             )}
           </div>
-          <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-secondary)' }}>
+          <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--text-secondary, #94a3b8)' }}>
             Deterministic background execution kernel — Zero LLM daemons, complete SQLite restart survival.
           </p>
         </div>
@@ -470,6 +473,68 @@ export const AutomationsView: React.FC = () => {
             gap: '24px',
           }}
         >
+          {/* Sovereign Human Approval Plinth */}
+          {waitingApprovalRuns.length > 0 && (
+            <div
+              data-testid="approval-plinth-banner"
+              style={{
+                padding: '16px 20px',
+                borderRadius: 'var(--radius-md, 6px)',
+                backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                border: '1px solid rgba(245, 158, 11, 0.35)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '16px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--state-verifying-fg, #fbbf24)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icons.Shield size={18} color="currentColor" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--state-verifying-fg, #fbbf24)' }}>
+                    SOVEREIGN HUMAN APPROVAL REQUIRED ({waitingApprovalRuns.length})
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary, #cbd5e1)', marginTop: '2px' }}>
+                    Autonomous run halted at policy boundary. Requires operator verification before proceeding.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  onClick={() => setRunsTab('WAITING_APPROVAL')}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-sm, 4px)',
+                    backgroundColor: 'var(--state-waiting-border, #f59e0b)',
+                    color: '#000000',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Inspect Halted Runs ({waitingApprovalRuns.length})
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Scheduled Jobs Section */}
           <section data-testid="scheduled-jobs-section">
             <div
@@ -525,6 +590,7 @@ export const AutomationsView: React.FC = () => {
               </div>
             ) : (
               <div
+                className="responsive-table-scroll"
                 style={{
                   backgroundColor: 'var(--bg-panel)',
                   borderRadius: 'var(--radius-md)',
@@ -532,7 +598,7 @@ export const AutomationsView: React.FC = () => {
                   overflow: 'hidden',
                 }}
               >
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', minWidth: '540px' }}>
                   <thead>
                     <tr
                       style={{
@@ -762,6 +828,7 @@ export const AutomationsView: React.FC = () => {
               </div>
             ) : (
               <div
+                className="responsive-table-scroll"
                 style={{
                   backgroundColor: 'var(--bg-panel)',
                   borderRadius: 'var(--radius-md)',
@@ -769,7 +836,7 @@ export const AutomationsView: React.FC = () => {
                   overflow: 'hidden',
                 }}
               >
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', minWidth: '540px' }}>
                   <thead>
                     <tr
                       style={{

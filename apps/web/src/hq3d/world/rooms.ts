@@ -78,8 +78,8 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     accentColor: '#475569',
     cameraPreset: {
       id: 'ROOM_INFRASTRUCTURE_ROOM',
-      target: [-8.8, 1.3, -5.8],
-      position: [-6.2, 3.0, -2.0],
+      target: [-8.8, 1.4, -5.6],
+      position: [-5.6, 3.4, -1.2],
       description: '42U OmniRoute Gateway & Compute Server Racks with Cable Trays',
     },
   },

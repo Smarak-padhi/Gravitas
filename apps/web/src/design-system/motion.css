@@ -4,11 +4,20 @@
  */
 
 :root {
+  /* Defined Durations */
+  --motion-duration-micro: 120ms;
+  --motion-duration-ui: 240ms;
+  --motion-duration-spatial: 380ms;
+  --motion-duration-camera: 600ms;
+
   --motion-duration-instant: 50ms;
   --motion-duration-fast: 150ms;
   --motion-duration-normal: 250ms;
   --motion-duration-deliberate: 400ms;
 
+  /* Standard Curves */
+  --motion-ease-tactile: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-ease-stone-settle: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
   --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
@@ -43,10 +52,13 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Focus indicator outline for keyboard accessibility */
-:focus-visible {
-  outline: 2px solid var(--border-focus) !important;
-  outline-offset: 1px !important;
+/* Tactile press response */
+.interactive-press {
+  transition: transform var(--motion-duration-micro) var(--motion-ease-tactile),
+              background-color var(--motion-duration-micro) ease;
+}
+.interactive-press:active {
+  transform: scale(0.98);
 }
 
 /* Living HQ Tactile Atelier Keyframes */
@@ -93,4 +105,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-

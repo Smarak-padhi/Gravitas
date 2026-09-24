@@ -1,90 +1,149 @@
 /**
  * Gravitas Design System — Tokens
- * High-Density, High-Contrast Mission Control Palette
+ * 4-Tier Token Architecture: Primitive -> Semantic -> Component -> Spatial/3D
+ * High-Density Mission Control with Tactile Material Depth
  */
 
 :root {
-  /* Surfaces */
-  --bg-app: #07090e;
-  --bg-canvas: #07090e;
-  --bg-panel: #0d111a;
-  --bg-panel-elevated: #141a26;
-  --bg-panel-subtle: #101520;
-  --bg-surface-active: #1b2333;
-  --bg-surface-hover: #161c2b;
+  /* ==========================================================================
+     Tier 1: Primitive Tokens (Raw Scales)
+     ========================================================================== */
 
-  /* Borders */
-  --border-subtle: #1a2233;
-  --border-color: #242e42;
-  --border-hover: #374663;
-  --border-focus: #3b82f6;
+  /* Neutral Color Scales (Obsidian to Crisp Starlight) */
+  --color-obsidian-950: #05070b;
+  --color-obsidian-900: #080c14;
+  --color-obsidian-850: #0e131f;
+  --color-obsidian-800: #141b2a;
+  --color-obsidian-750: #1a2336;
+  --color-obsidian-700: #232d43;
+  --color-obsidian-600: #33415e;
+  --color-obsidian-500: #4b5d82;
+  --color-slate-400: #94a3b8;
+  --color-slate-300: #cbd5e1;
+  --color-slate-200: #e2e8f0;
+  --color-slate-100: #f1f5f9;
+  --color-pure-white: #ffffff;
 
-  /* Typography */
+  /* Accent Scales */
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-subtle: rgba(59, 130, 246, 0.12);
+  --color-blue-border: rgba(59, 130, 246, 0.35);
+
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-subtle: rgba(16, 185, 129, 0.12);
+  --color-emerald-border: rgba(16, 185, 129, 0.35);
+
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-subtle: rgba(245, 158, 11, 0.15);
+  --color-amber-border: rgba(245, 158, 11, 0.4);
+
+  --color-rose-500: #ef4444;
+  --color-rose-600: #dc2626;
+  --color-rose-subtle: rgba(239, 68, 68, 0.12);
+  --color-rose-border: rgba(239, 68, 68, 0.35);
+
+  --color-cyan-500: #06b6d4;
+  --color-cyan-subtle: rgba(6, 182, 212, 0.12);
+  --color-cyan-border: rgba(6, 182, 212, 0.35);
+
+  --color-purple-500: #8b5cf6;
+  --color-purple-subtle: rgba(139, 92, 246, 0.12);
+
+  /* Spacing Grid (4px/8px Baseline) */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ==========================================================================
+     Tier 2: Semantic Tokens (Meaning & Application)
+     ========================================================================== */
+
+  /* Surfaces & Canvas */
+  --bg-app: var(--color-obsidian-950);
+  --bg-canvas: var(--color-obsidian-900);
+  --bg-surface: var(--color-obsidian-850);
+  --bg-surface-elevated: var(--color-obsidian-800);
+  --bg-surface-active: var(--color-obsidian-750);
+  --bg-surface-hover: rgba(255, 255, 255, 0.04);
+  --bg-surface-overlay: rgba(8, 12, 20, 0.85);
+
+  /* Hairline Architectural Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --border-focus: var(--color-blue-500);
+
+  /* Typography Roles */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Text colors */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-primary: var(--color-slate-100);
+  --text-secondary: var(--color-slate-400);
   --text-muted: #64748b;
   --text-dim: #475569;
+  --text-accent: var(--color-blue-500);
 
-  /* Engine State Tokens */
-  --state-ready-fg: #94a3b8;
-  --state-ready-bg: #161e2e;
-  --state-ready-border: #2e3d59;
+  /* Engine & Runtime State Tokens */
+  --state-ready-fg: var(--color-slate-300);
+  --state-ready-bg: rgba(148, 163, 184, 0.1);
+  --state-ready-border: rgba(148, 163, 184, 0.25);
 
   --state-running-fg: #38bdf8;
-  --state-running-bg: #0c2538;
-  --state-running-border: #0284c7;
+  --state-running-bg: rgba(56, 189, 248, 0.12);
+  --state-running-border: rgba(56, 189, 248, 0.35);
 
-  --state-verifying-fg: #fbbf24;
-  --state-verifying-bg: #382006;
-  --state-verifying-border: #d97706;
+  --state-verifying-fg: #fde047;
+  --state-verifying-bg: rgba(253, 224, 71, 0.12);
+  --state-verifying-border: rgba(253, 224, 71, 0.35);
 
   --state-waiting-fg: #fde047;
-  --state-waiting-bg: #3a2206;
+  --state-waiting-bg: rgba(245, 158, 11, 0.16);
   --state-waiting-border: #eab308;
   --state-waiting-glow: rgba(234, 179, 8, 0.35);
 
-  --state-success-fg: #4ade80;
-  --state-success-bg: #062b16;
-  --state-success-border: #16a34a;
+  --state-success-fg: #34d399;
+  --state-success-bg: rgba(16, 185, 129, 0.12);
+  --state-success-border: rgba(16, 185, 129, 0.35);
 
   --state-failure-fg: #f87171;
-  --state-failure-bg: #3b0d0d;
-  --state-failure-border: #dc2626;
+  --state-failure-bg: rgba(239, 68, 68, 0.14);
+  --state-failure-border: rgba(239, 68, 68, 0.35);
 
-  /* Inbox Severities */
-  --severity-action-fg: #fde047;
-  --severity-action-bg: #3a2206;
-  --severity-action-border: #eab308;
+  /* Infrastructure & Connector States */
+  --infra-online-fg: var(--color-emerald-500);
+  --infra-online-bg: var(--color-emerald-subtle);
+  --infra-terminal-led: var(--color-cyan-500);
+  --infra-terminal-bg: var(--color-cyan-subtle);
 
-  --severity-critical-fg: #f87171;
-  --severity-critical-bg: #3b0d0d;
-  --severity-critical-border: #dc2626;
+  /* Border Radii */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 9999px;
 
-  --severity-important-fg: #fbbf24;
-  --severity-important-bg: #382006;
-  --severity-important-border: #d97706;
+  /* Shadows & Depth */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 10px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.65);
+  --shadow-modal: 0 24px 48px -8px rgba(0, 0, 0, 0.85);
 
-  --severity-fyi-fg: #94a3b8;
-  --severity-fyi-bg: #161e2e;
-  --severity-fyi-border: #242e42;
-
-  /* Spacing and Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-modal: 0 20px 40px rgba(0, 0, 0, 0.7);
-
-  /* Z-indices */
+  /* Z-Index Hierarchy */
   --z-base: 1;
+  --z-nav: 30;
   --z-drawer: 40;
   --z-console: 50;
   --z-modal: 100;
@@ -92,52 +151,96 @@
   --z-tooltip: 300;
 
   /* ==========================================================================
-     Living HQ · The Tactile Atelier Tokens
-     Warm cream/stone canvas, parchment surfaces, warm woods, calm mineral accents
+     Tier 3: Component Dimensions
      ========================================================================== */
-  --hq-canvas: #F7F5F0;
-  --hq-canvas-subtle: #EFECE6;
-  --hq-surface-base: #FFFFFF;
-  --hq-surface-parchment: #FCFAF6;
-  --hq-surface-panel: #F4F1EA;
-  --hq-surface-hover: #EBE7DD;
-  --hq-surface-active: #E3DEC3;
+  --topbar-height: 56px;
+  --sidebar-width: 290px;
+  --inspector-width: 380px;
+  --touch-target-min: 44px;
 
-  --hq-border-subtle: #E3DFD5;
-  --hq-border-strong: #C8C2B4;
-  --hq-border-dark: #8C8474;
-
-  --hq-text-primary: #1C1E21;
-  --hq-text-secondary: #555B66;
-  --hq-text-muted: #848B98;
-
-  --hq-wood-oak: #8C6D53;
-  --hq-wood-walnut: #5A4231;
-  --hq-metal-brass: #D97706;
-  --hq-metal-steel: #64748B;
-
-  --hq-mineral-blue: #2B59C3;
-  --hq-mineral-blue-bg: #EFF4FE;
-  --hq-mineral-blue-border: #93B4F5;
-
-  --hq-mineral-sage: #3D7A68;
-  --hq-mineral-sage-bg: #EBF5F1;
-  --hq-mineral-sage-border: #A3D4C4;
-
-  --hq-mineral-amber: #B45309;
-  --hq-mineral-amber-bg: #FEF7ED;
-  --hq-mineral-amber-border: #FCD34D;
-
-  --hq-mineral-iris: #6B46C1;
-  --hq-mineral-iris-bg: #F5F0FF;
-  --hq-mineral-iris-border: #D6BCFA;
-
-  --hq-mineral-crimson: #B91C1C;
-  --hq-mineral-crimson-bg: #FEF2F2;
-  --hq-mineral-crimson-border: #FECACA;
-
-  --hq-shadow-tactile: 0 2px 4px rgba(60, 50, 40, 0.06), 0 8px 16px rgba(60, 50, 40, 0.04);
-  --hq-shadow-float: 0 6px 12px rgba(60, 50, 40, 0.08), 0 16px 32px rgba(60, 50, 40, 0.06);
-  --hq-shadow-deep: 0 12px 24px rgba(60, 50, 40, 0.12), 0 24px 48px rgba(60, 50, 40, 0.08);
+  /* ==========================================================================
+     Tier 4: Spatial & 3D Environment Tokens
+     ========================================================================== */
+  --hq-ambient-light: #2d3748;
+  --hq-service-light-key: #d0e0ff;
+  --hq-service-light-fill: #7080a0;
+  --hq-rack-led-active: #06b6d4;
+  --hq-rack-led-idle: #1e293b;
+  --hq-floor-grid: #1e293b;
 }
 
+/* Base resets & typography */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Accessible focus visible */
+:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* ============================================================
+   Responsive Layout — Mobile / Tablet Overrides
+   ============================================================ */
+
+/* Prevent page-level horizontal scrolling at all viewports */
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Tablet: hide sidebar at ≤ 768px */
+@media (max-width: 768px) {
+  .runs-list-sidebar {
+    display: none !important;
+  }
+}
+
+/* Mobile: inner scrollable tables — allow horizontal scroll inside component */
+@media (max-width: 640px) {
+  /* Automations table wrapper: scroll horizontally inside container */
+  .responsive-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Inspector / side panels: full width on mobile */
+  .calendar-inspector-panel,
+  .connectors-sidebar-panel {
+    display: none !important;
+  }
+
+  /* Connectors main grid: single column on mobile */
+  .connectors-main-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Connectors card grid: stack vertically */
+  .connectors-card-grid > * {
+    max-width: 100% !important;
+  }
+
+  /* Modals must fit viewport */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .modal-sheet {
+    border-radius: 12px 12px 0 0 !important;
+    max-height: 90vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

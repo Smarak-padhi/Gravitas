@@ -38,24 +38,62 @@ export class HqInfrastructure {
     rackGroup.name = 'station:omniroute-rack'
     rackGroup.userData = { type: 'station', id: station.id, name: station.name }
 
-    // Raised Equipment Pad / PDU Plinth (dark graphite with brass rim)
+    // 1. Raised Access Floor Platform (Anti-Static Equipment Area)
+    const floorPlatformGeo = this.track(new THREE.BoxGeometry(4.8, 0.06, 3.8))
+    const floorPlatform = new THREE.Mesh(floorPlatformGeo, materials.limestoneDark)
+    floorPlatform.position.set(0.0, 0.03, 0.4)
+    floorPlatform.receiveShadow = true
+    rackGroup.add(floorPlatform)
+
+    // Floor Platform Beveled Edge Trim (Brushed Aluminum / Steel)
+    const floorTrimGeo = this.track(new THREE.BoxGeometry(4.88, 0.02, 3.88))
+    const floorTrim = new THREE.Mesh(floorTrimGeo, materials.gunmetal)
+    floorTrim.position.set(0.0, 0.06, 0.4)
+    rackGroup.add(floorTrim)
+
+    // Floor Grid Seam Lines (0.6m tile seams)
+    const seamMat = materials.limestonePlinth
+    for (let gx = -2.1; gx <= 2.1; gx += 0.6) {
+      const seamGeo = this.track(new THREE.BoxGeometry(0.015, 0.005, 3.7))
+      const seam = new THREE.Mesh(seamGeo, seamMat)
+      seam.position.set(gx, 0.065, 0.4)
+      rackGroup.add(seam)
+    }
+
+    // 2. Equipment Pad / Heavy PDU Plinth (dark graphite with brass rim)
     const plinthGeo = this.track(new THREE.BoxGeometry(3.6, 0.12, 1.8))
     const plinth = new THREE.Mesh(plinthGeo, materials.limestoneDark)
-    plinth.position.set(0.0, 0.06, 0.0)
+    plinth.position.set(0.0, 0.12, 0.0)
     plinth.receiveShadow = true
     rackGroup.add(plinth)
 
     const plinthRimGeo = this.track(new THREE.BoxGeometry(3.66, 0.02, 1.86))
     const plinthRim = new THREE.Mesh(plinthRimGeo, materials.brass)
-    plinthRim.position.set(0.0, 0.12, 0.0)
+    plinthRim.position.set(0.0, 0.18, 0.0)
     rackGroup.add(plinthRim)
+
+    // 3. Equipment Wall Backplane & Vertical Conduit Risers
+    const wallBackplaneGeo = this.track(new THREE.BoxGeometry(3.8, 2.8, 0.1))
+    const wallBackplane = new THREE.Mesh(wallBackplaneGeo, materials.limestonePlinth)
+    wallBackplane.position.set(0.0, 1.4, -0.85)
+    wallBackplane.receiveShadow = true
+    rackGroup.add(wallBackplane)
+
+    const riserOffsets = [-1.4, -0.4, 0.4, 1.4]
+    for (const ro of riserOffsets) {
+      const riserGeo = this.track(new THREE.BoxGeometry(0.12, 2.6, 0.12))
+      const riser = new THREE.Mesh(riserGeo, materials.gunmetal)
+      riser.position.set(ro, 1.35, -0.78)
+      riser.castShadow = true
+      rackGroup.add(riser)
+    }
 
     // Dual 42U Server Cabinets: Rack 01 (OmniRoute Gateway), Rack 02 (Connector Bay / External Capabilities)
     const rackOffsets = [-0.85, 0.85]
     for (let i = 0; i < rackOffsets.length; i++) {
       const rx = rackOffsets[i]!
       const cabinetGroup = new THREE.Group()
-      cabinetGroup.position.set(rx, 0.12, 0.0)
+      cabinetGroup.position.set(rx, 0.18, 0.0)
 
       // 1. 42U Steel Cabinet Outer Housing (1.1m wide x 2.3m high x 1.1m deep)
       const frameGeo = this.track(new THREE.BoxGeometry(1.1, 2.3, 1.1))
@@ -77,6 +115,27 @@ export class HqInfrastructure {
       const face = new THREE.Mesh(faceGeo, materials.serverRackFace)
       face.position.set(0.0, 1.15, 0.555)
       cabinetGroup.add(face)
+
+      // 3. Modular Server Blade Bezels (1U / 2U chassis drawers)
+      const bladeHeights = [0.35, 0.75, 1.15, 1.55, 1.95]
+      for (const by of bladeHeights) {
+        const bladeGeo = this.track(new THREE.BoxGeometry(0.92, 0.16, 0.025))
+        const blade = new THREE.Mesh(bladeGeo, materials.limestoneDark)
+        blade.position.set(0.0, by, 0.565)
+        cabinetGroup.add(blade)
+
+        // Brass server extraction handle
+        const handleGeo = this.track(new THREE.BoxGeometry(0.24, 0.015, 0.02))
+        const bladeHandle = new THREE.Mesh(handleGeo, materials.brass)
+        bladeHandle.position.set(0.0, by, 0.58)
+        cabinetGroup.add(bladeHandle)
+
+        // Status micro-LED indicator
+        const dotGeo = this.track(new THREE.BoxGeometry(0.015, 0.015, 0.015))
+        const dot = new THREE.Mesh(dotGeo, i === 0 ? materials.statusRunning : materials.statusReady)
+        dot.position.set(0.38, by, 0.58)
+        cabinetGroup.add(dot)
+      }
 
       // If Rack 01 (OmniRoute), mount the authoritative activity LED bar
       if (i === 0) {
@@ -120,17 +179,33 @@ export class HqInfrastructure {
     }
 
     // Overhead Cable Ladder Tray bridging from rack top to main floor conduit
-    const trayGeo = this.track(new THREE.BoxGeometry(3.2, 0.08, 0.5))
+    const trayGeo = this.track(new THREE.BoxGeometry(3.6, 0.08, 0.6))
     const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
-    tray.position.set(0.0, 2.5, 0.0)
+    tray.position.set(0.0, 2.65, 0.0)
     tray.castShadow = true
     rackGroup.add(tray)
 
-    const trayStrutGeo = this.track(new THREE.BoxGeometry(0.03, 0.04, 0.48))
-    for (let tx = -1.4; tx <= 1.4; tx += 0.35) {
+    const trayStrutGeo = this.track(new THREE.BoxGeometry(0.03, 0.04, 0.58))
+    for (let tx = -1.6; tx <= 1.6; tx += 0.4) {
       const strut = new THREE.Mesh(trayStrutGeo, materials.brass)
-      strut.position.set(tx, 2.52, 0.0)
+      strut.position.set(tx, 2.67, 0.0)
       rackGroup.add(strut)
+    }
+
+    // Overhead HVAC Cooling Ducts (Utility ceiling run)
+    const ductGeo = this.track(new THREE.CylinderGeometry(0.16, 0.16, 4.4, 16))
+    const duct = new THREE.Mesh(ductGeo, materials.gunmetal)
+    duct.rotation.z = Math.PI / 2
+    duct.position.set(0.0, 2.95, -0.4)
+    duct.castShadow = true
+    rackGroup.add(duct)
+
+    const ductBandGeo = this.track(new THREE.CylinderGeometry(0.17, 0.17, 0.08, 16))
+    for (let dx = -1.8; dx <= 1.8; dx += 0.9) {
+      const band = new THREE.Mesh(ductBandGeo, materials.brass)
+      band.rotation.z = Math.PI / 2
+      band.position.set(dx, 2.95, -0.4)
+      rackGroup.add(band)
     }
 
     this.group.add(rackGroup)

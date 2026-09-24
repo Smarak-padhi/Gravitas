@@ -28,9 +28,9 @@ export function Tabs<T extends string = string>({
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        backgroundColor: 'var(--bg-panel-subtle)',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-md)',
+        backgroundColor: 'var(--bg-panel-subtle, rgba(15, 20, 34, 0.6))',
+        border: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))',
+        borderRadius: 'var(--radius-md, 6px)',
         padding: '2px',
         gap: '2px',
       }}
@@ -48,31 +48,49 @@ export function Tabs<T extends string = string>({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '5px 12px',
-              borderRadius: 'var(--radius-sm)',
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-sm, 4px)',
               fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.4px',
-              fontFamily: 'var(--font-mono)',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              fontFamily: 'var(--font-sans, system-ui, sans-serif)',
               border: 'none',
-              backgroundColor: isActive ? 'var(--border-focus)' : 'transparent',
-              color: isActive ? '#ffffff' : 'var(--text-secondary)',
+              backgroundColor: isActive
+                ? 'var(--surface-active, rgba(59, 130, 246, 0.2))'
+                : 'transparent',
+              color: isActive
+                ? 'var(--text-primary, #ffffff)'
+                : 'var(--text-secondary, #94a3b8)',
               cursor: 'pointer',
-              transition: 'all var(--motion-duration-fast) var(--motion-ease-standard)',
+              transition: 'background-color 150ms ease, color 150ms ease',
               userSelect: 'none',
               whiteSpace: 'nowrap',
+              outline: 'none',
             }}
           >
-            {item.icon}
+            {item.icon && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  color: isActive ? 'var(--brand-primary, #60a5fa)' : 'inherit',
+                }}
+              >
+                {item.icon}
+              </span>
+            )}
             <span>{item.label}</span>
             {item.count !== undefined && (
               <span
                 style={{
                   fontSize: '9px',
                   padding: '1px 5px',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'var(--bg-panel-elevated)',
-                  color: isActive ? '#ffffff' : 'var(--text-muted)',
+                  borderRadius: 'var(--radius-sm, 4px)',
+                  backgroundColor: isActive
+                    ? 'rgba(255, 255, 255, 0.2)'
+                    : 'var(--bg-panel-elevated, rgba(255, 255, 255, 0.06))',
+                  color: isActive ? '#ffffff' : 'var(--text-muted, #64748b)',
+                  fontFamily: 'var(--font-mono, monospace)',
                 }}
               >
                 {item.count}
