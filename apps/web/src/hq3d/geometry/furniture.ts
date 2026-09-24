@@ -9,6 +9,7 @@ import type { MaterialLibrary } from '../materials/materials.js'
 import type { StationId } from '../types.js'
 import type { StationStatus } from '../world/worldState.js'
 import { STATION_DEFINITIONS } from '../world/stations.js'
+import { HeroFrontendBay } from './heroBay/heroFrontendBay.js'
 
 export class HqFurniture {
   public readonly group: THREE.Group
@@ -129,11 +130,18 @@ export class HqFurniture {
    * - Expansion Bays 03 & 04: standby modular stations.
    */
   private buildAgentWorkstations(materials: MaterialLibrary): void {
+    // 0. Soft Woven Area Rug spanning the Agent Operations room
+    const roomRugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 4.8))
+    const roomRug = new THREE.Mesh(roomRugGeo, materials.carpetWarm)
+    roomRug.position.set(0.0, 7.204, -0.1)
+    roomRug.receiveShadow = true
+    this.group.add(roomRug)
+
     const stationsConfig = [
       {
         id: 'frontend-engineer-workstation',
         legacyId: 'codex-workstation',
-        pos: [-2.5, 7.2, 0.5],
+        pos: [-3.5, 7.2, 0.6],
         matColor: materials.terminalScreen, // Slate cyan code display
       },
       {
@@ -161,6 +169,27 @@ export class HqFurniture {
         (STATION_DEFINITIONS as any)[cfg.id] ??
         (STATION_DEFINITIONS as any)[cfg.legacyId]
 
+      const isFrontend = cfg.id === 'frontend-engineer-workstation'
+      const isBackend = cfg.id === 'backend-engineer-workstation'
+
+      if (isFrontend) {
+        const heroResult = HeroFrontendBay.buildBay(materials, this.track.bind(this))
+        heroResult.podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
+
+        // Register both modern role ID and legacy aliases for indicators
+        this.stationIndicators.set('frontend-engineer-workstation', heroResult.indicatorMesh)
+        this.stationIndicators.set('codex-workstation', heroResult.indicatorMesh)
+        this.stationIndicators.set('engineering-workstation-01', heroResult.indicatorMesh)
+
+        // Register both modern role ID and legacy aliases for screens
+        this.stationScreens.set('frontend-engineer-workstation', heroResult.screens)
+        this.stationScreens.set('codex-workstation', heroResult.screens)
+        this.stationScreens.set('engineering-workstation-01', heroResult.screens)
+
+        this.group.add(heroResult.podGroup)
+        continue
+      }
+
       const podGroup = new THREE.Group()
       podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
       podGroup.name = `station:${stationDef.id}`
@@ -173,29 +202,13 @@ export class HqFurniture {
       ind.name = `station-indicator:${stationDef.id}`
       podGroup.add(ind)
 
-      const isFrontend = cfg.id === 'frontend-engineer-workstation'
-      const isBackend = cfg.id === 'backend-engineer-workstation'
-
-      // Register both modern role ID and legacy aliases
-      if (isFrontend) {
-        this.stationIndicators.set('frontend-engineer-workstation', ind)
-        this.stationIndicators.set('codex-workstation', ind)
-        this.stationIndicators.set('engineering-workstation-01', ind)
-      } else if (isBackend) {
+      // Register indicators for other stations
+      if (isBackend) {
         this.stationIndicators.set('backend-engineer-workstation', ind)
         this.stationIndicators.set('fcc-workstation', ind)
         this.stationIndicators.set('engineering-workstation-02', ind)
       } else {
         this.stationIndicators.set(stationDef.id as StationId, ind)
-      }
-
-      // 0. Soft Woven Area Rug under workstation pod
-      if (isFrontend) {
-        const rugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 4.8))
-        const rug = new THREE.Mesh(rugGeo, materials.carpetWarm)
-        rug.position.set(2.5, 0.004, -0.6)
-        rug.receiveShadow = true
-        podGroup.add(rug)
       }
 
       // 1. Walnut Desktop Slab (2.2m x 0.95m x 0.06m)
@@ -917,9 +930,9 @@ export class HqFurniture {
     }
     f2Group.add(troughGroup)
 
-    // Architectural Shelving Unit in Agent Operations (West wall)
+    // Architectural Shelving Unit in Agent Operations (West wall, rear zone)
     const shelfGroup = new THREE.Group()
-    shelfGroup.position.set(-5.6, 1.2, -1.0)
+    shelfGroup.position.set(-6.0, 1.2, 2.2)
     shelfGroup.rotation.y = Math.PI / 2
 
     const shelfFrameGeo = this.track(new THREE.BoxGeometry(0.35, 2.2, 2.0))

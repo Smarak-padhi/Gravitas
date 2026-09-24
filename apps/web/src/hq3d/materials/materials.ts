@@ -108,6 +108,28 @@ export class MaterialLibrary {
   public readonly statusSuccess: THREE.MeshStandardMaterial
   public readonly statusFailure: THREE.MeshStandardMaterial
 
+  // Wave 12F Hero Fidelity Materials (Frontend Bay)
+  public readonly heroDeskWood: THREE.MeshStandardMaterial
+  public readonly heroSteel: THREE.MeshStandardMaterial
+  public readonly heroBrass: THREE.MeshStandardMaterial
+  public readonly heroFabric: THREE.MeshStandardMaterial
+  public readonly heroPlastic: THREE.MeshStandardMaterial
+  public readonly heroScreenIdle: THREE.MeshStandardMaterial
+  public readonly heroScreenActive: THREE.MeshStandardMaterial
+  public readonly heroScreenPortrait: THREE.MeshStandardMaterial
+  public readonly heroScreenPortraitActive: THREE.MeshStandardMaterial
+  public readonly heroDeskMat: THREE.MeshStandardMaterial
+  public readonly heroTablet: THREE.MeshStandardMaterial
+  public readonly heroCeramic: THREE.MeshStandardMaterial
+  public readonly heroLampGlow: THREE.MeshStandardMaterial
+  public readonly heroCharSkin: THREE.MeshStandardMaterial
+  public readonly heroCharHair: THREE.MeshStandardMaterial
+  public readonly heroCharSweater: THREE.MeshStandardMaterial
+  public readonly heroCharDenim: THREE.MeshStandardMaterial
+  public readonly heroCharSneaker: THREE.MeshStandardMaterial
+  public readonly heroAcousticWood: THREE.MeshStandardMaterial
+  public readonly heroAcousticFelt: THREE.MeshStandardMaterial
+
   private readonly allMaterials: THREE.Material[] = []
   private readonly allTextures: THREE.Texture[] = []
 
@@ -130,6 +152,14 @@ export class MaterialLibrary {
     const carpetTex = hasCanvas ? this.trackTex(TextureGenerator.createCarpetTexture()) : null
     const wallArtTex = hasCanvas ? this.trackTex(TextureGenerator.createWallArtTexture()) : null
     const whiteboardTex = hasCanvas ? this.trackTex(TextureGenerator.createWhiteboardTexture()) : null
+    const heroDeskTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroDeskWoodTexture()) : null
+    const heroFabricTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroFabricTexture()) : null
+    const heroScreenIdleTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroUltrawideScreenTexture(false)) : null
+    const heroScreenActiveTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroUltrawideScreenTexture(true)) : null
+    const heroScreenPortraitTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroPortraitScreenTexture(false)) : null
+    const heroScreenPortraitActiveTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroPortraitScreenTexture(true)) : null
+    const heroDeskMatTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroDeskMatTexture()) : null
+    const heroTabletTex = hasCanvas ? this.trackTex(TextureGenerator.createHeroTabletSketchTexture()) : null
 
     // 2. Architectural Stone Floor (Warm mineral slate tone matching Gravitas shell)
     this.limestone = this.track(
@@ -777,6 +807,181 @@ export class MaterialLibrary {
     )
     this.statusFailure = this.track(
       new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3, metalness: 0.2 })
+    )
+
+    // Wave 12F Hero Fidelity Materials (Frontend Bay)
+    this.heroDeskWood = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroDeskTex,
+        roughness: 0.44,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroSteel = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x2b303c,
+        roughness: 0.52,
+        metalness: 0.42,
+      })
+    )
+
+    this.heroBrass = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        roughness: 0.32,
+        metalness: 0.85,
+      })
+    )
+
+    this.heroFabric = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroFabricTex,
+        roughness: 0.88,
+        metalness: 0.0,
+      })
+    )
+
+    this.heroPlastic = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1e2229,
+        roughness: 0.48,
+        metalness: 0.08,
+      })
+    )
+
+    this.heroScreenIdle = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroScreenIdleTex,
+        roughness: 0.35,
+        metalness: 0.02,
+        emissive: 0x000000,
+      })
+    )
+
+    this.heroScreenActive = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroScreenActiveTex,
+        roughness: 0.35,
+        metalness: 0.02,
+        emissive: 0x0c2540,
+        emissiveIntensity: 0.65,
+      })
+    )
+
+    this.heroScreenPortrait = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroScreenPortraitTex,
+        roughness: 0.35,
+        metalness: 0.02,
+        emissive: 0x000000,
+      })
+    )
+
+    this.heroScreenPortraitActive = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroScreenPortraitActiveTex,
+        roughness: 0.35,
+        metalness: 0.02,
+        emissive: 0x0c2540,
+        emissiveIntensity: 0.65,
+      })
+    )
+
+    this.heroDeskMat = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroDeskMatTex,
+        roughness: 0.82,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroTablet = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: heroTabletTex,
+        roughness: 0.18,
+        metalness: 0.1,
+      })
+    )
+
+    this.heroCeramic = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x0d9488,
+        roughness: 0.15,
+        metalness: 0.05,
+      })
+    )
+
+    this.heroLampGlow = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xfffcf0,
+        emissive: 0xffeed5,
+        emissiveIntensity: 0.85,
+      })
+    )
+
+    this.heroCharSkin = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xf3cca8,
+        roughness: 0.62,
+        metalness: 0.0,
+      })
+    )
+
+    this.heroCharHair = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x3d271d,
+        roughness: 0.38,
+        metalness: 0.05,
+      })
+    )
+
+    this.heroCharSweater = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xb4a4d9,
+        roughness: 0.82,
+        metalness: 0.0,
+      })
+    )
+
+    this.heroCharDenim = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x24324f,
+        roughness: 0.78,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroCharSneaker = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xedebe8,
+        roughness: 0.48,
+        metalness: 0.05,
+      })
+    )
+
+    this.heroAcousticWood = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xc89d66,
+        roughness: 0.48,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroAcousticFelt = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x161a22,
+        roughness: 0.95,
+        metalness: 0.0,
+      })
     )
   }
 

@@ -527,4 +527,357 @@ export class TextureGenerator {
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
   }
+
+  /**
+   * Hero Workstation Natural European White Oak Wood Texture
+   */
+  public static createHeroDeskWoodTexture(): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1024
+    canvas.height = 512
+    const ctx = canvas.getContext('2d')!
+
+    // Warm natural honey-oak base tone
+    ctx.fillStyle = '#b8895b'
+    ctx.fillRect(0, 0, 1024, 512)
+
+    // Wood grain linear striations
+    for (let y = 0; y < 512; y += 2) {
+      const alpha = Math.sin(y * 0.08) * 0.08 + Math.sin(y * 0.3) * 0.04 + 0.12
+      ctx.fillStyle = `rgba(130, 85, 45, ${alpha.toFixed(3)})`
+      ctx.fillRect(0, y, 1024, 2)
+    }
+
+    // Organic wavy grain flow
+    for (let i = 0; i < 40; i++) {
+      const yBase = (i * 24) % 512
+      ctx.strokeStyle = 'rgba(95, 60, 30, 0.12)'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(0, yBase)
+      for (let x = 0; x <= 1024; x += 32) {
+        const offset = Math.sin(x * 0.015 + i) * 6 + Math.cos(x * 0.008 + i * 2) * 4
+        ctx.lineTo(x, yBase + offset)
+      }
+      ctx.stroke()
+    }
+
+    // Subtle pore flecks
+    ctx.fillStyle = 'rgba(75, 45, 20, 0.08)'
+    for (let i = 0; i < 3000; i++) {
+      const px = Math.random() * 1024
+      const py = Math.random() * 512
+      ctx.fillRect(px, py, Math.random() * 3 + 1, 1)
+    }
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
+
+  /**
+   * Hero Ergonomic Chair Woven Mesh Fabric Texture
+   */
+  public static createHeroFabricTexture(): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 256
+    const ctx = canvas.getContext('2d')!
+
+    // Deep graphite fabric base
+    ctx.fillStyle = '#1c2028'
+    ctx.fillRect(0, 0, 256, 256)
+
+    // Diagonal twill weave pattern
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)'
+    for (let x = 0; x < 256; x += 4) {
+      for (let y = 0; y < 256; y += 4) {
+        if ((x + y) % 8 === 0) {
+          ctx.fillRect(x, y, 2, 2)
+        }
+      }
+    }
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)'
+    for (let x = 0; x < 256; x += 4) {
+      for (let y = 0; y < 256; y += 4) {
+        if ((x - y + 256) % 8 === 0) {
+          ctx.fillRect(x, y, 2, 2)
+        }
+      }
+    }
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set(4, 4)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
+
+  /**
+   * Hero Ultrawide 34" Display Texture (Code & Visual Engineering IDE)
+   */
+  public static createHeroUltrawideScreenTexture(active: boolean): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1024
+    canvas.height = 512
+    const ctx = canvas.getContext('2d')!
+
+    // Clean dark matte editor background
+    ctx.fillStyle = active ? '#0c1017' : '#080a0e'
+    ctx.fillRect(0, 0, 1024, 512)
+
+    // Window top title bar
+    ctx.fillStyle = active ? '#161b24' : '#10141a'
+    ctx.fillRect(0, 0, 1024, 32)
+
+    // Window control dots
+    ctx.fillStyle = active ? '#ef4444' : '#555555'
+    ctx.beginPath()
+    ctx.arc(20, 16, 5, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = active ? '#eab308' : '#444444'
+    ctx.beginPath()
+    ctx.arc(36, 16, 5, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = active ? '#22c55e' : '#333333'
+    ctx.beginPath()
+    ctx.arc(52, 16, 5, 0, Math.PI * 2)
+    ctx.fill()
+
+    // Title text
+    ctx.fillStyle = active ? '#94a3b8' : '#475569'
+    ctx.font = '12px monospace'
+    ctx.fillText('gravitas / apps / web / src / components / CanvasView.tsx', 80, 20)
+
+    // Left sidebar (File tree)
+    ctx.fillStyle = active ? '#111620' : '#0d1015'
+    ctx.fillRect(0, 32, 180, 480)
+
+    // Sidebar items
+    const sideItems = ['src/', '  hq3d/', '    geometry/', '    materials/', '    motion/', '  components/', '  hooks/', 'package.json']
+    ctx.font = '11px monospace'
+    for (let i = 0; i < sideItems.length; i++) {
+      ctx.fillStyle = i === 1 ? (active ? '#38bdf8' : '#64748b') : (active ? '#64748b' : '#334155')
+      ctx.fillText(sideItems[i]!, 16, 60 + i * 22)
+    }
+
+    // Center Main Editor Area (Code lines)
+    const codeStartX = 200
+    const codeColors = active
+      ? ['#38bdf8', '#c084fc', '#4ade80', '#fbbf24', '#f43f5e', '#94a3b8']
+      : ['#1e3a5f', '#3b2f5c', '#204a35', '#4a3d1c', '#4a1d28', '#334155']
+
+    for (let row = 0; row < 18; row++) {
+      const y = 60 + row * 23
+      // Line numbers
+      ctx.fillStyle = active ? '#334155' : '#1e293b'
+      ctx.font = '11px monospace'
+      ctx.fillText(String(row + 1).padStart(2, ' '), codeStartX - 16, y)
+
+      // Indent
+      const indent = (row % 4 === 1 ? 24 : row % 4 === 2 ? 48 : row % 4 === 3 ? 24 : 0)
+      let curX = codeStartX + 12 + indent
+
+      // Code token segments
+      const segCount = (row % 3) + 2
+      for (let s = 0; s < segCount; s++) {
+        const segWidth = ((row * 17 + s * 37) % 90) + 30
+        const color = codeColors[(row + s) % codeColors.length]!
+        ctx.fillStyle = color
+        ctx.fillRect(curX, y - 9, segWidth, 10)
+        curX += segWidth + 8
+      }
+    }
+
+    // Right Split: Live Component Preview Canvas
+    const previewX = 640
+    ctx.fillStyle = active ? '#0f172a' : '#0a0e17'
+    ctx.fillRect(previewX, 32, 384, 480)
+    ctx.strokeStyle = active ? '#1e293b' : '#111827'
+    ctx.lineWidth = 1
+    ctx.strokeRect(previewX, 32, 384, 480)
+
+    // Preview UI Header
+    ctx.fillStyle = active ? '#1e293b' : '#131b2b'
+    ctx.fillRect(previewX + 16, 48, 352, 36)
+    ctx.fillStyle = active ? '#38bdf8' : '#1e3a5f'
+    ctx.fillRect(previewX + 28, 58, 64, 16)
+
+    // Preview Cards
+    for (let c = 0; c < 3; c++) {
+      const cardY = 100 + c * 105
+      ctx.fillStyle = active ? '#1e293b' : '#101726'
+      ctx.fillRect(previewX + 16, cardY, 352, 92)
+      ctx.fillStyle = active ? '#475569' : '#1e293b'
+      ctx.fillRect(previewX + 32, cardY + 16, 120, 14)
+      ctx.fillStyle = active ? '#334155' : '#162032'
+      ctx.fillRect(previewX + 32, cardY + 38, 280, 8)
+      ctx.fillRect(previewX + 32, cardY + 52, 220, 8)
+
+      // Accent button
+      ctx.fillStyle = active ? '#2563eb' : '#1d3257'
+      ctx.fillRect(previewX + 32, cardY + 68, 64, 14)
+    }
+
+    // Bottom Status Bar
+    ctx.fillStyle = active ? '#0284c7' : '#0f172a'
+    ctx.fillRect(0, 492, 1024, 20)
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '11px monospace'
+    ctx.fillText(active ? '● WORKER_RUNNING — 0 errors — TypeScript 5.8 — Vite HMR' : '○ STANDBY — Idle — Git main (clean)', 16, 506)
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
+
+  /**
+   * Hero Secondary 24" Portrait Display Texture (Mobile Preview & Design Tokens)
+   */
+  public static createHeroPortraitScreenTexture(active: boolean): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 512
+    const ctx = canvas.getContext('2d')!
+
+    // Dark slate background
+    ctx.fillStyle = active ? '#0b0f17' : '#070a0f'
+    ctx.fillRect(0, 0, 256, 512)
+
+    // Mobile Device Frame Outline in preview
+    ctx.strokeStyle = active ? '#334155' : '#1e293b'
+    ctx.lineWidth = 2
+    ctx.strokeRect(16, 24, 224, 464)
+
+    // Top status bar notch
+    ctx.fillStyle = active ? '#1e293b' : '#0f172a'
+    ctx.fillRect(80, 24, 96, 14)
+
+    // Navigation Header
+    ctx.fillStyle = active ? '#1e293b' : '#111827'
+    ctx.fillRect(24, 46, 208, 40)
+    ctx.fillStyle = active ? '#38bdf8' : '#1e3a5f'
+    ctx.fillRect(36, 58, 48, 16)
+
+    // Color Palette Token Swatches
+    const tokens = active
+      ? ['#38bdf8', '#818cf8', '#34d399', '#fbbf24', '#f87171']
+      : ['#1e3a5f', '#2a3560', '#1c4a35', '#47361a', '#472020']
+
+    ctx.fillStyle = active ? '#94a3b8' : '#475569'
+    ctx.font = '10px monospace'
+    ctx.fillText('DESIGN TOKENS', 36, 110)
+
+    for (let i = 0; i < tokens.length; i++) {
+      ctx.fillStyle = tokens[i]!
+      ctx.fillRect(36 + i * 36, 120, 28, 28)
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)'
+      ctx.strokeRect(36 + i * 36, 120, 28, 28)
+    }
+
+    // Component Feed Cards
+    for (let c = 0; c < 3; c++) {
+      const cardY = 166 + c * 100
+      ctx.fillStyle = active ? '#1e293b' : '#101726'
+      ctx.fillRect(28, cardY, 200, 88)
+
+      // Avatar circle
+      ctx.fillStyle = active ? '#38bdf8' : '#1e3a5f'
+      ctx.beginPath()
+      ctx.arc(46, cardY + 22, 12, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Title & description lines
+      ctx.fillStyle = active ? '#e2e8f0' : '#475569'
+      ctx.fillRect(66, cardY + 14, 100, 8)
+      ctx.fillStyle = active ? '#64748b' : '#1e293b'
+      ctx.fillRect(66, cardY + 26, 140, 6)
+      ctx.fillRect(40, cardY + 48, 176, 6)
+      ctx.fillRect(40, cardY + 60, 130, 6)
+    }
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
+
+  /**
+   * Hero Desk Mat with Contrast Stitching
+   */
+  public static createHeroDeskMatTexture(): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 512
+    canvas.height = 256
+    const ctx = canvas.getContext('2d')!
+
+    // Dark charcoal felt/leather base
+    ctx.fillStyle = '#1e222a'
+    ctx.fillRect(0, 0, 512, 256)
+
+    // Micro surface texture
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'
+    for (let i = 0; i < 4000; i++) {
+      ctx.fillRect(Math.random() * 512, Math.random() * 256, 1.5, 1.5)
+    }
+
+    // Perimeter dashed stitch line
+    ctx.strokeStyle = '#64748b'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([4, 4])
+    ctx.strokeRect(10, 10, 492, 236)
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
+
+  /**
+   * Hero Creative Tablet Sketch Surface (Wireframe architecture)
+   */
+  public static createHeroTabletSketchTexture(): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 256
+    const ctx = canvas.getContext('2d')!
+
+    // Dark matte glass drafting surface
+    ctx.fillStyle = '#0f172a'
+    ctx.fillRect(0, 0, 256, 256)
+
+    // Subtle isometric drafting grid
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)'
+    ctx.lineWidth = 1
+    for (let i = 16; i < 256; i += 16) {
+      ctx.beginPath()
+      ctx.moveTo(i, 0)
+      ctx.lineTo(i, 256)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(0, i)
+      ctx.lineTo(256, i)
+      ctx.stroke()
+    }
+
+    // Stylus sketch wireframe lines
+    ctx.strokeStyle = '#38bdf8'
+    ctx.lineWidth = 2
+    ctx.strokeRect(32, 32, 80, 80)
+    ctx.strokeRect(144, 32, 80, 80)
+    ctx.strokeRect(88, 144, 80, 80)
+
+    ctx.beginPath()
+    ctx.moveTo(72, 112)
+    ctx.lineTo(128, 144)
+    ctx.moveTo(184, 112)
+    ctx.lineTo(128, 144)
+    ctx.stroke()
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
+  }
 }

@@ -22,6 +22,7 @@ import {
   TOWER_ROLE_HOME_ROTATIONS,
 } from '../roles/roles.js'
 import { buildRoleInspectorMetadata } from '../roles/roleStationMapping.js'
+import { HeroCharacter } from './heroBay/heroCharacter.js'
 
 interface FigureController {
   readonly roleId: RoleId
@@ -78,12 +79,84 @@ export class HqCharacters {
     const pos = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
     const rotY = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
 
+    // Wave 12F Hero Frontend Engineer Character (authored miniature prototype)
+    if (roleId === 'role:engineering:frontend-engineer') {
+      const hero = HeroCharacter.buildCharacter(
+        this.materials,
+        this.track.bind(this),
+        this.trackMat.bind(this)
+      )
+      const rootGroup = hero.rootGroup
+      rootGroup.position.set(...pos)
+      rootGroup.rotation.y = rotY
+      rootGroup.name = `character:${roleId}`
+
+      const initialMeta = buildRoleInspectorMetadata({
+        roleId,
+        departmentId: 'ENGINEERING',
+        displayName: 'Frontend Engineer',
+        characterState: 'IDLE',
+        isSeated: true,
+        stationId: 'engineering-workstation-01',
+        stationAlias: 'codex-workstation',
+        currentTaskId: null,
+        currentTaskTitle: null,
+        currentHarness: 'UNKNOWN',
+        transport: 'UNKNOWN',
+        provider: 'UNKNOWN',
+        model: 'UNKNOWN',
+        isFixtureOnly: false,
+        homePosition: pos,
+      })
+
+      rootGroup.userData = {
+        type: 'character',
+        id: roleId,
+        name: 'Frontend Engineer',
+        role: 'Frontend Engineer',
+        room: 'Agent Operations',
+        status: 'IDLE',
+        description: 'Frontend Engineer at home station.',
+        roleMetadata: initialMeta,
+      }
+
+      this.group.add(rootGroup)
+      this.figureMap.set(roleId, rootGroup)
+      this.figureMap.set('char-codex', rootGroup)
+      const aliasNode = new THREE.Object3D()
+      aliasNode.name = 'character:char-codex'
+      aliasNode.userData = rootGroup.userData
+      rootGroup.add(aliasNode)
+
+      this.controllers.set(roleId, {
+        roleId,
+        rootGroup,
+        torsoGroup: hero.torsoGroup,
+        headMesh: hero.headMesh,
+        armsLeftGroup: hero.armsLeftGroup,
+        armsRightGroup: hero.armsRightGroup,
+        legLeftGroup: hero.legLeftGroup,
+        legRightGroup: hero.legRightGroup,
+        seatedLegsGroup: hero.seatedLegsGroup,
+        standingLegsGroup: hero.standingLegsGroup,
+        accessoryMesh: hero.accessoryMesh,
+        statusRing: hero.statusRing,
+        statusMaterial: hero.statusMaterial,
+        baseTorsoY: hero.baseTorsoY,
+        isSeatedDefault: true,
+        isSeated: true,
+        phaseOffset,
+        characterState: 'IDLE',
+      })
+      return
+    }
+
     const rootGroup = new THREE.Group()
     rootGroup.position.set(...pos)
     rootGroup.rotation.y = rotY
     rootGroup.name = `character:${roleId}`
 
-    const isSeated = roleId === 'role:engineering:frontend-engineer' || roleId === 'role:engineering:backend-engineer'
+    const isSeated = roleId === 'role:engineering:backend-engineer'
     const yBase = isSeated ? 0.46 : 0.0
 
     // Material selection per role (Cozy modern creative studio aesthetic)
@@ -99,11 +172,6 @@ export class HqCharacters {
       accentMat = this.materials.charPlannerAccent
       roomName = 'Mission Control'
       roleName = 'Chief Planner'
-    } else if (roleId === 'role:engineering:frontend-engineer') {
-      suitMat = this.materials.charSweaterLavender
-      accentMat = this.materials.charFrontendAccent
-      roomName = 'Agent Operations'
-      roleName = 'Frontend Engineer'
     } else if (roleId === 'role:engineering:backend-engineer') {
       suitMat = this.materials.charSweaterSlate
       accentMat = this.materials.charBackendAccent
@@ -178,45 +246,7 @@ export class HqCharacters {
     torsoGroup.add(specRight)
 
     // Role-specific sculpted hair & mascot accessories
-    if (roleId === 'role:engineering:frontend-engineer') {
-      // Stylized sculpted ponytail for Frontend Engineer
-      const hairCapGeo = this.track(new THREE.SphereGeometry(0.126, 14, 12))
-      const hairCap = new THREE.Mesh(hairCapGeo, this.materials.hairPonytail)
-      hairCap.scale.set(0.98, 1.05, 1.02)
-      hairCap.position.set(0.0, 0.37, -0.015)
-      torsoGroup.add(hairCap)
-
-      // Ponytail scrunchie / tie band
-      const tieGeo = this.track(new THREE.CylinderGeometry(0.024, 0.024, 0.035, 12))
-      const tie = new THREE.Mesh(tieGeo, this.materials.charFrontendAccent)
-      tie.rotation.x = Math.PI / 4
-      tie.position.set(0.0, 0.38, -0.14)
-      torsoGroup.add(tie)
-
-      // Sculpted arched ponytail tail
-      const tailGeo = this.track(new THREE.CylinderGeometry(0.018, 0.036, 0.28, 10))
-      const tail = new THREE.Mesh(tailGeo, this.materials.hairPonytail)
-      tail.position.set(0.0, 0.24, -0.19)
-      tail.rotation.x = 0.38
-      tail.castShadow = true
-      torsoGroup.add(tail)
-
-      // Wireless over-ear headphones
-      const hpBandGeo = this.track(new THREE.TorusGeometry(0.13, 0.01, 8, 16, Math.PI))
-      const hpBand = new THREE.Mesh(hpBandGeo, this.materials.champagneBrass)
-      hpBand.rotation.z = Math.PI
-      hpBand.rotation.y = Math.PI / 2
-      hpBand.position.set(0.0, 0.38, 0.0)
-      torsoGroup.add(hpBand)
-
-      for (const earpadX of [-0.13, 0.13]) {
-        const cupGeo = this.track(new THREE.CylinderGeometry(0.032, 0.032, 0.022, 12))
-        const cup = new THREE.Mesh(cupGeo, this.materials.charFrontendAccent)
-        cup.rotation.z = Math.PI / 2
-        cup.position.set(earpadX, 0.35, 0.0)
-        torsoGroup.add(cup)
-      }
-    } else if (roleId === 'role:strategy:chief-planner') {
+    if (roleId === 'role:strategy:chief-planner') {
       // Chief Planner: Sculpted slick hair crown
       const hairCrownGeo = this.track(new THREE.BoxGeometry(0.21, 0.08, 0.21))
       const hairCrown = new THREE.Mesh(hairCrownGeo, this.materials.hairPlanner)
@@ -294,22 +324,12 @@ export class HqCharacters {
       handR.position.set(0.16, -0.11, 0.23)
       armsRightGroup.add(handR)
 
-      // Accessory per engineering role
-      if (roleId === 'role:engineering:frontend-engineer') {
-        // Design tablet resting on desk
-        const tabletGeo = this.track(new THREE.BoxGeometry(0.22, 0.015, 0.16))
-        accessoryMesh = new THREE.Mesh(tabletGeo, this.materials.deviceTablet)
-        accessoryMesh.position.set(0.0, -0.12, 0.32)
-        accessoryMesh.rotation.x = -0.1
-        torsoGroup.add(accessoryMesh)
-      } else {
-        // Backend Engineer: Systems terminal / notebook
-        const notebookGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.17))
-        accessoryMesh = new THREE.Mesh(notebookGeo, this.materials.terminalScreenEmerald)
-        accessoryMesh.position.set(0.0, -0.12, 0.32)
-        accessoryMesh.rotation.x = -0.08
-        torsoGroup.add(accessoryMesh)
-      }
+      // Backend Engineer: Systems terminal / notebook
+      const notebookGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.17))
+      accessoryMesh = new THREE.Mesh(notebookGeo, this.materials.terminalScreenEmerald)
+      accessoryMesh.position.set(0.0, -0.12, 0.32)
+      accessoryMesh.rotation.x = -0.08
+      torsoGroup.add(accessoryMesh)
 
       // Seated Legs (denim thighs + denim shins + stylish rounded sneakers)
       const seatedLegs = new THREE.Group()
@@ -445,17 +465,13 @@ export class HqCharacters {
           ? 'planning-table'
           : roleId === 'role:quality:independent-reviewer'
             ? 'verifier-console'
-            : roleId === 'role:engineering:frontend-engineer'
-              ? 'engineering-workstation-01'
-              : 'engineering-workstation-02',
+            : 'engineering-workstation-02',
       stationAlias:
         roleId === 'role:strategy:chief-planner'
           ? 'planning-table'
           : roleId === 'role:quality:independent-reviewer'
             ? 'verifier-console'
-            : roleId === 'role:engineering:frontend-engineer'
-              ? 'codex-workstation'
-              : 'fcc-workstation',
+            : 'fcc-workstation',
       currentTaskId: null,
       currentTaskTitle: null,
       currentHarness: 'UNKNOWN',
@@ -479,13 +495,7 @@ export class HqCharacters {
 
     this.group.add(rootGroup)
     this.figureMap.set(roleId, rootGroup)
-    if (roleId === 'role:engineering:frontend-engineer') {
-      this.figureMap.set('char-codex', rootGroup)
-      const aliasNode = new THREE.Object3D()
-      aliasNode.name = 'character:char-codex'
-      aliasNode.userData = rootGroup.userData
-      rootGroup.add(aliasNode)
-    } else if (roleId === 'role:engineering:backend-engineer') {
+    if (roleId === 'role:engineering:backend-engineer') {
       this.figureMap.set('char-fcc', rootGroup)
       const aliasNode = new THREE.Object3D()
       aliasNode.name = 'character:char-fcc'
