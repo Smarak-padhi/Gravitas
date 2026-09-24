@@ -83,3 +83,6 @@ export {
   JobScheduler,
   type JobSchedulerOptions,
 } from './jobs/jobScheduler.js'
+
+// Personal OS Capability & Connector Kernel (Wave 12J)
+export * from './connectors/index.js'

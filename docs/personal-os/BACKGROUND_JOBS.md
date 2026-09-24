@@ -4,14 +4,14 @@
 
 Routine background work in Gravitas does NOT run persistent LLM daemons. The architecture distinguishes sharply between **Deterministic Background Jobs** and **Reasoning Workflows**:
 
-$$\text{Background Work} = \begin{cases} 
+$$\text{Background Work} = \begin{cases}
 \text{Deterministic Service (cron, download, index, test)}, & \text{if logic is algorithmic} \\
 \text{Transient Role-Harness Task (planner, researcher)}, & \text{if logic requires semantic reasoning}
 \end{cases}$$
 
 ### The Universal Execution Pipeline
 ```
-[ Trigger ] 
+[ Trigger ]
   (USER, SCHEDULE, EVENT, CONDITION, CONNECTOR)
       │
       ▼
@@ -104,3 +104,23 @@ All background jobs share an unambiguous, observable finite state machine:
  │ COMPLETED │             │  FAILED   │             │ CANCELLED │
  └───────────┘             └───────────┘             └───────────┘
 ```
+
+---
+
+## 5. Connector Capability Integration (Wave 12J)
+
+Wave 12J introduced structured connector read execution to background jobs via `JobAction.CONNECTOR_READ`:
+
+```typescript
+export interface ConnectorReadAction {
+  readonly type: 'CONNECTOR_READ'
+  readonly connectorId: string
+  readonly accountId?: string
+  readonly capabilityId: string
+  readonly parameters?: Record<string, unknown>
+}
+```
+
+- **Execution Path:** Handled deterministically by `ActionExecutor` querying `ConnectorRegistry`.
+- **Zero LLM Token Usage:** Routine calendar synchronization, upcoming event reminders, and meeting conflict detection run without invoking LLM models.
+- **Least-Privilege Isolation:** Jobs only request read-only capabilities (`calendar.events.read`). No background job can trigger external mutations without sovereign human approval.

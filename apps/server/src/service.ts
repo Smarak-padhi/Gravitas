@@ -48,6 +48,14 @@ import {
   type PersonalOsNotification,
   type Clock,
   SystemClock,
+  type ConnectorId,
+  type ConnectorAccountId,
+  type ConnectorDescriptor,
+  type ConnectorAccount,
+  type CalendarSummary,
+  type CalendarEventSummary,
+  type CalendarEventsPage,
+  type CalendarEventsQuery,
 } from '@gravitas/core'
 import {
   type JobStore,
@@ -57,6 +65,13 @@ import {
   NotificationBus,
   JobRunner,
   JobScheduler,
+  CredentialBroker,
+  SqliteConnectorStore,
+  ConnectorRegistry,
+  MockCalendarProvider,
+  GoogleCalendarAdapter,
+  type ConnectorAuditLogEntry,
+  type StoredCredentials,
 } from '@gravitas/orchestrator'
 import { CANONICAL_CAPABILITIES, type AgentDescriptor } from '@gravitas/agents'
 import {
@@ -118,6 +133,7 @@ import type {
   TaskEvidenceDiffResponse,
   TaskEvidenceRef,
   TaskEvidenceResponse,
+  RuntimeConnectorProjection,
 } from './types.js'
 
 export interface RunServiceOptions {
@@ -133,6 +149,11 @@ export interface RunServiceOptions {
   readonly notificationBus?: NotificationBus | undefined
   readonly clock?: Clock | undefined
   readonly jobDbPath?: string | undefined
+  readonly credentialBroker?: CredentialBroker | undefined
+  readonly connectorStore?: SqliteConnectorStore | undefined
+  readonly connectorRegistry?: ConnectorRegistry | undefined
+  readonly connectorDbPath?: string | undefined
+  readonly seedCalendarJobs?: boolean | undefined
 }
 
 export class RunService {
@@ -150,6 +171,9 @@ export class RunService {
   public readonly jobStore: JobStore
   public readonly jobScheduler: JobScheduler
   public readonly notificationBus: NotificationBus
+  public readonly credentialBroker: CredentialBroker
+  public readonly connectorStore: SqliteConnectorStore
+  public readonly connectorRegistry: ConnectorRegistry
   private readonly clock: Clock
 
   public constructor(options: RunServiceOptions) {
@@ -168,6 +192,43 @@ export class RunService {
     // Critical recovery: reconcile interrupted runs from dead processes
     this.jobStore.reconcileInterruptedRuns()
 
+    const connectorDbPath = options.connectorDbPath ?? (options.jobDbPath ? options.jobDbPath : join(this.runtimeRoot, 'connectors.db'))
+    this.credentialBroker = options.credentialBroker ?? new CredentialBroker()
+    this.connectorStore = options.connectorStore ?? new SqliteConnectorStore(connectorDbPath)
+    this.connectorRegistry = options.connectorRegistry ?? new ConnectorRegistry(this.connectorStore, this.credentialBroker)
+
+    this.credentialBroker.registerRefreshHandler('google-calendar', GoogleCalendarAdapter.refreshGoogleToken)
+
+    if (!this.connectorRegistry.getAdapter('calendar-mock')) {
+      this.connectorRegistry.registerAdapter(new MockCalendarProvider())
+    }
+    if (!this.connectorRegistry.getAdapter('calendar-google')) {
+      this.connectorRegistry.registerAdapter(new GoogleCalendarAdapter())
+    }
+
+    // Default mock calendar account for zero-configuration deterministic operations
+    const existingAccounts = this.connectorRegistry.listAccounts('calendar-mock')
+    if (existingAccounts.length === 0) {
+      this.connectorRegistry.provisionAccount(
+        {
+          id: 'account-mock-default',
+          connectorId: 'calendar-mock',
+          providerAccountId: 'operator@gravitas.internal',
+          displayLabel: 'Gravitas Primary Calendar',
+          status: 'CONNECTED',
+          grantedScopes: ['calendar.calendars.read', 'calendar.events.read', 'calendar.event.read'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          accountId: 'account-mock-default',
+          provider: 'mock-calendar',
+          accessToken: 'mock_local_access_token',
+          updatedAt: new Date().toISOString(),
+        },
+      )
+    }
+
     this.notificationBus =
       options.notificationBus ??
       new NotificationBus(this.jobStore, this.clock)
@@ -178,6 +239,7 @@ export class RunService {
         'repo:core': process.cwd(),
         'repo:default': process.cwd(),
       },
+      connectorRegistry: this.connectorRegistry,
     })
 
     const jobRunner = new JobRunner({
@@ -198,6 +260,11 @@ export class RunService {
 
     // Start background job scheduler
     this.jobScheduler.start()
+
+    // Seed preset calendar automations if requested
+    if (options.seedCalendarJobs) {
+      this.seedDefaultCalendarJobs()
+    }
 
     this.gatewayRegistry = options.gatewayRegistry ?? new DefaultGatewayRegistry()
     if (!options.gatewayRegistry) {
@@ -905,6 +972,23 @@ export class RunService {
     const notifications = this.jobStore.listNotifications({ unreadOnly: false })
     this.eventHub.projectionStore.setJobsState(jobs, recentRuns, notifications)
 
+    const connectorDescriptors = this.connectorRegistry.listConnectors()
+    const connectorProjections: RuntimeConnectorProjection[] = connectorDescriptors.map((cd) => {
+      const accounts = this.connectorRegistry.listAccounts(cd.id)
+      const firstAcc = accounts[0]
+      return {
+        connectorId: cd.id,
+        provider: cd.provider,
+        displayName: cd.displayName,
+        status: cd.status,
+        accountsCount: accounts.length,
+        ...(firstAcc ? { activeAccountId: firstAcc.id } : {}),
+        capabilitiesCount: cd.capabilities.length,
+        ...(firstAcc?.lastSyncAt ? { lastSyncAt: firstAcc.lastSyncAt } : {}),
+      }
+    })
+    this.eventHub.projectionStore.setConnectorsState(connectorProjections)
+
     return {
       service: 'gravitas',
       version: GRAVITAS_VERSION,
@@ -1104,6 +1188,7 @@ export class RunService {
     this.jobScheduler.stop()
     await this.jobScheduler.waitForActiveRuns()
     this.jobStore.close()
+    this.connectorStore.close()
   }
 
   public listJobs(filter?: JobFilter): BackgroundJob[] {
@@ -1207,5 +1292,244 @@ export class RunService {
   public markAllNotificationsRead(): void {
     this.jobStore.markAllNotificationsRead()
   }
-}
 
+  // ==========================================================================
+  // Connector Kernel Methods (Wave 12J)
+  // ==========================================================================
+
+  public listConnectors(): readonly ConnectorDescriptor[] {
+    return this.connectorRegistry.listConnectors()
+  }
+
+  public getConnector(id: ConnectorId): ConnectorDescriptor | null {
+    return this.connectorRegistry.getConnector(id)
+  }
+
+  public listConnectorAccounts(connectorId?: ConnectorId): readonly ConnectorAccount[] {
+    return this.connectorRegistry.listAccounts(connectorId)
+  }
+
+  public getConnectorAccount(id: ConnectorAccountId): ConnectorAccount | null {
+    return this.connectorRegistry.getAccount(id)
+  }
+
+  public provisionConnectorAccount(
+    account: ConnectorAccount,
+    credentials?: StoredCredentials | undefined,
+  ): void {
+    this.connectorRegistry.provisionAccount(account, credentials)
+  }
+
+  public disconnectConnectorAccount(accountId: ConnectorAccountId): boolean {
+    return this.connectorRegistry.disconnectAccount(accountId)
+  }
+
+  public async checkConnectorHealth(
+    connectorId: ConnectorId,
+    accountId?: ConnectorAccountId,
+  ): Promise<{ healthy: boolean; status: string; message?: string }> {
+    return this.connectorRegistry.checkHealth(connectorId, accountId)
+  }
+
+  public getConnectorAuditLogs(filter?: {
+    connectorId?: ConnectorId
+    accountId?: ConnectorAccountId
+    limit?: number
+  }): readonly ConnectorAuditLogEntry[] {
+    return this.connectorRegistry.getAuditLogs(filter)
+  }
+
+  // ==========================================================================
+  // Calendar Operations Foundation (Wave 12J)
+  // ==========================================================================
+
+  public async getCalendars(
+    connectorId: ConnectorId = 'calendar-mock',
+    accountId?: ConnectorAccountId,
+  ): Promise<readonly CalendarSummary[]> {
+    const accId = accountId ?? this.connectorRegistry.listAccounts(connectorId)[0]?.id ?? 'account-mock-default'
+    const result = await this.connectorRegistry.executeCapability<unknown, readonly CalendarSummary[]>({
+      requestId: `req_cal_${Date.now()}`,
+      connectorId,
+      accountId: accId,
+      capabilityId: 'calendar.calendars.read',
+      authority: 'READ',
+      actor: { type: 'OPERATOR', id: 'operator' },
+      contextDomains: ['PERSONAL', 'BUSINESS'],
+      input: {},
+      requestedAt: new Date().toISOString(),
+    })
+    return result.data ?? []
+  }
+
+  public async getCalendarEvents(
+    query: CalendarEventsQuery,
+    connectorId: ConnectorId = 'calendar-mock',
+    accountId?: ConnectorAccountId,
+  ): Promise<CalendarEventsPage> {
+    const accId = accountId ?? this.connectorRegistry.listAccounts(connectorId)[0]?.id ?? 'account-mock-default'
+    const result = await this.connectorRegistry.executeCapability<CalendarEventsQuery, CalendarEventsPage>({
+      requestId: `req_evts_${Date.now()}`,
+      connectorId,
+      accountId: accId,
+      capabilityId: 'calendar.events.read',
+      authority: 'READ',
+      actor: { type: 'OPERATOR', id: 'operator' },
+      contextDomains: ['PERSONAL', 'BUSINESS'],
+      input: query,
+      requestedAt: new Date().toISOString(),
+    })
+    return result.data ?? { events: [], timeZone: 'UTC' }
+  }
+
+  public async getCalendarEvent(
+    calendarId: string,
+    eventId: string,
+    connectorId: ConnectorId = 'calendar-mock',
+    accountId?: ConnectorAccountId,
+  ): Promise<CalendarEventSummary> {
+    const accId = accountId ?? this.connectorRegistry.listAccounts(connectorId)[0]?.id ?? 'account-mock-default'
+    const result = await this.connectorRegistry.executeCapability<{ calendarId: string; eventId: string }, CalendarEventSummary>({
+      requestId: `req_evt_${Date.now()}`,
+      connectorId,
+      accountId: accId,
+      capabilityId: 'calendar.event.read',
+      authority: 'READ',
+      actor: { type: 'OPERATOR', id: 'operator' },
+      contextDomains: ['PERSONAL', 'BUSINESS'],
+      input: { calendarId, eventId },
+      requestedAt: new Date().toISOString(),
+    })
+    if (!result.data) {
+      throw new Error(`Event ${eventId} not found in calendar ${calendarId}`)
+    }
+    return result.data
+  }
+
+  public seedDefaultCalendarJobs(): void {
+    const existingJobs = this.jobStore.listJobs()
+    const existingIds = new Set(existingJobs.map((j) => j.id))
+
+    if (!existingIds.has('job-calendar-agenda')) {
+      const agendaJob: BackgroundJob = {
+        id: 'job-calendar-agenda',
+        title: 'Morning Agenda Summary',
+        description: "Daily deterministic retrieval of today's calendar agenda",
+        kind: 'SUMMARY',
+        status: 'ENABLED',
+        trigger: {
+          type: 'CRON',
+          expression: '0 8 * * *',
+          timezone: 'UTC',
+        },
+        action: {
+          type: 'CONNECTOR_READ',
+          connectorId: 'calendar-mock',
+          accountId: 'account-mock-default',
+          capabilityId: 'calendar.events.read',
+          parameters: { calendarId: 'primary' },
+        },
+        autonomyLevel: 'L2',
+        requiredAuthority: 'READ',
+        contextDomains: ['PERSONAL', 'BUSINESS'],
+        executionBudget: {
+          maxRuntimeMs: 30000,
+          maxAttempts: 1,
+        },
+        retryPolicy: {
+          mode: 'NONE',
+          maxAttempts: 1,
+          delayMs: 1000,
+        },
+        notificationPolicy: {
+          deliveryPolicy: 'IMMEDIATE',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      this.jobStore.saveJob(agendaJob)
+    }
+
+    if (!existingIds.has('job-calendar-reminder')) {
+      const reminderJob: BackgroundJob = {
+        id: 'job-calendar-reminder',
+        title: 'Calendar Event Reminder',
+        description: 'Periodic check for imminent calendar events',
+        kind: 'REMINDER',
+        status: 'ENABLED',
+        trigger: {
+          type: 'INTERVAL',
+          intervalSeconds: 900,
+          anchorAt: new Date().toISOString(),
+          timezone: 'UTC',
+        },
+        action: {
+          type: 'CONNECTOR_READ',
+          connectorId: 'calendar-mock',
+          accountId: 'account-mock-default',
+          capabilityId: 'calendar.events.read',
+          parameters: { calendarId: 'primary' },
+        },
+        autonomyLevel: 'L2',
+        requiredAuthority: 'READ',
+        contextDomains: ['PERSONAL'],
+        executionBudget: {
+          maxRuntimeMs: 30000,
+          maxAttempts: 1,
+        },
+        retryPolicy: {
+          mode: 'NONE',
+          maxAttempts: 1,
+          delayMs: 1000,
+        },
+        notificationPolicy: {
+          deliveryPolicy: 'IMMEDIATE',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      this.jobStore.saveJob(reminderJob)
+    }
+
+    if (!existingIds.has('job-calendar-conflict-check')) {
+      const conflictJob: BackgroundJob = {
+        id: 'job-calendar-conflict-check',
+        title: 'Calendar Conflict Detection',
+        description: 'Hourly scan to detect overlapping schedule conflicts',
+        kind: 'CHECK',
+        status: 'ENABLED',
+        trigger: {
+          type: 'INTERVAL',
+          intervalSeconds: 3600,
+          anchorAt: new Date().toISOString(),
+          timezone: 'UTC',
+        },
+        action: {
+          type: 'CONNECTOR_READ',
+          connectorId: 'calendar-mock',
+          accountId: 'account-mock-default',
+          capabilityId: 'calendar.events.read',
+          parameters: { calendarId: 'primary' },
+        },
+        autonomyLevel: 'L2',
+        requiredAuthority: 'READ',
+        contextDomains: ['PERSONAL', 'BUSINESS'],
+        executionBudget: {
+          maxRuntimeMs: 30000,
+          maxAttempts: 1,
+        },
+        retryPolicy: {
+          mode: 'NONE',
+          maxAttempts: 1,
+          delayMs: 1000,
+        },
+        notificationPolicy: {
+          deliveryPolicy: 'IMMEDIATE',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      this.jobStore.saveJob(conflictJob)
+    }
+  }
+}

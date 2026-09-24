@@ -68,3 +68,13 @@ The existing `@gravitas/orchestrator` implementation already enforces:
 4. Mutation detection and change scope auditing.
 
 The new scheduling components (`ReminderService`, `ConditionWatcher`, `BackgroundJobQueue`) wrap *around* the scheduler as trigger sources—**they do not alter the internal core scheduler state machine.**
+
+---
+
+## 4. Calendar Scheduling Ground Truth (Wave 12J)
+
+In Wave 12J, the `JobScheduler` directly drives deterministic calendar monitoring:
+- **`job-calendar-agenda`**: Runs on daily cron (`0 8 * * *`) to fetch the day's agenda.
+- **`job-calendar-reminder`**: Runs on 15-minute interval (`900s`) to scan for imminent events.
+- **`job-calendar-conflict-check`**: Runs on 1-hour interval (`3600s`) to scan for overlapping appointments.
+- All actions execute via `CONNECTOR_READ` with zero LLM inference.

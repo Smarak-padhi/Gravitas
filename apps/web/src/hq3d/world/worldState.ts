@@ -99,8 +99,16 @@ export interface WorldGatewayInfraState {
   }
 }
 
+export interface WorldConnectorInfraState {
+  readonly connectorId: string
+  readonly status: 'AVAILABLE' | 'UNAVAILABLE' | 'ERROR' | 'CONFIG_REQUIRED'
+  readonly active: boolean
+  readonly lastSyncAt?: string | undefined
+}
+
 export interface WorldInfraState {
   readonly gateways: Readonly<Record<string, WorldGatewayInfraState>>
+  readonly connectors?: Readonly<Record<string, WorldConnectorInfraState>> | undefined
 }
 
 // ─── Revision Identity (Authoritative + Deterministic Cache Key) ───────────────
@@ -629,6 +637,19 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     alertLevel = 'ELEVATED'
   }
 
+  // 6b. External Capability Connectors Infrastructure Aggregation
+  const connectorMap: Record<string, WorldConnectorInfraState> = {}
+  if (projection?.connectors) {
+    for (const c of projection.connectors) {
+      connectorMap[c.id] = {
+        connectorId: c.id,
+        status: c.status,
+        active: c.status === 'AVAILABLE',
+        ...(c.lastHealthCheckAt ? { lastSyncAt: c.lastHealthCheckAt } : {}),
+      }
+    }
+  }
+
   // 7. Build Immutable WorldState with Revision Identity
   const canonicalTaskFingerprint = computeCanonicalTaskFingerprint(tasks)
 
@@ -645,6 +666,7 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     handoffs: Object.freeze(worldHandoffs),
     infrastructure: Object.freeze({
       gateways: Object.freeze(finalGateways),
+      connectors: Object.freeze(connectorMap),
     }),
     alertLevel,
   })

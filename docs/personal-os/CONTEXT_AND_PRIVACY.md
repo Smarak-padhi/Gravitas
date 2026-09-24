@@ -2,7 +2,7 @@
 
 ## 1. The Principle of Least Context
 
-A foundational vulnerability in naive multi-agent systems is broadcasting all user context into a single shared memory store or global prompt preamble. 
+A foundational vulnerability in naive multi-agent systems is broadcasting all user context into a single shared memory store or global prompt preamble.
 
 $$\text{System Knowledge} \neq \text{Role Context}$$
 
@@ -51,3 +51,4 @@ To guarantee that API keys and authentication tokens are never leaked in LLM com
 1. **Secrets Live Outside Prompts:** Worker prompts never contain raw credentials (`OPENAI_API_KEY`, `SENDGRID_API_KEY`, `GITHUB_TOKEN`).
 2. **Connector Proxying:** Connectors execute network requests using credentials securely stored in OS keychains or server environment files.
 3. **Evidence Redaction:** Before any prompt compilation trace or subprocess stdio log is written to the `.evidence/` vault, an automated regex-based redaction filter scrubs known credential formats and authorization headers.
+4. **Credential Boundary Specification:** See [CREDENTIAL_BOUNDARY.md](file:///c:/Users/smara/Desktop/Multi-agent/docs/personal-os/CREDENTIAL_BOUNDARY.md) for full Wave 12J in-memory vault, opaque handle, and token refresh specifications.

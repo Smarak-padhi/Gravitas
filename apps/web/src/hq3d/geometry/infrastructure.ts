@@ -14,6 +14,7 @@ export class HqInfrastructure {
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private readonly materials: MaterialLibrary
   private gatewayLedMesh: THREE.Mesh | null = null
+  private connectorLedMesh: THREE.Mesh | null = null
   private dispatchLedMesh: THREE.Mesh | null = null
 
   constructor(materials: MaterialLibrary) {
@@ -49,7 +50,7 @@ export class HqInfrastructure {
     plinthRim.position.set(0.0, 0.12, 0.0)
     rackGroup.add(plinthRim)
 
-    // Dual 42U Server Cabinets: Rack 01 (OmniRoute Gateway), Rack 02 (Model Providers)
+    // Dual 42U Server Cabinets: Rack 01 (OmniRoute Gateway), Rack 02 (Connector Bay / External Capabilities)
     const rackOffsets = [-0.85, 0.85]
     for (let i = 0; i < rackOffsets.length; i++) {
       const rx = rackOffsets[i]!
@@ -84,6 +85,13 @@ export class HqInfrastructure {
         this.gatewayLedMesh.position.set(0.0, 2.15, 0.57)
         this.gatewayLedMesh.name = 'omniroute-activity-led'
         cabinetGroup.add(this.gatewayLedMesh)
+      } else if (i === 1) {
+        // Rack 02: External Service Capability Connector Bay LED bar
+        const ledGeo = this.track(new THREE.BoxGeometry(0.88, 0.03, 0.02))
+        this.connectorLedMesh = new THREE.Mesh(ledGeo, materials.statusReady)
+        this.connectorLedMesh.position.set(0.0, 2.15, 0.57)
+        this.connectorLedMesh.name = 'connector-activity-led'
+        cabinetGroup.add(this.connectorLedMesh)
       }
 
       // Vertical Brushed Brass Mounting Rails
@@ -218,12 +226,28 @@ export class HqInfrastructure {
     }
   }
 
+  public setConnectorActivity(
+    status: 'CONNECTED' | 'DISCONNECTED' | 'SYNCING' | 'ERROR' | 'IDLE'
+  ): void {
+    if (!this.connectorLedMesh) return
+    if (status === 'SYNCING') {
+      this.connectorLedMesh.material = this.materials.statusRunning
+    } else if (status === 'CONNECTED' || status === 'IDLE') {
+      this.connectorLedMesh.material = this.materials.statusReady
+    } else if (status === 'ERROR') {
+      this.connectorLedMesh.material = this.materials.statusFailure
+    } else {
+      this.connectorLedMesh.material = this.materials.gunmetal
+    }
+  }
+
   public dispose(): void {
     for (const geom of this.geometriesToDispose) {
       geom.dispose()
     }
     this.geometriesToDispose.length = 0
     this.gatewayLedMesh = null
+    this.connectorLedMesh = null
     this.dispatchLedMesh = null
   }
 }

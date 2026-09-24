@@ -1,15 +1,22 @@
-# Gravitas Connector SDK & External Integration Architecture (Wave 12C.5)
+# Gravitas Connector SDK & External Integration Architecture
+## Wave 12J: Bounded Capability Transport Layer
+
+**Status**: PRODUCTION (Wave 12J verified)
+**Reference Runtime Documents**:
+- [CONNECTOR_RUNTIME.md](file:///c:/Users/smara/Desktop/Multi-agent/docs/personal-os/CONNECTOR_RUNTIME.md)
+- [CALENDAR_RUNTIME.md](file:///c:/Users/smara/Desktop/Multi-agent/docs/personal-os/CALENDAR_RUNTIME.md)
+- [CREDENTIAL_BOUNDARY.md](file:///c:/Users/smara/Desktop/Multi-agent/docs/personal-os/CREDENTIAL_BOUNDARY.md)
 
 ## 1. Principles of the Connector SDK
 
-A `Connector` is a specialized, deterministic bridge between the Gravitas orchestrator and an external software platform (e.g., Google Calendar, IMAP/SMTP, GitHub, Cloud Storage, or OS Filesystem).
+A `Connector` is a specialized, deterministic bridge between the Gravitas orchestrator and an external software platform (e.g., Google Calendar, Mock Calendar Provider, and future capability transports).
 
-$$\text{Connector (Bridge \& Protocol Handler)} \neq \text{AgentRole (Reasoning Entity)}$$
+$$\text{ROLE} \neq \text{HARNESS} \neq \text{PROVIDER/MODEL} \neq \text{CONNECTOR} \neq \text{EXTERNAL ACCOUNT}$$
 
 ### Core Rules:
 1. **Connectors Do Not Reason:** A connector contains zero prompt templates, zero LLM calls, and zero autonomous judgment. It executes structured API calls, serializes responses, and enforces rate limits.
-2. **Strict Protocol Compliance:** No brittle DOM-scraping or policy-violating automations (e.g., no unofficial WhatsApp web session hijackers). All messaging integrations use official developer APIs, authorized webhooks, or local protocol standards.
-3. **Out-of-Band Secrets:** Connector authentication tokens (OAuth2 refresh tokens, API keys) are held strictly in server-side secure memory or OS keyrings. They are never injected into LLM context prompts.
+2. **Strict Protocol Compliance:** No brittle DOM-scraping or policy-violating automations. All integrations use official developer APIs or deterministic mock providers.
+3. **Out-of-Band Secrets:** Connector authentication tokens (OAuth2 refresh tokens, API keys) are held strictly in server-side secure memory (`CredentialBroker`). They are never injected into LLM context prompts or stored in durable logs.
 
 ---
 

@@ -23,7 +23,7 @@ export const AutomationsView: React.FC = () => {
   const [formId, setFormId] = useState<string>(() => `job_${Date.now().toString(36)}`)
   const [formTitle, setFormTitle] = useState<string>('')
   const [formDescription, setFormDescription] = useState<string>('')
-  const [formPreset, setFormPreset] = useState<'REMINDER' | 'REPO_CHECK' | 'FILE_STAT' | 'NOOP'>('REMINDER')
+  const [formPreset, setFormPreset] = useState<'REMINDER' | 'REPO_CHECK' | 'FILE_STAT' | 'NOOP' | 'CALENDAR_AGENDA' | 'CALENDAR_REMINDER' | 'CALENDAR_CONFLICT'>('REMINDER')
   const [formTriggerType, setFormTriggerType] = useState<'INTERVAL' | 'MANUAL' | 'CRON'>('INTERVAL')
   const [formIntervalSec, setFormIntervalSec] = useState<number>(3600)
   const [formCron, setFormCron] = useState<string>('0 14 * * *')
@@ -137,7 +137,11 @@ export const AutomationsView: React.FC = () => {
     setIsSubmitting(true)
     try {
       let action: any
+      let jobKind: any = 'CHECK'
+      let domains: any = ['system']
+
       if (formPreset === 'REMINDER') {
+        jobKind = 'REMINDER'
         action = {
           type: 'EMIT_NOTIFICATION',
           title: formActionTitle,
@@ -145,16 +149,45 @@ export const AutomationsView: React.FC = () => {
           severity: 'INFO',
         }
       } else if (formPreset === 'REPO_CHECK') {
+        jobKind = 'REPOSITORY_CHECK'
         action = {
           type: 'REPOSITORY_CHECK',
           repositoryId: 'repo:core',
           checkType: 'STATUS',
         }
       } else if (formPreset === 'FILE_STAT') {
+        jobKind = 'FILE_OPERATION'
         action = {
           type: 'FILE_OPERATION',
           operation: 'STAT',
           path: formFilePath,
+        }
+      } else if (formPreset === 'CALENDAR_AGENDA') {
+        jobKind = 'SUMMARY'
+        domains = ['calendar']
+        action = {
+          type: 'CONNECTOR_READ',
+          connectorId: 'connector-calendar-google',
+          capability: 'calendar.events.list',
+          params: { calendarId: 'primary', maxResults: 10 },
+        }
+      } else if (formPreset === 'CALENDAR_REMINDER') {
+        jobKind = 'REMINDER'
+        domains = ['calendar']
+        action = {
+          type: 'CONNECTOR_READ',
+          connectorId: 'connector-calendar-google',
+          capability: 'calendar.events.list',
+          params: { calendarId: 'primary', maxResults: 5 },
+        }
+      } else if (formPreset === 'CALENDAR_CONFLICT') {
+        jobKind = 'CHECK'
+        domains = ['calendar']
+        action = {
+          type: 'CONNECTOR_READ',
+          connectorId: 'connector-calendar-google',
+          capability: 'calendar.events.list',
+          params: { calendarId: 'primary', maxResults: 20 },
         }
       } else {
         action = {
@@ -187,13 +220,13 @@ export const AutomationsView: React.FC = () => {
         id: formId.trim() || `job_${Date.now().toString(36)}`,
         title: formTitle.trim() || 'Untitled Automation',
         description: formDescription.trim() || undefined,
-        kind: formPreset === 'REMINDER' ? 'REMINDER' : formPreset === 'REPO_CHECK' ? 'REPOSITORY_CHECK' : formPreset === 'FILE_STAT' ? 'FILE_OPERATION' : 'MAINTENANCE',
+        kind: jobKind,
         status: 'ENABLED',
         trigger,
         action,
         autonomyLevel: 'L1',
         requiredAuthority: 'READ',
-        contextDomains: ['system'],
+        contextDomains: domains,
         executionBudget: {
           maxRuntimeMs: 30000,
           maxAttempts: 1,
@@ -1077,6 +1110,9 @@ export const AutomationsView: React.FC = () => {
                   }}
                 >
                   <option value="REMINDER">Personal Reminder (Emit Notification)</option>
+                  <option value="CALENDAR_AGENDA">📅 Calendar: Morning Agenda Sync (CONNECTOR_READ)</option>
+                  <option value="CALENDAR_REMINDER">📅 Calendar: Upcoming Event Reminders (CONNECTOR_READ)</option>
+                  <option value="CALENDAR_CONFLICT">📅 Calendar: Meeting Conflict Detection (CONNECTOR_READ)</option>
                   <option value="REPO_CHECK">Repository Integrity Check (repo:core)</option>
                   <option value="FILE_STAT">Local File Stat Check</option>
                   <option value="NOOP">Zero-Mutation Ping (No-op)</option>

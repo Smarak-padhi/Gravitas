@@ -136,12 +136,21 @@ export interface InvokeRoleAction {
   readonly reasoningBudget?: number | undefined // Token budget ceiling
 }
 
+export interface ConnectorReadAction {
+  readonly type: 'CONNECTOR_READ'
+  readonly connectorId: string
+  readonly accountId: string
+  readonly capabilityId: string
+  readonly parameters?: Record<string, unknown> | undefined
+}
+
 export type JobAction =
   | EmitNotificationAction
   | RepositoryCheckAction
   | FileOperationAction
   | NoopAction
   | InvokeRoleAction
+  | ConnectorReadAction
 
 // ============================================================================
 // 4. Governance: Authority & Autonomy

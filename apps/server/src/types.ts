@@ -202,6 +202,7 @@ export type {
   RuntimeHandoffProjection,
   ArtifactCustodyLocation,
   RuntimeArtifactProjection,
+  RuntimeConnectorProjection,
   RuntimeProjectionSnapshot,
 } from './projection.js'
 

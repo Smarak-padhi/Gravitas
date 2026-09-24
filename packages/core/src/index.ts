@@ -193,6 +193,7 @@ export {
   type FileOperationAction,
   type NoopAction,
   type InvokeRoleAction,
+  type ConnectorReadAction,
   type JobAction,
   type JobAuthorityClass,
   type AutonomyLevel,
@@ -209,3 +210,26 @@ export {
   SystemClock,
   FakeClock,
 } from './jobs.js'
+
+// Canonical Personal OS Capability & Connector Kernel (Wave 12J)
+export {
+  type ContextDomain,
+  type ConnectorId,
+  type ConnectorAccountId,
+  type ConnectorProviderId,
+  type ConnectorStatus,
+  type ConnectorCapabilityId,
+  type ConnectorCapability,
+  type ConnectorDescriptor,
+  type ConnectorAccount,
+  type ConnectorActor,
+  type ConnectorExecutionRequest,
+  type ConnectorErrorCode,
+  type ConnectorErrorPayload,
+  ConnectorError,
+  type ConnectorExecutionResult,
+  type CalendarSummary,
+  type CalendarEventSummary,
+  type CalendarEventsQuery,
+  type CalendarEventsPage,
+} from './connectors.js'

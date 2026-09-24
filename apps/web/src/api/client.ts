@@ -24,6 +24,13 @@ import type {
   BackgroundJob,
   JobRun,
   PersonalOsNotification,
+  ConnectorDescriptor,
+  ConnectorAccount,
+  ConnectorAuditLogEntry,
+  CalendarSummary,
+  CalendarEventSummary,
+  CalendarEventsPage,
+  CalendarEventsQuery,
 } from './types.js'
 
 export class GravitasApiError extends Error {
@@ -272,5 +279,109 @@ export const api = {
     return request<{ success: boolean }>('/api/v1/notifications/read-all', {
       method: 'POST',
     })
+  },
+
+  // Personal OS Connectors (Wave 12J)
+  listConnectors(): Promise<{ connectors: readonly ConnectorDescriptor[] }> {
+    return request<{ connectors: readonly ConnectorDescriptor[] }>('/api/v1/connectors')
+  },
+
+  getConnector(id: string): Promise<ConnectorDescriptor> {
+    return request<ConnectorDescriptor>(`/api/v1/connectors/${encodeURIComponent(id)}`)
+  },
+
+  checkConnectorHealth(id: string, accountId?: string): Promise<{ healthy: boolean; status: string; message?: string }> {
+    const qs = accountId ? `?accountId=${encodeURIComponent(accountId)}` : ''
+    return request<{ healthy: boolean; status: string; message?: string }>(
+      `/api/v1/connectors/${encodeURIComponent(id)}/health${qs}`,
+      { method: 'POST' },
+    )
+  },
+
+  listConnectorAccounts(connectorId: string): Promise<{ accounts: readonly ConnectorAccount[] }> {
+    return request<{ accounts: readonly ConnectorAccount[] }>(
+      `/api/v1/connectors/${encodeURIComponent(connectorId)}/accounts`,
+    )
+  },
+
+  provisionConnectorAccount(
+    connectorId: string,
+    data: {
+      id?: string
+      providerAccountId: string
+      displayLabel: string
+      grantedScopes?: readonly string[]
+      credentials?: Record<string, unknown>
+    },
+  ): Promise<{ success: boolean; account: ConnectorAccount }> {
+    return request<{ success: boolean; account: ConnectorAccount }>(
+      `/api/v1/connectors/${encodeURIComponent(connectorId)}/accounts`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+    )
+  },
+
+  disconnectConnectorAccount(connectorId: string, accountId: string): Promise<{ success: boolean }> {
+    return request<{ success: boolean }>(
+      `/api/v1/connectors/${encodeURIComponent(connectorId)}/accounts/${encodeURIComponent(accountId)}`,
+      { method: 'DELETE' },
+    )
+  },
+
+  getConnectorAuditLogs(filter?: {
+    connectorId?: string
+    accountId?: string
+    limit?: number
+  }): Promise<{ auditLogs: readonly ConnectorAuditLogEntry[] }> {
+    const params = new URLSearchParams()
+    if (filter?.connectorId) params.set('connectorId', filter.connectorId)
+    if (filter?.accountId) params.set('accountId', filter.accountId)
+    if (filter?.limit) params.set('limit', String(filter.limit))
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<{ auditLogs: readonly ConnectorAuditLogEntry[] }>(`/api/v1/connectors/audit${qs}`)
+  },
+
+  // Calendar Operations Foundation (Wave 12J)
+  getCalendars(connectorId?: string, accountId?: string): Promise<{ calendars: readonly CalendarSummary[] }> {
+    const params = new URLSearchParams()
+    if (connectorId) params.set('connectorId', connectorId)
+    if (accountId) params.set('accountId', accountId)
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<{ calendars: readonly CalendarSummary[] }>(`/api/v1/calendar/calendars${qs}`)
+  },
+
+  getCalendarEvents(
+    query?: CalendarEventsQuery,
+    connectorId?: string,
+    accountId?: string,
+  ): Promise<CalendarEventsPage> {
+    const params = new URLSearchParams()
+    if (connectorId) params.set('connectorId', connectorId)
+    if (accountId) params.set('accountId', accountId)
+    if (query?.calendarId) params.set('calendarId', query.calendarId)
+    if (query?.timeMin) params.set('timeMin', query.timeMin)
+    if (query?.timeMax) params.set('timeMax', query.timeMax)
+    if (query?.maxResults) params.set('maxResults', String(query.maxResults))
+    if (query?.pageToken) params.set('pageToken', query.pageToken)
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<CalendarEventsPage>(`/api/v1/calendar/events${qs}`)
+  },
+
+  getCalendarEvent(
+    eventId: string,
+    calendarId = 'primary',
+    connectorId?: string,
+    accountId?: string,
+  ): Promise<CalendarEventSummary> {
+    const params = new URLSearchParams()
+    if (calendarId) params.set('calendarId', calendarId)
+    if (connectorId) params.set('connectorId', connectorId)
+    if (accountId) params.set('accountId', accountId)
+    const qs = params.toString() ? `?${params.toString()}` : ''
+    return request<CalendarEventSummary>(
+      `/api/v1/calendar/events/${encodeURIComponent(eventId)}${qs}`,
+    )
   },
 }

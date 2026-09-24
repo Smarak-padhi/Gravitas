@@ -168,6 +168,23 @@ export class HqScene {
       }
     }
 
+    // 2b. Reconcile external service connector capability indicator
+    const connectorMap = worldState.infrastructure.connectors
+    if (connectorMap && Object.keys(connectorMap).length > 0) {
+      const anyActive = Object.values(connectorMap).some((c) => c.status === 'AVAILABLE')
+      const anyError = Object.values(connectorMap).some((c) => c.status === 'ERROR')
+      const isSyncing = worldState.stations['dispatch-console']?.status === 'ACTIVE' && anyActive
+      if (isSyncing) {
+        this.infrastructure.setConnectorActivity('SYNCING')
+      } else if (anyError) {
+        this.infrastructure.setConnectorActivity('ERROR')
+      } else if (anyActive) {
+        this.infrastructure.setConnectorActivity('CONNECTED')
+      } else {
+        this.infrastructure.setConnectorActivity('DISCONNECTED')
+      }
+    }
+
     // 3. Reconcile role presentation states & characters (Wave 12D)
     const roleStates = deriveRolePresentationStates(worldState)
     this.characters.reconcileRoles(roleStates)

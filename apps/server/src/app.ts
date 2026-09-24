@@ -240,16 +240,29 @@ export function createRequestListener(deps: AppDependencies) {
             return
           }
 
-          const allowedActions = ['EMIT_NOTIFICATION', 'REPOSITORY_CHECK', 'FILE_OPERATION', 'NOOP']
+          const allowedActions = ['EMIT_NOTIFICATION', 'REPOSITORY_CHECK', 'FILE_OPERATION', 'NOOP', 'CONNECTOR_READ']
           if (!allowedActions.includes(action.type)) {
             sendError(
               res,
               400,
               'INVALID_REQUEST',
-              `Unsupported action type '${action.type}'. Wave 12I-R supports: [${allowedActions.join(', ')}].`,
+              `Unsupported action type '${action.type}'. Wave 12J supports: [${allowedActions.join(', ')}].`,
               requestId
             )
             return
+          }
+
+          if (action.type === 'CONNECTOR_READ') {
+            if (!action.connectorId || !action.accountId || !action.capabilityId) {
+              sendError(
+                res,
+                400,
+                'INVALID_REQUEST',
+                'CONNECTOR_READ action requires connectorId, accountId, and capabilityId.',
+                requestId
+              )
+              return
+            }
           }
 
           const fullJob: BackgroundJob = {
@@ -453,6 +466,208 @@ export function createRequestListener(deps: AppDependencies) {
           return
         }
         sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/notifications/:id/read.`, requestId)
+        return
+      }
+
+      // --- Connector Audit Logs: GET /api/v1/connectors/audit ---
+      if (pathname === '/api/v1/connectors/audit') {
+        if (method === 'GET') {
+          const filter: { connectorId?: string; accountId?: string; limit?: number } = {}
+          const cId = url.searchParams.get('connectorId')
+          if (cId) filter.connectorId = cId
+          const aId = url.searchParams.get('accountId')
+          if (aId) filter.accountId = aId
+          const limitStr = url.searchParams.get('limit')
+          if (limitStr) filter.limit = parseInt(limitStr, 10)
+          const logs = service.getConnectorAuditLogs(filter)
+          sendJson(res, 200, { auditLogs: logs })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/connectors/audit.`, requestId)
+        return
+      }
+
+      // --- Connectors List: GET /api/v1/connectors ---
+      if (pathname === '/api/v1/connectors') {
+        if (method === 'GET') {
+          const connectors = service.listConnectors()
+          sendJson(res, 200, { connectors })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/connectors.`, requestId)
+        return
+      }
+
+      // --- Connector Detail: GET /api/v1/connectors/:id ---
+      const connectorDetailMatch = pathname.match(/^\/api\/v1\/connectors\/([^/]+)$/)
+      if (connectorDetailMatch) {
+        if (method === 'GET') {
+          const connectorId = connectorDetailMatch[1]
+          if (!connectorId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing connector id.', requestId)
+            return
+          }
+          const connector = service.getConnector(connectorId)
+          if (!connector) {
+            sendError(res, 404, 'NOT_FOUND', `Connector ${connectorId} not found.`, requestId)
+            return
+          }
+          sendJson(res, 200, connector)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/connectors/:id.`, requestId)
+        return
+      }
+
+      // --- Connector Health Check: POST /api/v1/connectors/:id/health ---
+      const connectorHealthMatch = pathname.match(/^\/api\/v1\/connectors\/([^/]+)\/health$/)
+      if (connectorHealthMatch) {
+        if (method === 'POST') {
+          const connectorId = connectorHealthMatch[1]
+          if (!connectorId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing connector id.', requestId)
+            return
+          }
+          const accountId = url.searchParams.get('accountId') || undefined
+          const health = await service.checkConnectorHealth(connectorId, accountId)
+          sendJson(res, 200, health)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on health check.`, requestId)
+        return
+      }
+
+      // --- Connector Accounts: GET, POST /api/v1/connectors/:id/accounts ---
+      const connectorAccountsMatch = pathname.match(/^\/api\/v1\/connectors\/([^/]+)\/accounts$/)
+      if (connectorAccountsMatch) {
+        const connectorId = connectorAccountsMatch[1]
+        if (!connectorId) {
+          sendError(res, 400, 'INVALID_REQUEST', 'Missing connector id.', requestId)
+          return
+        }
+        if (method === 'GET') {
+          const accounts = service.listConnectorAccounts(connectorId)
+          sendJson(res, 200, { accounts })
+          return
+        }
+        if (method === 'POST') {
+          const body = await readJsonBody<any>(req, requestId)
+          if (!body || !body.providerAccountId || !body.displayLabel) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing required fields for connector account (providerAccountId, displayLabel).', requestId)
+            return
+          }
+          const accountId = body.id || `acc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
+          const account = {
+            id: accountId,
+            connectorId,
+            providerAccountId: String(body.providerAccountId),
+            displayLabel: String(body.displayLabel),
+            status: 'CONNECTED' as const,
+            grantedScopes: Array.isArray(body.grantedScopes) ? body.grantedScopes.map(String) : [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+
+          let credentials = undefined
+          if (body.credentials) {
+            credentials = {
+              accountId,
+              provider: connectorId === 'calendar-google' ? ('google-calendar' as const) : ('mock-calendar' as const),
+              accessToken: String(body.credentials.accessToken || ''),
+              refreshToken: body.credentials.refreshToken ? String(body.credentials.refreshToken) : undefined,
+              expiresAt: body.credentials.expiresAt ? Number(body.credentials.expiresAt) : undefined,
+              clientId: body.credentials.clientId ? String(body.credentials.clientId) : undefined,
+              clientSecret: body.credentials.clientSecret ? String(body.credentials.clientSecret) : undefined,
+              scopes: account.grantedScopes,
+              updatedAt: new Date().toISOString(),
+            }
+          }
+
+          service.provisionConnectorAccount(account, credentials)
+          // Strictly return account WITHOUT credentials
+          sendJson(res, 201, { success: true, account })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on connector accounts.`, requestId)
+        return
+      }
+
+      // --- Disconnect Account: DELETE /api/v1/connectors/:id/accounts/:accountId ---
+      const disconnectAccountMatch = pathname.match(/^\/api\/v1\/connectors\/([^/]+)\/accounts\/([^/]+)$/)
+      if (disconnectAccountMatch) {
+        if (method === 'DELETE') {
+          const accountId = disconnectAccountMatch[2]
+          if (!accountId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing account id.', requestId)
+            return
+          }
+          const success = service.disconnectConnectorAccount(accountId)
+          if (!success) {
+            sendError(res, 404, 'NOT_FOUND', `Account ${accountId} not found.`, requestId)
+            return
+          }
+          sendJson(res, 200, { success: true })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on account.`, requestId)
+        return
+      }
+
+      // --- Calendar Calendars Query: GET /api/v1/calendar/calendars ---
+      if (pathname === '/api/v1/calendar/calendars') {
+        if (method === 'GET') {
+          const connectorId = url.searchParams.get('connectorId') || 'calendar-mock'
+          const accountId = url.searchParams.get('accountId') || undefined
+          const calendars = await service.getCalendars(connectorId, accountId)
+          sendJson(res, 200, { calendars })
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/calendar/calendars.`, requestId)
+        return
+      }
+
+      // --- Calendar Events Query: GET /api/v1/calendar/events ---
+      if (pathname === '/api/v1/calendar/events') {
+        if (method === 'GET') {
+          const connectorId = url.searchParams.get('connectorId') || 'calendar-mock'
+          const accountId = url.searchParams.get('accountId') || undefined
+          const calendarId = url.searchParams.get('calendarId') || 'primary'
+          const timeMin = url.searchParams.get('timeMin') || undefined
+          const timeMax = url.searchParams.get('timeMax') || undefined
+          const pageToken = url.searchParams.get('pageToken') || undefined
+          const maxResultsStr = url.searchParams.get('maxResults')
+          const maxResults = maxResultsStr ? parseInt(maxResultsStr, 10) : undefined
+
+          const eventsPage = await service.getCalendarEvents(
+            { calendarId, timeMin, timeMax, maxResults, pageToken },
+            connectorId,
+            accountId,
+          )
+          sendJson(res, 200, eventsPage)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on /api/v1/calendar/events.`, requestId)
+        return
+      }
+
+      // --- Calendar Single Event: GET /api/v1/calendar/events/:eventId ---
+      const calendarSingleEventMatch = pathname.match(/^\/api\/v1\/calendar\/events\/([^/]+)$/)
+      if (calendarSingleEventMatch) {
+        if (method === 'GET') {
+          const eventId = calendarSingleEventMatch[1]
+          if (!eventId) {
+            sendError(res, 400, 'INVALID_REQUEST', 'Missing event id.', requestId)
+            return
+          }
+          const connectorId = url.searchParams.get('connectorId') || 'calendar-mock'
+          const accountId = url.searchParams.get('accountId') || undefined
+          const calendarId = url.searchParams.get('calendarId') || 'primary'
+
+          const event = await service.getCalendarEvent(calendarId, eventId, connectorId, accountId)
+          sendJson(res, 200, event)
+          return
+        }
+        sendError(res, 405, 'METHOD_NOT_ALLOWED', `Method ${method} not allowed on event.`, requestId)
         return
       }
 

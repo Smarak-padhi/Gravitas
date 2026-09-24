@@ -32,13 +32,22 @@ Wave 12F-R: Production Handoff Projection Closure (CLOSED)
 Wave 12G:   Authoritative Role Locomotion & Spatial Reconciliation (CLOSED)
      │
      ▼
-Wave 12H:   Authoritative Artifact Custody + Handoff Visualization + Human Approval Flow (SEALED)
+Wave 12H:   Authoritative Artifact Custody + Handoff Visualization + Human Approval Flow (CLOSED)
      │
      ▼
-Wave 12I:   Personal OS Operations Foundation (NOT STARTED)
+Wave 12I:   Personal OS Operations Foundation (CLOSED in 12I-R)
      │
      ▼
-Wave 13:    Background Job System & Courier Logistics
+Wave 12I-R: Personal OS Execution Kernel Forensic Closure (SEALED)
+     │
+     ▼
+Wave 12J:   Connector Kernel + Calendar Operations Foundation (SEALED — GO)
+     │
+     ▼
+Wave 12K:   Unified Inbox & Notification Dispatch (NOT STARTED)
+     │
+     ▼
+Wave 13:    Background Job Logistics & Courier Pipeline
      │
      ▼
 Wave 14:    Connector SDK & Bounded External Platforms
@@ -89,4 +98,30 @@ Wave 19+:   Strategic Opportunity & Cross-Domain Synthesis
   - Complete 21-fixture matrix (A through U) and 70 passing assertions in `custody.test.ts`.
   - Real runtime causal proofs 28 and 29 passing in `projection.test.ts`.
   - 16 visual evidence screenshots in `docs/3d-hq/evidence/wave12h/`.
-- **Status:** **WAVE 12H — GO** | **WAVE 12I — NOT STARTED**.
+- **Status:** **WAVE 12H — GO** | **WAVE 12I — CLOSED**.
+
+### Wave 12I & 12I-R: Personal OS Operations Foundation & Kernel Forensic Closure (SEALED)
+- **Goal:** Establish production SQLite background job store, clock abstraction, execution runner, deterministic scheduler, notification bus, and comprehensive UI automations console.
+- **Achievements:**
+  - WAL-mode SQLite job store with state machine validation and execution history.
+  - Deterministic triggers (`INTERVAL`, `CRON`, `MANUAL`).
+  - Action executor with path jailed actions (`FILE_STAT`, `REPO_CHECK`, `NOTIFY`, `NOOP`).
+  - Complete notification bus with deduplication window and multi-channel readiness.
+  - Sovereign human approval plinth for high-risk actions.
+  - Forensic closure passing 100% of unit, server, and Playwright suites.
+- **Status:** **WAVE 12I-R — GO** | **WAVE 12J — CLOSED**.
+
+### Wave 12J: Connector Kernel + Calendar Operations Foundation (SEALED)
+- **Goal:** Build the first production external-service capability layer for Gravitas, proved exclusively through the Calendar domain.
+- **Achievements:**
+  - Reusable least-privilege capability transport architecture (`ConnectorRegistry`, `ConnectorAdapter`).
+  - Credential boundary with in-memory vault (`CredentialBroker`), opaque handles, and automatic token refresh.
+  - SQLite connector store with versioned migrations for accounts, audit logs, and sync state.
+  - Google Calendar adapter (native fetch REST v3) + multi-timezone deterministic Mock provider.
+  - Background calendar automation jobs (`Morning Agenda Summary`, `Calendar Event Reminder`, `Calendar Conflict Detection`) using `CONNECTOR_READ`.
+  - Glassmorphic Web UI: Connected capabilities overview, accounts list, capability table, health check, modal provisioning, and sanitized audit trail drawer.
+  - Interactive Calendar Operations view with multi-calendar switcher, filters (`ALL`, `TODAY`, `UPCOMING`), event timeline, and inspector panel.
+  - 3D HQ Station 5 (Server Bay) external capability hardware rack LED and activity telemetry.
+  - 8 authoritative visual evidence screenshots captured in `docs/personal-os/evidence/wave12j/`.
+  - Full regression pass: `git diff --check`, `npm run typecheck`, `npm run build`, `npx vitest run --fileParallelism=false` (1013 tests passed), `npx playwright test tests/connectors-calendar.spec.ts --workers=1` (8 passed).
+- **Status:** **WAVE 12J — GO** | **WAVE 12K — NOT STARTED**.

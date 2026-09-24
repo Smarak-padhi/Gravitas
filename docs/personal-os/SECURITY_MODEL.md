@@ -23,3 +23,13 @@ As a Personal Operating System capable of operating email, reading local files, 
 | **Secret Leakage in Evidence Logs** | API keys appear in stdout traces or git diff evidence. | Evidence Vault Ingestion Filter | Automated regex-based redaction engine scrubs known bearer token and API key patterns before writing to disk. | Novel non-standard key formats might bypass regex. |
 | **Recursive Agent Spawning Abuse**| A rogue planner spawns 1,000 sub-agents to exhaust API balance. | Execution Budget Ceiling | Child tasks consume parent budget slice; hard limit on concurrent workers (`maxConcurrentWorkers: 4`). | None (enforced by supervisor). |
 | **Notification Flooding / Spam** | Worker emits 500 events in 10 seconds, overwhelming operator. | Notification Policy Engine | Deduplication filter, sliding window rate limits (max 1 voice/60s), quiet hour suppression. | Visual clutter if UI filters disabled. |
+
+---
+
+## 3. Wave 12J Credential Isolation & Least-Privilege Transports
+
+In Wave 12J, connector security has been formalized into the production kernel:
+- **Zero Token Leakage:** OAuth tokens and API secrets are isolated in memory via `CredentialBroker`.
+- **Opaque Handles:** Connectors interact via `CredentialHandle`; plain-text tokens never enter prompts, logs, or SQLite stores.
+- **Read-Only Autonomy:** Autonomous execution is restricted to `READ` authority. Write capabilities require explicit human cryptographic sign-off.
+- See [CREDENTIAL_BOUNDARY.md](file:///c:/Users/smara/Desktop/Multi-agent/docs/personal-os/CREDENTIAL_BOUNDARY.md) for full formal specifications.

@@ -20,8 +20,11 @@ import type {
   RepositoryCheckAction,
   FileOperationAction,
   InvokeRoleAction,
+  ConnectorReadAction,
   JobErrorCode,
+  CalendarEventsPage,
 } from '@gravitas/core'
+import type { ConnectorRegistry } from '../connectors/connectorRegistry.js'
 
 export interface ActionResult {
   readonly success: boolean
@@ -42,23 +45,27 @@ export interface ActionResult {
     readonly message: string
     readonly severity: string
   } | undefined
+  readonly data?: unknown | undefined
 }
 
 export interface ActionExecutorOptions {
   readonly allowedFileRoots: readonly string[]
   readonly registeredRepositories: Readonly<Record<string, string>> // repositoryId -> absolute path
   readonly roleInvoker?: ((action: InvokeRoleAction) => Promise<ActionResult>) | undefined
+  readonly connectorRegistry?: ConnectorRegistry | undefined
 }
 
 export class ActionExecutor {
   private readonly allowedRoots: readonly string[]
   private readonly registeredRepos: Readonly<Record<string, string>>
   private readonly roleInvoker?: ((action: InvokeRoleAction) => Promise<ActionResult>) | undefined
+  private readonly connectorRegistry?: ConnectorRegistry | undefined
 
   public constructor(options: ActionExecutorOptions) {
     this.allowedRoots = options.allowedFileRoots.map((r) => path.resolve(r))
     this.registeredRepos = options.registeredRepositories
     this.roleInvoker = options.roleInvoker
+    this.connectorRegistry = options.connectorRegistry
   }
 
   public async execute(action: JobAction, signal?: AbortSignal): Promise<ActionResult> {
@@ -91,6 +98,9 @@ export class ActionExecutor {
 
       case 'INVOKE_ROLE':
         return this.executeInvokeRole(action, signal)
+
+      case 'CONNECTOR_READ':
+        return this.executeConnectorRead(action, signal)
 
       default:
         return {
@@ -343,6 +353,76 @@ export class ActionExecutor {
         totalTokens: 165,
       },
       monetaryCost: 0.001,
+    }
+  }
+
+  // ==========================================================================
+  // Connector Capability Execution
+  // ==========================================================================
+
+  private async executeConnectorRead(action: ConnectorReadAction, signal?: AbortSignal): Promise<ActionResult> {
+    if (signal?.aborted) {
+      return {
+        success: false,
+        resultSummary: 'Connector execution aborted',
+        errorCode: 'CANCELLED',
+        reasoningUsed: false,
+      }
+    }
+
+    if (!this.connectorRegistry) {
+      return {
+        success: false,
+        resultSummary: 'Connector registry not configured on ActionExecutor',
+        errorCode: 'DEPENDENCY_UNAVAILABLE',
+        reasoningUsed: false,
+      }
+    }
+
+    try {
+      const result = await this.connectorRegistry.executeCapability({
+        requestId: `req-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        connectorId: action.connectorId,
+        accountId: action.accountId,
+        capabilityId: action.capabilityId,
+        authority: 'READ',
+        actor: { type: 'JOB', id: 'job_executor' },
+        contextDomains: ['PERSONAL', 'BUSINESS'],
+        input: action.parameters ?? {},
+        requestedAt: new Date().toISOString(),
+      })
+
+      let summary = `Read successfully via ${action.connectorId}:${action.capabilityId}`
+      if (result.data && typeof result.data === 'object' && 'events' in (result.data as any)) {
+        const events = (result.data as CalendarEventsPage).events
+        summary = `Retrieved ${events.length} calendar events`
+      } else if (result.recordsRead !== undefined) {
+        summary = `Read ${result.recordsRead} items from ${action.connectorId}`
+      }
+
+      return {
+        success: true,
+        resultCode: 'CONNECTOR_READ_OK',
+        resultSummary: summary,
+        reasoningUsed: false,
+        data: result.data,
+      }
+    } catch (err: any) {
+      let code: JobErrorCode = 'ACTION_ERROR'
+      if (err.code === 'AUTH_REQUIRED' || err.code === 'REAUTH_REQUIRED' || err.code === 'PERMISSION_DENIED') {
+        code = 'AUTHORITY_DENIED'
+      } else if (err.code === 'TIMEOUT') {
+        code = 'TIMEOUT'
+      } else if (err.code === 'NOT_FOUND') {
+        code = 'DEPENDENCY_UNAVAILABLE'
+      }
+
+      return {
+        success: false,
+        resultSummary: `Connector read failed: ${err.message}`,
+        errorCode: code,
+        reasoningUsed: false,
+      }
     }
   }
 }

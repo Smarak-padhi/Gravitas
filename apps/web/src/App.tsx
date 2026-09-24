@@ -24,6 +24,8 @@ import { browserNotifier } from './features/inbox/browserNotifier.js'
 import { ActivityTimeline } from './features/timeline/ActivityTimeline.js'
 import { AgentRegistryView } from './features/agents/AgentRegistryView.js'
 import { AutomationsView } from './features/automations/AutomationsView.js'
+import { ConnectorsView } from './features/connectors/ConnectorsView.js'
+import { CalendarView } from './features/calendar/CalendarView.js'
 import { CommandPalette } from './features/command-palette/CommandPalette.js'
 import type { CommandItem } from './features/command-palette/commandPaletteState.js'
 import { LivingHqCanvas3D } from './hq3d/LivingHqCanvas3D.js'
@@ -48,7 +50,7 @@ export const App: React.FC = () => {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('gravitas:activeView') as WorkspaceView | null
-        if (saved && ['HQ3D', 'OFFICE', 'GRAPH', 'EVIDENCE', 'TIMELINE', 'AGENTS', 'AUTOMATIONS'].includes(saved)) {
+        if (saved && ['HQ3D', 'OFFICE', 'GRAPH', 'EVIDENCE', 'TIMELINE', 'AGENTS', 'AUTOMATIONS', 'CONNECTORS', 'CALENDAR'].includes(saved)) {
           return saved
         }
       } catch {
@@ -401,6 +403,30 @@ export const App: React.FC = () => {
         run: () => handleViewChange('AGENTS'),
       },
       {
+        id: 'nav-calendar',
+        title: 'Open Calendar Operations',
+        subtitle: 'Review synchronized events, agendas, and conflict detection',
+        category: 'NAVIGATION',
+        shortcut: 'Ctrl+6',
+        run: () => handleViewChange('CALENDAR'),
+      },
+      {
+        id: 'nav-connectors',
+        title: 'Open Connector Registry',
+        subtitle: 'Inspect bounded external service connectors and credentials',
+        category: 'NAVIGATION',
+        shortcut: 'Ctrl+7',
+        run: () => handleViewChange('CONNECTORS'),
+      },
+      {
+        id: 'nav-automations',
+        title: 'Open Automations & Scheduler',
+        subtitle: 'Inspect automated recurring background jobs',
+        category: 'NAVIGATION',
+        shortcut: 'Ctrl+8',
+        run: () => handleViewChange('AUTOMATIONS'),
+      },
+      {
         id: 'toggle-inbox',
         title: 'Toggle Operator Inbox',
         subtitle: `${inboxItems.length} actionable review items`,
@@ -699,6 +725,16 @@ export const App: React.FC = () => {
           {/* VIEW: PERSONAL OS AUTOMATIONS & BACKGROUND SCHEDULER */}
           {activeView === 'AUTOMATIONS' && (
             <AutomationsView />
+          )}
+
+          {/* VIEW: CALENDAR OPERATIONS FOUNDATION */}
+          {activeView === 'CALENDAR' && (
+            <CalendarView />
+          )}
+
+          {/* VIEW: CONNECTOR CAPABILITY KERNEL */}
+          {activeView === 'CONNECTORS' && (
+            <ConnectorsView />
           )}
         </main>
 

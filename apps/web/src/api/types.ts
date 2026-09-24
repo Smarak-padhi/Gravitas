@@ -163,6 +163,16 @@ export interface RuntimeArtifactProjection {
   readonly currentCustody: ArtifactCustodyLocation
 }
 
+export interface RuntimeConnectorProjection {
+  readonly id: string
+  readonly name: string
+  readonly status: 'AVAILABLE' | 'UNAVAILABLE' | 'ERROR' | 'CONFIG_REQUIRED'
+  readonly supportedCapabilities: readonly string[]
+  readonly accountCount: number
+  readonly activeAccountCount: number
+  readonly lastHealthCheckAt?: string | undefined
+}
+
 export interface RuntimeProjectionSnapshot {
   readonly schemaVersion: string
   readonly epoch: string
@@ -173,6 +183,7 @@ export interface RuntimeProjectionSnapshot {
   readonly backgroundJobs?: readonly BackgroundJob[] | undefined
   readonly recentJobRuns?: readonly JobRun[] | undefined
   readonly personalNotifications?: readonly PersonalOsNotification[] | undefined
+  readonly connectors?: readonly RuntimeConnectorProjection[] | undefined
 }
 
 export interface RunDetailResponse {
@@ -300,4 +311,35 @@ export interface ApiErrorPayload {
     readonly message: string
     readonly requestId: string
   }
+}
+
+export type {
+  ConnectorDescriptor,
+  ConnectorAccount,
+  ConnectorCapability,
+  ConnectorStatus,
+  ConnectorId,
+  ConnectorAccountId,
+  CalendarSummary,
+  CalendarEventSummary,
+  CalendarEventsPage,
+  CalendarEventsQuery,
+} from '@gravitas/core'
+
+export interface ConnectorAuditLogEntry {
+  readonly id: string
+  readonly timestamp: string
+  readonly connectorId: string
+  readonly accountId?: string | undefined
+  readonly capabilityId?: string | undefined
+  readonly actorType: string
+  readonly actorId: string
+  readonly authority: string
+  readonly action: string
+  readonly success: boolean
+  readonly durationMs: number
+  readonly sanitizedInputSummary?: string | undefined
+  readonly sanitizedOutputSummary?: string | undefined
+  readonly errorCode?: string | undefined
+  readonly errorMessage?: string | undefined
 }

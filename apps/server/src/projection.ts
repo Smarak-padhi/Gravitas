@@ -95,6 +95,17 @@ export interface RuntimeTaskProjection {
   readonly browserQa?: RuntimeBrowserQaProjection | undefined
 }
 
+export interface RuntimeConnectorProjection {
+  readonly connectorId: string
+  readonly provider: string
+  readonly displayName: string
+  readonly status: string
+  readonly accountsCount: number
+  readonly activeAccountId?: string | undefined
+  readonly capabilitiesCount: number
+  readonly lastSyncAt?: string | undefined
+}
+
 export interface RuntimeProjectionSnapshot {
   readonly schemaVersion: '1.0.0'
   readonly epoch: string
@@ -105,6 +116,7 @@ export interface RuntimeProjectionSnapshot {
   readonly backgroundJobs?: readonly BackgroundJob[] | undefined
   readonly recentJobRuns?: readonly JobRun[] | undefined
   readonly personalNotifications?: readonly PersonalOsNotification[] | undefined
+  readonly connectors?: readonly RuntimeConnectorProjection[] | undefined
 }
 
 /**
@@ -122,6 +134,7 @@ export class RuntimeProjectionStore {
   private backgroundJobs: readonly BackgroundJob[] = []
   private recentJobRuns: readonly JobRun[] = []
   private personalNotifications: readonly PersonalOsNotification[] = []
+  private connectors: readonly RuntimeConnectorProjection[] = []
 
   public constructor(epochId?: string) {
     this.epoch = epochId ?? `proj_epoch_${randomUUID()}`
@@ -510,6 +523,7 @@ export class RuntimeProjectionStore {
       backgroundJobs: this.backgroundJobs,
       recentJobRuns: this.recentJobRuns,
       personalNotifications: this.personalNotifications,
+      connectors: this.connectors,
     }
   }
 
@@ -522,6 +536,15 @@ export class RuntimeProjectionStore {
     this.recentJobRuns = runs
     this.personalNotifications = notifications
     this.revision++
+  }
+
+  public setConnectorsState(connectors: readonly RuntimeConnectorProjection[]): void {
+    this.connectors = connectors
+    this.revision++
+  }
+
+  public getConnectors(): readonly RuntimeConnectorProjection[] {
+    return this.connectors
   }
 
   public getBackgroundJobs(): readonly BackgroundJob[] {
