@@ -81,6 +81,7 @@ export const App: React.FC = () => {
   const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>(null)
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [isRunsCollapsed, setIsRunsCollapsed] = useState<boolean>(false)
 
   // Initial load
   const loadInitialData = useCallback(async () => {
@@ -586,13 +587,110 @@ export const App: React.FC = () => {
           position: 'relative',
         }}
       >
-        {/* Left Rail: Runs List */}
-        <RunsList
-          runs={runs}
-          selectedRunId={selectedRunId}
-          onSelectRun={(id) => setSelectedRunId(id)}
-          onNewRunClick={() => setIsComposerOpen(true)}
-        />
+        {/* Left Rail: Runs List (Collapsible for Maximum 3D HQ Viewport) */}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            transition: 'width 0.2s ease',
+            width: isRunsCollapsed ? '44px' : '280px',
+            overflow: 'hidden',
+            flexShrink: 0,
+            borderRight: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-panel)',
+          }}
+        >
+          {isRunsCollapsed ? (
+            <div
+              style={{
+                width: '44px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '12px 4px',
+                gap: '12px',
+              }}
+            >
+              <button
+                onClick={() => setIsRunsCollapsed(false)}
+                title="Expand Runs Panel"
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '4px',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  fontSize: '12px',
+                }}
+              >
+                ▶
+              </button>
+              <button
+                onClick={() => setIsComposerOpen(true)}
+                title="+ New Run"
+                style={{
+                  background: 'var(--accent-primary)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '16px',
+                  position: 'relative',
+                }}
+              >
+                +
+                <span style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>+ New Run</span>
+              </button>
+              <div
+                style={{
+                  writingMode: 'vertical-rl',
+                  textOrientation: 'mixed',
+                  color: 'var(--text-muted)',
+                  fontSize: '11px',
+                  letterSpacing: '1px',
+                  marginTop: '12px',
+                  transform: 'rotate(180deg)',
+                }}
+              >
+                RUNS ({runs.length})
+              </div>
+            </div>
+          ) : (
+            <div style={{ width: '280px', display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+              <button
+                onClick={() => setIsRunsCollapsed(true)}
+                title="Collapse Runs Panel"
+                style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '8px',
+                  zIndex: 5,
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: '4px',
+                }}
+              >
+                ◀
+              </button>
+              <RunsList
+                runs={runs}
+                selectedRunId={selectedRunId}
+                onSelectRun={(id) => setSelectedRunId(id)}
+                onNewRunClick={() => setIsComposerOpen(true)}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Central Workspace Area */}
         <main

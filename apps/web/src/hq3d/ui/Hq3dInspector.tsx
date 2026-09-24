@@ -36,17 +36,18 @@ export const Hq3dInspector: React.FC<Hq3dInspectorProps> = ({
       data-testid="hq3d-inspector"
       aria-label="3D Headquarters Inspector"
       style={{
-        width: '320px',
+        width: '280px',
         maxWidth: '100%',
-        backgroundColor: 'var(--bg-panel, #121722)',
-        borderLeft: '1px solid var(--border-color, #232b3e)',
+        backgroundColor: 'rgba(15, 20, 28, 0.88)',
+        backdropFilter: 'blur(16px)',
+        borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
         flexDirection: 'column',
         overflowY: 'auto',
         color: 'var(--text-primary, #e2e8f0)',
         fontSize: '12px',
         zIndex: 10,
-        boxShadow: '-4px 0 16px rgba(0, 0, 0, 0.4)',
+        boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.5)',
       }}
     >
       {/* Header */}

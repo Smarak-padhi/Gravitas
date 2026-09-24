@@ -435,7 +435,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             pointerEvents: 'none',
-            zIndex: 10,
+            zIndex: 20,
           }}
         >
           {/* Left: Quick Floors / Rooms Navigation */}
@@ -764,20 +764,34 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
         )}
       </div>
 
-      {/* Docked 2D Inspector on Right Side */}
-      <Hq3dInspector
-        entity={selectedEntity}
-        performanceStats={performanceStats}
-        showPerformance={showPerformance}
-        onTogglePerformance={() => setShowPerformance(!showPerformance)}
-        onSelectRoom={handleSelectRoom}
-        onSelectRole={handleSelectRole}
-        onResetOverview={handleResetOverview}
-        onClose={() => {
-          setSelectedEntity(null)
-          directorRef.current?.resetToOverview()
+      {/* Docked 2D Inspector Floating Glass Overlay on Right Side */}
+      <div
+        style={{
+          position: 'absolute',
+          right: '12px',
+          top: '56px',
+          bottom: '12px',
+          zIndex: 15,
+          display: 'flex',
+          overflow: 'hidden',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
         }}
-      />
+      >
+        <Hq3dInspector
+          entity={selectedEntity}
+          performanceStats={performanceStats}
+          showPerformance={showPerformance}
+          onTogglePerformance={() => setShowPerformance(!showPerformance)}
+          onSelectRoom={handleSelectRoom}
+          onSelectRole={handleSelectRole}
+          onResetOverview={handleResetOverview}
+          onClose={() => {
+            setSelectedEntity(null)
+            directorRef.current?.resetToOverview()
+          }}
+        />
+      </div>
     </div>
   )
 }

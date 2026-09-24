@@ -231,69 +231,82 @@ export class HqScene {
 
     switch (mode) {
       case 'DAY':
-        this.scene.background = new THREE.Color(0x1a212d) // Soft daylight slate
+        this.scene.background = new THREE.Color(0x1e2530) // Soft architectural slate
         this.keyLight.color.setHex(0xfff8ee)
         this.keyLight.intensity = 1.45
         this.keyLight.position.set(-14.0, 22.0, -10.0)
         this.fillLight.color.setHex(0x9fc2e0)
-        this.fillLight.intensity = 0.85
-        this.ambientLight.color.setHex(0xb8d2ec)
-        this.ambientLight.groundColor.setHex(0x2d3644)
-        this.ambientLight.intensity = 0.95
+        this.fillLight.intensity = 0.95
+        this.ambientLight.color.setHex(0xcfdbe8)
+        this.ambientLight.groundColor.setHex(0x333d4d)
+        this.ambientLight.intensity = 1.1
 
         // Balanced daylight spot fill
-        this.spotPlanning.intensity = 1.6
-        this.spotOperations.intensity = 1.5
-        this.spotCleanroom.intensity = 1.8
-        this.spotBrowserQa.intensity = 1.6
-        this.spotInfrastructure.intensity = 1.6
-        this.spotApproval.intensity = 1.6
+        this.spotPlanning.color.setHex(0xffeedb)
+        this.spotPlanning.intensity = 2.0
+        this.spotOperations.color.setHex(0xe2eeff)
+        this.spotOperations.intensity = 2.0
+        this.spotCleanroom.color.setHex(0xd4f4ff)
+        this.spotCleanroom.intensity = 2.2
+        this.spotBrowserQa.color.setHex(0xc2f0e8)
+        this.spotBrowserQa.intensity = 2.0
+        this.spotInfrastructure.color.setHex(0xa5c6e8)
+        this.spotInfrastructure.intensity = 2.0
+        this.spotApproval.color.setHex(0xffdfa8)
+        this.spotApproval.intensity = 2.0
         break
 
       case 'EVENING':
-        this.scene.background = new THREE.Color(0x131724) // Deep twilight indigo
-        this.keyLight.color.setHex(0xf59e0b) // Warm sunset amber
-        this.keyLight.intensity = 1.15
+        this.scene.background = new THREE.Color(0x161b26) // Deep twilight slate
+        this.keyLight.color.setHex(0xfbbf24) // Warm low-angle golden light
+        this.keyLight.intensity = 1.25
         this.keyLight.position.set(-18.0, 16.0, -12.0)
         this.fillLight.color.setHex(0x6366f1) // Indigo ambient fill
-        this.fillLight.intensity = 0.65
-        this.ambientLight.color.setHex(0x818cf8)
-        this.ambientLight.groundColor.setHex(0x1e2433)
-        this.ambientLight.intensity = 0.75
+        this.fillLight.intensity = 0.75
+        this.ambientLight.color.setHex(0x94a3b8)
+        this.ambientLight.groundColor.setHex(0x1e293b)
+        this.ambientLight.intensity = 0.85
 
         // Warm cozy interior pools
-        this.spotPlanning.intensity = 2.1
-        this.spotOperations.intensity = 2.0
-        this.spotCleanroom.intensity = 2.2
-        this.spotBrowserQa.intensity = 2.0
-        this.spotInfrastructure.intensity = 2.0
-        this.spotApproval.intensity = 2.2
+        this.spotPlanning.color.setHex(0xffedd5)
+        this.spotPlanning.intensity = 2.6
+        this.spotOperations.color.setHex(0xfef08a)
+        this.spotOperations.intensity = 2.6
+        this.spotCleanroom.color.setHex(0xdbeafe)
+        this.spotCleanroom.intensity = 2.5
+        this.spotBrowserQa.color.setHex(0xccfbf1)
+        this.spotBrowserQa.intensity = 2.4
+        this.spotInfrastructure.color.setHex(0x93c5fd)
+        this.spotInfrastructure.intensity = 2.4
+        this.spotApproval.color.setHex(0xfef08a)
+        this.spotApproval.intensity = 2.8
         break
 
       case 'NIGHT':
-        this.scene.background = new THREE.Color(0x090c13) // Obsidian midnight
-        this.keyLight.color.setHex(0x38bdf8) // Soft cool moonbeam key
-        this.keyLight.intensity = 0.35
-        this.keyLight.position.set(-10.0, 24.0, -6.0)
-        this.fillLight.color.setHex(0x1e293b) // Deep navy fill
-        this.fillLight.intensity = 0.3
-        this.ambientLight.color.setHex(0x1e2638)
-        this.ambientLight.groundColor.setHex(0x0a0e17)
-        this.ambientLight.intensity = 0.4
+        // Atmospheric Night: deep desaturated indigo exterior + warm inhabited interiors
+        this.scene.background = new THREE.Color(0x0f172a) // Deep slate midnight navy (never pitch black)
+        this.keyLight.color.setHex(0x93c5fd) // Soft cool moonbeam key
+        this.keyLight.intensity = 0.75
+        this.keyLight.position.set(-12.0, 22.0, -8.0)
+        this.fillLight.color.setHex(0x38bdf8) // Cool cyan-blue ambient fill
+        this.fillLight.intensity = 0.65
+        this.ambientLight.color.setHex(0x475569) // Luminous cool exterior ambient
+        this.ambientLight.groundColor.setHex(0x1e293b)
+        this.ambientLight.intensity = 0.85 // High enough that whole building & furniture remain readable!
 
         // Rich warm glowing lantern pools inside the building
         this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 2.6
-        this.spotOperations.color.setHex(0xfef3c7)
-        this.spotOperations.intensity = 2.5
-        this.spotCleanroom.color.setHex(0xd4f4ff)
-        this.spotCleanroom.intensity = 2.4
-        this.spotBrowserQa.color.setHex(0xccfbf1)
-        this.spotBrowserQa.intensity = 2.3
-        this.spotInfrastructure.color.setHex(0xa5c6e8)
-        this.spotInfrastructure.intensity = 2.2
-        this.spotApproval.color.setHex(0xfde68a)
-        this.spotApproval.intensity = 2.8
+        this.spotPlanning.intensity = 3.2
+        this.spotOperations.color.setHex(0xfef08a)
+        this.spotOperations.intensity = 3.4
+        this.spotCleanroom.color.setHex(0xbae6fd)
+        this.spotCleanroom.intensity = 3.0
+        this.spotBrowserQa.color.setHex(0x99f6e4)
+        this.spotBrowserQa.intensity = 2.8
+        this.spotInfrastructure.color.setHex(0x7dd3fc)
+        this.spotInfrastructure.intensity = 2.8
+        this.spotApproval.color.setHex(0xfde047)
+        this.spotApproval.intensity = 3.6
         break
     }
   }

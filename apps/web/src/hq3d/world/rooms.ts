@@ -7,23 +7,23 @@ import type { CameraFramingPreset, RoomDefinition, RoomId } from '../types.js'
 
 export const HQ_OVERVIEW_PRESET: CameraFramingPreset = {
   id: 'HQ_OVERVIEW',
-  target: [0.0, 2.6, 1.2],
-  position: [-18.5, 13.0, -17.5],
-  description: 'Headquarters Full Vertical Cutaway Overview',
+  target: [0.0, 1.8, 1.2],
+  position: [-12.5, 6.5, -14.2],
+  description: 'Headquarters Full Vertical Architectural Cutaway Dollhouse Overview',
 }
 
 // Wave 12K Focused Workstation & Character Camera Presets
 export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
   WS_FRONTEND: {
     id: 'WS_FRONTEND',
-    target: [-6.5, 1.0, 1.2],
-    position: [-8.4, 2.2, 3.2],
+    target: [-6.5, 1.0, 1.4],
+    position: [-7.8, 1.5, 0.8],
     description: 'Frontend Engineer Workstation & Laptop Focus',
   },
   WS_BACKEND: {
     id: 'WS_BACKEND',
-    target: [-1.8, 1.0, 1.2],
-    position: [-3.8, 2.2, 3.2],
+    target: [-1.8, 1.0, 1.4],
+    position: [-3.2, 1.5, 0.8],
     description: 'Backend Engineer Workstation & Telemetry Focus',
   },
   WS_PLANNING: {
@@ -43,35 +43,35 @@ export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
 export const CHARACTER_PRESETS: Record<string, CameraFramingPreset> = {
   CHAR_FRONTEND: {
     id: 'CHAR_FRONTEND',
-    target: [-6.5, 1.05, 1.2],
-    position: [-7.8, 1.8, 2.6],
-    description: 'Frontend Engineer Mascot & Stylized Ponytail Focus',
+    target: [-6.5, 1.12, 1.82],
+    position: [-7.7, 1.42, 1.4],
+    description: 'Frontend Engineer Mascot, Ponytail & Headphones Closeup',
   },
   CHAR_BACKEND: {
     id: 'CHAR_BACKEND',
-    target: [-1.8, 1.05, 1.2],
-    position: [-3.1, 1.8, 2.6],
-    description: 'Backend Engineer Mascot & Headset Focus',
+    target: [-1.8, 1.12, 1.82],
+    position: [-3.0, 1.42, 1.4],
+    description: 'Backend Engineer Mascot & Headset Closeup',
   },
   CHAR_PLANNER: {
     id: 'CHAR_PLANNER',
     target: [-4.5, 1.1, 4.6],
-    position: [-6.0, 1.9, 6.2],
+    position: [-4.5, 1.45, 3.2],
     description: 'Chief Planner Mascot & Drafting Folio Focus',
   },
   CHAR_REVIEWER: {
     id: 'CHAR_REVIEWER',
-    target: [6.0, 1.1, 6.0],
-    position: [4.2, 2.0, 4.8],
+    target: [6.0, 1.1, 5.75],
+    position: [6.0, 1.45, 4.3],
     description: 'Independent Reviewer Mascot & Inspection Loupe Focus',
   },
 }
 
 export const ELEVATOR_PRESET: CameraFramingPreset = {
   id: 'ELEVATOR_VIEW',
-  target: [0.0, 2.4, 9.8],
-  position: [0.0, 3.2, 4.2],
-  description: 'Vertical Elevator Shaft & Articulated Carriage Transit',
+  target: [0.0, 2.0, 9.8],
+  position: [-3.5, 2.0, 4.5],
+  description: 'Vertical Architectural Elevator Shaft & Exterior Carriage Transit',
 }
 
 export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
@@ -98,9 +98,9 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     accentColor: '#2b59c3',
     cameraPreset: {
       id: 'ROOM_AGENT_OPERATIONS',
-      target: [-4.5, 1.0, 1.2],
-      position: [-9.2, 3.4, 4.2],
-      description: 'Agent Operations Workstations & Seated Prototypes (Codex & FCC)',
+      target: [-4.2, 1.1, 0.8],
+      position: [-10.5, 2.6, -4.5],
+      description: 'Agent Operations Workstations, Wall Art, Plants & Seated Engineers',
     },
   },
   VERIFICATION_LAB: {

@@ -84,29 +84,31 @@ export class HqCharacters {
     const isSeated = roleId === 'role:engineering:frontend-engineer' || roleId === 'role:engineering:backend-engineer'
     const yBase = isSeated ? 0.46 : 0.0
 
-    // Material selection per role
-    let suitMat = this.materials.charSuitDark
-    let accentMat: THREE.Material = this.materials.brass
+    // Material selection per role (Cozy modern creative studio aesthetic)
+    let suitMat = this.materials.charSweaterSlate
+    let accentMat: THREE.Material = this.materials.champagneBrass
+    const pantsMat = this.materials.charDenim
+    const shoeMat = this.materials.charSneakerWhite
     let roomName = 'Agent Operations'
     let roleName = 'Engineer'
 
     if (roleId === 'role:strategy:chief-planner') {
-      suitMat = this.materials.charPlannerSuit
+      suitMat = this.materials.charSweaterOat
       accentMat = this.materials.charPlannerAccent
       roomName = 'Mission Control'
       roleName = 'Chief Planner'
     } else if (roleId === 'role:engineering:frontend-engineer') {
-      suitMat = this.materials.charFrontendSuit
+      suitMat = this.materials.charSweaterLavender
       accentMat = this.materials.charFrontendAccent
       roomName = 'Agent Operations'
       roleName = 'Frontend Engineer'
     } else if (roleId === 'role:engineering:backend-engineer') {
-      suitMat = this.materials.charBackendSuit
+      suitMat = this.materials.charSweaterSlate
       accentMat = this.materials.charBackendAccent
       roomName = 'Agent Operations'
       roleName = 'Backend Engineer'
     } else if (roleId === 'role:quality:independent-reviewer') {
-      suitMat = this.materials.charReviewerSuit
+      suitMat = this.materials.charTunicSage
       accentMat = this.materials.charReviewerAccent
       roomName = 'Verification Cleanroom'
       roleName = 'Independent Reviewer'
@@ -132,37 +134,45 @@ export class HqCharacters {
     const torsoGroup = new THREE.Group()
     torsoGroup.position.set(0.0, yBase + 0.62, 0.0)
 
-    // Tailored jacket / coat
+    // Cozy knit sweater / tailored tunic torso
     const torsoGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 0.22))
     const torso = new THREE.Mesh(torsoGeo, suitMat)
     torso.castShadow = true
     torsoGroup.add(torso)
 
-    // Accent tie / lapel strip
-    const lapelGeo = this.track(new THREE.BoxGeometry(0.09, 0.32, 0.02))
-    const lapel = new THREE.Mesh(lapelGeo, accentMat)
-    lapel.position.set(0.0, 0.02, 0.112)
-    torsoGroup.add(lapel)
-
-    // Collar
-    const collarGeo = this.track(new THREE.CylinderGeometry(0.05, 0.06, 0.07, 8))
+    // Accent collar / ribbing detail
+    const collarGeo = this.track(new THREE.CylinderGeometry(0.06, 0.07, 0.06, 12))
     const collar = new THREE.Mesh(collarGeo, accentMat)
     collar.position.set(0.0, 0.22, 0.0)
     torsoGroup.add(collar)
 
-    // 2. Sculpted Stylized Mascot Head
-    const headGeo = this.track(new THREE.SphereGeometry(0.12, 16, 14))
+    // 2. Sculpted Stylized Mascot Head with expressive eyes
+    const headGeo = this.track(new THREE.SphereGeometry(0.125, 16, 14))
     const head = new THREE.Mesh(headGeo, this.materials.charSkin)
-    head.scale.set(0.96, 1.08, 0.98)
+    head.scale.set(0.96, 1.06, 0.98)
     head.position.set(0.0, 0.35, 0.0)
     head.castShadow = true
     torsoGroup.add(head)
 
-    // Architectural brow visor band (refined brass / accent)
-    const visorGeo = this.track(new THREE.BoxGeometry(0.16, 0.038, 0.08))
-    const visor = new THREE.Mesh(visorGeo, accentMat)
-    visor.position.set(0.0, 0.37, 0.082)
-    torsoGroup.add(visor)
+    // Expressive stylized eyes (dark almond pill shape)
+    const eyeGeo = this.track(new THREE.BoxGeometry(0.024, 0.042, 0.015))
+    const eyeLeft = new THREE.Mesh(eyeGeo, this.materials.charEyes)
+    eyeLeft.position.set(-0.042, 0.355, 0.116)
+    torsoGroup.add(eyeLeft)
+
+    const eyeRight = new THREE.Mesh(eyeGeo, this.materials.charEyes)
+    eyeRight.position.set(0.042, 0.355, 0.116)
+    torsoGroup.add(eyeRight)
+
+    // Micro catchlight specular highlights
+    const specGeo = this.track(new THREE.BoxGeometry(0.008, 0.012, 0.012))
+    const specLeft = new THREE.Mesh(specGeo, this.materials.charEyeSpec)
+    specLeft.position.set(-0.038, 0.366, 0.122)
+    torsoGroup.add(specLeft)
+
+    const specRight = new THREE.Mesh(specGeo, this.materials.charEyeSpec)
+    specRight.position.set(0.046, 0.366, 0.122)
+    torsoGroup.add(specRight)
 
     // Role-specific sculpted hair & mascot accessories
     if (roleId === 'role:engineering:frontend-engineer') {
@@ -296,34 +306,34 @@ export class HqCharacters {
         torsoGroup.add(accessoryMesh)
       }
 
-      // Seated Legs (horizontal thighs + vertical shins + shoes)
+      // Seated Legs (denim thighs + denim shins + stylish white sneakers)
       const seatedLegs = new THREE.Group()
       seatedLegs.name = 'seated-legs'
 
       const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
-      const thighL = new THREE.Mesh(thighGeo, suitMat)
+      const thighL = new THREE.Mesh(thighGeo, pantsMat)
       thighL.position.set(-0.1, yBase + 0.36, 0.17)
       seatedLegs.add(thighL)
 
-      const thighR = new THREE.Mesh(thighGeo, suitMat)
+      const thighR = new THREE.Mesh(thighGeo, pantsMat)
       thighR.position.set(0.1, yBase + 0.36, 0.17)
       seatedLegs.add(thighR)
 
       const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
-      const shinL = new THREE.Mesh(shinGeo, suitMat)
+      const shinL = new THREE.Mesh(shinGeo, pantsMat)
       shinL.position.set(-0.1, 0.21, 0.34)
       seatedLegs.add(shinL)
 
-      const shinR = new THREE.Mesh(shinGeo, suitMat)
+      const shinR = new THREE.Mesh(shinGeo, pantsMat)
       shinR.position.set(0.1, 0.21, 0.34)
       seatedLegs.add(shinR)
 
       const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
-      const shoeL = new THREE.Mesh(shoeGeo, suitMat)
+      const shoeL = new THREE.Mesh(shoeGeo, shoeMat)
       shoeL.position.set(-0.1, 0.03, 0.38)
       seatedLegs.add(shoeL)
 
-      const shoeR = new THREE.Mesh(shoeGeo, suitMat)
+      const shoeR = new THREE.Mesh(shoeGeo, shoeMat)
       shoeR.position.set(0.1, 0.03, 0.38)
       seatedLegs.add(shoeR)
 
@@ -369,19 +379,19 @@ export class HqCharacters {
       }
     }
 
-    // Articulated Standing / Walking Legs (Present on all characters, toggled when walking/standing)
+    // Articulated Standing / Walking Legs (denim + white sneakers)
     const standingLegsGroup = new THREE.Group()
     standingLegsGroup.name = 'standing-legs'
 
     const legLeftGroup = new THREE.Group()
     legLeftGroup.position.set(-0.1, 0.62, 0.0)
     const legGeoL = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
-    const legMeshL = new THREE.Mesh(legGeoL, suitMat)
+    const legMeshL = new THREE.Mesh(legGeoL, pantsMat)
     legMeshL.position.set(0.0, -0.28, 0.0)
     legMeshL.castShadow = true
     legLeftGroup.add(legMeshL)
     const shoeGeoL = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-    const shoeMeshL = new THREE.Mesh(shoeGeoL, suitMat)
+    const shoeMeshL = new THREE.Mesh(shoeGeoL, shoeMat)
     shoeMeshL.position.set(0.0, -0.59, 0.03)
     legLeftGroup.add(shoeMeshL)
     standingLegsGroup.add(legLeftGroup)
@@ -389,12 +399,12 @@ export class HqCharacters {
     const legRightGroup = new THREE.Group()
     legRightGroup.position.set(0.1, 0.62, 0.0)
     const legGeoR = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
-    const legMeshR = new THREE.Mesh(legGeoR, suitMat)
+    const legMeshR = new THREE.Mesh(legGeoR, pantsMat)
     legMeshR.position.set(0.0, -0.28, 0.0)
     legMeshR.castShadow = true
     legRightGroup.add(legMeshR)
     const shoeGeoR = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-    const shoeMeshR = new THREE.Mesh(shoeGeoR, suitMat)
+    const shoeMeshR = new THREE.Mesh(shoeGeoR, shoeMat)
     shoeMeshR.position.set(0.0, -0.59, 0.03)
     legRightGroup.add(shoeMeshR)
     standingLegsGroup.add(legRightGroup)

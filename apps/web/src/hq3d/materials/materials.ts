@@ -43,9 +43,25 @@ export class MaterialLibrary {
   public readonly bookSpineAmber: THREE.MeshStandardMaterial
   public readonly bookSpineTeal: THREE.MeshStandardMaterial
 
-  // Wave 12K Elevator Materials
+  // Wave 12K-R Dollhouse Interior Materials
+  public readonly woodOakFloor: THREE.MeshStandardMaterial
+  public readonly carpetWarm: THREE.MeshStandardMaterial
+  public readonly wallArtAbstract: THREE.MeshStandardMaterial
+  public readonly coffeeMugTeal: THREE.MeshStandardMaterial
+  public readonly coffeeMugTerracotta: THREE.MeshStandardMaterial
+  public readonly laptopAluminum: THREE.MeshStandardMaterial
   public readonly elevatorGuideRail: THREE.MeshStandardMaterial
   public readonly elevatorCabInterior: THREE.MeshStandardMaterial
+
+  // Wave 12K-R Stylized Mascot Character Kit Materials
+  public readonly charEyes: THREE.MeshStandardMaterial
+  public readonly charEyeSpec: THREE.MeshStandardMaterial
+  public readonly charSneakerWhite: THREE.MeshStandardMaterial
+  public readonly charDenim: THREE.MeshStandardMaterial
+  public readonly charSweaterOat: THREE.MeshStandardMaterial
+  public readonly charSweaterLavender: THREE.MeshStandardMaterial
+  public readonly charSweaterSlate: THREE.MeshStandardMaterial
+  public readonly charTunicSage: THREE.MeshStandardMaterial
 
   // Wave 12K Mascot Character Hair & Accessories
   public readonly hairPonytail: THREE.MeshStandardMaterial
@@ -110,6 +126,10 @@ export class MaterialLibrary {
     const laptopTex = hasCanvas ? this.trackTex(TextureGenerator.createDeviceScreenTexture('LAPTOP')) : null
     const tabletTex = hasCanvas ? this.trackTex(TextureGenerator.createDeviceScreenTexture('TABLET')) : null
     const phoneTex = hasCanvas ? this.trackTex(TextureGenerator.createDeviceScreenTexture('PHONE')) : null
+    const oakFloorTex = hasCanvas ? this.trackTex(TextureGenerator.createOakFloorTexture()) : null
+    const carpetTex = hasCanvas ? this.trackTex(TextureGenerator.createCarpetTexture()) : null
+    const wallArtTex = hasCanvas ? this.trackTex(TextureGenerator.createWallArtTexture()) : null
+    const whiteboardTex = hasCanvas ? this.trackTex(TextureGenerator.createWhiteboardTexture()) : null
 
     // 2. Architectural Stone Floor (Warm mineral slate tone matching Gravitas shell)
     this.limestone = this.track(
@@ -272,9 +292,126 @@ export class MaterialLibrary {
 
     this.whiteboardSurface = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0xf8fafc,
+        color: 0xffffff,
+        map: whiteboardTex,
         roughness: 0.18,
         metalness: 0.04,
+      })
+    )
+
+    this.woodOakFloor = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: oakFloorTex,
+        roughness: 0.65,
+        metalness: 0.05,
+      })
+    )
+
+    this.carpetWarm = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: carpetTex,
+        roughness: 0.95,
+        metalness: 0.0,
+      })
+    )
+
+    this.wallArtAbstract = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: wallArtTex,
+        roughness: 0.75,
+        metalness: 0.05,
+      })
+    )
+
+    this.coffeeMugTeal = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x0d9488,
+        roughness: 0.15,
+        metalness: 0.1,
+      })
+    )
+
+    this.coffeeMugTerracotta = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xc25e38,
+        roughness: 0.28,
+        metalness: 0.05,
+      })
+    )
+
+    this.laptopAluminum = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x64748b,
+        roughness: 0.35,
+        metalness: 0.85,
+      })
+    )
+
+    this.charEyes = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.15,
+        metalness: 0.1,
+      })
+    )
+
+    this.charEyeSpec = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.85,
+        roughness: 0.1,
+      })
+    )
+
+    this.charSneakerWhite = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xf1f5f9,
+        roughness: 0.35,
+        metalness: 0.05,
+      })
+    )
+
+    this.charDenim = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x27364b,
+        roughness: 0.82,
+        metalness: 0.04,
+      })
+    )
+
+    this.charSweaterOat = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xded5c8,
+        roughness: 0.85,
+        metalness: 0.02,
+      })
+    )
+
+    this.charSweaterLavender = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xb4a4eb,
+        roughness: 0.8,
+        metalness: 0.02,
+      })
+    )
+
+    this.charSweaterSlate = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.8,
+        metalness: 0.04,
+      })
+    )
+
+    this.charTunicSage = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x5eead4,
+        roughness: 0.72,
+        metalness: 0.02,
       })
     )
 

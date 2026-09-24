@@ -159,8 +159,17 @@ export class HqFurniture {
       podGroup.add(ind)
       this.stationIndicators.set(stationDef.id, ind)
 
-      // 1. Walnut Desktop Slab (2.2m x 1.0m x 0.08m)
-      const deskGeo = this.track(new THREE.BoxGeometry(2.2, 0.08, 1.0))
+      // 0. Soft Woven Area Rug under workstation pod
+      if (cfg.id === 'codex-workstation') {
+        const rugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 6.2))
+        const rug = new THREE.Mesh(rugGeo, materials.carpetWarm)
+        rug.position.set(2.35, 0.004, -0.6)
+        rug.receiveShadow = true
+        podGroup.add(rug)
+      }
+
+      // 1. Walnut Desktop Slab (2.2m x 0.95m x 0.06m)
+      const deskGeo = this.track(new THREE.BoxGeometry(2.2, 0.06, 0.95))
       const desk = new THREE.Mesh(deskGeo, materials.walnut)
       desk.position.set(0.0, 0.72, 0.0)
       desk.castShadow = true
@@ -170,11 +179,11 @@ export class HqFurniture {
       // Brass front edge chamfer trim
       const trimGeo = this.track(new THREE.BoxGeometry(2.22, 0.02, 0.04))
       const trim = new THREE.Mesh(trimGeo, materials.brass)
-      trim.position.set(0.0, 0.75, 0.49)
+      trim.position.set(0.0, 0.74, 0.47)
       podGroup.add(trim)
 
       // Desk frame trestle legs (gunmetal steel)
-      const legLeftGeo = this.track(new THREE.BoxGeometry(0.08, 0.7, 0.8))
+      const legLeftGeo = this.track(new THREE.BoxGeometry(0.06, 0.7, 0.75))
       const legLeft = new THREE.Mesh(legLeftGeo, materials.gunmetal)
       legLeft.position.set(-0.95, 0.35, 0.0)
       legLeft.castShadow = true
@@ -191,105 +200,131 @@ export class HqFurniture {
       panel.position.set(0.0, 0.5, -0.42)
       podGroup.add(panel)
 
-      // 2. Dual Beveled Monitors
-      // Primary center display
-      const mon1FrameGeo = this.track(new THREE.BoxGeometry(0.9, 0.52, 0.04))
-      const mon1Frame = new THREE.Mesh(mon1FrameGeo, materials.gunmetal)
-      mon1Frame.position.set(-0.35, 1.15, -0.28)
-      mon1Frame.castShadow = true
-      podGroup.add(mon1Frame)
+      // 2. Refined, Properly Scaled Displays (0.72m width with slim bezels)
+      const isFrontend = cfg.id === 'fcc-workstation'
+      const screensForStation: THREE.Mesh[] = []
 
-      const mon1ScreenGeo = this.track(new THREE.BoxGeometry(0.86, 0.48, 0.01))
-      const mon1Screen = new THREE.Mesh(mon1ScreenGeo, cfg.matColor)
-      mon1Screen.position.set(-0.35, 1.15, -0.255)
-      podGroup.add(mon1Screen)
+      if (isFrontend) {
+        // Frontend: Center-left slim monitor + open aluminum laptop
+        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
+        const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+        monFrame.position.set(-0.25, 1.10, -0.22)
+        monFrame.castShadow = true
+        podGroup.add(monFrame)
 
-      // Secondary angled display
-      const mon2Frame = new THREE.Mesh(mon1FrameGeo, materials.gunmetal)
-      mon2Frame.position.set(0.55, 1.15, -0.24)
-      mon2Frame.rotation.y = -0.26
-      mon2Frame.castShadow = true
-      podGroup.add(mon2Frame)
+        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
+        const monScreen = new THREE.Mesh(monScreenGeo, cfg.matColor)
+        monScreen.position.set(-0.25, 1.10, -0.208)
+        podGroup.add(monScreen)
+        screensForStation.push(monScreen)
 
-      const mon2Screen = new THREE.Mesh(mon1ScreenGeo, materials.terminalScreen)
-      mon2Screen.position.set(0.55, 1.15, -0.215)
-      mon2Screen.rotation.y = -0.26
-      podGroup.add(mon2Screen)
+        // Articulated monitor mounting arm
+        const armGeo = this.track(new THREE.CylinderGeometry(0.018, 0.018, 0.36, 8))
+        const arm = new THREE.Mesh(armGeo, materials.brass)
+        arm.position.set(-0.25, 0.92, -0.26)
+        podGroup.add(arm)
 
-      // Articulated monitor mounting arms (brass & gunmetal)
-      const armGeo = this.track(new THREE.CylinderGeometry(0.025, 0.025, 0.38, 8))
-      const arm = new THREE.Mesh(armGeo, materials.brass)
-      arm.position.set(0.0, 0.95, -0.32)
-      podGroup.add(arm)
+        // Sleek 15" Aluminum Laptop (open clamshell at 110 deg)
+        const laptopBaseGeo = this.track(new THREE.BoxGeometry(0.32, 0.01, 0.22))
+        const laptopBase = new THREE.Mesh(laptopBaseGeo, materials.laptopAluminum)
+        laptopBase.position.set(0.48, 0.755, 0.08)
+        laptopBase.rotation.y = -0.25
+        laptopBase.castShadow = true
+        podGroup.add(laptopBase)
+
+        const laptopLidGeo = this.track(new THREE.BoxGeometry(0.32, 0.21, 0.008))
+        const laptopLid = new THREE.Mesh(laptopLidGeo, materials.laptopAluminum)
+        laptopLid.position.set(0.48, 0.855, -0.01)
+        laptopLid.rotation.y = -0.25
+        laptopLid.rotation.x = -0.24
+        laptopLid.castShadow = true
+        podGroup.add(laptopLid)
+
+        const lapScrGeo = this.track(new THREE.BoxGeometry(0.30, 0.19, 0.002))
+        const lapScr = new THREE.Mesh(lapScrGeo, materials.deviceLaptop)
+        lapScr.position.set(0.48, 0.855, -0.005)
+        lapScr.rotation.y = -0.25
+        lapScr.rotation.x = -0.24
+        podGroup.add(lapScr)
+        screensForStation.push(lapScr)
+
+        // Teal ceramic coffee mug
+        const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
+        const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTeal)
+        mug.position.set(-0.75, 0.792, 0.15)
+        mug.castShadow = true
+        podGroup.add(mug)
+
+        // Designer notebook with pen
+        const nbGeo = this.track(new THREE.BoxGeometry(0.18, 0.012, 0.24))
+        const nb = new THREE.Mesh(nbGeo, materials.bookSpineAmber)
+        nb.position.set(-0.62, 0.756, -0.05)
+        nb.rotation.y = 0.18
+        podGroup.add(nb)
+      } else {
+        // Backend / Expansion: Dual balanced curved display arrangement
+        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
+        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
+
+        // Center monitor
+        const mon1Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+        mon1Frame.position.set(-0.36, 1.10, -0.22)
+        mon1Frame.rotation.y = 0.12
+        mon1Frame.castShadow = true
+        podGroup.add(mon1Frame)
+
+        const mon1Screen = new THREE.Mesh(monScreenGeo, cfg.matColor)
+        mon1Screen.position.set(-0.36, 1.10, -0.208)
+        mon1Screen.rotation.y = 0.12
+        podGroup.add(mon1Screen)
+        screensForStation.push(mon1Screen)
+
+        // Right monitor
+        const mon2Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+        mon2Frame.position.set(0.36, 1.10, -0.22)
+        mon2Frame.rotation.y = -0.16
+        mon2Frame.castShadow = true
+        podGroup.add(mon2Frame)
+
+        const mon2Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreen)
+        mon2Screen.position.set(0.36, 1.10, -0.208)
+        mon2Screen.rotation.y = -0.16
+        podGroup.add(mon2Screen)
+        screensForStation.push(mon2Screen)
+
+        // Articulated dual monitor stand
+        const armGeo = this.track(new THREE.CylinderGeometry(0.02, 0.02, 0.36, 8))
+        const arm = new THREE.Mesh(armGeo, materials.brass)
+        arm.position.set(0.0, 0.92, -0.26)
+        podGroup.add(arm)
+
+        // Terracotta ceramic coffee mug
+        const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
+        const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTerracotta)
+        mug.position.set(0.78, 0.792, 0.18)
+        mug.castShadow = true
+        podGroup.add(mug)
+      }
+
+      this.stationScreens.set(stationDef.id, screensForStation)
 
       // Compact keyboard & precision mouse mat
-      const matGeo = this.track(new THREE.BoxGeometry(0.85, 0.005, 0.32))
+      const matGeo = this.track(new THREE.BoxGeometry(0.75, 0.004, 0.28))
       const mat = new THREE.Mesh(matGeo, materials.limestoneDark)
-      mat.position.set(0.0, 0.765, 0.18)
+      mat.position.set(isFrontend ? -0.15 : 0.0, 0.752, 0.18)
       podGroup.add(mat)
 
-      const kbGeo = this.track(new THREE.BoxGeometry(0.42, 0.012, 0.14))
+      const kbGeo = this.track(new THREE.BoxGeometry(0.38, 0.012, 0.13))
       const kb = new THREE.Mesh(kbGeo, materials.gunmetal)
-      kb.position.set(-0.1, 0.772, 0.18)
+      kb.position.set(isFrontend ? -0.22 : -0.08, 0.758, 0.18)
       podGroup.add(kb)
 
-      // Modern Ultra-Thin Laptop (clamshell open at 110 deg)
-      const laptopBaseGeo = this.track(new THREE.BoxGeometry(0.34, 0.012, 0.23))
-      const laptopBase = new THREE.Mesh(laptopBaseGeo, materials.gunmetal)
-      laptopBase.position.set(0.65, 0.768, 0.15)
-      laptopBase.rotation.y = -0.18
-      podGroup.add(laptopBase)
+      // Warm LED task desk lamp
+      const lampGeo = this.track(new THREE.BoxGeometry(0.35, 0.018, 0.04))
+      const lamp = new THREE.Mesh(lampGeo, materials.lampWarmGlow)
+      lamp.position.set(0.0, 1.28, -0.22)
+      podGroup.add(lamp)
 
-      const laptopKbGeo = this.track(new THREE.BoxGeometry(0.30, 0.005, 0.11))
-      const laptopKb = new THREE.Mesh(laptopKbGeo, materials.structureGraphite)
-      laptopKb.position.set(0.65, 0.775, 0.12)
-      laptopKb.rotation.y = -0.18
-      podGroup.add(laptopKb)
-
-      const laptopLidGeo = this.track(new THREE.BoxGeometry(0.34, 0.22, 0.01))
-      const laptopLid = new THREE.Mesh(laptopLidGeo, materials.gunmetal)
-      laptopLid.position.set(0.65, 0.88, 0.035)
-      laptopLid.rotation.y = -0.18
-      laptopLid.rotation.x = -0.22
-      podGroup.add(laptopLid)
-
-      const laptopScreenGeo = this.track(new THREE.BoxGeometry(0.32, 0.20, 0.002))
-      const laptopScreen = new THREE.Mesh(laptopScreenGeo, materials.deviceLaptop)
-      laptopScreen.position.set(0.65, 0.88, 0.042)
-      laptopScreen.rotation.y = -0.18
-      laptopLid.rotation.x = -0.22
-      podGroup.add(laptopScreen)
-
-      this.stationScreens.set(stationDef.id, [mon1Screen, mon2Screen, laptopScreen])
-
-      // Ceramic Coffee Mug
-      const mugGeo = this.track(new THREE.CylinderGeometry(0.038, 0.034, 0.085, 12))
-      const mug = new THREE.Mesh(mugGeo, materials.planterCeramic)
-      mug.position.set(-0.75, 0.805, 0.25)
-      podGroup.add(mug)
-
-      // Brass Desk Task Lamp with warm glow
-      const lampBaseGeo = this.track(new THREE.CylinderGeometry(0.065, 0.065, 0.015, 12))
-      const lampBase = new THREE.Mesh(lampBaseGeo, materials.champagneBrass)
-      lampBase.position.set(-0.85, 0.768, -0.24)
-      podGroup.add(lampBase)
-
-      const lampArmGeo = this.track(new THREE.CylinderGeometry(0.008, 0.008, 0.36, 8))
-      const lampArm = new THREE.Mesh(lampArmGeo, materials.champagneBrass)
-      lampArm.position.set(-0.82, 0.94, -0.2)
-      lampArm.rotation.z = -0.2
-      podGroup.add(lampArm)
-
-      const lampShadeGeo = this.track(new THREE.ConeGeometry(0.07, 0.11, 12))
-      const lampShade = new THREE.Mesh(lampShadeGeo, materials.champagneBrass)
-      lampShade.position.set(-0.76, 1.1, -0.15)
-      lampShade.rotation.z = Math.PI - 0.3
-      podGroup.add(lampShade)
-
-      const bulbGeo = this.track(new THREE.SphereGeometry(0.02, 8, 8))
-      const bulb = new THREE.Mesh(bulbGeo, materials.lampWarmGlow)
-      bulb.position.set(-0.76, 1.08, -0.15)
-      podGroup.add(bulb)
 
       // 3. Ergonomic Task Chair
       const chairGroup = new THREE.Group()
@@ -812,6 +847,41 @@ export class HqFurniture {
       }
     }
     propsGroup.add(shelfGroup)
+
+    // 6. Agent Operations Hero Room: Modern Framed Abstract Wall Art (West Wall)
+    const artGroup = new THREE.Group()
+    artGroup.position.set(-13.42, 2.6, 1.2)
+    artGroup.rotation.y = Math.PI / 2
+
+    const artCanvasGeo = this.track(new THREE.BoxGeometry(2.4, 1.5, 0.02))
+    const artCanvas = new THREE.Mesh(artCanvasGeo, materials.wallArtAbstract)
+    artCanvas.position.set(0.0, 0.0, 0.0)
+    artGroup.add(artCanvas)
+
+    const artFrameGeo = this.track(new THREE.BoxGeometry(2.46, 1.56, 0.03))
+    const artFrame = new THREE.Mesh(artFrameGeo, materials.champagneBrass)
+    artFrame.position.set(0.0, 0.0, -0.01)
+    artGroup.add(artFrame)
+    propsGroup.add(artGroup)
+
+    // 7. Agent Operations Hero Room: Project Whiteboard / Architecture Board (West Wall)
+    const opsWbGroup = new THREE.Group()
+    opsWbGroup.position.set(-13.42, 2.3, -3.2)
+    opsWbGroup.rotation.y = Math.PI / 2
+
+    const opsWbGeo = this.track(new THREE.BoxGeometry(1.8, 1.2, 0.02))
+    const opsWb = new THREE.Mesh(opsWbGeo, materials.whiteboardSurface)
+    opsWbGroup.add(opsWb)
+
+    const opsWbFrameGeo = this.track(new THREE.BoxGeometry(1.84, 1.24, 0.015))
+    const opsWbFrame = new THREE.Mesh(opsWbFrameGeo, materials.champagneBrass)
+    opsWbFrame.position.set(0.0, 0.0, -0.01)
+    opsWbGroup.add(opsWbFrame)
+    propsGroup.add(opsWbGroup)
+
+    // 8. Hero Room Potted Greenery
+    propsGroup.add(this.buildPottedTree(materials, [-11.2, 0.0, 2.2], 1.8))
+    propsGroup.add(this.buildPottedTree(materials, [-1.2, 0.0, -1.8], 1.5))
 
     this.group.add(propsGroup)
   }

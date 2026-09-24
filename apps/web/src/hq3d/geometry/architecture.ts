@@ -64,9 +64,9 @@ export class HqArchitecture {
    * Main Ground Operations Floor (Tighter 26m x 20m footprint, eliminating empty void)
    */
   private buildGroundSlab(materials: MaterialLibrary): void {
-    // Primary mineral stone floor slab
+    // Primary architectural floor slab with warm natural oak flooring
     const floorGeo = this.track(new THREE.BoxGeometry(26.0, 0.4, 20.0))
-    const floorMesh = new THREE.Mesh(floorGeo, materials.limestone)
+    const floorMesh = new THREE.Mesh(floorGeo, materials.woodOakFloor)
     floorMesh.position.set(0.0, -0.2, 0.5)
     floorMesh.receiveShadow = true
     floorMesh.name = 'ground-floor-slab'
@@ -255,55 +255,20 @@ export class HqArchitecture {
 
   /**
    * Overhead Open-Truss Light Bridges & Structural Frames
-   * Frames the 3D volume like an architectural physical maquette.
+   * Unobtrusive ceiling perimeter frames that do not occlude interior views.
    */
   private buildOverheadFrames(materials: MaterialLibrary): void {
-    // Open horizontal architectural beam bridge above Agent Operations (Y = +4.8m)
-    const beamGeo = this.track(new THREE.BoxGeometry(14.0, 0.14, 0.14))
-    const beam1 = new THREE.Mesh(beamGeo, materials.gunmetal)
-    beam1.position.set(-4.5, 4.8, 0.5)
-    beam1.castShadow = true
-    this.group.add(beam1)
+    // Slender perimeter structural tie at ceiling height (Y = 6.0m)
+    const tieGeo = this.track(new THREE.BoxGeometry(14.0, 0.08, 0.08))
+    const tie1 = new THREE.Mesh(tieGeo, materials.structureGraphite)
+    tie1.position.set(-4.5, 6.0, 0.5)
+    this.group.add(tie1)
 
-    const beam2 = new THREE.Mesh(beamGeo, materials.gunmetal)
-    beam2.position.set(-4.5, 4.8, -3.5)
-    beam2.castShadow = true
-    this.group.add(beam2)
-
-    // Transverse connecting struts with integrated recessed LED channels
-    for (let bx = -10.5; bx <= 1.5; bx += 3.0) {
-      const strutGeo = this.track(new THREE.BoxGeometry(0.08, 0.08, 4.0))
-      const strut = new THREE.Mesh(strutGeo, materials.gunmetal)
-      strut.position.set(bx, 4.8, -1.5)
-      this.group.add(strut)
-
-      // Recessed downward linear LED luminaire
-      const ledGeo = this.track(new THREE.BoxGeometry(0.03, 0.02, 3.4))
-      const led = new THREE.Mesh(ledGeo, materials.vellum)
-      led.position.set(bx, 4.75, -1.5)
-      this.group.add(led)
-    }
-
-    // Light armature framing Mission Control Planning Table (Y = +4.2m)
-    const mcRingGeo = this.track(new THREE.BoxGeometry(4.2, 0.08, 2.6))
+    // Light armature framing Mission Control Planning Table suspended high at Y = +5.2m
+    const mcRingGeo = this.track(new THREE.BoxGeometry(4.2, 0.06, 2.6))
     const mcRing = new THREE.Mesh(mcRingGeo, materials.brass)
-    mcRing.position.set(-4.5, 4.2, 5.5)
-    mcRing.castShadow = true
+    mcRing.position.set(-4.5, 5.2, 5.5)
     this.group.add(mcRing)
-
-    // Slender suspension cables
-    const cableCorners = [
-      [-6.5, 5.5],
-      [-2.5, 5.5],
-      [-6.5, 6.7],
-      [-2.5, 6.7],
-    ]
-    for (const [cx, cz] of cableCorners) {
-      const cableGeo = this.track(new THREE.CylinderGeometry(0.008, 0.008, 1.4, 6))
-      const cable = new THREE.Mesh(cableGeo, materials.gunmetal)
-      cable.position.set(cx!, 4.9, cz!)
-      this.group.add(cable)
-    }
   }
 
   /**
@@ -611,11 +576,9 @@ export class HqArchitecture {
     frontTrim.position.set(0.0, 6.18, -9.8)
     envelopeGroup.add(frontTrim)
 
-    // 5. Slender Perimeter Structural Columns / Piers
+    // 5. Slender Perimeter Corner Columns (Cutaway corners only, keeping front facade open)
     const columnCoords = [
       [-13.5, -9.8],
-      [-4.5, -9.8],
-      [4.5, -9.8],
       [13.5, -9.8],
     ]
     for (const [colX, colZ] of columnCoords) {
@@ -631,8 +594,8 @@ export class HqArchitecture {
       envelopeGroup.add(base)
     }
 
-    // 6. Overhead Acoustic Ceiling Baffles & Soft Downlights (Y = 6.15)
-    for (let z = -5.0; z <= 6.0; z += 3.5) {
+    // 6. Overhead Acoustic Ceiling Structure & Soft Downlights (Over rear roof deck only, keeping cutaway aperture open)
+    for (let z = 5.5; z <= 9.5; z += 2.0) {
       const baffleGeo = this.track(new THREE.BoxGeometry(25.0, 0.12, 0.08))
       const baffle = new THREE.Mesh(baffleGeo, materials.ceilingPanel)
       baffle.position.set(0.0, 6.15, z)
