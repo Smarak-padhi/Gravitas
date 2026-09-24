@@ -1,119 +1,195 @@
 /**
  * Gravitas 3D Headquarters — Station Definitions & Metadata
- * Truthful prototype station models for Wave 12B without fake runtime activity.
+ * Truthful station models aligned with the Living HQ North-Star vertical cutaway tower.
+ *
+ * Implements role-oriented physical stations with explicit presentation mapping
+ * to preserve backwards compatibility for historical and runtime canonical IDs.
  */
 
 import type { StationDefinition, StationId } from '../types.js'
 
+export function resolveCanonicalStationId(stationId: string): StationId {
+  if (stationId === 'codex-workstation' || stationId === 'engineering-workstation-01') {
+    return 'frontend-engineer-workstation'
+  }
+  if (stationId === 'fcc-workstation' || stationId === 'engineering-workstation-02') {
+    return 'backend-engineer-workstation'
+  }
+  return stationId as StationId
+}
+
 export const STATION_DEFINITIONS: Record<StationId, StationDefinition> = {
+  // ── Floor 1: Mission Control (Y = 3.6m) ──────────────────────────────────
   'planning-table': {
     id: 'planning-table',
     name: 'Mission Planning Table',
     roomId: 'MISSION_CONTROL',
-    position: [-4.5, 0.0, 5.5],
+    position: [-1.5, 3.6, 0.5],
     rotationY: 0,
     role: 'Goal Ingestion & DAG Decomposition',
     status: 'Operational Foundation',
-    description: 'Central architectural light table for DAG planning. Runtime task binding begins Wave 12C+.',
+    description: 'Central architectural light table for DAG planning and run orchestration.',
   },
+
+  // ── Floor 2: Agent Operations Hero Room (Y = 7.2m) ───────────────────────
+  'frontend-engineer-workstation': {
+    id: 'frontend-engineer-workstation',
+    name: 'Frontend Engineer Workstation',
+    roomId: 'AGENT_OPERATIONS',
+    position: [-3.5, 7.2, 0.6],
+    rotationY: 0,
+    role: 'Frontend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Specialist drafting station with curved visual displays, design tablet, and preview surface.',
+  },
+  'backend-engineer-workstation': {
+    id: 'backend-engineer-workstation',
+    name: 'Backend Engineer Workstation',
+    roomId: 'AGENT_OPERATIONS',
+    position: [2.5, 7.2, 0.6],
+    rotationY: 0,
+    role: 'Backend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Technical systems workstation with multi-terminal monitoring array and telemetry console.',
+  },
+
   'codex-workstation': {
     id: 'codex-workstation',
-    name: 'Codex Workstation 01',
+    name: 'Frontend Engineer Workstation (Legacy Alias)',
     roomId: 'AGENT_OPERATIONS',
-    position: [-6.5, 0.0, 1.2],
+    position: [-3.5, 7.2, 0.6],
     rotationY: 0,
-    role: 'Engineering Specialist',
-    status: 'Prototype Workstation',
-    description: 'Assigned drafting station for Codex. Runtime isolated worktree binding begins Wave 12C+.',
+    role: 'Frontend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Legacy station identifier mapped to Frontend Engineer physical workstation.',
+  },
+  'engineering-workstation-01': {
+    id: 'engineering-workstation-01',
+    name: 'Frontend Engineer Workstation (Engineering-01 Alias)',
+    roomId: 'AGENT_OPERATIONS',
+    position: [-3.5, 7.2, 0.6],
+    rotationY: 0,
+    role: 'Frontend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Presentation station identifier mapped to Frontend Engineer physical workstation.',
   },
   'fcc-workstation': {
     id: 'fcc-workstation',
-    name: 'Claude / FCC Workstation 02',
+    name: 'Backend Engineer Workstation (Legacy Alias)',
     roomId: 'AGENT_OPERATIONS',
-    position: [-1.8, 0.0, 1.2],
+    position: [2.5, 7.2, 0.6],
     rotationY: 0,
-    role: 'Architectural Reasoning',
-    status: 'Prototype Workstation',
-    description: 'Assigned drafting station for FCC / Claude. Runtime isolated worktree binding begins Wave 12C+.',
+    role: 'Backend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Legacy station identifier mapped to Backend Engineer physical workstation.',
   },
+  'engineering-workstation-02': {
+    id: 'engineering-workstation-02',
+    name: 'Backend Engineer Workstation (Engineering-02 Alias)',
+    roomId: 'AGENT_OPERATIONS',
+    position: [2.5, 7.2, 0.6],
+    rotationY: 0,
+    role: 'Backend Engineering Specialist',
+    status: 'Active Workstation',
+    description: 'Presentation station identifier mapped to Backend Engineer physical workstation.',
+  },
+  'verification-lab-console': {
+    id: 'verification-lab-console',
+    name: 'Verification Console (Cleanroom Alias)',
+    roomId: 'VERIFICATION_LAB',
+    position: [0.0, 10.8, 1.0],
+    rotationY: 0,
+    role: 'Verification Cleanroom Lead',
+    status: 'Inspection Standby',
+    description: 'Presentation station identifier mapped to Verification Console.',
+  },
+
   'expansion-bay-3': {
     id: 'expansion-bay-3',
     name: 'Expansion Bay 03',
     roomId: 'AGENT_OPERATIONS',
-    position: [-6.5, 0.0, -2.4],
+    position: [-3.5, 7.2, -1.8],
     rotationY: 0,
     role: 'Design & Dynamic Agents',
     status: 'Standby Capacity',
-    description: 'Modular expansion workstation for Astra or concurrent worker instances.',
+    description: 'Modular expansion workstation for dynamic worker instances.',
   },
   'expansion-bay-4': {
     id: 'expansion-bay-4',
     name: 'Expansion Bay 04',
     roomId: 'AGENT_OPERATIONS',
-    position: [-1.8, 0.0, -2.4],
+    position: [2.5, 7.2, -1.8],
     rotationY: 0,
     role: 'Dynamic Worker Slot',
     status: 'Standby Capacity',
     description: 'Modular expansion bay reserved for high-concurrency DAG execution.',
   },
+
+  // ── Floor 3: Verification Cleanroom (Y = 10.8m) ──────────────────────────
   'verifier-console': {
     id: 'verifier-console',
     name: 'Verification Console',
     roomId: 'VERIFICATION_LAB',
-    position: [6.0, 0.1, 6.5],
+    position: [0.0, 10.8, 1.0],
     rotationY: 0,
     role: 'Independent Evidence Gate',
-    status: 'Cleanroom Prototype',
+    status: 'Cleanroom Active',
     description: 'Independent verification terminal for deterministic test execution and mutation scope enforcement.',
-  },
-  'browser-qa-matrix': {
-    id: 'browser-qa-matrix',
-    name: 'Device Matrix Wall',
-    roomId: 'BROWSER_QA_LAB',
-    position: [6.2, 0.1, -0.5],
-    rotationY: 0,
-    role: 'Playwright DOM Validation',
-    status: 'Matrix Bench',
-    description: 'Deterministic multi-viewport testing bench for real DOM inspection and visual assertions.',
-  },
-  'omniroute-rack': {
-    id: 'omniroute-rack',
-    name: 'OmniRoute Gateway Rack',
-    roomId: 'INFRASTRUCTURE_ROOM',
-    position: [-8.8, 0.0, -5.8],
-    rotationY: 0,
-    role: 'Inference Infrastructure',
-    status: 'Gateway Active',
-    description: 'Dual 42U server cabinet routing model invocations with fallback telemetry. Strictly infrastructure.',
-  },
-  'approval-plinth': {
-    id: 'approval-plinth',
-    name: 'Approval Plinth',
-    roomId: 'APPROVAL_MEZZANINE',
-    position: [0.0, 2.95, 8.5],
-    rotationY: 0,
-    role: 'Human Authority Station',
-    status: 'Awaiting Candidate',
-    description: 'Elevated command plinth where candidate commits halt for explicit human authorization.',
   },
   'repository-vault': {
     id: 'repository-vault',
     name: 'Repository Vault Dock',
     roomId: 'VERIFICATION_LAB',
-    position: [10.2, 0.1, 4.0],
+    position: [4.5, 10.8, 1.0],
     rotationY: 0,
     role: 'Base Branch Materialization',
     status: 'Git Archive Dock',
-    description: 'Sleek terminal dock where approved commits are materialized into the primary base branch.',
+    description: 'Sleek terminal dock where verified candidate commits materialize into the primary base branch.',
+  },
+
+  // ── Floor 4: Browser QA Lab (Y = 14.4m) ──────────────────────────────────
+  'browser-qa-matrix': {
+    id: 'browser-qa-matrix',
+    name: 'Device Matrix Wall',
+    roomId: 'BROWSER_QA_LAB',
+    position: [0.0, 14.4, 1.2],
+    rotationY: 0,
+    role: 'Playwright DOM Validation',
+    status: 'Matrix Bench',
+    description: 'Deterministic multi-viewport testing bench for real DOM inspection and visual assertions.',
+  },
+
+  // ── Floor 5: Infrastructure Server Bay (Y = 18.0m) ───────────────────────
+  'omniroute-rack': {
+    id: 'omniroute-rack',
+    name: 'OmniRoute Gateway Rack',
+    roomId: 'INFRASTRUCTURE_ROOM',
+    position: [-2.5, 18.0, 1.0],
+    rotationY: 0,
+    role: 'Inference Infrastructure',
+    status: 'Gateway Standby',
+    description: 'Dual 42U server cabinet routing model invocations. Strictly non-humanoid infrastructure.',
   },
   'dispatch-console': {
     id: 'dispatch-console',
     name: 'Personal OS Dispatch Console',
     roomId: 'INFRASTRUCTURE_ROOM',
-    position: [-6.8, 0.0, -4.5],
+    position: [2.0, 18.0, 1.0],
     rotationY: Math.PI / 4,
     role: 'Background Job Dispatch & Kernel Scheduler',
     status: 'Operational Kernel',
-    description: 'Deterministic Background Job Execution Console. Dispatches cron, interval, and one-time tasks with zero persistent inference loops.',
+    description: 'Deterministic Background Job Execution Console. Dispatches cron, interval, and one-time tasks.',
+  },
+
+  // ── Floor 6: Approval Control (Y = 21.6m) ─────────────────────────────────
+  'approval-plinth': {
+    id: 'approval-plinth',
+    name: 'Approval Plinth',
+    roomId: 'APPROVAL_MEZZANINE',
+    position: [0.0, 21.6, 1.0],
+    rotationY: 0,
+    role: 'Human Authority Station',
+    status: 'Awaiting Candidate',
+    description: 'Command plinth where candidate commits halt for explicit human authorization.',
   },
 }

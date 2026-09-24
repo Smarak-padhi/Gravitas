@@ -47,10 +47,24 @@ describe('3D Headquarters — Architectural World & Stations', () => {
   })
 
   it('defines 11 authoritative prototype stations mapped to rooms', () => {
-    const stations = Object.values(STATION_DEFINITIONS)
-    expect(stations).toHaveLength(11)
+    const canonicalIds = [
+      'planning-table',
+      'frontend-engineer-workstation',
+      'backend-engineer-workstation',
+      'expansion-bay-3',
+      'expansion-bay-4',
+      'verifier-console',
+      'browser-qa-matrix',
+      'omniroute-rack',
+      'approval-plinth',
+      'repository-vault',
+      'dispatch-console',
+    ] as const
+    expect(canonicalIds).toHaveLength(11)
 
-    for (const st of stations) {
+    for (const id of canonicalIds) {
+      const st = STATION_DEFINITIONS[id]
+      expect(st).toBeDefined()
       expect(ROOM_DEFINITIONS[st.roomId]).toBeDefined()
       expect(st.position).toHaveLength(3)
       expect(st.status).toBeTruthy()

@@ -41,6 +41,7 @@ export interface HqRoleIdentity {
   readonly departmentId: DepartmentId
   readonly stationId: string
   readonly stationAlias: string
+  readonly physicalWorkstationId?: string
   readonly visualIdentity: RoleVisualIdentity
 }
 
@@ -51,6 +52,7 @@ export interface RolePresentationState {
   readonly characterState: CharacterPresentationState
   readonly stationId: string
   readonly stationAlias: string
+  readonly physicalWorkstationId?: string
   readonly homePosition: readonly [number, number, number]
   readonly isSeated: boolean
   readonly currentTaskId: string | null

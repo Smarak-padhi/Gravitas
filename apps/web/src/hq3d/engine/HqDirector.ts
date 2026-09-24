@@ -258,8 +258,14 @@ export class HqDirector {
   /**
    * Framed camera navigation by Room ID
    */
-  public frameRoom(roomId: RoomId): void {
-    const room = ROOM_DEFINITIONS[roomId]
+  public frameRoom(roomId: string): void {
+    const normalized =
+      roomId === 'VERIFICATION_CLEANROOM'
+        ? ('VERIFICATION_LAB' as RoomId)
+        : roomId === 'INFRASTRUCTURE_SERVERS'
+          ? ('INFRASTRUCTURE_ROOM' as RoomId)
+          : (roomId as RoomId)
+    const room = ROOM_DEFINITIONS[normalized]
     if (room) {
       this.cameraRig.setFraming(room.cameraPreset, this.reducedMotion)
       if (this.onEntitySelected) {
@@ -363,15 +369,22 @@ export class HqDirector {
     return this.scene.getAtmosphere()
   }
 
-  public frameWorkstation(key: keyof typeof WORKSTATION_PRESETS): void {
-    const preset = WORKSTATION_PRESETS[key]
+  public frameWorkstation(key: string): void {
+    const upper = key.toUpperCase()
+    const lookupKey = upper.startsWith('WS_') ? upper : `WS_${upper}`
+    const preset = WORKSTATION_PRESETS[lookupKey] || WORKSTATION_PRESETS[key]
     if (preset) {
       this.cameraRig.setFraming(preset, this.reducedMotion)
     }
   }
 
-  public frameCharacter(key: keyof typeof CHARACTER_PRESETS): void {
-    const preset = CHARACTER_PRESETS[key]
+  public frameCharacter(key: string): void {
+    const upper = key.toUpperCase()
+    const lookupKey = upper.startsWith('CHAR_') ? upper : `CHAR_${upper}`
+    const preset =
+      CHARACTER_PRESETS[lookupKey] ||
+      CHARACTER_PRESETS[key] ||
+      WORKSTATION_PRESETS[`WS_${upper}`]
     if (preset) {
       this.cameraRig.setFraming(preset, this.reducedMotion)
     }

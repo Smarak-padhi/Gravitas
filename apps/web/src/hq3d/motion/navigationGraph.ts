@@ -370,9 +370,11 @@ const RAW_NODES: readonly NavigationNode[] = [
 const STATION_NODE_MAP = new Map<string, string>([
   ['planning-table', 'NODE_PLANNER_HOME'],
 
+  ['frontend-engineer-workstation', 'NODE_FE_HOME'],
   ['engineering-workstation-01', 'NODE_FE_HOME'],
   ['codex-workstation', 'NODE_FE_HOME'],
 
+  ['backend-engineer-workstation', 'NODE_BE_HOME'],
   ['engineering-workstation-02', 'NODE_BE_HOME'],
   ['fcc-workstation', 'NODE_BE_HOME'],
 

@@ -17,70 +17,70 @@ export interface CustodyLocationPoint {
   readonly description: string
 }
 
-// Desk surface height is ~0.78m; conduits elevate to 0.85m; mezzanine is at Y = 3.75m.
+// Vertical cutaway tower elevations: Floor 0 (0m), Floor 1 (3.6m), Floor 2 (7.2m), Floor 3 (10.8m), Floor 4 (14.4m), Floor 5 (18m), Floor 6 (21.6m)
 export const CUSTODY_LOCATIONS: Record<ArtifactCustodyLocation, CustodyLocationPoint> = {
   PRODUCER_DESK: {
     id: 'PRODUCER_DESK',
-    position: [-6.5, 0.78, 1.2],
+    position: [-2.5, 7.98, 0.5],
     name: 'Authoring Workstation Surface',
     roomName: 'Agent Operations',
-    description: 'Active drafting surface where candidate work products are authored.',
+    description: 'Active drafting surface where candidate work products are authored on Floor 2.',
   },
   REVIEW_INBOX: {
     id: 'REVIEW_INBOX',
-    position: [2.0, 0.78, 3.65],
+    position: [-1.5, 11.58, 0.5],
     name: 'Review Intake Dock',
     roomName: 'Verification Lab',
-    description: 'Airlock staging plinth where verified candidate dossiers await independent review.',
+    description: 'Airlock staging plinth where verified candidate dossiers await independent review on Floor 3.',
   },
   REVIEW_BENCH: {
     id: 'REVIEW_BENCH',
-    position: [7.2, 0.78, 4.0],
-    name: 'Verification Lab Review Console',
+    position: [0.0, 11.75, 0.5],
+    name: 'Verification Cleanroom Review Console',
     roomName: 'Verification Lab',
     description: 'Cleanroom audit console where Independent Reviewer conducts architectural inspection.',
   },
   INTEGRATION_INBOX: {
     id: 'INTEGRATION_INBOX',
-    position: [-3.6, 0.78, -2.4],
+    position: [0.0, 7.98, -1.5],
     name: 'Integration Intake Staging Tray',
     roomName: 'Agent Operations',
-    description: 'Staging tray where passed review candidates await branch composition.',
+    description: 'Staging tray where passed review candidates await branch composition on Floor 2.',
   },
   INTEGRATION_BENCH: {
     id: 'INTEGRATION_BENCH',
-    position: [-6.5, 0.78, -2.4],
+    position: [2.5, 7.98, 0.5],
     name: 'Integration & Conflict Inspection Bench',
     roomName: 'Agent Operations',
     description: 'Worktree composition bench for conflict inspection and candidate staging.',
   },
   APPROVAL_PLINTH: {
     id: 'APPROVAL_PLINTH',
-    position: [0.0, 3.75, 8.5],
-    name: 'Approval Mezzanine Plinth',
+    position: [0.0, 22.5, 0.5],
+    name: 'Approval Control Plinth',
     roomName: 'Approval Mezzanine',
-    description: 'Command plinth where verified candidate releases await sovereign human authorization.',
+    description: 'Command plinth where verified candidate releases await sovereign human authorization on Floor 6.',
   },
   COMPLETED_TRAY: {
     id: 'COMPLETED_TRAY',
-    position: [10.2, 0.78, 4.0],
+    position: [3.5, 1.15, 0.5],
     name: 'Completed Release Repository Dock',
-    roomName: 'Verification Lab',
-    description: 'Final repository archive dock where approved changes are permanently sealed.',
+    roomName: 'Mezzanine Vault',
+    description: 'Final repository archive dock where approved changes are permanently sealed on Level 0.',
   },
   FAILURE_HOLD: {
     id: 'FAILURE_HOLD',
-    position: [7.2, 0.78, 1.5],
+    position: [-2.8, 4.48, 1.2],
     name: 'Quarantine & Failure Hold',
-    roomName: 'Agent Operations',
-    description: 'Diagnostic holding tray where rejected or failing candidates halt for inspection.',
+    roomName: 'Mission Control Quarantine',
+    description: 'Diagnostic holding tray where rejected or failing candidates halt for inspection on Floor 1.',
   },
   NEUTRAL_HOLD: {
     id: 'NEUTRAL_HOLD',
-    position: [-4.5, 0.78, 5.5],
+    position: [0.0, 7.98, 0.5],
     name: 'Mission Planning Neutral Stash',
     roomName: 'Agent Operations',
-    description: 'Central neutral hold at planning table for unregistered tasks or pending allocations.',
+    description: 'Central neutral hold at planning table for unregistered tasks or pending allocations on Floor 1.',
   },
 }
 
@@ -89,15 +89,15 @@ export const CUSTODY_LOCATIONS: Record<ArtifactCustodyLocation, CustodyLocationP
  */
 export function getProducerDeskCoordinate(sourceRoleId?: string): readonly [number, number, number] {
   if (sourceRoleId === 'role:engineering:backend-engineer') {
-    return [-1.8, 0.78, 1.2]
+    return [2.5, 7.98, 0.5]
   }
   if (sourceRoleId === 'role:strategy:chief-planner') {
-    return [-4.5, 0.78, 5.5]
+    return [0.0, 4.48, 0.5]
   }
   if (sourceRoleId === 'role:quality:independent-reviewer') {
-    return [7.2, 0.78, 4.0]
+    return [0.0, 11.75, 0.5]
   }
-  return [-6.5, 0.78, 1.2] // Default Frontend Engineer workstation
+  return [-2.5, 7.98, 0.5] // Default Frontend Engineer workstation
 }
 
 /**

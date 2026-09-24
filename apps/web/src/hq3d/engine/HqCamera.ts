@@ -27,8 +27,8 @@ export class HqCameraRig {
   private interpolationFactor = 0.08
 
   // Safety Bounds (WORLD_LAYOUT.md & CAMERA_INTERACTION.md)
-  public static readonly MIN_DISTANCE = 4.0
-  public static readonly MAX_DISTANCE = 45.0
+  public static readonly MIN_DISTANCE = 3.5
+  public static readonly MAX_DISTANCE = 65.0
   public static readonly MIN_POLAR_ANGLE = THREE.MathUtils.degToRad(20) // ~20 deg from zenith (steep)
   public static readonly MAX_POLAR_ANGLE = THREE.MathUtils.degToRad(75) // ~75 deg (prevents floor clipping)
   public static readonly MIN_AZIMUTH_ANGLE = THREE.MathUtils.degToRad(15) // ~15 deg (East limit)

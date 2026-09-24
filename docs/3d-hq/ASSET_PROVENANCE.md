@@ -15,13 +15,13 @@ No third-party commercial GLB/GLTF models, unverified downloads, or copyrighted 
 
 | Asset Name | Type | Creator | Source / Generation Method | License / Rights | Local Path |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stylized Mascot Character Kit** | 3D Meshes & Materials | Antigravity / Gravitas Team | Custom procedural compound hierarchy (`SphereGeometry`, `CylinderGeometry`, `BoxGeometry`) with stylized eyes, knit sweaters, denim, and sneakers | MIT (Project Native) | `apps/web/src/hq3d/geometry/characters.ts` |
-| **Architectural Workstations V2** | 3D Meshes & Materials | Antigravity / Gravitas Team | Custom procedural furniture with scaled 0.72m slim displays, aluminum laptop, ceramic mugs, task lamps | MIT (Project Native) | `apps/web/src/hq3d/geometry/furniture.ts` |
-| **Natural Oak Plank Flooring** | 2D Procedural Texture | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D math synthesizer generating wood grain, bevel seams, and organic tone variance | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
-| **Woven Wool Area Rug** | 2D Procedural Texture | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D micro-weave texture synthesizer | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
-| **Abstract Studio Wall Art** | 2D Procedural Texture | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D composition generator rendering contemporary geometric abstract art | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
-| **Architecture Whiteboard Canvas**| 2D Procedural Texture | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D technical flowchart and architecture diagram generator | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
-| **Architectural Cutaway Envelope** | 3D Meshes & Materials | Antigravity / Gravitas Team | Charcoal facade cladding, open front cutaway apertures, glass elevator shaft tower | MIT (Project Native) | `apps/web/src/hq3d/geometry/architecture.ts` |
+| **Stylized Mascot Character Kit V2** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Custom procedural compound hierarchy (`CapsuleGeometry` sweater torsos, `SphereGeometry` heads, rounded limbs, articulated seating poses, denim trousers, and white sneakers) | MIT (Project Native) | `apps/web/src/hq3d/geometry/characters.ts` |
+| **Asymmetric Floor 2 Workstations** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Custom procedural furniture with curved ultrawide monitors, portrait preview screens, sketch tablets, systems terminal arrays, ceramic mugs, and acoustic timber battens | MIT (Project Native) | `apps/web/src/hq3d/geometry/furniture.ts` |
+| **7-Level Vertical Cutaway Tower** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Multi-level architectural slabs ($Y=0\dots 21.6\text{m}$), fluted travertine columns, walnut fascias, external glass elevator shaft with bronze cab | MIT (Project Native) | `apps/web/src/hq3d/geometry/architecture.ts` |
+| **Natural Oak Plank Flooring** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D math synthesizer generating wood grain, bevel seams, and organic tone variance | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
+| **Woven Wool Area Rug** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D micro-weave texture synthesizer | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
+| **Abstract Studio Wall Art** | IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D composition generator rendering contemporary geometric abstract art | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
+| **Architecture Whiteboard Canvas**| IN_REPO_PROCEDURAL | Antigravity / Gravitas Team | Pure HTML5 Canvas 2D technical flowchart and architecture diagram generator | MIT (Project Native) | `apps/web/src/hq3d/materials/textures.ts` |
 
 ---
 

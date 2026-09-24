@@ -18,6 +18,8 @@ import {
   FROZEN_ROLES,
   ROLE_HOME_POSITIONS,
   ROLE_HOME_ROTATIONS,
+  TOWER_ROLE_HOME_POSITIONS,
+  TOWER_ROLE_HOME_ROTATIONS,
 } from '../roles/roles.js'
 import { buildRoleInspectorMetadata } from '../roles/roleStationMapping.js'
 
@@ -73,8 +75,8 @@ export class HqCharacters {
   }
 
   private buildRoleFigure(roleId: RoleId, phaseOffset: number): void {
-    const pos = ROLE_HOME_POSITIONS[roleId]
-    const rotY = ROLE_HOME_ROTATIONS[roleId]
+    const pos = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
+    const rotY = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
 
     const rootGroup = new THREE.Group()
     rootGroup.position.set(...pos)
@@ -134,16 +136,17 @@ export class HqCharacters {
     const torsoGroup = new THREE.Group()
     torsoGroup.position.set(0.0, yBase + 0.62, 0.0)
 
-    // Cozy knit sweater / tailored tunic torso
-    const torsoGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 0.22))
+    // Cozy knit sweater / tailored tunic torso - soft curved collectible mascot form
+    const torsoGeo = this.track(new THREE.CapsuleGeometry(0.13, 0.18, 8, 16))
     const torso = new THREE.Mesh(torsoGeo, suitMat)
+    torso.scale.set(1.15, 1.0, 0.85) // Tapered soft-curved sweater torso
     torso.castShadow = true
     torsoGroup.add(torso)
 
     // Accent collar / ribbing detail
-    const collarGeo = this.track(new THREE.CylinderGeometry(0.06, 0.07, 0.06, 12))
+    const collarGeo = this.track(new THREE.CylinderGeometry(0.065, 0.075, 0.05, 16))
     const collar = new THREE.Mesh(collarGeo, accentMat)
-    collar.position.set(0.0, 0.22, 0.0)
+    collar.position.set(0.0, 0.19, 0.0)
     torsoGroup.add(collar)
 
     // 2. Sculpted Stylized Mascot Head with expressive eyes
@@ -261,32 +264,34 @@ export class HqCharacters {
     let seatedLegsGroup: THREE.Group | null = null
 
     if (isSeated) {
-      // Seated Posture: Upper arms down, forearms forward resting toward desk
-      const upperArmGeo = this.track(new THREE.BoxGeometry(0.08, 0.26, 0.09))
+      // Seated Posture: Soft rounded arms resting forward toward desk
+      const upperArmGeo = this.track(new THREE.CapsuleGeometry(0.038, 0.16, 6, 12))
       const armL = new THREE.Mesh(upperArmGeo, suitMat)
-      armL.position.set(-0.22, 0.0, 0.0)
+      armL.position.set(-0.2, 0.0, 0.0)
       armsLeftGroup.add(armL)
 
       const armR = new THREE.Mesh(upperArmGeo, suitMat)
-      armR.position.set(0.22, 0.0, 0.0)
+      armR.position.set(0.2, 0.0, 0.0)
       armsRightGroup.add(armR)
 
-      const forearmGeo = this.track(new THREE.BoxGeometry(0.07, 0.07, 0.26))
+      const forearmGeo = this.track(new THREE.CapsuleGeometry(0.034, 0.16, 6, 12))
       const forearmL = new THREE.Mesh(forearmGeo, suitMat)
-      forearmL.position.set(-0.2, -0.13, 0.13)
+      forearmL.rotation.x = Math.PI / 2
+      forearmL.position.set(-0.18, -0.11, 0.11)
       armsLeftGroup.add(forearmL)
 
       const forearmR = new THREE.Mesh(forearmGeo, suitMat)
-      forearmR.position.set(0.2, -0.13, 0.13)
+      forearmR.rotation.x = Math.PI / 2
+      forearmR.position.set(0.18, -0.11, 0.11)
       armsRightGroup.add(forearmR)
 
-      const handGeo = this.track(new THREE.BoxGeometry(0.06, 0.04, 0.07))
+      const handGeo = this.track(new THREE.SphereGeometry(0.032, 8, 8))
       const handL = new THREE.Mesh(handGeo, this.materials.charSkin)
-      handL.position.set(-0.16, -0.13, 0.27)
+      handL.position.set(-0.16, -0.11, 0.23)
       armsLeftGroup.add(handL)
 
       const handR = new THREE.Mesh(handGeo, this.materials.charSkin)
-      handR.position.set(0.16, -0.13, 0.27)
+      handR.position.set(0.16, -0.11, 0.23)
       armsRightGroup.add(handR)
 
       // Accessory per engineering role
@@ -306,48 +311,52 @@ export class HqCharacters {
         torsoGroup.add(accessoryMesh)
       }
 
-      // Seated Legs (denim thighs + denim shins + stylish white sneakers)
+      // Seated Legs (denim thighs + denim shins + stylish rounded sneakers)
       const seatedLegs = new THREE.Group()
       seatedLegs.name = 'seated-legs'
 
-      const thighGeo = this.track(new THREE.BoxGeometry(0.12, 0.11, 0.38))
+      const thighGeo = this.track(new THREE.CapsuleGeometry(0.052, 0.22, 6, 12))
       const thighL = new THREE.Mesh(thighGeo, pantsMat)
-      thighL.position.set(-0.1, yBase + 0.36, 0.17)
+      thighL.rotation.x = Math.PI / 2
+      thighL.position.set(-0.1, yBase + 0.36, 0.16)
       seatedLegs.add(thighL)
 
       const thighR = new THREE.Mesh(thighGeo, pantsMat)
-      thighR.position.set(0.1, yBase + 0.36, 0.17)
+      thighR.rotation.x = Math.PI / 2
+      thighR.position.set(0.1, yBase + 0.36, 0.16)
       seatedLegs.add(thighR)
 
-      const shinGeo = this.track(new THREE.BoxGeometry(0.1, 0.42, 0.1))
+      const shinGeo = this.track(new THREE.CapsuleGeometry(0.046, 0.22, 6, 12))
       const shinL = new THREE.Mesh(shinGeo, pantsMat)
-      shinL.position.set(-0.1, 0.21, 0.34)
+      shinL.position.set(-0.1, 0.2, 0.3)
       seatedLegs.add(shinL)
 
       const shinR = new THREE.Mesh(shinGeo, pantsMat)
-      shinR.position.set(0.1, 0.21, 0.34)
+      shinR.position.set(0.1, 0.2, 0.3)
       seatedLegs.add(shinR)
 
-      const shoeGeo = this.track(new THREE.BoxGeometry(0.11, 0.06, 0.18))
+      const shoeGeo = this.track(new THREE.CapsuleGeometry(0.042, 0.08, 6, 12))
       const shoeL = new THREE.Mesh(shoeGeo, shoeMat)
-      shoeL.position.set(-0.1, 0.03, 0.38)
+      shoeL.rotation.x = Math.PI / 2
+      shoeL.position.set(-0.1, 0.04, 0.34)
       seatedLegs.add(shoeL)
 
       const shoeR = new THREE.Mesh(shoeGeo, shoeMat)
-      shoeR.position.set(0.1, 0.03, 0.38)
+      shoeR.rotation.x = Math.PI / 2
+      shoeR.position.set(0.1, 0.04, 0.34)
       seatedLegs.add(shoeR)
 
       rootGroup.add(seatedLegs)
       seatedLegsGroup = seatedLegs
     } else {
       // Standing Posture (Chief Planner & Independent Reviewer)
-      const armGeo = this.track(new THREE.BoxGeometry(0.08, 0.44, 0.09))
+      const armGeo = this.track(new THREE.CapsuleGeometry(0.038, 0.32, 6, 12))
       const armL = new THREE.Mesh(armGeo, suitMat)
-      armL.position.set(-0.22, -0.08, 0.04)
+      armL.position.set(-0.2, -0.06, 0.02)
       armsLeftGroup.add(armL)
 
       const armR = new THREE.Mesh(armGeo, suitMat)
-      armR.position.set(0.22, -0.08, 0.04)
+      armR.position.set(0.2, -0.06, 0.02)
       armsRightGroup.add(armR)
 
       if (roleId === 'role:strategy:chief-planner') {
@@ -360,9 +369,9 @@ export class HqCharacters {
 
         // Arms forward holding folio
         armL.rotation.x = -0.35
-        armL.position.set(-0.18, -0.06, 0.12)
+        armL.position.set(-0.16, -0.04, 0.1)
         armR.rotation.x = -0.35
-        armR.position.set(0.18, -0.06, 0.12)
+        armR.position.set(0.16, -0.04, 0.1)
       } else if (roleId === 'role:quality:independent-reviewer') {
         // Independent Reviewer: Verification slate held at chest height
         const slateGeo = this.track(new THREE.BoxGeometry(0.24, 0.015, 0.18))
@@ -373,39 +382,39 @@ export class HqCharacters {
 
         // Arms angled holding slate
         armL.rotation.x = -0.55
-        armL.position.set(-0.16, -0.02, 0.14)
+        armL.position.set(-0.15, -0.01, 0.12)
         armR.rotation.x = -0.55
-        armR.position.set(0.16, -0.02, 0.14)
+        armR.position.set(0.15, -0.01, 0.12)
       }
     }
 
-    // Articulated Standing / Walking Legs (denim + white sneakers)
+    // Articulated Standing / Walking Legs (denim + rounded white sneakers)
     const standingLegsGroup = new THREE.Group()
     standingLegsGroup.name = 'standing-legs'
 
     const legLeftGroup = new THREE.Group()
     legLeftGroup.position.set(-0.1, 0.62, 0.0)
-    const legGeoL = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
-    const legMeshL = new THREE.Mesh(legGeoL, pantsMat)
-    legMeshL.position.set(0.0, -0.28, 0.0)
+    const legGeo = this.track(new THREE.CapsuleGeometry(0.052, 0.38, 6, 12))
+    const legMeshL = new THREE.Mesh(legGeo, pantsMat)
+    legMeshL.position.set(0.0, -0.26, 0.0)
     legMeshL.castShadow = true
     legLeftGroup.add(legMeshL)
-    const shoeGeoL = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-    const shoeMeshL = new THREE.Mesh(shoeGeoL, shoeMat)
-    shoeMeshL.position.set(0.0, -0.59, 0.03)
+    const shoeGeo = this.track(new THREE.CapsuleGeometry(0.045, 0.08, 6, 12))
+    const shoeMeshL = new THREE.Mesh(shoeGeo, shoeMat)
+    shoeMeshL.rotation.x = Math.PI / 2
+    shoeMeshL.position.set(0.0, -0.54, 0.03)
     legLeftGroup.add(shoeMeshL)
     standingLegsGroup.add(legLeftGroup)
 
     const legRightGroup = new THREE.Group()
     legRightGroup.position.set(0.1, 0.62, 0.0)
-    const legGeoR = this.track(new THREE.BoxGeometry(0.13, 0.56, 0.14))
-    const legMeshR = new THREE.Mesh(legGeoR, pantsMat)
-    legMeshR.position.set(0.0, -0.28, 0.0)
+    const legMeshR = new THREE.Mesh(legGeo, pantsMat)
+    legMeshR.position.set(0.0, -0.26, 0.0)
     legMeshR.castShadow = true
     legRightGroup.add(legMeshR)
-    const shoeGeoR = this.track(new THREE.BoxGeometry(0.14, 0.06, 0.2))
-    const shoeMeshR = new THREE.Mesh(shoeGeoR, shoeMat)
-    shoeMeshR.position.set(0.0, -0.59, 0.03)
+    const shoeMeshR = new THREE.Mesh(shoeGeo, shoeMat)
+    shoeMeshR.rotation.x = Math.PI / 2
+    shoeMeshR.position.set(0.0, -0.54, 0.03)
     legRightGroup.add(shoeMeshR)
     standingLegsGroup.add(legRightGroup)
 

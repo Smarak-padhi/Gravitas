@@ -129,31 +129,46 @@ export class HqTaskDossiers {
 
     switch (task.physicalLocation) {
       case 'PLANNING_AREA':
-        return [-4.5 + offset, 0.88, 5.5]
+        // Floor 1 (Mission Control): Y = 3.6m + 0.88m = 4.48m
+        return [-1.2 + offset * 0.4, 4.48, 0.5]
 
       case 'ASSIGNED_WORKSTATION':
-        if (task.assignedStationId === 'codex-workstation') {
-          return [-6.5 + offset * 0.5, 0.76, 1.2]
+        // Floor 2 (Agent Operations): Y = 7.2m + 0.76m = 7.96m
+        if (
+          task.assignedStationId === 'frontend-engineer-workstation' ||
+          task.assignedStationId === 'codex-workstation' ||
+          task.assignedStationId === 'engineering-workstation-01'
+        ) {
+          return [-2.5 + offset * 0.35, 7.96, 0.7]
         }
-        if (task.assignedStationId === 'fcc-workstation') {
-          return [-1.8 + offset * 0.5, 0.76, 1.2]
+        if (
+          task.assignedStationId === 'backend-engineer-workstation' ||
+          task.assignedStationId === 'fcc-workstation' ||
+          task.assignedStationId === 'engineering-workstation-02'
+        ) {
+          return [2.5 + offset * 0.35, 7.96, 0.7]
         }
-        return [-4.2 + offset * 0.5, 0.76, 1.2]
+        return [-0.5 + offset * 0.35, 7.96, 0.7]
 
       case 'VERIFICATION_BENCH':
-        return [6.0 + offset * 0.4, 1.15, 6.2]
+        // Floor 3 (Verification Cleanroom): Y = 10.8m + 0.95m = 11.75m
+        return [0.0 + offset * 0.4, 11.75, 0.5]
 
       case 'BROWSER_QA_MATRIX':
-        return [6.2 + offset * 0.4, 0.88, -1.2]
+        // Floor 4 (Browser QA Lab): Y = 14.4m + 0.8m = 15.2m
+        return [-0.5 + offset * 0.4, 15.2, 0.2]
 
       case 'APPROVAL_PLINTH':
-        return [0.0 + offset * 0.35, 3.16, 8.5]
+        // Floor 6 (Approval Control): Y = 21.6m + 0.9m = 22.5m
+        return [0.0 + offset * 0.35, 22.5, 0.5]
 
       case 'FAILURE_HOLD':
-        return [-7.5 + offset * 0.4, 0.88, 5.5]
+        // Floor 1 (Mission Control Quarantine): Y = 3.6m + 0.88m = 4.48m
+        return [-2.8 + offset * 0.4, 4.48, 1.2]
 
       case 'COMPLETED_TRAY':
-        return [-6.5 + offset * 0.4, 1.05, -8.0]
+        // Floor 0 (Mezzanine Archive Vault): Y = 0.0m + 1.15m = 1.15m
+        return [3.5 + offset * 0.3, 1.15, 0.5]
 
       case 'NEUTRAL_HOLD':
       default:

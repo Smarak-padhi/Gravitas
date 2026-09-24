@@ -72,7 +72,7 @@ const DOSSIER_MATERIAL = new THREE.MeshStandardMaterial({
   metalness: 0.3,
 })
 
-const INTEGRATION_DESK_POSITION: readonly [number, number, number] = [-4.15, 0.0, 1.2]
+const INTEGRATION_DESK_POSITION: readonly [number, number, number] = [0.0, 7.2, -1.5]
 
 function getStationCoordinates(stationId?: StationId | null): readonly [number, number, number] {
   if (!stationId) {
@@ -179,7 +179,7 @@ export class HandoffConduitManager {
           this.dossiers.set(handoff.id, dossier)
           this.rootGroup.add(dossier)
         }
-        dossier.position.set(start[0], DOSSIER_Y, start[2])
+        dossier.position.set(start[0], start[1] + DOSSIER_Y, start[2])
         dossier.visible = true
       } else {
         const dossier = this.dossiers.get(handoff.id)
@@ -225,8 +225,8 @@ export class HandoffConduitManager {
     start: readonly [number, number, number],
     end: readonly [number, number, number]
   ): void {
-    const vStart = new THREE.Vector3(start[0], CONDUIT_Y, start[2])
-    const vEnd = new THREE.Vector3(end[0], CONDUIT_Y, end[2])
+    const vStart = new THREE.Vector3(start[0], start[1] + CONDUIT_Y, start[2])
+    const vEnd = new THREE.Vector3(end[0], end[1] + CONDUIT_Y, end[2])
 
     const midpoint = new THREE.Vector3().addVectors(vStart, vEnd).multiplyScalar(0.5)
     const distance = vStart.distanceTo(vEnd)

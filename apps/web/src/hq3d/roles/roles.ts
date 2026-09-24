@@ -37,6 +37,7 @@ export const FRONTEND_ENGINEER_ROLE: HqRoleIdentity = {
   departmentId: 'ENGINEERING',
   stationId: 'engineering-workstation-01',
   stationAlias: 'codex-workstation',
+  physicalWorkstationId: 'frontend-engineer-workstation',
   visualIdentity: {
     silhouette: 'slightly expressive creative silhouette',
     wardrobeProfile: 'deep indigo / muted cobalt workwear',
@@ -54,6 +55,7 @@ export const BACKEND_ENGINEER_ROLE: HqRoleIdentity = {
   departmentId: 'ENGINEERING',
   stationId: 'engineering-workstation-02',
   stationAlias: 'fcc-workstation',
+  physicalWorkstationId: 'backend-engineer-workstation',
   visualIdentity: {
     silhouette: 'structured technical silhouette',
     wardrobeProfile: 'charcoal / forest-neutral workwear',
@@ -71,6 +73,7 @@ export const INDEPENDENT_REVIEWER_ROLE: HqRoleIdentity = {
   departmentId: 'QUALITY',
   stationId: 'verification-lab-console',
   stationAlias: 'verifier-console',
+  physicalWorkstationId: 'verifier-console',
   visualIdentity: {
     silhouette: 'restrained precise silhouette',
     wardrobeProfile: 'pale sage / stone cleanroom-inspired coat',
@@ -96,14 +99,19 @@ export const ROLE_BY_ID: ReadonlyMap<RoleId, HqRoleIdentity> = new Map(
 export const ROLE_BY_STATION_ID: ReadonlyMap<string, HqRoleIdentity> = new Map([
   [CHIEF_PLANNER_ROLE.stationId, CHIEF_PLANNER_ROLE],
   [CHIEF_PLANNER_ROLE.stationAlias, CHIEF_PLANNER_ROLE],
-  [FRONTEND_ENGINEER_ROLE.stationId, FRONTEND_ENGINEER_ROLE],
-  [FRONTEND_ENGINEER_ROLE.stationAlias, FRONTEND_ENGINEER_ROLE],
-  [BACKEND_ENGINEER_ROLE.stationId, BACKEND_ENGINEER_ROLE],
-  [BACKEND_ENGINEER_ROLE.stationAlias, BACKEND_ENGINEER_ROLE],
-  [INDEPENDENT_REVIEWER_ROLE.stationId, INDEPENDENT_REVIEWER_ROLE],
-  [INDEPENDENT_REVIEWER_ROLE.stationAlias, INDEPENDENT_REVIEWER_ROLE],
+  ['frontend-engineer-workstation', FRONTEND_ENGINEER_ROLE],
+  ['codex-workstation', FRONTEND_ENGINEER_ROLE],
+  ['engineering-workstation-01', FRONTEND_ENGINEER_ROLE],
+  ['backend-engineer-workstation', BACKEND_ENGINEER_ROLE],
+  ['fcc-workstation', BACKEND_ENGINEER_ROLE],
+  ['engineering-workstation-02', BACKEND_ENGINEER_ROLE],
+  ['verifier-console', INDEPENDENT_REVIEWER_ROLE],
+  ['verification-lab-console', INDEPENDENT_REVIEWER_ROLE],
 ])
 
+/**
+ * Canonical 2D home positions (historical runtime contract).
+ */
 export const ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number, number]> = {
   'role:strategy:chief-planner': [-4.5, 0.0, 4.6],
   'role:engineering:frontend-engineer': [-6.5, 0.0, 1.85],
@@ -112,10 +120,27 @@ export const ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number, numbe
 }
 
 export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
-  'role:strategy:chief-planner': 0.0, // Facing planning table
-  'role:engineering:frontend-engineer': Math.PI, // Facing workstation 01 desk
-  'role:engineering:backend-engineer': Math.PI, // Facing workstation 02 desk
-  'role:quality:independent-reviewer': 0.0, // Facing cleanroom console
+  'role:strategy:chief-planner': 0.0,
+  'role:engineering:frontend-engineer': Math.PI,
+  'role:engineering:backend-engineer': Math.PI,
+  'role:quality:independent-reviewer': 0.0,
+}
+
+/**
+ * 3D Cutaway Tower Role Home Positions across the 7 vertical levels.
+ */
+export const TOWER_ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number, number]> = {
+  'role:strategy:chief-planner': [-1.5, 3.6, 0.0],
+  'role:engineering:frontend-engineer': [-3.5, 7.2, 1.15],
+  'role:engineering:backend-engineer': [2.5, 7.2, 1.15],
+  'role:quality:independent-reviewer': [0.0, 10.8, 0.5],
+}
+
+export const TOWER_ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
+  'role:strategy:chief-planner': 0.0,
+  'role:engineering:frontend-engineer': Math.PI,
+  'role:engineering:backend-engineer': Math.PI,
+  'role:quality:independent-reviewer': 0.0,
 }
 
 /**

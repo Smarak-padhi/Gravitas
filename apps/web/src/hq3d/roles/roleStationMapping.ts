@@ -31,8 +31,10 @@ export const LEGACY_ROLE_COMPATIBILITY_MAPPING: Readonly<Record<string, RoleId>>
   'planning-table': 'role:strategy:chief-planner',
 
   // Engineering Floor
+  'frontend-engineer-workstation': 'role:engineering:frontend-engineer',
   'engineering-workstation-01': 'role:engineering:frontend-engineer',
   'codex-workstation': 'role:engineering:frontend-engineer',
+  'backend-engineer-workstation': 'role:engineering:backend-engineer',
   'engineering-workstation-02': 'role:engineering:backend-engineer',
   'fcc-workstation': 'role:engineering:backend-engineer',
 

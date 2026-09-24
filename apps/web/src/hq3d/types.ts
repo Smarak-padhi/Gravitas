@@ -13,11 +13,16 @@ export type RoomId =
 
 export type StationId =
   | 'planning-table'
+  | 'frontend-engineer-workstation'
+  | 'backend-engineer-workstation'
+  | 'engineering-workstation-01'
+  | 'engineering-workstation-02'
   | 'codex-workstation'
   | 'fcc-workstation'
   | 'expansion-bay-3'
   | 'expansion-bay-4'
   | 'verifier-console'
+  | 'verification-lab-console'
   | 'browser-qa-matrix'
   | 'omniroute-rack'
   | 'approval-plinth'

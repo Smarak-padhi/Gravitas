@@ -205,6 +205,19 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     }
   }
 
+  // Populate legacy presentation aliases for seamless backward compatibility
+  if (stations['frontend-engineer-workstation']) {
+    stations['codex-workstation'] = { ...stations['frontend-engineer-workstation'], id: 'codex-workstation' }
+    stations['engineering-workstation-01'] = { ...stations['frontend-engineer-workstation'], id: 'engineering-workstation-01' }
+  }
+  if (stations['backend-engineer-workstation']) {
+    stations['fcc-workstation'] = { ...stations['backend-engineer-workstation'], id: 'fcc-workstation' }
+    stations['engineering-workstation-02'] = { ...stations['backend-engineer-workstation'], id: 'engineering-workstation-02' }
+  }
+  if (stations['verifier-console']) {
+    stations['verification-lab-console'] = { ...stations['verifier-console'], id: 'verification-lab-console' }
+  }
+
   // 2. Build quick-lookup maps
   const activeTaskMap = new Map<string, RuntimeTaskProjection>()
   if (projection?.activeTasks) {
@@ -360,6 +373,22 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
           }
           break
         }
+        case 'RUNNING': {
+          if (assignedStationId) {
+            physicalLocation = 'ASSIGNED_WORKSTATION'
+            stations[assignedStationId] = {
+              ...stations[assignedStationId],
+              status: 'ACTIVE',
+              activeTaskId: ct.id,
+              activeRoleId: roleId,
+              workerIdentity: workerId,
+              activeRoute: routeProvenance,
+            }
+          } else {
+            physicalLocation = 'NEUTRAL_HOLD'
+          }
+          break
+        }
         case 'FAILED': {
           physicalLocation = 'FAILURE_HOLD'
           break
@@ -455,7 +484,15 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     activeRouteCount: number
     providerFallbackOccurred: boolean
     transportFallbackOccurred: boolean
-  }> = {}
+  }> = {
+    'omniroute-local': {
+      active: false,
+      activeTaskIds: [],
+      activeRouteCount: 0,
+      providerFallbackOccurred: false,
+      transportFallbackOccurred: false,
+    },
+  }
 
   let anyProviderFallback = false
   let anyTransportFallback = false

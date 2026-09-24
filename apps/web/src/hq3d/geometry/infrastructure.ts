@@ -34,7 +34,8 @@ export class HqInfrastructure {
   private buildServerRacks(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['omniroute-rack']
     const rackGroup = new THREE.Group()
-    rackGroup.position.set(-8.8, 0.0, -5.8)
+    rackGroup.position.set(station.position[0], station.position[1], station.position[2])
+    rackGroup.rotation.y = station.rotationY
     rackGroup.name = 'station:omniroute-rack'
     rackGroup.userData = { type: 'station', id: station.id, name: station.name }
 

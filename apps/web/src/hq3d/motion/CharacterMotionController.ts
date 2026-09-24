@@ -19,6 +19,8 @@ import {
   FROZEN_ROLES,
   ROLE_HOME_POSITIONS,
   ROLE_HOME_ROTATIONS,
+  TOWER_ROLE_HOME_POSITIONS,
+  TOWER_ROLE_HOME_ROTATIONS,
 } from '../roles/roles.js'
 import type { HqCharacters } from '../geometry/characters.js'
 import {
@@ -81,8 +83,8 @@ export class CharacterMotionController {
     // Initialize all 4 frozen roles at their home stations
     for (const role of FROZEN_ROLES) {
       const roleId = role.roleId
-      const homePos = ROLE_HOME_POSITIONS[roleId]
-      const homeRot = ROLE_HOME_ROTATIONS[roleId]
+      const homePos = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
+      const homeRot = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
       const homeStation = role.stationId
       const isSeated = role.visualIdentity.isSeatedDefault
 
@@ -219,8 +221,8 @@ export class CharacterMotionController {
     const nodeId = getStationNodeId(this.graph, stationId)
     const node = nodeId ? this.graph.nodes.get(nodeId) : undefined
 
-    let targetPos: readonly [number, number, number] = ROLE_HOME_POSITIONS[roleId]
-    let targetRot: number = ROLE_HOME_ROTATIONS[roleId]
+    let targetPos: readonly [number, number, number] = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
+    let targetRot: number = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
 
     if (node) {
       targetPos = node.position

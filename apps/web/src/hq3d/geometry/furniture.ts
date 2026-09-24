@@ -43,7 +43,8 @@ export class HqFurniture {
   private buildMissionPlanningTable(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['planning-table']
     const tableGroup = new THREE.Group()
-    tableGroup.position.set(-4.5, 0.0, 5.5)
+    tableGroup.position.set(station.position[0], station.position[1], station.position[2])
+    tableGroup.rotation.y = station.rotationY
     tableGroup.name = 'station:planning-table'
     tableGroup.userData = { type: 'station', id: station.id, name: station.name }
 
@@ -120,32 +121,46 @@ export class HqFurniture {
    * Premium modular drafting stations with dual curved monitors, cable management,
    * ergonomic task chairs, and personal desk dividers.
    */
+  /**
+   * Zone B: Agent Operations Workstations (Floor 2, Y = 7.2m)
+   * High-contrast asymmetric role workstations:
+   * - Frontend Engineer: design-oriented curved monitor + portrait secondary preview + open laptop + tablet sketch device + warm details.
+   * - Backend Engineer: systems-oriented dual curved displays + logs/terminal topology + technical console notebook + analytical details.
+   * - Expansion Bays 03 & 04: standby modular stations.
+   */
   private buildAgentWorkstations(materials: MaterialLibrary): void {
     const stationsConfig = [
       {
-        id: 'codex-workstation',
-        pos: [-6.5, 0.0, 1.2],
+        id: 'frontend-engineer-workstation',
+        legacyId: 'codex-workstation',
+        pos: [-2.5, 7.2, 0.5],
         matColor: materials.terminalScreen, // Slate cyan code display
       },
       {
-        id: 'fcc-workstation',
-        pos: [-1.8, 0.0, 1.2],
+        id: 'backend-engineer-workstation',
+        legacyId: 'fcc-workstation',
+        pos: [2.5, 7.2, 0.5],
         matColor: materials.terminalScreenAmber, // Warm amber architectural display
       },
       {
         id: 'expansion-bay-3',
-        pos: [-6.5, 0.0, -2.4],
+        legacyId: 'expansion-bay-3',
+        pos: [-2.5, 7.2, -1.8],
         matColor: materials.terminalScreenEmerald, // Standby telemetry display
       },
       {
         id: 'expansion-bay-4',
-        pos: [-1.8, 0.0, -2.4],
+        legacyId: 'expansion-bay-4',
+        pos: [2.5, 7.2, -1.8],
         matColor: materials.terminalScreen, // Standby display
       },
     ]
 
     for (const cfg of stationsConfig) {
-      const stationDef = STATION_DEFINITIONS[cfg.id as keyof typeof STATION_DEFINITIONS]
+      const stationDef =
+        (STATION_DEFINITIONS as any)[cfg.id] ??
+        (STATION_DEFINITIONS as any)[cfg.legacyId]
+
       const podGroup = new THREE.Group()
       podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
       podGroup.name = `station:${stationDef.id}`
@@ -157,13 +172,28 @@ export class HqFurniture {
       ind.position.set(0.0, 0.76, 0.48)
       ind.name = `station-indicator:${stationDef.id}`
       podGroup.add(ind)
-      this.stationIndicators.set(stationDef.id, ind)
+
+      const isFrontend = cfg.id === 'frontend-engineer-workstation'
+      const isBackend = cfg.id === 'backend-engineer-workstation'
+
+      // Register both modern role ID and legacy aliases
+      if (isFrontend) {
+        this.stationIndicators.set('frontend-engineer-workstation', ind)
+        this.stationIndicators.set('codex-workstation', ind)
+        this.stationIndicators.set('engineering-workstation-01', ind)
+      } else if (isBackend) {
+        this.stationIndicators.set('backend-engineer-workstation', ind)
+        this.stationIndicators.set('fcc-workstation', ind)
+        this.stationIndicators.set('engineering-workstation-02', ind)
+      } else {
+        this.stationIndicators.set(stationDef.id as StationId, ind)
+      }
 
       // 0. Soft Woven Area Rug under workstation pod
-      if (cfg.id === 'codex-workstation') {
-        const rugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 6.2))
+      if (isFrontend) {
+        const rugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 4.8))
         const rug = new THREE.Mesh(rugGeo, materials.carpetWarm)
-        rug.position.set(2.35, 0.004, -0.6)
+        rug.position.set(2.5, 0.004, -0.6)
         rug.receiveShadow = true
         podGroup.add(rug)
       }
@@ -200,21 +230,21 @@ export class HqFurniture {
       panel.position.set(0.0, 0.5, -0.42)
       podGroup.add(panel)
 
-      // 2. Refined, Properly Scaled Displays (0.72m width with slim bezels)
-      const isFrontend = cfg.id === 'fcc-workstation'
+      // 2. Asymmetric Displays & Equipment per User Correction 4
       const screensForStation: THREE.Mesh[] = []
 
       if (isFrontend) {
-        // Frontend: Center-left slim monitor + open aluminum laptop
-        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
+        // ── FRONTEND ENGINEER WORKSTATION ────────────────────────────
+        // 1. Primary Design-Oriented Ultrawide Display
+        const monFrameGeo = this.track(new THREE.BoxGeometry(0.82, 0.46, 0.02))
         const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-        monFrame.position.set(-0.25, 1.10, -0.22)
+        monFrame.position.set(-0.25, 1.12, -0.22)
         monFrame.castShadow = true
         podGroup.add(monFrame)
 
-        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
+        const monScreenGeo = this.track(new THREE.BoxGeometry(0.78, 0.42, 0.005))
         const monScreen = new THREE.Mesh(monScreenGeo, cfg.matColor)
-        monScreen.position.set(-0.25, 1.10, -0.208)
+        monScreen.position.set(-0.25, 1.12, -0.208)
         podGroup.add(monScreen)
         screensForStation.push(monScreen)
 
@@ -224,17 +254,17 @@ export class HqFurniture {
         arm.position.set(-0.25, 0.92, -0.26)
         podGroup.add(arm)
 
-        // Sleek 15" Aluminum Laptop (open clamshell at 110 deg)
+        // 2. Open 15" Aluminum Laptop (web/browser preview)
         const laptopBaseGeo = this.track(new THREE.BoxGeometry(0.32, 0.01, 0.22))
         const laptopBase = new THREE.Mesh(laptopBaseGeo, materials.laptopAluminum)
-        laptopBase.position.set(0.48, 0.755, 0.08)
+        laptopBase.position.set(0.52, 0.755, 0.08)
         laptopBase.rotation.y = -0.25
         laptopBase.castShadow = true
         podGroup.add(laptopBase)
 
         const laptopLidGeo = this.track(new THREE.BoxGeometry(0.32, 0.21, 0.008))
         const laptopLid = new THREE.Mesh(laptopLidGeo, materials.laptopAluminum)
-        laptopLid.position.set(0.48, 0.855, -0.01)
+        laptopLid.position.set(0.52, 0.855, -0.01)
         laptopLid.rotation.y = -0.25
         laptopLid.rotation.x = -0.24
         laptopLid.castShadow = true
@@ -242,53 +272,60 @@ export class HqFurniture {
 
         const lapScrGeo = this.track(new THREE.BoxGeometry(0.30, 0.19, 0.002))
         const lapScr = new THREE.Mesh(lapScrGeo, materials.deviceLaptop)
-        lapScr.position.set(0.48, 0.855, -0.005)
+        lapScr.position.set(0.52, 0.855, -0.005)
         lapScr.rotation.y = -0.25
         lapScr.rotation.x = -0.24
         podGroup.add(lapScr)
         screensForStation.push(lapScr)
 
-        // Teal ceramic coffee mug
+        // 3. Digital Graphic Tablet & Stylus on Desk
+        const tabMatGeo = this.track(new THREE.BoxGeometry(0.24, 0.012, 0.18))
+        const tabMat = new THREE.Mesh(tabMatGeo, materials.deviceTablet)
+        tabMat.position.set(0.18, 0.756, 0.16)
+        tabMat.rotation.y = -0.1
+        podGroup.add(tabMat)
+
+        // 4. Creative Personal Details: Teal ceramic mug & designer notebook
         const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
         const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTeal)
-        mug.position.set(-0.75, 0.792, 0.15)
+        mug.position.set(-0.8, 0.792, 0.15)
         mug.castShadow = true
         podGroup.add(mug)
 
-        // Designer notebook with pen
         const nbGeo = this.track(new THREE.BoxGeometry(0.18, 0.012, 0.24))
         const nb = new THREE.Mesh(nbGeo, materials.bookSpineAmber)
         nb.position.set(-0.62, 0.756, -0.05)
         nb.rotation.y = 0.18
         podGroup.add(nb)
-      } else {
-        // Backend / Expansion: Dual balanced curved display arrangement
+      } else if (isBackend) {
+        // ── BACKEND ENGINEER WORKSTATION ─────────────────────────────
+        // 1. Dual Systems-Oriented Curved Displays (Terminal / Logs Topology)
         const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
         const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
 
-        // Center monitor
+        // Center-left monitor (Active log / build stream)
         const mon1Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
         mon1Frame.position.set(-0.36, 1.10, -0.22)
-        mon1Frame.rotation.y = 0.12
+        mon1Frame.rotation.y = 0.15
         mon1Frame.castShadow = true
         podGroup.add(mon1Frame)
 
-        const mon1Screen = new THREE.Mesh(monScreenGeo, cfg.matColor)
+        const mon1Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreenEmerald)
         mon1Screen.position.set(-0.36, 1.10, -0.208)
-        mon1Screen.rotation.y = 0.12
+        mon1Screen.rotation.y = 0.15
         podGroup.add(mon1Screen)
         screensForStation.push(mon1Screen)
 
-        // Right monitor
+        // Center-right monitor (Infrastructure / runtime topology)
         const mon2Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
         mon2Frame.position.set(0.36, 1.10, -0.22)
-        mon2Frame.rotation.y = -0.16
+        mon2Frame.rotation.y = -0.15
         mon2Frame.castShadow = true
         podGroup.add(mon2Frame)
 
         const mon2Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreen)
         mon2Screen.position.set(0.36, 1.10, -0.208)
-        mon2Screen.rotation.y = -0.16
+        mon2Screen.rotation.y = -0.15
         podGroup.add(mon2Screen)
         screensForStation.push(mon2Screen)
 
@@ -298,15 +335,58 @@ export class HqFurniture {
         arm.position.set(0.0, 0.92, -0.26)
         podGroup.add(arm)
 
-        // Terracotta ceramic coffee mug
+        // 2. Overhead mini telemetry status panel
+        const miniPanelGeo = this.track(new THREE.BoxGeometry(0.44, 0.08, 0.02))
+        const miniPanel = new THREE.Mesh(miniPanelGeo, materials.terminalScreenAmber)
+        miniPanel.position.set(0.0, 1.35, -0.24)
+        podGroup.add(miniPanel)
+        screensForStation.push(miniPanel)
+
+        // 3. Technical Console / Dark Systems Notebook
+        const diagConsoleGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.16))
+        const diagConsole = new THREE.Mesh(diagConsoleGeo, materials.limestoneDark)
+        diagConsole.position.set(-0.72, 0.76, 0.12)
+        diagConsole.rotation.y = 0.1
+        podGroup.add(diagConsole)
+
+        // 4. Terracotta ceramic coffee mug
         const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
         const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTerracotta)
-        mug.position.set(0.78, 0.792, 0.18)
+        mug.position.set(0.8, 0.792, 0.18)
         mug.castShadow = true
         podGroup.add(mug)
+      } else {
+        // ── EXPANSION BAYS 03 & 04 ───────────────────────────────────
+        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
+        const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+        monFrame.position.set(0.0, 1.10, -0.22)
+        monFrame.castShadow = true
+        podGroup.add(monFrame)
+
+        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
+        const monScreen = new THREE.Mesh(monScreenGeo, cfg.matColor)
+        monScreen.position.set(0.0, 1.10, -0.208)
+        podGroup.add(monScreen)
+        screensForStation.push(monScreen)
+
+        const armGeo = this.track(new THREE.CylinderGeometry(0.02, 0.02, 0.36, 8))
+        const arm = new THREE.Mesh(armGeo, materials.brass)
+        arm.position.set(0.0, 0.92, -0.26)
+        podGroup.add(arm)
       }
 
-      this.stationScreens.set(stationDef.id, screensForStation)
+      // Register screens
+      if (isFrontend) {
+        this.stationScreens.set('frontend-engineer-workstation', screensForStation)
+        this.stationScreens.set('codex-workstation', screensForStation)
+        this.stationScreens.set('engineering-workstation-01', screensForStation)
+      } else if (isBackend) {
+        this.stationScreens.set('backend-engineer-workstation', screensForStation)
+        this.stationScreens.set('fcc-workstation', screensForStation)
+        this.stationScreens.set('engineering-workstation-02', screensForStation)
+      } else {
+        this.stationScreens.set(stationDef.id as StationId, screensForStation)
+      }
 
       // Compact keyboard & precision mouse mat
       const matGeo = this.track(new THREE.BoxGeometry(0.75, 0.004, 0.28))
@@ -324,7 +404,6 @@ export class HqFurniture {
       const lamp = new THREE.Mesh(lampGeo, materials.lampWarmGlow)
       lamp.position.set(0.0, 1.28, -0.22)
       podGroup.add(lamp)
-
 
       // 3. Ergonomic Task Chair
       const chairGroup = new THREE.Group()
@@ -371,12 +450,13 @@ export class HqFurniture {
   }
 
   /**
-   * Zone C: Verification Cleanroom Console & Inspection Bench
+   * Zone C: Verification Cleanroom Console & Inspection Bench (Floor 3, Y = 10.8m)
    */
   private buildVerificationConsole(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['verifier-console']
     const consoleGroup = new THREE.Group()
-    consoleGroup.position.set(6.0, 0.1, 6.5)
+    consoleGroup.position.set(station.position[0], station.position[1], station.position[2])
+    consoleGroup.rotation.y = station.rotationY
     consoleGroup.name = 'station:verifier-console'
     consoleGroup.userData = { type: 'station', id: station.id, name: station.name }
 
@@ -434,12 +514,13 @@ export class HqFurniture {
     ind.name = 'station-indicator:verifier-console'
     consoleGroup.add(ind)
     this.stationIndicators.set('verifier-console', ind)
+    this.stationIndicators.set('verification-lab-console' as any, ind)
 
     this.group.add(consoleGroup)
   }
 
   /**
-   * Zone D: Browser QA Multi-Device Matrix Wall & Test Rig
+   * Zone D: Browser QA Multi-Device Matrix Wall & Test Rig (Floor 4, Y = 14.4m)
    * REPLACES the monolithic black block with recognizable physical device viewports:
    * 1. Ultrawide Desktop (34-inch ratio)
    * 2. Laptop display (15-inch ratio)
@@ -450,7 +531,8 @@ export class HqFurniture {
   private buildBrowserQaDeviceMatrix(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['browser-qa-matrix']
     const qaGroup = new THREE.Group()
-    qaGroup.position.set(6.2, 0.1, -0.5)
+    qaGroup.position.set(station.position[0], station.position[1], station.position[2])
+    qaGroup.rotation.y = station.rotationY
     qaGroup.name = 'station:browser-qa-matrix'
     qaGroup.userData = { type: 'station', id: station.id, name: station.name }
 
@@ -547,13 +629,14 @@ export class HqFurniture {
   }
 
   /**
-   * Zone F: Approval Control Mezzanine Plinth & Review Console
+   * Zone F: Approval Control Mezzanine Plinth & Review Console (Floor 6, Y = 21.6m)
    * Dedicated human operator governance station with ergonomic seating and clear sightlines.
    */
   private buildApprovalMezzaninePlinth(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['approval-plinth']
     const plinthGroup = new THREE.Group()
-    plinthGroup.position.set(0.0, 2.95, 8.5)
+    plinthGroup.position.set(station.position[0], station.position[1], station.position[2])
+    plinthGroup.rotation.y = station.rotationY
     plinthGroup.name = 'station:approval-plinth'
     plinthGroup.userData = { type: 'station', id: station.id, name: station.name }
 
@@ -611,12 +694,13 @@ export class HqFurniture {
   }
 
   /**
-   * Repository Vault Terminal Dock in Verification Lab
+   * Repository Vault Terminal Dock on Mezzanine Level 0 (Y = 0.0m)
    */
   private buildRepositoryVault(materials: MaterialLibrary): void {
     const station = STATION_DEFINITIONS['repository-vault']
     const vaultGroup = new THREE.Group()
-    vaultGroup.position.set(10.2, 0.1, 4.0)
+    vaultGroup.position.set(station.position[0], station.position[1], station.position[2])
+    vaultGroup.rotation.y = station.rotationY
     vaultGroup.name = 'station:repository-vault'
     vaultGroup.userData = { type: 'station', id: station.id, name: station.name }
 
@@ -651,52 +735,21 @@ export class HqFurniture {
   }
 
   /**
-   * Procedural Office Life Props
-   * Plants, cozy lounge seating, coffee tables, architectural shelving,
-   * whiteboard, framed blueprints, and desk accessories.
+   * Procedural Architectural Life Props
+   * Distributed across vertical tower levels:
+   * - Mezzanine (L0, Y = 0.0m): Cozy lounge sofa, low coffee table, floor lamp, potted ficus.
+   * - Floor 1 (Y = 3.6m): Mission strategy whiteboard on rear wall, potted ficus.
+   * - Floor 2 (Y = 7.2m, Hero Room): Abstract wall art on rear wall, project architecture whiteboard, walnut bookshelf with books, snake plant trough, potted greenery.
+   * - Floor 3 (Y = 10.8m): Cleanroom observation bench.
    */
   private buildOfficeLifeProps(materials: MaterialLibrary): void {
     const propsGroup = new THREE.Group()
     propsGroup.name = 'office-life-props'
 
-    // 1. Tall Potted Ficus / Fig Trees
-    const tree1Group = this.buildPottedTree(materials, [-8.6, 0.0, 7.6], 2.2)
-    propsGroup.add(tree1Group)
-
-    const tree2Group = this.buildPottedTree(materials, [-11.6, 0.0, 2.8], 2.4)
-    propsGroup.add(tree2Group)
-
-    const tree3Group = this.buildPottedTree(materials, [1.2, 0.0, 8.6], 2.0)
-    propsGroup.add(tree3Group)
-
-    // 2. Low Planter Trough with Snake Plants (Corridor divider between Ops & Central Spine)
-    const troughGroup = new THREE.Group()
-    troughGroup.position.set(-0.8, 0.0, -1.0)
-
-    const boxGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 3.4))
-    const box = new THREE.Mesh(boxGeo, materials.walnut)
-    box.position.set(0.0, 0.21, 0.0)
-    box.castShadow = true
-    troughGroup.add(box)
-
-    const boxRimGeo = this.track(new THREE.BoxGeometry(0.38, 0.03, 3.44))
-    const boxRim = new THREE.Mesh(boxRimGeo, materials.champagneBrass)
-    boxRim.position.set(0.0, 0.43, 0.0)
-    troughGroup.add(boxRim)
-
-    // Snake plant blades
-    for (let pz = -1.4; pz <= 1.4; pz += 0.35) {
-      const bladeGeo = this.track(new THREE.BoxGeometry(0.04, 0.65 + Math.sin(pz) * 0.15, 0.16))
-      const blade = new THREE.Mesh(bladeGeo, materials.foliageDark)
-      blade.position.set((Math.random() - 0.5) * 0.1, 0.7, pz)
-      blade.rotation.y = (Math.random() - 0.5) * 0.5
-      troughGroup.add(blade)
-    }
-    propsGroup.add(troughGroup)
-
-    // 3. Cozy Lounge Nook (South corridor between Ops & Browser QA)
+    // ── LEVEL 0 MEZZANINE (Y = 0.0m) ──────────────────────────────────
+    // 1. Cozy Lounge Nook on Mezzanine
     const loungeGroup = new THREE.Group()
-    loungeGroup.position.set(0.8, 0.0, -5.8)
+    loungeGroup.position.set(0.0, 0.0, -1.0)
 
     // Sofa Base
     const sofaBaseGeo = this.track(new THREE.BoxGeometry(2.4, 0.12, 0.9))
@@ -806,13 +859,19 @@ export class HqFurniture {
     loungeGroup.add(lampGroup)
     propsGroup.add(loungeGroup)
 
-    // 4. Mission Control Strategy Whiteboard
+    // Potted tree on Mezzanine
+    propsGroup.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.2))
+
+    // ── FLOOR 1 MISSION CONTROL (Y = 3.6m) ───────────────────────────
+    const f1Group = new THREE.Group()
+    f1Group.position.set(0.0, 3.6, 0.0)
+
+    // Mission Control Strategy Whiteboard on rear acoustic wall
     const wbGroup = new THREE.Group()
-    wbGroup.position.set(-7.8, 1.8, 8.1)
+    wbGroup.position.set(0.0, 2.0, 3.65)
 
     const wbGeo = this.track(new THREE.BoxGeometry(2.8, 1.35, 0.03))
     const wb = new THREE.Mesh(wbGeo, materials.whiteboardSurface)
-    wb.position.set(0.0, 0.0, 0.0)
     wbGroup.add(wb)
 
     const wbFrameGeo = this.track(new THREE.BoxGeometry(2.84, 1.39, 0.02))
@@ -824,64 +883,90 @@ export class HqFurniture {
     const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
     tray.position.set(0.0, -0.68, 0.04)
     wbGroup.add(tray)
-    propsGroup.add(wbGroup)
+    f1Group.add(wbGroup)
 
-    // 5. Architectural Shelving Unit in Agent Operations
+    f1Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.0))
+    propsGroup.add(f1Group)
+
+    // ── FLOOR 2 AGENT OPERATIONS HERO ROOM (Y = 7.2m) ─────────────────
+    const f2Group = new THREE.Group()
+    f2Group.position.set(0.0, 7.2, 0.0)
+
+    // Low Planter Trough with Snake Plants (divider between workstation zones)
+    const troughGroup = new THREE.Group()
+    troughGroup.position.set(0.0, 0.0, 0.5)
+
+    const boxGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 3.2))
+    const box = new THREE.Mesh(boxGeo, materials.walnut)
+    box.position.set(0.0, 0.21, 0.0)
+    box.castShadow = true
+    troughGroup.add(box)
+
+    const boxRimGeo = this.track(new THREE.BoxGeometry(0.38, 0.03, 3.24))
+    const boxRim = new THREE.Mesh(boxRimGeo, materials.champagneBrass)
+    boxRim.position.set(0.0, 0.43, 0.0)
+    troughGroup.add(boxRim)
+
+    // Snake plant blades
+    for (let pz = -1.3; pz <= 1.3; pz += 0.35) {
+      const bladeGeo = this.track(new THREE.BoxGeometry(0.04, 0.65 + Math.sin(pz) * 0.15, 0.16))
+      const blade = new THREE.Mesh(bladeGeo, materials.foliageDark)
+      blade.position.set((Math.random() - 0.5) * 0.08, 0.7, pz)
+      blade.rotation.y = (Math.random() - 0.5) * 0.5
+      troughGroup.add(blade)
+    }
+    f2Group.add(troughGroup)
+
+    // Architectural Shelving Unit in Agent Operations (West wall)
     const shelfGroup = new THREE.Group()
-    shelfGroup.position.set(-12.8, 1.2, -1.5)
+    shelfGroup.position.set(-5.6, 1.2, -1.0)
+    shelfGroup.rotation.y = Math.PI / 2
 
-    const shelfFrameGeo = this.track(new THREE.BoxGeometry(0.35, 2.4, 2.0))
+    const shelfFrameGeo = this.track(new THREE.BoxGeometry(0.35, 2.2, 2.0))
     const shelfFrame = new THREE.Mesh(shelfFrameGeo, materials.walnut)
     shelfGroup.add(shelfFrame)
 
-    // Books and binders on shelves
-    for (let sy = -0.8; sy <= 0.8; sy += 0.5) {
+    for (let sy = -0.7; sy <= 0.7; sy += 0.5) {
       for (let sz = -0.7; sz <= 0.7; sz += 0.35) {
         const bookGeo = this.track(new THREE.BoxGeometry(0.24, 0.28, 0.06))
-        const bookMat = (Math.abs(sz + sy) < 0.4)
-          ? materials.bookSpineNavy
-          : (sz > 0 ? materials.bookSpineAmber : materials.bookSpineTeal)
+        const bookMat =
+          Math.abs(sz + sy) < 0.4
+            ? materials.bookSpineNavy
+            : sz > 0
+              ? materials.bookSpineAmber
+              : materials.bookSpineTeal
         const book = new THREE.Mesh(bookGeo, bookMat)
         book.position.set(0.02, sy + 0.15, sz)
         shelfGroup.add(book)
       }
     }
-    propsGroup.add(shelfGroup)
+    f2Group.add(shelfGroup)
 
-    // 6. Agent Operations Hero Room: Modern Framed Abstract Wall Art (West Wall)
+    // Framed Abstract Wall Art on rear wall
     const artGroup = new THREE.Group()
-    artGroup.position.set(-13.42, 2.6, 1.2)
-    artGroup.rotation.y = Math.PI / 2
+    artGroup.position.set(0.0, 2.0, 3.65)
 
     const artCanvasGeo = this.track(new THREE.BoxGeometry(2.4, 1.5, 0.02))
     const artCanvas = new THREE.Mesh(artCanvasGeo, materials.wallArtAbstract)
-    artCanvas.position.set(0.0, 0.0, 0.0)
     artGroup.add(artCanvas)
 
     const artFrameGeo = this.track(new THREE.BoxGeometry(2.46, 1.56, 0.03))
     const artFrame = new THREE.Mesh(artFrameGeo, materials.champagneBrass)
     artFrame.position.set(0.0, 0.0, -0.01)
     artGroup.add(artFrame)
-    propsGroup.add(artGroup)
+    f2Group.add(artGroup)
 
-    // 7. Agent Operations Hero Room: Project Whiteboard / Architecture Board (West Wall)
-    const opsWbGroup = new THREE.Group()
-    opsWbGroup.position.set(-13.42, 2.3, -3.2)
-    opsWbGroup.rotation.y = Math.PI / 2
+    // Hero Room Potted Greenery
+    f2Group.add(this.buildPottedTree(materials, [-4.8, 0.0, 2.2], 1.8))
+    f2Group.add(this.buildPottedTree(materials, [4.8, 0.0, 2.2], 1.8))
 
-    const opsWbGeo = this.track(new THREE.BoxGeometry(1.8, 1.2, 0.02))
-    const opsWb = new THREE.Mesh(opsWbGeo, materials.whiteboardSurface)
-    opsWbGroup.add(opsWb)
+    propsGroup.add(f2Group)
 
-    const opsWbFrameGeo = this.track(new THREE.BoxGeometry(1.84, 1.24, 0.015))
-    const opsWbFrame = new THREE.Mesh(opsWbFrameGeo, materials.champagneBrass)
-    opsWbFrame.position.set(0.0, 0.0, -0.01)
-    opsWbGroup.add(opsWbFrame)
-    propsGroup.add(opsWbGroup)
-
-    // 8. Hero Room Potted Greenery
-    propsGroup.add(this.buildPottedTree(materials, [-11.2, 0.0, 2.2], 1.8))
-    propsGroup.add(this.buildPottedTree(materials, [-1.2, 0.0, -1.8], 1.5))
+    // ── FLOOR 3 VERIFICATION CLEANROOM (Y = 10.8m) ───────────────────
+    const f3Group = new THREE.Group()
+    f3Group.position.set(0.0, 10.8, 0.0)
+    f3Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 1.8))
+    propsGroup.add(f3Group)
 
     this.group.add(propsGroup)
   }

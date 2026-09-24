@@ -1,41 +1,41 @@
 /**
  * Gravitas 3D Headquarters — Architectural Room Definitions & Camera Framing Presets
- * Recomposed presets focused tightly on hero subjects with rich contextual depth.
+ * Recomposed presets for the 7-level vertical architectural cutaway tower.
  */
 
 import type { CameraFramingPreset, RoomDefinition, RoomId } from '../types.js'
 
 export const HQ_OVERVIEW_PRESET: CameraFramingPreset = {
   id: 'HQ_OVERVIEW',
-  target: [0.0, 1.8, 1.2],
-  position: [-12.5, 6.5, -14.2],
+  target: [0.5, 12.6, 0.0],
+  position: [-14.0, 15.0, -44.0],
   description: 'Headquarters Full Vertical Architectural Cutaway Dollhouse Overview',
 }
 
-// Wave 12K Focused Workstation & Character Camera Presets
+// Focused Workstation & Character Camera Presets
 export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
   WS_FRONTEND: {
     id: 'WS_FRONTEND',
-    target: [-6.5, 1.0, 1.4],
-    position: [-7.8, 1.5, 0.8],
-    description: 'Frontend Engineer Workstation & Laptop Focus',
+    target: [-3.5, 8.0, 0.6],
+    position: [-5.5, 8.8, -2.2],
+    description: 'Frontend Engineer Workstation & Design Surface Focus',
   },
   WS_BACKEND: {
     id: 'WS_BACKEND',
-    target: [-1.8, 1.0, 1.4],
-    position: [-3.2, 1.5, 0.8],
-    description: 'Backend Engineer Workstation & Telemetry Focus',
+    target: [2.5, 8.0, 0.6],
+    position: [0.5, 8.8, -2.2],
+    description: 'Backend Engineer Workstation & Systems Array Focus',
   },
   WS_PLANNING: {
     id: 'WS_PLANNING',
-    target: [-4.5, 0.9, 5.5],
-    position: [-6.5, 2.5, 7.5],
+    target: [-1.5, 4.4, 0.5],
+    position: [-3.5, 5.2, -2.2],
     description: 'Mission Control Planning Table Focus',
   },
   WS_VERIFIER: {
     id: 'WS_VERIFIER',
-    target: [6.0, 1.1, 6.5],
-    position: [4.0, 2.4, 4.5],
+    target: [0.0, 11.6, 1.0],
+    position: [-2.0, 12.4, -1.8],
     description: 'Independent Verification Console & Cleanroom Bench',
   },
 }
@@ -43,35 +43,42 @@ export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
 export const CHARACTER_PRESETS: Record<string, CameraFramingPreset> = {
   CHAR_FRONTEND: {
     id: 'CHAR_FRONTEND',
-    target: [-6.5, 1.12, 1.82],
-    position: [-7.7, 1.42, 1.4],
-    description: 'Frontend Engineer Mascot, Ponytail & Headphones Closeup',
+    target: [-3.5, 8.15, 0.9],
+    position: [-4.6, 8.65, -0.6],
+    description: 'Frontend Engineer Mascot & Workstation Context Closeup',
   },
   CHAR_BACKEND: {
     id: 'CHAR_BACKEND',
-    target: [-1.8, 1.12, 1.82],
-    position: [-3.0, 1.42, 1.4],
-    description: 'Backend Engineer Mascot & Headset Closeup',
+    target: [2.5, 8.15, 0.9],
+    position: [1.4, 8.65, -0.6],
+    description: 'Backend Engineer Mascot & Workstation Context Closeup',
   },
   CHAR_PLANNER: {
     id: 'CHAR_PLANNER',
-    target: [-4.5, 1.1, 4.6],
-    position: [-4.5, 1.45, 3.2],
-    description: 'Chief Planner Mascot & Drafting Folio Focus',
+    target: [-1.5, 4.55, 0.2],
+    position: [-2.6, 5.05, -1.2],
+    description: 'Chief Planner Mascot & Drafting Folio Context Focus',
   },
   CHAR_REVIEWER: {
     id: 'CHAR_REVIEWER',
-    target: [6.0, 1.1, 5.75],
-    position: [6.0, 1.45, 4.3],
-    description: 'Independent Reviewer Mascot & Inspection Loupe Focus',
+    target: [0.0, 11.75, 0.7],
+    position: [-1.2, 12.25, -0.8],
+    description: 'Independent Reviewer Mascot & Inspection Loupe Context Focus',
   },
 }
 
 export const ELEVATOR_PRESET: CameraFramingPreset = {
   id: 'ELEVATOR_VIEW',
-  target: [0.0, 2.0, 9.8],
-  position: [-3.5, 2.0, 4.5],
+  target: [8.4, 12.0, 0.0],
+  position: [14.0, 15.0, -10.0],
   description: 'Vertical Architectural Elevator Shaft & Exterior Carriage Transit',
+}
+
+export const MEZZANINE_PRESET: CameraFramingPreset = {
+  id: 'MEZZANINE_PRESET',
+  target: [0.0, 1.2, 0.5],
+  position: [-5.5, 2.8, -6.8],
+  description: 'Mezzanine Creative Studio & Office Lounge Space',
 }
 
 export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
@@ -79,13 +86,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'MISSION_CONTROL',
     name: 'Mission Control',
     numberKey: '1',
-    center: [-4.5, 0.85, 5.5],
-    size: [6.5, 3.0, 5.5],
+    center: [0.0, 3.6, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#38bdf8',
     cameraPreset: {
       id: 'ROOM_MISSION_CONTROL',
-      target: [-4.5, 0.85, 5.5],
-      position: [-7.8, 3.8, 1.8],
+      target: [0.0, 4.8, 0.5],
+      position: [-5.5, 6.4, -6.8],
       description: 'Mission Control Planning Table & Blueprint DAG Surface',
     },
   },
@@ -93,13 +100,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'AGENT_OPERATIONS',
     name: 'Agent Operations Floor',
     numberKey: '2',
-    center: [-4.2, 0.85, 0.5],
-    size: [10.0, 3.0, 7.5],
+    center: [0.0, 7.2, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#2b59c3',
     cameraPreset: {
       id: 'ROOM_AGENT_OPERATIONS',
-      target: [-4.2, 1.1, 0.8],
-      position: [-10.5, 2.6, -4.5],
+      target: [0.0, 8.4, 0.5],
+      position: [-6.5, 10.0, -6.8],
       description: 'Agent Operations Workstations, Wall Art, Plants & Seated Engineers',
     },
   },
@@ -107,13 +114,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'VERIFICATION_LAB',
     name: 'Verification Cleanroom',
     numberKey: '3',
-    center: [6.0, 1.1, 6.2],
-    size: [8.5, 3.0, 5.5],
+    center: [0.0, 10.8, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#3d7a68',
     cameraPreset: {
       id: 'ROOM_VERIFICATION_LAB',
-      target: [6.0, 1.1, 6.2],
-      position: [2.2, 3.2, 2.5],
+      target: [0.0, 12.0, 0.5],
+      position: [-5.5, 13.6, -6.8],
       description: 'Independent Verification Console, Verifier Figure & Cleanroom Glass',
     },
   },
@@ -121,13 +128,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'BROWSER_QA_LAB',
     name: 'Browser QA Lab',
     numberKey: '4',
-    center: [6.2, 1.2, -0.5],
-    size: [8.5, 3.0, 6.5],
+    center: [0.0, 14.4, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#0d9488',
     cameraPreset: {
       id: 'ROOM_BROWSER_QA_LAB',
-      target: [6.2, 1.2, -1.2],
-      position: [4.2, 3.2, 2.4],
+      target: [0.0, 15.6, 0.5],
+      position: [-5.5, 17.2, -6.8],
       description: 'Multi-Device Testing Matrix Rig & Observation Bench',
     },
   },
@@ -135,13 +142,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'INFRASTRUCTURE_ROOM',
     name: 'Infrastructure Server Bay',
     numberKey: '5',
-    center: [-8.8, 1.4, -5.8],
-    size: [5.5, 3.5, 5.0],
+    center: [0.0, 18.0, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#475569',
     cameraPreset: {
       id: 'ROOM_INFRASTRUCTURE_ROOM',
-      target: [-8.8, 1.4, -5.6],
-      position: [-5.6, 3.4, -1.2],
+      target: [0.0, 19.2, 0.5],
+      position: [-5.5, 20.8, -6.8],
       description: '42U OmniRoute Gateway & Compute Server Racks with Cable Trays',
     },
   },
@@ -149,13 +156,13 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     id: 'APPROVAL_MEZZANINE',
     name: 'Approval Control Mezzanine',
     numberKey: '6',
-    center: [0.0, 3.2, 8.5],
-    size: [18.0, 3.5, 3.6],
+    center: [0.0, 21.6, 0.0],
+    size: [14.0, 3.4, 8.0],
     accentColor: '#d97706',
     cameraPreset: {
       id: 'ROOM_APPROVAL_MEZZANINE',
-      target: [0.0, 3.1, 8.5],
-      position: [0.0, 4.6, 2.2],
+      target: [0.0, 22.8, 0.5],
+      position: [-5.5, 24.4, -6.8],
       description: 'Elevated Human Governance Console & Operations Sightline',
     },
   },
@@ -163,8 +170,16 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
 
 export function getRoomByKey(key: string): RoomDefinition | undefined {
   const norm = key.toUpperCase()
-  if (norm === 'M') {
-    return ROOM_DEFINITIONS.APPROVAL_MEZZANINE
+  if (norm === 'M' || norm === '0') {
+    return {
+      id: 'APPROVAL_MEZZANINE' as RoomId,
+      name: 'Creative Studio Mezzanine',
+      numberKey: 'M',
+      center: [0.0, 0.0, 0.0],
+      size: [14.0, 3.4, 8.0],
+      accentColor: '#f59e0b',
+      cameraPreset: MEZZANINE_PRESET,
+    }
   }
   return Object.values(ROOM_DEFINITIONS).find((r) => r.numberKey === norm)
 }

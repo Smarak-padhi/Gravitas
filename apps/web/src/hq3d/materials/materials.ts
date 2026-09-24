@@ -160,7 +160,7 @@ export class MaterialLibrary {
     // Wave 12K Architectural Cutaway Materials
     this.structureGraphite = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x222631,
+        color: 0x3b4252,
         roughness: 0.52,
         metalness: 0.35,
       })
@@ -168,17 +168,17 @@ export class MaterialLibrary {
 
     this.facadeCharcoal = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x181c24,
-        roughness: 0.75,
-        metalness: 0.15,
+        color: 0x2e3544,
+        roughness: 0.65,
+        metalness: 0.22,
       })
     )
 
     this.cutawaySlabEdge = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x5a5045,
-        roughness: 0.85,
-        metalness: 0.05,
+        color: 0x8a725d,
+        roughness: 0.75,
+        metalness: 0.08,
       })
     )
 
@@ -482,10 +482,10 @@ export class MaterialLibrary {
     // 3. Natural Solid American Walnut
     this.walnut = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x36251b,
+        color: 0x8a5d3b,
         map: walnutTex,
-        roughness: 0.58,
-        metalness: 0.02,
+        roughness: 0.48,
+        metalness: 0.04,
       })
     )
 
@@ -501,9 +501,9 @@ export class MaterialLibrary {
     // 5. Dark Brushed Gunmetal / Graphite
     this.gunmetal = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x222630,
-        roughness: 0.42,
-        metalness: 0.82,
+        color: 0x3d4352,
+        roughness: 0.40,
+        metalness: 0.75,
       })
     )
 

@@ -55,72 +55,73 @@ export class HqScene {
     // Instantiate Material Library
     this.materials = new MaterialLibrary()
 
-    // 1. Soft Museum Key Directional Light
+    // 1. Soft Architectural Museum Key Directional Light (illuminates vertical tower from front-left-above)
     this.keyLight = new THREE.DirectionalLight(0xfff6ec, 1.35)
-    this.keyLight.position.set(-14.0, 22.0, -10.0)
+    this.keyLight.position.set(-18.0, 36.0, -28.0)
     this.keyLight.castShadow = true
     this.keyLight.shadow.mapSize.width = 2048
     this.keyLight.shadow.mapSize.height = 2048
     this.keyLight.shadow.camera.near = 5.0
-    this.keyLight.shadow.camera.far = 55.0
-    this.keyLight.shadow.camera.left = -16.0
-    this.keyLight.shadow.camera.right = 16.0
-    this.keyLight.shadow.camera.top = 16.0
-    this.keyLight.shadow.camera.bottom = -16.0
+    this.keyLight.shadow.camera.far = 95.0
+    this.keyLight.shadow.camera.left = -22.0
+    this.keyLight.shadow.camera.right = 22.0
+    this.keyLight.shadow.camera.top = 32.0
+    this.keyLight.shadow.camera.bottom = -4.0
     this.keyLight.shadow.bias = -0.0003
     this.keyLight.shadow.radius = 2.0
     this.scene.add(this.keyLight)
 
-    // 2. Opposing Soft Architectural Fill Light (illuminates shadow faces, prevents unreadable silhouettes)
+    // 2. Opposing Soft Architectural Fill Light (illuminates shadow faces, prevents black voids)
     this.fillLight = new THREE.DirectionalLight(0x8faec7, 0.8)
-    this.fillLight.position.set(16.0, 18.0, 14.0)
-    this.fillLight.target.position.set(0, 0, 0)
+    this.fillLight.position.set(20.0, 26.0, -20.0)
+    this.fillLight.target.position.set(0.0, 12.6, 0.0)
     this.scene.add(this.fillLight)
+    this.scene.add(this.fillLight.target)
 
     // 3. High-Ambiance Natural Skylight Fill
     this.ambientLight = new THREE.HemisphereLight(0xb8d2ec, 0x2b3442, 0.95)
     this.scene.add(this.ambientLight)
 
-    // 4. Dedicated Architectural Spotlight Pools
-    // Zone A: Mission Planning Table
-    this.spotPlanning = new THREE.SpotLight(0xffeedb, 2.0, 14.0, Math.PI / 4, 0.5, 1.1)
-    this.spotPlanning.position.set(-4.5, 6.5, 5.5)
-    this.spotPlanning.target.position.set(-4.5, 0.85, 5.5)
+    // 4. Dedicated Architectural Spotlight Pools per floor level
+    // Floor 1 (Y = 3.6m): Mission Planning Table
+    this.spotPlanning = new THREE.SpotLight(0xffeedb, 2.0, 16.0, Math.PI / 4, 0.5, 1.1)
+    this.spotPlanning.position.set(0.0, 6.8, -1.0)
+    this.spotPlanning.target.position.set(0.0, 3.6, 0.5)
     this.scene.add(this.spotPlanning)
     this.scene.add(this.spotPlanning.target)
 
-    // Zone B: Agent Operations Desk Pods
-    this.spotOperations = new THREE.SpotLight(0xe2eeff, 1.8, 14.0, Math.PI / 3.5, 0.5, 1.1)
-    this.spotOperations.position.set(-4.2, 6.8, 1.2)
-    this.spotOperations.target.position.set(-4.2, 0.85, 1.2)
+    // Floor 2 (Y = 7.2m): Agent Operations Hero Room
+    this.spotOperations = new THREE.SpotLight(0xe2eeff, 1.8, 16.0, Math.PI / 3.5, 0.5, 1.1)
+    this.spotOperations.position.set(0.0, 10.4, -1.0)
+    this.spotOperations.target.position.set(0.0, 7.2, 0.5)
     this.scene.add(this.spotOperations)
     this.scene.add(this.spotOperations.target)
 
-    // Zone C: Verification Cleanroom
-    this.spotCleanroom = new THREE.SpotLight(0xd4f4ff, 2.2, 12.0, Math.PI / 3.8, 0.5, 1.1)
-    this.spotCleanroom.position.set(6.0, 6.5, 6.2)
-    this.spotCleanroom.target.position.set(6.0, 1.1, 6.2)
+    // Floor 3 (Y = 10.8m): Verification Cleanroom
+    this.spotCleanroom = new THREE.SpotLight(0xd4f4ff, 2.2, 16.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotCleanroom.position.set(0.0, 14.0, -1.0)
+    this.spotCleanroom.target.position.set(0.0, 10.8, 0.5)
     this.scene.add(this.spotCleanroom)
     this.scene.add(this.spotCleanroom.target)
 
-    // Zone D: Browser QA Lab Matrix (aimed forward onto device screens and bench)
-    this.spotBrowserQa = new THREE.SpotLight(0xc2f0e8, 2.0, 12.0, Math.PI / 3.8, 0.5, 1.1)
-    this.spotBrowserQa.position.set(5.5, 6.0, 0.8)
-    this.spotBrowserQa.target.position.set(6.2, 1.2, -1.2)
+    // Floor 4 (Y = 14.4m): Browser QA Lab Matrix
+    this.spotBrowserQa = new THREE.SpotLight(0xc2f0e8, 2.0, 16.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotBrowserQa.position.set(0.0, 17.6, -1.0)
+    this.spotBrowserQa.target.position.set(0.0, 14.4, 0.5)
     this.scene.add(this.spotBrowserQa)
     this.scene.add(this.spotBrowserQa.target)
 
-    // Zone E: Infrastructure Server Bay (aimed at front cabinet faceplates)
-    this.spotInfrastructure = new THREE.SpotLight(0xa5c6e8, 2.0, 12.0, Math.PI / 3.5, 0.5, 1.1)
-    this.spotInfrastructure.position.set(-7.5, 5.5, -3.2)
-    this.spotInfrastructure.target.position.set(-8.8, 1.3, -5.8)
+    // Floor 5 (Y = 18.0m): Infrastructure Server Bay
+    this.spotInfrastructure = new THREE.SpotLight(0xa5c6e8, 2.0, 16.0, Math.PI / 3.5, 0.5, 1.1)
+    this.spotInfrastructure.position.set(-2.0, 21.2, -1.0)
+    this.spotInfrastructure.target.position.set(-2.5, 18.0, 1.0)
     this.scene.add(this.spotInfrastructure)
     this.scene.add(this.spotInfrastructure.target)
 
-    // Zone F: Approval Control Mezzanine Plinth
-    this.spotApproval = new THREE.SpotLight(0xffdfa8, 2.0, 12.0, Math.PI / 3.8, 0.5, 1.1)
-    this.spotApproval.position.set(0.0, 7.0, 7.5)
-    this.spotApproval.target.position.set(0.0, 3.1, 8.5)
+    // Floor 6 (Y = 21.6m): Approval Control Mezzanine Plinth
+    this.spotApproval = new THREE.SpotLight(0xffdfa8, 2.0, 16.0, Math.PI / 3.8, 0.5, 1.1)
+    this.spotApproval.position.set(0.0, 24.8, -1.0)
+    this.spotApproval.target.position.set(0.0, 21.6, 0.5)
     this.scene.add(this.spotApproval)
     this.scene.add(this.spotApproval.target)
 
@@ -234,7 +235,7 @@ export class HqScene {
         this.scene.background = new THREE.Color(0x1e2530) // Soft architectural slate
         this.keyLight.color.setHex(0xfff8ee)
         this.keyLight.intensity = 1.45
-        this.keyLight.position.set(-14.0, 22.0, -10.0)
+        this.keyLight.position.set(-18.0, 36.0, -28.0)
         this.fillLight.color.setHex(0x9fc2e0)
         this.fillLight.intensity = 0.95
         this.ambientLight.color.setHex(0xcfdbe8)
@@ -260,7 +261,7 @@ export class HqScene {
         this.scene.background = new THREE.Color(0x161b26) // Deep twilight slate
         this.keyLight.color.setHex(0xfbbf24) // Warm low-angle golden light
         this.keyLight.intensity = 1.25
-        this.keyLight.position.set(-18.0, 16.0, -12.0)
+        this.keyLight.position.set(-22.0, 24.0, -24.0)
         this.fillLight.color.setHex(0x6366f1) // Indigo ambient fill
         this.fillLight.intensity = 0.75
         this.ambientLight.color.setHex(0x94a3b8)
@@ -287,7 +288,7 @@ export class HqScene {
         this.scene.background = new THREE.Color(0x0f172a) // Deep slate midnight navy (never pitch black)
         this.keyLight.color.setHex(0x93c5fd) // Soft cool moonbeam key
         this.keyLight.intensity = 0.75
-        this.keyLight.position.set(-12.0, 22.0, -8.0)
+        this.keyLight.position.set(-16.0, 32.0, -22.0)
         this.fillLight.color.setHex(0x38bdf8) // Cool cyan-blue ambient fill
         this.fillLight.intensity = 0.65
         this.ambientLight.color.setHex(0x475569) // Luminous cool exterior ambient
