@@ -130,7 +130,7 @@ export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
  * 3D Cutaway Tower Role Home Positions across the 7 vertical levels.
  */
 export const TOWER_ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number, number]> = {
-  'role:strategy:chief-planner': [-1.5, 3.6, 0.0],
+  'role:strategy:chief-planner': [-1.5, 3.6, -0.75],
   'role:engineering:frontend-engineer': [-3.5, 7.2, 1.15],
   'role:engineering:backend-engineer': [2.5, 7.2, 1.15],
   'role:quality:independent-reviewer': [0.0, 10.8, 0.5],

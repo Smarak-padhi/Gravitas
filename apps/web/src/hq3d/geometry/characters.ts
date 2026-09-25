@@ -781,6 +781,7 @@ export class HqCharacters {
     if (id === 'char-codex' || id === 'frontend-engineer') return this.figureMap.get('role:engineering:frontend-engineer')
     if (id === 'char-fcc' || id === 'backend-engineer') return this.figureMap.get('role:engineering:backend-engineer')
     if (id === 'char-verifier' || id === 'independent-reviewer' || id === 'reviewer') return this.figureMap.get('role:quality:independent-reviewer')
+    if (id === 'char-planner' || id === 'chief-planner' || id === 'planner') return this.figureMap.get('role:strategy:chief-planner')
     return this.figureMap.get(id as RoleId)
   }
 

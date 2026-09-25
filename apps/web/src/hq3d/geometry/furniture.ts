@@ -12,6 +12,7 @@ import { STATION_DEFINITIONS } from '../world/stations.js'
 import { HeroFrontendBay } from './heroBay/heroFrontendBay.js'
 import { HeroBackendBay } from './heroBay/heroBackendBay.js'
 import { HeroReviewerBay } from './heroBay/heroReviewerBay.js'
+import { MissionControlRoom } from './missionControl/missionControlRoom.js'
 
 export class HqFurniture {
   public readonly group: THREE.Group
@@ -63,83 +64,14 @@ export class HqFurniture {
   }
 
   /**
-   * Zone A: Mission Control Planning Table (4.0m x 2.2m x 0.85m)
-   * The architectural planning heart: chamfered walnut frame, illuminated vellum blueprint DAG.
+   * Floor 1: Mission Control Production Suite (Y = 3.6m)
+   * The architectural planning heart: Strategy planning surface, Strategy & Dependency Wall,
+   * Dispatch transition edge, and archival reference unit.
    */
   private buildMissionPlanningTable(materials: MaterialLibrary): void {
-    const station = STATION_DEFINITIONS['planning-table']
-    const tableGroup = new THREE.Group()
-    tableGroup.position.set(station.position[0], station.position[1], station.position[2])
-    tableGroup.rotation.y = station.rotationY
-    tableGroup.name = 'station:planning-table'
-    tableGroup.userData = { type: 'station', id: station.id, name: station.name }
-
-    // Chamfered walnut table base frame
-    const baseGeo = this.track(new THREE.BoxGeometry(3.6, 0.14, 2.0))
-    const base = new THREE.Mesh(baseGeo, materials.walnut)
-    base.position.set(0.0, 0.78, 0.0)
-    base.castShadow = true
-    base.receiveShadow = true
-    tableGroup.add(base)
-
-    // Brushed brass beveled perimeter rim
-    const rimGeo = this.track(new THREE.BoxGeometry(3.66, 0.04, 2.06))
-    const rim = new THREE.Mesh(rimGeo, materials.brass)
-    rim.position.set(0.0, 0.85, 0.0)
-    rim.castShadow = true
-    tableGroup.add(rim)
-
-    // Illuminated Blueprint DAG Grid Surface
-    const surfaceGeo = this.track(new THREE.BoxGeometry(3.4, 0.02, 1.8))
-    const surface = new THREE.Mesh(surfaceGeo, materials.vellum)
-    surface.position.set(0.0, 0.87, 0.0)
-    surface.receiveShadow = true
-    tableGroup.add(surface)
-
-    // Architectural angled walnut pedestal legs
-    const legPositions = [
-      [-1.4, 0.38, -0.75],
-      [1.4, 0.38, -0.75],
-      [-1.4, 0.38, 0.75],
-      [1.4, 0.38, 0.75],
-    ]
-
-    for (const [lx, ly, lz] of legPositions) {
-      const legGeo = this.track(new THREE.BoxGeometry(0.18, 0.76, 0.18))
-      const leg = new THREE.Mesh(legGeo, materials.walnut)
-      leg.position.set(lx!, ly!, lz!)
-      leg.castShadow = true
-      leg.receiveShadow = true
-      tableGroup.add(leg)
-
-      // Brass foot pad
-      const footGeo = this.track(new THREE.BoxGeometry(0.22, 0.04, 0.22))
-      const foot = new THREE.Mesh(footGeo, materials.brass)
-      foot.position.set(lx!, 0.02, lz!)
-      tableGroup.add(foot)
-    }
-
-    // Peripheral dormant interface slates (inactive tablets resting on table corners)
-    const slate1Geo = this.track(new THREE.BoxGeometry(0.35, 0.015, 0.24))
-    const slate1 = new THREE.Mesh(slate1Geo, materials.terminalScreen)
-    slate1.position.set(-1.3, 0.88, 0.65)
-    slate1.rotation.y = 0.25
-    tableGroup.add(slate1)
-
-    const slate2 = new THREE.Mesh(slate1Geo, materials.terminalScreenAmber)
-    slate2.position.set(1.25, 0.88, -0.6)
-    slate2.rotation.y = -0.3
-    tableGroup.add(slate2)
-
-    // Authoritative Station Status Indicator Lens
-    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
-    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
-    ind.position.set(0.0, 0.88, 0.96)
-    ind.name = 'station-indicator:planning-table'
-    tableGroup.add(ind)
-    this.stationIndicators.set('planning-table', ind)
-
-    this.getFloorGroup(1).add(tableGroup)
+    const mcResult = MissionControlRoom.buildRoom(materials, this.track.bind(this))
+    this.stationIndicators.set('planning-table', mcResult.tableResult.indicatorMesh)
+    this.getFloorGroup(1).add(mcResult.roomGroup)
   }
 
   /**
@@ -651,25 +583,7 @@ export class HqFurniture {
     const f1Group = new THREE.Group()
     f1Group.position.set(0.0, 3.6, 0.0)
 
-    // Mission Control Strategy Whiteboard on rear acoustic wall
-    const wbGroup = new THREE.Group()
-    wbGroup.position.set(0.0, 2.0, 3.65)
-
-    const wbGeo = this.track(new THREE.BoxGeometry(2.8, 1.35, 0.03))
-    const wb = new THREE.Mesh(wbGeo, materials.whiteboardSurface)
-    wbGroup.add(wb)
-
-    const wbFrameGeo = this.track(new THREE.BoxGeometry(2.84, 1.39, 0.02))
-    const wbFrame = new THREE.Mesh(wbFrameGeo, materials.champagneBrass)
-    wbFrame.position.set(0.0, 0.0, -0.01)
-    wbGroup.add(wbFrame)
-
-    const trayGeo = this.track(new THREE.BoxGeometry(2.2, 0.02, 0.08))
-    const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
-    tray.position.set(0.0, -0.68, 0.04)
-    wbGroup.add(tray)
-    f1Group.add(wbGroup)
-
+    // Potted architectural plant in northwest corner
     f1Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.0))
     this.getFloorGroup(1).add(f1Group)
 

@@ -47,6 +47,10 @@ export class HqScene {
   private readonly spotInfrastructure: THREE.SpotLight
   private readonly spotApproval: THREE.SpotLight
 
+  // Floor 1 Dedicated Architectural Lighting Layers (Wave 12J)
+  private readonly spotPlanningWash: THREE.SpotLight
+  private readonly spotPlanningDispatch: THREE.SpotLight
+
   // Floor 2 Dedicated Architectural Lighting Layers
   private readonly spotOperationsWash: THREE.SpotLight
   private readonly spotOperationsDeskL: THREE.SpotLight
@@ -89,12 +93,27 @@ export class HqScene {
     this.scene.add(this.ambientLight)
 
     // 4. Dedicated Architectural Spotlight Pools per floor level
-    // Floor 1 (Y = 3.6m): Mission Planning Table
-    this.spotPlanning = new THREE.SpotLight(0xffeedb, 2.0, 16.0, Math.PI / 4, 0.5, 1.1)
-    this.spotPlanning.position.set(0.0, 6.8, -1.0)
-    this.spotPlanning.target.position.set(0.0, 3.6, 0.5)
+    // Floor 1 (Y = 3.6m): Mission Control Planning Table, Strategy Wall & Dispatch Edge
+    // 4a. Central Planning Table Downlight Pool
+    this.spotPlanning = new THREE.SpotLight(0xffeedb, 2.2, 16.0, Math.PI / 3.4, 0.5, 1.1)
+    this.spotPlanning.position.set(-1.2, 6.8, -0.6)
+    this.spotPlanning.target.position.set(-1.2, 3.6, 0.4)
     this.scene.add(this.spotPlanning)
     this.scene.add(this.spotPlanning.target)
+
+    // 4b. Strategy & Dependency Wall Wash Grazing Light
+    this.spotPlanningWash = new THREE.SpotLight(0xffedd5, 2.0, 16.0, Math.PI / 3.2, 0.6, 1.1)
+    this.spotPlanningWash.position.set(-1.0, 6.6, -0.8)
+    this.spotPlanningWash.target.position.set(-1.0, 5.2, 3.6)
+    this.scene.add(this.spotPlanningWash)
+    this.scene.add(this.spotPlanningWash.target)
+
+    // 4c. Dispatch & Transition Threshold Pool (East corridor toward elevator)
+    this.spotPlanningDispatch = new THREE.SpotLight(0xffe4b5, 1.8, 12.0, Math.PI / 4.0, 0.5, 1.1)
+    this.spotPlanningDispatch.position.set(3.2, 6.4, 0.0)
+    this.spotPlanningDispatch.target.position.set(3.2, 3.6, 0.5)
+    this.scene.add(this.spotPlanningDispatch)
+    this.scene.add(this.spotPlanningDispatch.target)
 
     // Floor 2 (Y = 7.2m): Agent Operations Hero Room Architectural Light Rig
     // 4a. Central Operations Downlight Pool
@@ -219,6 +238,12 @@ export class HqScene {
    * Overview / multi-floor transitions immediately restore all lighting pools and geometry.
    */
   public setFocusedRoom(roomId: string | null): void {
+    const isFloor1 =
+      roomId === 'MISSION_CONTROL' ||
+      roomId === 'ROOM_MISSION_CONTROL' ||
+      roomId === 'WS_PLANNING' ||
+      roomId === 'CHAR_PLANNER'
+
     const isFloor2 =
       roomId === 'AGENT_OPERATIONS' ||
       roomId === 'ROOM_AGENT_OPERATIONS' ||
@@ -229,9 +254,33 @@ export class HqScene {
       roomId === 'CHAR_BACKEND' ||
       roomId === 'CHAR_REVIEWER'
 
-    if (isFloor2) {
+    if (isFloor1) {
+      // Deactivate non-Floor-1 spotlights from WebGL forward lighting pass
+      this.spotOperations.visible = false
+      this.spotOperationsWash.visible = false
+      this.spotOperationsDeskL.visible = false
+      this.spotOperationsDeskR.visible = false
+      this.spotOperationsReviewer.visible = false
+      this.spotCleanroom.visible = false
+      this.spotBrowserQa.visible = false
+      this.spotInfrastructure.visible = false
+      this.spotApproval.visible = false
+
+      // Floor 1 dedicated fixtures remain active
+      this.spotPlanning.visible = true
+      this.spotPlanningWash.visible = true
+      this.spotPlanningDispatch.visible = true
+
+      // Floor 5 server bay is outside Floor 1 view
+      this.infrastructure.group.visible = false
+
+      // Focus visibility on Floor 1
+      this.furniture.setFloorVisibility(1)
+    } else if (isFloor2) {
       // Deactivate non-Floor-2 spotlights from WebGL forward lighting pass
       this.spotPlanning.visible = false
+      this.spotPlanningWash.visible = false
+      this.spotPlanningDispatch.visible = false
       this.spotCleanroom.visible = false
       this.spotBrowserQa.visible = false
       this.spotInfrastructure.visible = false
@@ -252,6 +301,8 @@ export class HqScene {
     } else {
       // Full overview / other rooms: restore all lights, furniture, and infrastructure
       this.spotPlanning.visible = true
+      this.spotPlanningWash.visible = true
+      this.spotPlanningDispatch.visible = true
       this.spotCleanroom.visible = true
       this.spotBrowserQa.visible = true
       this.spotInfrastructure.visible = true
@@ -383,9 +434,15 @@ export class HqScene {
         this.spotOperationsReviewer.color.setHex(0xffeedb)
         this.spotOperationsReviewer.intensity = 1.4
 
-        // Balanced daylight spot fill per floor
+        // Floor 1 Mission Control: layered warm daylight
         this.spotPlanning.color.setHex(0xffeedb)
-        this.spotPlanning.intensity = 1.8
+        this.spotPlanning.intensity = 2.2
+        this.spotPlanningWash.color.setHex(0xffedd5)
+        this.spotPlanningWash.intensity = 1.8
+        this.spotPlanningDispatch.color.setHex(0xffe4b5)
+        this.spotPlanningDispatch.intensity = 1.6
+
+        // Balanced daylight spot fill per floor
         this.spotCleanroom.color.setHex(0xd4f4ff)
         this.spotCleanroom.intensity = 1.8
         this.spotBrowserQa.color.setHex(0xc2f0e8)
@@ -420,9 +477,14 @@ export class HqScene {
         this.spotOperationsReviewer.color.setHex(0xfef08a)
         this.spotOperationsReviewer.intensity = 2.0
 
-        // Warm cozy interior pools
+        // Floor 1 Mission Control: rich amber golden-hour pools
         this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 2.2
+        this.spotPlanning.intensity = 2.4
+        this.spotPlanningWash.color.setHex(0xf59e0b)
+        this.spotPlanningWash.intensity = 2.0
+        this.spotPlanningDispatch.color.setHex(0xfef08a)
+        this.spotPlanningDispatch.intensity = 1.8
+
         this.spotCleanroom.color.setHex(0xdbeafe)
         this.spotCleanroom.intensity = 2.0
         this.spotBrowserQa.color.setHex(0xccfbf1)
@@ -447,6 +509,14 @@ export class HqScene {
         this.ambientLight.groundColor.setHex(0x101726) // Soft architectural floor bounce
         this.ambientLight.intensity = 0.45
 
+        // Floor 1 Mission Control: restrained warm architectural pools (wall wash & table pool)
+        this.spotPlanning.color.setHex(0xffedd5)
+        this.spotPlanning.intensity = 2.0
+        this.spotPlanningWash.color.setHex(0xfbbf24)
+        this.spotPlanningWash.intensity = 2.2
+        this.spotPlanningDispatch.color.setHex(0xffeedb)
+        this.spotPlanningDispatch.intensity = 1.6
+
         // Floor 2 Agent Operations: Intentional architectural light pools & timber slat cove grazing
         // 1. Central circulation safety pathway downlight pool (illuminates floor plane & Reviewer zone)
         this.spotOperations.color.setHex(0xffedd5)
@@ -464,8 +534,6 @@ export class HqScene {
         this.spotOperationsReviewer.intensity = 2.2
 
         // Calibrated night ambient pools across other tower levels
-        this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 1.2
         this.spotCleanroom.color.setHex(0x93c5fd)
         this.spotCleanroom.intensity = 1.1
         this.spotBrowserQa.color.setHex(0x5eead4)

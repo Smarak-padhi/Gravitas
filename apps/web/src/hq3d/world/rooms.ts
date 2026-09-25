@@ -55,8 +55,8 @@ export const CHARACTER_PRESETS: Record<string, CameraFramingPreset> = {
   },
   CHAR_PLANNER: {
     id: 'CHAR_PLANNER',
-    target: [-1.5, 4.55, 0.2],
-    position: [-2.6, 5.05, -1.2],
+    target: [-1.5, 4.35, -0.6],
+    position: [-2.6, 4.85, -2.0],
     description: 'Chief Planner Mascot & Drafting Folio Context Focus',
   },
   CHAR_REVIEWER: {

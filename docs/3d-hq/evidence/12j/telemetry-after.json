@@ -1,0 +1,143 @@
+{
+  "benchmarkEnvironment": {
+    "resolution": "1600x900",
+    "deviceScaleFactor": 1,
+    "headless": false,
+    "hardwareAccelerated": true,
+    "samplingDurationSeconds": 10,
+    "warmupDurationSeconds": 2
+  },
+  "pickingContract": {
+    "allPassed": true,
+    "results": [
+      {
+        "test": "frameRoom MISSION_CONTROL",
+        "passed": true
+      },
+      {
+        "test": "selectRole chief-planner",
+        "passed": true,
+        "details": {
+          "id": "role:strategy:chief-planner",
+          "type": "character",
+          "name": "Chief Planner",
+          "room": "Mission Control",
+          "role": "Chief Planner",
+          "status": "IDLE",
+          "description": "Chief Planner (CONTROL_STRATEGY). Station: planning-table. Status: IDLE. Harness: UNKNOWN.",
+          "roleMetadata": {
+            "roleId": "role:strategy:chief-planner",
+            "roleName": "Chief Planner",
+            "department": "CONTROL_STRATEGY",
+            "status": "IDLE",
+            "currentTaskId": null,
+            "currentTaskTitle": null,
+            "currentHarness": "UNKNOWN",
+            "transport": "UNKNOWN",
+            "provider": "UNKNOWN",
+            "model": "UNKNOWN",
+            "stationId": "planning-table",
+            "stationName": "Chief Planner Home Station",
+            "isFixtureOnly": false,
+            "spatialState": "AT_HOME",
+            "destinationStationId": "planning-table",
+            "destinationStationName": "Chief Planner Home Station",
+            "runtimePhase": "IDLE",
+            "gateway": "DIRECT",
+            "projectionEpoch": "proj_epoch_8b8e5393-730c-4f6b-84f6-d54485984985",
+            "projectionRevision": 6
+          }
+        }
+      },
+      {
+        "test": "selectStation planning-table",
+        "passed": true,
+        "details": {
+          "id": "planning-table",
+          "type": "station",
+          "name": "Mission Planning Table",
+          "room": "Mission Control",
+          "role": "Goal Ingestion & DAG Decomposition",
+          "status": "Operational Foundation",
+          "description": "Central architectural light table for DAG planning and run orchestration."
+        }
+      },
+      {
+        "test": "camera orbit",
+        "passed": true
+      },
+      {
+        "test": "camera zoom",
+        "passed": true
+      },
+      {
+        "test": "resetToOverview",
+        "passed": true
+      }
+    ]
+  },
+  "memorySoak": {
+    "cycles": 20,
+    "initialGeometries": 585,
+    "finalGeometries": 585,
+    "geometryDelta": 0,
+    "initialTextures": 23,
+    "finalTextures": 23,
+    "textureDelta": 0,
+    "initialHeapMb": 39.33,
+    "finalHeapMb": 48.55,
+    "heapDeltaMb": 9.22
+  },
+  "realForegroundPerformance": {
+    "missionControlDay": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.4,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.9,
+      "p99FrameTimeMs": 17,
+      "minFps": 58.48,
+      "low1PercentFps": 58.82,
+      "avgFrameTimeMs": 16.67
+    },
+    "missionControlNight": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.2,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.9,
+      "p99FrameTimeMs": 17,
+      "minFps": 58.48,
+      "low1PercentFps": 58.82,
+      "avgFrameTimeMs": 16.67
+    },
+    "towerOverviewDay": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.3,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.8,
+      "p99FrameTimeMs": 16.9,
+      "minFps": 58.48,
+      "low1PercentFps": 59.17,
+      "avgFrameTimeMs": 16.67
+    }
+  },
+  "sceneMetricsAfter": {
+    "drawCalls": 506,
+    "triangles": 48884,
+    "memoryGeometries": 585,
+    "memoryTextures": 23,
+    "totalNodes": 968,
+    "meshNodes": 814,
+    "instancedMeshNodes": 12,
+    "shadowCasterNodes": 128,
+    "shadowReceiverNodes": 104,
+    "matrixAutoUpdateTrueNodes": 195,
+    "matrixAutoUpdateFalseNodes": 773,
+    "uniqueGeometriesCount": 587,
+    "uniqueMaterialsCount": 84,
+    "totalLights": 16,
+    "activeLights": 7
+  }
+}
