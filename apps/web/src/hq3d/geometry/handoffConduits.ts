@@ -109,37 +109,37 @@ export class HandoffConduitManager {
     group.name = 'integration-surface-queue'
     group.position.set(...INTEGRATION_DESK_POSITION)
 
-    // Sleek low-profile console base
-    const baseGeo = new THREE.BoxGeometry(0.8, 0.75, 0.6)
-    const baseMat = new THREE.MeshStandardMaterial({
-      color: 0x1f2937,
-      roughness: 0.8,
-      metalness: 0.2,
+    // Sleek architectural recessed floor junction plate (flush with floor, zero foreground clutter)
+    const plateGeo = new THREE.BoxGeometry(0.7, 0.015, 0.35)
+    const plateMat = new THREE.MeshStandardMaterial({
+      color: 0x27272a,
+      roughness: 0.6,
+      metalness: 0.4,
     })
-    const base = new THREE.Mesh(baseGeo, baseMat)
-    base.position.y = 0.375
-    group.add(base)
+    const plate = new THREE.Mesh(plateGeo, plateMat)
+    plate.position.y = 0.025
+    group.add(plate)
 
-    // Console top surface
-    const topGeo = new THREE.BoxGeometry(0.85, 0.04, 0.65)
-    const topMat = new THREE.MeshStandardMaterial({
-      color: 0x374151,
-      roughness: 0.5,
-      metalness: 0.5,
+    // Champagne brass bezel trim
+    const bezelGeo = new THREE.BoxGeometry(0.72, 0.006, 0.37)
+    const bezelMat = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      roughness: 0.3,
+      metalness: 0.8,
     })
-    const top = new THREE.Mesh(topGeo, topMat)
-    top.position.y = 0.77
-    group.add(top)
+    const bezel = new THREE.Mesh(bezelGeo, bezelMat)
+    bezel.position.y = 0.03
+    group.add(bezel)
 
-    // Data queue LED indicator
-    const ledGeo = new THREE.BoxGeometry(0.4, 0.01, 0.02)
+    // Flush status LED indicator
+    const ledGeo = new THREE.BoxGeometry(0.32, 0.004, 0.015)
     const ledMat = new THREE.MeshStandardMaterial({
       color: 0x10b981,
       emissive: 0x059669,
-      emissiveIntensity: 0.4,
+      emissiveIntensity: 0.35,
     })
     const led = new THREE.Mesh(ledGeo, ledMat)
-    led.position.set(0, 0.795, 0.25)
+    led.position.set(0, 0.033, 0.0)
     group.add(led)
 
     this.integrationSurfaceMesh = group

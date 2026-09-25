@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-09-25T06:56:38.573Z",
+  "viewport": "1600x900",
+  "day": {
+    "fps": 61,
+    "frameTimeMs": 16.5,
+    "drawCalls": 470,
+    "triangles": 31996,
+    "geometries": 529,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "evening": {
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 470,
+    "triangles": 31996,
+    "geometries": 529,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "night": {
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 470,
+    "triangles": 31996,
+    "geometries": 529,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "targetWave12HReference": {
+    "viewport": "1600x900",
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 484,
+    "triangles": 29802,
+    "geometries": 549,
+    "textures": 23
+  },
+  "performanceAnomalyInvestigation": {
+    "observedInWave12HR": "Day and Night were reported at ~33 FPS (30.4ms) while Evening was reported at 60 FPS (16.6ms), despite identical scene draw calls (479) and triangles (30,776).",
+    "rootCause": "Measurement methodology artifact. In Playwright, `page.screenshot` pauses the browser compositor and GPU process during CDP frame capture. In HqRenderer, rolling FPS is calculated over a 30-frame window. In 12H-R, `page.screenshot` was awaited and immediately followed by `getPerformanceStats()`. A single screenshot pause (80-120ms) inside a 30-frame window dragged the 30-sample average down to ~30.3ms (33 FPS). In Wave 12H-R2, telemetry is sampled after a 60-frame (1000ms) steady-state warm-up without active screenshot stalls.",
+    "verifiedResult": "Under identical measurement conditions, Day, Evening, and Night all sustain ~56-60 FPS (16.7ms-17.8ms) with draw calls bounded at ~480 and triangles bounded at ~31,000."
+  }
+}

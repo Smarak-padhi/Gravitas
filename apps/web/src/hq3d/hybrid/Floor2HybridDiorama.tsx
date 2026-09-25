@@ -36,9 +36,9 @@ export interface Floor2HybridDioramaProps {
 
 // 3D Station Anchors on Floor 2 (Y = 7.2m, matching chair home positions)
 const ANCHORS_3D = {
-  frontend: new THREE.Vector3(-3.5, 7.9, 1.15),
-  reviewer: new THREE.Vector3(-0.2, 7.9, 0.7),
-  backend: new THREE.Vector3(2.5, 7.9, 1.15),
+  frontend: new THREE.Vector3(-2.6, 7.9, 1.15),
+  reviewer: new THREE.Vector3(0.0, 7.9, 0.05),
+  backend: new THREE.Vector3(2.6, 7.9, 1.15),
 }
 
 export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
@@ -190,6 +190,9 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
       status: 'ARRIVED',
     }))
 
+    // Sender's completion speech clears once Reviewer takes possession (Section 13)
+    setFrontendMessage(null)
+
     // Reviewer receives T-142 and starts reviewing
     setReviewerState('REVIEWING')
     const recvMsg = deriveAgentStatusMessage({
@@ -218,6 +221,8 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
 
   // SCENARIO 2: Verification Failure Case
   const runFailureScenario = useCallback(() => {
+    setFrontendMessage(null)
+    setBackendMessage(null)
     setFrontendState('IDLE')
     setReviewerState('REVIEWING')
     setHandoffState({
@@ -268,6 +273,20 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
       artifact: null,
     })
   }, [])
+
+  // Expose headless scenario triggers for deterministic tests & clean normal-mode automation
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    ;(window as any).__hqHybrid = {
+      runHandoff: runGoldenHandoff,
+      runFailure: runFailureScenario,
+      resetIdle: resetToIdle,
+      triggerHandoffArrived: handleHandoffArrived,
+    }
+    return () => {
+      delete (window as any).__hqHybrid
+    }
+  }, [runGoldenHandoff, runFailureScenario, resetToIdle, handleHandoffArrived])
 
   // Agent Click Handler
   const handleAgentClick = (role: IllustratedAgentRole) => {

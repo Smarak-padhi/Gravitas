@@ -130,335 +130,303 @@ export class HqFurniture {
    * - Expansion Bays 03 & 04: standby modular stations.
    */
   private buildAgentWorkstations(materials: MaterialLibrary): void {
-    // 0. Soft Woven Area Rug spanning the Agent Operations room
-    const roomRugGeo = this.track(new THREE.BoxGeometry(8.5, 0.008, 4.8))
+    // 0. Soft White Oak Herringbone & Warm Woven Area Rug spanning Agent Operations
+    const roomRugGeo = this.track(new THREE.BoxGeometry(9.6, 0.008, 4.6))
     const roomRug = new THREE.Mesh(roomRugGeo, materials.carpetWarm)
-    roomRug.position.set(0.0, 7.204, -0.1)
+    roomRug.position.set(0.0, 7.225, 0.6)
     roomRug.receiveShadow = true
     this.group.add(roomRug)
 
-    const stationsConfig = [
-      {
-        id: 'frontend-engineer-workstation',
-        legacyId: 'codex-workstation',
-        pos: [-3.5, 7.2, 0.6],
-        matColor: materials.terminalScreen, // Slate cyan code display
-      },
-      {
-        id: 'backend-engineer-workstation',
-        legacyId: 'fcc-workstation',
-        pos: [2.5, 7.2, 0.5],
-        matColor: materials.terminalScreenAmber, // Warm amber architectural display
-      },
-      {
-        id: 'expansion-bay-3',
-        legacyId: 'expansion-bay-3',
-        pos: [-2.5, 7.2, -1.8],
-        matColor: materials.terminalScreenEmerald, // Standby telemetry display
-      },
-      {
-        id: 'expansion-bay-4',
-        legacyId: 'expansion-bay-4',
-        pos: [2.5, 7.2, -1.8],
-        matColor: materials.terminalScreen, // Standby display
-      },
-    ]
+    // Brushed champagne brass border inlay framing the living zone
+    const rugBorderGeo = this.track(new THREE.BoxGeometry(9.66, 0.009, 4.66))
+    const rugBorder = new THREE.Mesh(rugBorderGeo, materials.champagneBrass)
+    rugBorder.position.set(0.0, 7.226, 0.6)
+    this.group.add(rugBorder)
 
-    for (const cfg of stationsConfig) {
-      const stationDef =
-        (STATION_DEFINITIONS as any)[cfg.id] ??
-        (STATION_DEFINITIONS as any)[cfg.legacyId]
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1. FRONTEND ENGINEER WORKSTATION (Screen Right Rear: X = -2.6, Z = 1.0)
+    // ──────────────────────────────────────────────────────────────────────────
+    const heroResult = HeroFrontendBay.buildBay(materials, this.track.bind(this))
+    heroResult.podGroup.position.set(-2.6, 7.2, 1.0)
 
-      const isFrontend = cfg.id === 'frontend-engineer-workstation'
-      const isBackend = cfg.id === 'backend-engineer-workstation'
+    // Register modern role ID and legacy aliases for indicators
+    this.stationIndicators.set('frontend-engineer-workstation', heroResult.indicatorMesh)
+    this.stationIndicators.set('codex-workstation', heroResult.indicatorMesh)
+    this.stationIndicators.set('engineering-workstation-01', heroResult.indicatorMesh)
 
-      if (isFrontend) {
-        const heroResult = HeroFrontendBay.buildBay(materials, this.track.bind(this))
-        heroResult.podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
+    // Register modern role ID and legacy aliases for screens
+    this.stationScreens.set('frontend-engineer-workstation', heroResult.screens)
+    this.stationScreens.set('codex-workstation', heroResult.screens)
+    this.stationScreens.set('engineering-workstation-01', heroResult.screens)
 
-        // Register both modern role ID and legacy aliases for indicators
-        this.stationIndicators.set('frontend-engineer-workstation', heroResult.indicatorMesh)
-        this.stationIndicators.set('codex-workstation', heroResult.indicatorMesh)
-        this.stationIndicators.set('engineering-workstation-01', heroResult.indicatorMesh)
+    this.group.add(heroResult.podGroup)
 
-        // Register both modern role ID and legacy aliases for screens
-        this.stationScreens.set('frontend-engineer-workstation', heroResult.screens)
-        this.stationScreens.set('codex-workstation', heroResult.screens)
-        this.stationScreens.set('engineering-workstation-01', heroResult.screens)
+    // ──────────────────────────────────────────────────────────────────────────
+    // 2. BACKEND ENGINEER WORKSTATION (Screen Left Rear: X = 2.6, Z = 1.0)
+    // ──────────────────────────────────────────────────────────────────────────
+    const backendGroup = new THREE.Group()
+    backendGroup.position.set(2.6, 7.2, 1.0)
+    backendGroup.name = 'station:backend-engineer-workstation'
+    backendGroup.userData = {
+      type: 'station',
+      id: 'backend-engineer-workstation',
+      name: 'Backend Engineer Workstation',
+    }
 
-        this.group.add(heroResult.podGroup)
-        continue
+    // Status indicator lens
+    const beIndGeo = this.track(new THREE.BoxGeometry(0.22, 0.012, 0.035))
+    const beInd = new THREE.Mesh(beIndGeo, materials.gunmetal)
+    beInd.position.set(0.0, 0.745, 0.44)
+    beInd.name = 'station-indicator:backend-engineer-workstation'
+    backendGroup.add(beInd)
+
+    this.stationIndicators.set('backend-engineer-workstation', beInd)
+    this.stationIndicators.set('fcc-workstation', beInd)
+    this.stationIndicators.set('engineering-workstation-02', beInd)
+
+    // 2.1 Solid American Walnut Desktop with Beveled Chamfers
+    const beDeskGeo = this.track(new THREE.BoxGeometry(2.1, 0.032, 0.9))
+    const beDesk = new THREE.Mesh(beDeskGeo, materials.walnut)
+    beDesk.position.set(0.0, 0.74, 0.0)
+    beDesk.castShadow = true
+    beDesk.receiveShadow = true
+    backendGroup.add(beDesk)
+
+    // Brushed champagne brass front edge chamfer trim
+    const beTrimGeo = this.track(new THREE.BoxGeometry(2.12, 0.012, 0.03))
+    const beTrim = new THREE.Mesh(beTrimGeo, materials.champagneBrass)
+    beTrim.position.set(0.0, 0.745, 0.45)
+    backendGroup.add(beTrim)
+
+    // 2.2 Slender Powder-Coated Graphite Steel Trestle Legs & Brass Glide Feet
+    for (const side of [-1, 1]) {
+      const legX = side * 0.88
+      const legGeo = this.track(new THREE.BoxGeometry(0.065, 0.72, 0.05))
+      const leg = new THREE.Mesh(legGeo, materials.structureGraphite)
+      leg.position.set(legX, 0.36, 0.0)
+      leg.castShadow = true
+      backendGroup.add(leg)
+
+      const footGeo = this.track(new THREE.BoxGeometry(0.07, 0.02, 0.72))
+      const foot = new THREE.Mesh(footGeo, materials.structureGraphite)
+      foot.position.set(legX, 0.01, 0.0)
+      foot.castShadow = true
+      backendGroup.add(foot)
+
+      for (const fz of [-0.3, 0.3]) {
+        const glideGeo = this.track(new THREE.CylinderGeometry(0.02, 0.022, 0.01, 16))
+        const glide = new THREE.Mesh(glideGeo, materials.champagneBrass)
+        glide.position.set(legX, 0.005, fz)
+        backendGroup.add(glide)
       }
+    }
 
-      const podGroup = new THREE.Group()
-      podGroup.position.set(cfg.pos[0]!, cfg.pos[1]!, cfg.pos[2]!)
-      podGroup.name = `station:${stationDef.id}`
-      podGroup.userData = { type: 'station', id: stationDef.id, name: stationDef.name }
+    // Under-desk cable management raceway
+    const cableTrayGeo = this.track(new THREE.BoxGeometry(1.4, 0.06, 0.16))
+    const cableTray = new THREE.Mesh(cableTrayGeo, materials.structureGraphite)
+    cableTray.position.set(0.0, 0.68, -0.2)
+    backendGroup.add(cableTray)
 
-      // Authoritative Station Status Light Lens
-      const indGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.04))
-      const ind = new THREE.Mesh(indGeo, materials.gunmetal)
-      ind.position.set(0.0, 0.76, 0.48)
-      ind.name = `station-indicator:${stationDef.id}`
-      podGroup.add(ind)
+    // 2.3 Dual Systems-Oriented Curved Displays (Terminal / Logs Topology)
+    const backendScreens: THREE.Mesh[] = []
+    const monFrameGeo = this.track(new THREE.BoxGeometry(0.68, 0.40, 0.018))
+    const monScreenGeo = this.track(new THREE.BoxGeometry(0.64, 0.36, 0.004))
 
-      // Register indicators for other stations
-      if (isBackend) {
-        this.stationIndicators.set('backend-engineer-workstation', ind)
-        this.stationIndicators.set('fcc-workstation', ind)
-        this.stationIndicators.set('engineering-workstation-02', ind)
-      } else {
-        this.stationIndicators.set(stationDef.id as StationId, ind)
-      }
+    // Center-left monitor (Active log / build stream)
+    const mon1Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+    mon1Frame.position.set(-0.35, 1.08, -0.2)
+    mon1Frame.rotation.y = 0.20
+    mon1Frame.castShadow = true
+    backendGroup.add(mon1Frame)
 
-      // 1. Walnut Desktop Slab (2.2m x 0.95m x 0.06m)
-      const deskGeo = this.track(new THREE.BoxGeometry(2.2, 0.06, 0.95))
-      const desk = new THREE.Mesh(deskGeo, materials.walnut)
-      desk.position.set(0.0, 0.72, 0.0)
-      desk.castShadow = true
-      desk.receiveShadow = true
-      podGroup.add(desk)
+    const mon1Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreenEmerald)
+    mon1Screen.position.set(-0.35, 1.08, -0.19)
+    mon1Screen.rotation.y = 0.20
+    backendGroup.add(mon1Screen)
+    backendScreens.push(mon1Screen)
 
-      // Brass front edge chamfer trim
-      const trimGeo = this.track(new THREE.BoxGeometry(2.22, 0.02, 0.04))
-      const trim = new THREE.Mesh(trimGeo, materials.brass)
-      trim.position.set(0.0, 0.74, 0.47)
-      podGroup.add(trim)
+    // Center-right monitor (Infrastructure / runtime topology)
+    const mon2Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
+    mon2Frame.position.set(0.35, 1.08, -0.2)
+    mon2Frame.rotation.y = -0.20
+    mon2Frame.castShadow = true
+    backendGroup.add(mon2Frame)
 
-      // Desk frame trestle legs (gunmetal steel)
-      const legLeftGeo = this.track(new THREE.BoxGeometry(0.06, 0.7, 0.75))
-      const legLeft = new THREE.Mesh(legLeftGeo, materials.gunmetal)
-      legLeft.position.set(-0.95, 0.35, 0.0)
-      legLeft.castShadow = true
-      podGroup.add(legLeft)
+    const mon2Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreen)
+    mon2Screen.position.set(0.35, 1.08, -0.19)
+    mon2Screen.rotation.y = -0.20
+    backendGroup.add(mon2Screen)
+    backendScreens.push(mon2Screen)
 
-      const legRight = new THREE.Mesh(legLeftGeo, materials.gunmetal)
-      legRight.position.set(0.95, 0.35, 0.0)
-      legRight.castShadow = true
-      podGroup.add(legRight)
+    // Articulated dual monitor stand
+    const armGeo = this.track(new THREE.CylinderGeometry(0.018, 0.018, 0.34, 8))
+    const arm = new THREE.Mesh(armGeo, materials.champagneBrass)
+    arm.position.set(0.0, 0.91, -0.24)
+    backendGroup.add(arm)
 
-      // Rear acoustic modesty panel (walnut)
-      const panelGeo = this.track(new THREE.BoxGeometry(1.9, 0.38, 0.04))
-      const panel = new THREE.Mesh(panelGeo, materials.walnut)
-      panel.position.set(0.0, 0.5, -0.42)
-      podGroup.add(panel)
+    this.stationScreens.set('backend-engineer-workstation', backendScreens)
+    this.stationScreens.set('fcc-workstation', backendScreens)
+    this.stationScreens.set('engineering-workstation-02', backendScreens)
 
-      // 2. Asymmetric Displays & Equipment per User Correction 4
-      const screensForStation: THREE.Mesh[] = []
+    // 2.4 Tactile Peripherals: Desk Mat, Keyboard, Mouse, Diagnostic Notebook, Mug, Task Lamp
+    const matGeo = this.track(new THREE.BoxGeometry(0.72, 0.004, 0.28))
+    const mat = new THREE.Mesh(matGeo, materials.heroDeskMat)
+    mat.position.set(0.0, 0.758, 0.16)
+    backendGroup.add(mat)
 
-      if (isFrontend) {
-        // ── FRONTEND ENGINEER WORKSTATION ────────────────────────────
-        // 1. Primary Design-Oriented Ultrawide Display
-        const monFrameGeo = this.track(new THREE.BoxGeometry(0.82, 0.46, 0.02))
-        const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-        monFrame.position.set(-0.25, 1.12, -0.22)
-        monFrame.castShadow = true
-        podGroup.add(monFrame)
+    const kbGeo = this.track(new THREE.BoxGeometry(0.34, 0.01, 0.12))
+    const kb = new THREE.Mesh(kbGeo, materials.gunmetal)
+    kb.position.set(-0.06, 0.763, 0.16)
+    backendGroup.add(kb)
 
-        const monScreenGeo = this.track(new THREE.BoxGeometry(0.78, 0.42, 0.005))
-        const monScreen = new THREE.Mesh(monScreenGeo, cfg.matColor)
-        monScreen.position.set(-0.25, 1.12, -0.208)
-        podGroup.add(monScreen)
-        screensForStation.push(monScreen)
+    const mouseGeo = this.track(new THREE.BoxGeometry(0.055, 0.015, 0.09))
+    const mouse = new THREE.Mesh(mouseGeo, materials.gunmetal)
+    mouse.position.set(0.22, 0.765, 0.16)
+    backendGroup.add(mouse)
 
-        // Articulated monitor mounting arm
-        const armGeo = this.track(new THREE.CylinderGeometry(0.018, 0.018, 0.36, 8))
-        const arm = new THREE.Mesh(armGeo, materials.brass)
-        arm.position.set(-0.25, 0.92, -0.26)
-        podGroup.add(arm)
+    const diagGeo = this.track(new THREE.BoxGeometry(0.22, 0.015, 0.16))
+    const diag = new THREE.Mesh(diagGeo, materials.bookSpineNavy)
+    diag.position.set(-0.68, 0.764, 0.12)
+    diag.rotation.y = 0.12
+    backendGroup.add(diag)
 
-        // 2. Open 15" Aluminum Laptop (web/browser preview)
-        const laptopBaseGeo = this.track(new THREE.BoxGeometry(0.32, 0.01, 0.22))
-        const laptopBase = new THREE.Mesh(laptopBaseGeo, materials.laptopAluminum)
-        laptopBase.position.set(0.52, 0.755, 0.08)
-        laptopBase.rotation.y = -0.25
-        laptopBase.castShadow = true
-        podGroup.add(laptopBase)
+    const mugGeo = this.track(new THREE.CylinderGeometry(0.038, 0.034, 0.08, 12))
+    const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTerracotta)
+    mug.position.set(0.72, 0.796, 0.18)
+    mug.castShadow = true
+    backendGroup.add(mug)
 
-        const laptopLidGeo = this.track(new THREE.BoxGeometry(0.32, 0.21, 0.008))
-        const laptopLid = new THREE.Mesh(laptopLidGeo, materials.laptopAluminum)
-        laptopLid.position.set(0.52, 0.855, -0.01)
-        laptopLid.rotation.y = -0.25
-        laptopLid.rotation.x = -0.24
-        laptopLid.castShadow = true
-        podGroup.add(laptopLid)
+    const lampGeo = this.track(new THREE.BoxGeometry(0.42, 0.016, 0.03))
+    const lamp = new THREE.Mesh(lampGeo, materials.lampWarmGlow)
+    lamp.position.set(0.0, 1.25, -0.22)
+    backendGroup.add(lamp)
 
-        const lapScrGeo = this.track(new THREE.BoxGeometry(0.30, 0.19, 0.002))
-        const lapScr = new THREE.Mesh(lapScrGeo, materials.deviceLaptop)
-        lapScr.position.set(0.52, 0.855, -0.005)
-        lapScr.rotation.y = -0.25
-        lapScr.rotation.x = -0.24
-        podGroup.add(lapScr)
-        screensForStation.push(lapScr)
+    // 2.5 Ergonomic Task Chair for Backend Engineer
+    const chairGroup = new THREE.Group()
+    chairGroup.position.set(0.0, 0.0, 0.58)
 
-        // 3. Digital Graphic Tablet & Stylus on Desk
-        const tabMatGeo = this.track(new THREE.BoxGeometry(0.24, 0.012, 0.18))
-        const tabMat = new THREE.Mesh(tabMatGeo, materials.deviceTablet)
-        tabMat.position.set(0.18, 0.756, 0.16)
-        tabMat.rotation.y = -0.1
-        podGroup.add(tabMat)
+    const spiderHubGeo = this.track(new THREE.CylinderGeometry(0.045, 0.055, 0.06, 12))
+    const spiderHub = new THREE.Mesh(spiderHubGeo, materials.structureGraphite)
+    spiderHub.position.set(0.0, 0.12, 0.0)
+    chairGroup.add(spiderHub)
 
-        // 4. Creative Personal Details: Teal ceramic mug & designer notebook
-        const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
-        const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTeal)
-        mug.position.set(-0.8, 0.792, 0.15)
-        mug.castShadow = true
-        podGroup.add(mug)
+    const gasCylGeo = this.track(new THREE.CylinderGeometry(0.022, 0.022, 0.32, 8))
+    const gasCyl = new THREE.Mesh(gasCylGeo, materials.champagneBrass)
+    gasCyl.position.set(0.0, 0.28, 0.0)
+    chairGroup.add(gasCyl)
 
-        const nbGeo = this.track(new THREE.BoxGeometry(0.18, 0.012, 0.24))
-        const nb = new THREE.Mesh(nbGeo, materials.bookSpineAmber)
-        nb.position.set(-0.62, 0.756, -0.05)
-        nb.rotation.y = 0.18
-        podGroup.add(nb)
-      } else if (isBackend) {
-        // ── BACKEND ENGINEER WORKSTATION ─────────────────────────────
-        // 1. Dual Systems-Oriented Curved Displays (Terminal / Logs Topology)
-        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
-        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
+    const seatGeo = this.track(new THREE.BoxGeometry(0.46, 0.05, 0.44))
+    const seat = new THREE.Mesh(seatGeo, materials.chairMeshDark)
+    seat.position.set(0.0, 0.44, 0.0)
+    seat.castShadow = true
+    chairGroup.add(seat)
 
-        // Center-left monitor (Active log / build stream)
-        const mon1Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-        mon1Frame.position.set(-0.36, 1.10, -0.22)
-        mon1Frame.rotation.y = 0.15
-        mon1Frame.castShadow = true
-        podGroup.add(mon1Frame)
+    const backGeo = this.track(new THREE.BoxGeometry(0.42, 0.44, 0.04))
+    const back = new THREE.Mesh(backGeo, materials.chairMeshDark)
+    back.position.set(0.0, 0.70, 0.20)
+    back.castShadow = true
+    chairGroup.add(back)
 
-        const mon1Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreenEmerald)
-        mon1Screen.position.set(-0.36, 1.10, -0.208)
-        mon1Screen.rotation.y = 0.15
-        podGroup.add(mon1Screen)
-        screensForStation.push(mon1Screen)
+    backendGroup.add(chairGroup)
+    this.group.add(backendGroup)
 
-        // Center-right monitor (Infrastructure / runtime topology)
-        const mon2Frame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-        mon2Frame.position.set(0.36, 1.10, -0.22)
-        mon2Frame.rotation.y = -0.15
-        mon2Frame.castShadow = true
-        podGroup.add(mon2Frame)
+    // ──────────────────────────────────────────────────────────────────────────
+    // 3. INDEPENDENT REVIEWER VERIFICATION STATION (Screen Center Forward: X = 0.0, Z = -0.1)
+    // ──────────────────────────────────────────────────────────────────────────
+    const reviewerGroup = new THREE.Group()
+    reviewerGroup.position.set(0.0, 7.2, -0.1)
+    reviewerGroup.name = 'station:reviewer-workstation'
+    reviewerGroup.userData = {
+      type: 'station',
+      id: 'reviewer-workstation',
+      name: 'Independent Reviewer Verification Station',
+    }
 
-        const mon2Screen = new THREE.Mesh(monScreenGeo, materials.terminalScreen)
-        mon2Screen.position.set(0.36, 1.10, -0.208)
-        mon2Screen.rotation.y = -0.15
-        podGroup.add(mon2Screen)
-        screensForStation.push(mon2Screen)
+    // Status indicator lens
+    const revIndGeo = this.track(new THREE.BoxGeometry(0.22, 0.012, 0.035))
+    const revInd = new THREE.Mesh(revIndGeo, materials.gunmetal)
+    revInd.position.set(0.0, 0.865, 0.36)
+    revInd.name = 'station-indicator:reviewer-workstation'
+    reviewerGroup.add(revInd)
+    this.stationIndicators.set('reviewer-workstation' as any, revInd)
 
-        // Articulated dual monitor stand
-        const armGeo = this.track(new THREE.CylinderGeometry(0.02, 0.02, 0.36, 8))
-        const arm = new THREE.Mesh(armGeo, materials.brass)
-        arm.position.set(0.0, 0.92, -0.26)
-        podGroup.add(arm)
+    // 3.1 Beveled White Oak Inspection Bench (1.7m x 0.72m at standing height 0.86m)
+    const revTopGeo = this.track(new THREE.BoxGeometry(1.7, 0.032, 0.72))
+    const revTop = new THREE.Mesh(revTopGeo, materials.heroDeskWood)
+    revTop.position.set(0.0, 0.86, 0.0)
+    revTop.castShadow = true
+    revTop.receiveShadow = true
+    reviewerGroup.add(revTop)
 
-        // 2. Overhead mini telemetry status panel
-        const miniPanelGeo = this.track(new THREE.BoxGeometry(0.44, 0.08, 0.02))
-        const miniPanel = new THREE.Mesh(miniPanelGeo, materials.terminalScreenAmber)
-        miniPanel.position.set(0.0, 1.35, -0.24)
-        podGroup.add(miniPanel)
-        screensForStation.push(miniPanel)
+    // Brushed champagne brass perimeter rim
+    const revTrimGeo = this.track(new THREE.BoxGeometry(1.72, 0.012, 0.74))
+    const revTrim = new THREE.Mesh(revTrimGeo, materials.champagneBrass)
+    revTrim.position.set(0.0, 0.865, 0.0)
+    reviewerGroup.add(revTrim)
 
-        // 3. Technical Console / Dark Systems Notebook
-        const diagConsoleGeo = this.track(new THREE.BoxGeometry(0.24, 0.02, 0.16))
-        const diagConsole = new THREE.Mesh(diagConsoleGeo, materials.limestoneDark)
-        diagConsole.position.set(-0.72, 0.76, 0.12)
-        diagConsole.rotation.y = 0.1
-        podGroup.add(diagConsole)
+    // Slender tapered architectural legs with brass shoes
+    for (const [lx, lz] of [[-0.74, -0.28], [0.74, -0.28], [-0.74, 0.28], [0.74, 0.28]]) {
+      const legGeo = this.track(new THREE.CylinderGeometry(0.022, 0.016, 0.84, 12))
+      const leg = new THREE.Mesh(legGeo, materials.champagneBrass)
+      leg.position.set(lx!, 0.43, lz!)
+      leg.castShadow = true
+      reviewerGroup.add(leg)
+    }
 
-        // 4. Terracotta ceramic coffee mug
-        const mugGeo = this.track(new THREE.CylinderGeometry(0.042, 0.038, 0.085, 12))
-        const mug = new THREE.Mesh(mugGeo, materials.coffeeMugTerracotta)
-        mug.position.set(0.8, 0.792, 0.18)
-        mug.castShadow = true
-        podGroup.add(mug)
-      } else {
-        // ── EXPANSION BAYS 03 & 04 ───────────────────────────────────
-        const monFrameGeo = this.track(new THREE.BoxGeometry(0.72, 0.42, 0.02))
-        const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-        monFrame.position.set(0.0, 1.10, -0.22)
-        monFrame.castShadow = true
-        podGroup.add(monFrame)
+    // 3.2 Centered Inspection Viewport Slate (displays code diff & test runner output)
+    const viewportFrameGeo = this.track(new THREE.BoxGeometry(0.48, 0.015, 0.32))
+    const viewportFrame = new THREE.Mesh(viewportFrameGeo, materials.gunmetal)
+    viewportFrame.position.set(0.0, 0.88, -0.05)
+    viewportFrame.rotation.x = -0.22 // Ergonomically angled towards Reviewer
+    reviewerGroup.add(viewportFrame)
 
-        const monScreenGeo = this.track(new THREE.BoxGeometry(0.68, 0.38, 0.005))
-        const monScreen = new THREE.Mesh(monScreenGeo, cfg.matColor)
-        monScreen.position.set(0.0, 1.10, -0.208)
-        podGroup.add(monScreen)
-        screensForStation.push(monScreen)
+    const viewportScreenGeo = this.track(new THREE.BoxGeometry(0.44, 0.004, 0.28))
+    const viewportScreen = new THREE.Mesh(viewportScreenGeo, materials.terminalScreenAmber)
+    viewportScreen.position.set(0.0, 0.888, -0.05)
+    viewportScreen.rotation.x = -0.22
+    reviewerGroup.add(viewportScreen)
 
-        const armGeo = this.track(new THREE.CylinderGeometry(0.02, 0.02, 0.36, 8))
-        const arm = new THREE.Mesh(armGeo, materials.brass)
-        arm.position.set(0.0, 0.92, -0.26)
-        podGroup.add(arm)
-      }
+    // 3.3 Tactile Inspection Tools: Brass Loupe Dock, Anodized Checklist Pad, Stylus
+    const loupeDockGeo = this.track(new THREE.CylinderGeometry(0.045, 0.05, 0.02, 16))
+    const loupeDock = new THREE.Mesh(loupeDockGeo, materials.champagneBrass)
+    loupeDock.position.set(-0.54, 0.88, 0.08)
+    reviewerGroup.add(loupeDock)
 
-      // Register screens
-      if (isFrontend) {
-        this.stationScreens.set('frontend-engineer-workstation', screensForStation)
-        this.stationScreens.set('codex-workstation', screensForStation)
-        this.stationScreens.set('engineering-workstation-01', screensForStation)
-      } else if (isBackend) {
-        this.stationScreens.set('backend-engineer-workstation', screensForStation)
-        this.stationScreens.set('fcc-workstation', screensForStation)
-        this.stationScreens.set('engineering-workstation-02', screensForStation)
-      } else {
-        this.stationScreens.set(stationDef.id as StationId, screensForStation)
-      }
+    const loupeRimGeo = this.track(new THREE.TorusGeometry(0.035, 0.006, 8, 24))
+    const loupeRim = new THREE.Mesh(loupeRimGeo, materials.champagneBrass)
+    loupeRim.position.set(-0.54, 0.91, 0.08)
+    loupeRim.rotation.x = Math.PI / 2
+    reviewerGroup.add(loupeRim)
 
-      // Compact keyboard & precision mouse mat
-      const matGeo = this.track(new THREE.BoxGeometry(0.75, 0.004, 0.28))
-      const mat = new THREE.Mesh(matGeo, materials.limestoneDark)
-      mat.position.set(isFrontend ? -0.15 : 0.0, 0.752, 0.18)
-      podGroup.add(mat)
+    const clipGeo = this.track(new THREE.BoxGeometry(0.24, 0.012, 0.30))
+    const clip = new THREE.Mesh(clipGeo, materials.bookSpineAmber)
+    clip.position.set(0.52, 0.88, 0.06)
+    clip.rotation.y = -0.15
+    reviewerGroup.add(clip)
 
-      const kbGeo = this.track(new THREE.BoxGeometry(0.38, 0.012, 0.13))
-      const kb = new THREE.Mesh(kbGeo, materials.gunmetal)
-      kb.position.set(isFrontend ? -0.22 : -0.08, 0.758, 0.18)
-      podGroup.add(kb)
+    const penGeo = this.track(new THREE.CylinderGeometry(0.005, 0.005, 0.16, 8))
+    const pen = new THREE.Mesh(penGeo, materials.champagneBrass)
+    pen.position.set(0.66, 0.885, 0.06)
+    pen.rotation.x = Math.PI / 2
+    reviewerGroup.add(pen)
 
-      // Warm LED task desk lamp
-      const lampGeo = this.track(new THREE.BoxGeometry(0.35, 0.018, 0.04))
-      const lamp = new THREE.Mesh(lampGeo, materials.lampWarmGlow)
-      lamp.position.set(0.0, 1.28, -0.22)
-      podGroup.add(lamp)
+    this.group.add(reviewerGroup)
 
-      // 3. Ergonomic Task Chair
-      const chairGroup = new THREE.Group()
-      chairGroup.position.set(0.0, 0.0, 0.65)
+    // ──────────────────────────────────────────────────────────────────────────
+    // 4. STANDBY EXPANSION BAYS 03 & 04 (Slender Perimeter Wall Docks, Zero Foreground Clutter)
+    // ──────────────────────────────────────────────────────────────────────────
+    for (const [side, bayId] of [[-1, 'expansion-bay-3'], [1, 'expansion-bay-4']] as const) {
+      const bayGroup = new THREE.Group()
+      bayGroup.position.set(side * 6.4, 7.2, 0.0)
+      bayGroup.name = `station:${bayId}`
 
-      // Star base with casters
-      const baseHubGeo = this.track(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 8))
-      const baseHub = new THREE.Mesh(baseHubGeo, materials.gunmetal)
-      baseHub.position.set(0.0, 0.1, 0.0)
-      chairGroup.add(baseHub)
-
-      const gasCylinderGeo = this.track(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8))
-      const gasCylinder = new THREE.Mesh(gasCylinderGeo, materials.brass)
-      gasCylinder.position.set(0.0, 0.28, 0.0)
-      chairGroup.add(gasCylinder)
-
-      // Contoured seat cushion
-      const seatGeo = this.track(new THREE.BoxGeometry(0.48, 0.06, 0.46))
-      const seat = new THREE.Mesh(seatGeo, materials.charSuitDark)
-      seat.position.set(0.0, 0.46, 0.0)
-      seat.castShadow = true
-      chairGroup.add(seat)
-
-      // Curved ergonomic lumbar backrest
-      const backGeo = this.track(new THREE.BoxGeometry(0.44, 0.48, 0.05))
-      const back = new THREE.Mesh(backGeo, materials.charSuitDark)
-      back.position.set(0.0, 0.74, 0.21)
-      back.castShadow = true
-      chairGroup.add(back)
-
-      // Armrests
-      const armrestGeo = this.track(new THREE.BoxGeometry(0.06, 0.18, 0.26))
-      const armLeft = new THREE.Mesh(armrestGeo, materials.gunmetal)
-      armLeft.position.set(-0.25, 0.56, 0.05)
-      chairGroup.add(armLeft)
-
-      const armRight = new THREE.Mesh(armrestGeo, materials.gunmetal)
-      armRight.position.set(0.25, 0.56, 0.05)
-      chairGroup.add(armRight)
-
-      podGroup.add(chairGroup)
-      this.group.add(podGroup)
+      const bayIndGeo = this.track(new THREE.BoxGeometry(0.2, 0.02, 0.04))
+      const bayInd = new THREE.Mesh(bayIndGeo, materials.gunmetal)
+      bayInd.position.set(0.0, 1.2, 0.0)
+      bayGroup.add(bayInd)
+      this.stationIndicators.set(bayId as StationId, bayInd)
+      this.stationScreens.set(bayId as StationId, [])
+      this.group.add(bayGroup)
     }
   }
 
@@ -905,30 +873,7 @@ export class HqFurniture {
     const f2Group = new THREE.Group()
     f2Group.position.set(0.0, 7.2, 0.0)
 
-    // Low Planter Trough with Snake Plants (divider between workstation zones)
-    const troughGroup = new THREE.Group()
-    troughGroup.position.set(0.0, 0.0, 0.5)
-
-    const boxGeo = this.track(new THREE.BoxGeometry(0.36, 0.42, 3.2))
-    const box = new THREE.Mesh(boxGeo, materials.walnut)
-    box.position.set(0.0, 0.21, 0.0)
-    box.castShadow = true
-    troughGroup.add(box)
-
-    const boxRimGeo = this.track(new THREE.BoxGeometry(0.38, 0.03, 3.24))
-    const boxRim = new THREE.Mesh(boxRimGeo, materials.champagneBrass)
-    boxRim.position.set(0.0, 0.43, 0.0)
-    troughGroup.add(boxRim)
-
-    // Snake plant blades
-    for (let pz = -1.3; pz <= 1.3; pz += 0.35) {
-      const bladeGeo = this.track(new THREE.BoxGeometry(0.04, 0.65 + Math.sin(pz) * 0.15, 0.16))
-      const blade = new THREE.Mesh(bladeGeo, materials.foliageDark)
-      blade.position.set((Math.random() - 0.5) * 0.08, 0.7, pz)
-      blade.rotation.y = (Math.random() - 0.5) * 0.5
-      troughGroup.add(blade)
-    }
-    f2Group.add(troughGroup)
+    // Open central circulation corridor on Floor 2 (no central planter dividing the agents)
 
     // Architectural Shelving Unit in Agent Operations (West wall, rear zone)
     const shelfGroup = new THREE.Group()

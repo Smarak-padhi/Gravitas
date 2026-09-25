@@ -83,6 +83,15 @@ export class HqRenderer {
     }
   }
 
+  public resetTelemetry(): void {
+    this.frameTimes = []
+    this.lastFrameTime = performance.now()
+  }
+
+  public getPixelRatio(): number {
+    return this.renderer.getPixelRatio()
+  }
+
   public dispose(): void {
     const canvas = this.renderer.domElement
     canvas.removeEventListener('webglcontextlost', this.handleContextLost)

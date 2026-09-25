@@ -449,6 +449,28 @@ export class HqDirector {
     return this.renderer.getPerformanceStats()
   }
 
+  public getPixelRatio(): number {
+    return this.renderer.getPixelRatio()
+  }
+
+  public resetPerformanceTelemetry(): void {
+    this.renderer.resetTelemetry()
+  }
+
+  public getSceneLightStats(): { lightCount: number; shadowCastingLightCount: number } {
+    let lightCount = 0
+    let shadowCastingLightCount = 0
+    this.scene.scene.traverse((obj) => {
+      if ((obj as any).isLight) {
+        lightCount++
+        if ((obj as any).castShadow) {
+          shadowCastingLightCount++
+        }
+      }
+    })
+    return { lightCount, shadowCastingLightCount }
+  }
+
   public dispose(): void {
     this.stopLoop()
     this.unbindEvents()

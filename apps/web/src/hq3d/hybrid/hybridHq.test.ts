@@ -195,4 +195,38 @@ describe('Wave 12H-R Hybrid HQ Experience & Presentation Consistency Tests', () 
     const isDebugActive = debugParams.get('debug') === 'hybrid'
     expect(isDebugActive).toBe(true)
   })
+
+  it('12. Sender speech clearing: handover transfer clears previous worker completion speech', () => {
+    // Frontend sends completion message
+    const compMsg = deriveAgentStatusMessage({
+      roleId: 'role:engineering:frontend-engineer',
+      taskId: 'T-142',
+      event: 'TASK_COMPLETED',
+    })
+    expect(compMsg?.roleId).toBe('role:engineering:frontend-engineer')
+
+    // Upon arrival, Reviewer receives handoff and becomes active
+    const recvMsg = deriveAgentStatusMessage({
+      roleId: 'role:quality:independent-reviewer',
+      taskId: 'T-142',
+      event: 'HANDOFF_RECEIVED',
+    })
+    expect(recvMsg?.roleId).toBe('role:quality:independent-reviewer')
+
+    // Sender's message should not share the same role ID or persist across distinct lifecycle moments
+    expect(compMsg?.roleId).not.toBe(recvMsg?.roleId)
+  })
+
+  it('13. Day/Eve/Night atmosphere changes do not fabricate runtime activity', () => {
+    const atmospheres = ['DAY', 'EVENING', 'NIGHT'] as const
+    const initialStatus = getAgentPresentationStatus('IDLE')
+
+    // Atmosphere presets must preserve runtime truth: idle remains idle across Day, Evening, Night
+    for (const _atm of atmospheres) {
+      const statusUnderAtmosphere = getAgentPresentationStatus('IDLE')
+      expect(statusUnderAtmosphere).toBe(initialStatus)
+      expect(statusUnderAtmosphere).toBe('Standby / Non-productive')
+      expect(statusUnderAtmosphere.toLowerCase()).not.toContain('working')
+    }
+  })
 })

@@ -10,7 +10,7 @@ import type { AtmosphereMode } from './engine/HqScene.js'
 import type { PerformanceStats, RoomId, SelectedEntity } from './types.js'
 import type { RoleId } from './roles/types.js'
 import { Hq3dInspector } from './ui/Hq3dInspector.js'
-import { ROOM_DEFINITIONS, WORKSTATION_PRESETS, CHARACTER_PRESETS, getRoomByKey } from './world/rooms.js'
+import { ROOM_DEFINITIONS, getRoomByKey } from './world/rooms.js'
 import { deriveWorldState, type WorldState } from './world/worldState.js'
 import { useEvents } from '../api/useEvents.js'
 import type { RuntimeProjectionSnapshot, StateSummaryResponse } from '../api/types.js'
@@ -335,21 +335,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
     setAnnouncement(`Atmosphere preset changed to ${mode}`)
   }
 
-  const handleSelectWorkstation = (key: keyof typeof WORKSTATION_PRESETS) => {
-    directorRef.current?.frameWorkstation(key)
-    const preset = WORKSTATION_PRESETS[key]
-    if (preset) {
-      setAnnouncement(`Framing workstation: ${preset.description}`)
-    }
-  }
 
-  const handleSelectCharacterPreset = (key: keyof typeof CHARACTER_PRESETS) => {
-    directorRef.current?.frameCharacter(key)
-    const preset = CHARACTER_PRESETS[key]
-    if (preset) {
-      setAnnouncement(`Framing character: ${preset.description}`)
-    }
-  }
 
   const handleResetOverview = () => {
     setCurrentRoomId('OVERVIEW')
@@ -542,67 +528,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
 
             <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255, 255, 255, 0.12)', margin: '0 3px' }} />
 
-            {/* Quick Workstation Focus Dropdown / Buttons */}
-            <button
-              onClick={() => handleSelectWorkstation('WS_FRONTEND')}
-              data-testid="hq-nav-ws-frontend"
-              title="Focus Frontend Engineer Workstation (Ponytail & Laptop)"
-              style={{
-                padding: '4px 6px',
-                borderRadius: '5px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#60a5fa',
-                fontSize: '11px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <span>💻</span>
-              <span style={{ fontSize: '10px' }}>Frontend</span>
-            </button>
-            <button
-              onClick={() => handleSelectWorkstation('WS_BACKEND')}
-              data-testid="hq-nav-ws-backend"
-              title="Focus Backend Engineer Workstation"
-              style={{
-                padding: '4px 6px',
-                borderRadius: '5px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#38bdf8',
-                fontSize: '11px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <span>⚙️</span>
-              <span style={{ fontSize: '10px' }}>Backend</span>
-            </button>
-            <button
-              onClick={() => handleSelectCharacterPreset('CHAR_FRONTEND')}
-              data-testid="hq-nav-char-frontend"
-              title="Focus Frontend Mascot (Stylized Ponytail)"
-              style={{
-                padding: '4px 6px',
-                borderRadius: '5px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#f472b6',
-                fontSize: '11px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <span>👱‍♀️</span>
-              <span style={{ fontSize: '10px' }}>Ponytail</span>
-            </button>
+            {/* Direct role inspection via character clicks; redundant HUD buttons removed per Section 8 */}
 
             {reducedMotion && (
               <span
