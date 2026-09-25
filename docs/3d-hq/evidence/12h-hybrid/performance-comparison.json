@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-09-25T03:16:46.079Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "hybridFloor2": {
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 484,
+    "triangles": 29802,
+    "geometries": 549,
+    "textures": 23
+  },
+  "hero3dFloor2": {
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 576,
+    "triangles": 49954,
+    "geometries": 549,
+    "textures": 23
+  },
+  "summary": {
+    "drawCallsDelta": -92,
+    "trianglesDelta": -20152,
+    "geometriesDelta": 0
+  }
+}

@@ -14,6 +14,7 @@ import { ROOM_DEFINITIONS, WORKSTATION_PRESETS, CHARACTER_PRESETS, getRoomByKey 
 import { deriveWorldState, type WorldState } from './world/worldState.js'
 import { useEvents } from '../api/useEvents.js'
 import type { RuntimeProjectionSnapshot, StateSummaryResponse } from '../api/types.js'
+import { Floor2HybridDiorama } from './hybrid/Floor2HybridDiorama.js'
 
 export interface LivingHqCanvas3DProps {
   readonly isViewActive: boolean
@@ -38,6 +39,15 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   const [reducedMotion, setReducedMotion] = useState(false)
   const [announcement, setAnnouncement] = useState<string>('')
   const [webglError, setWebglError] = useState<string | null>(null)
+  const [experienceMode, setExperienceMode] = useState<'HYBRID' | '3D_EXPERIMENTAL'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('mode') === 'hybrid') return 'HYBRID'
+    }
+    return '3D_EXPERIMENTAL'
+  })
+  const [currentRoomId, setCurrentRoomId] = useState<RoomId | 'OVERVIEW'>('OVERVIEW')
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 1280, height: 720 })
   const [atmosphere, setAtmosphere] = useState<AtmosphereMode>(() => {
     if (typeof window === 'undefined') return 'DAY'
     const hour = new Date().getHours()
@@ -47,6 +57,8 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   })
   const [isElevatorActive, setIsElevatorActive] = useState(false)
   const [activeTaskCount, setActiveTaskCount] = useState(0)
+
+  const isHybridFloor2 = experienceMode === 'HYBRID' && currentRoomId === 'AGENT_OPERATIONS'
 
   // 1. Accessibility: Detect prefers-reduced-motion
   useEffect(() => {
@@ -222,6 +234,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
       for (const entry of entries) {
         const { width, height } = entry.contentRect
         if (width > 0 && height > 0) {
+          setCanvasDimensions({ width, height })
           directorRef.current?.handleResize(width, height)
         }
       }
@@ -230,6 +243,16 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
     ro.observe(container)
     return () => ro.disconnect()
   }, [])
+
+  // 4b. Reconcile 3D character visibility when Floor 2 Hybrid Diorama is active
+  useEffect(() => {
+    if (directorRef.current) {
+      const feFig = directorRef.current.scene.characters.figureMap.get('role:engineering:frontend-engineer')
+      const beFig = directorRef.current.scene.characters.figureMap.get('role:engineering:backend-engineer')
+      if (feFig) feFig.visible = !isHybridFloor2
+      if (beFig) beFig.visible = !isHybridFloor2
+    }
+  }, [isHybridFloor2])
 
   // 5. Telemetry polling (every 500ms when view is active and HUD enabled)
   useEffect(() => {
@@ -263,6 +286,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
       if ((e.key >= '1' && e.key <= '6') || e.key === 'm' || e.key === 'M') {
         const room = getRoomByKey(e.key)
         if (room) {
+          setCurrentRoomId(room.id)
           directorRef.current?.navigateToFloorWithElevator(room.id)
           setAnnouncement(`Elevator moving to: ${room.name} (Floor ${room.numberKey})`)
         }
@@ -272,6 +296,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
           directorRef.current?.skipElevator()
           setAnnouncement('Elevator transit skipped')
         } else {
+          setCurrentRoomId('OVERVIEW')
           directorRef.current?.resetToOverview()
           setAnnouncement('Reset camera to Headquarters Overview')
         }
@@ -286,6 +311,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   }, [handleKeyDown])
 
   const handleSelectRoom = (roomId: RoomId) => {
+    setCurrentRoomId(roomId)
     const room = ROOM_DEFINITIONS[roomId]
     if (room) {
       setAnnouncement(`Navigating to ${room.name} via spatial elevator`)
@@ -321,6 +347,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   }
 
   const handleResetOverview = () => {
+    setCurrentRoomId('OVERVIEW')
     directorRef.current?.resetToOverview()
     setAnnouncement('Reset camera to Headquarters Overview')
   }
@@ -599,6 +626,68 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
               pointerEvents: 'auto',
             }}
           >
+            {/* Experience Mode Toggle: Hybrid Diorama vs 3D Experimental */}
+            <div
+              data-testid="experience-mode-toggle"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                padding: '3px',
+                backgroundColor: 'rgba(15, 20, 28, 0.85)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
+              }}
+            >
+              <button
+                onClick={() => {
+                  setExperienceMode('HYBRID')
+                  handleSelectRoom('AGENT_OPERATIONS')
+                }}
+                data-testid="mode-hybrid-btn"
+                title="Hybrid 2D/3D Experience: Illustrated Agents & Management-Sim Diorama"
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  backgroundColor: experienceMode === 'HYBRID' ? 'rgba(129, 140, 248, 0.25)' : 'transparent',
+                  border: experienceMode === 'HYBRID' ? '1px solid #818cf8' : '1px solid transparent',
+                  color: experienceMode === 'HYBRID' ? '#c4b5fd' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: experienceMode === 'HYBRID' ? 700 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>✨</span>
+                <span>Hybrid HQ</span>
+              </button>
+              <button
+                onClick={() => setExperienceMode('3D_EXPERIMENTAL')}
+                data-testid="mode-3d-btn"
+                title="3D Experimental Mode: Procedural Architecture & Hero Bay"
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  backgroundColor: experienceMode === '3D_EXPERIMENTAL' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
+                  border: experienceMode === '3D_EXPERIMENTAL' ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid transparent',
+                  color: experienceMode === '3D_EXPERIMENTAL' ? '#38bdf8' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: experienceMode === '3D_EXPERIMENTAL' ? 700 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span>🏢</span>
+                <span>3D Tower</span>
+              </button>
+            </div>
+
             {/* Atmosphere Presets Pill */}
             <div
               data-testid="hq-atmosphere-pill"
@@ -762,36 +851,49 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
             </button>
           </aside>
         )}
+
+        {/* Layer B: Floor 2 Hybrid Diorama Overlay */}
+        {isHybridFloor2 && (
+          <Floor2HybridDiorama
+            camera={directorRef.current?.cameraRig.camera ?? null}
+            canvasRect={canvasDimensions}
+            activeFloorId={currentRoomId}
+            isFocused={true}
+            onSelectEntity={setSelectedEntity}
+          />
+        )}
       </div>
 
-      {/* Docked 2D Inspector Floating Glass Overlay on Right Side */}
-      <div
-        style={{
-          position: 'absolute',
-          right: '12px',
-          top: '56px',
-          bottom: '12px',
-          zIndex: 15,
-          display: 'flex',
-          overflow: 'hidden',
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
-        }}
-      >
-        <Hq3dInspector
-          entity={selectedEntity}
-          performanceStats={performanceStats}
-          showPerformance={showPerformance}
-          onTogglePerformance={() => setShowPerformance(!showPerformance)}
-          onSelectRoom={handleSelectRoom}
-          onSelectRole={handleSelectRole}
-          onResetOverview={handleResetOverview}
-          onClose={() => {
-            setSelectedEntity(null)
-            directorRef.current?.resetToOverview()
+      {/* Docked 2D Inspector Floating Glass Overlay on Right Side (Suppressed in Hybrid Floor 2 Mode) */}
+      {!isHybridFloor2 && (
+        <div
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '56px',
+            bottom: '12px',
+            zIndex: 15,
+            display: 'flex',
+            overflow: 'hidden',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
           }}
-        />
-      </div>
+        >
+          <Hq3dInspector
+            entity={selectedEntity}
+            performanceStats={performanceStats}
+            showPerformance={showPerformance}
+            onTogglePerformance={() => setShowPerformance(!showPerformance)}
+            onSelectRoom={handleSelectRoom}
+            onSelectRole={handleSelectRole}
+            onResetOverview={handleResetOverview}
+            onClose={() => {
+              setSelectedEntity(null)
+              directorRef.current?.resetToOverview()
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
