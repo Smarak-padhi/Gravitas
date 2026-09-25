@@ -353,31 +353,32 @@ export class HqScene {
       case 'NIGHT':
         // Inhabited Miniature Engineering Studio at Night:
         // Deep exterior night contrast + intentional architectural lighting pools (wall wash, task pools, dormant monitors)
+        // High architectural readability: room depth, rear circulation, timber slats, and floor plane remain clear
         this.scene.background = new THREE.Color(0x090d16) // Deep architectural midnight slate
         this.keyLight.color.setHex(0x64748b) // Subtle cool moonbeam rim
-        this.keyLight.intensity = 0.32
+        this.keyLight.intensity = 0.38
         this.keyLight.position.set(-16.0, 32.0, -22.0)
-        this.fillLight.color.setHex(0x1e293b) // Opposing soft night ambient
-        this.fillLight.intensity = 0.18
-        this.ambientLight.color.setHex(0x0f172a) // Exterior night dome
-        this.ambientLight.groundColor.setHex(0x020617)
-        this.ambientLight.intensity = 0.22
+        this.fillLight.color.setHex(0x334155) // Soft indirect architectural fill (separates floor & window planes)
+        this.fillLight.intensity = 0.40
+        this.ambientLight.color.setHex(0x1e293b) // Exterior night dome
+        this.ambientLight.groundColor.setHex(0x101726) // Soft architectural floor bounce
+        this.ambientLight.intensity = 0.45
 
         // Floor 2 Agent Operations: Intentional architectural light pools & timber slat cove grazing
-        // 1. Central circulation safety pathway downlight pool
+        // 1. Central circulation safety pathway downlight pool (illuminates floor plane & Reviewer zone)
         this.spotOperations.color.setHex(0xffedd5)
-        this.spotOperations.intensity = 1.6
-        // 2. Wall-wash cove light grazing the acoustic timber battens
-        this.spotOperationsWash.color.setHex(0xf59e0b)
-        this.spotOperationsWash.intensity = 2.2
+        this.spotOperations.intensity = 2.2
+        // 2. Wall-wash cove light grazing the acoustic timber battens & rear circulation
+        this.spotOperationsWash.color.setHex(0xfbbf24)
+        this.spotOperationsWash.intensity = 2.4
         // 3. Workstation architectural task pools (illuminates walnut/oak surfaces; monitors strictly dormant)
         this.spotOperationsDeskL.color.setHex(0xffeedb)
-        this.spotOperationsDeskL.intensity = 1.6
+        this.spotOperationsDeskL.intensity = 2.0
         this.spotOperationsDeskR.color.setHex(0xffeedb)
-        this.spotOperationsDeskR.intensity = 1.6
+        this.spotOperationsDeskR.intensity = 2.0
         // 4. Reviewer verification console inspection downlight pool
         this.spotOperationsReviewer.color.setHex(0xffedd5)
-        this.spotOperationsReviewer.intensity = 1.8
+        this.spotOperationsReviewer.intensity = 2.2
 
         // Calibrated night ambient pools across other tower levels
         this.spotPlanning.color.setHex(0xffedd5)

@@ -132,18 +132,18 @@ export class HqFurniture {
    * - Expansion Bays 03 & 04: standby modular stations.
    */
   private buildAgentWorkstations(materials: MaterialLibrary): void {
-    // 0. Soft White Oak Herringbone & Warm Woven Area Rug spanning Agent Operations
+    // 0. Architectural Studio Mat & Warm Woven Area Rug spanning Agent Operations
+    // Inlay plinth/trim sits slightly below the rug so only the 30mm outer border trims the perimeter
+    const rugBorderGeo = this.track(new THREE.BoxGeometry(9.66, 0.006, 4.66))
+    const rugBorder = new THREE.Mesh(rugBorderGeo, materials.champagneBrass)
+    rugBorder.position.set(0.0, 7.222, 0.6)
+    this.group.add(rugBorder)
+
     const roomRugGeo = this.track(new THREE.BoxGeometry(9.6, 0.008, 4.6))
     const roomRug = new THREE.Mesh(roomRugGeo, materials.carpetWarm)
-    roomRug.position.set(0.0, 7.225, 0.6)
+    roomRug.position.set(0.0, 7.228, 0.6)
     roomRug.receiveShadow = true
     this.group.add(roomRug)
-
-    // Brushed champagne brass border inlay framing the living zone
-    const rugBorderGeo = this.track(new THREE.BoxGeometry(9.66, 0.009, 4.66))
-    const rugBorder = new THREE.Mesh(rugBorderGeo, materials.champagneBrass)
-    rugBorder.position.set(0.0, 7.226, 0.6)
-    this.group.add(rugBorder)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 1. FRONTEND ENGINEER WORKSTATION (Screen Right Rear: X = -2.6, Z = 1.0)

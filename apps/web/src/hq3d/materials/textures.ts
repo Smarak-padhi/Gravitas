@@ -339,7 +339,8 @@ export class TextureGenerator {
   }
 
   /**
-   * Warm Scandinavian Oak Hardwood Floor Planks
+   * Warm Scandinavian White Oak Hardwood Floor Planks
+   * Natural muted architectural oak with subtle grain flow and micro-bevel joints
    */
   public static createOakFloorTexture(): THREE.CanvasTexture {
     const canvas = document.createElement('canvas')
@@ -347,38 +348,41 @@ export class TextureGenerator {
     canvas.height = 512
     const ctx = canvas.getContext('2d')!
 
-    // Warm natural oak base
-    ctx.fillStyle = '#9e7e5d'
+    // Natural white oak architectural base (muted warm greige-amber, not flat mustard)
+    ctx.fillStyle = '#8a7a67'
     ctx.fillRect(0, 0, 512, 512)
 
-    // Staggered plank layout (64px wide planks)
+    // Staggered plank layout (64px wide planks, 32px height)
     const plankHeight = 32
     for (let y = 0; y < 512; y += plankHeight) {
       const plankOffset = (y / plankHeight) % 2 === 0 ? 0 : 96
-      // Plank tone variation
       for (let x = -plankOffset; x < 512 + 128; x += 192) {
         const toneShift = ((x + y * 7) % 5) - 2
-        ctx.fillStyle = toneShift > 0 ? '#a68564' : toneShift < 0 ? '#947555' : '#9e7e5d'
+        ctx.fillStyle = toneShift > 0 ? '#92826f' : toneShift < 0 ? '#82725f' : '#8a7a67'
         ctx.fillRect(Math.max(0, x), y, Math.min(192, 512 - x), plankHeight)
 
-        // Plank end joint
-        ctx.fillStyle = 'rgba(70, 50, 35, 0.4)'
-        ctx.fillRect(x, y, 2, plankHeight)
+        // Subtle micro-joint shadow & highlight
+        ctx.fillStyle = 'rgba(40, 30, 20, 0.35)'
+        ctx.fillRect(x, y, 1.5, plankHeight)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)'
+        ctx.fillRect(x + 1.5, y, 1, plankHeight)
       }
 
-      // Horizontal groove
-      ctx.fillStyle = 'rgba(50, 35, 25, 0.5)'
-      ctx.fillRect(0, y + plankHeight - 1, 512, 1.5)
+      // Horizontal plank seam
+      ctx.fillStyle = 'rgba(35, 25, 18, 0.40)'
+      ctx.fillRect(0, y + plankHeight - 1, 512, 1.2)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'
+      ctx.fillRect(0, y + plankHeight, 512, 0.8)
     }
 
-    // Subtle natural wood grain lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+    // Subtle natural linear wood grain lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'
     ctx.lineWidth = 1
-    for (let i = 0; i < 40; i++) {
-      const gy = (i * 13) % 512
+    for (let i = 0; i < 36; i++) {
+      const gy = (i * 14) % 512
       ctx.beginPath()
       ctx.moveTo(0, gy)
-      ctx.bezierCurveTo(170, gy + 3, 340, gy - 2, 512, gy + 1)
+      ctx.bezierCurveTo(170, gy + 2, 340, gy - 2, 512, gy + 1)
       ctx.stroke()
     }
 
@@ -391,33 +395,63 @@ export class TextureGenerator {
   }
 
   /**
-   * Cozy Textured Wool Woven Area Rug
+   * Premium Architectural Studio Floor Material (Floor 2 Central Plane)
+   * Refined warm neutral architectural acoustic flooring with subtle paver joints,
+   * gentle tonal variation, and calibrated specular response (no flat mustard polygon)
    */
   public static createCarpetTexture(): THREE.CanvasTexture {
     const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 256
+    canvas.width = 512
+    canvas.height = 512
     const ctx = canvas.getContext('2d')!
 
-    // Warm oatmeal wool base
-    ctx.fillStyle = '#d5ccc0'
-    ctx.fillRect(0, 0, 256, 256)
+    // Architectural warm neutral greige base
+    ctx.fillStyle = '#786c5f'
+    ctx.fillRect(0, 0, 512, 512)
 
-    // Inset border frame
-    ctx.strokeStyle = '#b8ab9a'
-    ctx.lineWidth = 8
-    ctx.strokeRect(12, 12, 232, 232)
+    // Staggered architectural flooring slabs (256px wide x 64px high)
+    const slabHeight = 64
+    const slabWidth = 256
+    for (let y = 0; y < 512; y += slabHeight) {
+      const rowOffset = ((y / slabHeight) % 2) * (slabWidth / 2)
+      for (let x = -rowOffset; x < 512 + slabWidth; x += slabWidth) {
+        // Restrained tonal variation between slabs (±2-3%)
+        const hash = ((x * 17 + y * 31) % 7) - 3
+        ctx.fillStyle = hash > 1 ? '#7e7265' : hash < -1 ? '#726659' : '#786c5f'
+        ctx.fillRect(x, y, slabWidth, slabHeight)
 
-    // Woven texture noise
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)'
-    for (let x = 0; x < 256; x += 4) {
-      ctx.fillRect(x, 0, 1.5, 256)
+        // Micro-fiber texture noise inside the slab
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.025)'
+        for (let i = 0; i < 40; i++) {
+          const fx = x + ((i * 19) % slabWidth)
+          const fy = y + ((i * 23) % slabHeight)
+          ctx.fillRect(fx, fy, 8, 1)
+        }
+
+        // Vertical architectural joint seam
+        ctx.fillStyle = 'rgba(30, 24, 18, 0.38)'
+        ctx.fillRect(x, y, 1.5, slabHeight)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'
+        ctx.fillRect(x + 1.5, y, 1, slabHeight)
+      }
+
+      // Horizontal architectural joint seam
+      ctx.fillStyle = 'rgba(25, 20, 15, 0.42)'
+      ctx.fillRect(0, y + slabHeight - 1.5, 512, 1.5)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)'
+      ctx.fillRect(0, y + slabHeight, 512, 1)
     }
-    for (let y = 0; y < 256; y += 4) {
-      ctx.fillRect(0, y, 256, 1.5)
+
+    // Very subtle cross-grain weave structure
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.02)'
+    for (let x = 0; x < 512; x += 8) {
+      ctx.fillRect(x, 0, 1, 512)
     }
 
     const texture = new THREE.CanvasTexture(canvas)
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set(4, 2)
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
   }

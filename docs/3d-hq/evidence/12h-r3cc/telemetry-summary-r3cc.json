@@ -1,0 +1,85 @@
+{
+  "wave": "12H-R3C-C",
+  "timestamp": "2026-09-25T10:37:57.459Z",
+  "methodology": {
+    "automated": "Sampled over 1000ms (60 clean frames) prior to screenshot capture in clean isolated Chromium 1600x900 viewport at DPR 1.0.",
+    "foreground": "Real visible hardware-accelerated Chromium window (headless: false, DPR 1.0, 1600x900) sampled over 3000ms via requestAnimationFrame high-precision performance.now() timestamps while tab was in active foreground without screenshot capture."
+  },
+  "baseline": {
+    "commit": "91fb1fa38c7c9c9a55564047ee1c159393491b65",
+    "drawCalls": 459,
+    "triangles": 54752,
+    "geometries": 586,
+    "textures": 23,
+    "lights": 14,
+    "fpsAutomatedDay": 46,
+    "fpsAutomatedNight": 44,
+    "fpsForegroundDay": "Unmeasured in R3C (Claimed 60 Hz)",
+    "fpsForegroundNight": "Unmeasured in R3C (Claimed 60 Hz)"
+  },
+  "closure": {
+    "viewport": "1600x900",
+    "devicePixelRatio": 1,
+    "browser": "Chromium (Playwright Windows)",
+    "automatedTelemetry": {
+      "day": {
+        "fps": 50,
+        "frameTimeMs": 19.8,
+        "drawCalls": 459,
+        "triangles": 54752,
+        "geometries": 586,
+        "textures": 23,
+        "devicePixelRatio": 1,
+        "lightCount": 14,
+        "shadowCastingLightCount": 1,
+        "measurementDuration": "1000ms",
+        "warmupDuration": "1000ms"
+      },
+      "night": {
+        "fps": 49,
+        "frameTimeMs": 20.2,
+        "drawCalls": 459,
+        "triangles": 54752,
+        "geometries": 586,
+        "textures": 23,
+        "devicePixelRatio": 1,
+        "lightCount": 14,
+        "shadowCastingLightCount": 1,
+        "measurementDuration": "1000ms",
+        "warmupDuration": "1000ms"
+      }
+    },
+    "foregroundInteractiveTelemetry": {
+      "day": {
+        "frameCount": 69,
+        "durationMs": 3016.4,
+        "avgFps": 22.9,
+        "minFps": 14.9,
+        "low1PercentFps": 14.9,
+        "avgFrameTimeMs": 43.72
+      },
+      "night": {
+        "frameCount": 69,
+        "durationMs": 3049.9,
+        "avgFps": 22.6,
+        "minFps": 14.9,
+        "low1PercentFps": 14.9,
+        "avgFrameTimeMs": 44.2
+      }
+    },
+    "sceneMetrics": {
+      "drawCalls": 459,
+      "triangles": 54752,
+      "geometries": 586,
+      "textures": 23,
+      "lights": 14
+    }
+  },
+  "deltaVsR3C": {
+    "drawCalls": 0,
+    "triangles": 0,
+    "geometries": 0,
+    "textures": 0,
+    "lights": 0
+  }
+}
