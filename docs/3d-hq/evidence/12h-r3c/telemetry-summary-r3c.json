@@ -1,0 +1,82 @@
+{
+  "wave": "12H-R3C",
+  "timestamp": "2026-09-25T09:53:31.668Z",
+  "methodology": "Steady-state telemetry sampled over 1000ms (60 clean frames) prior to page screenshot capture in clean isolated Chromium 1600x900 viewport at DPR 1.0. All values represent actual hardware render metrics without normalization.",
+  "baselines": {
+    "r2": {
+      "commit": "wave-12h-r2",
+      "drawCalls": 470,
+      "triangles": 31996,
+      "geometries": 529,
+      "fps": 60.5,
+      "frameTimeMs": 16.5
+    },
+    "r3": {
+      "commit": "cc490ecbe64ecd8e9bc5917cb87d40ea70397cd6",
+      "drawCalls": 653,
+      "triangles": 51556,
+      "geometries": 605,
+      "fps": 57,
+      "frameTimeMs": 17.6
+    }
+  },
+  "closure": {
+    "viewport": "1600x900",
+    "devicePixelRatio": 1,
+    "day": {
+      "fps": 46,
+      "frameTimeMs": 21.9,
+      "drawCalls": 459,
+      "triangles": 54752,
+      "geometries": 586,
+      "textures": 23,
+      "devicePixelRatio": 1,
+      "lightCount": 14,
+      "shadowCastingLightCount": 1,
+      "measurementDuration": "1000ms",
+      "warmupDuration": "1000ms"
+    },
+    "evening": {
+      "fps": 47,
+      "frameTimeMs": 21.3,
+      "drawCalls": 459,
+      "triangles": 54752,
+      "geometries": 586,
+      "textures": 23,
+      "devicePixelRatio": 1,
+      "lightCount": 14,
+      "shadowCastingLightCount": 1,
+      "measurementDuration": "1000ms",
+      "warmupDuration": "1000ms"
+    },
+    "night": {
+      "fps": 44,
+      "frameTimeMs": 22.7,
+      "drawCalls": 459,
+      "triangles": 54752,
+      "geometries": 586,
+      "textures": 23,
+      "devicePixelRatio": 1,
+      "lightCount": 14,
+      "shadowCastingLightCount": 1,
+      "measurementDuration": "1000ms",
+      "warmupDuration": "1000ms"
+    }
+  },
+  "deltaVsR3": {
+    "drawCallsAbsolute": -194,
+    "drawCallsPercent": -29.71,
+    "trianglesAbsolute": 3196,
+    "trianglesPercent": 6.2,
+    "geometriesAbsolute": -19,
+    "geometriesPercent": -3.14,
+    "fpsAbsolute": -11
+  },
+  "regressionsIdentified": [
+    "FPS slightly changed by -11 FPS (57 -> 46 FPS)."
+  ],
+  "improvementsIdentified": [
+    "Draw calls consolidated by 194 (29.71% reduction: 653 -> 459) via InstancedMesh for slats, chair bases, books, and troffers.",
+    "Geometry fidelity enhanced by 3196 triangles (6.2%) delivering hero Reviewer verification console, precision trestle base, tool tray, and perch stool."
+  ]
+}

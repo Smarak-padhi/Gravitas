@@ -92,7 +92,7 @@ export class HeroFrontendBay {
     feltBacker.receiveShadow = true
     acousticWallGroup.add(feltBacker)
 
-    // Vertical solid oak timber slats with deep shadow reveals facing into the bay (-Z)
+    // Vertical solid oak timber slats with deep shadow reveals facing into the bay (-Z) (instanced for optimal draw call budget)
     const slatWidth = 0.038
     const slatDepth = 0.024
     const slatSpacing = 0.075
@@ -101,13 +101,17 @@ export class HeroFrontendBay {
     const slatGeo = track(new THREE.BoxGeometry(slatWidth, 3.12, slatDepth))
     const startX = -((slatCount - 1) * slatSpacing) / 2
 
+    const slatInstanced = new THREE.InstancedMesh(slatGeo, materials.heroAcousticWood, slatCount)
+    slatInstanced.castShadow = true
+    slatInstanced.receiveShadow = true
+    const dummy = new THREE.Object3D()
     for (let i = 0; i < slatCount; i++) {
-      const slat = new THREE.Mesh(slatGeo, materials.heroAcousticWood)
-      slat.position.set(startX + i * slatSpacing, 0.0, -slatDepth / 2)
-      slat.castShadow = true
-      slat.receiveShadow = true
-      acousticWallGroup.add(slat)
+      dummy.position.set(startX + i * slatSpacing, 0.0, -slatDepth / 2)
+      dummy.updateMatrix()
+      slatInstanced.setMatrixAt(i, dummy.matrix)
     }
+    slatInstanced.instanceMatrix.needsUpdate = true
+    acousticWallGroup.add(slatInstanced)
 
     // Top & bottom architectural reveals/fascia trim
     const topFasciaGeo = track(new THREE.BoxGeometry(3.24, 0.035, 0.032))
@@ -119,6 +123,19 @@ export class HeroFrontendBay {
     const botFascia = new THREE.Mesh(botFasciaGeo, materials.structureGraphite)
     botFascia.position.set(0.0, -1.58, -slatDepth / 2 - 0.004)
     acousticWallGroup.add(botFascia)
+
+    // Vertical architectural side casing reveals (terminating the slat array)
+    for (const sx of [-1.61, 1.61]) {
+      const casingGeo = track(new THREE.BoxGeometry(0.024, 3.2, 0.034))
+      const casing = new THREE.Mesh(casingGeo, materials.structureGraphite)
+      casing.position.set(sx, 0.0, -slatDepth / 2 - 0.004)
+      acousticWallGroup.add(casing)
+
+      const casingRevealGeo = track(new THREE.BoxGeometry(0.012, 3.2, 0.036))
+      const casingReveal = new THREE.Mesh(casingRevealGeo, materials.heroBrass)
+      casingReveal.position.set(sx - (Math.sign(sx) * 0.012), 0.0, -slatDepth / 2 - 0.005)
+      acousticWallGroup.add(casingReveal)
+    }
 
     // Horizontal champagne brass architectural reveal datum trim
     const datumTrimGeo = track(new THREE.BoxGeometry(3.24, 0.018, 0.034))
@@ -251,39 +268,55 @@ export class HeroFrontendBay {
     chairGroup.add(spiderHub)
 
     const spiderRadius = 0.28
+    const legArmGeo = track(new THREE.BoxGeometry(0.032, 0.024, spiderRadius))
+    const legArmInstanced = new THREE.InstancedMesh(legArmGeo, materials.heroSteel, 5)
+    legArmInstanced.castShadow = true
+
+    const casterStemGeo = track(new THREE.CylinderGeometry(0.008, 0.008, 0.035, 8))
+    const casterStemInstanced = new THREE.InstancedMesh(casterStemGeo, materials.heroSteel, 5)
+
+    const chairWheelGeo = track(new THREE.CylinderGeometry(0.025, 0.025, 0.012, 12))
+    chairWheelGeo.rotateZ(Math.PI / 2)
+    const chairWheelInstanced = new THREE.InstancedMesh(chairWheelGeo, materials.heroPlastic, 10)
+    chairWheelInstanced.castShadow = true
+
+    const chairDummy = new THREE.Object3D()
+    let wheelIndex = 0
+
     for (let i = 0; i < 5; i++) {
       const angle = (i * Math.PI * 2) / 5
       const cosA = Math.cos(angle)
       const sinA = Math.sin(angle)
 
       // Arched spider leg arm
-      const legArmGeo = track(new THREE.BoxGeometry(0.032, 0.024, spiderRadius))
-      const legArm = new THREE.Mesh(legArmGeo, materials.heroSteel)
-      legArm.position.set((cosA * spiderRadius) / 2, 0.08, (sinA * spiderRadius) / 2)
-      legArm.rotation.y = -angle + Math.PI / 2
-      legArm.rotation.z = 0.08 // Gentle downward arch
-      legArm.castShadow = true
-      chairGroup.add(legArm)
+      chairDummy.position.set((cosA * spiderRadius) / 2, 0.08, (sinA * spiderRadius) / 2)
+      chairDummy.rotation.set(0, -angle + Math.PI / 2, 0.08)
+      chairDummy.updateMatrix()
+      legArmInstanced.setMatrixAt(i, chairDummy.matrix)
 
-      // Caster swivel stem and twin nylon wheels
+      // Caster swivel stem
       const wheelX = cosA * spiderRadius
       const wheelZ = sinA * spiderRadius
-
-      const casterStemGeo = track(new THREE.CylinderGeometry(0.008, 0.008, 0.035, 8))
-      const casterStem = new THREE.Mesh(casterStemGeo, materials.heroSteel)
-      casterStem.position.set(wheelX, 0.045, wheelZ)
-      chairGroup.add(casterStem)
+      chairDummy.position.set(wheelX, 0.045, wheelZ)
+      chairDummy.rotation.set(0, 0, 0)
+      chairDummy.updateMatrix()
+      casterStemInstanced.setMatrixAt(i, chairDummy.matrix)
 
       // Dual wheels
       for (const wOffset of [-0.012, 0.012]) {
-        const wheelGeo = track(new THREE.CylinderGeometry(0.025, 0.025, 0.012, 12))
-        wheelGeo.rotateZ(Math.PI / 2)
-        const wheel = new THREE.Mesh(wheelGeo, materials.heroPlastic)
-        wheel.position.set(wheelX + wOffset, 0.025, wheelZ)
-        wheel.castShadow = true
-        chairGroup.add(wheel)
+        chairDummy.position.set(wheelX + wOffset, 0.025, wheelZ)
+        chairDummy.rotation.set(0, 0, 0)
+        chairDummy.updateMatrix()
+        chairWheelInstanced.setMatrixAt(wheelIndex++, chairDummy.matrix)
       }
     }
+    legArmInstanced.instanceMatrix.needsUpdate = true
+    casterStemInstanced.instanceMatrix.needsUpdate = true
+    chairWheelInstanced.instanceMatrix.needsUpdate = true
+
+    chairGroup.add(legArmInstanced)
+    chairGroup.add(casterStemInstanced)
+    chairGroup.add(chairWheelInstanced)
 
     // 3.2 Pneumatic Gas Cylinder & Mechanism
     const gasStrutGeo = track(new THREE.CylinderGeometry(0.02, 0.024, 0.32, 16))

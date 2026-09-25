@@ -11,6 +11,7 @@ import type { StationStatus } from '../world/worldState.js'
 import { STATION_DEFINITIONS } from '../world/stations.js'
 import { HeroFrontendBay } from './heroBay/heroFrontendBay.js'
 import { HeroBackendBay } from './heroBay/heroBackendBay.js'
+import { HeroReviewerBay } from './heroBay/heroReviewerBay.js'
 
 export class HqFurniture {
   public readonly group: THREE.Group
@@ -183,108 +184,15 @@ export class HqFurniture {
     // ──────────────────────────────────────────────────────────────────────────
     // 3. INDEPENDENT REVIEWER VERIFICATION STATION (Screen Center Forward: X = 0.0, Z = -0.1)
     // ──────────────────────────────────────────────────────────────────────────
-    const reviewerGroup = new THREE.Group()
-    reviewerGroup.position.set(0.0, 7.2, -0.1)
-    reviewerGroup.name = 'station:reviewer-workstation'
-    reviewerGroup.userData = {
-      type: 'station',
-      id: 'reviewer-workstation',
-      name: 'Independent Reviewer Verification Station',
-    }
+    const reviewerResult = HeroReviewerBay.buildBay(materials, this.track.bind(this))
 
-    // Status indicator lens
-    const revIndGeo = this.track(new THREE.BoxGeometry(0.22, 0.012, 0.035))
-    const revInd = new THREE.Mesh(revIndGeo, materials.gunmetal)
-    revInd.position.set(0.0, 0.865, 0.36)
-    revInd.name = 'station-indicator:reviewer-workstation'
-    reviewerGroup.add(revInd)
-    this.stationIndicators.set('reviewer-workstation' as any, revInd)
+    // Register modern role ID and legacy aliases for indicators
+    this.stationIndicators.set('reviewer-workstation' as any, reviewerResult.indicatorMesh)
 
-    // 3.1 Beveled White Oak Inspection Bench (1.7m x 0.72m at standing height 0.86m)
-    const revTopGeo = this.track(new THREE.BoxGeometry(1.7, 0.032, 0.72))
-    const revTop = new THREE.Mesh(revTopGeo, materials.heroDeskWood)
-    revTop.position.set(0.0, 0.86, 0.0)
-    revTop.castShadow = true
-    revTop.receiveShadow = true
-    reviewerGroup.add(revTop)
+    // Register modern role ID and legacy aliases for screens
+    this.stationScreens.set('reviewer-workstation' as any, reviewerResult.screens)
 
-    // Brushed champagne brass perimeter rim
-    const revTrimGeo = this.track(new THREE.BoxGeometry(1.72, 0.012, 0.74))
-    const revTrim = new THREE.Mesh(revTrimGeo, materials.champagneBrass)
-    revTrim.position.set(0.0, 0.865, 0.0)
-    reviewerGroup.add(revTrim)
-
-    // Slender tapered architectural legs with brass shoes
-    for (const [lx, lz] of [[-0.74, -0.28], [0.74, -0.28], [-0.74, 0.28], [0.74, 0.28]]) {
-      const legGeo = this.track(new THREE.CylinderGeometry(0.022, 0.016, 0.84, 12))
-      const leg = new THREE.Mesh(legGeo, materials.champagneBrass)
-      leg.position.set(lx!, 0.43, lz!)
-      leg.castShadow = true
-      reviewerGroup.add(leg)
-    }
-
-    // Longitudinal champagne brass footrest stretcher rail
-    const stretcherGeo = this.track(new THREE.CylinderGeometry(0.014, 0.014, 1.48, 12))
-    stretcherGeo.rotateZ(Math.PI / 2)
-    const stretcher = new THREE.Mesh(stretcherGeo, materials.champagneBrass)
-    stretcher.position.set(0.0, 0.22, 0.0)
-    stretcher.castShadow = true
-    reviewerGroup.add(stretcher)
-
-    // Side cross-stretchers between front and back legs
-    for (const sx of [-0.74, 0.74]) {
-      const sideStretcherGeo = this.track(new THREE.CylinderGeometry(0.012, 0.012, 0.56, 12))
-      sideStretcherGeo.rotateX(Math.PI / 2)
-      const sideStretcher = new THREE.Mesh(sideStretcherGeo, materials.champagneBrass)
-      sideStretcher.position.set(sx, 0.22, 0.0)
-      sideStretcher.castShadow = true
-      reviewerGroup.add(sideStretcher)
-    }
-
-    // Turned champagne brass cable grommet
-    const grommetGeo = this.track(new THREE.CylinderGeometry(0.024, 0.024, 0.012, 16))
-    const grommet = new THREE.Mesh(grommetGeo, materials.champagneBrass)
-    grommet.position.set(0.48, 0.868, -0.22)
-    reviewerGroup.add(grommet)
-
-    // 3.2 Centered Inspection Viewport Slate (displays code diff & test runner output)
-    const viewportFrameGeo = this.track(new THREE.BoxGeometry(0.48, 0.015, 0.32))
-    const viewportFrame = new THREE.Mesh(viewportFrameGeo, materials.gunmetal)
-    viewportFrame.position.set(0.0, 0.88, -0.05)
-    viewportFrame.rotation.x = -0.22 // Ergonomically angled towards Reviewer
-    reviewerGroup.add(viewportFrame)
-
-    const viewportScreenGeo = this.track(new THREE.BoxGeometry(0.44, 0.004, 0.28))
-    const viewportScreen = new THREE.Mesh(viewportScreenGeo, materials.terminalScreenAmber)
-    viewportScreen.position.set(0.0, 0.888, -0.05)
-    viewportScreen.rotation.x = -0.22
-    reviewerGroup.add(viewportScreen)
-
-    // 3.3 Tactile Inspection Tools: Brass Loupe Dock, Anodized Checklist Pad, Stylus
-    const loupeDockGeo = this.track(new THREE.CylinderGeometry(0.045, 0.05, 0.02, 16))
-    const loupeDock = new THREE.Mesh(loupeDockGeo, materials.champagneBrass)
-    loupeDock.position.set(-0.54, 0.88, 0.08)
-    reviewerGroup.add(loupeDock)
-
-    const loupeRimGeo = this.track(new THREE.TorusGeometry(0.035, 0.006, 8, 24))
-    const loupeRim = new THREE.Mesh(loupeRimGeo, materials.champagneBrass)
-    loupeRim.position.set(-0.54, 0.91, 0.08)
-    loupeRim.rotation.x = Math.PI / 2
-    reviewerGroup.add(loupeRim)
-
-    const clipGeo = this.track(new THREE.BoxGeometry(0.24, 0.012, 0.30))
-    const clip = new THREE.Mesh(clipGeo, materials.bookSpineAmber)
-    clip.position.set(0.52, 0.88, 0.06)
-    clip.rotation.y = -0.15
-    reviewerGroup.add(clip)
-
-    const penGeo = this.track(new THREE.CylinderGeometry(0.005, 0.005, 0.16, 8))
-    const pen = new THREE.Mesh(penGeo, materials.champagneBrass)
-    pen.position.set(0.66, 0.885, 0.06)
-    pen.rotation.x = Math.PI / 2
-    reviewerGroup.add(pen)
-
-    this.group.add(reviewerGroup)
+    this.group.add(reviewerResult.podGroup)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 4. STANDBY EXPANSION BAYS 03 & 04 (Slender Perimeter Wall Docks, Zero Foreground Clutter)
@@ -758,20 +666,39 @@ export class HqFurniture {
     const shelfFrame = new THREE.Mesh(shelfFrameGeo, materials.walnut)
     shelfGroup.add(shelfFrame)
 
+    const bookGeo = this.track(new THREE.BoxGeometry(0.24, 0.28, 0.06))
+    const navyPositions: [number, number, number][] = []
+    const amberPositions: [number, number, number][] = []
+    const tealPositions: [number, number, number][] = []
+
     for (let sy = -0.7; sy <= 0.7; sy += 0.5) {
       for (let sz = -0.7; sz <= 0.7; sz += 0.35) {
-        const bookGeo = this.track(new THREE.BoxGeometry(0.24, 0.28, 0.06))
-        const bookMat =
-          Math.abs(sz + sy) < 0.4
-            ? materials.bookSpineNavy
-            : sz > 0
-              ? materials.bookSpineAmber
-              : materials.bookSpineTeal
-        const book = new THREE.Mesh(bookGeo, bookMat)
-        book.position.set(0.02, sy + 0.15, sz)
-        shelfGroup.add(book)
+        if (Math.abs(sz + sy) < 0.4) {
+          navyPositions.push([0.02, sy + 0.15, sz])
+        } else if (sz > 0) {
+          amberPositions.push([0.02, sy + 0.15, sz])
+        } else {
+          tealPositions.push([0.02, sy + 0.15, sz])
+        }
       }
     }
+
+    const dummyBook = new THREE.Object3D()
+    const addInstancedBooks = (mat: THREE.Material, positions: [number, number, number][]) => {
+      if (positions.length === 0) return
+      const inst = new THREE.InstancedMesh(bookGeo, mat, positions.length)
+      positions.forEach(([bx, by, bz], idx) => {
+        dummyBook.position.set(bx, by, bz)
+        dummyBook.updateMatrix()
+        inst.setMatrixAt(idx, dummyBook.matrix)
+      })
+      inst.instanceMatrix.needsUpdate = true
+      shelfGroup.add(inst)
+    }
+
+    addInstancedBooks(materials.bookSpineNavy, navyPositions)
+    addInstancedBooks(materials.bookSpineAmber, amberPositions)
+    addInstancedBooks(materials.bookSpineTeal, tealPositions)
     f2Group.add(shelfGroup)
 
     // Framed Abstract Wall Art on rear wall
@@ -843,15 +770,19 @@ export class HqFurniture {
     const cloudFrame = new THREE.Mesh(cloudFrameGeo, materials.walnut)
     ceilingCloudGroup.add(cloudFrame)
 
-    // Recessed warm linear LED troffers
+    // Recessed warm linear LED troffers (instanced)
+    const trofferGeo = this.track(new THREE.BoxGeometry(4.2, 0.016, 0.08))
+    const trofferInstanced = new THREE.InstancedMesh(trofferGeo, materials.lampWarmGlow, 4)
+    let tIdx = 0
     for (const tz of [-1.2, 1.4]) {
       for (const tx of [-3.2, 3.2]) {
-        const trofferGeo = this.track(new THREE.BoxGeometry(4.2, 0.016, 0.08))
-        const troffer = new THREE.Mesh(trofferGeo, materials.lampWarmGlow)
-        troffer.position.set(tx, -0.018, tz)
-        ceilingCloudGroup.add(troffer)
+        dummyBook.position.set(tx, -0.018, tz)
+        dummyBook.updateMatrix()
+        trofferInstanced.setMatrixAt(tIdx++, dummyBook.matrix)
       }
     }
+    trofferInstanced.instanceMatrix.needsUpdate = true
+    ceilingCloudGroup.add(trofferInstanced)
     f2Group.add(ceilingCloudGroup)
 
     propsGroup.add(f2Group)
