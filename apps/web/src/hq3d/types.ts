@@ -24,6 +24,8 @@ export type StationId =
   | 'verifier-console'
   | 'verification-lab-console'
   | 'browser-qa-matrix'
+  | 'browser-qa-station'
+  | 'evidence-wall'
   | 'omniroute-rack'
   | 'approval-plinth'
   | 'repository-vault'
@@ -32,7 +34,13 @@ export type StationId =
 
 import type { RoleId, RoleInspectorMetadata } from './roles/types.js'
 
-export type CharacterId = RoleId | 'char-codex' | 'char-fcc' | 'char-verifier'
+export type CharacterId =
+  | RoleId
+  | 'char-codex'
+  | 'char-fcc'
+  | 'char-verifier'
+  | 'char-browser-qa'
+  | 'browser-qa'
 
 export type EntityType = 'room' | 'station' | 'character' | 'artifact'
 

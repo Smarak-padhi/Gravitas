@@ -1,0 +1,163 @@
+{
+  "totalNodes": 1264,
+  "meshNodes": 1079,
+  "instancedMeshNodes": 17,
+  "uniqueGeometries": 803,
+  "uniqueMaterials": 89,
+  "shadowCasterNodes": 155,
+  "shadowReceiverNodes": 114,
+  "matrixAutoUpdateTrueNodes": 228,
+  "matrixAutoUpdateFalseNodes": 1036,
+  "totalLights": 20,
+  "activeLights": 20,
+  "lights": [
+    {
+      "type": "DirectionalLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.65,
+      "castShadow": true
+    },
+    {
+      "type": "DirectionalLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.1,
+      "castShadow": false
+    },
+    {
+      "type": "HemisphereLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.25,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 2.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.8,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.6,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.4,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 2.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.8,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.6,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 2.2,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.8,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.6,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.6,
+      "castShadow": false
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.8,
+      "castShadow": false
+    },
+    {
+      "type": "PointLight",
+      "name": "",
+      "visible": true,
+      "intensity": 1.2,
+      "castShadow": false
+    }
+  ],
+  "renderInfo": {
+    "calls": 564,
+    "triangles": 34532,
+    "points": 0,
+    "lines": 0,
+    "geometries": 801,
+    "textures": 24
+  }
+}

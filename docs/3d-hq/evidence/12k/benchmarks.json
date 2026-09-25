@@ -1,0 +1,57 @@
+{
+  "f3DayBench": {
+    "frameCount": 554,
+    "sampleDurationMs": 10016.3,
+    "avgFps": 55.31,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 33.4,
+    "p99FrameTimeMs": 33.6,
+    "minFps": 29.5,
+    "low1PercentFps": 29.76,
+    "avgFrameTimeMs": 18.08
+  },
+  "f3NightBench": {
+    "frameCount": 550,
+    "sampleDurationMs": 10015.9,
+    "avgFps": 54.91,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 33.4,
+    "p99FrameTimeMs": 33.6,
+    "minFps": 29.59,
+    "low1PercentFps": 29.76,
+    "avgFrameTimeMs": 18.21
+  },
+  "f4DayBench": {
+    "frameCount": 541,
+    "sampleDurationMs": 10016,
+    "avgFps": 54.01,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 33.4,
+    "p99FrameTimeMs": 33.5,
+    "minFps": 29.67,
+    "low1PercentFps": 29.85,
+    "avgFrameTimeMs": 18.51
+  },
+  "f4NightBench": {
+    "frameCount": 554,
+    "sampleDurationMs": 10016,
+    "avgFps": 55.31,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 33.4,
+    "p99FrameTimeMs": 33.5,
+    "minFps": 29.76,
+    "low1PercentFps": 29.85,
+    "avgFrameTimeMs": 18.08
+  },
+  "overviewBench": {
+    "frameCount": 546,
+    "sampleDurationMs": 10016,
+    "avgFps": 54.51,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 33.4,
+    "p99FrameTimeMs": 33.5,
+    "minFps": 29.59,
+    "low1PercentFps": 29.85,
+    "avgFrameTimeMs": 18.34
+  }
+}

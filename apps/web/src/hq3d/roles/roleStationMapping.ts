@@ -10,9 +10,9 @@
  */
 
 import type { WorldState, WorldTaskState } from '../world/worldState.js'
-import type { CharacterPresentationState, RoleId, RolePresentationState, RoleInspectorMetadata } from './types.js'
+import type { CharacterPresentationState, RoleId, RolePresentationState, RoleInspectorMetadata, HqRoleIdentity } from './types.js'
 import {
-  FROZEN_ROLES,
+  TOWER_ROLES,
   ROLE_BY_ID,
   ROLE_HOME_POSITIONS,
 } from './roles.js'
@@ -41,6 +41,7 @@ export const LEGACY_ROLE_COMPATIBILITY_MAPPING: Readonly<Record<string, RoleId>>
   // Quality & Verification
   'verification-lab-console': 'role:quality:independent-reviewer',
   'verifier-console': 'role:quality:independent-reviewer',
+  'browser-qa-station': 'role:quality:browser-qa',
 } as const
 
 /**
@@ -58,11 +59,12 @@ export function resolveRoleIdFromStation(stationId: string): RoleId | null {
  */
 export function deriveRolePresentationStates(
   worldState: WorldState,
-  fixtureOverrides?: Partial<Record<RoleId, Partial<RolePresentationState>>>
+  fixtureOverrides?: Partial<Record<RoleId, Partial<RolePresentationState>>>,
+  rolesToDerive: readonly HqRoleIdentity[] = TOWER_ROLES
 ): Map<RoleId, RolePresentationState> {
   const result = new Map<RoleId, RolePresentationState>()
 
-  for (const role of FROZEN_ROLES) {
+  for (const role of rolesToDerive) {
     const roleId = role.roleId
     const homePosition = ROLE_HOME_POSITIONS[roleId]
     const override = fixtureOverrides?.[roleId]
@@ -108,6 +110,27 @@ export function deriveRolePresentationStates(
 
       if (isVerifying) {
         characterState = 'VERIFYING'
+      } else if (activeTask?.canonicalState === 'WAITING_APPROVAL') {
+        characterState = 'WAITING'
+      } else if (activeTask?.canonicalState === 'FAILED') {
+        characterState = 'FAILURE'
+      } else if (activeTask?.canonicalState === 'SUCCEEDED' || activeTask?.canonicalState === 'APPROVED') {
+        characterState = 'SUCCESS'
+      } else {
+        characterState = 'IDLE'
+      }
+    } else if (roleId === 'role:quality:browser-qa') {
+      // Browser QA Truth Rule:
+      // State is FOCUSED when BROWSER_QA lifecycle phase is active
+      const matrixState = worldState.stations['browser-qa-matrix']
+      const isBrowserQaActive =
+        matrixState?.status === 'BROWSER_QA' ||
+        stationState?.status === 'BROWSER_QA' ||
+        activeTask?.physicalLocation === 'BROWSER_QA_MATRIX' ||
+        activeTask?.runtimePhase === 'BROWSER_QA'
+
+      if (isBrowserQaActive) {
+        characterState = 'FOCUSED'
       } else if (activeTask?.canonicalState === 'WAITING_APPROVAL') {
         characterState = 'WAITING'
       } else if (activeTask?.canonicalState === 'FAILED') {

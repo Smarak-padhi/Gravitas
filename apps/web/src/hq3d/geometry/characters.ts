@@ -15,7 +15,7 @@ import type { MaterialLibrary } from '../materials/materials.js'
 import type { CharacterId } from '../types.js'
 import type { CharacterPresentationState, RoleId, RolePresentationState } from '../roles/types.js'
 import {
-  FROZEN_ROLES,
+  TOWER_ROLES,
   ROLE_HOME_POSITIONS,
   ROLE_HOME_ROTATIONS,
   TOWER_ROLE_HOME_POSITIONS,
@@ -58,9 +58,9 @@ export class HqCharacters {
     this.group = new THREE.Group()
     this.group.name = 'hq-characters'
 
-    // Build the four frozen role characters
-    for (let i = 0; i < FROZEN_ROLES.length; i++) {
-      const role = FROZEN_ROLES[i]
+    // Build the tower role characters (FROZEN_ROLES + BROWSER_QA_ROLE)
+    for (let i = 0; i < TOWER_ROLES.length; i++) {
+      const role = TOWER_ROLES[i]
       this.buildRoleFigure(role.roleId, i * 1.57)
     }
   }
@@ -182,6 +182,11 @@ export class HqCharacters {
       accentMat = this.materials.charReviewerAccent
       roomName = 'Verification Cleanroom'
       roleName = 'Independent Reviewer'
+    } else if (roleId === 'role:quality:browser-qa') {
+      suitMat = this.materials.charSweaterSlate
+      accentMat = this.materials.deviceTablet
+      roomName = 'Browser QA Lab'
+      roleName = 'Browser QA Specialist'
     }
 
     // 0. Status Underlay Ring (Floor disk indicating active status)
@@ -285,6 +290,18 @@ export class HqCharacters {
       loupe.rotation.x = Math.PI / 2
       loupe.position.set(0.06, 0.37, 0.13)
       torsoGroup.add(loupe)
+    } else if (roleId === 'role:quality:browser-qa') {
+      // Browser QA Specialist: Short cropped analytical hair & testing visor
+      const hairGeo = this.track(new THREE.BoxGeometry(0.20, 0.08, 0.20))
+      const hair = new THREE.Mesh(hairGeo, this.materials.hairBackend)
+      hair.position.set(0.0, 0.44, -0.01)
+      torsoGroup.add(hair)
+
+      // Optical testing visor across eyes in vibrant cyan/teal
+      const visorGeo = this.track(new THREE.BoxGeometry(0.19, 0.032, 0.02))
+      const visor = new THREE.Mesh(visorGeo, this.materials.deviceTablet)
+      visor.position.set(0.0, 0.36, 0.12)
+      torsoGroup.add(visor)
     }
 
     // 3. Articulated Arms & Physical Accessories
@@ -405,6 +422,19 @@ export class HqCharacters {
         armL.position.set(-0.15, -0.01, 0.12)
         armR.rotation.x = -0.55
         armR.position.set(0.15, -0.01, 0.12)
+      } else if (roleId === 'role:quality:browser-qa') {
+        // Browser QA Specialist: Responsive testing tablet held at chest
+        const tabGeo = this.track(new THREE.BoxGeometry(0.22, 0.015, 0.16))
+        accessoryMesh = new THREE.Mesh(tabGeo, this.materials.deviceTablet)
+        accessoryMesh.position.set(0.0, -0.08, 0.22)
+        accessoryMesh.rotation.x = -0.38
+        torsoGroup.add(accessoryMesh)
+
+        // Arms forward holding tablet
+        armL.rotation.x = -0.42
+        armL.position.set(-0.15, -0.02, 0.11)
+        armR.rotation.x = -0.42
+        armR.position.set(0.15, -0.02, 0.11)
       }
     }
 
@@ -454,7 +484,7 @@ export class HqCharacters {
       departmentId:
         roleId === 'role:strategy:chief-planner'
           ? 'CONTROL_STRATEGY'
-          : roleId === 'role:quality:independent-reviewer'
+          : (roleId === 'role:quality:independent-reviewer' || roleId === 'role:quality:browser-qa')
             ? 'QUALITY'
             : 'ENGINEERING',
       displayName: roleName,
@@ -465,13 +495,17 @@ export class HqCharacters {
           ? 'planning-table'
           : roleId === 'role:quality:independent-reviewer'
             ? 'verifier-console'
-            : 'engineering-workstation-02',
+            : roleId === 'role:quality:browser-qa'
+              ? 'browser-qa-station'
+              : 'engineering-workstation-02',
       stationAlias:
         roleId === 'role:strategy:chief-planner'
           ? 'planning-table'
           : roleId === 'role:quality:independent-reviewer'
             ? 'verifier-console'
-            : 'fcc-workstation',
+            : roleId === 'role:quality:browser-qa'
+              ? 'browser-qa-matrix'
+              : 'fcc-workstation',
       currentTaskId: null,
       currentTaskTitle: null,
       currentHarness: 'UNKNOWN',
@@ -505,6 +539,12 @@ export class HqCharacters {
       this.figureMap.set('char-verifier', rootGroup)
       const aliasNode = new THREE.Object3D()
       aliasNode.name = 'character:char-verifier'
+      aliasNode.userData = rootGroup.userData
+      rootGroup.add(aliasNode)
+    } else if (roleId === 'role:quality:browser-qa') {
+      this.figureMap.set('char-browser-qa' as any, rootGroup)
+      const aliasNode = new THREE.Object3D()
+      aliasNode.name = 'character:char-browser-qa'
       aliasNode.userData = rootGroup.userData
       rootGroup.add(aliasNode)
     }
@@ -752,7 +792,9 @@ export class HqCharacters {
             ? 'Mission Control'
             : roleId === 'role:quality:independent-reviewer'
               ? 'Verification Cleanroom'
-              : 'Agent Operations',
+              : roleId === 'role:quality:browser-qa'
+                ? 'Browser QA Lab'
+                : 'Agent Operations',
         status: presentation.characterState,
         description: `${presentation.displayName} (${presentation.departmentId}). Station: ${presentation.stationId}. Status: ${presentation.characterState}. Harness: ${presentation.currentHarness}.`,
         roleMetadata: inspectorMeta,
@@ -769,6 +811,7 @@ export class HqCharacters {
     if (id === 'char-codex') targetRoleId = 'role:engineering:frontend-engineer'
     else if (id === 'char-fcc') targetRoleId = 'role:engineering:backend-engineer'
     else if (id === 'char-verifier') targetRoleId = 'role:quality:independent-reviewer'
+    else if (id === 'char-browser-qa' || id === 'browser-qa') targetRoleId = 'role:quality:browser-qa'
     else if (this.figureMap.has(id as RoleId)) targetRoleId = id as RoleId
 
     if (targetRoleId) {
@@ -782,6 +825,7 @@ export class HqCharacters {
     if (id === 'char-fcc' || id === 'backend-engineer') return this.figureMap.get('role:engineering:backend-engineer')
     if (id === 'char-verifier' || id === 'independent-reviewer' || id === 'reviewer') return this.figureMap.get('role:quality:independent-reviewer')
     if (id === 'char-planner' || id === 'chief-planner' || id === 'planner') return this.figureMap.get('role:strategy:chief-planner')
+    if (id === 'char-browser-qa' || id === 'browser-qa') return this.figureMap.get('role:quality:browser-qa')
     return this.figureMap.get(id as RoleId)
   }
 

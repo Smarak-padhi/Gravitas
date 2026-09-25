@@ -57,6 +57,14 @@ export class HqScene {
   private readonly spotOperationsDeskR: THREE.SpotLight
   private readonly spotOperationsReviewer: THREE.SpotLight
 
+  // Floor 3 Dedicated Architectural Lighting Layers (Wave 12K)
+  private readonly spotCleanroomWash: THREE.SpotLight
+  private readonly spotCleanroomEdge: THREE.SpotLight
+
+  // Floor 4 Dedicated Architectural Lighting Layers (Wave 12K)
+  private readonly spotBrowserQaWash: THREE.SpotLight
+  private readonly spotBrowserQaInteraction: THREE.SpotLight
+
   constructor() {
     this.scene = new THREE.Scene()
     // Architectural dark slate environment matching Gravitas application shell
@@ -152,18 +160,48 @@ export class HqScene {
     this.scene.add(this.spotOperationsReviewer.target)
 
     // Floor 3 (Y = 10.8m): Verification Cleanroom
-    this.spotCleanroom = new THREE.SpotLight(0xd4f4ff, 2.2, 16.0, Math.PI / 3.8, 0.5, 1.1)
-    this.spotCleanroom.position.set(0.0, 14.0, -1.0)
-    this.spotCleanroom.target.position.set(0.0, 10.8, 0.5)
+    // 4a. Central Verification Bench Downlight Pool
+    this.spotCleanroom = new THREE.SpotLight(0xe6f4f8, 2.2, 16.0, Math.PI / 3.4, 0.5, 1.1)
+    this.spotCleanroom.position.set(0.0, 14.0, 0.4)
+    this.spotCleanroom.target.position.set(0.0, 10.8, 0.8)
     this.scene.add(this.spotCleanroom)
     this.scene.add(this.spotCleanroom.target)
 
+    // 4b. Evidence Wall Grazing Wash Light
+    this.spotCleanroomWash = new THREE.SpotLight(0xdbeafe, 1.8, 16.0, Math.PI / 3.2, 0.6, 1.1)
+    this.spotCleanroomWash.position.set(0.0, 13.8, 1.2)
+    this.spotCleanroomWash.target.position.set(0.0, 12.2, 3.65)
+    this.scene.add(this.spotCleanroomWash)
+    this.scene.add(this.spotCleanroomWash.target)
+
+    // 4c. Candidate Circulation & Elevator Transition Edge
+    this.spotCleanroomEdge = new THREE.SpotLight(0xf1f5f9, 1.6, 12.0, Math.PI / 4.0, 0.5, 1.1)
+    this.spotCleanroomEdge.position.set(3.6, 13.6, 0.2)
+    this.spotCleanroomEdge.target.position.set(3.6, 10.8, 0.4)
+    this.scene.add(this.spotCleanroomEdge)
+    this.scene.add(this.spotCleanroomEdge.target)
+
     // Floor 4 (Y = 14.4m): Browser QA Lab Matrix
-    this.spotBrowserQa = new THREE.SpotLight(0xc2f0e8, 2.0, 16.0, Math.PI / 3.8, 0.5, 1.1)
-    this.spotBrowserQa.position.set(0.0, 17.6, -1.0)
-    this.spotBrowserQa.target.position.set(0.0, 14.4, 0.5)
+    // 4a. Device Test Bench Downlight Pool
+    this.spotBrowserQa = new THREE.SpotLight(0xe0f2fe, 2.2, 16.0, Math.PI / 3.4, 0.5, 1.1)
+    this.spotBrowserQa.position.set(0.0, 17.6, 0.4)
+    this.spotBrowserQa.target.position.set(0.0, 14.4, 0.8)
     this.scene.add(this.spotBrowserQa)
     this.scene.add(this.spotBrowserQa.target)
+
+    // 4b. Viewport Observation Wall Grazing Light
+    this.spotBrowserQaWash = new THREE.SpotLight(0xccfbf1, 1.8, 16.0, Math.PI / 3.2, 0.6, 1.1)
+    this.spotBrowserQaWash.position.set(0.0, 17.4, 1.2)
+    this.spotBrowserQaWash.target.position.set(0.0, 15.8, 3.65)
+    this.scene.add(this.spotBrowserQaWash)
+    this.scene.add(this.spotBrowserQaWash.target)
+
+    // 4c. Interaction Test Zone & Device Rack Pool
+    this.spotBrowserQaInteraction = new THREE.SpotLight(0xf0fdf4, 1.6, 12.0, Math.PI / 4.0, 0.5, 1.1)
+    this.spotBrowserQaInteraction.position.set(-3.8, 17.2, 0.4)
+    this.spotBrowserQaInteraction.target.position.set(-3.8, 14.4, 0.8)
+    this.scene.add(this.spotBrowserQaInteraction)
+    this.scene.add(this.spotBrowserQaInteraction.target)
 
     // Floor 5 (Y = 18.0m): Infrastructure Server Bay
     this.spotInfrastructure = new THREE.SpotLight(0xa5c6e8, 2.0, 16.0, Math.PI / 3.5, 0.5, 1.1)
@@ -249,10 +287,21 @@ export class HqScene {
       roomId === 'ROOM_AGENT_OPERATIONS' ||
       roomId === 'WS_FRONTEND' ||
       roomId === 'WS_BACKEND' ||
-      roomId === 'WS_VERIFIER' ||
       roomId === 'CHAR_FRONTEND' ||
-      roomId === 'CHAR_BACKEND' ||
+      roomId === 'CHAR_BACKEND'
+
+    const isFloor3 =
+      roomId === 'VERIFICATION_LAB' ||
+      roomId === 'ROOM_VERIFICATION_LAB' ||
+      roomId === 'WS_VERIFIER' ||
       roomId === 'CHAR_REVIEWER'
+
+    const isFloor4 =
+      roomId === 'BROWSER_QA_LAB' ||
+      roomId === 'ROOM_BROWSER_QA_LAB' ||
+      roomId === 'WS_DEVICE_BENCH' ||
+      roomId === 'WS_BROWSER_QA' ||
+      roomId === 'CHAR_BROWSER_QA'
 
     if (isFloor1) {
       // Deactivate non-Floor-1 spotlights from WebGL forward lighting pass
@@ -262,7 +311,11 @@ export class HqScene {
       this.spotOperationsDeskR.visible = false
       this.spotOperationsReviewer.visible = false
       this.spotCleanroom.visible = false
+      this.spotCleanroomWash.visible = false
+      this.spotCleanroomEdge.visible = false
       this.spotBrowserQa.visible = false
+      this.spotBrowserQaWash.visible = false
+      this.spotBrowserQaInteraction.visible = false
       this.spotInfrastructure.visible = false
       this.spotApproval.visible = false
 
@@ -271,10 +324,7 @@ export class HqScene {
       this.spotPlanningWash.visible = true
       this.spotPlanningDispatch.visible = true
 
-      // Floor 5 server bay is outside Floor 1 view
       this.infrastructure.group.visible = false
-
-      // Focus visibility on Floor 1
       this.furniture.setFloorVisibility(1)
     } else if (isFloor2) {
       // Deactivate non-Floor-2 spotlights from WebGL forward lighting pass
@@ -282,7 +332,11 @@ export class HqScene {
       this.spotPlanningWash.visible = false
       this.spotPlanningDispatch.visible = false
       this.spotCleanroom.visible = false
+      this.spotCleanroomWash.visible = false
+      this.spotCleanroomEdge.visible = false
       this.spotBrowserQa.visible = false
+      this.spotBrowserQaWash.visible = false
+      this.spotBrowserQaInteraction.visible = false
       this.spotInfrastructure.visible = false
       this.spotApproval.visible = false
 
@@ -293,18 +347,65 @@ export class HqScene {
       this.spotOperationsDeskR.visible = true
       this.spotOperationsReviewer.visible = true
 
-      // Floor 5 server bay is outside Floor 2 view
       this.infrastructure.group.visible = false
-
-      // Cull distant furniture
       this.furniture.setFloorVisibility(2)
+    } else if (isFloor3) {
+      // Focus on Floor 3 Verification Cleanroom
+      this.spotPlanning.visible = false
+      this.spotPlanningWash.visible = false
+      this.spotPlanningDispatch.visible = false
+      this.spotOperations.visible = false
+      this.spotOperationsWash.visible = false
+      this.spotOperationsDeskL.visible = false
+      this.spotOperationsDeskR.visible = false
+      this.spotOperationsReviewer.visible = false
+      this.spotBrowserQa.visible = false
+      this.spotBrowserQaWash.visible = false
+      this.spotBrowserQaInteraction.visible = false
+      this.spotInfrastructure.visible = false
+      this.spotApproval.visible = false
+
+      // Floor 3 dedicated fixtures active
+      this.spotCleanroom.visible = true
+      this.spotCleanroomWash.visible = true
+      this.spotCleanroomEdge.visible = true
+
+      this.infrastructure.group.visible = false
+      this.furniture.setFloorVisibility(3)
+    } else if (isFloor4) {
+      // Focus on Floor 4 Browser QA Lab
+      this.spotPlanning.visible = false
+      this.spotPlanningWash.visible = false
+      this.spotPlanningDispatch.visible = false
+      this.spotOperations.visible = false
+      this.spotOperationsWash.visible = false
+      this.spotOperationsDeskL.visible = false
+      this.spotOperationsDeskR.visible = false
+      this.spotOperationsReviewer.visible = false
+      this.spotCleanroom.visible = false
+      this.spotCleanroomWash.visible = false
+      this.spotCleanroomEdge.visible = false
+      this.spotInfrastructure.visible = false
+      this.spotApproval.visible = false
+
+      // Floor 4 dedicated fixtures active
+      this.spotBrowserQa.visible = true
+      this.spotBrowserQaWash.visible = true
+      this.spotBrowserQaInteraction.visible = true
+
+      this.infrastructure.group.visible = false
+      this.furniture.setFloorVisibility(4)
     } else {
       // Full overview / other rooms: restore all lights, furniture, and infrastructure
       this.spotPlanning.visible = true
       this.spotPlanningWash.visible = true
       this.spotPlanningDispatch.visible = true
       this.spotCleanroom.visible = true
+      this.spotCleanroomWash.visible = true
+      this.spotCleanroomEdge.visible = true
       this.spotBrowserQa.visible = true
+      this.spotBrowserQaWash.visible = true
+      this.spotBrowserQaInteraction.visible = true
       this.spotInfrastructure.visible = true
       this.spotApproval.visible = true
 
@@ -442,11 +543,22 @@ export class HqScene {
         this.spotPlanningDispatch.color.setHex(0xffe4b5)
         this.spotPlanningDispatch.intensity = 1.6
 
-        // Balanced daylight spot fill per floor
-        this.spotCleanroom.color.setHex(0xd4f4ff)
-        this.spotCleanroom.intensity = 1.8
-        this.spotBrowserQa.color.setHex(0xc2f0e8)
-        this.spotBrowserQa.intensity = 1.6
+        // Floor 3 Verification Cleanroom: crisp cool-white daylight
+        this.spotCleanroom.color.setHex(0xe6f4f8)
+        this.spotCleanroom.intensity = 2.2
+        this.spotCleanroomWash.color.setHex(0xdbeafe)
+        this.spotCleanroomWash.intensity = 1.8
+        this.spotCleanroomEdge.color.setHex(0xf1f5f9)
+        this.spotCleanroomEdge.intensity = 1.6
+
+        // Floor 4 Browser QA Lab: high-clarity neutral daylight
+        this.spotBrowserQa.color.setHex(0xe0f2fe)
+        this.spotBrowserQa.intensity = 2.2
+        this.spotBrowserQaWash.color.setHex(0xccfbf1)
+        this.spotBrowserQaWash.intensity = 1.8
+        this.spotBrowserQaInteraction.color.setHex(0xf0fdf4)
+        this.spotBrowserQaInteraction.intensity = 1.6
+
         this.spotInfrastructure.color.setHex(0xa5c6e8)
         this.spotInfrastructure.intensity = 1.6
         this.spotApproval.color.setHex(0xffdfa8)
@@ -485,10 +597,22 @@ export class HqScene {
         this.spotPlanningDispatch.color.setHex(0xfef08a)
         this.spotPlanningDispatch.intensity = 1.8
 
+        // Floor 3 Cleanroom twilight
         this.spotCleanroom.color.setHex(0xdbeafe)
-        this.spotCleanroom.intensity = 2.0
+        this.spotCleanroom.intensity = 2.2
+        this.spotCleanroomWash.color.setHex(0x93c5fd)
+        this.spotCleanroomWash.intensity = 1.8
+        this.spotCleanroomEdge.color.setHex(0xfef08a)
+        this.spotCleanroomEdge.intensity = 1.6
+
+        // Floor 4 Browser QA twilight
         this.spotBrowserQa.color.setHex(0xccfbf1)
-        this.spotBrowserQa.intensity = 1.8
+        this.spotBrowserQa.intensity = 2.2
+        this.spotBrowserQaWash.color.setHex(0x5eead4)
+        this.spotBrowserQaWash.intensity = 1.8
+        this.spotBrowserQaInteraction.color.setHex(0xfef08a)
+        this.spotBrowserQaInteraction.intensity = 1.6
+
         this.spotInfrastructure.color.setHex(0x93c5fd)
         this.spotInfrastructure.intensity = 1.8
         this.spotApproval.color.setHex(0xfef08a)
@@ -533,11 +657,22 @@ export class HqScene {
         this.spotOperationsReviewer.color.setHex(0xffedd5)
         this.spotOperationsReviewer.intensity = 2.2
 
-        // Calibrated night ambient pools across other tower levels
+        // Floor 3 Verification Cleanroom: precise cool-white night inspection pool
         this.spotCleanroom.color.setHex(0x93c5fd)
-        this.spotCleanroom.intensity = 1.1
+        this.spotCleanroom.intensity = 1.8
+        this.spotCleanroomWash.color.setHex(0x60a5fa)
+        this.spotCleanroomWash.intensity = 1.6
+        this.spotCleanroomEdge.color.setHex(0xa5b4fc)
+        this.spotCleanroomEdge.intensity = 1.4
+
+        // Floor 4 Browser QA Lab: cyan/teal night testing pools
         this.spotBrowserQa.color.setHex(0x5eead4)
-        this.spotBrowserQa.intensity = 1.0
+        this.spotBrowserQa.intensity = 1.8
+        this.spotBrowserQaWash.color.setHex(0x2dd4bf)
+        this.spotBrowserQaWash.intensity = 1.6
+        this.spotBrowserQaInteraction.color.setHex(0x14b8a6)
+        this.spotBrowserQaInteraction.intensity = 1.4
+
         this.spotInfrastructure.color.setHex(0x38bdf8)
         this.spotInfrastructure.intensity = 1.0
         this.spotApproval.color.setHex(0xfde047)

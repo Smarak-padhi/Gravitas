@@ -13,6 +13,8 @@ import { HeroFrontendBay } from './heroBay/heroFrontendBay.js'
 import { HeroBackendBay } from './heroBay/heroBackendBay.js'
 import { HeroReviewerBay } from './heroBay/heroReviewerBay.js'
 import { MissionControlRoom } from './missionControl/missionControlRoom.js'
+import { VerificationCleanroomRoom } from './verificationCleanroom/verificationCleanroomRoom.js'
+import { BrowserQaLabRoom } from './browserQaLab/browserQaLabRoom.js'
 
 export class HqFurniture {
   public readonly group: THREE.Group
@@ -170,182 +172,35 @@ export class HqFurniture {
   }
 
   /**
-   * Zone C: Verification Cleanroom Console & Inspection Bench (Floor 3, Y = 10.8m)
+   * Floor 3: Verification Cleanroom Suite (Y = 10.8m)
+   * Controlled precision verification environment:
+   * Layer A: Hero Verification Bench & Evidence Inspection Console
+   * Layer B: Evidence Matrix & Test Wall Architecture
+   * Layer C: Candidate Circulation, Verdict Edge & Elevator Portal
    */
   private buildVerificationConsole(materials: MaterialLibrary): void {
-    const station = STATION_DEFINITIONS['verifier-console']
-    const consoleGroup = new THREE.Group()
-    consoleGroup.position.set(station.position[0], station.position[1], station.position[2])
-    consoleGroup.rotation.y = station.rotationY
-    consoleGroup.name = 'station:verifier-console'
-    consoleGroup.userData = { type: 'station', id: station.id, name: station.name }
-
-    // Honed mineral cleanroom console bench (3.2m x 0.9m x 0.95m standing height)
-    const benchGeo = this.track(new THREE.BoxGeometry(3.2, 0.1, 0.9))
-    const bench = new THREE.Mesh(benchGeo, materials.limestonePlinth)
-    bench.position.set(0.0, 0.95, 0.0)
-    bench.castShadow = true
-    bench.receiveShadow = true
-    consoleGroup.add(bench)
-
-    // Brushed brass perimeter channel
-    const trimGeo = this.track(new THREE.BoxGeometry(3.24, 0.03, 0.94))
-    const trim = new THREE.Mesh(trimGeo, materials.brass)
-    trim.position.set(0.0, 0.99, 0.0)
-    consoleGroup.add(trim)
-
-    // Solid pedestal supports (dark graphite)
-    const pedGeo = this.track(new THREE.BoxGeometry(0.7, 0.9, 0.7))
-    const pedLeft = new THREE.Mesh(pedGeo, materials.gunmetal)
-    pedLeft.position.set(-1.1, 0.45, 0.0)
-    pedLeft.castShadow = true
-    consoleGroup.add(pedLeft)
-
-    const pedRight = new THREE.Mesh(pedGeo, materials.gunmetal)
-    pedRight.position.set(1.1, 0.45, 0.0)
-    pedRight.castShadow = true
-    consoleGroup.add(pedRight)
-
-    // Triple Verification Displays (Diff view, Test Execution, Mutation Gate)
-    const screenOffsets = [-0.95, 0.0, 0.95]
-    for (let i = 0; i < screenOffsets.length; i++) {
-      const sx = screenOffsets[i]!
-      const rot = i === 0 ? 0.18 : i === 2 ? -0.18 : 0.0
-
-      const monFrameGeo = this.track(new THREE.BoxGeometry(0.82, 0.5, 0.04))
-      const monFrame = new THREE.Mesh(monFrameGeo, materials.gunmetal)
-      monFrame.position.set(sx, 1.38, 0.22)
-      monFrame.rotation.y = -rot
-      monFrame.castShadow = true
-      consoleGroup.add(monFrame)
-
-      const screenMat = i === 1 ? materials.terminalScreenEmerald : materials.terminalScreen
-      const monScreenGeo = this.track(new THREE.BoxGeometry(0.78, 0.46, 0.01))
-      const monScreen = new THREE.Mesh(monScreenGeo, screenMat)
-      monScreen.position.set(sx, 1.38, 0.195)
-      monScreen.rotation.y = -rot
-      consoleGroup.add(monScreen)
-    }
-
-    // Authoritative Verifier Station Indicator
-    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
-    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
-    ind.position.set(0.0, 1.01, 0.42)
-    ind.name = 'station-indicator:verifier-console'
-    consoleGroup.add(ind)
-    this.stationIndicators.set('verifier-console', ind)
-    this.stationIndicators.set('verification-lab-console' as any, ind)
-
-    this.getFloorGroup(3).add(consoleGroup)
+    const cleanroomResult = VerificationCleanroomRoom.buildRoom(materials, this.track.bind(this))
+    this.stationIndicators.set('verifier-console', cleanroomResult.benchResult.indicatorMesh)
+    this.stationIndicators.set('verification-lab-console' as any, cleanroomResult.benchResult.indicatorMesh)
+    this.stationScreens.set('verifier-console', cleanroomResult.benchResult.screens)
+    this.stationScreens.set('verification-lab-console' as any, cleanroomResult.benchResult.screens)
+    this.getFloorGroup(3).add(cleanroomResult.roomGroup)
   }
 
   /**
-   * Zone D: Browser QA Multi-Device Matrix Wall & Test Rig (Floor 4, Y = 14.4m)
-   * REPLACES the monolithic black block with recognizable physical device viewports:
-   * 1. Ultrawide Desktop (34-inch ratio)
-   * 2. Laptop display (15-inch ratio)
-   * 3. Tablet in portrait
-   * 4. Smartphone in portrait
-   * Mounted onto an architectural testing rig frame with observation bench.
+   * Floor 4: Browser QA Lab Suite (Y = 14.4m)
+   * Real product surface testing laboratory:
+   * Layer A: Hero Multi-Surface Device Workstation (Desktop, Laptop, Tablet, Phone)
+   * Layer B: Viewport Observation & Responsive Comparison Wall
+   * Layer C: Interaction Test Zone, Device Testing Rack & Circulation
    */
   private buildBrowserQaDeviceMatrix(materials: MaterialLibrary): void {
-    const station = STATION_DEFINITIONS['browser-qa-matrix']
-    const qaGroup = new THREE.Group()
-    qaGroup.position.set(station.position[0], station.position[1], station.position[2])
-    qaGroup.rotation.y = station.rotationY
-    qaGroup.name = 'station:browser-qa-matrix'
-    qaGroup.userData = { type: 'station', id: station.id, name: station.name }
-
-    // Architectural aluminum / graphite test rig armature frame
-    const rigFrameGeo = this.track(new THREE.BoxGeometry(4.8, 2.2, 0.08))
-    const rigFrame = new THREE.Mesh(rigFrameGeo, materials.gunmetal)
-    rigFrame.position.set(0.0, 1.4, -1.2)
-    rigFrame.castShadow = true
-    qaGroup.add(rigFrame)
-
-    // Brass accent mounting rails across rig
-    for (const ry of [0.75, 1.4, 2.1]) {
-      const railGeo = this.track(new THREE.BoxGeometry(4.84, 0.03, 0.12))
-      const rail = new THREE.Mesh(railGeo, materials.brass)
-      rail.position.set(0.0, ry, -1.2)
-      qaGroup.add(rail)
-    }
-
-    // 1. Device A: Ultrawide Desktop Monitor (Left, 1.4m x 0.6m)
-    const dtFrameGeo = this.track(new THREE.BoxGeometry(1.4, 0.62, 0.04))
-    const dtFrame = new THREE.Mesh(dtFrameGeo, materials.gunmetal)
-    dtFrame.position.set(-1.4, 1.7, -1.1)
-    dtFrame.castShadow = true
-    qaGroup.add(dtFrame)
-
-    const dtScreenGeo = this.track(new THREE.BoxGeometry(1.36, 0.58, 0.01))
-    const dtScreen = new THREE.Mesh(dtScreenGeo, materials.deviceDesktop)
-    dtScreen.position.set(-1.4, 1.7, -1.075)
-    qaGroup.add(dtScreen)
-
-    // 2. Device B: Laptop Frame (Center-Right, 0.75m x 0.5m)
-    const ltFrameGeo = this.track(new THREE.BoxGeometry(0.8, 0.52, 0.03))
-    const ltFrame = new THREE.Mesh(ltFrameGeo, materials.gunmetal)
-    ltFrame.position.set(0.45, 1.7, -1.1)
-    ltFrame.castShadow = true
-    qaGroup.add(ltFrame)
-
-    const ltScreenGeo = this.track(new THREE.BoxGeometry(0.76, 0.48, 0.01))
-    const ltScreen = new THREE.Mesh(ltScreenGeo, materials.deviceLaptop)
-    ltScreen.position.set(0.45, 1.7, -1.08)
-    qaGroup.add(ltScreen)
-
-    // 3. Device C: Tablet in Portrait (Right, 0.45m x 0.6m)
-    const tabFrameGeo = this.track(new THREE.BoxGeometry(0.45, 0.6, 0.02))
-    const tabFrame = new THREE.Mesh(tabFrameGeo, materials.gunmetal)
-    tabFrame.position.set(1.5, 1.7, -1.1)
-    tabFrame.castShadow = true
-    qaGroup.add(tabFrame)
-
-    const tabScreenGeo = this.track(new THREE.BoxGeometry(0.41, 0.56, 0.01))
-    const tabScreen = new THREE.Mesh(tabScreenGeo, materials.deviceTablet)
-    tabScreen.position.set(1.5, 1.7, -1.085)
-    qaGroup.add(tabScreen)
-
-    // 4. Device D: Smartphone in Portrait (Below laptop, 0.22m x 0.42m)
-    const phFrameGeo = this.track(new THREE.BoxGeometry(0.24, 0.44, 0.02))
-    const phFrame = new THREE.Mesh(phFrameGeo, materials.gunmetal)
-    phFrame.position.set(0.45, 0.95, -1.1)
-    phFrame.castShadow = true
-    qaGroup.add(phFrame)
-
-    const phScreenGeo = this.track(new THREE.BoxGeometry(0.21, 0.41, 0.01))
-    const phScreen = new THREE.Mesh(phScreenGeo, materials.devicePhone)
-    phScreen.position.set(0.45, 0.95, -1.085)
-    qaGroup.add(phScreen)
-
-    // QA Technician Observation & Control Bench (2.8m x 0.75m x 0.72m)
-    const benchGeo = this.track(new THREE.BoxGeometry(2.8, 0.08, 0.75))
-    const bench = new THREE.Mesh(benchGeo, materials.walnut)
-    bench.position.set(-0.5, 0.72, 0.1)
-    bench.castShadow = true
-    bench.receiveShadow = true
-    qaGroup.add(bench)
-
-    // Steel leg frame
-    const legGeo = this.track(new THREE.BoxGeometry(0.06, 0.7, 0.65))
-    const leg1 = new THREE.Mesh(legGeo, materials.gunmetal)
-    leg1.position.set(-1.7, 0.35, 0.1)
-    qaGroup.add(leg1)
-
-    const leg2 = new THREE.Mesh(legGeo, materials.gunmetal)
-    leg2.position.set(0.7, 0.35, 0.1)
-    qaGroup.add(leg2)
-
-    // Authoritative Browser QA Matrix Station Indicator
-    const indGeo = this.track(new THREE.BoxGeometry(0.3, 0.02, 0.06))
-    const ind = new THREE.Mesh(indGeo, materials.gunmetal)
-    ind.position.set(0.0, 0.89, 0.48)
-    ind.name = 'station-indicator:browser-qa-matrix'
-    qaGroup.add(ind)
-    this.stationIndicators.set('browser-qa-matrix', ind)
-
-    this.getFloorGroup(4).add(qaGroup)
+    const qaResult = BrowserQaLabRoom.buildRoom(materials, this.track.bind(this))
+    this.stationIndicators.set('browser-qa-matrix', qaResult.benchResult.indicatorMesh)
+    this.stationIndicators.set('browser-qa-station' as any, qaResult.benchResult.indicatorMesh)
+    this.stationScreens.set('browser-qa-matrix', qaResult.benchResult.screens)
+    this.stationScreens.set('browser-qa-station' as any, qaResult.benchResult.screens)
+    this.getFloorGroup(4).add(qaResult.roomGroup)
   }
 
   /**
@@ -723,11 +578,7 @@ export class HqFurniture {
 
     this.getFloorGroup(2).add(f2Group)
 
-    // ── FLOOR 3 VERIFICATION CLEANROOM (Y = 10.8m) ───────────────────
-    const f3Group = new THREE.Group()
-    f3Group.position.set(0.0, 10.8, 0.0)
-    f3Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 1.8))
-    this.getFloorGroup(3).add(f3Group)
+
   }
 
   private buildPottedTree(materials: MaterialLibrary, pos: [number, number, number], height: number): THREE.Group {
@@ -801,7 +652,7 @@ export class HqFurniture {
     // Toggle workstation screen brightness between active and idle standby
     const screens = this.stationScreens.get(stationId)
     if (screens) {
-      const isActive = status === 'ACTIVE' || status === 'VERIFYING'
+      const isActive = status === 'ACTIVE' || status === 'VERIFYING' || status === 'BROWSER_QA'
       for (const scr of screens) {
         if (scr.material && 'emissiveIntensity' in scr.material) {
           ;(scr.material as THREE.MeshStandardMaterial).emissiveIntensity = isActive ? 0.65 : 0.0

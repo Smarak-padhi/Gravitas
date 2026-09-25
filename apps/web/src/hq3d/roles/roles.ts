@@ -85,6 +85,24 @@ export const INDEPENDENT_REVIEWER_ROLE: HqRoleIdentity = {
   },
 }
 
+export const BROWSER_QA_ROLE: HqRoleIdentity = {
+  roleId: 'role:quality:browser-qa',
+  displayName: 'Browser QA Specialist',
+  departmentId: 'QUALITY',
+  stationId: 'browser-qa-station',
+  stationAlias: 'browser-qa-matrix',
+  physicalWorkstationId: 'browser-qa-matrix',
+  visualIdentity: {
+    silhouette: 'analytical QA testing silhouette',
+    wardrobeProfile: 'deep slate/teal workwear with testing tablet',
+    accentSemantic: 'responsive testing tablet / stylus',
+    primaryColorHex: 0x1e293b, // slate workwear
+    accentColorHex: 0x2dd4bf, // teal accent
+    accessoryDescription: 'responsive testing tablet / stylus',
+    isSeatedDefault: false,
+  },
+}
+
 export const FROZEN_ROLES: readonly HqRoleIdentity[] = [
   CHIEF_PLANNER_ROLE,
   FRONTEND_ENGINEER_ROLE,
@@ -92,8 +110,13 @@ export const FROZEN_ROLES: readonly HqRoleIdentity[] = [
   INDEPENDENT_REVIEWER_ROLE,
 ] as const
 
+export const TOWER_ROLES: readonly HqRoleIdentity[] = [
+  ...FROZEN_ROLES,
+  BROWSER_QA_ROLE,
+] as const
+
 export const ROLE_BY_ID: ReadonlyMap<RoleId, HqRoleIdentity> = new Map(
-  FROZEN_ROLES.map((r) => [r.roleId, r])
+  TOWER_ROLES.map((r) => [r.roleId, r])
 )
 
 export const ROLE_BY_STATION_ID: ReadonlyMap<string, HqRoleIdentity> = new Map([
@@ -107,6 +130,7 @@ export const ROLE_BY_STATION_ID: ReadonlyMap<string, HqRoleIdentity> = new Map([
   ['engineering-workstation-02', BACKEND_ENGINEER_ROLE],
   ['verifier-console', INDEPENDENT_REVIEWER_ROLE],
   ['verification-lab-console', INDEPENDENT_REVIEWER_ROLE],
+  ['browser-qa-station', BROWSER_QA_ROLE],
 ])
 
 /**
@@ -117,6 +141,7 @@ export const ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number, numbe
   'role:engineering:frontend-engineer': [-6.5, 0.0, 1.85],
   'role:engineering:backend-engineer': [-1.8, 0.0, 1.85],
   'role:quality:independent-reviewer': [6.0, 0.1, 5.75],
+  'role:quality:browser-qa': [0.0, 0.0, 0.0],
 }
 
 export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
@@ -124,6 +149,7 @@ export const ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
   'role:engineering:frontend-engineer': Math.PI,
   'role:engineering:backend-engineer': Math.PI,
   'role:quality:independent-reviewer': 0.0,
+  'role:quality:browser-qa': 0.0,
 }
 
 /**
@@ -134,6 +160,7 @@ export const TOWER_ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number,
   'role:engineering:frontend-engineer': [-3.5, 7.2, 1.15],
   'role:engineering:backend-engineer': [2.5, 7.2, 1.15],
   'role:quality:independent-reviewer': [0.0, 10.8, 0.5],
+  'role:quality:browser-qa': [0.0, 14.4, 0.4],
 }
 
 export const TOWER_ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
@@ -141,6 +168,7 @@ export const TOWER_ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
   'role:engineering:frontend-engineer': Math.PI,
   'role:engineering:backend-engineer': Math.PI,
   'role:quality:independent-reviewer': 0.0,
+  'role:quality:browser-qa': 0.0,
 }
 
 /**

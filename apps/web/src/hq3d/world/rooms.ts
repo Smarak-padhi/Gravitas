@@ -34,9 +34,21 @@ export const WORKSTATION_PRESETS: Record<string, CameraFramingPreset> = {
   },
   WS_VERIFIER: {
     id: 'WS_VERIFIER',
-    target: [0.0, 11.6, 1.0],
-    position: [-2.0, 12.4, -1.8],
+    target: [0.0, 11.6, 0.8],
+    position: [-2.8, 12.6, -3.2],
     description: 'Independent Verification Console & Cleanroom Bench',
+  },
+  WS_DEVICE_BENCH: {
+    id: 'WS_DEVICE_BENCH',
+    target: [0.0, 15.2, 0.8],
+    position: [-2.8, 16.2, -3.2],
+    description: 'Browser QA Multi-Device Testing Bench Focus',
+  },
+  WS_BROWSER_QA: {
+    id: 'WS_BROWSER_QA',
+    target: [0.0, 15.2, 0.8],
+    position: [-2.8, 16.2, -3.2],
+    description: 'Browser QA Multi-Device Testing Bench Focus',
   },
 }
 
@@ -61,9 +73,15 @@ export const CHARACTER_PRESETS: Record<string, CameraFramingPreset> = {
   },
   CHAR_REVIEWER: {
     id: 'CHAR_REVIEWER',
-    target: [0.0, 11.75, 0.7],
-    position: [-1.2, 12.25, -0.8],
+    target: [0.0, 11.6, 0.5],
+    position: [-1.8, 12.4, -2.2],
     description: 'Independent Reviewer Mascot & Inspection Loupe Context Focus',
+  },
+  CHAR_BROWSER_QA: {
+    id: 'CHAR_BROWSER_QA',
+    target: [0.0, 15.2, 0.4],
+    position: [-1.8, 16.0, -2.2],
+    description: 'Browser QA Specialist Mascot & Multi-Viewport Testing Context Focus',
   },
 }
 

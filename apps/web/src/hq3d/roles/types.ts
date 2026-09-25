@@ -13,6 +13,7 @@ export type RoleId =
   | 'role:engineering:frontend-engineer'
   | 'role:engineering:backend-engineer'
   | 'role:quality:independent-reviewer'
+  | 'role:quality:browser-qa'
 
 export type DepartmentId = 'CONTROL_STRATEGY' | 'ENGINEERING' | 'QUALITY'
 
