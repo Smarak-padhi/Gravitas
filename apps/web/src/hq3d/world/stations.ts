@@ -52,6 +52,16 @@ export const STATION_DEFINITIONS: Record<StationId, StationDefinition> = {
     status: 'Active Workstation',
     description: 'Technical systems workstation with multi-terminal monitoring array and telemetry console.',
   },
+  'reviewer-workstation': {
+    id: 'reviewer-workstation',
+    name: 'Independent Reviewer Verification Station',
+    roomId: 'AGENT_OPERATIONS',
+    position: [0.0, 7.2, -0.1],
+    rotationY: 0,
+    role: 'Quality & Verification Gate',
+    status: 'Active Review Gate',
+    description: 'Specialist acoustic inspection pod with dual curved monitors and analysis tablet.',
+  },
 
   'codex-workstation': {
     id: 'codex-workstation',

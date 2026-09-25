@@ -35,6 +35,7 @@ function createEmptyWorldState(): WorldState {
       'approval-plinth': { id: 'approval-plinth', roomId: 'APPROVAL_MEZZANINE', status: 'IDLE' },
       'repository-vault': { id: 'repository-vault', roomId: 'APPROVAL_MEZZANINE', status: 'IDLE' },
       'dispatch-console': { id: 'dispatch-console', roomId: 'INFRASTRUCTURE_ROOM', status: 'IDLE' },
+      'reviewer-workstation': { id: 'reviewer-workstation', roomId: 'AGENT_OPERATIONS', status: 'IDLE' },
     },
     infrastructure: {
       gateways: {

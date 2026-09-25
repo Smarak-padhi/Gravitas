@@ -777,10 +777,10 @@ export class HqCharacters {
     }
   }
 
-  public getFigure(id: CharacterId): THREE.Group | undefined {
-    if (id === 'char-codex') return this.figureMap.get('role:engineering:frontend-engineer')
-    if (id === 'char-fcc') return this.figureMap.get('role:engineering:backend-engineer')
-    if (id === 'char-verifier') return this.figureMap.get('role:quality:independent-reviewer')
+  public getFigure(id: CharacterId | string): THREE.Group | undefined {
+    if (id === 'char-codex' || id === 'frontend-engineer') return this.figureMap.get('role:engineering:frontend-engineer')
+    if (id === 'char-fcc' || id === 'backend-engineer') return this.figureMap.get('role:engineering:backend-engineer')
+    if (id === 'char-verifier' || id === 'independent-reviewer' || id === 'reviewer') return this.figureMap.get('role:quality:independent-reviewer')
     return this.figureMap.get(id as RoleId)
   }
 

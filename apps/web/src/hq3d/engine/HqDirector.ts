@@ -267,6 +267,7 @@ export class HqDirector {
           : (roomId as RoomId)
     const room = ROOM_DEFINITIONS[normalized]
     if (room) {
+      this.scene.setFocusedRoom(room.id)
       this.cameraRig.setFraming(room.cameraPreset, this.reducedMotion)
       if (this.onEntitySelected) {
         this.onEntitySelected({
@@ -300,6 +301,7 @@ export class HqDirector {
     if (this.elevatorTransition) {
       this.skipElevator()
     }
+    this.scene.setFocusedRoom(null)
     this.cameraRig.resetToOverview(this.reducedMotion)
     this.picking.clearSelection()
     if (this.onEntitySelected) {
@@ -332,6 +334,7 @@ export class HqDirector {
       return
     }
 
+    this.scene.setFocusedRoom(null)
     this.cameraRig.setFraming(ELEVATOR_PRESET, false)
     this.elevatorTransition = {
       targetRoomId: roomId,
@@ -374,6 +377,7 @@ export class HqDirector {
     const lookupKey = upper.startsWith('WS_') ? upper : `WS_${upper}`
     const preset = WORKSTATION_PRESETS[lookupKey] || WORKSTATION_PRESETS[key]
     if (preset) {
+      this.scene.setFocusedRoom(lookupKey)
       this.cameraRig.setFraming(preset, this.reducedMotion)
     }
   }
@@ -386,6 +390,7 @@ export class HqDirector {
       CHARACTER_PRESETS[key] ||
       WORKSTATION_PRESETS[`WS_${upper}`]
     if (preset) {
+      this.scene.setFocusedRoom(lookupKey)
       this.cameraRig.setFraming(preset, this.reducedMotion)
     }
   }
@@ -425,16 +430,19 @@ export class HqDirector {
       this.scene.infrastructure.group.getObjectByName(`station:${stationId}`) ||
       this.scene.furniture.group.getObjectByName(`station:${stationId}`)
     const stationDef = STATION_DEFINITIONS[stationId]
-    if (!stationDef) return null
-    const room = ROOM_DEFINITIONS[stationDef.roomId]
+    if (!stationDef && !stationObj?.userData?.name) return null
+    const id = stationDef?.id || stationId
+    const name = stationDef?.name || (stationObj?.userData?.name as string) || stationId
+    const roomId = stationDef?.roomId || (stationObj?.userData?.roomId as RoomId) || 'AGENT_OPERATIONS'
+    const room = ROOM_DEFINITIONS[roomId]
     const entity: SelectedEntity = {
-      id: stationDef.id,
+      id,
       type: 'station',
-      name: stationDef.name,
-      room: room ? room.name : stationDef.roomId,
-      role: stationDef.role,
-      status: stationDef.status,
-      description: stationDef.description,
+      name,
+      room: room ? room.name : roomId,
+      role: stationDef?.role || (stationObj?.userData?.role as string) || 'Specialist Station',
+      status: stationDef?.status || (stationObj?.userData?.status as string) || 'Active',
+      description: stationDef?.description || (stationObj?.userData?.description as string) || 'Hero bay operational workstation.',
     }
     if (stationObj) {
       this.picking.setSelection(entity, stationObj)

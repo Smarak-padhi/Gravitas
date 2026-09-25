@@ -171,7 +171,6 @@ export class HeroCharacter {
     hairCapGeo.scale(0.98, 1.05, 1.02)
     const hairCap = new THREE.Mesh(hairCapGeo, materials.heroCharHair)
     hairCap.position.set(0.0, 0.015, -0.01)
-    hairCap.castShadow = true
     hairGroup.add(hairCap)
 
     // Sweeping side bangs across forehead
@@ -180,7 +179,6 @@ export class HeroCharacter {
     bang.position.set(-0.025, 0.07, 0.085)
     bang.rotation.z = -0.22
     bang.rotation.y = 0.12
-    bang.castShadow = true
     hairGroup.add(bang)
 
     // Side tress left
@@ -236,7 +234,6 @@ export class HeroCharacter {
       cupOuterGeo.rotateZ(Math.PI / 2)
       const cupOuter = new THREE.Mesh(cupOuterGeo, materials.heroSteel)
       cupOuter.position.set(earcupX + side * 0.012, 0.0, 0.0)
-      cupOuter.castShadow = true
       hpGroup.add(cupOuter)
 
       // Plush memory foam ear cushion with pastel cyan accent
@@ -266,7 +263,6 @@ export class HeroCharacter {
     upperArmL.position.set(0.0, -0.10, 0.05)
     upperArmL.rotation.x = 0.52 // Natural forward angle from shoulder
     upperArmL.rotation.z = -0.12
-    upperArmL.castShadow = true
     armsLeftGroup.add(upperArmL)
 
     // Forearm with rib-knit cuff
@@ -275,7 +271,6 @@ export class HeroCharacter {
     foreArmL.position.set(-0.02, -0.22, 0.20)
     foreArmL.rotation.x = 1.30 // Resting along desktop
     foreArmL.rotation.y = 0.22
-    foreArmL.castShadow = true
     armsLeftGroup.add(foreArmL)
 
     // Left hand resting over keyboard keys
@@ -290,14 +285,12 @@ export class HeroCharacter {
     upperArmR.position.set(0.0, -0.10, 0.05)
     upperArmR.rotation.x = 0.52
     upperArmR.rotation.z = 0.12
-    upperArmR.castShadow = true
     armsRightGroup.add(upperArmR)
 
     const foreArmR = new THREE.Mesh(foreArmGeo, materials.heroCharSweater)
     foreArmR.position.set(0.02, -0.22, 0.20)
     foreArmR.rotation.x = 1.30
     foreArmR.rotation.y = -0.22
-    foreArmR.castShadow = true
     armsRightGroup.add(foreArmR)
 
     // Right hand over ergonomic mouse
@@ -317,7 +310,7 @@ export class HeroCharacter {
     const seatedLegsGroup = new THREE.Group()
     seatedLegsGroup.position.set(0.0, baseTorsoY, 0.0)
 
-    // Contoured denim pelvis / hips bridging seat and sweater waist
+    // Contoured denim pelvis / hips bridging seat and sweater waist (casts lower body shadow)
     const pelvisGeo = track(new THREE.BoxGeometry(0.28, 0.34, 0.22))
     const pelvis = new THREE.Mesh(pelvisGeo, materials.heroCharDenim)
     pelvis.position.set(0.0, 0.16, 0.0)
@@ -337,7 +330,6 @@ export class HeroCharacter {
       thighGeo.rotateX(Math.PI / 2)
       const thigh = new THREE.Mesh(thighGeo, materials.heroCharDenim)
       thigh.position.set(legX, 0.04, 0.18)
-      thigh.castShadow = true
       thigh.receiveShadow = true
       legSubGroup.add(thigh)
 
@@ -351,7 +343,7 @@ export class HeroCharacter {
       const calfGeo = track(new THREE.CapsuleGeometry(0.044, 0.36, 8, 12))
       const calf = new THREE.Mesh(calfGeo, materials.heroCharDenim)
       calf.position.set(legX, -0.18, 0.34)
-      calf.castShadow = true
+      calf.receiveShadow = true
       legSubGroup.add(calf)
 
       // Trouser cuff hem
@@ -368,7 +360,6 @@ export class HeroCharacter {
       const soleGeo = track(new THREE.BoxGeometry(0.076, 0.022, 0.18))
       const sole = new THREE.Mesh(soleGeo, materials.heroCharSneaker)
       sole.position.set(0.0, 0.011, 0.03)
-      sole.castShadow = true
       sole.receiveShadow = true
       shoeGroup.add(sole)
 
@@ -376,7 +367,6 @@ export class HeroCharacter {
       const upperGeo = track(new THREE.BoxGeometry(0.072, 0.045, 0.16))
       const upper = new THREE.Mesh(upperGeo, materials.heroCharSneaker)
       upper.position.set(0.0, 0.038, 0.02)
-      upper.castShadow = true
       shoeGroup.add(upper)
 
       // Rounded toe box

@@ -119,13 +119,13 @@ export class HeroBackendBay {
     acousticWallGroup.add(botFascia)
 
     // Vertical architectural side casing reveals (terminating the slat array)
+    const casingGeo = track(new THREE.BoxGeometry(0.024, 3.2, 0.034))
+    const casingRevealGeo = track(new THREE.BoxGeometry(0.012, 3.2, 0.036))
     for (const sx of [-1.61, 1.61]) {
-      const casingGeo = track(new THREE.BoxGeometry(0.024, 3.2, 0.034))
       const casing = new THREE.Mesh(casingGeo, materials.structureGraphite)
       casing.position.set(sx, 0.0, -slatDepth / 2 - 0.004)
       acousticWallGroup.add(casing)
 
-      const casingRevealGeo = track(new THREE.BoxGeometry(0.012, 3.2, 0.036))
       const casingReveal = new THREE.Mesh(casingRevealGeo, materials.champagneBrass)
       casingReveal.position.set(sx - (Math.sign(sx) * 0.012), 0.0, -slatDepth / 2 - 0.005)
       acousticWallGroup.add(casingReveal)
@@ -172,37 +172,39 @@ export class HeroBackendBay {
 
     // 2.2 Motorized Dual-Stage Telescoping Steel Lift Legs
     const legSpacingX = 0.88
+    const outerColGeo = track(new THREE.BoxGeometry(0.08, 0.38, 0.055))
+    const innerColGeo = track(new THREE.BoxGeometry(0.07, 0.34, 0.048))
+    const footShape = this.createRoundedRectShape(0.075, 0.76, 0.02)
+    const footGeo = track(
+      new THREE.ExtrudeGeometry(footShape, {
+        depth: 0.024,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.004,
+        bevelThickness: 0.004,
+        curveSegments: 8,
+      })
+    )
+    footGeo.rotateX(Math.PI / 2)
+    const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.024, 0.012, 16))
+    const topBracketGeo = track(new THREE.BoxGeometry(0.065, 0.025, 0.62))
 
     for (const side of [-1, 1]) {
       const legX = side * legSpacingX
 
       // Lower stage outer column (powder-coated structural graphite)
-      const outerColGeo = track(new THREE.BoxGeometry(0.08, 0.38, 0.055))
       const outerCol = new THREE.Mesh(outerColGeo, materials.structureGraphite)
       outerCol.position.set(legX, 0.20, 0.0)
       outerCol.castShadow = true
       deskGroup.add(outerCol)
 
       // Upper stage inner column (telescoping sleeve)
-      const innerColGeo = track(new THREE.BoxGeometry(0.07, 0.34, 0.048))
       const innerCol = new THREE.Mesh(innerColGeo, materials.structureGraphite)
       innerCol.position.set(legX, 0.54, 0.0)
       innerCol.castShadow = true
       deskGroup.add(innerCol)
 
       // Solid steel foot sled with beveled ends
-      const footShape = this.createRoundedRectShape(0.075, 0.76, 0.02)
-      const footGeo = track(
-        new THREE.ExtrudeGeometry(footShape, {
-          depth: 0.024,
-          bevelEnabled: true,
-          bevelSegments: 3,
-          bevelSize: 0.004,
-          bevelThickness: 0.004,
-          curveSegments: 8,
-        })
-      )
-      footGeo.rotateX(Math.PI / 2)
       const footSled = new THREE.Mesh(footGeo, materials.structureGraphite)
       footSled.position.set(legX, 0.024, 0.0)
       footSled.castShadow = true
@@ -211,14 +213,12 @@ export class HeroBackendBay {
 
       // Dual brass leveling glide discs underneath each foot
       for (const fz of [-0.32, 0.32]) {
-        const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.024, 0.012, 16))
         const glide = new THREE.Mesh(glideGeo, materials.champagneBrass)
         glide.position.set(legX, 0.006, fz)
         deskGroup.add(glide)
       }
 
       // Upper desktop mounting bracket
-      const topBracketGeo = track(new THREE.BoxGeometry(0.065, 0.025, 0.62))
       const topBracket = new THREE.Mesh(topBracketGeo, materials.structureGraphite)
       topBracket.position.set(legX, 0.71, 0.0)
       deskGroup.add(topBracket)
@@ -389,28 +389,28 @@ export class HeroBackendBay {
     chairGroup.add(backGroup)
 
     // 3.5 Sculpted 3D Armrests
+    const uprightGeo = track(new THREE.BoxGeometry(0.03, 0.20, 0.04))
+    const padShape = this.createRoundedRectShape(0.075, 0.24, 0.02)
+    const padGeo = track(
+      new THREE.ExtrudeGeometry(padShape, {
+        depth: 0.022,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.006,
+        bevelThickness: 0.006,
+        curveSegments: 8,
+      })
+    )
+    padGeo.rotateX(Math.PI / 2)
+
     for (const side of [-1, 1]) {
       const armX = side * 0.26
-      const uprightGeo = track(new THREE.BoxGeometry(0.03, 0.20, 0.04))
       const upright = new THREE.Mesh(uprightGeo, materials.structureGraphite)
       upright.position.set(armX, 0.54, 0.04)
       chairGroup.add(upright)
 
-      const padShape = this.createRoundedRectShape(0.075, 0.24, 0.02)
-      const padGeo = track(
-        new THREE.ExtrudeGeometry(padShape, {
-          depth: 0.022,
-          bevelEnabled: true,
-          bevelSegments: 3,
-          bevelSize: 0.006,
-          bevelThickness: 0.006,
-          curveSegments: 8,
-        })
-      )
-      padGeo.rotateX(Math.PI / 2)
       const armPad = new THREE.Mesh(padGeo, materials.structureGraphite)
       armPad.position.set(armX, 0.65, 0.04)
-      armPad.castShadow = true
       chairGroup.add(armPad)
     }
 
@@ -427,7 +427,6 @@ export class HeroBackendBay {
     const mountClampGeo = track(new THREE.BoxGeometry(0.14, 0.08, 0.09))
     const mountClamp = new THREE.Mesh(mountClampGeo, materials.structureGraphite)
     mountClamp.position.set(0.0, 0.0, 0.0)
-    mountClamp.castShadow = true
     monitorGroup.add(mountClamp)
 
     // Vertical mounting mast
@@ -493,8 +492,7 @@ export class HeroBackendBay {
     rightMonGroup.position.set(0.38, 0.36, 0.16)
     rightMonGroup.rotation.y = -0.28 // Inward curve angle
 
-    const arm2Geo = track(new THREE.BoxGeometry(0.035, 0.035, 0.22))
-    const arm2 = new THREE.Mesh(arm2Geo, materials.structureGraphite)
+    const arm2 = new THREE.Mesh(arm1Geo, materials.structureGraphite)
     arm2.position.set(-0.12, 0.0, -0.08)
     arm2.rotation.y = 0.22
     rightMonGroup.add(arm2)
@@ -504,21 +502,18 @@ export class HeroBackendBay {
     mon2Housing.castShadow = true
     rightMonGroup.add(mon2Housing)
 
-    const mon2ScreenGeo = track(new THREE.PlaneGeometry(0.65, 0.39))
-    const secondaryScreenMesh = new THREE.Mesh(mon2ScreenGeo, materials.terminalScreen)
+    const secondaryScreenMesh = new THREE.Mesh(mon1ScreenGeo, materials.terminalScreen)
     secondaryScreenMesh.position.set(0.0, 0.0, 0.031)
     secondaryScreenMesh.name = 'screen:backend-metrics'
     rightMonGroup.add(secondaryScreenMesh)
     screens.push(secondaryScreenMesh)
 
     // Monitor Light Bar atop right display
-    const bar2Geo = track(new THREE.BoxGeometry(0.40, 0.016, 0.022))
-    const bar2 = new THREE.Mesh(bar2Geo, materials.structureGraphite)
+    const bar2 = new THREE.Mesh(bar1Geo, materials.structureGraphite)
     bar2.position.set(0.0, 0.225, 0.035)
     rightMonGroup.add(bar2)
 
-    const diff2Geo = track(new THREE.BoxGeometry(0.36, 0.004, 0.012))
-    const diff2 = new THREE.Mesh(diff2Geo, materials.lampWarmGlow)
+    const diff2 = new THREE.Mesh(diff1Geo, materials.lampWarmGlow)
     diff2.position.set(0.0, 0.215, 0.035)
     rightMonGroup.add(diff2)
 

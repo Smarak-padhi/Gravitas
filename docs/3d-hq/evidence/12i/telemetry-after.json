@@ -1,0 +1,200 @@
+{
+  "benchmarkEnvironment": {
+    "resolution": "1600x900",
+    "deviceScaleFactor": 1,
+    "headless": false,
+    "hardwareAccelerated": true,
+    "samplingDurationSeconds": 10,
+    "warmupDurationSeconds": 2
+  },
+  "pickingContract": {
+    "allPassed": true,
+    "results": [
+      {
+        "test": "frameRoom AGENT_OPERATIONS",
+        "passed": true
+      },
+      {
+        "test": "selectRole frontend-engineer",
+        "passed": true,
+        "details": {
+          "id": "frontend-engineer",
+          "type": "character",
+          "name": "Frontend Engineer",
+          "room": "Agent Operations",
+          "role": "Frontend Engineer",
+          "status": "IDLE",
+          "description": "Frontend Engineer (ENGINEERING). Station: engineering-workstation-01. Status: IDLE. Harness: UNKNOWN.",
+          "roleMetadata": {
+            "roleId": "role:engineering:frontend-engineer",
+            "roleName": "Frontend Engineer",
+            "department": "ENGINEERING",
+            "status": "IDLE",
+            "currentTaskId": null,
+            "currentTaskTitle": null,
+            "currentHarness": "UNKNOWN",
+            "transport": "UNKNOWN",
+            "provider": "UNKNOWN",
+            "model": "UNKNOWN",
+            "stationId": "engineering-workstation-01",
+            "stationName": "Frontend Engineer Home Station",
+            "isFixtureOnly": false,
+            "spatialState": "AT_HOME",
+            "destinationStationId": "codex-workstation",
+            "destinationStationName": "Frontend Engineer Home Station",
+            "runtimePhase": "IDLE",
+            "gateway": "DIRECT",
+            "projectionEpoch": "proj_epoch_79540674-1efb-44f3-826d-b276005fed03",
+            "projectionRevision": 6
+          }
+        }
+      },
+      {
+        "test": "selectRole backend-engineer",
+        "passed": true,
+        "details": {
+          "id": "backend-engineer",
+          "type": "character",
+          "name": "Backend Engineer",
+          "room": "Agent Operations",
+          "role": "Backend Engineer",
+          "status": "IDLE",
+          "description": "Backend Engineer (ENGINEERING). Station: engineering-workstation-02. Status: IDLE. Harness: UNKNOWN.",
+          "roleMetadata": {
+            "roleId": "role:engineering:backend-engineer",
+            "roleName": "Backend Engineer",
+            "department": "ENGINEERING",
+            "status": "IDLE",
+            "currentTaskId": null,
+            "currentTaskTitle": null,
+            "currentHarness": "UNKNOWN",
+            "transport": "UNKNOWN",
+            "provider": "UNKNOWN",
+            "model": "UNKNOWN",
+            "stationId": "engineering-workstation-02",
+            "stationName": "Backend Engineer Home Station",
+            "isFixtureOnly": false,
+            "spatialState": "AT_HOME",
+            "destinationStationId": "fcc-workstation",
+            "destinationStationName": "Backend Engineer Home Station",
+            "runtimePhase": "IDLE",
+            "gateway": "DIRECT",
+            "projectionEpoch": "proj_epoch_79540674-1efb-44f3-826d-b276005fed03",
+            "projectionRevision": 6
+          }
+        }
+      },
+      {
+        "test": "selectRole independent-reviewer",
+        "passed": true,
+        "details": {
+          "id": "independent-reviewer",
+          "type": "character",
+          "name": "Independent Reviewer",
+          "room": "Verification Cleanroom",
+          "role": "Independent Reviewer",
+          "status": "IDLE",
+          "description": "Independent Reviewer (QUALITY). Station: verification-lab-console. Status: IDLE. Harness: UNKNOWN.",
+          "roleMetadata": {
+            "roleId": "role:quality:independent-reviewer",
+            "roleName": "Independent Reviewer",
+            "department": "QUALITY",
+            "status": "IDLE",
+            "currentTaskId": null,
+            "currentTaskTitle": null,
+            "currentHarness": "UNKNOWN",
+            "transport": "UNKNOWN",
+            "provider": "UNKNOWN",
+            "model": "UNKNOWN",
+            "stationId": "verification-lab-console",
+            "stationName": "Independent Reviewer Home Station",
+            "isFixtureOnly": false,
+            "spatialState": "AT_HOME",
+            "destinationStationId": "verifier-console",
+            "destinationStationName": "Independent Reviewer Home Station",
+            "runtimePhase": "IDLE",
+            "gateway": "DIRECT",
+            "projectionEpoch": "proj_epoch_79540674-1efb-44f3-826d-b276005fed03",
+            "projectionRevision": 6
+          }
+        }
+      },
+      {
+        "test": "camera orbit",
+        "passed": true
+      },
+      {
+        "test": "camera zoom",
+        "passed": true
+      },
+      {
+        "test": "resetToOverview",
+        "passed": true
+      }
+    ]
+  },
+  "memorySoak": {
+    "cycles": 20,
+    "initialGeometries": 542,
+    "finalGeometries": 542,
+    "geometryDelta": 0,
+    "initialTextures": 23,
+    "finalTextures": 23,
+    "textureDelta": 0,
+    "initialHeapMb": 32.4,
+    "finalHeapMb": 38.16,
+    "heapDeltaMb": 5.76
+  },
+  "realForegroundPerformance": {
+    "floor2Day": {
+      "frameCount": 601,
+      "sampleDurationMs": 10015.9,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 17,
+      "p99FrameTimeMs": 17.2,
+      "minFps": 57.47,
+      "low1PercentFps": 58.14,
+      "avgFrameTimeMs": 16.67
+    },
+    "floor2Night": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.3,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.9,
+      "p99FrameTimeMs": 17,
+      "minFps": 58.14,
+      "low1PercentFps": 58.82,
+      "avgFrameTimeMs": 16.67
+    },
+    "towerOverviewDay": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.1,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.9,
+      "p99FrameTimeMs": 17,
+      "minFps": 57.8,
+      "low1PercentFps": 58.82,
+      "avgFrameTimeMs": 16.67
+    }
+  },
+  "sceneMetricsAfter": {
+    "drawCalls": 507,
+    "triangles": 57140,
+    "memoryGeometries": 542,
+    "memoryTextures": 23,
+    "totalNodes": 787,
+    "meshNodes": 648,
+    "instancedMeshNodes": 12,
+    "shadowCasterNodes": 114,
+    "shadowReceiverNodes": 67,
+    "matrixAutoUpdateTrueNodes": 191,
+    "matrixAutoUpdateFalseNodes": 596,
+    "uniqueGeometriesCount": 544,
+    "uniqueMaterialsCount": 84,
+    "totalLights": 14,
+    "activeLights": 9
+  }
+}

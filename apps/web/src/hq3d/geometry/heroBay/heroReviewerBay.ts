@@ -87,19 +87,21 @@ export class HeroReviewerBay {
     consoleGroup.position.set(0.0, 0.0, 0.0)
 
     // 2.1 Heavy Sculpted Trestle Pedestals (Left & Right)
+    const mastGeo = track(new THREE.BoxGeometry(0.08, 0.82, 0.24))
+    const faceGeo = track(new THREE.BoxGeometry(0.084, 0.76, 0.03))
+    const footGeo = track(new THREE.BoxGeometry(0.12, 0.04, 0.58))
+    const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.026, 0.018, 12))
+
     for (const side of [-1, 1]) {
       const legX = side * 0.72
 
       // Vertical graphite mast
-      const mastGeo = track(new THREE.BoxGeometry(0.08, 0.82, 0.24))
       const mast = new THREE.Mesh(mastGeo, materials.structureGraphite)
       mast.position.set(legX, 0.43, 0.0)
-      mast.castShadow = true
       mast.receiveShadow = true
       consoleGroup.add(mast)
 
       // Solid walnut decorative face cladding
-      const faceGeo = track(new THREE.BoxGeometry(0.084, 0.76, 0.03))
       const faceF = new THREE.Mesh(faceGeo, materials.walnut)
       faceF.position.set(legX, 0.43, 0.12)
       consoleGroup.add(faceF)
@@ -109,16 +111,13 @@ export class HeroReviewerBay {
       consoleGroup.add(faceB)
 
       // Cantilevered graphite outrigger foot (0.58m long)
-      const footGeo = track(new THREE.BoxGeometry(0.12, 0.04, 0.58))
       const foot = new THREE.Mesh(footGeo, materials.structureGraphite)
       foot.position.set(legX, 0.02, 0.0)
-      foot.castShadow = true
       foot.receiveShadow = true
       consoleGroup.add(foot)
 
       // Milled champagne brass leveling glides (front and back)
       for (const fz of [-0.25, 0.25]) {
-        const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.026, 0.018, 12))
         const glide = new THREE.Mesh(glideGeo, materials.champagneBrass)
         glide.position.set(legX, 0.009, fz)
         consoleGroup.add(glide)
@@ -129,7 +128,6 @@ export class HeroReviewerBay {
     const stretcherGeo = track(new THREE.BoxGeometry(1.44, 0.036, 0.036))
     const stretcher = new THREE.Mesh(stretcherGeo, materials.champagneBrass)
     stretcher.position.set(0.0, 0.22, 0.0)
-    stretcher.castShadow = true
     consoleGroup.add(stretcher)
 
     // Integrated under-desk cable spine & equipment channel
@@ -295,9 +293,10 @@ export class HeroReviewerBay {
     stoolGroup.add(footRing)
 
     // 4 Splayed architectural legs with graphite glides
+    const legGeo = track(new THREE.CylinderGeometry(0.012, 0.014, 0.32, 8))
+    const stoolGlideGeo = track(new THREE.CylinderGeometry(0.018, 0.022, 0.014, 8))
     for (let i = 0; i < 4; i++) {
       const angle = (i * Math.PI) / 2 + Math.PI / 4
-      const legGeo = track(new THREE.CylinderGeometry(0.012, 0.014, 0.32, 8))
       const leg = new THREE.Mesh(legGeo, materials.structureGraphite)
       const legRadius = 0.14
       leg.position.set(Math.cos(angle) * legRadius, 0.15, Math.sin(angle) * legRadius)
@@ -305,8 +304,7 @@ export class HeroReviewerBay {
       leg.rotation.x = -Math.sin(angle) * 0.14
       stoolGroup.add(leg)
 
-      const glideGeo = track(new THREE.CylinderGeometry(0.018, 0.022, 0.014, 8))
-      const glide = new THREE.Mesh(glideGeo, materials.champagneBrass)
+      const glide = new THREE.Mesh(stoolGlideGeo, materials.champagneBrass)
       glide.position.set(Math.cos(angle) * (legRadius + 0.04), 0.007, Math.sin(angle) * (legRadius + 0.04))
       stoolGroup.add(glide)
     }

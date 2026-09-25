@@ -17,6 +17,7 @@ export class HqFurniture {
   public readonly group: THREE.Group
   public readonly stationIndicators = new Map<StationId, THREE.Mesh>()
   public readonly stationScreens = new Map<StationId, THREE.Mesh[]>()
+  private readonly floorGroups = new Map<number, THREE.Group>()
   private readonly geometriesToDispose: THREE.BufferGeometry[] = []
   private readonly materials: MaterialLibrary
 
@@ -32,6 +33,28 @@ export class HqFurniture {
     this.buildApprovalMezzaninePlinth(materials)
     this.buildRepositoryVault(materials)
     this.buildOfficeLifeProps(materials)
+  }
+
+  public getFloorGroup(floor: number): THREE.Group {
+    let grp = this.floorGroups.get(floor)
+    if (!grp) {
+      grp = new THREE.Group()
+      grp.name = `furniture-floor-${floor}`
+      this.floorGroups.set(floor, grp)
+      this.group.add(grp)
+    }
+    return grp
+  }
+
+  public setFloorVisibility(activeFloor: number | null): void {
+    for (const [floor, grp] of this.floorGroups.entries()) {
+      if (activeFloor === null) {
+        grp.visible = true
+      } else {
+        // Keep active floor and immediately adjacent levels (within 1 floor) visible for natural vertical parallax
+        grp.visible = Math.abs(floor - activeFloor) <= 1
+      }
+    }
   }
 
   private track<T extends THREE.BufferGeometry>(geom: T): T {
@@ -116,7 +139,7 @@ export class HqFurniture {
     tableGroup.add(ind)
     this.stationIndicators.set('planning-table', ind)
 
-    this.group.add(tableGroup)
+    this.getFloorGroup(1).add(tableGroup)
   }
 
   /**
@@ -132,18 +155,20 @@ export class HqFurniture {
    * - Expansion Bays 03 & 04: standby modular stations.
    */
   private buildAgentWorkstations(materials: MaterialLibrary): void {
+    const f2Group = this.getFloorGroup(2)
+
     // 0. Architectural Studio Mat & Warm Woven Area Rug spanning Agent Operations
     // Inlay plinth/trim sits slightly below the rug so only the 30mm outer border trims the perimeter
     const rugBorderGeo = this.track(new THREE.BoxGeometry(9.66, 0.006, 4.66))
     const rugBorder = new THREE.Mesh(rugBorderGeo, materials.champagneBrass)
     rugBorder.position.set(0.0, 7.222, 0.6)
-    this.group.add(rugBorder)
+    f2Group.add(rugBorder)
 
     const roomRugGeo = this.track(new THREE.BoxGeometry(9.6, 0.008, 4.6))
     const roomRug = new THREE.Mesh(roomRugGeo, materials.carpetWarm)
     roomRug.position.set(0.0, 7.228, 0.6)
     roomRug.receiveShadow = true
-    this.group.add(roomRug)
+    f2Group.add(roomRug)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 1. FRONTEND ENGINEER WORKSTATION (Screen Right Rear: X = -2.6, Z = 1.0)
@@ -161,7 +186,7 @@ export class HqFurniture {
     this.stationScreens.set('codex-workstation', heroResult.screens)
     this.stationScreens.set('engineering-workstation-01', heroResult.screens)
 
-    this.group.add(heroResult.podGroup)
+    f2Group.add(heroResult.podGroup)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 2. BACKEND ENGINEER WORKSTATION (Screen Left Rear: X = 2.6, Z = 1.0)
@@ -179,7 +204,7 @@ export class HqFurniture {
     this.stationScreens.set('fcc-workstation', backendResult.screens)
     this.stationScreens.set('engineering-workstation-02', backendResult.screens)
 
-    this.group.add(backendResult.podGroup)
+    f2Group.add(backendResult.podGroup)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 3. INDEPENDENT REVIEWER VERIFICATION STATION (Screen Center Forward: X = 0.0, Z = -0.1)
@@ -187,12 +212,12 @@ export class HqFurniture {
     const reviewerResult = HeroReviewerBay.buildBay(materials, this.track.bind(this))
 
     // Register modern role ID and legacy aliases for indicators
-    this.stationIndicators.set('reviewer-workstation' as any, reviewerResult.indicatorMesh)
+    this.stationIndicators.set('reviewer-workstation', reviewerResult.indicatorMesh)
 
     // Register modern role ID and legacy aliases for screens
-    this.stationScreens.set('reviewer-workstation' as any, reviewerResult.screens)
+    this.stationScreens.set('reviewer-workstation', reviewerResult.screens)
 
-    this.group.add(reviewerResult.podGroup)
+    f2Group.add(reviewerResult.podGroup)
 
     // ──────────────────────────────────────────────────────────────────────────
     // 4. STANDBY EXPANSION BAYS 03 & 04 (Slender Perimeter Wall Docks, Zero Foreground Clutter)
@@ -208,7 +233,7 @@ export class HqFurniture {
       bayGroup.add(bayInd)
       this.stationIndicators.set(bayId as StationId, bayInd)
       this.stationScreens.set(bayId as StationId, [])
-      this.group.add(bayGroup)
+      f2Group.add(bayGroup)
     }
   }
 
@@ -279,7 +304,7 @@ export class HqFurniture {
     this.stationIndicators.set('verifier-console', ind)
     this.stationIndicators.set('verification-lab-console' as any, ind)
 
-    this.group.add(consoleGroup)
+    this.getFloorGroup(3).add(consoleGroup)
   }
 
   /**
@@ -388,7 +413,7 @@ export class HqFurniture {
     qaGroup.add(ind)
     this.stationIndicators.set('browser-qa-matrix', ind)
 
-    this.group.add(qaGroup)
+    this.getFloorGroup(4).add(qaGroup)
   }
 
   /**
@@ -453,7 +478,7 @@ export class HqFurniture {
     chairGroup.add(chairBack)
 
     plinthGroup.add(chairGroup)
-    this.group.add(plinthGroup)
+    this.getFloorGroup(6).add(plinthGroup)
   }
 
   /**
@@ -494,7 +519,7 @@ export class HqFurniture {
     vaultGroup.add(ind)
     this.stationIndicators.set('repository-vault', ind)
 
-    this.group.add(vaultGroup)
+    this.getFloorGroup(0).add(vaultGroup)
   }
 
   /**
@@ -506,9 +531,6 @@ export class HqFurniture {
    * - Floor 3 (Y = 10.8m): Cleanroom observation bench.
    */
   private buildOfficeLifeProps(materials: MaterialLibrary): void {
-    const propsGroup = new THREE.Group()
-    propsGroup.name = 'office-life-props'
-
     // ── LEVEL 0 MEZZANINE (Y = 0.0m) ──────────────────────────────────
     // 1. Cozy Lounge Nook on Mezzanine
     const loungeGroup = new THREE.Group()
@@ -528,16 +550,16 @@ export class HqFurniture {
       [-1.1, 0.38],
       [1.1, 0.38],
     ]
+    const sLegGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.14, 8))
     for (const [lx, lz] of sLegCorners) {
-      const legGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.14, 8))
-      const leg = new THREE.Mesh(legGeo, materials.champagneBrass)
+      const leg = new THREE.Mesh(sLegGeo, materials.champagneBrass)
       leg.position.set(lx!, 0.07, lz!)
       loungeGroup.add(leg)
     }
 
     // Sofa Seat Cushions (3 cushions)
+    const seatGeo = this.track(new THREE.BoxGeometry(0.72, 0.22, 0.8))
     for (let cx = -0.75; cx <= 0.75; cx += 0.75) {
-      const seatGeo = this.track(new THREE.BoxGeometry(0.72, 0.22, 0.8))
       const seat = new THREE.Mesh(seatGeo, materials.couchFabricWarm)
       seat.position.set(cx, 0.31, 0.02)
       seat.castShadow = true
@@ -552,8 +574,8 @@ export class HqFurniture {
     loungeGroup.add(back)
 
     // Sofa Armrests
+    const armGeo = this.track(new THREE.BoxGeometry(0.14, 0.32, 0.84))
     for (const ax of [-1.15, 1.15]) {
-      const armGeo = this.track(new THREE.BoxGeometry(0.14, 0.32, 0.84))
       const arm = new THREE.Mesh(armGeo, materials.couchFabricWarm)
       arm.position.set(ax, 0.48, 0.0)
       loungeGroup.add(arm)
@@ -580,8 +602,8 @@ export class HqFurniture {
     tableTop.castShadow = true
     loungeGroup.add(tableTop)
 
+    const tLegGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.33, 8))
     for (const [tx, tz] of [[-0.55, 0.85], [0.55, 0.85], [-0.55, 1.35], [0.55, 1.35]]) {
-      const tLegGeo = this.track(new THREE.CylinderGeometry(0.02, 0.015, 0.33, 8))
       const tLeg = new THREE.Mesh(tLegGeo, materials.champagneBrass)
       tLeg.position.set(tx!, 0.165, tz!)
       loungeGroup.add(tLeg)
@@ -620,10 +642,10 @@ export class HqFurniture {
     lampGroup.add(fBulb)
 
     loungeGroup.add(lampGroup)
-    propsGroup.add(loungeGroup)
 
-    // Potted tree on Mezzanine
-    propsGroup.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.2))
+    const l0Group = this.getFloorGroup(0)
+    l0Group.add(loungeGroup)
+    l0Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.2))
 
     // ── FLOOR 1 MISSION CONTROL (Y = 3.6m) ───────────────────────────
     const f1Group = new THREE.Group()
@@ -649,7 +671,7 @@ export class HqFurniture {
     f1Group.add(wbGroup)
 
     f1Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 2.0))
-    propsGroup.add(f1Group)
+    this.getFloorGroup(1).add(f1Group)
 
     // ── FLOOR 2 AGENT OPERATIONS HERO ROOM (Y = 7.2m) ─────────────────
     const f2Group = new THREE.Group()
@@ -732,13 +754,13 @@ export class HqFurniture {
     f2Group.add(baseboardReveal)
 
     // Side baseboards along West and East walls
+    const sideBaseGeo = this.track(new THREE.BoxGeometry(0.024, 0.08, 8.2))
+    const sideRevealGeo = this.track(new THREE.BoxGeometry(0.028, 0.012, 8.2))
     for (const sx of [-7.08, 7.08]) {
-      const sideBaseGeo = this.track(new THREE.BoxGeometry(0.024, 0.08, 8.2))
       const sideBase = new THREE.Mesh(sideBaseGeo, materials.structureGraphite)
       sideBase.position.set(sx, 0.04, 0.2)
       f2Group.add(sideBase)
 
-      const sideRevealGeo = this.track(new THREE.BoxGeometry(0.028, 0.012, 8.2))
       const sideReveal = new THREE.Mesh(sideRevealGeo, materials.champagneBrass)
       sideReveal.position.set(sx, 0.085, 0.2)
       f2Group.add(sideReveal)
@@ -751,8 +773,8 @@ export class HqFurniture {
     windowSill.castShadow = true
     f2Group.add(windowSill)
 
+    const bracketGeo = this.track(new THREE.BoxGeometry(0.22, 0.06, 0.03))
     for (const bz of [-2.4, 0.0, 2.4]) {
-      const bracketGeo = this.track(new THREE.BoxGeometry(0.22, 0.06, 0.03))
       const bracket = new THREE.Mesh(bracketGeo, materials.champagneBrass)
       bracket.position.set(-7.07, -0.02, bz)
       f2Group.add(bracket)
@@ -785,15 +807,13 @@ export class HqFurniture {
     ceilingCloudGroup.add(trofferInstanced)
     f2Group.add(ceilingCloudGroup)
 
-    propsGroup.add(f2Group)
+    this.getFloorGroup(2).add(f2Group)
 
     // ── FLOOR 3 VERIFICATION CLEANROOM (Y = 10.8m) ───────────────────
     const f3Group = new THREE.Group()
     f3Group.position.set(0.0, 10.8, 0.0)
     f3Group.add(this.buildPottedTree(materials, [-4.5, 0.0, 1.5], 1.8))
-    propsGroup.add(f3Group)
-
-    this.group.add(propsGroup)
+    this.getFloorGroup(3).add(f3Group)
   }
 
   private buildPottedTree(materials: MaterialLibrary, pos: [number, number, number], height: number): THREE.Group {
@@ -814,7 +834,6 @@ export class HqFurniture {
     const trunkGeo = this.track(new THREE.CylinderGeometry(0.035, 0.045, height, 8))
     const trunk = new THREE.Mesh(trunkGeo, materials.walnut)
     trunk.position.set(0.0, height / 2 + 0.4, 0.0)
-    trunk.castShadow = true
     treeGroup.add(trunk)
 
     const leafClusters = [
@@ -830,7 +849,6 @@ export class HqFurniture {
       const leafMat = i % 2 === 0 ? materials.foliageGreen : materials.foliageDark
       const foliage = new THREE.Mesh(leafGeo, leafMat)
       foliage.position.set(lx!, ly!, lz!)
-      foliage.castShadow = true
       treeGroup.add(foliage)
     }
 
@@ -885,5 +903,6 @@ export class HqFurniture {
     this.geometriesToDispose.length = 0
     this.stationIndicators.clear()
     this.stationScreens.clear()
+    this.floorGroups.clear()
   }
 }

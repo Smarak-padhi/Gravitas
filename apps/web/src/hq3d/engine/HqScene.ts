@@ -61,20 +61,20 @@ export class HqScene {
     // Instantiate Material Library
     this.materials = new MaterialLibrary()
 
-    // 1. Soft Architectural Museum Key Directional Light (illuminates vertical tower from front-left-above)
+    // 1. Soft Architectural Museum Key Directional Light (calibrated shadow camera frustum)
     this.keyLight = new THREE.DirectionalLight(0xfff6ec, 1.35)
     this.keyLight.position.set(-18.0, 36.0, -28.0)
     this.keyLight.castShadow = true
-    this.keyLight.shadow.mapSize.width = 2048
-    this.keyLight.shadow.mapSize.height = 2048
+    this.keyLight.shadow.mapSize.width = 1024
+    this.keyLight.shadow.mapSize.height = 1024
     this.keyLight.shadow.camera.near = 5.0
-    this.keyLight.shadow.camera.far = 95.0
-    this.keyLight.shadow.camera.left = -22.0
-    this.keyLight.shadow.camera.right = 22.0
-    this.keyLight.shadow.camera.top = 32.0
-    this.keyLight.shadow.camera.bottom = -4.0
+    this.keyLight.shadow.camera.far = 80.0
+    this.keyLight.shadow.camera.left = -12.0
+    this.keyLight.shadow.camera.right = 12.0
+    this.keyLight.shadow.camera.top = 28.0
+    this.keyLight.shadow.camera.bottom = -2.0
     this.keyLight.shadow.bias = -0.0003
-    this.keyLight.shadow.radius = 2.0
+    this.keyLight.shadow.radius = 1.5
     this.scene.add(this.keyLight)
 
     // 2. Opposing Soft Architectural Fill Light (illuminates shadow faces, prevents black voids)
@@ -183,6 +183,89 @@ export class HqScene {
 
     this.custodyMotion = new ArtifactMotionController()
     this.scene.add(this.custodyMotion.getGroup())
+
+    // Freeze static matrices to prevent per-frame CPU matrix recomputation
+    this.freezeStaticMatrices()
+  }
+
+  /**
+   * Freezes static scene graph node matrices to eliminate continuous CPU matrix recalculation.
+   * Dynamic parts (elevator car, elevator doors, characters, dossiers) remain dynamic.
+   */
+  public freezeStaticMatrices(): void {
+    const freeze = (obj: THREE.Object3D) => {
+      if (
+        obj.name?.startsWith('elevator-cab') ||
+        obj.name?.startsWith('elevator-door')
+      ) {
+        return
+      }
+      obj.updateMatrix()
+      obj.updateMatrixWorld(true)
+      obj.matrixAutoUpdate = false
+      for (const child of obj.children) {
+        freeze(child)
+      }
+    }
+    freeze(this.architecture.group)
+    freeze(this.furniture.group)
+    freeze(this.infrastructure.group)
+  }
+
+  /**
+   * Gated Floor Spotlight & Distant Geometry Visibility (Wave 12I).
+   * When closely focused on Floor 2, prunes out-of-view spotlights from the WebGL forward lighting
+   * loop and culls distant architectural levels.
+   * Overview / multi-floor transitions immediately restore all lighting pools and geometry.
+   */
+  public setFocusedRoom(roomId: string | null): void {
+    const isFloor2 =
+      roomId === 'AGENT_OPERATIONS' ||
+      roomId === 'ROOM_AGENT_OPERATIONS' ||
+      roomId === 'WS_FRONTEND' ||
+      roomId === 'WS_BACKEND' ||
+      roomId === 'WS_VERIFIER' ||
+      roomId === 'CHAR_FRONTEND' ||
+      roomId === 'CHAR_BACKEND' ||
+      roomId === 'CHAR_REVIEWER'
+
+    if (isFloor2) {
+      // Deactivate non-Floor-2 spotlights from WebGL forward lighting pass
+      this.spotPlanning.visible = false
+      this.spotCleanroom.visible = false
+      this.spotBrowserQa.visible = false
+      this.spotInfrastructure.visible = false
+      this.spotApproval.visible = false
+
+      // Floor 2 dedicated fixtures remain active
+      this.spotOperations.visible = true
+      this.spotOperationsWash.visible = true
+      this.spotOperationsDeskL.visible = true
+      this.spotOperationsDeskR.visible = true
+      this.spotOperationsReviewer.visible = true
+
+      // Floor 5 server bay is outside Floor 2 view
+      this.infrastructure.group.visible = false
+
+      // Cull distant furniture
+      this.furniture.setFloorVisibility(2)
+    } else {
+      // Full overview / other rooms: restore all lights, furniture, and infrastructure
+      this.spotPlanning.visible = true
+      this.spotCleanroom.visible = true
+      this.spotBrowserQa.visible = true
+      this.spotInfrastructure.visible = true
+      this.spotApproval.visible = true
+
+      this.spotOperations.visible = true
+      this.spotOperationsWash.visible = true
+      this.spotOperationsDeskL.visible = true
+      this.spotOperationsDeskR.visible = true
+      this.spotOperationsReviewer.visible = true
+
+      this.infrastructure.group.visible = true
+      this.furniture.setFloorVisibility(null)
+    }
   }
 
   private lastTimeSeconds: number | null = null

@@ -1,0 +1,355 @@
+{
+  "wave": "12I",
+  "checkpoint": "886b5df7714a756543a1ceb8e728a59a45dc3e96",
+  "timestamp": "2026-09-25T11:22:06.848Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900,
+    "dpr": 1
+  },
+  "renderer": {
+    "info": {
+      "calls": 429,
+      "triangles": 48936,
+      "points": 0,
+      "lines": 0,
+      "memoryGeometries": 586,
+      "memoryTextures": 23
+    },
+    "pixelRatio": 1,
+    "antialias": true,
+    "shadowMap": {
+      "enabled": true,
+      "type": 1
+    },
+    "toneMapping": 4,
+    "toneMappingExposure": 1.05,
+    "outputColorSpace": "srgb"
+  },
+  "sceneGraph": {
+    "totalNodes": 782,
+    "meshNodes": 648,
+    "skinnedMeshNodes": 0,
+    "instancedMeshNodes": 12,
+    "shadowCasterNodes": 189,
+    "shadowReceiverNodes": 65,
+    "transparentMeshNodes": 19,
+    "matrixAutoUpdateNodes": 782,
+    "hiddenNodesTraversed": 5,
+    "uniqueGeometriesCount": 601,
+    "uniqueMaterialsCount": 84,
+    "geometryTypeCount": {
+      "BoxGeometry": 394,
+      "CylinderGeometry": 104,
+      "ExtrudeGeometry": 23,
+      "PlaneGeometry": 5,
+      "CapsuleGeometry": 23,
+      "ConeGeometry": 3,
+      "SphereGeometry": 38,
+      "TorusGeometry": 7,
+      "RingGeometry": 4
+    },
+    "materialTypeCount": {
+      "MeshStandardMaterial": 79,
+      "MeshBasicMaterial": 5
+    },
+    "floors": [
+      {
+        "floor": "Floor 0 (Foundation / Plinth)",
+        "objects": 69,
+        "meshes": 49,
+        "instancedMeshes": 0,
+        "shadowCasters": 9,
+        "shadowReceivers": 5,
+        "transparentMeshes": 5,
+        "matrixAutoUpdateCount": 69,
+        "uniqueGeometries": 46,
+        "uniqueMaterials": 15
+      },
+      {
+        "floor": "Floor 1 (Mission Control)",
+        "objects": 65,
+        "meshes": 54,
+        "instancedMeshes": 0,
+        "shadowCasters": 20,
+        "shadowReceivers": 8,
+        "transparentMeshes": 1,
+        "matrixAutoUpdateCount": 65,
+        "uniqueGeometries": 48,
+        "uniqueMaterials": 25
+      },
+      {
+        "floor": "Floor 2 (Agent Operations)",
+        "objects": 371,
+        "meshes": 306,
+        "instancedMeshes": 11,
+        "shadowCasters": 89,
+        "shadowReceivers": 32,
+        "transparentMeshes": 2,
+        "matrixAutoUpdateCount": 371,
+        "uniqueGeometries": 289,
+        "uniqueMaterials": 57
+      },
+      {
+        "floor": "Floor 3 (Verification Lab)",
+        "objects": 83,
+        "meshes": 63,
+        "instancedMeshes": 1,
+        "shadowCasters": 22,
+        "shadowReceivers": 4,
+        "transparentMeshes": 2,
+        "matrixAutoUpdateCount": 83,
+        "uniqueGeometries": 57,
+        "uniqueMaterials": 26
+      },
+      {
+        "floor": "Floor 4 (Browser QA Lab)",
+        "objects": 63,
+        "meshes": 59,
+        "instancedMeshes": 0,
+        "shadowCasters": 30,
+        "shadowReceivers": 4,
+        "transparentMeshes": 6,
+        "matrixAutoUpdateCount": 63,
+        "uniqueGeometries": 58,
+        "uniqueMaterials": 19
+      },
+      {
+        "floor": "Floor 5 (Infrastructure)",
+        "objects": 76,
+        "meshes": 69,
+        "instancedMeshes": 0,
+        "shadowCasters": 9,
+        "shadowReceivers": 9,
+        "transparentMeshes": 3,
+        "matrixAutoUpdateCount": 76,
+        "uniqueGeometries": 67,
+        "uniqueMaterials": 13
+      },
+      {
+        "floor": "Floor 6 (Approval Mezzanine)",
+        "objects": 55,
+        "meshes": 48,
+        "instancedMeshes": 0,
+        "shadowCasters": 10,
+        "shadowReceivers": 3,
+        "transparentMeshes": 0,
+        "matrixAutoUpdateCount": 55,
+        "uniqueGeometries": 36,
+        "uniqueMaterials": 15
+      },
+      {
+        "floor": "Tower Core & Envelope (Global)",
+        "objects": 0,
+        "meshes": 0,
+        "instancedMeshes": 0,
+        "shadowCasters": 0,
+        "shadowReceivers": 0,
+        "transparentMeshes": 0,
+        "matrixAutoUpdateCount": 0,
+        "uniqueGeometries": 0,
+        "uniqueMaterials": 0
+      }
+    ]
+  },
+  "lights": [
+    {
+      "type": "DirectionalLight",
+      "name": "",
+      "color": "#fff8ee",
+      "intensity": 1.65,
+      "castShadow": true,
+      "shadowMapSize": {
+        "w": 2048,
+        "h": 2048
+      }
+    },
+    {
+      "type": "DirectionalLight",
+      "name": "",
+      "color": "#b4d4f0",
+      "intensity": 1.1,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "HemisphereLight",
+      "name": "",
+      "color": "#dde8f5",
+      "intensity": 1.25,
+      "castShadow": false,
+      "shadowMapSize": null
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#ffeedb",
+      "intensity": 1.8,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#fff7ed",
+      "intensity": 2,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#fef3c7",
+      "intensity": 1.2,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#fffbeb",
+      "intensity": 1.2,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#fffbeb",
+      "intensity": 1.2,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#ffeedb",
+      "intensity": 1.4,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#d4f4ff",
+      "intensity": 1.8,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#c2f0e8",
+      "intensity": 1.6,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#a5c6e8",
+      "intensity": 1.6,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "SpotLight",
+      "name": "",
+      "color": "#ffdfa8",
+      "intensity": 1.8,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    },
+    {
+      "type": "PointLight",
+      "name": "",
+      "color": "#ffedd5",
+      "intensity": 1.2,
+      "castShadow": false,
+      "shadowMapSize": {
+        "w": 512,
+        "h": 512
+      }
+    }
+  ],
+  "profilingBreakdown": {
+    "cpuBreakdownMs": {
+      "sceneUpdate": 0.022,
+      "cameraRigUpdate": 0.008,
+      "rendererRender": 7.308
+    },
+    "shadowAblation": {
+      "drawCallsWithShadow": 435,
+      "drawCallsWithoutShadow": 269,
+      "shadowDrawCallsDelta": 166
+    }
+  },
+  "foregroundInteractiveBenchmarks": {
+    "floor2Day": {
+      "frameCount": 219,
+      "sampleDurationMs": 10049.7,
+      "avgFps": 21.79,
+      "medianFrameTimeMs": 49.9,
+      "p95FrameTimeMs": 66.8,
+      "p99FrameTimeMs": 67.1,
+      "minFps": 12,
+      "low1PercentFps": 14.9,
+      "avgFrameTimeMs": 45.89
+    },
+    "floor2Night": {
+      "frameCount": 208,
+      "sampleDurationMs": 10016.1,
+      "avgFps": 20.77,
+      "medianFrameTimeMs": 50,
+      "p95FrameTimeMs": 66.9,
+      "p99FrameTimeMs": 83.3,
+      "minFps": 12,
+      "low1PercentFps": 12,
+      "avgFrameTimeMs": 48.15
+    },
+    "towerOverviewDay": {
+      "frameCount": 396,
+      "sampleDurationMs": 10033.1,
+      "avgFps": 39.47,
+      "medianFrameTimeMs": 17,
+      "p95FrameTimeMs": 33.7,
+      "p99FrameTimeMs": 50.1,
+      "minFps": 14.97,
+      "low1PercentFps": 19.96,
+      "avgFrameTimeMs": 25.34
+    }
+  }
+}

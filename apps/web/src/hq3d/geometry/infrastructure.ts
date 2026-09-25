@@ -85,7 +85,6 @@ export class HqInfrastructure {
       const riserGeo = this.track(new THREE.BoxGeometry(0.12, 2.6, 0.12))
       const riser = new THREE.Mesh(riserGeo, materials.gunmetal)
       riser.position.set(ro, 1.35, -0.78)
-      riser.castShadow = true
       rackGroup.add(riser)
     }
 
@@ -108,7 +107,6 @@ export class HqInfrastructure {
       const cowlGeo = this.track(new THREE.BoxGeometry(1.14, 0.06, 1.14))
       const cowl = new THREE.Mesh(cowlGeo, materials.gunmetal)
       cowl.position.set(0.0, 2.33, 0.0)
-      cowl.castShadow = true
       cabinetGroup.add(cowl)
 
       // 2. Front Server Face with procedural 1U/2U server slots & ventilation
@@ -183,7 +181,6 @@ export class HqInfrastructure {
     const trayGeo = this.track(new THREE.BoxGeometry(3.6, 0.08, 0.6))
     const tray = new THREE.Mesh(trayGeo, materials.gunmetal)
     tray.position.set(0.0, 2.65, 0.0)
-    tray.castShadow = true
     rackGroup.add(tray)
 
     const trayStrutGeo = this.track(new THREE.BoxGeometry(0.03, 0.04, 0.58))
@@ -198,7 +195,6 @@ export class HqInfrastructure {
     const duct = new THREE.Mesh(ductGeo, materials.gunmetal)
     duct.rotation.z = Math.PI / 2
     duct.position.set(0.0, 2.95, -0.4)
-    duct.castShadow = true
     rackGroup.add(duct)
 
     const ductBandGeo = this.track(new THREE.CylinderGeometry(0.17, 0.17, 0.08, 16))
@@ -236,7 +232,6 @@ export class HqInfrastructure {
     const columnGeo = this.track(new THREE.BoxGeometry(1.1, 0.82, 0.7))
     const column = new THREE.Mesh(columnGeo, materials.gunmetal)
     column.position.set(0.0, 0.54, 0.0)
-    column.castShadow = true
     column.receiveShadow = true
     consoleGroup.add(column)
 
@@ -247,7 +242,6 @@ export class HqInfrastructure {
 
     const deckGeo = this.track(new THREE.BoxGeometry(1.2, 0.06, 0.75))
     const deck = new THREE.Mesh(deckGeo, materials.gunmetal)
-    deck.castShadow = true
     deckGroup.add(deck)
 
     // Brass edge trim on desk surface

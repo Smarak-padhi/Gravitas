@@ -36,15 +36,15 @@ export class HqPicking {
       { x: halfW, z: halfD, dx: -1, dz: -1 },
     ]
 
+    // X-arm and Z-arm shared corner bracket geometries
+    const xArmGeo = this.track(new THREE.BoxGeometry(bracketLen, 0.015, bracketThick))
+    const zArmGeo = this.track(new THREE.BoxGeometry(bracketThick, 0.015, bracketLen))
+
     for (const c of corners) {
-      // X-arm of corner bracket
-      const xArmGeo = this.track(new THREE.BoxGeometry(bracketLen, 0.015, bracketThick))
       const xArm = new THREE.Mesh(xArmGeo, materials.selectionBracket)
       xArm.position.set(c.x + (c.dx * bracketLen) / 2, 0.02, c.z)
       this.indicatorGroup.add(xArm)
 
-      // Z-arm of corner bracket
-      const zArmGeo = this.track(new THREE.BoxGeometry(bracketThick, 0.015, bracketLen))
       const zArm = new THREE.Mesh(zArmGeo, materials.selectionBracket)
       zArm.position.set(c.x, 0.02, c.z + (c.dz * bracketLen) / 2)
       this.indicatorGroup.add(zArm)

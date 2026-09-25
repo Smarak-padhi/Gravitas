@@ -125,13 +125,13 @@ export class HeroFrontendBay {
     acousticWallGroup.add(botFascia)
 
     // Vertical architectural side casing reveals (terminating the slat array)
+    const casingGeo = track(new THREE.BoxGeometry(0.024, 3.2, 0.034))
+    const casingRevealGeo = track(new THREE.BoxGeometry(0.012, 3.2, 0.036))
     for (const sx of [-1.61, 1.61]) {
-      const casingGeo = track(new THREE.BoxGeometry(0.024, 3.2, 0.034))
       const casing = new THREE.Mesh(casingGeo, materials.structureGraphite)
       casing.position.set(sx, 0.0, -slatDepth / 2 - 0.004)
       acousticWallGroup.add(casing)
 
-      const casingRevealGeo = track(new THREE.BoxGeometry(0.012, 3.2, 0.036))
       const casingReveal = new THREE.Mesh(casingRevealGeo, materials.heroBrass)
       casingReveal.position.set(sx - (Math.sign(sx) * 0.012), 0.0, -slatDepth / 2 - 0.005)
       acousticWallGroup.add(casingReveal)
@@ -173,37 +173,39 @@ export class HeroFrontendBay {
 
     // 2.2 Motorized Dual-Stage Telescoping Steel Lift Legs
     const legSpacingX = 0.88
+    const outerColGeo = track(new THREE.BoxGeometry(0.08, 0.38, 0.055))
+    const innerColGeo = track(new THREE.BoxGeometry(0.07, 0.34, 0.048))
+    const footShape = this.createRoundedRectShape(0.075, 0.76, 0.02)
+    const footGeo = track(
+      new THREE.ExtrudeGeometry(footShape, {
+        depth: 0.024,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.004,
+        bevelThickness: 0.004,
+        curveSegments: 8,
+      })
+    )
+    footGeo.rotateX(Math.PI / 2)
+    const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.024, 0.012, 16))
+    const topBracketGeo = track(new THREE.BoxGeometry(0.065, 0.025, 0.62))
 
     for (const side of [-1, 1]) {
       const legX = side * legSpacingX
 
       // Lower stage outer column (powder-coated graphite steel)
-      const outerColGeo = track(new THREE.BoxGeometry(0.08, 0.38, 0.055))
       const outerCol = new THREE.Mesh(outerColGeo, materials.heroSteel)
       outerCol.position.set(legX, 0.20, 0.0)
       outerCol.castShadow = true
       deskGroup.add(outerCol)
 
       // Upper stage inner column (telescoping sleeve)
-      const innerColGeo = track(new THREE.BoxGeometry(0.07, 0.34, 0.048))
       const innerCol = new THREE.Mesh(innerColGeo, materials.heroSteel)
       innerCol.position.set(legX, 0.54, 0.0)
       innerCol.castShadow = true
       deskGroup.add(innerCol)
 
       // Solid steel foot sled with beveled ends
-      const footShape = this.createRoundedRectShape(0.075, 0.76, 0.02)
-      const footGeo = track(
-        new THREE.ExtrudeGeometry(footShape, {
-          depth: 0.024,
-          bevelEnabled: true,
-          bevelSegments: 3,
-          bevelSize: 0.004,
-          bevelThickness: 0.004,
-          curveSegments: 8,
-        })
-      )
-      footGeo.rotateX(Math.PI / 2)
       const footSled = new THREE.Mesh(footGeo, materials.heroSteel)
       footSled.position.set(legX, 0.024, 0.0)
       footSled.castShadow = true
@@ -212,14 +214,12 @@ export class HeroFrontendBay {
 
       // Dual brass leveling glide discs underneath each foot
       for (const fz of [-0.32, 0.32]) {
-        const glideGeo = track(new THREE.CylinderGeometry(0.022, 0.024, 0.012, 16))
         const glide = new THREE.Mesh(glideGeo, materials.heroBrass)
         glide.position.set(legX, 0.006, fz)
         deskGroup.add(glide)
       }
 
       // Upper desktop mounting bracket
-      const topBracketGeo = track(new THREE.BoxGeometry(0.065, 0.025, 0.62))
       const topBracket = new THREE.Mesh(topBracketGeo, materials.heroSteel)
       topBracket.position.set(legX, 0.71, 0.0)
       deskGroup.add(topBracket)
@@ -264,13 +264,11 @@ export class HeroFrontendBay {
     const spiderHubGeo = track(new THREE.CylinderGeometry(0.05, 0.06, 0.06, 16))
     const spiderHub = new THREE.Mesh(spiderHubGeo, materials.heroSteel)
     spiderHub.position.set(0.0, 0.12, 0.0)
-    spiderHub.castShadow = true
     chairGroup.add(spiderHub)
 
     const spiderRadius = 0.28
     const legArmGeo = track(new THREE.BoxGeometry(0.032, 0.024, spiderRadius))
     const legArmInstanced = new THREE.InstancedMesh(legArmGeo, materials.heroSteel, 5)
-    legArmInstanced.castShadow = true
 
     const casterStemGeo = track(new THREE.CylinderGeometry(0.008, 0.008, 0.035, 8))
     const casterStemInstanced = new THREE.InstancedMesh(casterStemGeo, materials.heroSteel, 5)
@@ -278,7 +276,6 @@ export class HeroFrontendBay {
     const chairWheelGeo = track(new THREE.CylinderGeometry(0.025, 0.025, 0.012, 12))
     chairWheelGeo.rotateZ(Math.PI / 2)
     const chairWheelInstanced = new THREE.InstancedMesh(chairWheelGeo, materials.heroPlastic, 10)
-    chairWheelInstanced.castShadow = true
 
     const chairDummy = new THREE.Object3D()
     let wheelIndex = 0
@@ -395,31 +392,28 @@ export class HeroFrontendBay {
     chairGroup.add(backGroup)
 
     // 3.5 Sculpted 3D Armrests
+    const uprightGeo = track(new THREE.BoxGeometry(0.03, 0.20, 0.04))
+    const padShape = this.createRoundedRectShape(0.075, 0.24, 0.02)
+    const padGeo = track(
+      new THREE.ExtrudeGeometry(padShape, {
+        depth: 0.022,
+        bevelEnabled: true,
+        bevelSegments: 3,
+        bevelSize: 0.006,
+        bevelThickness: 0.006,
+        curveSegments: 8,
+      })
+    )
+    padGeo.rotateX(Math.PI / 2)
+
     for (const side of [-1, 1]) {
       const armX = side * 0.26
-
-      // Vertical support arm curving up from seat pan
-      const uprightGeo = track(new THREE.BoxGeometry(0.03, 0.20, 0.04))
       const upright = new THREE.Mesh(uprightGeo, materials.heroSteel)
       upright.position.set(armX, 0.54, 0.04)
       chairGroup.add(upright)
 
-      // Polyurethane arm pad with beveled contour
-      const padShape = this.createRoundedRectShape(0.075, 0.24, 0.02)
-      const padGeo = track(
-        new THREE.ExtrudeGeometry(padShape, {
-          depth: 0.022,
-          bevelEnabled: true,
-          bevelSegments: 3,
-          bevelSize: 0.006,
-          bevelThickness: 0.006,
-          curveSegments: 8,
-        })
-      )
-      padGeo.rotateX(Math.PI / 2)
       const armPad = new THREE.Mesh(padGeo, materials.heroPlastic)
       armPad.position.set(armX, 0.65, 0.04)
-      armPad.castShadow = true
       chairGroup.add(armPad)
     }
 
@@ -436,7 +430,6 @@ export class HeroFrontendBay {
     const mountClampGeo = track(new THREE.BoxGeometry(0.12, 0.08, 0.09))
     const mountClamp = new THREE.Mesh(mountClampGeo, materials.heroSteel)
     mountClamp.position.set(0.0, 0.0, 0.0)
-    mountClamp.castShadow = true
     monitorGroup.add(mountClamp)
 
     // Vertical mounting mast
@@ -579,7 +572,6 @@ export class HeroFrontendBay {
     )
     kbCaseGeo.rotateX(Math.PI / 2)
     const kbCase = new THREE.Mesh(kbCaseGeo, materials.heroSteel)
-    kbCase.castShadow = true
     kbGroup.add(kbCase)
 
     // Sculpted keycap matrix block
@@ -612,7 +604,6 @@ export class HeroFrontendBay {
     const mouseBody = new THREE.Mesh(mouseBodyGeo, materials.heroSteel)
     mouseBody.scale.set(1.0, 0.55, 1.0)
     mouseBody.position.set(0.0, 0.014, 0.0)
-    mouseBody.castShadow = true
     mouseGroup.add(mouseBody)
 
     // Knurled metal scroll wheel
@@ -666,7 +657,6 @@ export class HeroFrontendBay {
     const lampBaseGeo = track(new THREE.CylinderGeometry(0.065, 0.07, 0.024, 24))
     const lampBase = new THREE.Mesh(lampBaseGeo, materials.heroBrass)
     lampBase.position.set(0.0, 0.012, 0.0)
-    lampBase.castShadow = true
     lampGroup.add(lampBase)
 
     // Articulated dual thin upright arms
@@ -716,7 +706,6 @@ export class HeroFrontendBay {
     const mugBodyGeo = track(new THREE.CylinderGeometry(0.042, 0.036, 0.088, 20))
     const mugBody = new THREE.Mesh(mugBodyGeo, materials.heroCeramic)
     mugBody.position.set(0.0, 0.044, 0.0)
-    mugBody.castShadow = true
     mugGroup.add(mugBody)
 
     // Exposed terracotta clay bottom ring
@@ -742,7 +731,6 @@ export class HeroFrontendBay {
     const nbGeo = track(new THREE.BoxGeometry(0.18, 0.018, 0.24))
     const nb = new THREE.Mesh(nbGeo, materials.heroFabric)
     nb.position.set(0.0, 0.009, 0.0)
-    nb.castShadow = true
     nbGroup.add(nb)
 
     // Ribbon bookmark

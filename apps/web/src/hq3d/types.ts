@@ -28,6 +28,7 @@ export type StationId =
   | 'approval-plinth'
   | 'repository-vault'
   | 'dispatch-console'
+  | 'reviewer-workstation'
 
 import type { RoleId, RoleInspectorMetadata } from './roles/types.js'
 
