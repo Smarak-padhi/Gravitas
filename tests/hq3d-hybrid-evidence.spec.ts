@@ -165,7 +165,7 @@ test.describe.serial('Wave 12H Hybrid HQ Visual Evidence Suite', () => {
     // 1600x900 viewport for crisp management-sim composition
     await page.setViewportSize({ width: 1600, height: 900 })
 
-    await page.goto(`http://127.0.0.1:${VITE_PORT}`)
+    await page.goto(`http://127.0.0.1:${VITE_PORT}?debug=hybrid`)
     await page.waitForSelector('[data-testid="living-hq-canvas-container"]', { timeout: 15000 })
     await page.waitForTimeout(1000)
 

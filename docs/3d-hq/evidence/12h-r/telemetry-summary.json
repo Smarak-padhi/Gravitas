@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-09-25T05:46:08.431Z",
+  "viewport": "1600x900",
+  "day": {
+    "fps": 33,
+    "frameTimeMs": 30.4,
+    "drawCalls": 479,
+    "triangles": 30776,
+    "geometries": 549,
+    "textures": 23
+  },
+  "evening": {
+    "fps": 60,
+    "frameTimeMs": 16.6,
+    "drawCalls": 479,
+    "triangles": 30776,
+    "geometries": 549,
+    "textures": 23
+  },
+  "night": {
+    "fps": 33,
+    "frameTimeMs": 30.3,
+    "drawCalls": 479,
+    "triangles": 30776,
+    "geometries": 549,
+    "textures": 23
+  },
+  "targetWave12HReference": {
+    "viewport": "1600x900",
+    "fps": 60,
+    "frameTimeMs": 16.7,
+    "drawCalls": 484,
+    "triangles": 29802,
+    "geometries": 549,
+    "textures": 23
+  }
+}

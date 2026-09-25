@@ -58,7 +58,12 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   const [isElevatorActive, setIsElevatorActive] = useState(false)
   const [activeTaskCount, setActiveTaskCount] = useState(0)
 
-  const isHybridFloor2 = experienceMode === 'HYBRID' && currentRoomId === 'AGENT_OPERATIONS'
+  const isCharacterPreview =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('preview') === 'characters'
+
+  const isHybridFloor2 =
+    (experienceMode === 'HYBRID' && currentRoomId === 'AGENT_OPERATIONS') || isCharacterPreview
 
   // 1. Accessibility: Detect prefers-reduced-motion
   useEffect(() => {

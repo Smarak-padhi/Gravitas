@@ -105,9 +105,9 @@ export const ROOM_DEFINITIONS: Record<RoomId, RoomDefinition> = {
     accentColor: '#2b59c3',
     cameraPreset: {
       id: 'ROOM_AGENT_OPERATIONS',
-      target: [-0.5, 8.2, 0.5],
-      position: [-1.8, 10.4, -7.2],
-      description: 'Agent Operations Workstations, Wall Art, Plants & Seated Engineers',
+      target: [-0.5, 8.0, 0.7],
+      position: [-0.6, 11.2, -6.5],
+      description: 'Agent Operations Dollhouse View: Frontend, Reviewer & Backend Hero Staging',
     },
   },
   VERIFICATION_LAB: {

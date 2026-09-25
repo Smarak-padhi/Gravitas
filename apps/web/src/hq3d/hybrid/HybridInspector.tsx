@@ -1,14 +1,42 @@
 /**
- * Serious 2D Contextual Inspector (Layer C) for Hybrid HQ (Wave 12H)
+ * Serious 2D Contextual Inspector (Layer C) for Hybrid HQ (Wave 12H-R)
  *
- * Provides a clean, modern, warm, highly readable interface for:
+ * Provides a clean, modern, warm, highly readable interface with:
+ * - Deterministic, non-contradictory status presentation:
+ *   when state is FAILED, copy explicitly says "Execution halted on [task]" (NEVER "Working on...").
  * - Agent inspection: Role, current phase, task, strictly separated harness/model provenance, timeline.
  * - Task artifact inspection: Task ID, source, destination, dependencies, verification status, evidence, diff, approvals.
- * - Activity Timeline: Persistent log of operational messages (no data exists ONLY in bubbles).
+ * - Activity Timeline: Persistent log of operational messages.
  */
 
 import React, { useState } from 'react'
 import type { AgentStatusMessage, HybridTaskDetail, IllustratedAgentRole, IllustratedAgentState } from './types.js'
+
+/**
+ * Derives a canonical, non-contradictory human-readable status description
+ * strictly aligned with the agent's presentation state.
+ */
+export function getAgentPresentationStatus(state: IllustratedAgentState, taskId?: string): string {
+  if (state === 'FAILED') {
+    return taskId ? `Execution halted on ${taskId}` : 'Execution halted with errors'
+  }
+  if (state === 'COMPLETED') {
+    return taskId ? `Finished ${taskId} (Handoff ready)` : 'Task completed'
+  }
+  if (state === 'REVIEWING') {
+    return taskId ? `Verifying ${taskId}` : 'Inspection active'
+  }
+  if (state === 'WAITING_APPROVAL') {
+    return taskId ? `Awaiting approval for ${taskId}` : 'Awaiting operator approval'
+  }
+  if (state === 'WAITING') {
+    return taskId ? `Waiting on dependencies for ${taskId}` : 'Waiting on upstream dependencies'
+  }
+  if (state === 'WORKING') {
+    return taskId ? `Working on ${taskId}` : 'Executing assigned task'
+  }
+  return 'Standby / Non-productive'
+}
 
 export interface HybridInspectorProps {
   readonly selectedAgent: {
@@ -184,6 +212,7 @@ export const HybridInspector: React.FC<HybridInspectorProps> = ({
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span
+                      data-testid="inspector-agent-state"
                       style={{
                         padding: '3px 8px',
                         borderRadius: '6px',
@@ -192,24 +221,33 @@ export const HybridInspector: React.FC<HybridInspectorProps> = ({
                         backgroundColor:
                           selectedAgent.state === 'WORKING'
                             ? 'rgba(56, 189, 248, 0.15)'
-                            : selectedAgent.state === 'WAITING_APPROVAL'
+                            : selectedAgent.state === 'WAITING_APPROVAL' || selectedAgent.state === 'COMPLETED'
                             ? 'rgba(34, 197, 94, 0.15)'
+                            : selectedAgent.state === 'FAILED'
+                            ? 'rgba(239, 68, 68, 0.15)'
+                            : selectedAgent.state === 'REVIEWING'
+                            ? 'rgba(132, 204, 22, 0.15)'
                             : 'rgba(148, 163, 184, 0.15)',
                         color:
                           selectedAgent.state === 'WORKING'
                             ? '#38bdf8'
-                            : selectedAgent.state === 'WAITING_APPROVAL'
+                            : selectedAgent.state === 'WAITING_APPROVAL' || selectedAgent.state === 'COMPLETED'
                             ? '#4ade80'
+                            : selectedAgent.state === 'FAILED'
+                            ? '#f87171'
+                            : selectedAgent.state === 'REVIEWING'
+                            ? '#a3e635'
                             : '#cbd5e1',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
                       }}
                     >
                       {selectedAgent.state}
                     </span>
-                    <span style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                      {selectedAgent.currentTaskId
-                        ? `Working on ${selectedAgent.currentTaskId}`
-                        : 'Standby / Non-productive'}
+                    <span
+                      data-testid="inspector-agent-status-text"
+                      style={{ fontSize: '12px', color: selectedAgent.state === 'FAILED' ? '#fca5a5' : '#cbd5e1' }}
+                    >
+                      {getAgentPresentationStatus(selectedAgent.state, selectedAgent.currentTaskId)}
                     </span>
                   </div>
                 </div>
@@ -233,7 +271,7 @@ export const HybridInspector: React.FC<HybridInspectorProps> = ({
                         {selectedAgent.currentTaskId}: {selectedAgent.taskTitle}
                       </div>
                       <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                        Phase: {selectedAgent.phase} • Started {selectedAgent.startedAt ?? '10:42'}
+                        Phase: {selectedAgent.phase} • Started {selectedAgent.startedAt ?? '10:42 AM'}
                       </div>
                     </div>
                   </div>

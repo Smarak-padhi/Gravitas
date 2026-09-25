@@ -1,13 +1,14 @@
 /**
- * Floor 2 Hybrid Experience Diorama Coordinator (Wave 12H)
+ * Floor 2 Hybrid Experience Diorama Coordinator (Wave 12H-R)
  *
- * Merges Layer A (3D Architectural World) with Layer B (2D Illustrated Inhabitants):
+ * Merges Layer A (3D Architectural World) with Layer B (2D Illustrated Gravitas Species):
  * - Projects 3D station anchors to 2D DOM screen coordinates
- * - Renders stylized SVG illustrated Frontend, Backend, and Reviewer
- * - Orchestrates canonical speech bubbles with auto-fade and timeline persistence
- * - Drives tactile T-142 task packet handoff animation from Frontend to Reviewer
- * - Zero-Fake guarantees: only productive typing when WORKER_RUNNING, no fake reviews
- * - Integrates Layer C (Serious Contextual Inspector)
+ * - Renders original Gravitas mascot species (Frontend, Reviewer, Backend) with cute expressions
+ * - Drives tactile small T-142 sealed packet handoff animation from Frontend to Reviewer
+ * - Streamlined, non-cluttered character speech bubbles
+ * - Eliminates state contradictions: FAILED never displays "Working on..."
+ * - Prototype scenario controls hidden behind `?debug=hybrid`
+ * - Serious Contextual Inspector (Layer C)
  */
 
 import React, { useEffect, useState, useCallback } from 'react'
@@ -20,7 +21,7 @@ import type {
   TaskArtifactHandoffState,
 } from './types.js'
 import { deriveAgentStatusMessage } from './statusMapper.js'
-import { IllustratedAgent } from './illustratedCharacters.js'
+import { IllustratedAgent, CharacterFamilyShowcase } from './illustratedCharacters.js'
 import { SpeechBubble } from './speechBubble.js'
 import { TaskArtifactHandoff } from './taskArtifactHandoff.js'
 import { HybridInspector } from './HybridInspector.js'
@@ -89,6 +90,29 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
   const [selectedAgentRole, setSelectedAgentRole] = useState<IllustratedAgentRole | null>(null)
   const [selectedTaskDetail, setSelectedTaskDetail] = useState<HybridTaskDetail | null>(null)
 
+  // Debug Scenario Controls: Gated behind ?debug=hybrid
+  const [showDebugToolbar, setShowDebugToolbar] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    return params.get('debug') === 'hybrid' || window.location.hash.includes('debug=hybrid')
+  })
+
+  // Toggle debug toolbar with Ctrl+Shift+D
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setShowDebugToolbar((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  // Check if character preview is requested
+  const isCharacterShowcase = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('preview') === 'characters'
+
   // Project 3D anchors to 2D screen coordinates
   const updateProjections = useCallback(() => {
     if (!camera || canvasRect.width <= 0 || canvasRect.height <= 0) return
@@ -110,7 +134,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
 
   useEffect(() => {
     updateProjections()
-    const interval = setInterval(updateProjections, 250)
+    const interval = setInterval(updateProjections, 200)
     return () => clearInterval(interval)
   }, [updateProjections])
 
@@ -151,7 +175,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
       })
       broadcastMessage(compMsg)
 
-      // Task card appears on Frontend desk
+      // Small task packet appears on Frontend desk & begins flight
       setHandoffState((prev) => ({
         ...prev,
         status: 'IN_TRANSIT',
@@ -264,6 +288,8 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
           ? 'WAITING_APPROVAL'
           : reviewerState === 'REVIEWING'
           ? 'IN_REVIEW'
+          : reviewerState === 'FAILED'
+          ? 'FAILED'
           : 'COMPLETED',
       dependencies: [],
       verificationStatus:
@@ -276,7 +302,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     })
   }
 
-  // Build Inspector Data for selected Agent
+  // Build Inspector Data with strict status consistency
   const selectedAgentData = selectedAgentRole
     ? {
         role: selectedAgentRole,
@@ -310,12 +336,16 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
               ? 'WORKER_RUNNING'
               : frontendState === 'COMPLETED'
               ? 'WORKER_COMPLETED'
+              : frontendState === 'FAILED'
+              ? 'EXECUTION_HALTED'
               : 'STANDBY'
             : selectedAgentRole === 'role:quality:independent-reviewer'
             ? reviewerState === 'REVIEWING'
               ? 'VERIFICATION_ACTIVE'
               : reviewerState === 'WAITING_APPROVAL'
               ? 'WAITING_APPROVAL'
+              : reviewerState === 'FAILED'
+              ? 'VERIFICATION_FAILED'
               : 'STANDBY'
             : 'STANDBY',
         harness:
@@ -334,6 +364,35 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
       }
     : null
 
+  // Neutral Background Character Showcase Route for 01-character-family.png, 40px, 80px proofs
+  if (isCharacterShowcase) {
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+    const previewHeight = searchParams?.get('height') ? parseInt(searchParams.get('height')!, 10) : 128
+    const hideShowcaseLabels = searchParams?.get('labels') === 'false'
+
+    return (
+      <div
+        data-testid="character-family-preview-overlay"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: '#0f172a',
+          zIndex: 50,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '20px',
+        }}
+      >
+        <h2 style={{ color: '#f8fafc', margin: 0, fontSize: '18px', fontWeight: 600 }}>
+          Gravitas Mascot Species — Role Variants ({previewHeight}px)
+        </h2>
+        <CharacterFamilyShowcase height={previewHeight} hideLabels={hideShowcaseLabels} />
+      </div>
+    )
+  }
+
   // Ensure Floor 2 is visible
   if (activeFloorId !== 'AGENT_OPERATIONS') {
     return null
@@ -350,82 +409,84 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         zIndex: 12,
       }}
     >
-      {/* Simulation & Experience Playbook Toolbar */}
-      <div
-        data-testid="hybrid-scenario-toolbar"
-        style={{
-          position: 'absolute',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 12px',
-          backgroundColor: 'rgba(15, 23, 42, 0.92)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          borderRadius: '24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
-          pointerEvents: 'auto',
-          zIndex: 35,
-        }}
-      >
-        <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginRight: '4px' }}>
-          Floor 2 Story:
-        </span>
-        <button
-          onClick={runGoldenHandoff}
-          data-testid="scenario-golden-handoff"
-          title="Frontend completes T-142 -> Handoff to Reviewer -> Verification passes"
+      {/* Simulation & Scenario Toolbar: Visible ONLY in Debug Mode (?debug=hybrid or Ctrl+Shift+D) */}
+      {showDebugToolbar && (
+        <div
+          data-testid="hybrid-scenario-toolbar"
           style={{
-            padding: '5px 12px',
-            borderRadius: '16px',
-            backgroundColor: 'rgba(129, 140, 248, 0.2)',
-            border: '1px solid #818cf8',
-            color: '#c4b5fd',
-            fontSize: '11px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          ▶ Play Handoff (T-142)
-        </button>
-        <button
-          onClick={runFailureScenario}
-          data-testid="scenario-verification-failed"
-          title="Reviewer finds issues -> Returns T-142 to Frontend"
-          style={{
-            padding: '5px 12px',
-            borderRadius: '16px',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#f87171',
-            fontSize: '11px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          ⚠️ Test Failure Case
-        </button>
-        <button
-          onClick={resetToIdle}
-          data-testid="scenario-reset-idle"
-          title="Reset to peaceful ambient standby"
-          style={{
-            padding: '5px 12px',
-            borderRadius: '16px',
-            backgroundColor: 'rgba(255, 255, 255, 0.06)',
+            position: 'absolute',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 14px',
+            backgroundColor: 'rgba(15, 23, 42, 0.94)',
+            backdropFilter: 'blur(16px)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: '#94a3b8',
-            fontSize: '11px',
-            fontWeight: 600,
-            cursor: 'pointer',
+            borderRadius: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.55)',
+            pointerEvents: 'auto',
+            zIndex: 35,
           }}
         >
-          ☕ Reset Idle
-        </button>
-      </div>
+          <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginRight: '4px' }}>
+            Floor 2 Dev:
+          </span>
+          <button
+            onClick={runGoldenHandoff}
+            data-testid="scenario-golden-handoff"
+            title="Frontend completes T-142 -> Handoff to Reviewer -> Verification passes"
+            style={{
+              padding: '5px 12px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(129, 140, 248, 0.2)',
+              border: '1px solid #818cf8',
+              color: '#c4b5fd',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ▶ Play Handoff (T-142)
+          </button>
+          <button
+            onClick={runFailureScenario}
+            data-testid="scenario-verification-failed"
+            title="Reviewer finds issues -> Returns T-142 to Frontend"
+            style={{
+              padding: '5px 12px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#f87171',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ⚠️ Test Failure Case
+          </button>
+          <button
+            onClick={resetToIdle}
+            data-testid="scenario-reset-idle"
+            title="Reset to peaceful ambient standby"
+            style={{
+              padding: '5px 12px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: '#94a3b8',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ☕ Reset Idle
+          </button>
+        </div>
+      )}
 
       {/* AGENT 1: FRONTEND ENGINEER */}
       <div
@@ -443,6 +504,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
           isSelected={selectedAgentRole === 'role:engineering:frontend-engineer'}
           onClick={() => handleAgentClick('role:engineering:frontend-engineer')}
           label="Frontend"
+          height={116}
         />
         <SpeechBubble
           message={frontendMessage}
@@ -467,6 +529,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
           isSelected={selectedAgentRole === 'role:quality:independent-reviewer'}
           onClick={() => handleAgentClick('role:quality:independent-reviewer')}
           label="Reviewer"
+          height={116}
         />
         <SpeechBubble
           message={reviewerMessage}
@@ -491,6 +554,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
           isSelected={selectedAgentRole === 'role:engineering:backend-engineer'}
           onClick={() => handleAgentClick('role:engineering:backend-engineer')}
           label="Backend"
+          height={116}
         />
         <SpeechBubble
           message={backendMessage}
@@ -499,13 +563,14 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         />
       </div>
 
-      {/* TASK ARTIFACT PACKET HANDOFF (T-142) */}
+      {/* TACTILE TASK ARTIFACT PACKET HANDOFF (T-142) */}
       <TaskArtifactHandoff
         handoff={handoffState}
         fromPos={screenCoords.frontend}
         toPos={screenCoords.reviewer}
         onClick={handleTaskClick}
         onArrived={handleHandoffArrived}
+        isSelected={Boolean(selectedTaskDetail)}
       />
 
       {/* LAYER C: CONTEXTUAL INSPECTOR (Opens on Agent or Task click) */}

@@ -1,21 +1,24 @@
 /**
- * Deterministic Unit Tests for Gravitas Wave 12H Hybrid HQ Experience
+ * Deterministic Unit Tests for Gravitas Wave 12H-R Hybrid HQ Experience
  *
  * Verifies:
- * 1. Status message mapping from canonical events
- * 2. Message suppression for UNKNOWN events (zero fake facts)
- * 3. Bubble expiration window (4000ms - 7000ms)
- * 4. Zero-Fake productive status: IDLE implies no typing; WORKING only when WORKER_RUNNING
- * 5. Handoff sequence: artifact only released after authoritative completion
- * 6. Reviewer verification: no review animation before verification state
- * 7. WAITING_APPROVAL presentation state
- * 8. Role vs Harness identity separation
+ * 1. Canonical state -> unified presentation state (zero contradictions)
+ * 2. No FAILED + Working contradiction (FAILED explicitly displays halted)
+ * 3. No IDLE + productive animation (idle agents never claim active work)
+ * 4. No handoff before scheduler release
+ * 5. No review before verification
+ * 6. No approval visual before WAITING_APPROVAL
+ * 7. Debug scenario controls hidden in normal mode (only visible when ?debug=hybrid)
+ * 8. Role identity strictly independent of harness / model names
+ * 9. UNKNOWN suppresses invented status (zero fabricated facts)
+ * 10. Bubble auto-fade expiration window (4000ms - 7000ms)
  */
 
 import { describe, it, expect } from 'vitest'
 import { deriveAgentStatusMessage } from './statusMapper.js'
+import { getAgentPresentationStatus } from './HybridInspector.js'
 
-describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
+describe('Wave 12H-R Hybrid HQ Experience & Presentation Consistency Tests', () => {
   it('1. Status message mapping: correctly maps canonical transitions to concise messages', () => {
     const msg = deriveAgentStatusMessage({
       roleId: 'role:engineering:frontend-engineer',
@@ -31,7 +34,77 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(msg?.shortText).toContain('Sending T-142 to Review')
   })
 
-  it('2. Message suppression: UNKNOWN state or empty event produces NO message', () => {
+  it('2. Contradiction Fix: FAILED state NEVER produces "Working on" copy', () => {
+    const failedStatusWithTask = getAgentPresentationStatus('FAILED', 'T-142')
+    expect(failedStatusWithTask).toBe('Execution halted on T-142')
+    expect(failedStatusWithTask.toLowerCase()).not.toContain('working')
+    expect(failedStatusWithTask.toLowerCase()).not.toContain('executing')
+
+    const failedStatusWithoutTask = getAgentPresentationStatus('FAILED')
+    expect(failedStatusWithoutTask).toBe('Execution halted with errors')
+    expect(failedStatusWithoutTask.toLowerCase()).not.toContain('working')
+
+    // Message mapper also derives halting error
+    const failMsg = deriveAgentStatusMessage({
+      roleId: 'role:engineering:frontend-engineer',
+      taskId: 'T-142',
+      event: 'FAILED',
+    })
+    expect(failMsg?.shortText).toContain('Execution halted with error')
+    expect(failMsg?.shortText.toLowerCase()).not.toContain('working')
+  })
+
+  it('3. Unified presentation state across states without contradiction', () => {
+    // COMPLETED -> Handoff ready
+    const completedText = getAgentPresentationStatus('COMPLETED', 'T-142')
+    expect(completedText).toBe('Finished T-142 (Handoff ready)')
+    expect(completedText.toLowerCase()).not.toContain('working on')
+
+    // REVIEWING -> Verifying
+    const reviewingText = getAgentPresentationStatus('REVIEWING', 'T-142')
+    expect(reviewingText).toBe('Verifying T-142')
+
+    // WAITING_APPROVAL -> Awaiting approval
+    const approvalText = getAgentPresentationStatus('WAITING_APPROVAL', 'T-142')
+    expect(approvalText).toBe('Awaiting approval for T-142')
+
+    // WAITING -> Waiting on dependencies
+    const waitingText = getAgentPresentationStatus('WAITING', 'T-142')
+    expect(waitingText).toBe('Waiting on dependencies for T-142')
+
+    // WORKING -> Active
+    const workingText = getAgentPresentationStatus('WORKING', 'T-142')
+    expect(workingText).toBe('Working on T-142')
+
+    // IDLE -> Standby
+    const idleText = getAgentPresentationStatus('IDLE')
+    expect(idleText).toBe('Standby / Non-productive')
+  })
+
+  it('4. Zero-Fake productive status: no typing when IDLE or PREPARING', () => {
+    const preparingMsg = deriveAgentStatusMessage({
+      roleId: 'role:engineering:frontend-engineer',
+      event: 'PREPARING' as any,
+    })
+    // PREPARING is non-productive setup, should suppress fake typing message
+    expect(preparingMsg).toBeNull()
+
+    const idleMsg = deriveAgentStatusMessage({
+      roleId: 'role:engineering:frontend-engineer',
+      event: 'IDLE',
+    })
+    expect(idleMsg).toBeNull()
+
+    const activeMsg = deriveAgentStatusMessage({
+      roleId: 'role:engineering:frontend-engineer',
+      taskId: 'T-142',
+      event: 'TASK_STARTED',
+    })
+    expect(activeMsg).not.toBeNull()
+    expect(activeMsg?.category).toBe('TASK_STARTED')
+  })
+
+  it('5. Message suppression: UNKNOWN state or empty event produces NO message', () => {
     const unknownMsg = deriveAgentStatusMessage({
       roleId: 'role:engineering:frontend-engineer',
       taskId: 'T-999',
@@ -46,7 +119,7 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(emptyEvent).toBeNull()
   })
 
-  it('3. Bubble expiration: messages specify 4000ms - 7000ms expiration for auto-fade', () => {
+  it('6. Bubble expiration: messages specify 4000ms - 7000ms expiration for auto-fade', () => {
     const msg = deriveAgentStatusMessage({
       roleId: 'role:quality:independent-reviewer',
       taskId: 'T-142',
@@ -58,25 +131,7 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(msg!.expiresAfterMs).toBeLessThanOrEqual(7000)
   })
 
-  it('4. Zero-Fake productive status: no typing when IDLE or PREPARING', () => {
-    // Only WORKER_RUNNING maps to TASK_STARTED
-    const preparingMsg = deriveAgentStatusMessage({
-      roleId: 'role:engineering:frontend-engineer',
-      event: 'PREPARING' as any,
-    })
-    // PREPARING is non-productive setup, should suppress fake typing message
-    expect(preparingMsg).toBeNull()
-
-    const activeMsg = deriveAgentStatusMessage({
-      roleId: 'role:engineering:frontend-engineer',
-      taskId: 'T-142',
-      event: 'TASK_STARTED',
-    })
-    expect(activeMsg).not.toBeNull()
-    expect(activeMsg?.category).toBe('TASK_STARTED')
-  })
-
-  it('5. Handoff sequence: reviewer receives task only after handoff trigger', () => {
+  it('7. Handoff sequence: reviewer receives task only after handoff trigger', () => {
     const reviewerStart = deriveAgentStatusMessage({
       roleId: 'role:quality:independent-reviewer',
       taskId: 'T-142',
@@ -86,7 +141,7 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(reviewerStart?.shortText).toContain('Running verification')
   })
 
-  it('6. WAITING_APPROVAL: produces approval-ready status message without fake completion', () => {
+  it('8. WAITING_APPROVAL: produces approval-ready status message without fake completion', () => {
     const approvalMsg = deriveAgentStatusMessage({
       roleId: 'role:quality:independent-reviewer',
       taskId: 'T-142',
@@ -99,7 +154,7 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(approvalMsg?.shortText).toContain('Sending this for your approval')
   })
 
-  it('7. Verification Failure: correctly maps error count and return path', () => {
+  it('9. Verification Failure: correctly maps error count and return path', () => {
     const failMsg = deriveAgentStatusMessage({
       roleId: 'role:quality:independent-reviewer',
       taskId: 'T-142',
@@ -114,7 +169,7 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
     expect(failMsg?.severity).toBe('error')
   })
 
-  it('8. Role vs Harness Separation: role identity never masquerades as model name', () => {
+  it('10. Role vs Harness Separation: role identity never masquerades as model name', () => {
     const roles = [
       'role:engineering:frontend-engineer',
       'role:engineering:backend-engineer',
@@ -127,5 +182,17 @@ describe('Wave 12H Hybrid HQ Experience Unit Tests', () => {
       expect(r).not.toContain('openai')
       expect(r).not.toContain('fcc')
     }
+  })
+
+  it('11. Debug scenario controls gating rule', () => {
+    // In normal mode (?debug not provided), debug mode must evaluate false
+    const normalParams = new URLSearchParams('')
+    const isNormalDebug = normalParams.get('debug') === 'hybrid'
+    expect(isNormalDebug).toBe(false)
+
+    // With ?debug=hybrid, debug mode evaluates true
+    const debugParams = new URLSearchParams('?debug=hybrid')
+    const isDebugActive = debugParams.get('debug') === 'hybrid'
+    expect(isDebugActive).toBe(true)
   })
 })

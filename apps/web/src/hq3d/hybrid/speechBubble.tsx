@@ -1,8 +1,11 @@
 /**
- * Floating Speech & Status Bubble Component for Hybrid HQ (Wave 12H)
+ * Streamlined Character Speech Bubble Component for Hybrid HQ (Wave 12H-R)
  *
- * Renders concise, non-ephemeral operational status messages over agent avatars.
- * Supports auto-fade (4-7s), dismiss, role-based palette accents, and click-through to inspector.
+ * Implements clean, charming, non-cluttered operational character dialogue:
+ * - Pure character quote: "Implementation finished. Sending T-142 to Review."
+ * - Stripped of redundant HUD clutter (no category badges, task chips, timestamps inside the bubble)
+ * - Tail pointing to agent, auto-fade (4-7s), role-based accent outline
+ * - Zero LLM, zero fake chat, strictly derived from canonical runtime state.
  */
 
 import React, { useEffect, useState } from 'react'
@@ -57,16 +60,7 @@ export const SpeechBubble: React.FC<SpeechBubbleProps> = ({
       ? '#818cf8' // Lavender
       : message.roleId === 'role:engineering:backend-engineer'
       ? '#2dd4bf' // Teal
-      : '#a3e635' // Sage / Lime
-
-  const severityBg =
-    message.severity === 'error'
-      ? 'rgba(239, 68, 68, 0.15)'
-      : message.severity === 'success'
-      ? 'rgba(34, 197, 94, 0.15)'
-      : message.severity === 'warning'
-      ? 'rgba(245, 158, 11, 0.15)'
-      : 'rgba(15, 23, 42, 0.92)'
+      : '#84cc16' // Sage / Lime
 
   return (
     <div
@@ -77,27 +71,27 @@ export const SpeechBubble: React.FC<SpeechBubbleProps> = ({
       data-category={message.category}
       style={{
         position: 'absolute',
-        bottom: '124px',
+        bottom: '128px',
         left: '50%',
         transform: fading
           ? 'translateX(-50%) translateY(4px) scale(0.96)'
           : 'translateX(-50%) translateY(0) scale(1)',
         opacity: fading ? 0 : 1,
-        transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-        minWidth: '160px',
-        maxWidth: '240px',
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        minWidth: '150px',
+        maxWidth: '220px',
         padding: '8px 12px',
-        backgroundColor: severityBg,
+        backgroundColor: 'rgba(15, 23, 42, 0.94)',
         backdropFilter: 'blur(16px)',
         border: `1.5px solid ${accentColor}`,
         borderRadius: '12px',
-        boxShadow: `0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px ${accentColor}33`,
+        boxShadow: `0 8px 24px rgba(0, 0, 0, 0.5), 0 0 14px ${accentColor}25`,
         cursor: 'pointer',
         zIndex: 30,
         pointerEvents: 'auto',
       }}
     >
-      {/* Speech Arrow */}
+      {/* Speech Tail */}
       <div
         style={{
           position: 'absolute',
@@ -106,51 +100,22 @@ export const SpeechBubble: React.FC<SpeechBubbleProps> = ({
           transform: 'translateX(-50%)',
           width: 0,
           height: 0,
-          borderLeft: '7px solid transparent',
-          borderRight: '7px solid transparent',
+          borderLeft: '6px solid transparent',
+          borderRight: '6px solid transparent',
           borderTop: `7px solid ${accentColor}`,
         }}
       />
 
-      {/* Category Mini Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '4px',
-          fontSize: '10px',
-          fontWeight: 600,
-          color: accentColor,
-          letterSpacing: '0.3px',
-        }}
-      >
-        <span>
-          {message.category.replace(/_/g, ' ')}
-        </span>
-        {message.taskId && (
-          <span
-            style={{
-              padding: '1px 5px',
-              borderRadius: '4px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              color: '#e2e8f0',
-              fontFamily: 'var(--font-mono, monospace)',
-            }}
-          >
-            {message.taskId}
-          </span>
-        )}
-      </div>
-
-      {/* Message Text */}
+      {/* Pure Character Communication Message */}
       <p
         style={{
           margin: 0,
-          fontSize: '12px',
+          fontSize: '11.5px',
           lineHeight: '1.4',
           color: '#f8fafc',
           fontWeight: 500,
+          textAlign: 'center',
+          letterSpacing: '0.1px',
         }}
       >
         “{message.shortText}”

@@ -227,26 +227,38 @@ export class HqScene {
     return this.currentAtmosphere
   }
 
+  /**
+   * DEPARTMENT LIGHTING GRAMMAR (Architectural Language for Future Tower Expansion):
+   * - Strategy / Mission Control (Floor 1): Warm Ivory / Brushed Brass (0xffeedb / 0xffedd5)
+   * - Agent Operations (Floor 2): Warm Neutral + restrained Lavender & Teal accents (0xfff4e6 / 0xfef3c7)
+   * - Verification Lab (Floor 3): Clean Neutral + restrained Sage (0xd4f4ff / 0xdbeafe)
+   * - Browser QA Lab (Floor 4): Crisp Neutral with screen-oriented accents (0xc2f0e8 / 0xccfbf1)
+   * - Infrastructure (Floor 5): Cooler Technical Slate / Cyan (0xa5c6e8 / 0x7dd3fc)
+   * - Approval Mezzanine (Floor 6): Quiet Warm Gold / Champagne (0xffdfa8 / 0xfde047)
+   * NOTE: Saturated RGB gamer setups are strictly forbidden. Lighting must reveal material hierarchy.
+   */
   public setAtmosphere(mode: AtmosphereMode): void {
     this.currentAtmosphere = mode
 
     switch (mode) {
       case 'DAY':
-        this.scene.background = new THREE.Color(0x1e2530) // Soft architectural slate
-        this.keyLight.color.setHex(0xfff8ee)
-        this.keyLight.intensity = 1.45
+        // Fresh architectural daylight: warm sunlight + open sky ambient
+        this.scene.background = new THREE.Color(0x232d3d) // Clean architectural sky-slate
+        this.keyLight.color.setHex(0xfff8ee) // Warm direct sunlight
+        this.keyLight.intensity = 1.75
         this.keyLight.position.set(-18.0, 36.0, -28.0)
-        this.fillLight.color.setHex(0x9fc2e0)
-        this.fillLight.intensity = 0.95
-        this.ambientLight.color.setHex(0xcfdbe8)
-        this.ambientLight.groundColor.setHex(0x333d4d)
-        this.ambientLight.intensity = 1.1
+        this.fillLight.color.setHex(0xb4d4f0) // Soft daylight fill
+        this.fillLight.intensity = 1.15
+        this.ambientLight.color.setHex(0xdde8f5) // Skylight dome
+        this.ambientLight.groundColor.setHex(0x3e4c5e)
+        this.ambientLight.intensity = 1.35
 
-        // Balanced daylight spot fill
+        // Balanced daylight spot fill per floor
         this.spotPlanning.color.setHex(0xffeedb)
-        this.spotPlanning.intensity = 2.0
-        this.spotOperations.color.setHex(0xe2eeff)
-        this.spotOperations.intensity = 2.0
+        this.spotPlanning.intensity = 2.2
+        // Floor 2 Agent Operations: warm welcoming architectural daylight pool
+        this.spotOperations.color.setHex(0xfff4e6)
+        this.spotOperations.intensity = 2.8
         this.spotCleanroom.color.setHex(0xd4f4ff)
         this.spotCleanroom.intensity = 2.2
         this.spotBrowserQa.color.setHex(0xc2f0e8)
@@ -254,60 +266,62 @@ export class HqScene {
         this.spotInfrastructure.color.setHex(0xa5c6e8)
         this.spotInfrastructure.intensity = 2.0
         this.spotApproval.color.setHex(0xffdfa8)
-        this.spotApproval.intensity = 2.0
+        this.spotApproval.intensity = 2.2
         break
 
       case 'EVENING':
-        this.scene.background = new THREE.Color(0x161b26) // Deep twilight slate
-        this.keyLight.color.setHex(0xfbbf24) // Warm low-angle golden light
-        this.keyLight.intensity = 1.25
+        // Cozy architectural twilight: golden low-angle sun + rich indigo fill
+        this.scene.background = new THREE.Color(0x131926) // Deep twilight slate
+        this.keyLight.color.setHex(0xf59e0b) // Rich amber golden-hour sun
+        this.keyLight.intensity = 1.45
         this.keyLight.position.set(-22.0, 24.0, -24.0)
         this.fillLight.color.setHex(0x6366f1) // Indigo ambient fill
-        this.fillLight.intensity = 0.75
-        this.ambientLight.color.setHex(0x94a3b8)
-        this.ambientLight.groundColor.setHex(0x1e293b)
-        this.ambientLight.intensity = 0.85
+        this.fillLight.intensity = 0.85
+        this.ambientLight.color.setHex(0xa1a1aa)
+        this.ambientLight.groundColor.setHex(0x27272a)
+        this.ambientLight.intensity = 1.1
 
         // Warm cozy interior pools
         this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 2.6
-        this.spotOperations.color.setHex(0xfef08a)
-        this.spotOperations.intensity = 2.6
+        this.spotPlanning.intensity = 2.8
+        this.spotOperations.color.setHex(0xfef08a) // Warm golden task pool
+        this.spotOperations.intensity = 3.4
         this.spotCleanroom.color.setHex(0xdbeafe)
-        this.spotCleanroom.intensity = 2.5
+        this.spotCleanroom.intensity = 2.6
         this.spotBrowserQa.color.setHex(0xccfbf1)
         this.spotBrowserQa.intensity = 2.4
         this.spotInfrastructure.color.setHex(0x93c5fd)
         this.spotInfrastructure.intensity = 2.4
         this.spotApproval.color.setHex(0xfef08a)
-        this.spotApproval.intensity = 2.8
+        this.spotApproval.intensity = 3.0
         break
 
       case 'NIGHT':
-        // Atmospheric Night: deep desaturated indigo exterior + warm inhabited interiors
-        this.scene.background = new THREE.Color(0x0f172a) // Deep slate midnight navy (never pitch black)
-        this.keyLight.color.setHex(0x93c5fd) // Soft cool moonbeam key
-        this.keyLight.intensity = 0.75
+        // Illuminated Miniature Workplace at Night:
+        // Dark exterior + richly illuminated interior (warm incandescent pools, dormant truthful monitors)
+        this.scene.background = new THREE.Color(0x090d16) // Deep midnight exterior
+        this.keyLight.color.setHex(0x60a5fa) // Cool moonbeam rim
+        this.keyLight.intensity = 0.65
         this.keyLight.position.set(-16.0, 32.0, -22.0)
-        this.fillLight.color.setHex(0x38bdf8) // Cool cyan-blue ambient fill
-        this.fillLight.intensity = 0.65
-        this.ambientLight.color.setHex(0x475569) // Luminous cool exterior ambient
+        this.fillLight.color.setHex(0x38bdf8) // Soft cyan night skylight
+        this.fillLight.intensity = 0.55
+        this.ambientLight.color.setHex(0x334155) // Exterior night ambient
         this.ambientLight.groundColor.setHex(0x1e293b)
-        this.ambientLight.intensity = 0.85 // High enough that whole building & furniture remain readable!
+        this.ambientLight.intensity = 0.95
 
-        // Rich warm glowing lantern pools inside the building
+        // Rich warm illuminated interior lighting inside the building
         this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 3.2
-        this.spotOperations.color.setHex(0xfef08a)
-        this.spotOperations.intensity = 3.4
+        this.spotPlanning.intensity = 3.4
+        this.spotOperations.color.setHex(0xfef3c7) // Warm incandescent architectural glow
+        this.spotOperations.intensity = 4.0
         this.spotCleanroom.color.setHex(0xbae6fd)
-        this.spotCleanroom.intensity = 3.0
+        this.spotCleanroom.intensity = 3.2
         this.spotBrowserQa.color.setHex(0x99f6e4)
         this.spotBrowserQa.intensity = 2.8
         this.spotInfrastructure.color.setHex(0x7dd3fc)
         this.spotInfrastructure.intensity = 2.8
         this.spotApproval.color.setHex(0xfde047)
-        this.spotApproval.intensity = 3.6
+        this.spotApproval.intensity = 3.8
         break
     }
   }
