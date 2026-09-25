@@ -65,29 +65,45 @@ export class TextureGenerator {
   }
 
   /**
-   * American Walnut wood texture with subtle grain lines
+   * American Walnut wood texture with rich warm amber-chocolate grain
    */
   public static createWalnutTexture(): THREE.CanvasTexture {
     const canvas = document.createElement('canvas')
-    canvas.width = 256
-    canvas.height = 256
+    canvas.width = 512
+    canvas.height = 512
     const ctx = canvas.getContext('2d')!
 
-    // Warm deep walnut base
-    ctx.fillStyle = '#2c1e16'
-    ctx.fillRect(0, 0, 256, 256)
+    // Warm natural American walnut base tone (not flat black)
+    ctx.fillStyle = '#7a4e32'
+    ctx.fillRect(0, 0, 512, 512)
 
-    // Organic longitudinal grain bands
-    for (let y = 0; y < 256; y += 3) {
-      const alpha = 0.04 + Math.sin(y * 0.12) * 0.03 + Math.random() * 0.03
-      ctx.fillStyle = `rgba(20, 12, 8, ${alpha})`
-      ctx.fillRect(0, y, 256, 2)
+    // Longitudinal heartwood grain bands
+    for (let y = 0; y < 512; y += 2) {
+      const alpha = Math.sin(y * 0.09) * 0.08 + Math.sin(y * 0.28) * 0.04 + 0.14
+      ctx.fillStyle = `rgba(50, 26, 14, ${alpha.toFixed(3)})`
+      ctx.fillRect(0, y, 512, 2)
     }
 
-    // Subtle lighter heartwood streaks
-    for (let y = 10; y < 256; y += 24) {
-      ctx.fillStyle = 'rgba(64, 44, 32, 0.08)'
-      ctx.fillRect(0, y, 256, 4)
+    // Organic wavy heartwood grain flow
+    for (let i = 0; i < 32; i++) {
+      const yBase = (i * 32) % 512
+      ctx.strokeStyle = 'rgba(160, 110, 70, 0.16)'
+      ctx.lineWidth = 1.8
+      ctx.beginPath()
+      ctx.moveTo(0, yBase)
+      for (let x = 0; x <= 512; x += 32) {
+        const offset = Math.sin(x * 0.02 + i) * 7 + Math.cos(x * 0.01 + i * 2) * 5
+        ctx.lineTo(x, yBase + offset)
+      }
+      ctx.stroke()
+    }
+
+    // Fine organic pores
+    ctx.fillStyle = 'rgba(35, 18, 10, 0.12)'
+    for (let i = 0; i < 2000; i++) {
+      const px = Math.random() * 512
+      const py = Math.random() * 512
+      ctx.fillRect(px, py, Math.random() * 2.5 + 0.5, 1)
     }
 
     const texture = new THREE.CanvasTexture(canvas)

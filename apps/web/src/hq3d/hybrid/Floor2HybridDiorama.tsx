@@ -26,12 +26,20 @@ import { SpeechBubble } from './speechBubble.js'
 import { TaskArtifactHandoff } from './taskArtifactHandoff.js'
 import { HybridInspector } from './HybridInspector.js'
 
+export interface HybridSimulationStatus {
+  active: boolean
+  mode: 'DETERMINISTIC_FIXTURE'
+  phase: 'IDLE' | 'WORKING' | 'HANDOFF' | 'REVIEWING' | 'PASS' | 'FAIL'
+  label: string
+}
+
 export interface Floor2HybridDioramaProps {
   readonly camera: THREE.Camera | null
   readonly canvasRect: { width: number; height: number }
   readonly activeFloorId: string
   readonly isFocused?: boolean
   readonly onSelectEntity?: (entity: any) => void
+  readonly onSimulationStateChange?: (status: HybridSimulationStatus | null) => void
 }
 
 // 3D Station Anchors on Floor 2 (Y = 7.2m, matching chair home positions)
@@ -46,6 +54,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
   canvasRect,
   activeFloorId,
   isFocused: _isFocused,
+  onSimulationStateChange,
 }) => {
   // Agent States
   const [frontendState, setFrontendState] = useState<IllustratedAgentState>('IDLE')
@@ -158,6 +167,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     setFrontendState('WORKING')
     setReviewerState('IDLE')
     setBackendState('IDLE')
+    onSimulationStateChange?.({
+      active: true,
+      mode: 'DETERMINISTIC_FIXTURE',
+      phase: 'WORKING',
+      label: 'T-142: Working',
+    })
     const startMsg = deriveAgentStatusMessage({
       roleId: 'role:engineering:frontend-engineer',
       taskId: 'T-142',
@@ -168,6 +183,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     // 2. Frontend completes work after 1.8s
     setTimeout(() => {
       setFrontendState('COMPLETED')
+      onSimulationStateChange?.({
+        active: true,
+        mode: 'DETERMINISTIC_FIXTURE',
+        phase: 'HANDOFF',
+        label: 'T-142: Handoff in Transit',
+      })
       const compMsg = deriveAgentStatusMessage({
         roleId: 'role:engineering:frontend-engineer',
         taskId: 'T-142',
@@ -181,7 +202,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         status: 'IN_TRANSIT',
       }))
     }, 1800)
-  }, [broadcastMessage])
+  }, [broadcastMessage, onSimulationStateChange])
 
   // When task packet lands at Reviewer
   const handleHandoffArrived = useCallback(() => {
@@ -195,6 +216,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
 
     // Reviewer receives T-142 and starts reviewing
     setReviewerState('REVIEWING')
+    onSimulationStateChange?.({
+      active: true,
+      mode: 'DETERMINISTIC_FIXTURE',
+      phase: 'REVIEWING',
+      label: 'T-142: Reviewing',
+    })
     const recvMsg = deriveAgentStatusMessage({
       roleId: 'role:quality:independent-reviewer',
       taskId: 'T-142',
@@ -205,6 +232,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     // After 2.4s of verification, pass verification
     setTimeout(() => {
       setReviewerState('WAITING_APPROVAL')
+      onSimulationStateChange?.({
+        active: true,
+        mode: 'DETERMINISTIC_FIXTURE',
+        phase: 'PASS',
+        label: 'T-142: Verification Passed',
+      })
       const passMsg = deriveAgentStatusMessage({
         roleId: 'role:quality:independent-reviewer',
         taskId: 'T-142',
@@ -217,7 +250,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         artifact: prev.artifact ? { ...prev.artifact, verificationState: 'PASSED' } : null,
       }))
     }, 2400)
-  }, [broadcastMessage])
+  }, [broadcastMessage, onSimulationStateChange])
 
   // SCENARIO 2: Verification Failure Case
   const runFailureScenario = useCallback(() => {
@@ -225,6 +258,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     setBackendMessage(null)
     setFrontendState('IDLE')
     setReviewerState('REVIEWING')
+    onSimulationStateChange?.({
+      active: true,
+      mode: 'DETERMINISTIC_FIXTURE',
+      phase: 'REVIEWING',
+      label: 'T-142: Reviewing',
+    })
     setHandoffState({
       taskId: 'T-142',
       sourceRole: 'role:engineering:frontend-engineer',
@@ -241,6 +280,12 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
 
     setTimeout(() => {
       setReviewerState('FAILED')
+      onSimulationStateChange?.({
+        active: true,
+        mode: 'DETERMINISTIC_FIXTURE',
+        phase: 'FAIL',
+        label: 'T-142: Verification Failed',
+      })
       const failMsg = deriveAgentStatusMessage({
         roleId: 'role:quality:independent-reviewer',
         taskId: 'T-142',
@@ -254,7 +299,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         setFrontendState('FAILED')
       }, 1500)
     }, 1200)
-  }, [broadcastMessage])
+  }, [broadcastMessage, onSimulationStateChange])
 
   // Reset to Idle
   const resetToIdle = useCallback(() => {
@@ -264,6 +309,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
     setFrontendMessage(null)
     setReviewerMessage(null)
     setBackendMessage(null)
+    onSimulationStateChange?.(null)
     setHandoffState({
       taskId: 'T-142',
       sourceRole: 'role:engineering:frontend-engineer',
@@ -272,7 +318,7 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
       progress: 0,
       artifact: null,
     })
-  }, [])
+  }, [onSimulationStateChange])
 
   // Expose headless scenario triggers for deterministic tests & clean normal-mode automation
   useEffect(() => {

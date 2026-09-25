@@ -14,7 +14,7 @@ import { ROOM_DEFINITIONS, getRoomByKey } from './world/rooms.js'
 import { deriveWorldState, type WorldState } from './world/worldState.js'
 import { useEvents } from '../api/useEvents.js'
 import type { RuntimeProjectionSnapshot, StateSummaryResponse } from '../api/types.js'
-import { Floor2HybridDiorama } from './hybrid/Floor2HybridDiorama.js'
+import { Floor2HybridDiorama, type HybridSimulationStatus } from './hybrid/Floor2HybridDiorama.js'
 
 export interface LivingHqCanvas3DProps {
   readonly isViewActive: boolean
@@ -57,6 +57,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
   })
   const [isElevatorActive, setIsElevatorActive] = useState(false)
   const [activeTaskCount, setActiveTaskCount] = useState(0)
+  const [simulationStatus, setSimulationStatus] = useState<HybridSimulationStatus | null>(null)
 
   const isCharacterPreview =
     typeof window !== 'undefined' &&
@@ -709,13 +710,25 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
                 alignItems: 'center',
                 gap: '6px',
                 padding: '4px 10px',
-                backgroundColor: 'rgba(15, 20, 28, 0.85)',
+                backgroundColor: simulationStatus?.active
+                  ? 'rgba(15, 23, 42, 0.92)'
+                  : activeTaskCount > 0
+                    ? 'rgba(34, 197, 94, 0.15)'
+                    : 'rgba(15, 20, 28, 0.85)',
                 backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                border: simulationStatus?.active
+                  ? '1px solid rgba(56, 189, 248, 0.5)'
+                  : activeTaskCount > 0
+                    ? '1px solid rgba(34, 197, 94, 0.4)'
+                    : '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
                 fontSize: '11px',
                 fontFamily: 'var(--font-mono, monospace)',
-                color: activeTaskCount > 0 ? '#4ade80' : '#94a3b8',
+                color: simulationStatus?.active
+                  ? '#38bdf8'
+                  : activeTaskCount > 0
+                    ? '#4ade80'
+                    : '#94a3b8',
                 boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
               }}
             >
@@ -724,14 +737,24 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  backgroundColor: activeTaskCount > 0 ? '#22c55e' : '#64748b',
-                  boxShadow: activeTaskCount > 0 ? '0 0 8px #22c55e' : 'none',
+                  backgroundColor: simulationStatus?.active
+                    ? '#38bdf8'
+                    : activeTaskCount > 0
+                      ? '#22c55e'
+                      : '#64748b',
+                  boxShadow: simulationStatus?.active
+                    ? '0 0 8px #38bdf8'
+                    : activeTaskCount > 0
+                      ? '0 0 8px #22c55e'
+                      : 'none',
                 }}
               />
               <span>
-                {activeTaskCount > 0
-                  ? `${activeTaskCount} Agent${activeTaskCount > 1 ? 's' : ''} Working`
-                  : 'Idle (Honest Standby)'}
+                {simulationStatus?.active
+                  ? `[SIMULATION FIXTURE] ${simulationStatus.label}`
+                  : activeTaskCount > 0
+                    ? `${activeTaskCount} Agent${activeTaskCount > 1 ? 's' : ''} Working`
+                    : 'Idle (Honest Standby)'}
               </span>
             </div>
           </div>
@@ -791,6 +814,7 @@ export const LivingHqCanvas3D: React.FC<LivingHqCanvas3DProps> = ({
             activeFloorId={currentRoomId}
             isFocused={true}
             onSelectEntity={setSelectedEntity}
+            onSimulationStateChange={setSimulationStatus}
           />
         )}
       </div>

@@ -509,12 +509,12 @@ export class MaterialLibrary {
       })
     )
 
-    // 3. Natural Solid American Walnut
+    // 3. Natural Solid American Walnut (Warm rich grain, readable specular highlights)
     this.walnut = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x8a5d3b,
+        color: 0xffffff,
         map: walnutTex,
-        roughness: 0.48,
+        roughness: 0.40,
         metalness: 0.04,
       })
     )

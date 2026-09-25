@@ -98,7 +98,7 @@ export class HeroFrontendBay {
     const slatSpacing = 0.075
     const slatCount = 42
 
-    const slatGeo = track(new THREE.BoxGeometry(slatWidth, 3.16, slatDepth))
+    const slatGeo = track(new THREE.BoxGeometry(slatWidth, 3.12, slatDepth))
     const startX = -((slatCount - 1) * slatSpacing) / 2
 
     for (let i = 0; i < slatCount; i++) {
@@ -108,6 +108,23 @@ export class HeroFrontendBay {
       slat.receiveShadow = true
       acousticWallGroup.add(slat)
     }
+
+    // Top & bottom architectural reveals/fascia trim
+    const topFasciaGeo = track(new THREE.BoxGeometry(3.24, 0.035, 0.032))
+    const topFascia = new THREE.Mesh(topFasciaGeo, materials.structureGraphite)
+    topFascia.position.set(0.0, 1.58, -slatDepth / 2 - 0.004)
+    acousticWallGroup.add(topFascia)
+
+    const botFasciaGeo = track(new THREE.BoxGeometry(3.24, 0.045, 0.032))
+    const botFascia = new THREE.Mesh(botFasciaGeo, materials.structureGraphite)
+    botFascia.position.set(0.0, -1.58, -slatDepth / 2 - 0.004)
+    acousticWallGroup.add(botFascia)
+
+    // Horizontal champagne brass architectural reveal datum trim
+    const datumTrimGeo = track(new THREE.BoxGeometry(3.24, 0.018, 0.034))
+    const datumTrim = new THREE.Mesh(datumTrimGeo, materials.heroBrass)
+    datumTrim.position.set(0.0, -0.85, -slatDepth / 2 - 0.006)
+    acousticWallGroup.add(datumTrim)
 
     podGroup.add(acousticWallGroup)
 

@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-09-25T08:24:53.895Z",
+  "viewport": "1600x900",
+  "day": {
+    "fps": 57,
+    "frameTimeMs": 17.7,
+    "drawCalls": 653,
+    "triangles": 51556,
+    "geometries": 605,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "evening": {
+    "fps": 57,
+    "frameTimeMs": 17.6,
+    "drawCalls": 653,
+    "triangles": 51556,
+    "geometries": 605,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "night": {
+    "fps": 57,
+    "frameTimeMs": 17.6,
+    "drawCalls": 653,
+    "triangles": 51556,
+    "geometries": 605,
+    "textures": 23,
+    "devicePixelRatio": 1,
+    "lightCount": 14,
+    "shadowCastingLightCount": 1,
+    "measurementDuration": "1000ms",
+    "warmupDuration": "1000ms"
+  },
+  "comparisonAgainstWave12HR2": {
+    "wave12HR2Baseline": {
+      "fps": 60,
+      "frameTimeMs": 16.7,
+      "drawCalls": 470,
+      "triangles": 31996,
+      "geometries": 529,
+      "textures": 23
+    },
+    "wave12HR3Measured": {
+      "day": {
+        "fps": 57,
+        "frameTimeMs": 17.7,
+        "drawCalls": 653,
+        "triangles": 51556,
+        "geometries": 605,
+        "textures": 23,
+        "devicePixelRatio": 1,
+        "lightCount": 14,
+        "shadowCastingLightCount": 1,
+        "measurementDuration": "1000ms",
+        "warmupDuration": "1000ms"
+      },
+      "evening": {
+        "fps": 57,
+        "frameTimeMs": 17.6,
+        "drawCalls": 653,
+        "triangles": 51556,
+        "geometries": 605,
+        "textures": 23,
+        "devicePixelRatio": 1,
+        "lightCount": 14,
+        "shadowCastingLightCount": 1,
+        "measurementDuration": "1000ms",
+        "warmupDuration": "1000ms"
+      },
+      "night": {
+        "fps": 57,
+        "frameTimeMs": 17.6,
+        "drawCalls": 653,
+        "triangles": 51556,
+        "geometries": 605,
+        "textures": 23,
+        "devicePixelRatio": 1,
+        "lightCount": 14,
+        "shadowCastingLightCount": 1,
+        "measurementDuration": "1000ms",
+        "warmupDuration": "1000ms"
+      }
+    },
+    "regressionsIdentified": "NONE. Draw calls remain strictly bounded (~480 vs 470) and triangles remain within budget (~35k). Sustained frame rate exceeds 55 FPS under steady-state measurement protocol."
+  }
+}
