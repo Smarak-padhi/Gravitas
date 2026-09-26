@@ -16,7 +16,7 @@
 
 import type { RoleId } from '../roles/types.js'
 import {
-  FROZEN_ROLES,
+  TOWER_ROLES,
   ROLE_HOME_POSITIONS,
   ROLE_HOME_ROTATIONS,
   TOWER_ROLE_HOME_POSITIONS,
@@ -80,8 +80,8 @@ export class CharacterMotionController {
     this.characters = characters
     this.graph = getNavigationGraph()
 
-    // Initialize all 4 frozen roles at their home stations
-    for (const role of FROZEN_ROLES) {
+    // Initialize all tower roles at their home stations
+    for (const role of TOWER_ROLES) {
       const roleId = role.roleId
       const homePos = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
       const homeRot = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]

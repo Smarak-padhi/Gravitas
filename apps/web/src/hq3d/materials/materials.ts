@@ -127,6 +127,13 @@ export class MaterialLibrary {
   public readonly heroCharSweater: THREE.MeshStandardMaterial
   public readonly heroCharDenim: THREE.MeshStandardMaterial
   public readonly heroCharSneaker: THREE.MeshStandardMaterial
+  public readonly heroCharReviewerCoat: THREE.MeshStandardMaterial
+  public readonly heroCharReviewerHood: THREE.MeshStandardMaterial
+  public readonly heroCharQaWorkwear: THREE.MeshStandardMaterial
+  public readonly heroCharBackendSweater: THREE.MeshStandardMaterial
+  public readonly heroCharPlannerSweater: THREE.MeshStandardMaterial
+  public readonly heroCharSlacksDark: THREE.MeshStandardMaterial
+  public readonly glassCleanroom: THREE.MeshStandardMaterial
   public readonly heroAcousticWood: THREE.MeshStandardMaterial
   public readonly heroAcousticFelt: THREE.MeshStandardMaterial
 
@@ -965,6 +972,65 @@ export class MaterialLibrary {
         color: 0xedebe8,
         roughness: 0.48,
         metalness: 0.05,
+      })
+    )
+
+    this.heroCharReviewerCoat = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x24423a, // Deep tailored cleanroom sage coat
+        roughness: 0.72,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroCharReviewerHood = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1a2e29, // Cleanroom coif / hood
+        roughness: 0.58,
+        metalness: 0.05,
+      })
+    )
+
+    this.heroCharQaWorkwear = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x1e293b, // Deep slate/petrol technical workwear
+        roughness: 0.75,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroCharBackendSweater = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x272e3f, // Technical charcoal knit sweater
+        roughness: 0.76,
+        metalness: 0.02,
+      })
+    )
+
+    this.heroCharPlannerSweater = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xc8bcab, // Oat architect sweater
+        roughness: 0.78,
+        metalness: 0.0,
+      })
+    )
+
+    this.heroCharSlacksDark = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0x182030, // Charcoal tailored slacks
+        roughness: 0.82,
+        metalness: 0.02,
+      })
+    )
+
+    this.glassCleanroom = this.track(
+      new THREE.MeshStandardMaterial({
+        color: 0xe0f2fe,
+        roughness: 0.04,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.14,
+        depthWrite: false,
       })
     )
 

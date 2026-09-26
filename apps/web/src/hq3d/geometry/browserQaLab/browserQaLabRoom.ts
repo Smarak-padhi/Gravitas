@@ -108,35 +108,55 @@ export class BrowserQaLabRoom {
     roomGroup.add(ceilingGroup)
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 6. ARCHITECTURAL POTTED TREE (Terracotta Cylinder)
+    // 6. ARCHITECTURAL CABLE DISTRIBUTION & TEST HARNESS COLUMN (X = 4.8m, Z = 1.8m)
     // ──────────────────────────────────────────────────────────────────────────
-    const plantGroup = new THREE.Group()
-    plantGroup.position.set(4.8, 0.0, 1.8)
+    const cableTowerGroup = new THREE.Group()
+    cableTowerGroup.position.set(4.8, 0.0, 1.8)
 
-    const planterGeo = track(new THREE.CylinderGeometry(0.30, 0.25, 0.52, 16))
-    const planter = new THREE.Mesh(planterGeo, materials.planterTerracotta)
-    planter.position.set(0.0, 0.26, 0.0)
-    planter.castShadow = true
-    plantGroup.add(planter)
+    // Structural floor flange in gunmetal
+    const flangeGeo = track(new THREE.CylinderGeometry(0.32, 0.36, 0.08, 16))
+    const flange = new THREE.Mesh(flangeGeo, materials.structureGraphite)
+    flange.position.set(0.0, 0.04, 0.0)
+    flange.castShadow = true
+    flange.receiveShadow = true
+    cableTowerGroup.add(flange)
 
-    const soilGeo = track(new THREE.CylinderGeometry(0.26, 0.26, 0.04, 16))
-    const soil = new THREE.Mesh(soilGeo, materials.limestoneDark)
-    soil.position.set(0.0, 0.50, 0.0)
-    plantGroup.add(soil)
+    const flangeRingGeo = track(new THREE.CylinderGeometry(0.365, 0.365, 0.012, 16))
+    const flangeRing = new THREE.Mesh(flangeRingGeo, materials.champagneBrass)
+    flangeRing.position.set(0.0, 0.08, 0.0)
+    cableTowerGroup.add(flangeRing)
 
-    const trunkGeo = track(new THREE.CylinderGeometry(0.032, 0.042, 1.5, 8))
-    const trunk = new THREE.Mesh(trunkGeo, materials.walnut)
-    trunk.position.set(0.0, 1.15, 0.0)
-    plantGroup.add(trunk)
+    // Vertical extruded aluminum cable spine
+    const spineGeo = track(new THREE.BoxGeometry(0.16, 2.8, 0.16))
+    const spine = new THREE.Mesh(spineGeo, materials.laptopAluminum)
+    spine.position.set(0.0, 1.48, 0.0)
+    spine.castShadow = true
+    cableTowerGroup.add(spine)
 
-    const foliageGeo = track(new THREE.SphereGeometry(0.44, 12, 10))
-    const foliage = new THREE.Mesh(foliageGeo, materials.foliageGreen)
-    foliage.scale.set(1.0, 1.35, 1.0)
-    foliage.position.set(0.0, 1.75, 0.0)
-    foliage.castShadow = true
-    plantGroup.add(foliage)
+    // Cable routing rings / harness management collars at regular heights
+    const collarGeo = track(new THREE.TorusGeometry(0.18, 0.02, 8, 24))
+    collarGeo.rotateX(Math.PI / 2)
+    for (const cy of [0.6, 1.2, 1.8, 2.4]) {
+      const collar = new THREE.Mesh(collarGeo, materials.structureGraphite)
+      collar.position.set(0.0, cy, 0.0)
+      cableTowerGroup.add(collar)
 
-    roomGroup.add(plantGroup)
+      // Brass telemetry port rings
+      const portPlateGeo = track(new THREE.BoxGeometry(0.18, 0.06, 0.18))
+      const portPlate = new THREE.Mesh(portPlateGeo, materials.champagneBrass)
+      portPlate.position.set(0.0, cy, 0.0)
+      cableTowerGroup.add(portPlate)
+    }
+
+    // Heavy-duty harness drop conduits leading into the floor
+    const dropGeo = track(new THREE.CylinderGeometry(0.025, 0.025, 2.7, 12))
+    for (const dx of [-0.08, 0.08]) {
+      const drop = new THREE.Mesh(dropGeo, materials.gunmetal)
+      drop.position.set(dx, 1.42, 0.08)
+      cableTowerGroup.add(drop)
+    }
+
+    roomGroup.add(cableTowerGroup)
 
     // Freeze static matrices for WebGL performance
     roomGroup.traverse((obj) => {

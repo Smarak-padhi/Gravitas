@@ -159,16 +159,16 @@ export const TOWER_ROLE_HOME_POSITIONS: Record<RoleId, readonly [number, number,
   'role:strategy:chief-planner': [-1.5, 3.6, -0.75],
   'role:engineering:frontend-engineer': [-3.5, 7.2, 1.15],
   'role:engineering:backend-engineer': [2.5, 7.2, 1.15],
-  'role:quality:independent-reviewer': [0.0, 10.8, 0.5],
-  'role:quality:browser-qa': [0.0, 14.4, 0.4],
+  'role:quality:independent-reviewer': [0.0, 10.8, 0.35],
+  'role:quality:browser-qa': [0.0, 14.4, 0.35],
 }
 
 export const TOWER_ROLE_HOME_ROTATIONS: Record<RoleId, number> = {
   'role:strategy:chief-planner': 0.0,
   'role:engineering:frontend-engineer': Math.PI,
   'role:engineering:backend-engineer': Math.PI,
-  'role:quality:independent-reviewer': 0.0,
-  'role:quality:browser-qa': 0.0,
+  'role:quality:independent-reviewer': Math.PI - 0.25,
+  'role:quality:browser-qa': Math.PI - 0.25,
 }
 
 /**

@@ -273,32 +273,45 @@ export class HqArchitecture {
   }
 
   /**
-   * Floor 3 Verification Cleanroom Acoustic Glass Enclosure
+   * Floor 3 Verification Cleanroom Acoustic Glass Enclosure (Wave 12K-R)
    */
   private buildCleanroomPartitions(materials: MaterialLibrary): void {
     const cleanGroup = new THREE.Group()
     cleanGroup.name = 'floor3-cleanroom-partitions'
     const floor3Y = 10.8
 
-    // Frameless Acoustic Glass Partition (facing Operations and circulation)
-    const glassGeo = this.track(new THREE.BoxGeometry(0.05, 2.8, 6.2))
-    const glass = new THREE.Mesh(glassGeo, materials.glass)
+    // Crystal-clear Frameless Acoustic Glass Partition (tuned opacity 0.14, non-occluding)
+    const glassGeo = this.track(new THREE.BoxGeometry(0.04, 2.8, 6.2))
+    const glass = new THREE.Mesh(glassGeo, materials.glassCleanroom ?? materials.glass)
     glass.name = 'cleanroom-glass-wall' // Required by unit tests
     glass.position.set(-2.4, floor3Y + 1.4, 0.5)
     cleanGroup.add(glass)
 
-    // Low American walnut base curb under cleanroom glass
-    const curbGeo = this.track(new THREE.BoxGeometry(0.12, 0.14, 6.25))
+    // Low American walnut base curb under cleanroom glass with brass reveal
+    const curbGeo = this.track(new THREE.BoxGeometry(0.10, 0.12, 6.25))
     const curb = new THREE.Mesh(curbGeo, materials.walnut)
-    curb.position.set(-2.4, floor3Y + 0.07, 0.5)
+    curb.position.set(-2.4, floor3Y + 0.06, 0.5)
     cleanGroup.add(curb)
 
-    // Brushed champagne brass structural corner stanchions
-    for (const pz of [-2.6, 0.5, 3.6]) {
-      const postGeo = this.track(new THREE.CylinderGeometry(0.035, 0.035, 2.9, 8))
+    const curbTrimGeo = this.track(new THREE.BoxGeometry(0.108, 0.012, 6.25))
+    const curbTrim = new THREE.Mesh(curbTrimGeo, materials.champagneBrass)
+    curbTrim.position.set(-2.4, floor3Y + 0.122, 0.5)
+    cleanGroup.add(curbTrim)
+
+    // Slender architectural champagne brass perimeter stanchions (cleared from camera sightlines)
+    for (const pz of [-2.5, 3.5]) {
+      const postGeo = this.track(new THREE.CylinderGeometry(0.016, 0.016, 2.9, 12))
       const post = new THREE.Mesh(postGeo, materials.champagneBrass)
       post.position.set(-2.4, floor3Y + 1.45, pz)
       cleanGroup.add(post)
+
+      // Top and bottom spider clamp brackets
+      for (const py of [floor3Y + 0.14, floor3Y + 2.76]) {
+        const clampGeo = this.track(new THREE.BoxGeometry(0.06, 0.03, 0.04))
+        const clamp = new THREE.Mesh(clampGeo, materials.laptopAluminum)
+        clamp.position.set(-2.4, py, pz)
+        cleanGroup.add(clamp)
+      }
     }
 
     this.group.add(cleanGroup)

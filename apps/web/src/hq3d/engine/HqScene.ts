@@ -572,10 +572,10 @@ export class HqScene {
         this.keyLight.intensity = 1.45
         this.keyLight.position.set(-22.0, 24.0, -24.0)
         this.fillLight.color.setHex(0x6366f1) // Indigo ambient fill
-        this.fillLight.intensity = 0.85
-        this.ambientLight.color.setHex(0xa1a1aa)
-        this.ambientLight.groundColor.setHex(0x27272a)
-        this.ambientLight.intensity = 1.0
+        this.fillLight.intensity = 0.95
+        this.ambientLight.color.setHex(0xb0b8c4)
+        this.ambientLight.groundColor.setHex(0x334155)
+        this.ambientLight.intensity = 1.15
 
         // Floor 2 Agent Operations: warm golden twilight interior pools
         this.spotOperations.color.setHex(0xfef08a)
@@ -597,21 +597,21 @@ export class HqScene {
         this.spotPlanningDispatch.color.setHex(0xfef08a)
         this.spotPlanningDispatch.intensity = 1.8
 
-        // Floor 3 Cleanroom twilight
-        this.spotCleanroom.color.setHex(0xdbeafe)
-        this.spotCleanroom.intensity = 2.2
-        this.spotCleanroomWash.color.setHex(0x93c5fd)
-        this.spotCleanroomWash.intensity = 1.8
-        this.spotCleanroomEdge.color.setHex(0xfef08a)
-        this.spotCleanroomEdge.intensity = 1.6
+        // Floor 3 Cleanroom twilight: crisp calm white-blue
+        this.spotCleanroom.color.setHex(0xe0f2fe)
+        this.spotCleanroom.intensity = 2.4
+        this.spotCleanroomWash.color.setHex(0xbae6fd)
+        this.spotCleanroomWash.intensity = 2.0
+        this.spotCleanroomEdge.color.setHex(0xf1f5f9)
+        this.spotCleanroomEdge.intensity = 1.8
 
-        // Floor 4 Browser QA twilight
-        this.spotBrowserQa.color.setHex(0xccfbf1)
-        this.spotBrowserQa.intensity = 2.2
-        this.spotBrowserQaWash.color.setHex(0x5eead4)
-        this.spotBrowserQaWash.intensity = 1.8
-        this.spotBrowserQaInteraction.color.setHex(0xfef08a)
-        this.spotBrowserQaInteraction.intensity = 1.6
+        // Floor 4 Browser QA twilight: warm studio twilight
+        this.spotBrowserQa.color.setHex(0xffedd5)
+        this.spotBrowserQa.intensity = 2.4
+        this.spotBrowserQaWash.color.setHex(0xfef3c7)
+        this.spotBrowserQaWash.intensity = 2.0
+        this.spotBrowserQaInteraction.color.setHex(0xfff7ed)
+        this.spotBrowserQaInteraction.intensity = 1.8
 
         this.spotInfrastructure.color.setHex(0x93c5fd)
         this.spotInfrastructure.intensity = 1.8
@@ -622,61 +622,58 @@ export class HqScene {
       case 'NIGHT':
         // Inhabited Miniature Engineering Studio at Night:
         // Deep exterior night contrast + intentional architectural lighting pools (wall wash, task pools, dormant monitors)
-        // High architectural readability: room depth, rear circulation, timber slats, and floor plane remain clear
-        this.scene.background = new THREE.Color(0x090d16) // Deep architectural midnight slate
-        this.keyLight.color.setHex(0x64748b) // Subtle cool moonbeam rim
-        this.keyLight.intensity = 0.38
+        // High architectural readability: room boundaries, floor, hero apparatus, character, circulation, and major furniture
+        // are clearly perceived without requiring active screens. No neon tinting.
+        this.scene.background = new THREE.Color(0x0c111d) // Deep architectural midnight slate
+        this.keyLight.color.setHex(0x94a3b8) // Crisp moonlight rim
+        this.keyLight.intensity = 0.55
         this.keyLight.position.set(-16.0, 32.0, -22.0)
-        this.fillLight.color.setHex(0x334155) // Soft indirect architectural fill (separates floor & window planes)
-        this.fillLight.intensity = 0.40
-        this.ambientLight.color.setHex(0x1e293b) // Exterior night dome
-        this.ambientLight.groundColor.setHex(0x101726) // Soft architectural floor bounce
-        this.ambientLight.intensity = 0.45
+        this.fillLight.color.setHex(0x475569) // Slate architectural fill to define depth and structure
+        this.fillLight.intensity = 0.65
+        this.ambientLight.color.setHex(0x283548) // Deep ambient sky dome
+        this.ambientLight.groundColor.setHex(0x182030) // Soft architectural floor bounce
+        this.ambientLight.intensity = 0.80
 
         // Floor 1 Mission Control: restrained warm architectural pools (wall wash & table pool)
         this.spotPlanning.color.setHex(0xffedd5)
-        this.spotPlanning.intensity = 2.0
+        this.spotPlanning.intensity = 2.2
         this.spotPlanningWash.color.setHex(0xfbbf24)
-        this.spotPlanningWash.intensity = 2.2
+        this.spotPlanningWash.intensity = 2.4
         this.spotPlanningDispatch.color.setHex(0xffeedb)
-        this.spotPlanningDispatch.intensity = 1.6
+        this.spotPlanningDispatch.intensity = 1.8
 
         // Floor 2 Agent Operations: Intentional architectural light pools & timber slat cove grazing
-        // 1. Central circulation safety pathway downlight pool (illuminates floor plane & Reviewer zone)
         this.spotOperations.color.setHex(0xffedd5)
-        this.spotOperations.intensity = 2.2
-        // 2. Wall-wash cove light grazing the acoustic timber battens & rear circulation
+        this.spotOperations.intensity = 2.4
         this.spotOperationsWash.color.setHex(0xfbbf24)
         this.spotOperationsWash.intensity = 2.4
-        // 3. Workstation architectural task pools (illuminates walnut/oak surfaces; monitors strictly dormant)
         this.spotOperationsDeskL.color.setHex(0xffeedb)
-        this.spotOperationsDeskL.intensity = 2.0
+        this.spotOperationsDeskL.intensity = 2.2
         this.spotOperationsDeskR.color.setHex(0xffeedb)
-        this.spotOperationsDeskR.intensity = 2.0
-        // 4. Reviewer verification console inspection downlight pool
+        this.spotOperationsDeskR.intensity = 2.2
         this.spotOperationsReviewer.color.setHex(0xffedd5)
         this.spotOperationsReviewer.intensity = 2.2
 
-        // Floor 3 Verification Cleanroom: precise cool-white night inspection pool
-        this.spotCleanroom.color.setHex(0x93c5fd)
-        this.spotCleanroom.intensity = 1.8
-        this.spotCleanroomWash.color.setHex(0x60a5fa)
-        this.spotCleanroomWash.intensity = 1.6
-        this.spotCleanroomEdge.color.setHex(0xa5b4fc)
-        this.spotCleanroomEdge.intensity = 1.4
+        // Floor 3 Verification Cleanroom: crisp, controlled cool-white architectural inspection pool & wall wash
+        this.spotCleanroom.color.setHex(0xe0e7ff)
+        this.spotCleanroom.intensity = 2.6
+        this.spotCleanroomWash.color.setHex(0xbfdbfe)
+        this.spotCleanroomWash.intensity = 2.2
+        this.spotCleanroomEdge.color.setHex(0xf1f5f9)
+        this.spotCleanroomEdge.intensity = 1.8
 
-        // Floor 4 Browser QA Lab: cyan/teal night testing pools
-        this.spotBrowserQa.color.setHex(0x5eead4)
-        this.spotBrowserQa.intensity = 1.8
-        this.spotBrowserQaWash.color.setHex(0x2dd4bf)
-        this.spotBrowserQaWash.intensity = 1.6
-        this.spotBrowserQaInteraction.color.setHex(0x14b8a6)
-        this.spotBrowserQaInteraction.intensity = 1.4
+        // Floor 4 Browser QA Lab: warm studio architectural lighting (no neon green/teal!)
+        this.spotBrowserQa.color.setHex(0xffedd5)
+        this.spotBrowserQa.intensity = 2.6
+        this.spotBrowserQaWash.color.setHex(0xfef3c7)
+        this.spotBrowserQaWash.intensity = 2.2
+        this.spotBrowserQaInteraction.color.setHex(0xfff7ed)
+        this.spotBrowserQaInteraction.intensity = 1.8
 
-        this.spotInfrastructure.color.setHex(0x38bdf8)
-        this.spotInfrastructure.intensity = 1.0
+        this.spotInfrastructure.color.setHex(0x60a5fa)
+        this.spotInfrastructure.intensity = 1.4
         this.spotApproval.color.setHex(0xfde047)
-        this.spotApproval.intensity = 1.2
+        this.spotApproval.intensity = 1.6
         break
     }
   }

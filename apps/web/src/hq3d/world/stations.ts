@@ -54,13 +54,13 @@ export const STATION_DEFINITIONS: Record<StationId, StationDefinition> = {
   },
   'reviewer-workstation': {
     id: 'reviewer-workstation',
-    name: 'Independent Reviewer Verification Station',
+    name: 'Quality Consultation & Visiting Review Dock',
     roomId: 'AGENT_OPERATIONS',
     position: [0.0, 7.2, -0.1],
     rotationY: 0,
-    role: 'Quality & Verification Gate',
-    status: 'Active Review Gate',
-    description: 'Specialist acoustic inspection pod with dual curved monitors and analysis tablet.',
+    role: 'Visiting Quality Gate',
+    status: 'Standby Gate',
+    description: 'Secondary consultation and handoff dock on Engineering floor. Independent Reviewer authoritative permanent home is Floor 3 Verification Cleanroom.',
   },
 
   'codex-workstation': {

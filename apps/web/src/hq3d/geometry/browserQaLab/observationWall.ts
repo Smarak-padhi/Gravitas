@@ -39,7 +39,7 @@ export class ObservationWall {
     // ──────────────────────────────────────────────────────────────────────────
     const backerGeo = track(new THREE.BoxGeometry(10.6, 3.2, 0.04))
     const backer = new THREE.Mesh(backerGeo, materials.structureGraphite)
-    backer.position.set(0.0, 1.6, 0.02)
+    backer.position.set(0.0, 1.6, 0.0)
     backer.receiveShadow = true
     wallGroup.add(backer)
 
@@ -53,7 +53,7 @@ export class ObservationWall {
     const slatInst = new THREE.InstancedMesh(slatGeo, materials.walnut, slatPositions.length)
     const dummy = new THREE.Object3D()
     slatPositions.forEach((px, idx) => {
-      dummy.position.set(px, 1.6, 0.05)
+      dummy.position.set(px, 1.6, -0.02)
       dummy.updateMatrix()
       slatInst.setMatrixAt(idx, dummy.matrix)
     })
@@ -65,7 +65,7 @@ export class ObservationWall {
     for (const ry of [0.95, 2.95]) {
       const railGeo = track(new THREE.BoxGeometry(10.6, 0.025, 0.035))
       const rail = new THREE.Mesh(railGeo, materials.champagneBrass)
-      rail.position.set(0.0, ry, 0.065)
+      rail.position.set(0.0, ry, -0.035)
       wallGroup.add(rail)
     }
 
@@ -75,7 +75,7 @@ export class ObservationWall {
     // Smoked technical glass observation surface (5.4m x 1.76m x 0.02m)
     const glassGeo = track(new THREE.BoxGeometry(5.4, 1.76, 0.02))
     const glass = new THREE.Mesh(glassGeo, materials.glassDark)
-    glass.position.set(0.0, 1.95, 0.11)
+    glass.position.set(0.0, 1.95, -0.08)
     wallGroup.add(glass)
 
     // Satin aluminum perimeter frame
@@ -84,12 +84,12 @@ export class ObservationWall {
 
     for (const fy of [1.05, 2.85]) {
       const fh = new THREE.Mesh(frameHorizGeo, materials.laptopAluminum)
-      fh.position.set(0.0, fy, 0.11)
+      fh.position.set(0.0, fy, -0.08)
       wallGroup.add(fh)
     }
     for (const fx of [-2.72, 2.72]) {
       const fv = new THREE.Mesh(frameVertGeo, materials.laptopAluminum)
-      fv.position.set(fx, 1.95, 0.11)
+      fv.position.set(fx, 1.95, -0.08)
       wallGroup.add(fv)
     }
 
@@ -99,7 +99,7 @@ export class ObservationWall {
       for (const sy of [1.1, 2.8]) {
         const so = new THREE.Mesh(standoffGeo, materials.laptopAluminum)
         so.rotation.x = Math.PI / 2
-        so.position.set(sx, sy, 0.06)
+        so.position.set(sx, sy, -0.05)
         wallGroup.add(so)
       }
     }
@@ -110,25 +110,25 @@ export class ObservationWall {
     // Vertical dividing datum bar in champagne brass separating left & right comparison bays
     const centerDividerGeo = track(new THREE.BoxGeometry(0.024, 1.72, 0.025))
     const centerDivider = new THREE.Mesh(centerDividerGeo, materials.champagneBrass)
-    centerDivider.position.set(0.0, 1.95, 0.125)
+    centerDivider.position.set(0.0, 1.95, -0.095)
     wallGroup.add(centerDivider)
 
     // Left Bay Header Plaque [BASELINE SNAPSHOT REPOSITORY]
     const headerLeftGeo = track(new THREE.BoxGeometry(2.35, 0.05, 0.015))
     const headerLeft = new THREE.Mesh(headerLeftGeo, materials.laptopAluminum)
-    headerLeft.position.set(-1.3, 2.72, 0.125)
+    headerLeft.position.set(-1.3, 2.72, -0.095)
     wallGroup.add(headerLeft)
 
     // Right Bay Header Plaque [CANDIDATE VIEWPORT ASSERTION]
     const headerRight = new THREE.Mesh(headerLeftGeo, materials.laptopAluminum)
-    headerRight.position.set(1.3, 2.72, 0.125)
+    headerRight.position.set(1.3, 2.72, -0.095)
     wallGroup.add(headerRight)
 
     // Responsive calibration coordinate ticks along frame (subtle brass registration marks)
     for (const bx of [-2.2, -1.5, -0.8, 0.8, 1.5, 2.2]) {
       const tickGeo = track(new THREE.BoxGeometry(0.015, 0.03, 0.02))
       const tick = new THREE.Mesh(tickGeo, materials.champagneBrass)
-      tick.position.set(bx, 1.08, 0.125)
+      tick.position.set(bx, 1.08, -0.095)
       wallGroup.add(tick)
     }
 
@@ -137,7 +137,7 @@ export class ObservationWall {
     // ──────────────────────────────────────────────────────────────────────────
     const credenzaGeo = track(new THREE.BoxGeometry(5.8, 0.48, 0.38))
     const credenza = new THREE.Mesh(credenzaGeo, materials.structureGraphite)
-    credenza.position.set(0.0, 0.24, 0.22)
+    credenza.position.set(0.0, 0.24, -0.19)
     credenza.castShadow = true
     credenza.receiveShadow = true
     wallGroup.add(credenza)
@@ -145,14 +145,14 @@ export class ObservationWall {
     // American walnut top plinth with brass reveal
     const cTopGeo = track(new THREE.BoxGeometry(5.86, 0.025, 0.42))
     const cTop = new THREE.Mesh(cTopGeo, materials.walnut)
-    cTop.position.set(0.0, 0.49, 0.22)
+    cTop.position.set(0.0, 0.49, -0.19)
     wallGroup.add(cTop)
 
     // Modular equipment slots for testing peripherals
     for (let cx = -2.4; cx <= 2.4; cx += 1.2) {
       const slotGeo = track(new THREE.BoxGeometry(0.92, 0.18, 0.015))
       const slot = new THREE.Mesh(slotGeo, materials.gunmetal)
-      slot.position.set(cx, 0.32, 0.415)
+      slot.position.set(cx, 0.32, -0.385)
       wallGroup.add(slot)
     }
 
@@ -163,24 +163,24 @@ export class ObservationWall {
     for (const ox of [-2.4, 0.0, 2.4]) {
       const outriggerGeo = track(new THREE.BoxGeometry(0.03, 0.03, 0.62))
       const outrigger = new THREE.Mesh(outriggerGeo, materials.laptopAluminum)
-      outrigger.position.set(ox, 3.12, 0.35)
+      outrigger.position.set(ox, 3.12, -0.31)
       wallGroup.add(outrigger)
     }
 
     // Continuous luminaire bar casting glare-free downward wash
     const lumBarGeo = track(new THREE.BoxGeometry(5.6, 0.04, 0.06))
     const lumBar = new THREE.Mesh(lumBarGeo, materials.laptopAluminum)
-    lumBar.position.set(0.0, 3.12, 0.66)
+    lumBar.position.set(0.0, 3.12, -0.62)
     wallGroup.add(lumBar)
 
     const lumTrimGeo = track(new THREE.BoxGeometry(5.64, 0.01, 0.07))
     const lumTrim = new THREE.Mesh(lumTrimGeo, materials.champagneBrass)
-    lumTrim.position.set(0.0, 3.14, 0.66)
+    lumTrim.position.set(0.0, 3.14, -0.62)
     wallGroup.add(lumTrim)
 
     const lumLensGeo = track(new THREE.BoxGeometry(5.4, 0.008, 0.04))
     const lumLens = new THREE.Mesh(lumLensGeo, materials.lampWarmGlow)
-    lumLens.position.set(0.0, 3.096, 0.66)
+    lumLens.position.set(0.0, 3.096, -0.62)
     wallGroup.add(lumLens)
 
     return wallGroup

@@ -35,7 +35,7 @@ import { getFreePort } from './test-ports.js'
 import sharp from 'sharp'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
-const evidenceDir = join(__dirname, '../docs/3d-hq/evidence/12k')
+const evidenceDir = join(__dirname, '../docs/3d-hq/evidence/12k-r')
 
 class HybridTestHarness implements AgentHarness {
   public readonly id = 'hybrid-harness'
@@ -461,320 +461,371 @@ test.describe('Wave 12K Verification Cleanroom & Browser QA Lab Suite', () => {
     await writeFile(join(evidenceDir, 'benchmarks.json'), JSON.stringify(allBenchmarks, null, 2), 'utf8')
 
     // ──────────────────────────────────────────────────────────────────────────
-    // STEP 4: DETERMINISTIC SCREENSHOT CAPTURES (Section 22)
     // ──────────────────────────────────────────────────────────────────────────
-    console.log('[Capturing deterministic evidence screenshots]...')
+    // STEP 4: DETERMINISTIC SCREENSHOT CAPTURES (Wave 12K-R Section 13)
+    // ──────────────────────────────────────────────────────────────────────────
+    console.log('[Capturing deterministic evidence screenshots for Wave 12K-R]...')
 
-    // ── Floor 3: Verification Cleanroom (01 - 08) ──────────────────────────
+    // ── Floor 3: Verification Cleanroom (01 - 06) ──────────────────────────
     // 01-f3-day-wide.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('DAY')
-      dir.frameRoom('VERIFICATION_LAB')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '01-f3-day-wide.png') })
-
-    // 02-f3-eve-wide.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('EVENING')
-      dir.frameRoom('VERIFICATION_LAB')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '02-f3-eve-wide.png') })
-
-    // 03-f3-night-wide.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('NIGHT')
-      dir.frameRoom('VERIFICATION_LAB')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '03-f3-night-wide.png') })
-
-    // 04-f3-reviewer-medium.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'F3_REVIEWER_MEDIUM',
-          target: [0.0, 11.5, 0.5],
-          position: [-2.5, 12.2, -1.8],
-          description: 'Independent Reviewer Medium Framing',
+          id: 'F3_DAY_WIDE',
+          target: [0.0, 11.9, 0.4],
+          position: [-2.4, 13.5, -6.6],
+          description: 'F3 Verification Cleanroom Day Wide',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '04-f3-reviewer-medium.png') })
+    await page.screenshot({ path: join(evidenceDir, '01-f3-day-wide.png') })
 
-    // 05-f3-reviewer-close.png
+    // 02-f3-night-wide.png
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.setAtmosphere('NIGHT')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F3_NIGHT_WIDE',
+          target: [0.0, 11.9, 0.4],
+          position: [-2.4, 13.5, -6.6],
+          description: 'F3 Verification Cleanroom Night Wide',
+        },
+        true
+      )
+    })
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: join(evidenceDir, '02-f3-night-wide.png') })
+
+    // 03-f3-verification-bench-hero.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
-      dir.frameCharacter('CHAR_REVIEWER')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F3_VERIFICATION_BENCH_HERO',
+          target: [0.0, 11.45, 0.8],
+          position: [-2.2, 12.5, -2.6],
+          description: 'F3 Verification Bench Hero Apparatus',
+        },
+        true
+      )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '05-f3-reviewer-close.png') })
+    await page.screenshot({ path: join(evidenceDir, '03-f3-verification-bench-hero.png') })
 
-    // 06-f3-verification-bench.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('DAY')
-      dir.frameWorkstation('WS_VERIFIER')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '06-f3-verification-bench.png') })
-
-    // 07-f3-evidence-wall.png
+    // 04-f3-evidence-wall.png (Camera facing South evidence wall with clear perspective)
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
           id: 'F3_EVIDENCE_WALL',
-          target: [0.0, 12.0, 3.2],
-          position: [-1.5, 12.8, -4.5],
-          description: 'Verification Evidence Wall Detail',
+          target: [0.0, 12.4, 3.65],
+          position: [2.8, 12.6, 0.4],
+          description: 'F3 Architectural Evidence Wall Detail',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '07-f3-evidence-wall.png') })
+    await page.screenshot({ path: join(evidenceDir, '04-f3-evidence-wall.png') })
 
-    // 08-f3-elevator-transition.png
+    // 05-f3-reviewer-production-character.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'F3_ELEVATOR_PORTAL',
-          target: [4.8, 12.0, 0.5],
-          position: [1.0, 12.8, -5.0],
-          description: 'Cleanroom East Arrival Portal & Circulation',
+          id: 'F3_REVIEWER_PRODUCTION',
+          target: [0.0, 11.60, 0.35],
+          position: [-0.50, 11.75, -0.90],
+          description: 'F3 Independent Reviewer Production Character Closeup',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '08-f3-elevator-transition.png') })
+    await page.screenshot({ path: join(evidenceDir, '05-f3-reviewer-production-character.png') })
 
-    // ── Floor 4: Browser QA Lab (09 - 16) ──────────────────────────────────
-    // 09-f4-day-wide.png
+    // 06-f3-intake-to-verdict-composition.png (Flow: Intake -> Deck -> Rail -> Verdict)
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
-      dir.frameRoom('BROWSER_QA_LAB')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F3_INTAKE_TO_VERDICT',
+          target: [0.4, 11.6, 0.9],
+          position: [-3.4, 13.0, -1.6],
+          description: 'F3 Intake to Verdict Verification Pipeline Flow',
+        },
+        true
+      )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '09-f4-day-wide.png') })
+    await page.screenshot({ path: join(evidenceDir, '06-f3-intake-to-verdict-composition.png') })
 
-    // 10-f4-eve-wide.png
+    // ── Floor 4: Browser QA Lab (07 - 12) ──────────────────────────────────
+    // 07-f4-day-wide.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
-      dir.setAtmosphere('EVENING')
-      dir.frameRoom('BROWSER_QA_LAB')
+      dir.setAtmosphere('DAY')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F4_DAY_WIDE',
+          target: [0.0, 15.5, 0.4],
+          position: [-2.4, 17.1, -6.6],
+          description: 'F4 Browser QA Lab Day Wide',
+        },
+        true
+      )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '10-f4-eve-wide.png') })
+    await page.screenshot({ path: join(evidenceDir, '07-f4-day-wide.png') })
 
-    // 11-f4-night-wide.png
+    // 08-f4-night-wide.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('NIGHT')
-      dir.frameRoom('BROWSER_QA_LAB')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '11-f4-night-wide.png') })
-
-    // 12-f4-qa-role-medium.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'F4_QA_ROLE_MEDIUM',
-          target: [0.0, 15.1, 0.4],
-          position: [-2.5, 15.8, -1.8],
-          description: 'Browser QA Specialist Medium Framing',
+          id: 'F4_NIGHT_WIDE',
+          target: [0.0, 15.5, 0.4],
+          position: [-2.4, 17.1, -6.6],
+          description: 'F4 Browser QA Lab Night Wide',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '12-f4-qa-role-medium.png') })
+    await page.screenshot({ path: join(evidenceDir, '08-f4-night-wide.png') })
 
-    // 13-f4-qa-role-close.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('DAY')
-      dir.frameCharacter('CHAR_BROWSER_QA')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '13-f4-qa-role-close.png') })
-
-    // 14-f4-device-bench.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('DAY')
-      dir.frameWorkstation('WS_DEVICE_BENCH')
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '14-f4-device-bench.png') })
-
-    // 15-f4-observation-wall.png
+    // 09-f4-device-rig-hero.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'F4_OBSERVATION_WALL',
-          target: [0.0, 15.8, 3.2],
-          position: [-1.5, 16.4, -4.5],
-          description: 'Panoramic Viewport Observation Wall Detail',
+          id: 'F4_DEVICE_RIG_HERO',
+          target: [0.0, 15.05, 0.8],
+          position: [-2.2, 16.1, -2.6],
+          description: 'F4 Multi-Device Test Rig Hero Apparatus',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '15-f4-observation-wall.png') })
+    await page.screenshot({ path: join(evidenceDir, '09-f4-device-rig-hero.png') })
 
-    // 16-f4-interaction-zone.png
+    // 10-f4-observation-surface.png (Camera facing South observation wall with clear perspective)
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'F4_INTERACTION_ZONE',
-          target: [-3.8, 15.2, 0.8],
-          position: [-0.8, 16.2, -5.0],
-          description: 'DOM Interaction Test Console & Mobile Device Testing Rack',
+          id: 'F4_OBSERVATION_SURFACE',
+          target: [0.0, 16.0, 3.65],
+          position: [2.8, 16.2, 0.4],
+          description: 'F4 Viewport Observation Surface Detail',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '16-f4-interaction-zone.png') })
+    await page.screenshot({ path: join(evidenceDir, '10-f4-observation-surface.png') })
 
-    // ── Tower Multi-Floor Overview (17 - 19) ──────────────────────────────
-    // 17-tower-f1-f4-day.png
+    // 11-f4-qa-character.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.cameraRig.setFraming(
         {
-          id: 'TOWER_F1_F4_DAY',
+          id: 'F4_QA_CHARACTER',
+          target: [0.0, 15.20, 0.35],
+          position: [-0.50, 15.35, -0.90],
+          description: 'F4 Browser QA Specialist Production Character Closeup',
+        },
+        true
+      )
+    })
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: join(evidenceDir, '11-f4-qa-character.png') })
+
+    // 12-f4-device-rig-close.png
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.setAtmosphere('DAY')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F4_DEVICE_RIG_CLOSE',
+          target: [0.15, 15.15, 0.65],
+          position: [-1.2, 15.75, -0.75],
+          description: 'F4 Multi-Device Test Rig Device Array Detail',
+        },
+        true
+      )
+    })
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: join(evidenceDir, '12-f4-device-rig-close.png') })
+
+    // ── Tower Silhouettes & Stack (13 - 14) ─────────────────────────────────
+    // 13-f3-f4-tower-comparison.png
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.setAtmosphere('DAY')
+      dir.cameraRig.setFraming(
+        {
+          id: 'F3_F4_TOWER_COMPARISON',
+          target: [0.0, 13.2, 0.0],
+          position: [0.0, 13.8, -18.0],
+          description: 'Floor 3 and Floor 4 Tower Silhouette Comparison',
+        },
+        true
+      )
+    })
+    await page.waitForTimeout(800)
+    await page.screenshot({ path: join(evidenceDir, '13-f3-f4-tower-comparison.png') })
+
+    // 14-f1-f4-tower-stack.png
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.setAtmosphere('DAY')
+      dir.cameraRig.setFraming(
+        {
+          id: 'TOWER_F1_F4_STACK',
           target: [0.0, 9.2, 0.0],
-          position: [0.0, 9.8, -28.0],
+          position: [0.0, 9.8, -26.0],
           description: 'Tower Perspective Cutaway Framing F1 Through F4',
         },
         true
       )
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '17-tower-f1-f4-day.png') })
+    await page.screenshot({ path: join(evidenceDir, '14-f1-f4-tower-stack.png') })
 
-    // 18-tower-f1-f4-eve.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('EVENING')
-      dir.cameraRig.setFraming(
-        {
-          id: 'TOWER_F1_F4_EVE',
-          target: [0.0, 9.2, 0.0],
-          position: [0.0, 9.8, -28.0],
-          description: 'Tower Perspective Cutaway Framing F1 Through F4 (Evening)',
-        },
-        true
-      )
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '18-tower-f1-f4-eve.png') })
-
-    // 19-tower-f1-f4-night.png
-    await page.evaluate(() => {
-      const dir = (window as any).__hqDirector
-      dir.setAtmosphere('NIGHT')
-      dir.cameraRig.setFraming(
-        {
-          id: 'TOWER_F1_F4_NIGHT',
-          target: [0.0, 9.2, 0.0],
-          position: [0.0, 9.8, -28.0],
-          description: 'Tower Perspective Cutaway Framing F1 Through F4 (Night)',
-        },
-        true
-      )
-    })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '19-tower-f1-f4-night.png') })
-
-    // ── Regression: F2 & F1 Intact (22 - 23) ──────────────────────────────
-    // 22-f2-regression.png
+    // ── Regression: F2 Agent Operations Intact (15) ────────────────────────
+    // 15-f2-regression.png
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
       dir.frameRoom('AGENT_OPERATIONS')
     })
     await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '22-f2-regression.png') })
+    await page.screenshot({ path: join(evidenceDir, '15-f2-regression.png') })
 
-    // 23-f1-regression.png
+    // Switch to 3D Tower mode so procedural 3D characters are photographed without 2D diorama overlays
+    const fg3dBtn = page.locator('[data-testid="mode-3d-btn"]')
+    await fg3dBtn.click()
+    await page.waitForTimeout(500)
+
+    // Suppress docked inspector panel and clear picking for clean studio portraits
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.picking.clearSelection()
+      const el = document.querySelector('[data-testid="hq3d-inspector"]')
+      if (el) (el as HTMLElement).style.display = 'none'
+    })
+
+    // ── Character Family Consistency: Capture individual portraits (FE, BE, Reviewer, QA)
+    // Frontend Engineer portrait
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
-      dir.frameRoom('MISSION_CONTROL')
+      dir.cameraRig.setFraming(
+        {
+          id: 'CHAR_PORTRAIT_FE',
+          target: [-3.5, 8.16, 1.15],
+          position: [-3.5, 8.20, 0.20],
+          description: 'Frontend Engineer Portrait',
+        },
+        true
+      )
     })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '23-f1-regression.png') })
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: join(evidenceDir, 'char-fe.png') })
 
-    // ── Controlled Authoritative Fixture Evidence (24 - 25) ───────────────
-    // 24-f3-authoritative-verifying.png
+    // Backend Engineer portrait
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
-      dir.frameRoom('VERIFICATION_LAB')
-      dir.scene.furniture.setStationStatus('verifier-console', 'VERIFYING')
-      // Update character state to VERIFYING
-      const charController = dir.scene.characters.controllers?.get('role:quality:independent-reviewer')
-      if (charController) {
-        charController.characterState = 'VERIFYING'
-        if (charController.statusMaterial) {
-          charController.statusMaterial.opacity = 0.85
-          charController.statusMaterial.color.setHex(0x3d7a68)
-        }
-      }
-      dir.scene.renderTick?.(0.016)
+      dir.cameraRig.setFraming(
+        {
+          id: 'CHAR_PORTRAIT_BE',
+          target: [2.5, 8.16, 1.15],
+          position: [2.5, 8.20, 0.20],
+          description: 'Backend Engineer Portrait',
+        },
+        true
+      )
     })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '24-f3-authoritative-verifying.png') })
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: join(evidenceDir, 'char-be.png') })
 
-    // 25-f4-authoritative-browser-qa.png
+    // Independent Reviewer portrait
     await page.evaluate(() => {
       const dir = (window as any).__hqDirector
       dir.setAtmosphere('DAY')
-      dir.frameRoom('BROWSER_QA_LAB')
-      dir.scene.furniture.setStationStatus('browser-qa-matrix', 'BROWSER_QA')
-      dir.scene.furniture.setStationStatus('browser-qa-station', 'BROWSER_QA')
-      const charController = dir.scene.characters.controllers?.get('role:quality:browser-qa')
-      if (charController) {
-        charController.characterState = 'FOCUSED'
-        if (charController.statusMaterial) {
-          charController.statusMaterial.opacity = 0.85
-          charController.statusMaterial.color.setHex(0x0d9488)
-        }
-      }
-      dir.scene.renderTick?.(0.016)
+      dir.cameraRig.setFraming(
+        {
+          id: 'CHAR_PORTRAIT_REV',
+          target: [0.0, 11.72, 0.35],
+          position: [-0.08, 11.76, -0.60],
+          description: 'Independent Reviewer Portrait',
+        },
+        true
+      )
     })
-    await page.waitForTimeout(800)
-    await page.screenshot({ path: join(evidenceDir, '25-f4-authoritative-browser-qa.png') })
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: join(evidenceDir, 'char-rev.png') })
+
+    // Browser QA Specialist portrait
+    await page.evaluate(() => {
+      const dir = (window as any).__hqDirector
+      dir.setAtmosphere('DAY')
+      dir.cameraRig.setFraming(
+        {
+          id: 'CHAR_PORTRAIT_QA',
+          target: [0.0, 15.32, 0.35],
+          position: [-0.08, 15.36, -0.60],
+          description: 'Browser QA Specialist Portrait',
+        },
+        true
+      )
+    })
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: join(evidenceDir, 'char-qa.png') })
 
     // ──────────────────────────────────────────────────────────────────────────
-    // STEP 5: COMPOSE COMPARISON COMPOSITES (20 & 21)
+    // STEP 5: COMPOSE CHARACTER FAMILY & COMPARISON COMPOSITES
     // ──────────────────────────────────────────────────────────────────────────
-    console.log('[Stitching side-by-side comparison composites]...')
+    console.log('[Stitching character family consistency composite and floor comparisons]...')
+
+    // 16-character-family-consistency.png: 4-column side-by-side comparison with center crop
+    const feBuf = await sharp(join(evidenceDir, 'char-fe.png')).resize(600, 900, { fit: 'cover', position: 'center' }).toBuffer()
+    const beBuf = await sharp(join(evidenceDir, 'char-be.png')).resize(600, 900, { fit: 'cover', position: 'center' }).toBuffer()
+    const revBuf = await sharp(join(evidenceDir, 'char-rev.png')).resize(600, 900, { fit: 'cover', position: 'center' }).toBuffer()
+    const qaBuf = await sharp(join(evidenceDir, 'char-qa.png')).resize(600, 900, { fit: 'cover', position: 'center' }).toBuffer()
+
+    await sharp({
+      create: {
+        width: 2400,
+        height: 900,
+        channels: 4,
+        background: { r: 14, g: 18, b: 25, alpha: 1 },
+      },
+    })
+      .composite([
+        { input: feBuf, left: 0, top: 0 },
+        { input: beBuf, left: 600, top: 0 },
+        { input: revBuf, left: 1200, top: 0 },
+        { input: qaBuf, left: 1800, top: 0 },
+      ])
+      .png()
+      .toFile(join(evidenceDir, '16-character-family-consistency.png'))
 
     const stitchSideBySide = async (leftFile: string, rightFile: string, outputFile: string) => {
       const leftImg = sharp(join(evidenceDir, leftFile))
@@ -805,51 +856,11 @@ test.describe('Wave 12K Verification Cleanroom & Browser QA Lab Suite', () => {
         .toFile(join(evidenceDir, outputFile))
     }
 
-    const stitch2x2Grid = async (
-      topLeft: string,
-      topRight: string,
-      bottomLeft: string,
-      bottomRight: string,
-      outputFile: string
-    ) => {
-      const tl = await sharp(join(evidenceDir, topLeft)).resize(1200, 675).toBuffer()
-      const tr = await sharp(join(evidenceDir, topRight)).resize(1200, 675).toBuffer()
-      const bl = await sharp(join(evidenceDir, bottomLeft)).resize(1200, 675).toBuffer()
-      const br = await sharp(join(evidenceDir, bottomRight)).resize(1200, 675).toBuffer()
-
-      await sharp({
-        create: {
-          width: 2400,
-          height: 1350,
-          channels: 4,
-          background: { r: 14, g: 18, b: 25, alpha: 1 },
-        },
-      })
-        .composite([
-          { input: tl, left: 0, top: 0 },
-          { input: tr, left: 1200, top: 0 },
-          { input: bl, left: 0, top: 675 },
-          { input: br, left: 1200, top: 675 },
-        ])
-        .png()
-        .toFile(join(evidenceDir, outputFile))
-    }
-
-    // 20-f3-vs-f4.png: Side-by-side comparison of Cleanroom (left) and Browser QA Lab (right)
-    await stitchSideBySide(
-      '01-f3-day-wide.png',
-      '09-f4-day-wide.png',
-      '20-f3-vs-f4.png'
-    )
-
-    // 21-f1-f2-f3-f4-comparison.png: 4-floor comparison grid
-    await stitch2x2Grid(
-      '23-f1-regression.png',
-      '22-f2-regression.png',
-      '01-f3-day-wide.png',
-      '09-f4-day-wide.png',
-      '21-f1-f2-f3-f4-comparison.png'
-    )
+    // Additional comparison composites for review:
+    // f3-vs-f4-wide.png
+    await stitchSideBySide('01-f3-day-wide.png', '07-f4-day-wide.png', 'f3-vs-f4-wide.png')
+    // f3-vs-f4-night.png
+    await stitchSideBySide('02-f3-night-wide.png', '08-f4-night-wide.png', 'f3-vs-f4-night.png')
 
     // ──────────────────────────────────────────────────────────────────────────
     // STEP 6: SCENE GRAPH METRICS & RESOURCE COUNTS (Section 17)

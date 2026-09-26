@@ -578,30 +578,32 @@ export const Floor2HybridDiorama: React.FC<Floor2HybridDioramaProps> = ({
         />
       </div>
 
-      {/* AGENT 2: INDEPENDENT REVIEWER (Middle Workbench) */}
-      <div
-        style={{
-          position: 'absolute',
-          left: `${screenCoords.reviewer.x}px`,
-          top: `${screenCoords.reviewer.y}px`,
-          transform: 'translate(-50%, -50%)',
-          pointerEvents: 'auto',
-        }}
-      >
-        <IllustratedAgent
-          role="role:quality:independent-reviewer"
-          state={reviewerState}
-          isSelected={selectedAgentRole === 'role:quality:independent-reviewer'}
-          onClick={() => handleAgentClick('role:quality:independent-reviewer')}
-          label="Reviewer"
-          height={116}
-        />
-        <SpeechBubble
-          message={reviewerMessage}
-          onDismiss={() => setReviewerMessage(null)}
-          onClick={() => handleAgentClick('role:quality:independent-reviewer')}
-        />
-      </div>
+      {/* AGENT 2: INDEPENDENT REVIEWER (Visiting Consultation Dock on Floor 2 — only rendered when actively visiting) */}
+      {reviewerState !== 'IDLE' && (
+        <div
+          style={{
+            position: 'absolute',
+            left: `${screenCoords.reviewer.x}px`,
+            top: `${screenCoords.reviewer.y}px`,
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'auto',
+          }}
+        >
+          <IllustratedAgent
+            role="role:quality:independent-reviewer"
+            state={reviewerState}
+            isSelected={selectedAgentRole === 'role:quality:independent-reviewer'}
+            onClick={() => handleAgentClick('role:quality:independent-reviewer')}
+            label="Reviewer"
+            height={116}
+          />
+          <SpeechBubble
+            message={reviewerMessage}
+            onDismiss={() => setReviewerMessage(null)}
+            onClick={() => handleAgentClick('role:quality:independent-reviewer')}
+          />
+        </div>
+      )}
 
       {/* AGENT 3: BACKEND ENGINEER */}
       <div
