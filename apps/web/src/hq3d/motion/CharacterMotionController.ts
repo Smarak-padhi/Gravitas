@@ -71,20 +71,26 @@ export class CharacterMotionController {
   private readonly characters: HqCharacters
   private readonly graph: NavigationGraph
   private readonly stateMap = new Map<RoleId, CharacterControllerState>()
+  public readonly isTowerMode: boolean
 
   // Walking speed in world units per second (Target: 1.25–1.45 units/s)
   public static readonly WALKING_SPEED = 1.35
   public static readonly WALK_CADENCE = 6.5 // rad/s for limb swing
 
-  constructor(characters: HqCharacters) {
+  constructor(characters: HqCharacters, isTowerMode: boolean = false) {
     this.characters = characters
+    this.isTowerMode = isTowerMode
     this.graph = getNavigationGraph()
 
     // Initialize all tower roles at their home stations
     for (const role of TOWER_ROLES) {
       const roleId = role.roleId
-      const homePos = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
-      const homeRot = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
+      const homePos = isTowerMode
+        ? (TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId])
+        : ROLE_HOME_POSITIONS[roleId]
+      const homeRot = isTowerMode
+        ? (TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId])
+        : ROLE_HOME_ROTATIONS[roleId]
       const homeStation = role.stationId
       const isSeated = role.visualIdentity.isSeatedDefault
 
@@ -165,7 +171,7 @@ export class CharacterMotionController {
         }
 
         // Check if movement is needed
-        if (state.currentStationId !== destStation || state.activePath.length > 0) {
+        if (!this.isTowerMode && (state.currentStationId !== destStation || state.activePath.length > 0)) {
           // If destination changed mid-route, cancel old route and resolve new path
           if (destNodeId) {
             const startNodeId =
@@ -193,7 +199,8 @@ export class CharacterMotionController {
             }
           }
         } else {
-          // Already at destination station
+          // Already at destination station or in Tower mode
+          this.snapToStation(roleId, destStation)
           state.spatialState = intent.spatialState
           state.motionState = this.resolveStationMotionState(roleId, intent)
         }
@@ -218,14 +225,19 @@ export class CharacterMotionController {
     const state = this.stateMap.get(roleId)
     if (!state) return
 
-    const nodeId = getStationNodeId(this.graph, stationId)
-    const node = nodeId ? this.graph.nodes.get(nodeId) : undefined
+    let targetPos: readonly [number, number, number] = this.isTowerMode
+      ? (TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId])
+      : ROLE_HOME_POSITIONS[roleId]
+    let targetRot: number = this.isTowerMode
+      ? (TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId])
+      : ROLE_HOME_ROTATIONS[roleId]
 
-    let targetPos: readonly [number, number, number] = TOWER_ROLE_HOME_POSITIONS[roleId] ?? ROLE_HOME_POSITIONS[roleId]
-    let targetRot: number = TOWER_ROLE_HOME_ROTATIONS[roleId] ?? ROLE_HOME_ROTATIONS[roleId]
-
-    if (node) {
-      targetPos = node.position
+    if (!this.isTowerMode) {
+      const nodeId = getStationNodeId(this.graph, stationId)
+      const node = nodeId ? this.graph.nodes.get(nodeId) : undefined
+      if (node) {
+        targetPos = node.position
+      }
     }
 
     state.currentPosition = [targetPos[0], targetPos[1], targetPos[2]]

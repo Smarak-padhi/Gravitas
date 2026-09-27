@@ -649,12 +649,16 @@ export class HqFurniture {
       }
     }
 
-    // Toggle workstation screen brightness between active and idle standby
+    // Toggle workstation screen brightness and textures between active and idle standby
     const screens = this.stationScreens.get(stationId)
     if (screens) {
       const isActive = status === 'ACTIVE' || status === 'VERIFYING' || status === 'BROWSER_QA'
       for (const scr of screens) {
-        if (scr.material && 'emissiveIntensity' in scr.material) {
+        if (scr.name === 'screen:hero-ultrawide') {
+          scr.material = isActive ? this.materials.heroScreenActive : this.materials.heroScreenIdle
+        } else if (scr.name === 'screen:hero-portrait') {
+          scr.material = isActive ? this.materials.heroScreenPortraitActive : this.materials.heroScreenPortrait
+        } else if (scr.material && 'emissiveIntensity' in scr.material) {
           ;(scr.material as THREE.MeshStandardMaterial).emissiveIntensity = isActive ? 0.65 : 0.0
         }
       }

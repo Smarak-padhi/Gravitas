@@ -236,7 +236,7 @@ export class HqScene {
     this.handoffs = new HandoffConduitManager()
     this.scene.add(this.handoffs.getGroup())
 
-    this.motion = new CharacterMotionController(this.characters)
+    this.motion = new CharacterMotionController(this.characters, true)
 
     this.custodyMotion = new ArtifactMotionController()
     this.scene.add(this.custodyMotion.getGroup())
@@ -286,6 +286,7 @@ export class HqScene {
       roomId === 'AGENT_OPERATIONS' ||
       roomId === 'ROOM_AGENT_OPERATIONS' ||
       roomId === 'WS_FRONTEND' ||
+      roomId === 'WS_FRONTEND_CAUSAL' ||
       roomId === 'WS_BACKEND' ||
       roomId === 'CHAR_FRONTEND' ||
       roomId === 'CHAR_BACKEND'
@@ -343,9 +344,10 @@ export class HqScene {
       // Floor 2 dedicated fixtures remain active
       this.spotOperations.visible = true
       this.spotOperationsWash.visible = true
-      this.spotOperationsDeskL.visible = true
       this.spotOperationsDeskR.visible = true
-      this.spotOperationsReviewer.visible = true
+      const isFrontendDesk = roomId === 'WS_FRONTEND' || roomId === 'WS_FRONTEND_CAUSAL'
+      this.spotOperationsDeskL.visible = !isFrontendDesk
+      this.spotOperationsReviewer.visible = !isFrontendDesk
 
       this.infrastructure.group.visible = false
       this.furniture.setFloorVisibility(2)
@@ -626,13 +628,13 @@ export class HqScene {
         // are clearly perceived without requiring active screens. No neon tinting.
         this.scene.background = new THREE.Color(0x0c111d) // Deep architectural midnight slate
         this.keyLight.color.setHex(0xa0aec0) // Crisp moonlight rim
-        this.keyLight.intensity = 0.70
+        this.keyLight.intensity = 0.80
         this.keyLight.position.set(-16.0, 32.0, -22.0)
-        this.fillLight.color.setHex(0x56657a) // Slate architectural fill to define depth and structure
-        this.fillLight.intensity = 0.85
-        this.ambientLight.color.setHex(0x38465c) // Deep ambient sky dome with legible floor bounce
-        this.ambientLight.groundColor.setHex(0x222b3a) // Soft architectural floor bounce
-        this.ambientLight.intensity = 1.05
+        this.fillLight.color.setHex(0x607085) // Slate architectural fill to define depth and structure
+        this.fillLight.intensity = 0.95
+        this.ambientLight.color.setHex(0x405068) // Deep ambient sky dome with legible floor bounce
+        this.ambientLight.groundColor.setHex(0x283244) // Soft architectural floor bounce
+        this.ambientLight.intensity = 1.25
 
         // Floor 1 Mission Control: restrained warm architectural pools (wall wash & table pool)
         this.spotPlanning.color.setHex(0xffedd5)
@@ -644,13 +646,13 @@ export class HqScene {
 
         // Floor 2 Agent Operations: Intentional architectural light pools & timber slat cove grazing
         this.spotOperations.color.setHex(0xffedd5)
-        this.spotOperations.intensity = 2.8
+        this.spotOperations.intensity = 3.0
         this.spotOperationsWash.color.setHex(0xfbbf24)
-        this.spotOperationsWash.intensity = 2.6
+        this.spotOperationsWash.intensity = 3.0
         this.spotOperationsDeskL.color.setHex(0xfff3e0)
         this.spotOperationsDeskL.intensity = 2.4
         this.spotOperationsDeskR.color.setHex(0xfff3e0)
-        this.spotOperationsDeskR.intensity = 2.6
+        this.spotOperationsDeskR.intensity = 2.8
         this.spotOperationsReviewer.color.setHex(0xffedd5)
         this.spotOperationsReviewer.intensity = 2.2
 

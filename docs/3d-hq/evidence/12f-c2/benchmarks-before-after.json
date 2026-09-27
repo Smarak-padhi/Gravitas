@@ -1,0 +1,64 @@
+{
+  "benchmarkTimestamp": "2026-09-27T07:44:32.113Z",
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "devicePixelRatio": 1,
+  "browser": "Chromium (Playwright)",
+  "baselineWave12FC": {
+    "view": "F2_WORKSTATION_CAMERA",
+    "averageFps": 36.9,
+    "medianFrameTimeMs": 33.3,
+    "p95FrameTimeMs": 33.6,
+    "p99FrameTimeMs": 33.9,
+    "drawCalls": 357,
+    "triangles": 41012,
+    "geometries": 1037,
+    "textures": 22
+  },
+  "currentWave12FC2": {
+    "workstationView": {
+      "view": "F2_WORKSTATION_CAMERA",
+      "viewport": {
+        "width": 1600,
+        "height": 900
+      },
+      "dpr": 1.0000000149011612,
+      "atmosphere": "DAY",
+      "camera": "WS_FRONTEND_CAUSAL",
+      "browser": "Chromium (Playwright)",
+      "durationMs": 10000,
+      "totalFrames": 601,
+      "averageFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.8,
+      "p99FrameTimeMs": 16.9,
+      "drawCalls": 391,
+      "triangles": 54788,
+      "geometries": 1035,
+      "textures": 22
+    },
+    "towerOverview": {
+      "view": "TOWER_OVERVIEW_CAMERA",
+      "viewport": {
+        "width": 1600,
+        "height": 900
+      },
+      "dpr": 1.0000000149011612,
+      "atmosphere": "DAY",
+      "camera": "HQ_OVERVIEW",
+      "browser": "Chromium (Playwright)",
+      "durationMs": 5000,
+      "totalFrames": 301,
+      "averageFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.8,
+      "p99FrameTimeMs": 16.9,
+      "drawCalls": 1547,
+      "triangles": 117972,
+      "geometries": 1035,
+      "textures": 22
+    }
+  }
+}

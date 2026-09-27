@@ -1,0 +1,189 @@
+{
+  "evidenceType": "DETERMINISTIC_INTEGRATION",
+  "runId": "run-w12fc2-causal-proof",
+  "taskId": "task-fe-12fc2",
+  "roleId": "role:engineering:frontend-engineer",
+  "stationId": "frontend-engineer-workstation",
+  "harness": "codex",
+  "model": "gpt-4o",
+  "routeTransport": "DIRECT",
+  "timestamp": "2026-09-27T07:43:59.514Z",
+  "acceptedWorkstationInteractionRadiusMeters": 0.25,
+  "steps": [
+    {
+      "step": 1,
+      "name": "IDLE",
+      "screenshot": "01-idle.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "IDLE",
+      "runtimePhase": null,
+      "typingActive": false,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_HOME",
+      "motionState": "IDLE",
+      "stationStatus": "IDLE",
+      "isSeated": true
+    },
+    {
+      "step": 2,
+      "name": "PREPARING",
+      "screenshot": "02-preparing.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "ATTENTION",
+      "runtimePhase": "PREPARING",
+      "typingActive": false,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true
+    },
+    {
+      "step": 3,
+      "name": "WORKER_RUNNING",
+      "screenshot": "03-worker-running.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "FOCUSED",
+      "runtimePhase": "WORKER_RUNNING",
+      "typingActive": true,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true
+    },
+    {
+      "step": 4,
+      "name": "CLEANUP",
+      "screenshot": "04-cleanup.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "WAITING",
+      "runtimePhase": "CLEANUP",
+      "typingActive": false,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true
+    },
+    {
+      "step": 5,
+      "name": "VERIFYING",
+      "screenshot": "05-verifying.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "IDLE",
+      "runtimePhase": "VERIFYING",
+      "typingActive": false,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "MOVING_TO_ASSIGNMENT",
+      "motionState": "IDLE",
+      "stationStatus": "IDLE",
+      "isSeated": true
+    },
+    {
+      "step": 6,
+      "name": "NIGHT_IDLE",
+      "screenshot": "06-night-idle.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "IDLE",
+      "runtimePhase": null,
+      "typingActive": false,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_HOME",
+      "motionState": "IDLE",
+      "stationStatus": "IDLE",
+      "isSeated": true
+    },
+    {
+      "step": 7,
+      "name": "NIGHT_WORKER_RUNNING",
+      "screenshot": "07-night-worker-running.png",
+      "roleId": "role:engineering:frontend-engineer",
+      "characterState": "FOCUSED",
+      "runtimePhase": "WORKER_RUNNING",
+      "typingActive": true,
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "expectedWorkstationWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true
+    }
+  ]
+}

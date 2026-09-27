@@ -279,8 +279,10 @@ export class HqCharacters {
     if (reducedMotion || !isWalking) {
       ctrl.legLeftGroup.rotation.x = 0.0
       ctrl.legRightGroup.rotation.x = 0.0
-      ctrl.armsLeftGroup.rotation.x = 0.0
-      ctrl.armsRightGroup.rotation.x = 0.0
+      if (!ctrl.isSeated) {
+        ctrl.armsLeftGroup.rotation.x = 0.0
+        ctrl.armsRightGroup.rotation.x = 0.0
+      }
       ctrl.torsoGroup.position.y = ctrl.isSeated ? ctrl.baseTorsoY : 0.70
       ctrl.torsoGroup.rotation.z = 0.0
       return
@@ -316,12 +318,14 @@ export class HqCharacters {
         // Reduced motion: static upright / focused posture without continuous sine oscillation
         torsoGroup.position.y = baseTorsoY
         headMesh.position.y = 0.35
-        headMesh.rotation.x = characterState === 'VERIFYING' ? 0.14 : characterState === 'FOCUSED' ? 0.08 : 0.0
+        headMesh.rotation.x = characterState === 'VERIFYING' ? 0.14 : characterState === 'FOCUSED' ? 0.10 : 0.0
         torsoGroup.rotation.x = characterState === 'FOCUSED' ? 0.07 : 0.0
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = characterState === 'FOCUSED' ? -0.36 : 0.18
+          ctrl.armsRightGroup.rotation.x = characterState === 'FOCUSED' ? -0.34 : 0.18
         }
         continue
       }
@@ -330,39 +334,46 @@ export class HqCharacters {
       const breath = Math.sin(timeSeconds * 1.5 + phaseOffset)
 
       if (characterState === 'IDLE') {
-        // Idle: relaxed ambient presence, arms still, gentle head glance over 7s
+        // Idle: relaxed ambient presence, arms resting in lap/chair, gentle head glance over 7s
         torsoGroup.position.y = baseTorsoY + breath * 0.003
-        torsoGroup.rotation.x = 0.0
+        torsoGroup.rotation.x = -0.02
         headMesh.rotation.x = breath * 0.008
         headMesh.rotation.y = Math.sin(timeSeconds * 0.32 + phaseOffset) * 0.04
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = 0.18
+          ctrl.armsRightGroup.rotation.x = 0.18
         }
       } else if (characterState === 'FOCUSED') {
-        // Working / Focused posture: tilted forward toward screen
+        // Working / Focused posture: tilted forward toward screen, hands active on keyboard & mouse
         torsoGroup.position.y = baseTorsoY + breath * 0.002
-        torsoGroup.rotation.x = 0.08
-        headMesh.rotation.x = 0.08 + breath * 0.006
+        torsoGroup.rotation.x = 0.12
+        headMesh.rotation.x = 0.10 + breath * 0.006
         headMesh.rotation.y = 0.0
 
         // Active typing micro-motion only when authoritative state is WORKING / FOCUSED
         if (ctrl.isSeated) {
-          const typeMotion = Math.sin(timeSeconds * 7.5) * 0.004
+          ctrl.armsLeftGroup.rotation.x = -0.36
+          ctrl.armsRightGroup.rotation.x = -0.34
+          const typeMotion = Math.sin(timeSeconds * 12.0) * 0.008
           ctrl.armsLeftGroup.position.y = typeMotion
           ctrl.armsRightGroup.position.y = -typeMotion
         }
       } else if (characterState === 'VERIFYING') {
-        // Verifying posture: precise examination posture directed at inspection device
+        // Verifying posture: precise examination posture directed at inspection device, arms resting
         torsoGroup.position.y = baseTorsoY + breath * 0.002
-        torsoGroup.rotation.x = 0.06
-        headMesh.rotation.x = 0.14 + breath * 0.008
+        torsoGroup.rotation.x = 0.02
+        headMesh.rotation.x = 0.10 + breath * 0.008
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = 0.15
+          ctrl.armsRightGroup.rotation.x = 0.15
         }
       } else if (characterState === 'WAITING') {
+        // Waiting / Cleanup posture: upright relaxed posture, hands resting, no typing
         torsoGroup.position.y = baseTorsoY + breath * 0.003
         torsoGroup.rotation.x = -0.02
         headMesh.rotation.x = 0.0
@@ -370,6 +381,8 @@ export class HqCharacters {
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = 0.18
+          ctrl.armsRightGroup.rotation.x = 0.18
         }
       } else if (characterState === 'SUCCESS') {
         torsoGroup.position.y = baseTorsoY + breath * 0.004
@@ -379,15 +392,20 @@ export class HqCharacters {
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = 0.18
+          ctrl.armsRightGroup.rotation.x = 0.18
         }
       } else if (characterState === 'FAILURE' || characterState === 'ATTENTION') {
+        // Attention / Preparing posture: attentive posture, hands resting off keyboard
         torsoGroup.position.y = baseTorsoY + breath * 0.005
-        torsoGroup.rotation.x = 0.05
+        torsoGroup.rotation.x = 0.03
         headMesh.rotation.x = 0.03
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
           ctrl.armsLeftGroup.position.y = 0.0
           ctrl.armsRightGroup.position.y = 0.0
+          ctrl.armsLeftGroup.rotation.x = 0.12
+          ctrl.armsRightGroup.rotation.x = 0.12
         }
       }
     }
