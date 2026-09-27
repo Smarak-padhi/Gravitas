@@ -449,30 +449,66 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
         }
       }
 
+      let physicalLocation: PhysicalLocation = 'NEUTRAL_HOLD'
+      const prov: WorldRouteProvenance | undefined = at.route
+        ? {
+            transport: at.route.transport,
+            gatewayId: at.route.gatewayId ?? null,
+            active: at.route.active,
+            requestedProvider: at.route.requestedProvider ?? null,
+            requestedModel: at.route.requestedModel ?? null,
+            actualProvider: at.route.actualProvider ?? (at.route.requestedProvider ? 'UNKNOWN' : null),
+            actualModel: at.route.actualModel ?? (at.route.requestedModel ? 'UNKNOWN' : null),
+            providerFallbackOccurred: at.route.providerFallbackOccurred ?? false,
+            transportFallbackOccurred: at.route.transportFallbackOccurred ?? false,
+          }
+        : undefined
+
+      if (at.phase === 'VERIFYING') {
+        physicalLocation = 'VERIFICATION_BENCH'
+        stations['verifier-console'] = {
+          ...stations['verifier-console'],
+          status: 'VERIFYING',
+          activeTaskId: at.taskId,
+          workerIdentity: 'verifier',
+          activeRoute: prov,
+        }
+        if (stations['verification-lab-console']) {
+          stations['verification-lab-console'] = { ...stations['verifier-console'], id: 'verification-lab-console' }
+        }
+      } else if (at.phase === 'BROWSER_QA') {
+        physicalLocation = 'BROWSER_QA_MATRIX'
+        stations['browser-qa-matrix'] = {
+          ...stations['browser-qa-matrix'],
+          status: 'BROWSER_QA',
+          activeTaskId: at.taskId,
+          workerIdentity: 'browser-qa',
+          activeRoute: prov,
+        }
+      } else if (assignedStationId) {
+        physicalLocation = 'ASSIGNED_WORKSTATION'
+        stations[assignedStationId] = {
+          ...stations[assignedStationId],
+          status: 'ACTIVE',
+          activeTaskId: at.taskId,
+          activeRoleId: roleId,
+          workerIdentity: at.workerIdentity,
+          activeRoute: prov,
+        }
+      }
+
       worldTasks[at.taskId] = {
         id: at.taskId,
         title: `Task ${at.taskId}`,
         canonicalState: 'RUNNING',
         runtimePhase: at.phase,
-        physicalLocation: assignedStationId ? 'ASSIGNED_WORKSTATION' : 'NEUTRAL_HOLD',
+        physicalLocation,
         assignedStationId: assignedStationId ?? null,
         roleId,
         roleSource,
         harnessId: at.harnessId ?? at.workerIdentity ?? null,
         workerId: at.workerIdentity ?? null,
-        routeProvenance: at.route
-          ? {
-              transport: at.route.transport,
-              gatewayId: at.route.gatewayId ?? null,
-              active: at.route.active,
-              requestedProvider: at.route.requestedProvider ?? null,
-              requestedModel: at.route.requestedModel ?? null,
-              actualProvider: at.route.actualProvider ?? (at.route.requestedProvider ? 'UNKNOWN' : null),
-              actualModel: at.route.actualModel ?? (at.route.requestedModel ? 'UNKNOWN' : null),
-              providerFallbackOccurred: at.route.providerFallbackOccurred ?? false,
-              transportFallbackOccurred: at.route.transportFallbackOccurred ?? false,
-            }
-          : undefined,
+        routeProvenance: prov,
       }
     }
   }

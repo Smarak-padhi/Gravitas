@@ -106,7 +106,8 @@ export function deriveRolePresentationStates(
       const isVerifying =
         stationState?.status === 'VERIFYING' ||
         activeTask?.physicalLocation === 'VERIFICATION_BENCH' ||
-        activeTask?.canonicalState === 'VERIFYING'
+        activeTask?.canonicalState === 'VERIFYING' ||
+        activeTask?.runtimePhase === 'VERIFYING'
 
       if (isVerifying) {
         characterState = 'VERIFYING'
@@ -142,13 +143,29 @@ export function deriveRolePresentationStates(
       }
     } else {
       // Engineering Roles (Frontend Engineer / Backend Engineer)
-      const isStationActive = stationState?.status === 'ACTIVE'
-      const isTaskRunning =
-        activeTask?.canonicalState === 'RUNNING' ||
-        activeTask?.physicalLocation === 'ASSIGNED_WORKSTATION'
+      // Runtime Honesty Rule (Wave 12F-C): Productive working/typing (FOCUSED) MUST ONLY occur
+      // when the worker is authoritatively executing (WORKER_RUNNING).
+      // PREPARING acknowledges assignment without fake typing (ATTENTION).
+      // CLEANUP / finished worker ceases productive work (WAITING).
+      const phase = activeTask?.runtimePhase
+      const isWorkerRunning =
+        phase === 'WORKER_RUNNING' ||
+        (!phase &&
+          activeTask?.canonicalState === 'RUNNING' &&
+          (stationState?.status === 'ACTIVE' || activeTask?.physicalLocation === 'ASSIGNED_WORKSTATION'))
 
-      if (isStationActive || isTaskRunning) {
+      const isPreparing =
+        phase === 'PREPARING' ||
+        (!phase && activeTask?.canonicalState === 'READY' && !!activeTask?.assignedStationId)
+
+      const isCleanup = phase === 'CLEANUP'
+
+      if (isWorkerRunning) {
         characterState = 'FOCUSED'
+      } else if (isPreparing) {
+        characterState = 'ATTENTION'
+      } else if (isCleanup) {
+        characterState = 'WAITING'
       } else if (activeTask?.canonicalState === 'WAITING_APPROVAL') {
         characterState = 'WAITING'
       } else if (activeTask?.canonicalState === 'FAILED') {

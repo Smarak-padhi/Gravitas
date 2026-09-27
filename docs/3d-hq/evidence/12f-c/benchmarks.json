@@ -1,0 +1,29 @@
+{
+  "benchmarkTimestamp": "2026-09-27T07:06:40.531Z",
+  "workstationView": {
+    "view": "F2_WORKSTATION_CAMERA",
+    "durationMs": 10000,
+    "totalFrames": 370,
+    "averageFps": 36.9,
+    "medianFrameTimeMs": 33.3,
+    "p95FrameTimeMs": 33.6,
+    "p99FrameTimeMs": 33.9,
+    "drawCalls": 357,
+    "triangles": 41012,
+    "geometries": 1037,
+    "textures": 22
+  },
+  "towerOverview": {
+    "view": "TOWER_OVERVIEW_CAMERA",
+    "durationMs": 5000,
+    "totalFrames": 300,
+    "averageFps": 60,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 16.8,
+    "p99FrameTimeMs": 17,
+    "drawCalls": 1548,
+    "triangles": 117462,
+    "geometries": 1038,
+    "textures": 22
+  }
+}

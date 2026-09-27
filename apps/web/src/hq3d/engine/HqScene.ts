@@ -138,17 +138,17 @@ export class HqScene {
     this.scene.add(this.spotOperationsWash)
     this.scene.add(this.spotOperationsWash.target)
 
-    // 4c. Backend Workstation Task Light (Screen Left: X = 2.6)
-    this.spotOperationsDeskL = new THREE.SpotLight(0xfffbeb, 1.4, 8.0, Math.PI / 4.2, 0.5, 1.1)
-    this.spotOperationsDeskL.position.set(2.6, 9.8, 0.8)
-    this.spotOperationsDeskL.target.position.set(2.6, 7.4, 1.0)
+    // 4c. Backend Workstation Task Light (Screen Left: X = 2.5)
+    this.spotOperationsDeskL = new THREE.SpotLight(0xfffbeb, 1.4, 10.0, Math.PI / 3.6, 0.6, 1.1)
+    this.spotOperationsDeskL.position.set(2.5, 9.8, 0.6)
+    this.spotOperationsDeskL.target.position.set(2.5, 7.4, 0.8)
     this.scene.add(this.spotOperationsDeskL)
     this.scene.add(this.spotOperationsDeskL.target)
 
-    // 4d. Frontend Workstation Task Light (Screen Right: X = -2.6)
-    this.spotOperationsDeskR = new THREE.SpotLight(0xfffbeb, 1.4, 8.0, Math.PI / 4.2, 0.5, 1.1)
-    this.spotOperationsDeskR.position.set(-2.6, 9.8, 0.8)
-    this.spotOperationsDeskR.target.position.set(-2.6, 7.4, 1.0)
+    // 4d. Frontend Workstation Task Light (Screen Right: X = -3.5)
+    this.spotOperationsDeskR = new THREE.SpotLight(0xfffbeb, 1.4, 10.0, Math.PI / 3.6, 0.6, 1.1)
+    this.spotOperationsDeskR.position.set(-3.5, 9.8, 0.6)
+    this.spotOperationsDeskR.target.position.set(-3.5, 7.4, 0.8)
     this.scene.add(this.spotOperationsDeskR)
     this.scene.add(this.spotOperationsDeskR.target)
 
@@ -625,14 +625,14 @@ export class HqScene {
         // High architectural readability: room boundaries, floor, hero apparatus, character, circulation, and major furniture
         // are clearly perceived without requiring active screens. No neon tinting.
         this.scene.background = new THREE.Color(0x0c111d) // Deep architectural midnight slate
-        this.keyLight.color.setHex(0x94a3b8) // Crisp moonlight rim
-        this.keyLight.intensity = 0.55
+        this.keyLight.color.setHex(0xa0aec0) // Crisp moonlight rim
+        this.keyLight.intensity = 0.70
         this.keyLight.position.set(-16.0, 32.0, -22.0)
-        this.fillLight.color.setHex(0x475569) // Slate architectural fill to define depth and structure
-        this.fillLight.intensity = 0.65
-        this.ambientLight.color.setHex(0x283548) // Deep ambient sky dome
-        this.ambientLight.groundColor.setHex(0x182030) // Soft architectural floor bounce
-        this.ambientLight.intensity = 0.80
+        this.fillLight.color.setHex(0x56657a) // Slate architectural fill to define depth and structure
+        this.fillLight.intensity = 0.85
+        this.ambientLight.color.setHex(0x38465c) // Deep ambient sky dome with legible floor bounce
+        this.ambientLight.groundColor.setHex(0x222b3a) // Soft architectural floor bounce
+        this.ambientLight.intensity = 1.05
 
         // Floor 1 Mission Control: restrained warm architectural pools (wall wash & table pool)
         this.spotPlanning.color.setHex(0xffedd5)
@@ -644,13 +644,13 @@ export class HqScene {
 
         // Floor 2 Agent Operations: Intentional architectural light pools & timber slat cove grazing
         this.spotOperations.color.setHex(0xffedd5)
-        this.spotOperations.intensity = 2.4
+        this.spotOperations.intensity = 2.8
         this.spotOperationsWash.color.setHex(0xfbbf24)
-        this.spotOperationsWash.intensity = 2.4
-        this.spotOperationsDeskL.color.setHex(0xffeedb)
-        this.spotOperationsDeskL.intensity = 2.2
-        this.spotOperationsDeskR.color.setHex(0xffeedb)
-        this.spotOperationsDeskR.intensity = 2.2
+        this.spotOperationsWash.intensity = 2.6
+        this.spotOperationsDeskL.color.setHex(0xfff3e0)
+        this.spotOperationsDeskL.intensity = 2.4
+        this.spotOperationsDeskR.color.setHex(0xfff3e0)
+        this.spotOperationsDeskR.intensity = 2.6
         this.spotOperationsReviewer.color.setHex(0xffedd5)
         this.spotOperationsReviewer.intensity = 2.2
 

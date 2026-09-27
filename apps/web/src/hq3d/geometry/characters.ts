@@ -367,16 +367,28 @@ export class HqCharacters {
         torsoGroup.rotation.x = -0.02
         headMesh.rotation.x = 0.0
         headMesh.rotation.y = 0.0
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
       } else if (characterState === 'SUCCESS') {
         torsoGroup.position.y = baseTorsoY + breath * 0.004
         torsoGroup.rotation.x = -0.04
         headMesh.rotation.x = -0.04
         headMesh.rotation.y = 0.0
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
       } else if (characterState === 'FAILURE' || characterState === 'ATTENTION') {
         torsoGroup.position.y = baseTorsoY + breath * 0.005
         torsoGroup.rotation.x = 0.05
         headMesh.rotation.x = 0.03
         headMesh.rotation.y = 0.0
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.y = 0.0
+          ctrl.armsRightGroup.position.y = 0.0
+        }
       }
     }
   }

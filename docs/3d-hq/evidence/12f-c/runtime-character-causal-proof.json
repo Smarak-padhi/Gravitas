@@ -1,0 +1,77 @@
+{
+  "evidenceType": "DETERMINISTIC_INTEGRATION",
+  "runId": "run-w12fc-proof",
+  "taskId": "task-fe-12fc",
+  "roleId": "role:engineering:frontend-engineer",
+  "stationId": "frontend-engineer-workstation",
+  "harness": "codex",
+  "model": "gpt-4o",
+  "routeTransport": "DIRECT",
+  "timestamp": "2026-09-27T07:06:05.847Z",
+  "steps": [
+    {
+      "step": 1,
+      "name": "IDLE",
+      "screenshot": "01-idle.png",
+      "authoritativeState": "IDLE",
+      "canonicalTaskState": null,
+      "runtimePhase": null,
+      "characterState": "IDLE",
+      "armsLeftY": 0,
+      "typingActive": false,
+      "stationStatus": "IDLE",
+      "physicalLocation": "ASSIGNED_WORKSTATION"
+    },
+    {
+      "step": 2,
+      "name": "ASSIGNED_PREPARING",
+      "screenshot": "02-assigned-preparing.png",
+      "authoritativeState": "PREPARING",
+      "canonicalTaskState": "READY",
+      "runtimePhase": "PREPARING",
+      "characterState": "ATTENTION",
+      "armsLeftY": 0,
+      "typingActive": false,
+      "stationStatus": "IDLE",
+      "physicalLocation": "ASSIGNED_WORKSTATION"
+    },
+    {
+      "step": 3,
+      "name": "WORKER_RUNNING",
+      "screenshot": "03-worker-running.png",
+      "authoritativeState": "WORKER_RUNNING",
+      "canonicalTaskState": "RUNNING",
+      "runtimePhase": "WORKER_RUNNING",
+      "characterState": "FOCUSED",
+      "armsLeftY": 0,
+      "typingActive": true,
+      "stationStatus": "IDLE",
+      "physicalLocation": "ASSIGNED_WORKSTATION"
+    },
+    {
+      "step": 4,
+      "name": "WORKER_FINISHED",
+      "screenshot": "04-worker-finished.png",
+      "authoritativeState": "CLEANUP",
+      "canonicalTaskState": "RUNNING",
+      "runtimePhase": "CLEANUP",
+      "characterState": "WAITING",
+      "armsLeftY": -0.0011439223854829656,
+      "typingActive": false,
+      "stationStatus": "IDLE",
+      "physicalLocation": "ASSIGNED_WORKSTATION"
+    },
+    {
+      "step": 5,
+      "name": "VERIFYING",
+      "screenshot": "05-verifying.png",
+      "authoritativeState": "VERIFYING",
+      "canonicalTaskState": "VERIFYING",
+      "runtimePhase": "VERIFYING",
+      "frontendEngineerState": "IDLE",
+      "frontendEngineerTyping": false,
+      "reviewerState": "VERIFYING",
+      "physicalLocation": "VERIFICATION_BENCH"
+    }
+  ]
+}

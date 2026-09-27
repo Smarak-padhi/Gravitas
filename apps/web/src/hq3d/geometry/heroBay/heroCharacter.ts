@@ -2,7 +2,7 @@
  * Gravitas 3D Headquarters — Production Character Family Builders (Wave 12K-R)
  *
  * Authored high-fidelity character family for all Gravitas roles:
- * - Natural adult human proportions stylized for 1:6 miniature scale (head-to-body ratio ~1:7)
+ * - Premium stylized miniature humanoid proportions (stylized miniature scale, ~6 heads tall)
  * - Sculpted head with defined jawline, cheekbones, soft chin, and sculpted 3D nose bridge
  * - Stylized almond eyes with defined lid creases and double specular catchlights
  * - Tailored extruded knit crewneck sweater / cleanroom coat with raglan sleeve seams, rib-knit collar, and hem
@@ -425,7 +425,7 @@ export class HeroCharacter {
     collarMesh.position.set(0.0, 0.155, 0.01)
     torsoGroup.add(collarMesh)
 
-    // 2. Sculpted Head Group (Natural Human Proportions, ~6.2 Heads Tall)
+    // 2. Sculpted Head Group (Premium Stylized Miniature Humanoid, ~6 Heads Tall)
     const headGroup = new THREE.Group()
     headGroup.position.set(0.0, 0.26, 0.01)
 
