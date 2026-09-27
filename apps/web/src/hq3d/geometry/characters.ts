@@ -28,7 +28,9 @@ interface FigureController {
   readonly roleId: RoleId
   readonly rootGroup: THREE.Group
   readonly torsoGroup: THREE.Group
-  readonly headMesh: THREE.Mesh
+  readonly headMesh: THREE.Object3D
+  readonly baseHeadY: number
+  readonly baseHeadZ: number
   readonly armsLeftGroup: THREE.Group
   readonly armsRightGroup: THREE.Group
   readonly legLeftGroup: THREE.Group
@@ -202,6 +204,8 @@ export class HqCharacters {
       rootGroup,
       torsoGroup: hero.torsoGroup,
       headMesh: hero.headMesh,
+      baseHeadY: hero.baseHeadY ?? 0.35,
+      baseHeadZ: hero.baseHeadZ ?? 0.0,
       armsLeftGroup: hero.armsLeftGroup,
       armsRightGroup: hero.armsRightGroup,
       legLeftGroup: hero.legLeftGroup,
@@ -312,12 +316,13 @@ export class HqCharacters {
    */
   public update(timeSeconds: number, reducedMotion: boolean): void {
     for (const ctrl of this.controllers.values()) {
-      const { torsoGroup, headMesh, baseTorsoY, phaseOffset, characterState } = ctrl
+      const { torsoGroup, headMesh, baseTorsoY, baseHeadY, baseHeadZ, phaseOffset, characterState } = ctrl
 
       if (reducedMotion) {
         // Reduced motion: static upright / focused posture without continuous sine oscillation
         torsoGroup.position.y = baseTorsoY
-        headMesh.position.y = 0.35
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = characterState === 'VERIFYING' ? 0.14 : characterState === 'FOCUSED' ? 0.10 : 0.0
         torsoGroup.rotation.x = characterState === 'FOCUSED' ? 0.07 : 0.0
         headMesh.rotation.y = 0.0
@@ -339,8 +344,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.003
         torsoGroup.position.z = -0.04
         torsoGroup.rotation.x = -0.08
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.0
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = -0.04 + breath * 0.006
         headMesh.rotation.y = Math.sin(timeSeconds * 0.28 + phaseOffset) * 0.06
         if (ctrl.isSeated) {
@@ -356,8 +361,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.004
         torsoGroup.position.z = 0.01
         torsoGroup.rotation.x = 0.06
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.01
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ + 0.01
         headMesh.rotation.x = 0.14 + breath * 0.005
         headMesh.rotation.y = -0.10
         if (ctrl.isSeated) {
@@ -373,8 +378,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.002
         torsoGroup.position.z = 0.05
         torsoGroup.rotation.x = 0.22
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.02
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ + 0.01
         headMesh.rotation.x = 0.12 + breath * 0.004
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
@@ -392,8 +397,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.003
         torsoGroup.position.z = -0.02
         torsoGroup.rotation.x = -0.03
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.0
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = 0.02
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
@@ -409,8 +414,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.003
         torsoGroup.position.z = -0.03
         torsoGroup.rotation.x = -0.05
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.0
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = 0.0
         headMesh.rotation.y = 0.18
         if (ctrl.isSeated) {
@@ -423,8 +428,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.004
         torsoGroup.position.z = -0.03
         torsoGroup.rotation.x = -0.04
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.0
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = -0.04
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
@@ -437,8 +442,8 @@ export class HqCharacters {
         torsoGroup.position.y = baseTorsoY + breath * 0.005
         torsoGroup.position.z = 0.01
         torsoGroup.rotation.x = 0.04
-        headMesh.position.y = 0.35
-        headMesh.position.z = 0.0
+        headMesh.position.y = baseHeadY
+        headMesh.position.z = baseHeadZ
         headMesh.rotation.x = 0.12
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {

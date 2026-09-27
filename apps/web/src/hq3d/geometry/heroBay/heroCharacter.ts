@@ -20,7 +20,9 @@ import type { RoleId } from '../../roles/types.js'
 export interface HeroCharacterBuildResult {
   readonly rootGroup: THREE.Group
   readonly torsoGroup: THREE.Group
-  readonly headMesh: THREE.Mesh
+  readonly headMesh: THREE.Object3D
+  readonly baseHeadY?: number
+  readonly baseHeadZ?: number
   readonly armsLeftGroup: THREE.Group
   readonly armsRightGroup: THREE.Group
   readonly legLeftGroup: THREE.Group
@@ -36,11 +38,13 @@ export interface HeroCharacterBuildResult {
 interface CharacterParts {
   rootGroup: THREE.Group
   torsoGroup: THREE.Group
-  headMesh: THREE.Mesh
+  headMesh: THREE.Object3D
   headGroup: THREE.Group
   statusRing: THREE.Mesh
   statusMaterial: THREE.MeshBasicMaterial
   baseTorsoY: number
+  baseHeadY: number
+  baseHeadZ: number
 }
 
 export class HeroCharacter {
@@ -178,11 +182,13 @@ export class HeroCharacter {
     return {
       rootGroup,
       torsoGroup,
-      headMesh,
+      headMesh: headGroup,
       headGroup,
       statusRing,
       statusMaterial,
       baseTorsoY,
+      baseHeadY: 0.36,
+      baseHeadZ: 0.0,
     }
   }
 
@@ -667,7 +673,9 @@ export class HeroCharacter {
     return {
       rootGroup,
       torsoGroup,
-      headMesh: craniumMesh,
+      headMesh: headGroup,
+      baseHeadY: 0.26,
+      baseHeadZ: 0.01,
       armsLeftGroup,
       armsRightGroup,
       legLeftGroup: legs.legLeftGroup,
@@ -808,6 +816,8 @@ export class HeroCharacter {
       statusRing: base.statusRing,
       statusMaterial: base.statusMaterial,
       baseTorsoY: base.baseTorsoY,
+      baseHeadY: base.baseHeadY,
+      baseHeadZ: base.baseHeadZ,
     }
   }
 
@@ -969,6 +979,8 @@ export class HeroCharacter {
       statusRing: base.statusRing,
       statusMaterial: base.statusMaterial,
       baseTorsoY: base.baseTorsoY,
+      baseHeadY: base.baseHeadY,
+      baseHeadZ: base.baseHeadZ,
     }
   }
 
@@ -1103,6 +1115,8 @@ export class HeroCharacter {
       statusRing: base.statusRing,
       statusMaterial: base.statusMaterial,
       baseTorsoY: base.baseTorsoY,
+      baseHeadY: base.baseHeadY,
+      baseHeadZ: base.baseHeadZ,
     }
   }
 
@@ -1207,6 +1221,8 @@ export class HeroCharacter {
       statusRing: base.statusRing,
       statusMaterial: base.statusMaterial,
       baseTorsoY: base.baseTorsoY,
+      baseHeadY: base.baseHeadY,
+      baseHeadZ: base.baseHeadZ,
     }
   }
 }

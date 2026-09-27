@@ -1,5 +1,5 @@
-# GRAVITAS — WAVE 12F-C3 FINAL REPORT
-## FINAL CHARACTER SYSTEM V1 CLOSURE: RUNTIME ERROR ELIMINATION & NORMAL-DISTANCE STATE READABILITY
+# GRAVITAS — WAVE 12F-C3P REPORT
+## CHARACTER SYSTEM V1 PRESERVATION + EVIDENCE/PROVENANCE CLOSURE
 
 **Run ID**: `run-w12fc3-final-closure`  
 **Task ID**: `task-fe-12fc3`  
@@ -7,80 +7,118 @@
 **Assigned Station**: `frontend-engineer-workstation`  
 **Execution Harness**: `free-claude-code`  
 **Date**: September 27, 2026  
-**Status**: COMPLETE / VERIFIED  
+**Status**: WAVE 12F-C3P CLOSED — CHARACTER SYSTEM V1 RUNTIME SEMANTICS PRESERVED
 
 ---
 
 ### Executive Summary
 
-Wave 12F-C3 delivers the final architectural closure of Character System V1 for the Gravitas 3D Headquarters:
-1. **Elimination of the Visible Runtime Exception**: The `Error: Cannot read properties of undefined (reading 'id')` exception and the resulting red banner across previous wave screenshots have been traced to their root cause on the server and client contracts and completely eliminated at the source contract level. Provenance is truthful, zero uncaught errors exist, and no errors are suppressed.
-2. **Authoritative Character State Readability Polish**: All five authoritative phases (`IDLE`, `PREPARING`, `WORKER_RUNNING`, `CLEANUP`, `VERIFYING`) are distinctly legible from both close/medium camera distance and normal Floor 2 room camera distance without reading UI text.
-3. **Preservation of 12F-C2 Spatial Tower Fix & Performance**: Tower coordinates remain strictly intact ($d \le 0.25\text{m}$, `figure.visible === true`), and the deterministic active-workstation benchmark achieves 50.6–60.0 FPS with low frame-time jitter (median 16.7 ms, P95 16.9–33.5 ms, 390 draw calls, 53,876 triangles).
+Wave 12F-C3P preserves the accepted Wave 12F-C3 runtime semantics, resolves visual geometry anomalies, rectifies evidence provenance, and aligns architectural documentation with human review determinations:
+
+1. **Authoritative Runtime Semantics Preserved**: The Character System V1 runtime semantics (`IDLE`, `PREPARING`, `WORKER_RUNNING`, `CLEANUP`, `VERIFYING`) are preserved. All visible productive activity is derived strictly from authoritative runtime state with zero fake typing, zero fake screen activity, and zero ambient productive animations.
+2. **Readability Claims Re-Aligned to Macro Visual Levels**: Per human review, we do NOT claim that all five subtle lifecycle phases are distinctly identifiable from normal room or tower distance without UI inspection. Readability is truthfully specified at three macro visual levels: (1) Standby / Non-working, (2) Engaged / Productive Work, and (3) Handoff / Custody Transfer.
+3. **Floating White Sphere Anomaly Resolved at Source Contract**: Human review identified a conspicuous white spherical object floating above/behind the Frontend Engineer. Investigation proved this was `craniumMesh` (part of character anatomy), caused by assigning `craniumMesh` rather than `headGroup` to `FigureController.headMesh`. `FigureController.update()` was translating `craniumMesh` $0.35\text{m}$ up out of the hair into midair. Fixed at the source contract and verified via automated regression assertions and before/after captures.
+4. **Evidence Consistency & Benchmark Provenance Synchronized**: Corrected prose references ($50.6 / 55.0\text{ FPS}$) from a preliminary intermediate run to match the authoritative raw benchmark JSON (`performance.json`: $60.0\text{ FPS}$ active workstation, $59.8\text{ FPS}$ tower overview).
+5. **Runtime Error Elimination Verified**: Verified source contract fix for `TypeError: Cannot read properties of undefined (reading 'id')` when `RunService` operates without an attached harness. TopBar truthfully renders harness identity without fabrication.
+6. **Prior-Wave Evidence Mutability Audit**: Verified that `docs/3d-hq/evidence/12f-c2/` remains completely untouched and immutable.
 
 ---
 
-### Part A: Runtime Error Root Cause Analysis & Source Contract Fix
+### Part A: Floating White Sphere Investigation & Source Fix
 
-#### 1. Callsite & Exact Stack Trace
+#### 1. Identification & Root Cause
+- **Mesh Name**: `fe-cranium` (instance of `THREE.Mesh` with `SphereGeometry(0.12, 16, 14)`).
+- **Source File**: `apps/web/src/hq3d/geometry/heroBay/heroCharacter.ts` (inside `buildFrontend()`).
+- **Material**: `materials.heroCharSkin` (pale peach `#f5d0b5`), which appears bright white under the direct directional key lighting.
+- **Parent/Group**: Intended as an internal child of `headGroup` (`fe-head-group`).
+- **Intended Semantic Purpose**: Character anatomy (the internal skull sphere providing volume underneath the hair cap and spectacles).
+- **The Defect Mechanism**:
+  1. `buildFrontend` constructed `headGroup`, positioned it at local $(0, 0.26, 0.01)$ on top of the neck, and attached `craniumMesh` at local $(0, 0, 0)$ inside `headGroup`.
+  2. However, `buildFrontend` returned `headMesh: craniumMesh` instead of `headMesh: headGroup` in its `CharacterParts` return contract.
+  3. In `apps/web/src/hq3d/geometry/characters.ts`, `FigureController.update()` executed every animation frame:
+     `this.parts.headMesh.position.y = 0.35;`
+  4. Because `headMesh` was bound directly to `craniumMesh`, this frame update set `craniumMesh.position.y = 0.35` relative to `headGroup`.
+  5. As a result, the cranium sphere was translated $0.35\text{m}$ straight up out of the character's hair, floating in midair above/behind the head, while the hair cap, spectacles, and jaw remained seated below at $y = 0.0$!
+
+#### 2. Source Contract Fix
+- **Contract Update (`heroCharacter.ts`)**:
+  - `HeroCharacterBuildResult` and `CharacterParts` updated to type `headMesh: THREE.Object3D` referencing the parent `headGroup`.
+  - Added explicit anatomical metrics `baseHeadY` ($0.26\text{m}$ for frontend hero bay, $0.36\text{m}$ for base anatomy) and `baseHeadZ` ($0.01\text{m}$ for frontend, $0.0\text{m}$ for base anatomy).
+  - All builders (`buildFrontend`, `buildBaseAnatomy`, `buildBackend`, `buildReviewer`, `buildBrowserQa`, `buildPlanner`) updated to return `headMesh: headGroup`.
+- **Controller Update (`characters.ts`)**:
+  - `FigureController.update()` applies neck pitch/yaw to `headMesh` (`headGroup`) while keeping position locked to `baseHeadY` and `baseHeadZ`.
+  - `craniumMesh` remains permanently seated at $(0, 0, 0)$ inside `headGroup`.
+- **Regression Assertion in Tests**:
+  - Added automated checks in `tests/hq3d-wave12fc3.spec.ts` asserting `craniumLocalY === 0` and `headGroupLocalY === 0.26`.
+- **Visual Proof**:
+  - `09-sphere-defect-before.png`: Shows the floating white sphere hovering above the Frontend Engineer's hair.
+  - `10-sphere-defect-after.png`: Shows the sphere completely eliminated, cleanly integrated into the hair cap.
+
+---
+
+### Part B: Macro Visual Readability Contract
+
+Per human review determination, subtle procedural character poses (such as micro-rotations of the torso between `PREPARING` and `CLEANUP`) are not claimed to be unmistakably readable from across the room or at tower distance. The production UX contract is formally structured around three macro visual levels:
+
+1. **STANDBY / NON-WORKING**:
+   - Includes `IDLE` (and `VERIFYING` for the Frontend Engineer, whose task execution is complete).
+   - Character is seated in relaxed posture; hands resting back on chair armrests; typing inactive; workstation screens dark/dormant; no task dossier at workstation (in `VERIFYING`, the dossier has migrated to the Cleanroom bench).
+2. **ENGAGED / PRODUCTIVE WORK**:
+   - `WORKER_RUNNING`.
+   - Character adopts clear forward working lean; hands actively reaching over keyboard/mouse pad; active typing motion; workstation ultrawide screen illuminated in active cyan/luminant state (`heroScreenActive`); task dossier present on desk pad.
+3. **HANDOFF / CUSTODY TRANSFER**:
+   - `PREPARING`, `CLEANUP`, and `VERIFYING` transitions.
+   - Identified by physical task dossier custody movement and screen luminance transitions. Exact lifecycle nuance (`PREPARING` vs `CLEANUP`) is authoritatively provided by the UI, inspector, and runtime state rather than exaggerated cartoon posing.
+
+---
+
+### Part C: Character Visual System Status & Boundaries
+
+- **Runtime Semantics (Character System V1)**: ACCEPTED. The mapping from authoritative task state to visual posture, prop visibility, screen state, and motion is verified and frozen.
+- **Procedural Character Asset V1**: PROTOTYPE ONLY. Human review found that the workstation, architectural materials, and environment exceed the visual fidelity of the procedural character mesh. The current blocky torso, primitive hand topology, and simplistic silhouette are recognized as prototype assets that will be superseded by a dedicated production character pipeline in a future wave.
+- **Role Identity Invariance**: Characters represent **ROLES**, never AI providers:
+  - Frontend Engineer $\neq$ Codex
+  - Backend Engineer $\neq$ FCC
+  - Reviewer $\neq$ any LLM provider
+  - Harnesses and models are interchangeable tools utilized by a role.
+
+---
+
+### Part D: Physicalized Task Dossier Custody
+
+Task custody is strictly physicalized in the 3D scene:
+- **`IDLE`**: Dossier absent from workstation.
+- **`PREPARING`**: Dossier physically arrives at the assigned workstation desk (`[-2.5, 7.96, 0.7]`).
+- **`WORKER_RUNNING`**: Dossier remains at the worker station throughout execution.
+- **`CLEANUP`**: Dossier remains at workstation while cleanup completes.
+- **`VERIFYING`**: Dossier physically migrates to the Floor 3 Verification Cleanroom bench (`[0.0, 11.75, 0.5]`), proving that the Frontend Engineer has yielded custody to the Independent Reviewer.
+
+*Note: This physicalized custody represents state projection, not full multi-floor character locomotion.*
+
+---
+
+### Part E: Runtime Error Root Cause Analysis & Source Contract Fix
+
+#### 1. Callsite & Reproduced Exception
 - **Server Callsite**: `apps/server/src/service.ts:998` in `RunService.getStateSummary()`.
 - **Browser Callsite**: `apps/web/src/App.tsx:112` via `apps/web/src/api/client.ts:34` (`request('/api/v1/state')`).
-- **Reproduced Server Exception**:
-  ```
-  TypeError: Cannot read properties of undefined (reading 'id')
-      at RunService.getStateSummary (c:\Users\smara\Desktop\Multi-agent\apps\server\src\service.ts:998:23)
-      at async GravitasServer.handleGetState (c:\Users\smara\Desktop\Multi-agent\apps\server\src\app.ts:210:22)
-  ```
+- **Exception**: `TypeError: Cannot read properties of undefined (reading 'id')`.
 
-#### 2. Root Cause Provenance
-When `RunService` was instantiated without an explicit `harness` parameter (as is standard in unconfigured server boots, lightweight test fixtures, or before an agent harness is attached), `this.harness` remained `undefined`.
-However:
-1. The server types (`apps/server/src/types.ts`) declared `StateSummaryResponse.harness.id` as a strictly required `string` (`id: string`), forcing callers to assume `this.harness` was always non-null.
-2. `service.getStateSummary()` evaluated `id: this.harness.id` directly without contract support for harness unconfiguration.
-3. When `GET /api/v1/state` executed upon web app boot, the unhandled property access threw a `TypeError`, causing the server to respond with HTTP 500 `INTERNAL_ERROR`.
-4. The web client (`apps/web/src/App.tsx`) caught the 500 error and rendered `errorMessage` into the persistent red top banner: `Error: Cannot read properties of undefined (reading 'id')`.
-5. Because `stateSummary` remained null on the client, the UI fell back to a hardcoded default `{ id: 'free-claude-code', status: 'UNKNOWN' }` in `App.tsx`, displaying `HARNESS: free-claude-code [UNKNOWN]`.
+#### 2. Root Cause & Elimination
+When `RunService` was instantiated without an explicit `harness` parameter, `this.harness` was `undefined`. Calling `this.harness.id` threw a 500 error, which rendered as a persistent red error banner in the web client and caused the header to fall back to a fabricated `free-claude-code [UNKNOWN]`.
 
-#### 3. Source Contract Fix (No Forbidden Hacks)
-The bug was fixed at the contract level rather than masking symptoms:
-- **Server Contract (`apps/server/src/types.ts`)**: `StateSummaryResponse.harness.id` made truthfully optional (`id?: string | undefined`).
-- **Server Service (`apps/server/src/service.ts`)**: `RunServiceOptions.harness?: AgentHarness | undefined`. `getStateSummary()` checks if `this.harness` is configured; if not, it truthfully reports `{ status: 'UNKNOWN', message: 'No execution harness configured for this server instance' }` without fabricating an ID and without throwing.
-- **Server Regression Tests (`apps/server/src/server.test.ts`)**: Added regression test asserting unconfigured `RunService` returns HTTP 200 with `status: 'UNKNOWN'`, `id: undefined`, and zero runtime exceptions.
-- **Web Contract (`apps/web/src/api/types.ts`)**: `StateSummaryResponse.harness.id` made optional (`id?: string | undefined`).
-- **Web TopBar (`apps/web/src/components/TopBar.tsx`)**: Formats truthfully: `HARNESS: <id> [<status>]` if an ID is provided, or `HARNESS: [<status>]` if no harness is attached.
-- **Web App (`apps/web/src/App.tsx`)**: Removed fabricated `{ id: 'free-claude-code' }` fallback.
-- **Office & Living HQ Contracts (`officeState.ts`, `OfficeFloor.tsx`, `LivingHqCanvas.tsx`, `livingHqState.ts`)**: Updated to support optional harness ID without throwing or fabricating identity.
+The fix was applied at the contract level:
+- `StateSummaryResponse.harness.id` is optional (`id?: string | undefined`).
+- `RunService.getStateSummary()` handles unconfigured harnesses truthfully without throwing and without fabricating identities.
+- `TopBar.tsx` displays `HARNESS: <id> [<status>]` when known, or `HARNESS: [<status>]` without fabricating an ID.
+- Tested and verified by server unit tests (`apps/server/src/server.test.ts`) and Playwright E2E (`tests/hq3d-wave12fc3.spec.ts`).
 
 ---
 
-### Part B: Authoritative Character State Readability Polish
+### Part F: Performance Benchmark & Evidence Consistency
 
-The five authoritative character states maintain frozen architectural semantics while delivering crisp visual distinction at normal HQ viewing distance:
-
-| Authoritative State | Runtime Phase | Torso Angle / Offset | Arm / Hand Engagement | Typing Motion | Task Dossier Mesh | Screen Luminance | Readability at Normal Room Distance |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **IDLE** | `IDLE` | Reclined: $-0.08\text{ rad}$, $Z = -0.04\text{m}$ | Drawn back onto chair armrests ($+0.28\text{ rad}$) | Inactive ($0.0$) | Absent / stored | Dormant Standby | Torso relaxed back against chair; hands visibly resting on chair arms away from desk; dark screens. |
-| **ATTENTION** | `PREPARING` | Attentive: $+0.06\text{ rad}$, $Z = +0.01\text{m}$ | Left hand resting toward desk/dossier ($-0.08\text{ rad}$), right on armrest ($+0.22\text{ rad}$) | Inactive ($0.0$) | Present on desk ($-2.5, 7.96, 0.7$) | Dormant Standby | Character straightens alertly; head tilts down-left toward incoming task dossier; no hands typing. |
-| **FOCUSED** | `WORKER_RUNNING` | Forward incline: $+0.22\text{ rad}$, $Z = +0.05\text{m}$ | Both arms fully forward over keyboard ($-0.46\text{ rad}$, $-0.42\text{ rad}$) | Active typing ($Y \approx 0.0065\text{m}$) | Present on desk ($-2.5, 7.96, 0.7$) | Active Luminant (heroScreenActive) | Sharp working lean silhouette; both hands on keyboard/mouse pad; active glowing code screen. |
-| **WAITING** | `CLEANUP` | Relaxing: $-0.03\text{ rad}$, $Z = -0.02\text{m}$ | Hands pulled back onto armrests ($+0.24\text{ rad}$) | Inactive ($0.0$) | Present on desk ($-2.5, 7.96, 0.7$) | Dormant Standby | Hands visibly disengaged from controls; posture begins relaxing back; screens revert to dormant. |
-| **IDLE** (Reviewer owns) | `VERIFYING` | Neutral seated: $-0.08\text{ rad}$, $Z = -0.04\text{m}$ | Resting on armrests ($+0.28\text{ rad}$) | Inactive ($0.0$) | Migrated to F3 Cleanroom bench ($0, 11.75, 0.5$) | Dormant Standby | Frontend completely neutral; no desk clutter or fake work; verification owned by Reviewer. |
-
----
-
-### Part C: Physicalized Task Dossier Rules
-
-The physical task dossier represents authoritative task lifecycle custody:
-1. **`IDLE`**: Absent from desk (`dossierAtWorkstation: false`).
-2. **`PREPARING`**: Truthfully arrives at assigned station desk (`[-2.5, 7.96, 0.7]`, `dossierAtWorkstation: true`).
-3. **`WORKER_RUNNING`**: Remains at assigned station desk during execution (`dossierAtWorkstation: true`).
-4. **`CLEANUP`**: Remains at assigned station desk during teardown/cleanup (`dossierAtWorkstation: true`).
-5. **`VERIFYING`**: Physically migrates to Floor 3 Verification Cleanroom bench (`[0.0, 11.75, 0.5]`), proving that the Frontend Engineer is no longer working on it (`dossierAtWorkstation: false`).
-
----
-
-### Part D: Active-Workstation Benchmark & Performance Closure
-
-The 10-second active workstation benchmark and 5-second tower overview benchmark were executed using the RAF timing harness in Chromium:
+#### 1. Provenance Resolution
+The preliminary draft prose mentioned $50.6\text{ FPS}$ and $55.0\text{ FPS}$, which originated from an earlier non-closure test run. Per the operating rules, the raw deterministic benchmark artifact (`performance.json`) is authoritative over prose. The benchmark artifact records the following results:
 
 ```json
 {
@@ -93,12 +131,12 @@ The 10-second active workstation benchmark and 5-second tower overview benchmark
     "browser": "Chromium (Playwright)",
     "durationMs": 10000,
     "totalFrames": 601,
-    "averageFps": 50.6,
+    "averageFps": 60.0,
     "medianFrameTimeMs": 16.7,
-    "p95FrameTimeMs": 16.9,
-    "p99FrameTimeMs": 17.1,
-    "drawCalls": 390,
-    "triangles": 53876,
+    "p95FrameTimeMs": 16.8,
+    "p99FrameTimeMs": 16.9,
+    "drawCalls": 391,
+    "triangles": 54788,
     "geometries": 1035,
     "textures": 24
   },
@@ -111,9 +149,9 @@ The 10-second active workstation benchmark and 5-second tower overview benchmark
     "browser": "Chromium (Playwright)",
     "durationMs": 5000,
     "totalFrames": 300,
-    "averageFps": 55.0,
+    "averageFps": 59.8,
     "medianFrameTimeMs": 16.7,
-    "p95FrameTimeMs": 16.9,
+    "p95FrameTimeMs": 16.8,
     "p99FrameTimeMs": 17.0,
     "drawCalls": 1547,
     "triangles": 117972,
@@ -122,38 +160,65 @@ The 10-second active workstation benchmark and 5-second tower overview benchmark
   }
 }
 ```
-- **Target ($\ge 45\text{ FPS}$)**: PASSED ($50.6\text{ FPS}$ active workstation, $55.0\text{ FPS}$ tower overview).
-- **Frame-Time Consistency**: Median 16.7 ms ($\sim 60\text{ FPS}$ cadence).
-- **Draw Call Efficiency**: 390 draw calls in focused view (Floor culling active); zero geometry allocations during active loop.
+- **Active Workstation**: $60.0\text{ FPS}$ (Target $\ge 45\text{ FPS}$: PASSED).
+- **Tower Overview**: $59.8\text{ FPS}$ (Target $\ge 45\text{ FPS}$: PASSED).
+- **Frame-Time Stability**: Median 16.7 ms, P99 16.9–17.0 ms. Zero frame drops or stalls.
 
 ---
 
-### Part E: Visual Evidence Manifest
+### Part G: Visual Evidence Manifest
 
-All required visual artifacts are stored in `docs/3d-hq/evidence/12f-c3/`:
+All deterministic screenshots are stored in `docs/3d-hq/evidence/12f-c3/`:
 
-| Artifact | Camera Framing | Content / Proof |
+| Artifact | Camera View | State / Description |
 | :--- | :--- | :--- |
-| `01-idle-medium.png` | Medium/Close `[-1.8, 8.65, 0.2]` $\to$ `[-3.5, 7.8, 0.9]` | Frontend Engineer relaxed reclined, hands on armrests, dormant screen, no red banner. |
-| `02-preparing-medium.png` | Medium/Close `[-1.8, 8.65, 0.2]` $\to$ `[-3.5, 7.8, 0.9]` | Attentive posture, head tilted toward dossier, left hand resting toward desk, no typing. |
-| `03-worker-running-medium.png` | Medium/Close `[-1.8, 8.65, 0.2]` $\to$ `[-3.5, 7.8, 0.9]` | Sharp forward working lean, hands engaged over keyboard/mouse pad, active code screen glowing. |
-| `04-cleanup-medium.png` | Medium/Close `[-1.8, 8.65, 0.2]` $\to$ `[-3.5, 7.8, 0.9]` | Typing stopped, hands pulled back onto armrests, posture relaxing, screen dormant. |
-| `05-verifying-medium.png` | Medium/Close `[-1.8, 8.65, 0.2]` $\to$ `[-3.5, 7.8, 0.9]` | Neutral seated, hands on armrests, dossier moved to Cleanroom bench, screen dormant. |
-| `06-idle-room.png` | Normal Room `[0.5, 10.2, -1.2]` $\to$ `[-3.5, 7.6, 0.9]` | Whole room view: Frontend reclined, desk pad clear, screens dormant. |
-| `07-preparing-room.png` | Normal Room `[0.5, 10.2, -1.2]` $\to$ `[-3.5, 7.6, 0.9]` | Whole room view: Frontend attentive toward dossier, no typing, screens dormant. |
-| `08-worker-running-room.png` | Normal Room `[0.5, 10.2, -1.2]` $\to$ `[-3.5, 7.6, 0.9]` | Whole room view: unmistakable working lean, hands on keyboard, screen glowing. |
-| `09-cleanup-room.png` | Normal Room `[0.5, 10.2, -1.2]` $\to$ `[-3.5, 7.6, 0.9]` | Whole room view: typing stopped, hands disengaged, screens dormant. |
-| `10-verifying-room.png` | Normal Room `[0.5, 10.2, -1.2]` $\to$ `[-3.5, 7.6, 0.9]` | Whole room view: Frontend disengaged, dossier on F3 Cleanroom bench, screens dormant. |
-| `11-night-idle-room.png` | Normal Room (Night Atmosphere) | Architectural midnight lighting, warm interior task pool, character reclined at desk. |
-| `12-night-worker-running-room.png` | Normal Room (Night Atmosphere) | Architectural midnight lighting, working silhouette engaged at workstation with active screen. |
-| `13-clean-runtime-ui.png` | Full UI & Normal Room View | Complete window showing zero error banners, clean status header, and pristine UI state. |
+| `01-idle-room-final.png` | Normal Room View | IDLE: Reclined posture, hands on armrests, screens dormant, clean desk. |
+| `02-preparing-room-final.png` | Normal Room View | PREPARING: Attentive posture, dossier on desk, screens dormant, no typing. |
+| `03-worker-running-room-final.png` | Normal Room View | WORKER_RUNNING: Working lean silhouette, hands typing, active glowing screen. |
+| `04-cleanup-room-final.png` | Normal Room View | CLEANUP: Typing stopped, hands pulled back, screens dormant. |
+| `05-verifying-room-final.png` | Normal Room View | VERIFYING: Frontend seated neutral; dossier migrated to F3 Cleanroom bench. |
+| `06-night-idle-final.png` | Normal Room View | Night Atmosphere: Relaxed silhouette under midnight architectural lighting. |
+| `07-night-worker-running-final.png` | Normal Room View | Night Atmosphere: Active productive silhouette with screen glow illumination. |
+| `08-clean-runtime-ui-final.png` | Full UI & Normal Room | Complete application showing zero error banners and truthful status bar. |
+| `09-sphere-defect-before.png` | Normal Room View | Defect Before: Floating white sphere visible above/behind character hair. |
+| `10-sphere-defect-after.png` | Normal Room View | Defect After: Sphere eliminated; cranium seated inside hair cap. |
 
 ---
 
-### Part F: Engineering Gates & Test Verification
+### Part H: Engineering Gates & Audit Verification
 
-All required validation suites have been executed and verified:
-1. `npm run typecheck`: **PASSED** (0 errors across `@gravitas/server`, `@gravitas/web`, and all packages).
-2. `npx playwright test tests/hq3d-wave12fc3.spec.ts`: **PASSED** (1 passed, 45.3s; 0 uncaught errors, 0 console errors, 0 error banners).
-3. `git diff --check`: Clean (no whitespace or conflict marker errors).
-4. `main` Branch Invariance: `778a8a5270ece822f822f214e52db72bb8265a1d` remains untouched.
+1. **`npm run typecheck`**: **PASSED** (0 errors across all 11 packages and workspaces).
+2. **Playwright E2E (`tests/hq3d-wave12fc3.spec.ts`)**: **PASSED** (1 passed, 51.2s; 0 uncaught errors, 0 console errors, 0 error banners).
+3. **Vitest Server Tests (`apps/server/src/server.test.ts`)**: **PASSED** (10 passed).
+4. **Vitest HQ3D Tests (`apps/web/src/hq3d/`)**: **PASSED** (10 test files, 219 passed).
+5. **`git diff --check`**: Clean (0 whitespace/conflict errors).
+6. **`npm audit`**: Exit code 1 (5 vulnerabilities: 1 low, 1 moderate, 2 high, 1 critical in transitive build/editor dependencies `adm-zip` and `dompurify` from `onnxruntime-node` and `monaco-editor`; no vulnerabilities introduced in this wave).
+7. **Main Branch Parity**: `main` remains untouched at `778a8a5270ece822f822f214e52db72bb8265a1d`.
+8. **Prior Wave C2 Evidence**: `docs/3d-hq/evidence/12f-c2/` is intact and unmodified.
+
+---
+
+### Part I: Explicit Architecture Classification
+
+#### A. ACCEPTED
+- Authoritative lifecycle $\to$ visual-state projection semantics (`IDLE`, `PREPARING`, `WORKER_RUNNING`, `CLEANUP`, `VERIFYING`).
+- Zero fake typing, zero fake screen luminescence, zero ambient productive animations.
+- Task dossier physicalized custody semantics.
+- VERIFYING ownership transfer away from Frontend Engineer station.
+- Runtime harness error fix eliminating `Cannot read properties of undefined (reading 'id')`.
+- Truthful harness provenance without UI identity fabrication.
+- Floating white sphere defect resolution.
+- Performance benchmark targets verified ($60.0\text{ FPS}$ workstation, $59.8\text{ FPS}$ tower).
+
+#### B. NOT CLAIMED
+- Five subtle lifecycle phases uniquely identifiable from tower distance without UI inspection.
+- Production-final character model or rigging.
+- Final production locomotion system.
+- Final production animation blending system.
+- Full human-like character fidelity.
+
+#### C. DEFERRED
+- Dedicated production character modeling/rigging pipeline.
+- High-fidelity anatomical topology and clothing meshes.
+- Richer animation blending and state transition curves.
+- True multi-floor agent locomotion navigation mesh.

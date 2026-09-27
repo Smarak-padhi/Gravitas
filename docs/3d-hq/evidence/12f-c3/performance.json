@@ -1,5 +1,5 @@
 {
-  "benchmarkTimestamp": "2026-09-27T09:11:18.592Z",
+  "benchmarkTimestamp": "2026-09-27T09:57:33.507Z",
   "targetFps": 45,
   "activeWorkstationBenchmark": {
     "view": "F2_WORKSTATION_CAMERA",
@@ -16,9 +16,9 @@
     "averageFps": 60,
     "medianFrameTimeMs": 16.7,
     "p95FrameTimeMs": 16.8,
-    "p99FrameTimeMs": 17,
-    "drawCalls": 390,
-    "triangles": 53876,
+    "p99FrameTimeMs": 16.9,
+    "drawCalls": 391,
+    "triangles": 54788,
     "geometries": 1035,
     "textures": 24
   },
@@ -37,7 +37,7 @@
     "averageFps": 59.8,
     "medianFrameTimeMs": 16.7,
     "p95FrameTimeMs": 16.8,
-    "p99FrameTimeMs": 16.9,
+    "p99FrameTimeMs": 17,
     "drawCalls": 1547,
     "triangles": 117972,
     "geometries": 1035,

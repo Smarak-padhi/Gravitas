@@ -286,6 +286,12 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
         const ultrawideScreen = stationScreens?.find((s: any) => s.name === 'screen:hero-ultrawide')
         const isScreenActive = ultrawideScreen?.material === dir.scene.materials?.heroScreenActive
 
+        // Query head and cranium parenting integrity (floating sphere regression check)
+        const feHeadGroup = charCtrl?.headMesh
+        const cranium = feHeadGroup?.children?.find((c: any) => c.geometry?.type === 'SphereGeometry')
+        const craniumLocalY = cranium ? Number(cranium.position.y.toFixed(3)) : null
+        const headGroupLocalY = feHeadGroup ? Number(feHeadGroup.position.y.toFixed(3)) : null
+
         return {
           characterState: charCtrl?.characterState ?? 'UNKNOWN',
           figureVisible: fig?.visible ?? false,
@@ -305,6 +311,8 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
           torsoZOffsetM: Number((charCtrl?.torsoGroup?.position?.z ?? 0).toFixed(3)),
           headPitchRad: Number((charCtrl?.headMesh?.rotation?.x ?? 0).toFixed(3)),
           headYawRad: Number((charCtrl?.headMesh?.rotation?.y ?? 0).toFixed(3)),
+          headGroupLocalY,
+          craniumLocalY,
           armsLeftRotationX: Number((charCtrl?.armsLeftGroup?.rotation?.x ?? 0).toFixed(3)),
           armsRightRotationX: Number((charCtrl?.armsRightGroup?.rotation?.x ?? 0).toFixed(3)),
           armsLeftPositionY: Number((charCtrl?.armsLeftGroup?.position?.y ?? 0).toFixed(4)),
@@ -368,6 +376,10 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     expect(state1Audit.physicalizedPropState.dossierAtWorkstation).toBe(false)
     expect(state1Audit.torsoInclinePitchRad).toBeLessThan(0) // Relaxed reclined posture
 
+    // Head/cranium parenting integrity assertion (floating white sphere defect regression check)
+    expect(state1Audit.craniumLocalY).toBe(0)
+    expect(state1Audit.headGroupLocalY).toBeCloseTo(0.26, 2)
+
     // Medium Camera Capture
     await setMediumCamera()
     await page.screenshot({ path: join(evidenceDir, '01-idle-medium.png') })
@@ -375,6 +387,8 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     // Room Camera Capture
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '06-idle-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '01-idle-room-final.png') })
+    await page.screenshot({ path: join(evidenceDir, '10-sphere-defect-after.png') })
 
     characterStateVisualProof.states.push({
       phase: 'IDLE',
@@ -446,12 +460,14 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     expect(state2Audit.screenState).toBe('DORMANT_STANDBY') // Screen remains dormant in PREPARING
     expect(state2Audit.physicalizedPropState.dossierAtWorkstation).toBe(true) // Dossier arrives on desk truthfully
     expect(state2Audit.torsoInclinePitchRad).toBeGreaterThan(0) // Torso straightens attentively toward desk
+    expect(state2Audit.craniumLocalY).toBe(0)
 
     await setMediumCamera()
     await page.screenshot({ path: join(evidenceDir, '02-preparing-medium.png') })
 
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '07-preparing-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '02-preparing-room-final.png') })
 
     characterStateVisualProof.states.push({
       phase: 'PREPARING',
@@ -522,12 +538,14 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     expect(state3Audit.screenState).toBe('ACTIVE_LUMINANT') // Active glowing screen during active execution
     expect(state3Audit.torsoInclinePitchRad).toBeGreaterThanOrEqual(0.18) // Unmistakable forward working lean (~12.6 deg)
     expect(state3Audit.armsLeftRotationX).toBeLessThan(-0.40) // Arms fully reaching over keyboard
+    expect(state3Audit.craniumLocalY).toBe(0)
 
     await setMediumCamera()
     await page.screenshot({ path: join(evidenceDir, '03-worker-running-medium.png') })
 
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '08-worker-running-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '03-worker-running-room-final.png') })
 
     characterStateVisualProof.states.push({
       phase: 'WORKER_RUNNING',
@@ -599,12 +617,14 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     expect(state4Audit.screenState).toBe('DORMANT_STANDBY') // Screen standby
     expect(state4Audit.torsoInclinePitchRad).toBeLessThan(0) // Torso relaxed back
     expect(state4Audit.armsLeftRotationX).toBeGreaterThan(0.15) // Arms disengaged and back on armrests
+    expect(state4Audit.craniumLocalY).toBe(0)
 
     await setMediumCamera()
     await page.screenshot({ path: join(evidenceDir, '04-cleanup-medium.png') })
 
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '09-cleanup-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '04-cleanup-room-final.png') })
 
     characterStateVisualProof.states.push({
       phase: 'CLEANUP',
@@ -675,12 +695,14 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     expect(state5Audit.distanceFigureToWorkstationAnchor).toBeLessThanOrEqual(0.25)
     expect(state5Audit.screenState).toBe('DORMANT_STANDBY') // Frontend workstation dormant
     expect(state5Audit.physicalizedPropState.dossierAtWorkstation).toBe(false) // Dossier has migrated to Cleanroom bench
+    expect(state5Audit.craniumLocalY).toBe(0)
 
     await setMediumCamera()
     await page.screenshot({ path: join(evidenceDir, '05-verifying-medium.png') })
 
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '10-verifying-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '05-verifying-room-final.png') })
 
     characterStateVisualProof.states.push({
       phase: 'VERIFYING',
@@ -711,6 +733,7 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     await page.waitForTimeout(300)
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '11-night-idle-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '06-night-idle-final.png') })
 
     // Night Worker Running
     await page.evaluate(async () => {
@@ -750,18 +773,20 @@ test.describe('Wave 12F-C3 Final Character System V1 Closure', () => {
     })
     await page.waitForTimeout(300)
     await page.screenshot({ path: join(evidenceDir, '12-night-worker-running-room.png') })
+    await page.screenshot({ path: join(evidenceDir, '07-night-worker-running-final.png') })
 
     // Reset back to Day
     await page.locator('[data-testid="hq-atmosphere-day"]').click()
     await page.waitForTimeout(500)
 
     // ==========================================================================
-    // ERROR CLOSURE PROOF (13-clean-runtime-ui.png)
+    // ERROR CLOSURE PROOF (13-clean-runtime-ui.png & 08-clean-runtime-ui-final.png)
     // ==========================================================================
     console.log('[Evaluating Error Closure Proof...]')
     // Switch to Overview or full UI to capture complete pristine window without any red banner
     await setNormalRoomCamera()
     await page.screenshot({ path: join(evidenceDir, '13-clean-runtime-ui.png'), fullPage: false })
+    await page.screenshot({ path: join(evidenceDir, '08-clean-runtime-ui-final.png'), fullPage: false })
 
     // Check again that no error banners or uncaught exceptions exist
     expect(await page.locator('div:has-text("Error:")').count()).toBe(0)
