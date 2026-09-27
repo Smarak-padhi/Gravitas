@@ -620,7 +620,7 @@ export class HqFurniture {
     return treeGroup
   }
 
-  public setStationStatus(stationId: StationId, status: StationStatus): void {
+  public setStationStatus(stationId: StationId, status: StationStatus, phase?: string): void {
     const ind = this.stationIndicators.get(stationId)
     if (ind) {
       switch (status) {
@@ -652,7 +652,8 @@ export class HqFurniture {
     // Toggle workstation screen brightness and textures between active and idle standby
     const screens = this.stationScreens.get(stationId)
     if (screens) {
-      const isActive = status === 'ACTIVE' || status === 'VERIFYING' || status === 'BROWSER_QA'
+      // Authoritative screen rule: active working screen is only displayed during active task execution
+      const isActive = phase ? phase === 'WORKER_RUNNING' : (status === 'ACTIVE' || status === 'VERIFYING' || status === 'BROWSER_QA')
       for (const scr of screens) {
         if (scr.name === 'screen:hero-ultrawide') {
           scr.material = isActive ? this.materials.heroScreenActive : this.materials.heroScreenIdle

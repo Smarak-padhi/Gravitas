@@ -99,6 +99,30 @@ describe('GravitasServer HTTP Boundary (server.test.ts)', () => {
     })
   })
 
+  it('GET /api/v1/state handles unconfigured harness truthfully without throwing or fabricating identity (12F-C3)', async () => {
+    const unconfiguredRegistry = new InMemoryRegistry()
+    const unconfiguredEventHub = new EventHub(unconfiguredRegistry)
+    const unconfiguredService = new RunService({
+      registry: unconfiguredRegistry,
+      eventHub: unconfiguredEventHub,
+    })
+    const unconfiguredServer = new GravitasServer({
+      service: unconfiguredService,
+      eventHub: unconfiguredEventHub,
+    })
+    const addr = await unconfiguredServer.start({ host: '127.0.0.1', port: 0 })
+    try {
+      const res = await fetch(`${addr.url}/api/v1/state`)
+      expect(res.status).toBe(200)
+      const data = await res.json()
+      expect(data.harness.status).toBe('UNKNOWN')
+      expect(data.harness.id).toBeUndefined()
+      expect(data.harness.message).toContain('No execution harness configured')
+    } finally {
+      await unconfiguredServer.stop()
+    }
+  })
+
   it('GET /api/v1/gateways returns registered gateways list', async () => {
     const res = await fetch(`${serverUrl}/api/v1/gateways`)
     expect(res.status).toBe(200)

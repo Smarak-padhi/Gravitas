@@ -536,7 +536,6 @@ export const App: React.FC = () => {
         version={stateSummary?.version ?? '0.0.1'}
         harness={
           stateSummary?.harness ?? {
-            id: 'free-claude-code',
             status: 'UNKNOWN',
           }
         }

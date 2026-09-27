@@ -18,11 +18,11 @@ export type WorkspaceView =
 export interface TopBarProps {
   readonly connectionStatus: ConnectionStatus
   readonly version: string
-  readonly harness: {
-    readonly id: string
+  readonly harness?: {
+    readonly id?: string | undefined
     readonly status: string
     readonly message?: string | undefined
-  }
+  } | undefined
   readonly gateways?: ReadonlyArray<{
     readonly id: string
     readonly state: string
@@ -204,27 +204,29 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
 
           {/* Harness Telemetry */}
-          <div
-            className="topbar-harness-badge"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '11px',
-              padding: '2px 8px',
-              borderRadius: 'var(--radius-sm, 4px)',
-              backgroundColor: getHarnessStatusBg(harness.status),
-              border: `1px solid ${getHarnessStatusColor(harness.status)}`,
-              color: getHarnessStatusColor(harness.status),
-              fontFamily: 'var(--font-mono, monospace)',
-              flexShrink: 0,
-            }}
-            title={harness.message ?? `Harness ${harness.id}: ${harness.status}`}
-          >
-            <span style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HARNESS:</span>
-            <strong>{harness.id}</strong>
-            <span style={{ opacity: 0.85 }}>[{harness.status}]</span>
-          </div>
+          {harness && (
+            <div
+              className="topbar-harness-badge"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                padding: '2px 8px',
+                borderRadius: 'var(--radius-sm, 4px)',
+                backgroundColor: getHarnessStatusBg(harness.status),
+                border: `1px solid ${getHarnessStatusColor(harness.status)}`,
+                color: getHarnessStatusColor(harness.status),
+                fontFamily: 'var(--font-mono, monospace)',
+                flexShrink: 0,
+              }}
+              title={harness.message ?? (harness.id ? `Harness ${harness.id}: ${harness.status}` : `Harness: ${harness.status}`)}
+            >
+              <span style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '10px' }}>HARNESS:</span>
+              {harness.id && <strong>{harness.id}</strong>}
+              <span style={{ opacity: 0.85 }}>[{harness.status}]</span>
+            </div>
+          )}
 
           {/* Gateway Telemetry */}
           {gateways && gateways.length > 0 && (

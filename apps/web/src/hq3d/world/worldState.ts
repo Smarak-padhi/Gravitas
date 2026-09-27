@@ -723,6 +723,46 @@ export function deriveWorldState(input: DeriveWorldStateInput): WorldState {
     }
   }
 
+  // Synchronize legacy station aliases bidirectionally so whichever ID was updated propagates to all aliases
+  const feSource =
+    stations['frontend-engineer-workstation']?.status !== 'IDLE'
+      ? stations['frontend-engineer-workstation']
+      : stations['codex-workstation']?.status !== 'IDLE'
+        ? stations['codex-workstation']
+        : stations['engineering-workstation-01']?.status !== 'IDLE'
+          ? stations['engineering-workstation-01']
+          : stations['frontend-engineer-workstation']
+  if (feSource) {
+    stations['frontend-engineer-workstation'] = { ...feSource, id: 'frontend-engineer-workstation' }
+    stations['codex-workstation'] = { ...feSource, id: 'codex-workstation' }
+    stations['engineering-workstation-01'] = { ...feSource, id: 'engineering-workstation-01' }
+  }
+
+  const beSource =
+    stations['backend-engineer-workstation']?.status !== 'IDLE'
+      ? stations['backend-engineer-workstation']
+      : stations['fcc-workstation']?.status !== 'IDLE'
+        ? stations['fcc-workstation']
+        : stations['engineering-workstation-02']?.status !== 'IDLE'
+          ? stations['engineering-workstation-02']
+          : stations['backend-engineer-workstation']
+  if (beSource) {
+    stations['backend-engineer-workstation'] = { ...beSource, id: 'backend-engineer-workstation' }
+    stations['fcc-workstation'] = { ...beSource, id: 'fcc-workstation' }
+    stations['engineering-workstation-02'] = { ...beSource, id: 'engineering-workstation-02' }
+  }
+
+  const verifierSource =
+    stations['verifier-console']?.status !== 'IDLE'
+      ? stations['verifier-console']
+      : stations['verification-lab-console']?.status !== 'IDLE'
+        ? stations['verification-lab-console']
+        : stations['verifier-console']
+  if (verifierSource) {
+    stations['verifier-console'] = { ...verifierSource, id: 'verifier-console' }
+    stations['verification-lab-console'] = { ...verifierSource, id: 'verification-lab-console' }
+  }
+
   // 7. Build Immutable WorldState with Revision Identity
   const canonicalTaskFingerprint = computeCanonicalTaskFingerprint(tasks)
 

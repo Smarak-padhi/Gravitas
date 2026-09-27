@@ -1,0 +1,47 @@
+{
+  "benchmarkTimestamp": "2026-09-27T09:11:18.592Z",
+  "targetFps": 45,
+  "activeWorkstationBenchmark": {
+    "view": "F2_WORKSTATION_CAMERA",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "dpr": 1.0000000149011612,
+    "atmosphere": "DAY",
+    "camera": "WS_FRONTEND_MEDIUM",
+    "browser": "Chromium (Playwright)",
+    "durationMs": 10000,
+    "totalFrames": 601,
+    "averageFps": 60,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 16.8,
+    "p99FrameTimeMs": 17,
+    "drawCalls": 390,
+    "triangles": 53876,
+    "geometries": 1035,
+    "textures": 24
+  },
+  "overviewBenchmark": {
+    "view": "TOWER_OVERVIEW_CAMERA",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "dpr": 1.0000000149011612,
+    "atmosphere": "DAY",
+    "camera": "HQ_OVERVIEW",
+    "browser": "Chromium (Playwright)",
+    "durationMs": 5000,
+    "totalFrames": 300,
+    "averageFps": 59.8,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 16.8,
+    "p99FrameTimeMs": 16.9,
+    "drawCalls": 1547,
+    "triangles": 117972,
+    "geometries": 1035,
+    "textures": 24
+  },
+  "passTarget": true
+}

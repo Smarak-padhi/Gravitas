@@ -334,78 +334,118 @@ export class HqCharacters {
       const breath = Math.sin(timeSeconds * 1.5 + phaseOffset)
 
       if (characterState === 'IDLE') {
-        // Idle: relaxed ambient presence, arms resting in lap/chair, gentle head glance over 7s
+        // Idle: relaxed seated posture leaning comfortably into the chair backrest,
+        // hands resting on chair armrests / in lap away from controls, gentle ambient glance
         torsoGroup.position.y = baseTorsoY + breath * 0.003
-        torsoGroup.rotation.x = -0.02
-        headMesh.rotation.x = breath * 0.008
-        headMesh.rotation.y = Math.sin(timeSeconds * 0.32 + phaseOffset) * 0.04
+        torsoGroup.position.z = -0.04
+        torsoGroup.rotation.x = -0.08
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.0
+        headMesh.rotation.x = -0.04 + breath * 0.006
+        headMesh.rotation.y = Math.sin(timeSeconds * 0.28 + phaseOffset) * 0.06
         if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.position.y = 0.0
-          ctrl.armsRightGroup.position.y = 0.0
-          ctrl.armsLeftGroup.rotation.x = 0.18
-          ctrl.armsRightGroup.rotation.x = 0.18
+          ctrl.armsLeftGroup.position.set(0, 0, -0.04)
+          ctrl.armsRightGroup.position.set(0, 0, -0.04)
+          ctrl.armsLeftGroup.rotation.x = 0.28
+          ctrl.armsRightGroup.rotation.x = 0.28
+        }
+      } else if (characterState === 'ATTENTION') {
+        // Preparing / Attention posture: alert posture shifted forward toward the desk,
+        // head inclined toward incoming task dossier on the desk, left hand gently resting toward dossier,
+        // right hand resting on armrest, NO typing
+        torsoGroup.position.y = baseTorsoY + breath * 0.004
+        torsoGroup.position.z = 0.01
+        torsoGroup.rotation.x = 0.06
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.01
+        headMesh.rotation.x = 0.14 + breath * 0.005
+        headMesh.rotation.y = -0.10
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.set(0, 0, 0.02)
+          ctrl.armsRightGroup.position.set(0, 0, -0.02)
+          ctrl.armsLeftGroup.rotation.x = -0.08
+          ctrl.armsRightGroup.rotation.x = 0.22
         }
       } else if (characterState === 'FOCUSED') {
-        // Working / Focused posture: tilted forward toward screen, hands active on keyboard & mouse
+        // Working / Focused posture: unmistakable forward working incline over workstation,
+        // head directed forward at active screen, both arms engaged over keyboard/mouse,
+        // subtle deterministic typing micro-motion
         torsoGroup.position.y = baseTorsoY + breath * 0.002
-        torsoGroup.rotation.x = 0.12
-        headMesh.rotation.x = 0.10 + breath * 0.006
+        torsoGroup.position.z = 0.05
+        torsoGroup.rotation.x = 0.22
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.02
+        headMesh.rotation.x = 0.12 + breath * 0.004
         headMesh.rotation.y = 0.0
-
-        // Active typing micro-motion only when authoritative state is WORKING / FOCUSED
         if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.rotation.x = -0.36
-          ctrl.armsRightGroup.rotation.x = -0.34
+          ctrl.armsLeftGroup.position.z = 0.04
+          ctrl.armsRightGroup.position.z = 0.04
+          ctrl.armsLeftGroup.rotation.x = -0.46
+          ctrl.armsRightGroup.rotation.x = -0.42
           const typeMotion = Math.sin(timeSeconds * 12.0) * 0.008
           ctrl.armsLeftGroup.position.y = typeMotion
           ctrl.armsRightGroup.position.y = -typeMotion
         }
-      } else if (characterState === 'VERIFYING') {
-        // Verifying posture: precise examination posture directed at inspection device, arms resting
-        torsoGroup.position.y = baseTorsoY + breath * 0.002
-        torsoGroup.rotation.x = 0.02
-        headMesh.rotation.x = 0.10 + breath * 0.008
-        headMesh.rotation.y = 0.0
-        if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.position.y = 0.0
-          ctrl.armsRightGroup.position.y = 0.0
-          ctrl.armsLeftGroup.rotation.x = 0.15
-          ctrl.armsRightGroup.rotation.x = 0.15
-        }
       } else if (characterState === 'WAITING') {
-        // Waiting / Cleanup posture: upright relaxed posture, hands resting, no typing
+        // Cleanup / Waiting posture: task execution complete, torso relaxing back,
+        // hands disengaged from keyboard and pulled back to chair armrests, NO typing
         torsoGroup.position.y = baseTorsoY + breath * 0.003
-        torsoGroup.rotation.x = -0.02
-        headMesh.rotation.x = 0.0
+        torsoGroup.position.z = -0.02
+        torsoGroup.rotation.x = -0.03
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.0
+        headMesh.rotation.x = 0.02
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.position.y = 0.0
-          ctrl.armsRightGroup.position.y = 0.0
-          ctrl.armsLeftGroup.rotation.x = 0.18
-          ctrl.armsRightGroup.rotation.x = 0.18
+          ctrl.armsLeftGroup.position.set(0, 0, -0.03)
+          ctrl.armsRightGroup.position.set(0, 0, -0.03)
+          ctrl.armsLeftGroup.rotation.x = 0.24
+          ctrl.armsRightGroup.rotation.x = 0.24
+        }
+      } else if (characterState === 'VERIFYING') {
+        // Verifying posture: Frontend Engineer is neutral and visibly disengaged from controls.
+        // Head turned slightly toward center hall / cleanroom where Reviewer owns verification.
+        // Hands on armrests, NO typing, NO fake screen work.
+        torsoGroup.position.y = baseTorsoY + breath * 0.003
+        torsoGroup.position.z = -0.03
+        torsoGroup.rotation.x = -0.05
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.0
+        headMesh.rotation.x = 0.0
+        headMesh.rotation.y = 0.18
+        if (ctrl.isSeated) {
+          ctrl.armsLeftGroup.position.set(0, 0, -0.04)
+          ctrl.armsRightGroup.position.set(0, 0, -0.04)
+          ctrl.armsLeftGroup.rotation.x = 0.26
+          ctrl.armsRightGroup.rotation.x = 0.26
         }
       } else if (characterState === 'SUCCESS') {
         torsoGroup.position.y = baseTorsoY + breath * 0.004
+        torsoGroup.position.z = -0.03
         torsoGroup.rotation.x = -0.04
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.0
         headMesh.rotation.x = -0.04
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.position.y = 0.0
-          ctrl.armsRightGroup.position.y = 0.0
-          ctrl.armsLeftGroup.rotation.x = 0.18
-          ctrl.armsRightGroup.rotation.x = 0.18
+          ctrl.armsLeftGroup.position.set(0, 0, -0.03)
+          ctrl.armsRightGroup.position.set(0, 0, -0.03)
+          ctrl.armsLeftGroup.rotation.x = 0.22
+          ctrl.armsRightGroup.rotation.x = 0.22
         }
-      } else if (characterState === 'FAILURE' || characterState === 'ATTENTION') {
-        // Attention / Preparing posture: attentive posture, hands resting off keyboard
+      } else if (characterState === 'FAILURE') {
         torsoGroup.position.y = baseTorsoY + breath * 0.005
-        torsoGroup.rotation.x = 0.03
-        headMesh.rotation.x = 0.03
+        torsoGroup.position.z = 0.01
+        torsoGroup.rotation.x = 0.04
+        headMesh.position.y = 0.35
+        headMesh.position.z = 0.0
+        headMesh.rotation.x = 0.12
         headMesh.rotation.y = 0.0
         if (ctrl.isSeated) {
-          ctrl.armsLeftGroup.position.y = 0.0
-          ctrl.armsRightGroup.position.y = 0.0
-          ctrl.armsLeftGroup.rotation.x = 0.12
-          ctrl.armsRightGroup.rotation.x = 0.12
+          ctrl.armsLeftGroup.position.set(0, 0, -0.02)
+          ctrl.armsRightGroup.position.set(0, 0, -0.02)
+          ctrl.armsLeftGroup.rotation.x = 0.20
+          ctrl.armsRightGroup.rotation.x = 0.20
         }
       }
     }

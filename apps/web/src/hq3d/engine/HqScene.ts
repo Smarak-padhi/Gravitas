@@ -440,7 +440,18 @@ export class HqScene {
       } else if (stationId === 'dispatch-console') {
         this.infrastructure.setDispatchActivity(stState.status)
       } else {
-        this.furniture.setStationStatus(stationId as any, stState.status)
+        const canonicalStationId =
+          stationId === 'codex-workstation' || stationId === 'engineering-workstation-01'
+            ? 'frontend-engineer-workstation'
+            : stationId === 'fcc-workstation' || stationId === 'engineering-workstation-02'
+              ? 'backend-engineer-workstation'
+              : stationId === 'verification-lab-console'
+                ? 'verifier-console'
+                : stationId
+        const worldTask = Object.values(worldState.tasks).find(
+          (t) => t.assignedStationId === stationId || t.assignedStationId === canonicalStationId
+        )
+        this.furniture.setStationStatus(stationId as any, stState.status, worldTask?.runtimePhase)
       }
     }
 

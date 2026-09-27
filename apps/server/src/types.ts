@@ -215,7 +215,7 @@ export interface StateSummaryResponse {
   readonly runs: readonly Run[]
   readonly tasks: readonly Task[]
   readonly harness: {
-    readonly id: string
+    readonly id?: string | undefined
     readonly status: string
     readonly message?: string | undefined
   }

@@ -1,0 +1,29 @@
+{
+  "issue": "Runtime Exception: Cannot read properties of undefined (reading 'id') & HARNESS: free-claude-code [UNKNOWN] in Header",
+  "symptom": "Top red error banner displayed in all previous screenshots; top bar defaulted to fallback free-claude-code [UNKNOWN]",
+  "rootCauseProvenance": {
+    "serverCallsite": "RunService.getStateSummary() at apps/server/src/service.ts:998",
+    "browserCallsite": "App.loadInitialData() -> api.getState() -> request('/api/v1/state') at apps/web/src/api/client.ts:34",
+    "undefinedObject": "this.harness in RunService",
+    "mechanism": [
+      "RunServiceOptions previously declared harness as required in types, but when callers instantiated RunService without a harness (or prior to harness assignment), this.harness was undefined at runtime.",
+      "When the client sent GET /api/v1/state on boot, service.getStateSummary() evaluated `id: this.harness.id`.",
+      "Evaluating `.id` on undefined threw TypeError: Cannot read properties of undefined (reading 'id'), causing GET /api/v1/state to fail with 500 Internal Error.",
+      "apps/web caught the 500 GravitasApiError, set errorMessage to \"Cannot read properties of undefined (reading 'id')\", displaying the red banner.",
+      "stateSummary remained null, causing TopBar to fall back to a hardcoded identity `{ id: 'free-claude-code', status: 'UNKNOWN' }` in App.tsx."
+    ]
+  },
+  "sourceContractFix": {
+    "serverTypes": "StateSummaryResponse.harness.id is declared optional (id?: string | undefined).",
+    "serverService": "RunServiceOptions.harness is optional (harness?: AgentHarness | undefined). RunService.getStateSummary() gracefully handles unconfigured harness reporting truthfully without throwing, without optional chaining purely to hide errors, and without fabricating an id.",
+    "webTypes": "StateSummaryResponse.harness.id is optional (id?: string | undefined).",
+    "webTopBar": "TopBar accepts optional harness.id and renders truthfully: HARNESS: <id> [<status>] when present, or HARNESS: [<status>] without fabricating identities.",
+    "webApp": "Removed hardcoded fallback identity { id: 'free-claude-code' } in App.tsx."
+  },
+  "acceptanceVerification": {
+    "uncaughtExceptions": 0,
+    "consoleErrors": 0,
+    "visibleErrorBanners": 0,
+    "fabricatedProvenance": false
+  }
+}

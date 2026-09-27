@@ -40,7 +40,7 @@ export interface DeriveOfficeStateInput {
   readonly tasks: readonly Task[]
   readonly activeTask: Task | null
   readonly harness: {
-    readonly id: string
+    readonly id?: string | undefined
     readonly status: string
     readonly message?: string | undefined
   }

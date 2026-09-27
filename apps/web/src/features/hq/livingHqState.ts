@@ -46,7 +46,7 @@ export interface DeriveLivingHqInput {
   readonly tasks: readonly Task[]
   readonly activeTask: Task | null
   readonly harness: {
-    readonly id: string
+    readonly id?: string | undefined
     readonly status: string
     readonly message?: string | undefined
   }
@@ -142,7 +142,7 @@ export function deriveLivingHqState(input: DeriveLivingHqInput): LivingHqState {
   }
 
   // 1. Primary Worker (Codex / Claude / FCC / Harness)
-  const primaryIdentity = resolveCoworkerIdentity(harness.id, 'Primary Autonomous Worker')
+  const primaryIdentity = resolveCoworkerIdentity(harness.id ?? 'unconfigured', 'Primary Autonomous Worker')
   const primaryTask = runningTask ?? verifyingTask ?? waitingApprovalTask ?? activeTask
   const primaryPose: CanonicalPose = primaryTask
     ? mapTaskStateToAvatarPose(primaryTask.state)

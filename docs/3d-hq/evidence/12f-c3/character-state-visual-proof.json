@@ -1,0 +1,235 @@
+{
+  "evidenceType": "AUTHORITATIVE_VISUAL_STATE_PROOF_V1",
+  "runId": "run-w12fc3-final-closure",
+  "taskId": "task-fe-12fc3",
+  "roleId": "role:engineering:frontend-engineer",
+  "stationId": "frontend-engineer-workstation",
+  "harness": "free-claude-code",
+  "model": "claude-3-5-sonnet",
+  "timestamp": "2026-09-27T09:10:45.206Z",
+  "cameras": {
+    "mediumCamera": {
+      "position": [
+        -1.8,
+        8.65,
+        0.2
+      ],
+      "target": [
+        -3.5,
+        7.8,
+        0.9
+      ]
+    },
+    "normalRoomCamera": {
+      "position": [
+        0.5,
+        10.2,
+        -1.2
+      ],
+      "target": [
+        -3.5,
+        7.6,
+        0.9
+      ]
+    }
+  },
+  "acceptedWorkstationInteractionRadiusMeters": 0.25,
+  "states": [
+    {
+      "phase": "IDLE",
+      "characterState": "IDLE",
+      "mediumScreenshot": "01-idle-medium.png",
+      "roomScreenshot": "06-idle-room.png",
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "workstationPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_HOME",
+      "motionState": "IDLE",
+      "stationStatus": "IDLE",
+      "isSeated": true,
+      "typingActive": false,
+      "torsoInclinePitchRad": -0.08,
+      "torsoZOffsetM": -0.04,
+      "headPitchRad": -0.046,
+      "headYawRad": -0.01,
+      "armsLeftRotationX": 0.28,
+      "armsRightRotationX": 0.28,
+      "armsLeftPositionY": 0,
+      "physicalizedPropState": {
+        "dossierVisible": false,
+        "dossierAtWorkstation": false,
+        "dossierPosition": null
+      },
+      "screenState": "DORMANT_STANDBY"
+    },
+    {
+      "phase": "PREPARING",
+      "characterState": "ATTENTION",
+      "mediumScreenshot": "02-preparing-medium.png",
+      "roomScreenshot": "07-preparing-room.png",
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "workstationPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true,
+      "typingActive": false,
+      "torsoInclinePitchRad": 0.06,
+      "torsoZOffsetM": 0.01,
+      "headPitchRad": 0.144,
+      "headYawRad": -0.1,
+      "armsLeftRotationX": -0.08,
+      "armsRightRotationX": 0.22,
+      "armsLeftPositionY": 0,
+      "physicalizedPropState": {
+        "dossierVisible": true,
+        "dossierAtWorkstation": true,
+        "dossierPosition": [
+          -2.5,
+          7.96,
+          0.7
+        ]
+      },
+      "screenState": "DORMANT_STANDBY"
+    },
+    {
+      "phase": "WORKER_RUNNING",
+      "characterState": "FOCUSED",
+      "mediumScreenshot": "03-worker-running-medium.png",
+      "roomScreenshot": "08-worker-running-room.png",
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "workstationPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true,
+      "typingActive": true,
+      "torsoInclinePitchRad": 0.22,
+      "torsoZOffsetM": 0.05,
+      "headPitchRad": 0.118,
+      "headYawRad": 0,
+      "armsLeftRotationX": -0.46,
+      "armsRightRotationX": -0.42,
+      "armsLeftPositionY": 0.008,
+      "physicalizedPropState": {
+        "dossierVisible": true,
+        "dossierAtWorkstation": true,
+        "dossierPosition": [
+          -2.5,
+          7.96,
+          0.7
+        ]
+      },
+      "screenState": "ACTIVE_LUMINANT"
+    },
+    {
+      "phase": "CLEANUP",
+      "characterState": "WAITING",
+      "mediumScreenshot": "04-cleanup-medium.png",
+      "roomScreenshot": "09-cleanup-room.png",
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "workstationPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_ASSIGNMENT",
+      "motionState": "FOCUSED",
+      "stationStatus": "ACTIVE",
+      "isSeated": true,
+      "typingActive": false,
+      "torsoInclinePitchRad": -0.03,
+      "torsoZOffsetM": -0.02,
+      "headPitchRad": 0.02,
+      "headYawRad": 0,
+      "armsLeftRotationX": 0.24,
+      "armsRightRotationX": 0.24,
+      "armsLeftPositionY": 0,
+      "physicalizedPropState": {
+        "dossierVisible": true,
+        "dossierAtWorkstation": true,
+        "dossierPosition": [
+          -2.5,
+          7.96,
+          0.7
+        ]
+      },
+      "screenState": "DORMANT_STANDBY"
+    },
+    {
+      "phase": "VERIFYING",
+      "characterState": "IDLE",
+      "mediumScreenshot": "05-verifying-medium.png",
+      "roomScreenshot": "10-verifying-room.png",
+      "figureVisible": true,
+      "figureWorldPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "workstationPosition": [
+        -3.5,
+        7.2,
+        1.15
+      ],
+      "distanceFigureToWorkstationAnchor": 0,
+      "spatialIntent": "AT_HOME",
+      "motionState": "IDLE",
+      "stationStatus": "IDLE",
+      "isSeated": true,
+      "typingActive": false,
+      "torsoInclinePitchRad": -0.08,
+      "torsoZOffsetM": -0.04,
+      "headPitchRad": -0.04,
+      "headYawRad": -0.018,
+      "armsLeftRotationX": 0.28,
+      "armsRightRotationX": 0.28,
+      "armsLeftPositionY": 0,
+      "physicalizedPropState": {
+        "dossierVisible": true,
+        "dossierAtWorkstation": false,
+        "dossierPosition": [
+          0,
+          11.75,
+          0.5
+        ]
+      },
+      "screenState": "DORMANT_STANDBY"
+    }
+  ]
+}

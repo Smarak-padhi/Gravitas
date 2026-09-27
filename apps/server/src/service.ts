@@ -139,7 +139,7 @@ import type {
 export interface RunServiceOptions {
   readonly registry: InMemoryRegistry
   readonly eventHub: EventHub
-  readonly harness: AgentHarness
+  readonly harness?: AgentHarness | undefined
   readonly gatewayRegistry?: GatewayRegistry | undefined
   readonly runtimeRoot?: string | undefined
   readonly defaultRepository?: string | undefined
@@ -159,7 +159,7 @@ export interface RunServiceOptions {
 export class RunService {
   private readonly registry: InMemoryRegistry
   private readonly eventHub: EventHub
-  private readonly harness: AgentHarness
+  private readonly harness?: AgentHarness | undefined
   private readonly gatewayRegistry: GatewayRegistry
   private readonly runtimeRoot: string
   private readonly defaultRepository?: string | undefined
@@ -539,6 +539,10 @@ export class RunService {
     const prevRunStatus = run.status
     this.registry.updateRun({ ...run, status: 'RUNNING', updatedAt: new Date().toISOString() })
     this.eventHub.publish(createRunStateChangedEvent(run.id, prevRunStatus, 'RUNNING'))
+
+    if (!this.harness) {
+      throw new InvalidRequestError('NO_HARNESS', 'No agent harness configured on RunService')
+    }
 
     const scheduler = new BoundedScheduler({
       runId,
@@ -951,20 +955,25 @@ export class RunService {
     let harnessStatus = 'UNKNOWN'
     let harnessMessage: string | undefined
 
-    if (this.cachedHarnessAvailability && now - this.cachedHarnessAvailability.timestamp < 5000) {
-      harnessStatus = this.cachedHarnessAvailability.status
-      harnessMessage = this.cachedHarnessAvailability.message
-    } else {
-      try {
-        const avail = await this.harness.availability()
-        harnessStatus = avail.status
-        harnessMessage = avail.message
-        this.cachedHarnessAvailability = { status: avail.status, message: avail.message, timestamp: now }
-      } catch (err) {
-        harnessStatus = 'UNAVAILABLE'
-        harnessMessage = err instanceof Error ? err.message : 'Availability check failed'
-        this.cachedHarnessAvailability = { status: 'UNAVAILABLE', message: harnessMessage, timestamp: now }
+    if (this.harness) {
+      if (this.cachedHarnessAvailability && now - this.cachedHarnessAvailability.timestamp < 5000) {
+        harnessStatus = this.cachedHarnessAvailability.status
+        harnessMessage = this.cachedHarnessAvailability.message
+      } else {
+        try {
+          const avail = await this.harness.availability()
+          harnessStatus = avail.status
+          harnessMessage = avail.message
+          this.cachedHarnessAvailability = { status: avail.status, message: avail.message, timestamp: now }
+        } catch (err) {
+          harnessStatus = 'UNAVAILABLE'
+          harnessMessage = err instanceof Error ? err.message : 'Availability check failed'
+          this.cachedHarnessAvailability = { status: 'UNAVAILABLE', message: harnessMessage, timestamp: now }
+        }
       }
+    } else {
+      harnessStatus = 'UNKNOWN'
+      harnessMessage = 'No execution harness configured for this server instance'
     }
 
     const jobs = this.jobStore.listJobs()
@@ -994,11 +1003,20 @@ export class RunService {
       version: GRAVITAS_VERSION,
       runs,
       tasks,
-      harness: {
-        id: this.harness.id,
-        status: harnessStatus,
-        ...(harnessMessage ? { message: harnessMessage } : {}),
-      },
+      ...(this.harness
+        ? {
+            harness: {
+              id: this.harness.id,
+              status: harnessStatus,
+              ...(harnessMessage ? { message: harnessMessage } : {}),
+            },
+          }
+        : {
+            harness: {
+              status: harnessStatus,
+              message: harnessMessage,
+            },
+          }),
       projection: this.eventHub.projectionStore.getSnapshot(),
     }
   }
@@ -1048,7 +1066,7 @@ export class RunService {
           taskBranch: req.runtimeContextOverride.taskBranch ?? '(not yet allocated)',
           baseSha: req.runtimeContextOverride.baseSha ?? '(unknown)',
           allowedPaths: req.runtimeContextOverride.allowedPaths ?? contract?.constraints ?? [],
-          harnessId: req.runtimeContextOverride.harnessId ?? this.harness.id,
+          harnessId: req.runtimeContextOverride.harnessId ?? (this.harness ? this.harness.id : 'unassigned'),
           compiledAt: req.runtimeContextOverride.compiledAt ?? new Date().toISOString(),
         }
       : undefined

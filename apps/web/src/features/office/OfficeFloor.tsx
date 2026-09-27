@@ -17,7 +17,7 @@ export interface OfficeFloorProps {
   readonly tasks?: readonly Task[] | undefined
   readonly activeTask?: Task | null | undefined
   readonly harness?: {
-    readonly id: string
+    readonly id?: string | undefined
     readonly status: string
     readonly message?: string | undefined
   } | undefined
@@ -41,10 +41,16 @@ export const OfficeFloor: React.FC<OfficeFloorProps> = ({
   onSelectTask,
 }) => {
   // Resolved harness fallback from workers if not explicitly passed
-  const resolvedHarness = harness ?? {
-    id: workers[0]?.id || 'fake-deterministic-worker',
-    status: 'AVAILABLE',
-  }
+  const resolvedHarness = harness
+    ? {
+        id: harness.id || workers[0]?.id || 'fake-deterministic-worker',
+        status: harness.status,
+        message: harness.message,
+      }
+    : {
+        id: workers[0]?.id || 'fake-deterministic-worker',
+        status: 'AVAILABLE',
+      }
 
   // Construct Task objects from WorkerPresentation if tasks array is empty but workers exist
   const effectiveTasks: readonly Task[] =
