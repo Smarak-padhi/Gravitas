@@ -347,125 +347,337 @@ export class HeroCharacter {
     track: <T extends THREE.BufferGeometry>(geom: T) => T,
     trackMat: <T extends THREE.Material>(mat: T) => T
   ): HeroCharacterBuildResult {
-    const base = this.buildBaseAnatomy(
-      'Frontend Engineer',
-      'role:engineering:frontend-engineer',
-      materials.heroCharSweater,
-      materials.charFrontendAccent,
-      materials.heroCharSkin,
-      materials.heroCharHair,
-      true,
-      materials,
-      track,
-      trackMat
+    const rootGroup = new THREE.Group()
+    rootGroup.name = 'character:role:engineering:frontend-engineer'
+
+    const baseTorsoY = 0.74
+
+    // 0. Status Underlay Ring (Restrained Cobalt / Sky Accent)
+    const ringGeo = track(new THREE.RingGeometry(0.24, 0.36, 24))
+    ringGeo.rotateX(-Math.PI / 2)
+    const statusMaterial = trackMat(
+      new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      })
     )
+    const statusRing = new THREE.Mesh(ringGeo, statusMaterial)
+    statusRing.position.set(0.0, 0.015, 0.0)
+    rootGroup.add(statusRing)
 
-    // Hairstyle: Side-parted bob with sweeping bangs
-    const hairGroup = new THREE.Group()
-    const hairCapGeo = track(new THREE.SphereGeometry(0.12, 24, 18, 0, Math.PI * 2, 0, Math.PI * 0.65))
-    hairCapGeo.scale(0.98, 1.05, 1.02)
-    const hairCap = new THREE.Mesh(hairCapGeo, materials.heroCharHair)
-    hairCap.position.set(0.0, 0.015, -0.01)
-    hairGroup.add(hairCap)
+    // 1. Torso Group (Deep Indigo Tailored Raglan Knit)
+    const torsoGroup = new THREE.Group()
+    torsoGroup.position.set(0.0, baseTorsoY, 0.0)
 
-    const bangGeo = track(new THREE.BoxGeometry(0.12, 0.045, 0.04))
-    const bang = new THREE.Mesh(bangGeo, materials.heroCharHair)
-    bang.position.set(-0.025, 0.07, 0.085)
-    bang.rotation.z = -0.22
-    bang.rotation.y = 0.12
-    hairGroup.add(bang)
+    // Sculpted tapered sweater torso: shoulders 0.36m, chest 0.30m, waist 0.26m, height 0.34m
+    const torsoShape = new THREE.Shape()
+    torsoShape.moveTo(-0.13, -0.16)
+    torsoShape.lineTo(0.13, -0.16)
+    torsoShape.quadraticCurveTo(0.16, 0.02, 0.18, 0.14)
+    torsoShape.lineTo(-0.18, 0.14)
+    torsoShape.quadraticCurveTo(-0.16, 0.02, -0.13, -0.16)
 
-    for (const [side, x] of [[-1, -0.105], [1, 0.105]] as const) {
-      const tressGeo = track(new THREE.BoxGeometry(0.038, 0.14, 0.065))
-      const tress = new THREE.Mesh(tressGeo, materials.heroCharHair)
-      tress.position.set(x, -0.02, 0.03)
-      tress.rotation.z = side * -0.12
-      hairGroup.add(tress)
-    }
-    const napeGeo = track(new THREE.BoxGeometry(0.16, 0.12, 0.045))
-    const nape = new THREE.Mesh(napeGeo, materials.heroCharHair)
-    nape.position.set(0.0, -0.04, -0.09)
-    hairGroup.add(nape)
-    base.headGroup.add(hairGroup)
+    const torsoGeo = track(
+      new THREE.ExtrudeGeometry(torsoShape, {
+        depth: 0.18,
+        bevelEnabled: true,
+        bevelSegments: 5,
+        bevelSize: 0.028,
+        bevelThickness: 0.028,
+      })
+    )
+    torsoGeo.center()
+    const sweaterMesh = new THREE.Mesh(torsoGeo, materials.heroCharSweater)
+    sweaterMesh.castShadow = true
+    sweaterMesh.receiveShadow = true
+    torsoGroup.add(sweaterMesh)
 
-    // Designer Headphones
-    const hpGroup = new THREE.Group()
-    hpGroup.name = 'hero-headphones'
-    const hpBandGeo = track(new THREE.TorusGeometry(0.122, 0.014, 10, 24, Math.PI))
-    const hpBand = new THREE.Mesh(hpBandGeo, materials.heroSteel)
-    hpBand.position.set(0.0, 0.04, 0.0)
-    hpGroup.add(hpBand)
+    // Sculpted chest & upper back fullness volume (eliminates flat box look)
+    const chestVolGeo = track(new THREE.SphereGeometry(0.135, 20, 16))
+    chestVolGeo.scale(1.22, 1.0, 0.72)
+    const chestVol = new THREE.Mesh(chestVolGeo, materials.heroCharSweater)
+    chestVol.position.set(0.0, 0.04, 0.0)
+    torsoGroup.add(chestVol)
+
+    // Folded rib-knit sweater hem at waist
+    const hemGeo = track(new THREE.TorusGeometry(0.142, 0.020, 12, 24))
+    hemGeo.rotateX(Math.PI / 2)
+    hemGeo.scale(1.0, 0.82, 0.75)
+    const hem = new THREE.Mesh(hemGeo, materials.heroCharSweater)
+    hem.position.set(0.0, -0.16, 0.0)
+    torsoGroup.add(hem)
+
+    // Seamless sculpted anatomical neck (lofts cleanly from clavicles into skull base)
+    const neckGeo = track(new THREE.CylinderGeometry(0.040, 0.054, 0.09, 18))
+    neckGeo.scale(1.0, 1.0, 0.90)
+    const neckMesh = new THREE.Mesh(neckGeo, materials.heroCharSkin)
+    neckMesh.position.set(0.0, 0.19, 0.01)
+    torsoGroup.add(neckMesh)
+
+    // Rib-knit cobalt collar band wrapping smoothly at the base of the neck
+    const collarGeo = track(new THREE.TorusGeometry(0.078, 0.018, 14, 24))
+    collarGeo.rotateX(Math.PI / 2)
+    collarGeo.scale(1.0, 0.84, 0.88)
+    const collarMesh = new THREE.Mesh(collarGeo, materials.heroCharSweater)
+    collarMesh.position.set(0.0, 0.155, 0.01)
+    torsoGroup.add(collarMesh)
+
+    // 2. Sculpted Head Group (Natural Human Proportions, ~6.2 Heads Tall)
+    const headGroup = new THREE.Group()
+    headGroup.position.set(0.0, 0.26, 0.01)
+
+    // Cranium with refined jawline and soft chin
+    const craniumGeo = track(new THREE.SphereGeometry(0.112, 24, 20))
+    craniumGeo.scale(0.96, 1.10, 1.02)
+    const craniumMesh = new THREE.Mesh(craniumGeo, materials.heroCharSkin)
+    craniumMesh.castShadow = true
+    headGroup.add(craniumMesh)
+
+    // Soft sculpted chin and lower jaw volume
+    const chinGeo = track(new THREE.SphereGeometry(0.055, 18, 14))
+    chinGeo.scale(1.0, 0.82, 0.95)
+    const chinMesh = new THREE.Mesh(chinGeo, materials.heroCharSkin)
+    chinMesh.position.set(0.0, -0.065, 0.035)
+    headGroup.add(chinMesh)
+
+    // Sculpted 3D nose bridge
+    const noseGeo = track(new THREE.ConeGeometry(0.014, 0.040, 8))
+    noseGeo.rotateX(-0.15)
+    const noseMesh = new THREE.Mesh(noseGeo, materials.heroCharSkin)
+    noseMesh.position.set(0.0, 0.038, 0.116)
+    headGroup.add(noseMesh)
+
+    // Stylized almond eyes with dark pupils and double specular catchlights
+    const eyeMat = trackMat(new THREE.MeshBasicMaterial({ color: 0x111827 }))
+    const catchlightMat = trackMat(new THREE.MeshBasicMaterial({ color: 0xffffff }))
+    const eyeSocketGeo = track(new THREE.SphereGeometry(0.015, 12, 12))
+    eyeSocketGeo.scale(1.15, 0.85, 0.6)
+    const c1Geo = track(new THREE.PlaneGeometry(0.005, 0.005))
+    const c2Geo = track(new THREE.PlaneGeometry(0.0028, 0.0028))
 
     for (const side of [-1, 1]) {
-      const earcupX = side * 0.118
-      const yokeGeo = track(new THREE.BoxGeometry(0.012, 0.045, 0.02))
-      const yoke = new THREE.Mesh(yokeGeo, materials.heroBrass)
-      yoke.position.set(earcupX, 0.03, 0.0)
-      hpGroup.add(yoke)
+      const eyeX = side * 0.042
+      const eyeMesh = new THREE.Mesh(eyeSocketGeo, eyeMat)
+      eyeMesh.position.set(eyeX, 0.052, 0.106)
+      headGroup.add(eyeMesh)
 
-      const cupOuterGeo = track(new THREE.CylinderGeometry(0.038, 0.042, 0.024, 16))
-      cupOuterGeo.rotateZ(Math.PI / 2)
-      const cupOuter = new THREE.Mesh(cupOuterGeo, materials.heroSteel)
-      cupOuter.position.set(earcupX + side * 0.012, 0.0, 0.0)
-      hpGroup.add(cupOuter)
+      const c1Mesh = new THREE.Mesh(c1Geo, catchlightMat)
+      c1Mesh.position.set(eyeX - side * 0.003, 0.056, 0.114)
+      headGroup.add(c1Mesh)
 
-      const cupPillowGeo = track(new THREE.CylinderGeometry(0.04, 0.04, 0.016, 16))
-      cupPillowGeo.rotateZ(Math.PI / 2)
-      const cupPillow = new THREE.Mesh(cupPillowGeo, materials.charFrontendAccent)
-      cupPillow.position.set(earcupX + side * -0.006, 0.0, 0.0)
-      hpGroup.add(cupPillow)
+      const c2Mesh = new THREE.Mesh(c2Geo, catchlightMat)
+      c2Mesh.position.set(eyeX + side * 0.004, 0.048, 0.114)
+      headGroup.add(c2Mesh)
     }
-    base.headGroup.add(hpGroup)
 
-    // Seated Arms
+    // Flowing layered cognac hair with sculpted bangs and side locks
+    const hairGroup = new THREE.Group()
+    const hairCapGeo = track(new THREE.SphereGeometry(0.120, 24, 20, 0, Math.PI * 2, 0, Math.PI * 0.58))
+    hairCapGeo.scale(0.98, 1.08, 1.04)
+    const hairCap = new THREE.Mesh(hairCapGeo, materials.heroCharHair)
+    hairCap.position.set(0.0, 0.02, -0.01)
+    hairGroup.add(hairCap)
+
+    // Forehead bangs (layered curved volume so hair doesn't end abruptly)
+    const bangsGeo = track(new THREE.CapsuleGeometry(0.024, 0.10, 8, 10))
+    bangsGeo.rotateZ(Math.PI / 2)
+    bangsGeo.scale(1.0, 0.7, 0.8)
+    const bangs = new THREE.Mesh(bangsGeo, materials.heroCharHair)
+    bangs.position.set(0.0, 0.08, 0.09)
+    hairGroup.add(bangs)
+
+    // Side-swept fringe locks
+    const lockLGeo = track(new THREE.CapsuleGeometry(0.022, 0.09, 8, 10))
+    lockLGeo.rotateZ(0.40)
+    const lockL = new THREE.Mesh(lockLGeo, materials.heroCharHair)
+    lockL.position.set(-0.06, 0.06, 0.09)
+    hairGroup.add(lockL)
+
+    const lockRGeo = track(new THREE.CapsuleGeometry(0.018, 0.07, 8, 10))
+    lockRGeo.rotateZ(-0.30)
+    const lockR = new THREE.Mesh(lockRGeo, materials.heroCharHair)
+    lockR.position.set(0.06, 0.07, 0.08)
+    hairGroup.add(lockR)
+
+    // Sideburns framing the face cleanly
+    for (const side of [-1, 1]) {
+      const burnGeo = track(new THREE.BoxGeometry(0.014, 0.06, 0.028))
+      const burn = new THREE.Mesh(burnGeo, materials.heroCharHair)
+      burn.position.set(side * 0.108, 0.01, 0.03)
+      hairGroup.add(burn)
+    }
+
+    // Tapered back nape contour wrapping cleanly down towards sweater collar
+    const napeGeo = track(new THREE.BoxGeometry(0.14, 0.08, 0.04))
+    const nape = new THREE.Mesh(napeGeo, materials.heroCharHair)
+    nape.position.set(0.0, -0.05, -0.09)
+    hairGroup.add(nape)
+    headGroup.add(hairGroup)
+
+    // Designer champagne brass wireframe spectacles
+    const glassesGroup = new THREE.Group()
+    glassesGroup.name = 'hero-spectacles'
+    const bridgeGeo = track(new THREE.CylinderGeometry(0.002, 0.002, 0.024, 8))
+    bridgeGeo.rotateZ(Math.PI / 2)
+    const bridge = new THREE.Mesh(bridgeGeo, materials.heroBrass)
+    bridge.position.set(0.0, 0.054, 0.120)
+    glassesGroup.add(bridge)
+
+    for (const side of [-1, 1]) {
+      const gX = side * 0.044
+      const frameGeo = track(new THREE.TorusGeometry(0.018, 0.0022, 8, 20))
+      frameGeo.scale(1.15, 0.88, 1.0)
+      const frame = new THREE.Mesh(frameGeo, materials.heroBrass)
+      frame.position.set(gX, 0.052, 0.119)
+      glassesGroup.add(frame)
+
+      const templeGeo = track(new THREE.CylinderGeometry(0.0018, 0.0018, 0.11, 6))
+      templeGeo.rotateX(Math.PI / 2)
+      const temple = new THREE.Mesh(templeGeo, materials.heroBrass)
+      temple.position.set(gX + side * 0.018, 0.052, 0.065)
+      glassesGroup.add(temple)
+    }
+    headGroup.add(glassesGroup)
+    torsoGroup.add(headGroup)
+
+    // 3. Articulated Ergonomic Arms with Continuous Sleeves & Distinct Sculpted Hands
     const armsLeftGroup = new THREE.Group()
-    armsLeftGroup.position.set(-0.20, 0.10, 0.0)
+    armsLeftGroup.position.set(-0.19, 0.10, 0.0)
     const armsRightGroup = new THREE.Group()
-    armsRightGroup.position.set(0.20, 0.10, 0.0)
+    armsRightGroup.position.set(0.19, 0.10, 0.0)
 
-    const upperArmGeo = track(new THREE.CapsuleGeometry(0.036, 0.18, 8, 12))
-    const foreArmGeo = track(new THREE.CapsuleGeometry(0.032, 0.18, 8, 12))
-    const handGeo = track(new THREE.BoxGeometry(0.045, 0.022, 0.065))
+    // Raglan shoulder deltoid cap (smoothly merges torso and upper arm)
+    const shoulderGeo = track(new THREE.SphereGeometry(0.058, 16, 14))
+    shoulderGeo.scale(1.0, 1.22, 0.95)
 
-    for (const [side, subGroup] of [[-1, armsLeftGroup], [1, armsRightGroup]] as const) {
-      const upper = new THREE.Mesh(upperArmGeo, materials.heroCharSweater)
-      upper.position.set(0.0, -0.10, 0.05)
-      upper.rotation.x = 0.52
-      upper.rotation.z = side * 0.12
-      subGroup.add(upper)
+    const uArmGeo = track(new THREE.CylinderGeometry(0.046, 0.042, 0.18, 14))
+    const elbowGeo = track(new THREE.SphereGeometry(0.044, 14, 12)) // Organic cloth elbow joint
+    const fArmGeo = track(new THREE.CylinderGeometry(0.042, 0.036, 0.18, 14))
+    const cuffGeo = track(new THREE.TorusGeometry(0.036, 0.009, 8, 16))
+    cuffGeo.rotateX(Math.PI / 2)
 
-      const fore = new THREE.Mesh(foreArmGeo, materials.heroCharSweater)
-      fore.position.set(side * 0.02, -0.22, 0.20)
-      fore.rotation.x = 1.30
-      fore.rotation.y = side * -0.22
-      subGroup.add(fore)
+    // Helper for sculpted hands with defined fingers
+    const buildSculptedHand = (side: -1 | 1) => {
+      const hand = new THREE.Group()
+      // Palm
+      const palmGeo = track(new THREE.BoxGeometry(0.048, 0.022, 0.060))
+      const palm = new THREE.Mesh(palmGeo, materials.heroCharSkin)
+      palm.position.set(0, -0.014, 0.03)
+      hand.add(palm)
 
-      const hand = new THREE.Mesh(handGeo, materials.heroCharSkin)
-      hand.position.set(side * 0.01, -0.23, 0.34)
-      hand.rotation.x = 0.10
-      subGroup.add(hand)
+      // Opposed thumb
+      const thumbGeo = track(new THREE.CapsuleGeometry(0.0085, 0.024, 6, 8))
+      thumbGeo.rotateZ(side * -0.5)
+      thumbGeo.rotateX(0.2)
+      const thumb = new THREE.Mesh(thumbGeo, materials.heroCharSkin)
+      thumb.position.set(side * 0.028, -0.012, 0.018)
+      hand.add(thumb)
 
-      base.torsoGroup.add(subGroup)
+      // 4 distinct articulated fingers with natural relaxed curl
+      for (let f = 0; f < 4; f++) {
+        const fx = (f - 1.5) * 0.011
+        const fLen = f === 1 || f === 2 ? 0.032 : 0.026
+        const fingerGeo = track(new THREE.CapsuleGeometry(0.007, fLen, 6, 8))
+        fingerGeo.rotateX(0.38)
+        const finger = new THREE.Mesh(fingerGeo, materials.heroCharSkin)
+        finger.position.set(fx, -0.020, 0.060 + fLen * 0.4)
+        hand.add(finger)
+      }
+      return hand
     }
 
-    const legs = this.buildDualLegs(materials.heroCharDenim, materials.heroCharSneaker, true, base.baseTorsoY, track)
-    base.rootGroup.add(legs.seatedLegsGroup)
-    base.rootGroup.add(legs.standingLegsGroup)
+    // Left Arm (positioned ergonomically over keyboard / graphics tablet)
+    {
+      const shoulderL = new THREE.Mesh(shoulderGeo, materials.heroCharSweater)
+      shoulderL.position.set(0.0, 0.0, 0.0)
+      armsLeftGroup.add(shoulderL)
+
+      const upperL = new THREE.Mesh(uArmGeo, materials.heroCharSweater)
+      upperL.position.set(0.0, -0.08, 0.03)
+      upperL.rotation.x = 0.58
+      upperL.rotation.z = -0.08
+      armsLeftGroup.add(upperL)
+
+      // Organic continuous cloth elbow
+      const elbowL = new THREE.Mesh(elbowGeo, materials.heroCharSweater)
+      elbowL.position.set(-0.01, -0.16, 0.11)
+      armsLeftGroup.add(elbowL)
+
+      const foreL = new THREE.Mesh(fArmGeo, materials.heroCharSweater)
+      foreL.position.set(-0.01, -0.19, 0.22)
+      foreL.rotation.x = 1.32
+      foreL.rotation.y = 0.14
+      armsLeftGroup.add(foreL)
+
+      const cuffL = new THREE.Mesh(cuffGeo, materials.heroCharSweater)
+      cuffL.position.set(-0.01, -0.19, 0.31)
+      armsLeftGroup.add(cuffL)
+
+      const handL = buildSculptedHand(-1)
+      handL.position.set(-0.01, -0.20, 0.36)
+      handL.rotation.x = 0.12
+      armsLeftGroup.add(handL)
+    }
+
+    // Right Arm (resting comfortably on sculpted precision mouse)
+    {
+      const shoulderR = new THREE.Mesh(shoulderGeo, materials.heroCharSweater)
+      shoulderR.position.set(0.0, 0.0, 0.0)
+      armsRightGroup.add(shoulderR)
+
+      const upperR = new THREE.Mesh(uArmGeo, materials.heroCharSweater)
+      upperR.position.set(0.0, -0.08, 0.03)
+      upperR.rotation.x = 0.54
+      upperR.rotation.z = 0.08
+      armsRightGroup.add(upperR)
+
+      // Organic continuous cloth elbow
+      const elbowR = new THREE.Mesh(elbowGeo, materials.heroCharSweater)
+      elbowR.position.set(0.01, -0.16, 0.11)
+      armsRightGroup.add(elbowR)
+
+      const foreR = new THREE.Mesh(fArmGeo, materials.heroCharSweater)
+      foreR.position.set(0.01, -0.19, 0.22)
+      foreR.rotation.x = 1.30
+      foreR.rotation.y = -0.14
+      armsRightGroup.add(foreR)
+
+      const cuffR = new THREE.Mesh(cuffGeo, materials.heroCharSweater)
+      cuffR.position.set(0.01, -0.19, 0.31)
+      armsRightGroup.add(cuffR)
+
+      const handR = buildSculptedHand(1)
+      handR.position.set(0.01, -0.20, 0.36)
+      handR.rotation.x = 0.08
+      armsRightGroup.add(handR)
+    }
+
+    torsoGroup.add(armsLeftGroup)
+    torsoGroup.add(armsRightGroup)
+    rootGroup.add(torsoGroup)
+
+    // 4. Dual Leg System (Seated Workstation Legs & Standing/Walking Legs)
+    const legs = this.buildDualLegs(materials.heroCharDenim, materials.heroCharSneaker, true, baseTorsoY, track)
+    rootGroup.add(legs.seatedLegsGroup)
+    rootGroup.add(legs.standingLegsGroup)
 
     return {
-      rootGroup: base.rootGroup,
-      torsoGroup: base.torsoGroup,
-      headMesh: base.headMesh,
+      rootGroup,
+      torsoGroup,
+      headMesh: craniumMesh,
       armsLeftGroup,
       armsRightGroup,
       legLeftGroup: legs.legLeftGroup,
       legRightGroup: legs.legRightGroup,
       seatedLegsGroup: legs.seatedLegsGroup,
       standingLegsGroup: legs.standingLegsGroup,
-      accessoryMesh: hpGroup,
-      statusRing: base.statusRing,
-      statusMaterial: base.statusMaterial,
-      baseTorsoY: base.baseTorsoY,
+      accessoryMesh: glassesGroup,
+      statusRing,
+      statusMaterial,
+      baseTorsoY,
     }
   }
 

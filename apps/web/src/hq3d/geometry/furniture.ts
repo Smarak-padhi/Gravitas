@@ -105,10 +105,10 @@ export class HqFurniture {
     f2Group.add(roomRug)
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 1. FRONTEND ENGINEER WORKSTATION (Screen Right Rear: X = -2.6, Z = 1.0)
+    // 1. FRONTEND ENGINEER WORKSTATION (X = -3.5, Z = 0.6)
     // ──────────────────────────────────────────────────────────────────────────
     const heroResult = HeroFrontendBay.buildBay(materials, this.track.bind(this))
-    heroResult.podGroup.position.set(-2.6, 7.2, 1.0)
+    heroResult.podGroup.position.set(-3.5, 7.2, 0.6)
 
     // Register modern role ID and legacy aliases for indicators
     this.stationIndicators.set('frontend-engineer-workstation', heroResult.indicatorMesh)

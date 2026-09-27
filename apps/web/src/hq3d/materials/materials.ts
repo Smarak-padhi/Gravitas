@@ -937,31 +937,31 @@ export class MaterialLibrary {
 
     this.heroCharSkin = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0xf3cca8,
-        roughness: 0.62,
-        metalness: 0.0,
+        color: 0xf5d0b5,
+        roughness: 0.55,
+        metalness: 0.02,
       })
     )
 
     this.heroCharHair = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x3d271d,
-        roughness: 0.38,
-        metalness: 0.05,
+        color: 0x6e3c23,
+        roughness: 0.52,
+        metalness: 0.08,
       })
     )
 
     this.heroCharSweater = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0xb4a4d9,
-        roughness: 0.82,
-        metalness: 0.0,
+        color: 0x243352, // Tailored slate cobalt / indigo raglan knitwear
+        roughness: 0.72,
+        metalness: 0.04,
       })
     )
 
     this.heroCharDenim = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0x24324f,
+        color: 0x202636, // Tailored charcoal denim
         roughness: 0.78,
         metalness: 0.02,
       })
@@ -969,9 +969,9 @@ export class MaterialLibrary {
 
     this.heroCharSneaker = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0xedebe8,
-        roughness: 0.48,
-        metalness: 0.05,
+        color: 0xf3f4f6, // Minimalist off-white cupsole
+        roughness: 0.42,
+        metalness: 0.06,
       })
     )
 

@@ -1,0 +1,23 @@
+{
+  "benchmark": {
+    "frameCount": 601,
+    "sampleDurationMs": 10016,
+    "avgFps": 60,
+    "medianFrameTimeMs": 16.7,
+    "p95FrameTimeMs": 16.8,
+    "p99FrameTimeMs": 16.9,
+    "avgFrameTimeMs": 16.67
+  },
+  "metrics": {
+    "totalNodes": 1674,
+    "meshNodes": 1436,
+    "uniqueGeometries": 1074,
+    "uniqueMaterials": 83,
+    "renderInfo": {
+      "calls": 402,
+      "triangles": 49740,
+      "geometries": 1022,
+      "textures": 22
+    }
+  }
+}

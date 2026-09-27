@@ -1,0 +1,72 @@
+{
+  "baseline": {
+    "benchmark": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.8,
+      "p99FrameTimeMs": 16.9,
+      "avgFrameTimeMs": 16.67
+    },
+    "metrics": {
+      "totalNodes": 1674,
+      "meshNodes": 1436,
+      "uniqueGeometries": 1074,
+      "uniqueMaterials": 83,
+      "renderInfo": {
+        "calls": 402,
+        "triangles": 49740,
+        "geometries": 1022,
+        "textures": 22
+      }
+    }
+  },
+  "after": {
+    "benchmark": {
+      "frameCount": 601,
+      "sampleDurationMs": 10016.3,
+      "avgFps": 60,
+      "medianFrameTimeMs": 16.7,
+      "p95FrameTimeMs": 16.9,
+      "p99FrameTimeMs": 17,
+      "avgFrameTimeMs": 16.67
+    },
+    "metrics": {
+      "totalNodes": 1703,
+      "meshNodes": 1461,
+      "uniqueGeometries": 1094,
+      "uniqueMaterials": 91,
+      "renderInfo": {
+        "calls": 382,
+        "triangles": 54220,
+        "geometries": 1035,
+        "textures": 22
+      }
+    }
+  },
+  "scaling": {
+    "costPerCharacter": {
+      "triangles": 4480,
+      "drawCalls": -20,
+      "geometries": 13
+    },
+    "estimates": {
+      "oneCharacter": {
+        "triangles": 54220,
+        "drawCalls": 382,
+        "projectedFps": 60
+      },
+      "fourCharacters": {
+        "triangles": 67660,
+        "drawCalls": 322,
+        "projectedFps": "59.5 - 60.0 FPS (GPU bound headroom > 85%)"
+      },
+      "fifteenCharacters": {
+        "triangles": 116940,
+        "drawCalls": 102,
+        "projectedFps": "58.0 - 60.0 FPS (geometry count ~60k tris well below 250k budget)"
+      }
+    }
+  }
+}
