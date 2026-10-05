@@ -86,3 +86,15 @@ export {
 
 // Personal OS Capability & Connector Kernel (Wave 12J)
 export * from './connectors/index.js'
+
+// K2 Closed-Loop Orchestration Layer
+export * as k2 from './k2/index.js'
+
+// K3 Tool Registry & CapabilityGrant Runtime Layer
+export * as k3 from './k3/index.js'
+
+// K4 Architecture Arena Runtime Layer
+export * as k4 from './k4/index.js'
+
+// K5 Independent Verification & Falsification Runtime Layer
+export * as k5 from './k5/index.js'
