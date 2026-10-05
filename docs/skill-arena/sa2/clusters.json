@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-10-05T08:53:15.455Z",
+  "exactDuplicateClusters": [
+    [
+      "RULE-GSD-DISCUSS--000014",
+      "RULE-GSD-EXECUTE--000030"
+    ],
+    [
+      "RULE-GSD-PLAN-PHA-000024",
+      "RULE-GSD-PLAN-REV-000086"
+    ],
+    [
+      "RULE-GSD-PLAN-PHA-000027",
+      "RULE-GSD-SPEC-PHA-000150"
+    ],
+    [
+      "RULE-GSD-DOCS-UPD-000196",
+      "RULE-GSD-EXECUTE--000031"
+    ],
+    [
+      "RULE-GSD-DOCS-UPD-000198",
+      "RULE-GSD-EXECUTE--000035"
+    ],
+    [
+      "RULE-GSD-DOCS-UPD-000199",
+      "RULE-GSD-EXECUTE--000037"
+    ],
+    [
+      "RULE-GSD-SKETCH-000140",
+      "RULE-GSD-SPIKE-000144"
+    ],
+    [
+      "RULE-GSD-GRAPHIFY-000165",
+      "RULE-GSD-MEMPALAC-000177"
+    ],
+    [
+      "RULE-AND-SEC-000264",
+      "RULE-AND-SEC-000266"
+    ],
+    [
+      "RULE-AND-SEC-000265",
+      "RULE-AND-SEC-000267"
+    ],
+    [
+      "RULE-AND-SEC-000270",
+      "RULE-AND-SEC-000276"
+    ],
+    [
+      "RULE-AND-SEC-000271",
+      "RULE-AND-SEC-000277"
+    ],
+    [
+      "RULE-AND-POL-000417",
+      "RULE-AND-POL-000424"
+    ],
+    [
+      "RULE-AND-POL-000420",
+      "RULE-AND-POL-000427"
+    ],
+    [
+      "RULE-IOS-NAV-000556",
+      "RULE-IOS-PAT-000444"
+    ]
+  ],
+  "exactDuplicateClusterCount": 15,
+  "totalClusteredRules": 30
+}

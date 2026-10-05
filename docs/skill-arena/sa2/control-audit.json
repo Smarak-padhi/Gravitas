@@ -1,0 +1,6 @@
+{
+  "controlSampleSize": 100,
+  "controlMeaningfulRelationshipsFound": 5,
+  "controlMissSignal": "ACCEPTABLE_BOUNDED_RECALL",
+  "blockingExpansionRequired": false
+}

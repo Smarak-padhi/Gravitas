@@ -1,0 +1,5342 @@
+{
+  "generatedAt": "2026-10-05T08:53:15.459Z",
+  "totalConflictSets": 667,
+  "conflictSets": [
+    {
+      "conflictId": "CONF-0001",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0002",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0003",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0004",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-FORENSIC-000080",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0005",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0006",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0007",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0008",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000247",
+      "ruleBId": "RULE-AND-ADAPT-000248",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0009",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000248",
+      "ruleBId": "RULE-AND-ADAPT-000249",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0010",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000297",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0011",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0012",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0013",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0014",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-AND-REST-000395",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0015",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-REST-000399",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0016",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-AND-REST-000395",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0017",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000481",
+      "ruleBId": "RULE-IOS-PAT-000431",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0018",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-NET-000577",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0019",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000649",
+      "ruleBId": "RULE-IOS-MAP-000650",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0020",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GRAPH-000668",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0021",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0022",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0023",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GRAPH-000677",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0024",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000329",
+      "ruleBId": "RULE-AND-STYLE-000237",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0025",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-AND-R8-000329",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0026",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000329",
+      "ruleBId": "RULE-RADIX-000706",
+      "contextBoundary": "ANDROID vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0027",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000329",
+      "ruleBId": "RULE-RADIX-000707",
+      "contextBoundary": "ANDROID vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0028",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000524",
+      "ruleBId": "RULE-IOS-ANIM-000453",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0029",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000525",
+      "ruleBId": "RULE-IOS-ANIM-000453",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0030",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000528",
+      "ruleBId": "RULE-IOS-ANIM-000453",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0031",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0032",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-L10N-000544",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "IOS vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0033",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-DISCUSS--000016",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0034",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0035",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0036",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0037",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-EXECUTE--000036",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0038",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0039",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-PROGRESS-000041",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0040",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-QUICK-000059",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0041",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0042",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-QUICK-000063",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0043",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0044",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-FORENSIC-000080",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0045",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0046",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CAPTURE-000153",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0047",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-MAP-CODE-000163",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0048",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0049",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0050",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0051",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-WORKSPAC-000206",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0052",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000210",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0053",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0054",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000015",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0055",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-TEST-000240",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0056",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-TEST-000243",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0057",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0058",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0059",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0060",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0061",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-DISCUSS--000015",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0062",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0063",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0064",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0065",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0066",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0067",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0068",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DISCUSS--000016",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000198",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0069",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000301",
+      "ruleBId": "RULE-GSD-DISCUSS--000016",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0070",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-DISCUSS--000016",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0071",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-DISCUSS--000016",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0072",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-DISCUSS--000016",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0073",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0074",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0075",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0076",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0077",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000020",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0078",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000302",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0079",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0080",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000020",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0081",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000021",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0082",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000022",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0083",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0084",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000022",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0085",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0086",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0087",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000022",
+      "ruleBId": "RULE-IOS-A11Y-000528",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0088",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0089",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000022",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0090",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000024",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000027",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0091",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-NEW-PROJ-000102",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0092",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000024",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000150",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0093",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000024",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0094",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0095",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0096",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000222",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0097",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0098",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0099",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000024",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0100",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000027",
+      "ruleBId": "RULE-GSD-QUICK-000062",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0101",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000027",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0102",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-PHA-000027",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0103",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000027",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0104",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000028",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0105",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000028",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0106",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000028",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0107",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000028",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0108",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-PLAN-PHA-000028",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0109",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-EXECUTE--000029",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0110",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000029",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0111",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000029",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0112",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000029",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0113",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-EXECUTE--000029",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0114",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-GSD-EXECUTE--000029",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0115",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-GSD-EXECUTE--000029",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0116",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-EXECUTE--000029",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0117",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000034",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0118",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0119",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0120",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000034",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0121",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000034",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0122",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000034",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0123",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000297",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0124",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0125",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0126",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-GSD-EXECUTE--000034",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0127",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000034",
+      "ruleBId": "RULE-IOS-ASO-000598",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0128",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000035",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0129",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000035",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0130",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0131",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000035",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0132",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000035",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0133",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000199",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0134",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0135",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0136",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-EXECUTE--000035",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0137",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000036",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0138",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000036",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0139",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-EXECUTE--000036",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0140",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000036",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0141",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000036",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0142",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000036",
+      "ruleBId": "RULE-IOS-A11Y-000528",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0143",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000037",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0144",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000037",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0145",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000198",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0146",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-EXECUTE--000037",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0147",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000222",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0148",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0149",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0150",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-EXECUTE--000037",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0151",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-GSD-PROGRESS-000041",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0152",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000315",
+      "ruleBId": "RULE-GSD-PROGRESS-000041",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0153",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PROGRESS-000048",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0154",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-QUICK-000059",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0155",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-QUICK-000059",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0156",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-QUICK-000059",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0157",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000119",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0158",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-QUICK-000060",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0159",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000198",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0160",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000306",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0161",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0162",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0163",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0164",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-QUICK-000060",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0165",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000082",
+      "ruleBId": "RULE-GSD-QUICK-000062",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0166",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-QUICK-000062",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000150",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0167",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-QUICK-000062",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0168",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-QUICK-000063",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0169",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-QUICK-000063",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0170",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-QUICK-000063",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0171",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-QUICK-000063",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0172",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CODE-REV-000070",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0173",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CODE-REV-000070",
+      "ruleBId": "RULE-GSD-COMPLETE-000117",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0174",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CODE-REV-000070",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0175",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-CODE-REV-000070",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0176",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0177",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-DEBUG-000073",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0178",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0179",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000198",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0180",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DEBUG-000073",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0181",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-REV-000087",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0182",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MAP-CODE-000163",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0183",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0184",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0185",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0186",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0187",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000682",
+      "ruleBId": "RULE-GSD-UI-REVIE-000077",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0188",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000080",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0189",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-FORENSIC-000080",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0190",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000119",
+      "ruleBId": "RULE-GSD-FORENSIC-000080",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0191",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000080",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0192",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000080",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0193",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000080",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0194",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-FORENSIC-000080",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0195",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000082",
+      "ruleBId": "RULE-GSD-FORENSIC-000083",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0196",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000197",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0197",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000359",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0198",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-FORENSIC-000082",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0199",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0200",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0201",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0202",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-FORENSIC-000082",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0203",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-FORENSIC-000083",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0204",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-NEW-PROJ-000102",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0205",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-REV-000086",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000150",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0206",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-REV-000086",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0207",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0208",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0209",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000222",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0210",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0211",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0212",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-PLAN-REV-000086",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0213",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-PLAN-REV-000087",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0214",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-PLAN-REV-000087",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0215",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-PLAN-REV-000087",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0216",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000302",
+      "ruleBId": "RULE-GSD-PLAN-REV-000087",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0217",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-PLAN-REV-000087",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0218",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CAPTURE-000153",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0219",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000184",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0220",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000193",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0221",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-NEW-PROJ-000102",
+      "ruleBId": "RULE-GSD-WORKSPAC-000206",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0222",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000210",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0223",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0224",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0225",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-NEW-PROJ-000102",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0226",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0227",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000195",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0228",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000117",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000197",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0229",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-COMPLETE-000117",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0230",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-COMPLETE-000117",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0231",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-COMPLETE-000117",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0232",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-COMPLETE-000117",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0233",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000119",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000167",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0234",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000119",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000197",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0235",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0236",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0237",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0238",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0239",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-COMPLETE-000119",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0240",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000120",
+      "ruleBId": "RULE-GSD-MAP-CODE-000163",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0241",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-COMPLETE-000120",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0242",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-COMPLETE-000120",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0243",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-COMPLETE-000120",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0244",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-COMPLETE-000120",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0245",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-SKETCH-000139",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0246",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-SKETCH-000139",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0247",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-GSD-SKETCH-000139",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0248",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-SKETCH-000139",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0249",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-SPIKE-000143",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0250",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-SPIKE-000143",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0251",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-SPIKE-000143",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0252",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-SPEC-PHA-000150",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0253",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000150",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0254",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CAPTURE-000153",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0255",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000184",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0256",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000185",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0257",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000195",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0258",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-SPEC-PHA-000151",
+      "ruleBId": "RULE-GSD-WORKSPAC-000206",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0259",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000210",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0260",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0261",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-SPEC-PHA-000151",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0262",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0263",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0264",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0265",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0266",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0267",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0268",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-SPEC-PHA-000151",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0269",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CAPTURE-000153",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0270",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000302",
+      "ruleBId": "RULE-GSD-CAPTURE-000153",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0271",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MAP-CODE-000161",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0272",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-MAP-CODE-000163",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0273",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-GSD-MAP-CODE-000163",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0274",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000166",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0275",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000166",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0276",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000166",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0277",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000166",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0278",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000166",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0279",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000167",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0280",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-GRAPHIFY-000169",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0281",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000195",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0282",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000197",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0283",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0284",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0285",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0286",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0287",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0288",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-GRAPHIFY-000169",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0289",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0290",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0291",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000199",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0292",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0293",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0294",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0295",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000181",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0296",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0297",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-MEMPALAC-000181",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0298",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000184",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0299",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000198",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0300",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000184",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0301",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0302",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0303",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-MEMPALAC-000184",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0304",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000185",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0305",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000198",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0306",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000299",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0307",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0308",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0309",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000185",
+      "ruleBId": "RULE-IOS-PAT-000446",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0310",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0311",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-MEMPALAC-000185",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0312",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0313",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000199",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0314",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0315",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0316",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0317",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-IOS-PAT-000431",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0318",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000189",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0319",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0320",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0321",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0322",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0323",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000682",
+      "ruleBId": "RULE-GSD-MEMPALAC-000189",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0324",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000302",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0325",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0326",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0327",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000193",
+      "ruleBId": "RULE-IOS-PAT-000446",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0328",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-MEMPALAC-000193",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0329",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0330",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-MEMPALAC-000193",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0331",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000195",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0332",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000197",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0333",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000198",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0334",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000198",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0335",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000198",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0336",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000198",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0337",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-DOCS-UPD-000199",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0338",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000222",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0339",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0340",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0341",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GSD-DOCS-UPD-000199",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0342",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-WORKSPAC-000206",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0343",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000210",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0344",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-CONFIG-000214",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0345",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GSD-UPDATE-000218",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0346",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0347",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-GSD-WORKSPAC-000207",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0348",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000302",
+      "ruleBId": "RULE-GSD-CONFIG-000210",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0349",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-GSD-UPDATE-000217",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0350",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-UPDATE-000217",
+      "ruleBId": "RULE-IOS-NAV-000549",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0351",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000219",
+      "ruleBId": "RULE-IOS-PUSH-000666",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0352",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-E2E-000222",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0353",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000223",
+      "ruleBId": "RULE-AND-STYLE-000230",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0354",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000224",
+      "ruleBId": "RULE-AND-STYLE-000230",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0355",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000225",
+      "ruleBId": "RULE-AND-STYLE-000230",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0356",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000230",
+      "ruleBId": "RULE-AND-STYLE-000237",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0357",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000231",
+      "ruleBId": "RULE-AND-STYLE-000237",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0358",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-STYLE-000233",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0359",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000233",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0360",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0361",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000392",
+      "ruleBId": "RULE-AND-STYLE-000237",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0362",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0363",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-IOS-NET-000575",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0364",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-IOS-PUSH-000654",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0365",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-GRAPH-000669",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0366",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-STYLE-000237",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0367",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000246",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0368",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000297",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0369",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000300",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0370",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0371",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0372",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-AND-TEST-000240",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0373",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-TEST-000240",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0374",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-TEST-000240",
+      "ruleBId": "RULE-GRAPH-000668",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0375",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-TEST-000243",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0376",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000246",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0377",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000247",
+      "ruleBId": "RULE-AND-CAM-000352",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0378",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000248",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0379",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-AND-ADAPT-000250",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0380",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-AND-SEC-000297",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0381",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-AND-SEC-000302",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0382",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-AND-CAM-000352",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0383",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-AND-REST-000388",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0384",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000249",
+      "ruleBId": "RULE-IOS-ARCH-000447",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0385",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000250",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0386",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-ADAPT-000250",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0387",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000261",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0388",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000261",
+      "ruleBId": "RULE-AND-SEC-000291",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0389",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000261",
+      "ruleBId": "RULE-AND-SEC-000293",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0390",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-SEC-000261",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0391",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000261",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0392",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000263",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0393",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000263",
+      "ruleBId": "RULE-AND-SEC-000293",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0394",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-SEC-000263",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0395",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000263",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0396",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-AND-SEC-000263",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0397",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000296",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0398",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000297",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0399",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000298",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0400",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000299",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0401",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0402",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000303",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0403",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000288",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0404",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-AND-SEC-000288",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0405",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-AND-SEC-000288",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0406",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000289",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0407",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000290",
+      "ruleBId": "RULE-AND-SEC-000296",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0408",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000290",
+      "ruleBId": "RULE-AND-SEC-000297",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0409",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000290",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0410",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000290",
+      "ruleBId": "RULE-AND-SEC-000303",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0411",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000290",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0412",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000382",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0413",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0414",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0415",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-AND-SEC-000290",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0416",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000291",
+      "ruleBId": "RULE-AND-SEC-000296",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0417",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000291",
+      "ruleBId": "RULE-AND-SEC-000297",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0418",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000291",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0419",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000291",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0420",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000382",
+      "ruleBId": "RULE-AND-SEC-000291",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0421",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000292",
+      "ruleBId": "RULE-AND-SEC-000298",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0422",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000292",
+      "ruleBId": "RULE-AND-SEC-000301",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0423",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000292",
+      "ruleBId": "RULE-AND-SEC-000306",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0424",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000293",
+      "ruleBId": "RULE-AND-SEC-000298",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0425",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000293",
+      "ruleBId": "RULE-AND-SEC-000302",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0426",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000294",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0427",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000294",
+      "ruleBId": "RULE-AND-SEC-000301",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0428",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000294",
+      "ruleBId": "RULE-AND-SEC-000304",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0429",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000294",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0430",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000294",
+      "ruleBId": "RULE-AND-SEC-000306",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0431",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000295",
+      "ruleBId": "RULE-AND-SEC-000299",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0432",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000295",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0433",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000295",
+      "ruleBId": "RULE-AND-SEC-000301",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0434",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000295",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0435",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000296",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0436",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-AND-SEC-000296",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0437",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000296",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0438",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000297",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0439",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000297",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0440",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000381",
+      "ruleBId": "RULE-AND-SEC-000298",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0441",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000299",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0442",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000392",
+      "ruleBId": "RULE-AND-SEC-000299",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0443",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-AND-SEC-000299",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0444",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000299",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0445",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000300",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0446",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000300",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0447",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000300",
+      "ruleBId": "RULE-IOS-NET-000575",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0448",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000300",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0449",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000301",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0450",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000301",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0451",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000302",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0452",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000303",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0453",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000303",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0454",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000303",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0455",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000304",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0456",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-AND-SEC-000305",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0457",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000305",
+      "ruleBId": "RULE-IOS-ANIM-000448",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0458",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-SEC-000306",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0459",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000306",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0460",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0461",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-AND-R8-000329",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0462",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0463",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-IOS-PERF-000457",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0464",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-IOS-PERF-000458",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0465",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0466",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000313",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0467",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0468",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-AND-R8-000328",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0469",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000346",
+      "ruleBId": "RULE-AND-R8-000314",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0470",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0471",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0472",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0473",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000314",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0474",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000315",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0475",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000315",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0476",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0477",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-AND-R8-000329",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0478",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0479",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0480",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000318",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0481",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000325",
+      "ruleBId": "RULE-AND-R8-000326",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0482",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0483",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-POL-000422",
+      "ruleBId": "RULE-AND-R8-000325",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0484",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000325",
+      "ruleBId": "RULE-IOS-PERF-000456",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0485",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000325",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0486",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000326",
+      "ruleBId": "RULE-AND-R8-000328",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0487",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000327",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0488",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000327",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0489",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000328",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0490",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000329",
+      "ruleBId": "RULE-IOS-PERF-000462",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0491",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000335",
+      "ruleBId": "RULE-AND-CAM-000346",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0492",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000346",
+      "ruleBId": "RULE-AND-CAM-000352",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0493",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000348",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0494",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000348",
+      "ruleBId": "RULE-AND-REST-000395",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0495",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000348",
+      "ruleBId": "RULE-IOS-CONC-000470",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0496",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0497",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0498",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-CONC-000501",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0499",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-CONC-000503",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0500",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-NET-000581",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0501",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-MAP-000647",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0502",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0503",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-CAM-000352",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0504",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-AND-APPF-000359",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0505",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0506",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000356",
+      "ruleBId": "RULE-GRAPH-000670",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0507",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0508",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0509",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0510",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000358",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0511",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-APPF-000359",
+      "ruleBId": "RULE-IOS-NAV-000547",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0512",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000360",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0513",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000366",
+      "ruleBId": "RULE-AND-REST-000386",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0514",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000366",
+      "ruleBId": "RULE-AND-REST-000387",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0515",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-AUTH-000382",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0516",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-REST-000387",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0517",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-REST-000394",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0518",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000380",
+      "ruleBId": "RULE-AND-REST-000399",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0519",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-AUTH-000381",
+      "ruleBId": "RULE-AND-REST-000387",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0520",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0521",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0522",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-GRAPH-000669",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0523",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000386",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0524",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-AND-REST-000392",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0525",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-AND-REST-000395",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0526",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-IOS-SEC-000511",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0527",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0528",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000387",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0529",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-AND-REST-000392",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0530",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0531",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0532",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-IOS-ASO-000609",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0533",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0534",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0535",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000388",
+      "ruleBId": "RULE-GRAPH-000677",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0536",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-AND-REST-000394",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0537",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-POL-000422",
+      "ruleBId": "RULE-AND-REST-000389",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0538",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-ARCH-000447",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0539",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-CONC-000472",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0540",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-A11Y-000526",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0541",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-A11Y-000528",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0542",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0543",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-ASO-000598",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0544",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-REV-000619",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0545",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-REV-000620",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0546",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-REV-000621",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0547",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-REV-000622",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0548",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-AUTH-000632",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0549",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-IOS-AUTH-000633",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0550",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GRAPH-000671",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0551",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0552",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-RADIX-000706",
+      "contextBoundary": "ANDROID vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0553",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000389",
+      "ruleBId": "RULE-RADIX-000707",
+      "contextBoundary": "ANDROID vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0554",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-IOS-REV-000617",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0555",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000394",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0556",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-AND-REST-000399",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0557",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-AND-POL-000422",
+      "ruleBId": "RULE-AND-REST-000395",
+      "contextBoundary": "ANDROID vs ANDROID",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0558",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0559",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000395",
+      "ruleBId": "RULE-IOS-REV-000622",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0560",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-IOS-SEC-000512",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0561",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0562",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-GRAPH-000667",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0563",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-REST-000399",
+      "ruleBId": "RULE-GRAPH-000678",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0564",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-POL-000422",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "ANDROID vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0565",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000431",
+      "ruleBId": "RULE-IOS-PAT-000443",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0566",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000431",
+      "ruleBId": "RULE-IOS-PERF-000456",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0567",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000498",
+      "ruleBId": "RULE-IOS-PAT-000431",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0568",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-NAV-000549",
+      "ruleBId": "RULE-IOS-PAT-000431",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0569",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-GEST-000558",
+      "ruleBId": "RULE-IOS-PAT-000431",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0570",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000431",
+      "ruleBId": "RULE-VCL-000699",
+      "contextBoundary": "IOS vs NEXTJS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0571",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-ANIM-000449",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0572",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000526",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0573",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-L10N-000544",
+      "ruleBId": "RULE-IOS-PAT-000434",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0574",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000434",
+      "ruleBId": "RULE-IOS-REV-000621",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0575",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-COD-000574",
+      "ruleBId": "RULE-IOS-PAT-000435",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0576",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000435",
+      "ruleBId": "RULE-SHAD-000704",
+      "contextBoundary": "IOS vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0577",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PAT-000443",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0578",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000481",
+      "ruleBId": "RULE-IOS-PAT-000445",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0579",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0580",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-CONC-000501",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0581",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-NET-000581",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0582",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-MAP-000647",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0583",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0584",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-PUSH-000658",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0585",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-PUSH-000660",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0586",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-PUSH-000662",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0587",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ARCH-000447",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0588",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ANIM-000449",
+      "ruleBId": "RULE-IOS-ANIM-000451",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0589",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-PERF-000457",
+      "ruleBId": "RULE-IOS-PERF-000462",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0590",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-PERF-000457",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0591",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MET-000587",
+      "ruleBId": "RULE-IOS-PERF-000457",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0592",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-IOS-PERF-000457",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0593",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MET-000587",
+      "ruleBId": "RULE-IOS-PERF-000458",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0594",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-NET-000575",
+      "ruleBId": "RULE-IOS-PERF-000462",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0595",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000474",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0596",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000491",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0597",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0598",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0599",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0600",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-IOS-PERF-000467",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0601",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0602",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-CONC-000501",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0603",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-NET-000581",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0604",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-MAP-000647",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0605",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0606",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000472",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0607",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-COD-000574",
+      "ruleBId": "RULE-IOS-CONC-000474",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0608",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000481",
+      "ruleBId": "RULE-IOS-NET-000585",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0609",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000481",
+      "ruleBId": "RULE-IOS-MAP-000641",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0610",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000498",
+      "ruleBId": "RULE-IOS-CONC-000500",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0611",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-CONC-000499",
+      "ruleBId": "RULE-IOS-NET-000581",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0612",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-TEST-000514",
+      "ruleBId": "RULE-IOS-TEST-000516",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0613",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000525",
+      "ruleBId": "RULE-IOS-L10N-000538",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0614",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000525",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0615",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-IOS-A11Y-000525",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0616",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-A11Y-000526",
+      "ruleBId": "RULE-IOS-NET-000575",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0617",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000678",
+      "ruleBId": "RULE-IOS-A11Y-000527",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0618",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-L10N-000538",
+      "ruleBId": "RULE-SHAD-000704",
+      "contextBoundary": "IOS vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0619",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-L10N-000544",
+      "ruleBId": "RULE-IOS-NET-000575",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0620",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000677",
+      "ruleBId": "RULE-IOS-L10N-000544",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0621",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-IOS-NAV-000549",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0622",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-IOS-NAV-000549",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0623",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-COD-000574",
+      "ruleBId": "RULE-IOS-MAP-000643",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0624",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-COD-000574",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0625",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-IOS-COD-000574",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0626",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000649",
+      "ruleBId": "RULE-IOS-NET-000579",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0627",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000649",
+      "ruleBId": "RULE-IOS-NET-000585",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0628",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-IOS-MET-000587",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0629",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ASO-000588",
+      "ruleBId": "RULE-IOS-ASO-000589",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0630",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ASO-000588",
+      "ruleBId": "RULE-IOS-ASO-000605",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0631",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-ASO-000599",
+      "ruleBId": "RULE-IOS-ASO-000609",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0632",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-ASO-000609",
+      "ruleBId": "RULE-IOS-REV-000619",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0633",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000619",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0634",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000620",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0635",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000621",
+      "ruleBId": "RULE-IOS-REV-000624",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0636",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000621",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0637",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-IOS-PUSH-000654",
+      "ruleBId": "RULE-IOS-REV-000621",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0638",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-IOS-REV-000621",
+      "contextBoundary": "GLOBAL_CANDIDATE vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0639",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000622",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0640",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-REV-000623",
+      "ruleBId": "RULE-IOS-REV-000631",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0641",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000635",
+      "ruleBId": "RULE-IOS-MAP-000647",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0642",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000635",
+      "ruleBId": "RULE-IOS-PUSH-000652",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0643",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000635",
+      "ruleBId": "RULE-IOS-PUSH-000653",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0644",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-MAP-000649",
+      "ruleBId": "RULE-IOS-PUSH-000664",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0645",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-PUSH-000651",
+      "ruleBId": "RULE-IOS-PUSH-000653",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0646",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-IOS-PUSH-000651",
+      "ruleBId": "RULE-IOS-PUSH-000654",
+      "contextBoundary": "IOS vs IOS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0647",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GRAPH-000671",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0648",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000667",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0649",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GRAPH-000669",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0650",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GRAPH-000670",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0651",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000668",
+      "ruleBId": "RULE-GRAPH-000677",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0652",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0653",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000669",
+      "ruleBId": "RULE-SHAD-000704",
+      "contextBoundary": "GLOBAL_CANDIDATE vs REACT",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0654",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GRAPH-000671",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0655",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000670",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0656",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GRAPH-000674",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0657",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000671",
+      "ruleBId": "RULE-GRAPH-000677",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0658",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000674",
+      "ruleBId": "RULE-GRAPH-000675",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0659",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GRAPH-000675",
+      "ruleBId": "RULE-GRAPH-000682",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0660",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-GENUI-000688",
+      "ruleBId": "RULE-GENUI-000691",
+      "contextBoundary": "WEB vs WEB",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0661",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-VCL-000697",
+      "ruleBId": "RULE-VCL-000698",
+      "contextBoundary": "NEXTJS vs NEXTJS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0662",
+      "type": "TRUE_CONFLICT",
+      "ruleAId": "RULE-VCL-000697",
+      "ruleBId": "RULE-VCL-000700",
+      "contextBoundary": "NEXTJS vs NEXTJS",
+      "adjudicationStatus": "CONSENSUS_HIGH"
+    },
+    {
+      "conflictId": "CONF-0663",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-COMPLETE-000119",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "DISPUTED"
+    },
+    {
+      "conflictId": "CONF-0664",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-GSD-WORKSPAC-000207",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "GLOBAL_CANDIDATE vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "DISPUTED"
+    },
+    {
+      "conflictId": "CONF-0665",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000262",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "DISPUTED"
+    },
+    {
+      "conflictId": "CONF-0666",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-SEC-000306",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "DISPUTED"
+    },
+    {
+      "conflictId": "CONF-0667",
+      "type": "APPARENT_CONFLICT",
+      "ruleAId": "RULE-AND-R8-000317",
+      "ruleBId": "RULE-PONY-CORE-000008",
+      "contextBoundary": "ANDROID vs GLOBAL_CANDIDATE",
+      "adjudicationStatus": "DISPUTED"
+    }
+  ]
+}
