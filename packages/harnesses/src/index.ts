@@ -76,3 +76,6 @@ export {
   type CodexItemCompletedEvent,
   type ParsedCodexEvents,
 } from './codex.js'
+
+// K1 Execution-Adapter Layer
+export * as k1 from './k1/index.js'
