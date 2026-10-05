@@ -1,0 +1,25 @@
+{
+  "name": "@gravitas/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "node ./build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@gravitas/core": "*",
+    "@gravitas/harnesses": "*",
+    "@gravitas/orchestrator": "*",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.186.0",
+    "electron": "^44.5.1",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.1"
+  }
+}
