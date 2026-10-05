@@ -17,7 +17,15 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
+    "test:kernel": "node --experimental-strip-types --loader ./packages/core/scripts/test-loader.mjs --test packages/core/src/kernel/__tests__/kernel.test.ts",
     "test:harnesses": "vitest run packages/harnesses",
+    "test:k2": "vitest run packages/orchestrator/src/k2",
+    "test:k3": "vitest run packages/orchestrator/src/k3",
+    "test:k4": "vitest run packages/orchestrator/src/k4",
+    "test:k5": "vitest run packages/orchestrator/src/k5",
+    "test:d0": "vitest run apps/desktop/src/d0.test.ts",
+    "test:d1": "vitest run apps/desktop/src/d1.test.ts",
+    "test:d2": "vitest run apps/desktop/src/d2.test.ts",
     "test:fcc-integration": "vitest run --config vitest.integration.config.ts packages/harnesses/src/fcc-integration.test.ts",
     "test:claude-integration": "vitest run --config vitest.integration.config.ts packages/harnesses/src/claude-integration.test.ts",
     "test:codex-integration": "vitest run --config vitest.integration.config.ts packages/harnesses/src/codex-integration.test.ts",
@@ -34,11 +42,14 @@
     "qualify:codex:dry": "npx tsx packages/harnesses/scripts/qualify-codex.ts -- --dry-run",
     "qualify:omniroute": "npx tsx packages/gateways/scripts/qualify-omniroute.ts",
     "qualify:omniroute:dry": "npx tsx packages/gateways/scripts/qualify-omniroute.ts -- --dry-run",
-    "test:gateway-composition": "npx tsx scripts/test-gateway-composition.ts"
+    "test:gateway-composition": "npx tsx scripts/test-gateway-composition.ts",
+    "test:d3": "vitest run apps/desktop/src/d3.test.ts",
+    "test:d4": "vitest run apps/desktop/src/d4.test.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.15.0",
+    "electron": "^44.5.1",
     "typescript": "^5.8.3",
     "vitest": "^5.0.1"
   },

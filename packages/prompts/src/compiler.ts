@@ -150,7 +150,7 @@ export function compilePrompt(request: PromptCompilationRequest): ManagedCompile
   }
 
   const layerMetadata: LayerMetadata[] = CANONICAL_PROMPT_LAYER_ORDER.map(
-    (name): LayerMetadata => {
+    (name: PromptLayerName): LayerMetadata => {
       const rawText = layerTexts[name]
       const included = coreResult.includedLayers.includes(name)
       const layerByteLength = included && rawText
@@ -160,7 +160,7 @@ export function compilePrompt(request: PromptCompilationRequest): ManagedCompile
         name,
         included,
         byteLength: layerByteLength,
-        source: LAYER_SOURCES[name],
+        source: LAYER_SOURCES[name] ?? 'MANAGED_POLICY',
       }
     }
   )

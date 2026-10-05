@@ -20,6 +20,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       'packages/harnesses/src/*integration.test.ts',
+      'packages/core/src/kernel/__tests__/**',
     ],
     environment: 'node',
     /**
