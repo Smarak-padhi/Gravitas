@@ -1,0 +1,276 @@
+GRAVITAS — WAVES P0 & P1 AUDIT REPORT
+Phase P: Forensics & Architecture Baseline
+
+Date: 2026-09-30
+Repository: c:\Users\smara\Desktop\Multi-agent
+Primary Invariant: 
+ROLE
+≠
+EXECUTOR
+≠
+HARNESS
+≠
+MODEL
+≠
+PROVIDER
+≠
+GATEWAY
+≠
+PROCESS
+ROLE
+
+=EXECUTOR
+
+=HARNESS
+
+=MODEL
+
+=PROVIDER
+
+=GATEWAY
+
+=PROCESS
+
+1. Exact Git Provenance
+Parameter	Proven Runtime Value	Evidence Source
+Repository Path	C:\Users\smara\Desktop\Multi-agent	Direct host command
+Current Branch	feat/v0-golden-loop	git status --porcelain=v1 -b
+HEAD Commit SHA	516e01c82cb4c3afd1080e72e68a4e1e56687335	git rev-parse HEAD
+Origin Feature SHA	516e01c82cb4c3afd1080e72e68a4e1e56687335	git rev-parse refs/remotes/origin/feat/v0-golden-loop
+Local main SHA	778a8a5270ece822f822f214e52db72bb8265a1d	git rev-parse refs/heads/main
+Origin main SHA	778a8a5270ece822f822f214e52db72bb8265a1d	git rev-parse refs/remotes/origin/main
+Remotes	origin https://github.com/Smarak-padhi/Gravitas.git (fetch & push)	git remote -v
+Active Worktrees	C:/Users/smara/Desktop/Multi-agent [feat/v0-golden-loop]	git worktree list
+Tags	None	git tag -l
+Branch Divergence	In sync with origin/feat/v0-golden-loop; 10 commits ahead of main	git rev-list
+Working Tree Safety	Zero unstaged/staged modifications to tracked files; local main untouched; no stashes/resets	git diff --stat
+2. Exact Files Created and Modified
+Created Files (in docs/architecture-v2/):
+docs/architecture-v2/GRAVITAS_EXECUTION_ROADMAP.md — Operational master roadmap covering waves P0 through P8, K0 through K5, D0 through D4, and Phase I with explicit review gates and open architecture preservation.
+docs/architecture-v2/GRAVITAS_CONCEPTUAL_BOUNDARIES.md — Clear separation of Role, Executor, Harness, Model, Provider, Gateway, and Process with concrete hypothetical examples.
+docs/architecture-v2/PROGRAM_INVARIANTS.md — The 20 mandatory program rules governing evidence, human sovereignty, and execution bounds.
+docs/architecture-v2/CURRENT_GIT_BASELINE.md — Authoritative git SHAs, remotes, branches, and working tree audit.
+docs/architecture-v2/CURRENT_TOOLCHAIN_BASELINE.md — Verified versions of Node, npm, Git, Python, shell, running processes, and network listeners.
+docs/architecture-v2/CURRENT_DEPENDENCY_BASELINE.md — Workspace structure, absent node_modules evidence, and security audit details.
+docs/architecture-v2/EXECUTION_SURFACE_INVENTORY.md — Catalog of CLIs, harnesses, MCPs, and plugins under the strict qualification ladder.
+docs/architecture-v2/INTEGRATION_FEASIBILITY_MATRIX.md — Technical feasibility and capability matrix across all candidate automation surfaces.
+Modified Files:
+None. Zero tracked files were modified.
+Preserved Untracked Work:
+gravitas-agent-specs/: Contains 25 logical agent role contracts (00-AGENT-CONTRACT.md to 24-WORLD-PROJECTION-RENDERER.md) and 2 registries. Preserved untouched.
+3. Toolchain Versions
+Node.js: v24.13.0 (C:\Program Files\nodejs\node.exe) — [PROVEN]
+npm: 11.6.2 (C:\Program Files\nodejs\npm.cmd) — [PROVEN]
+Git: 2.54.0.windows.1 (C:\Program Files\Git\cmd\git.exe) — [PROVEN]
+Python: Python 3.12.10 (C:\Users\smara\AppData\Local\Programs\Python\Python312\python.exe) — [PROVEN]
+py Launcher: Python 3.14.5, Python 3.12 (64-bit), CPython 3.14.0 — [PROVEN]
+Host Shell: Windows PowerShell 5.1.26100.9549 (Desktop Edition, CLR 4.0.30319.42000) — [PROVEN]
+Host OS: Microsoft Windows NT 10.0.26100.9549 (NTFS at C:\) — [PROVEN]
+Absent Toolchains: cargo/rustc, go, pnpm, yarn, bun, deno are not on system PATH — [PROVEN]
+4. Package / Workspace State
+
+Monorepo root configured with npm workspaces:
+
+Workspaces (packages/*):
+@gravitas/core (packages/core)
+@gravitas/orchestrator (packages/orchestrator)
+@gravitas/harnesses (packages/harnesses)
+@gravitas/gateways (packages/gateways)
+@gravitas/agents (packages/agents)
+@gravitas/prompts (packages/prompts)
+@gravitas/git (packages/git)
+@gravitas/verifier (packages/verifier)
+@gravitas/browser-qa (packages/browser-qa)
+Workspaces (apps/*):
+@gravitas/server (apps/server)
+@gravitas/web (apps/web)
+CRITICAL FINDING — Missing Dependencies:
+node_modules is ABSENT from repository root and all workspace subdirectories (Test-Path returned False).
+npm ls --depth=0 exited with code 1 (ELSPROBLEMS unmet dependencies across all workspaces).
+In compliance with the Wave P0 freeze rule, npm install was NOT executed.
+5. Dependency / Security State
+Lockfile: package-lock.json present (715,831 bytes, lockfileVersion 3).
+Security Audit Result (npm audit):
+5 active advisories (1 low, 1 moderate, 2 high, 1 critical).
+High severity: adm-zip <= 0.6.0 (Memory allocation DoS, symlink overwrite, SUID preservation; GHSA-xcpc-8h2w-3j85, GHSA-vwc7-r8mq-g2x9, GHSA-j5f4-cc29-5x44).
+Moderate severity: dompurify <= 3.4.12 (Custom element bypass, hook pollution, detached subtree XSS; GHSA-c2j3-45gr-mqc4, GHSA-cmwh-pvxp-8882, GHSA-55q2-fjhq-7xh7).
+Root Cause: All 5 advisories stem from transitive dependencies of omniroute (onnxruntime-node and monaco-editor).
+No automatic fixes were applied.
+6. Discovered Execution Surfaces & Qualification Ladder
+DISCOVERED
+→
+INSTALLED
+→
+AUTHENTICATED
+→
+REACHABLE
+→
+CAPABILITY_PROBED
+→
+CONTAINMENT_TESTED
+→
+QUALIFIED
+→
+READY
+DISCOVERED→INSTALLED→AUTHENTICATED→REACHABLE→CAPABILITY_PROBED→CONTAINMENT_TESTED→QUALIFIED→READY
+Execution Surface	Path / Binary	Version	Current Level	Proven Finding
+PowerShell 5.1	powershell.exe	5.1.26100	CAPABILITY_PROBED	Direct local execution proven; GRAVITAS containment/qualification not tested
+Playwright Automation	playwright.exe / Python	1.62.0	CAPABILITY_PROBED	Browsers installed in ms-playwright; @playwright/mcp running
+Antigravity CLI (agy)	C:\Users\smara\AppData\Local\agy\bin\agy.exe	1.1.13	INSTALLED	Headless --print supported; interactive commands wait for TTY
+Antigravity IDE	Antigravity.exe	Electron	INSTALLED	Presentation UI only; no headless automation surface
+Codex CLI	npm\codex.ps1 (@openai/codex)	0.153.4	INSTALLED	Unauthenticated: missing credentials in auth.json
+Claude Code CLI	npm\claude.ps1 (@anthropic-ai/claude-code)	2.1.276	INSTALLED	Unauthenticated: not signed in to claude.ai
+Free Claude Code (FCC)	~/.local/bin/fcc-claude.exe	0.0.0.0	INSTALLED	Unreachable: fcc-server at 127.0.0.1:8082 not running
+FCC Server	~/.local/bin/fcc-server.exe	0.0.0.0	INSTALLED	Server binary exists; daemon is currently idle
+GitHub CLI (gh)	C:\Program Files\GitHub CLI\gh.exe	2.98.0	INSTALLED	Unauthenticated: gh auth status reports not logged in
+OmniRoute Gateway	node_modules\omniroute\bin\omniroute.mjs	Historical: 3.8.50	DISCOVERED	Absent on disk: local node_modules is not installed
+Antigravity Python SDK	PyPI google-antigravity	None	DISCOVERED	Not installed in host Python environment
+Gemini CLI	None found	None	ABSENT	No executable on PATH or scripts directories
+ChatGPT Integration	Desktop App 26.928.2636.0	26.928	INSTALLED	Desktop app idle; no direct programmatic API endpoint
+7. Categorization of Execution Surfaces
+Proven Callable Now (Deterministic Host Services):
+PowerShell 5.1 Host Shell: Fully operational for deterministic compilation, file operations, git checks, and process management.
+Playwright Core: Chromium engines are installed and capability has been partially probed; containment and GRAVITAS qualification are not yet proven.
+Installed-but-Unqualified Surfaces (Require Auth, Daemon, or Probe):
+Antigravity CLI (agy): Binary present (1.1.13). Help advertises non-interactive flags, but actual `-p` execution/auth/output/containment remain unproven and must be closed in P1 before approval.
+Codex CLI: Binary present (0.153.4), sandbox service running (CodexSandboxService), but unauthenticated.
+Claude Code CLI: Binary present (2.1.276), doctor reports operational engine, but unauthenticated.
+Free Claude Code (FCC): fcc-claude.exe present, but local fcc-server.exe is not listening on port 8082.
+GitHub CLI (gh): Present (2.98.0), but unauthenticated.
+Absent Surfaces:
+Gemini CLI: No CLI binary discovered.
+OmniRoute: Uninstalled due to missing node_modules.
+Antigravity Python SDK: Not installed in Python.
+Surfaces Requiring Authentication Before Qualification:
+Codex CLI: Requires running codex login or injecting API credentials.
+Claude Code CLI: Requires running claude auth login or configuring Anthropic credentials.
+GitHub CLI: Requires gh auth login.
+8. MCP, Plugin, and Connector Inventory
+MCP Servers:
+Antigravity MCP (~/.gemini/antigravity/mcp/):
+playwright: Active and currently running via npx (PID 8036, 19244).
+stitch: Active and currently running via npx (PID 12200, 20444).
+reticle: Configured schema available.
+Claude Code MCP (~/.claude.json):
+Configured servers: reticle, figma.
+Codex CLI MCP (~/.codex/config.toml):
+Configured servers: node_repl (notes missing CODEX_WINDOWS_REGISTERED_CORE env var), figma.
+Plugin Inventory:
+ponytail (C:\Users\smara\.gemini\config\plugins\ponytail): Focused on minimal code solutions and anti-bloat audits.
+Global npm agent tooling discovered: gsd-core, gsd-mcp-server, gsd-tools, gsd_run, uipro.
+Connector Inventory:
+Calendar and Communication connectors exist only as architectural specifications and ADR definitions (docs/adr/0007-connector-bounded-capability-not-agent.md, 0011-background-jobs-without-persistent-llms.md). Zero runtime connector daemons are active.
+9. Antigravity Programmatic-Access Findings
+
+An explicit investigation was conducted to determine whether Antigravity possesses a real programmatic/headless surface rather than an automatable GUI:
+
+Antigravity Desktop IDE (Antigravity.exe):
+Running as an Electron/Chromium desktop application (PIDs 3008, 5820, 11660, etc.) with internal language_server.exe (PID 8412) on ports 57925, 57926.
+It is an interactive developer UI. It does NOT expose a documented headless automation API or CLI entry point. GUI automation should not be treated as a supported harness.
+Antigravity CLI (agy.exe):
+Discovered at C:\Users\smara\AppData\Local\agy\bin\agy.exe (v1.1.13).
+`agy --help` advertises headless non-interactive invocation via `-p` / `--print`; actual successful invocation was not proven in this audit.
+Supports --output-format json and --output-format stream-json.
+Supports structured JSON schema enforcement via --json-schema.
+Supports conversation resumption via --continue and --conversation <id>.
+Supports execution sandboxing via --sandbox.
+Conclusion: `agy.exe` is the strongest discovered candidate programmatic surface for Antigravity, while the IDE is human-facing. `agy` must still pass current runtime/auth/containment probes before it can be treated as qualified or ready.
+10. Authority and Containment Findings
+Shell Authority: Under Windows PowerShell 5.1, processes inherit current user session permissions unless explicitly sandboxed.
+Filesystem Authority: Full NTFS read/write across C:\Users\smara unless wrapped in sandbox profiles.
+Codex Containment: Codex utilizes a dedicated elevated Windows background service: CodexSandboxService (codex-windows-sandbox-service.exe PID 8684) providing restricted filesystem and network containment.
+Git Authority: Git commits and worktrees are manageable via standard Git CLI, but worker execution must strictly occur within isolated worktrees (packages/git model) rather than primary branches.
+11. Unresolved Contradictions & Unsupported Assumptions in Prior Docs
+Assumption of Ready Execution Harnesses: Prior documentation and qualification artifacts (codex-qualification.json dated 2026-09-20, omniroute-qualification.json dated 2026-09-21) reported Codex and OmniRoute as APPROVED and ready. Current Reality: Codex is unauthenticated, and OmniRoute is not installed on disk due to missing node_modules.
+Assumption of Running FCC Proxy: Architectural documents assumed Free Claude Code was immediately callable. Current Reality: fcc-server.exe was idle; calling fcc-claude.exe timed out immediately looking for port 8082.
+Conflation of Antigravity IDE with Harness: Previous notes discussed automating Antigravity through its app window. Current Reality: The IDE UI is a presentation tool; headless automation must flow through agy.exe.
+12. Blockers for Wave P0/P1
+
+Human review can proceed, but P1 is NOT ready for approval. Required per-surface evidence fields are incomplete, and several qualification claims exceeded the proven ladder state. The reviewed Markdown artifacts document the blocking gaps.
+
+13. Exact Current Repository Status After Audit
+Branch: feat/v0-golden-loop
+HEAD SHA: 516e01c82cb4c3afd1080e72e68a4e1e56687335
+Tracked status: Clean. Zero modifications to existing files.
+Untracked files: gravitas-agent-specs/ and docs/architecture-v2/ (containing all 8 newly created baseline documents).
+Repository frozen: No code changes, no dependency installs, no auth mutations.
+P2 FORENSICS INPUTS
+
+(Context and evidence prepared specifically for the future Wave P2 audit)
+
+Wave P2 will execute source-level backend forensics tracing: 
+Goal
+→
+planning
+→
+task/DAG
+→
+scheduler
+→
+role resolution
+→
+capability grant
+→
+harness/provider
+→
+worktree/execution
+→
+candidate
+→
+cleanup
+→
+verifier
+→
+browser QA
+→
+evidence
+→
+WAITING_APPROVAL
+→
+human decision
+→
+integration/materialization
+Goal→planning→task/DAG→scheduler→role resolution→capability grant→harness/provider→worktree/execution→candidate→cleanup→verifier→browser QA→evidence→WAITING_APPROVAL→human decision→integration/materialization
+
+Evidence and Questions Inherited for P2 Investigation:
+Core Package State Tracing:
+How does packages/core/src/state-machine.ts transition tasks from PENDING to WAITING_APPROVAL to SUCCEEDED?
+Is the state machine strictly event-driven or does it poll?
+Scheduler & DAG Concurrency:
+In packages/orchestrator/src/scheduler.ts, how are dependencies between parallel tasks resolved?
+How does the scheduler handle task failure propagation across the DAG?
+Role Resolution vs Harness Selection:
+In packages/agents/ and packages/orchestrator/, how does a logical AgentRole select an available, qualified WorkerHarness?
+Does the codebase adhere to ROLE ≠ EXECUTOR ≠ HARNESS ≠ MODEL ≠ PROVIDER ≠ GATEWAY ≠ PROCESS, or are role identities hardcoded to harness adapters in legacy code?
+Git Worktree Isolation:
+In packages/git/src/worktree.ts, how are ephemeral execution worktrees created, bounded, and cleaned up?
+Is there any code path that can accidentally commit or merge into main without human approval?
+Capability Grants & Tool Scoping:
+Does packages/core or packages/orchestrator enforce runtime capability boundaries (file path whitelists, network rules), or are capability grants currently informational metadata?
+Harness Subprocess Process-Tree Termination:
+In packages/harnesses/src/process.ts, does Windows termination execute taskkill /pid <PID> /T /F to kill orphaned child processes on timeout?
+Verification & Evidence Integrity:
+In packages/verifier/ and packages/browser-qa/, what constitutes an authoritative evidence bundle?
+How are evidence hashes and approval manifests persisted and verified?
+STOP RULE ENFORCEMENT
+
+In accordance with the mandatory stop rule:
+
+Wave P0 baseline is substantially complete. Wave P1 is incomplete and requires a corrective evidence pass before approval.
+Wave P2 has NOT been started.
+No code refactoring, package installations, or architectural rewrites were initiated.
+Execution is terminated pending human review.
+
+WAVES P0-P1 BLOCKED
+
+REVIEWER CORRECTION — 2026-09-30
+- P0 provenance/baseline artifacts are usable, subject to ordinary source verification in P2.
+- P1 is blocked because the original prompt required a complete field set for each candidate execution surface and sequential qualification evidence. Several fields remain UNKNOWN/UNPROVEN.
+- PowerShell is not READY merely because local command execution works.
+- Playwright is CAPABILITY_PROBED, not production-ready.
+- `agy --help` proves advertised flags, not successful headless runtime behavior.
+- Historical Codex/OmniRoute qualification cannot override current unauthenticated/absent runtime state.
+- Desktop notification/background facilities and full MCP/plugin/connector authority/containment details require completion.
+- P2 must not start until a corrective P1 pass is reviewed and explicitly approved.
+
+WAVES P0-P1 BLOCKED
