@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self';">
+  <title>GRAVITAS — Desktop Command Center D1</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --border: #374151;
+      --border-focus: #38bdf8;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --badge-ready: #34d399;
+      --badge-offline: #f87171;
+      --badge-waiting: #fbbf24;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Focus accessibility baseline */
+    :focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.05em;
+      color: #38bdf8;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+    .badge-ready { background: #064e3b; color: var(--badge-ready); border: 1px solid #059669; }
+    .badge-offline { background: #7f1d1d; color: var(--badge-offline); border: 1px solid #dc2626; }
+    .badge-starting { background: #78350f; color: var(--badge-waiting); border: 1px solid #d97706; }
+
+    .header-meta {
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--text-muted);
+      display: flex;
+      gap: 16px;
+    }
+
+    nav {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 20px;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-btn:hover { color: var(--text-main); }
+    .nav-btn.active {
+      color: #38bdf8;
+      border-bottom-color: #38bdf8;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .surface { display: none; }
+    .surface.active { display: block; }
+
+    /* Overview Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-top: 0;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Activity timeline */
+    .timeline {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .timeline-item {
+      padding: 8px 12px;
+      border-left: 2px solid var(--border);
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+
+    /* Untrusted data containment */
+    pre.untrusted-data {
+      background: #000;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #a7f3d0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    td { font-family: monospace; }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+
+    /* Epistemological Banner */
+    .invariant-banner {
+      background: #1e1b4b;
+      border: 1px solid #4338ca;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #c7d2fe;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Modal Dialog */
+    dialog {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 24px;
+      max-width: 500px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+    }
+    dialog h3 {
+      margin-top: 0;
+      color: #38bdf8;
+      font-size: 16px;
+    }
+    .dialog-field {
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    .dialog-label {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Live Region */
+    .sr-live {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    /* D3 Living HQ */
+    #living-hq { flex: 1; overflow: auto; padding: 12px 20px; }
+    #living-hq[hidden], #cc-nav[hidden], #cc-main[hidden] { display: none; }
+    .world-heading { font-size: 15px; margin: 0 0 8px 0; color: #38bdf8; }
+    .world-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; font-size: 12px; }
+    .world-layout { display: grid; grid-template-columns: minmax(320px, 1.4fr) minmax(300px, 1fr); gap: 12px; min-height: 420px; }
+    #world-canvas-host { background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; min-height: 420px; height: 60vh; position: relative; }
+    #world-canvas-host[hidden] { display: none; }
+    .world-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    #world-outline { max-height: 40vh; overflow: auto; border: 1px solid var(--border); border-radius: 6px; padding: 8px; background: var(--bg-surface); }
+    .world-zone-title { font-size: 12px; margin: 8px 0 4px; color: var(--text-muted); text-transform: uppercase; }
+    .world-outline-list { list-style: none; margin: 0; padding: 0; }
+    .world-outline-btn { width: 100%; text-align: left; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; margin-bottom: 3px; font-family: monospace; font-size: 11px; cursor: pointer; }
+    .world-outline-btn[aria-pressed="true"] { border-color: var(--border-focus); background: #0c4a6e; }
+    .world-empty { font-size: 11px; color: var(--text-muted); margin: 2px 0; }
+    #world-inspector { border: 1px solid var(--border-focus); border-radius: 6px; padding: 10px; background: var(--bg-card); font-size: 12px; max-height: 40vh; overflow: auto; }
+    #world-inspector[hidden] { display: none; }
+    .world-inspector-dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-family: monospace; margin: 0 0 8px; }
+    .world-inspector-dl dt { color: var(--text-muted); }
+    .world-inspector-dl dd { margin: 0; word-break: break-all; }
+    .world-inspector-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+
+  <!-- Accessible live status announcement -->
+  <div id="status-announcer" class="sr-live" aria-live="polite"></div>
+
+  <!-- Header Landmark -->
+  <header role="banner">
+    <div class="brand">
+      <h1>GRAVITAS COMMAND CENTER</h1>
+      <span id="kernel-status-badge" class="badge badge-starting" role="status">STARTING</span>
+    </div>
+    <div class="header-meta">
+      <div role="group" aria-label="Switch view" style="display:flex; gap:6px;">
+        <button id="btn-view-command" class="btn btn-secondary" aria-pressed="true">Command Center</button>
+        <button id="btn-view-world" class="btn btn-secondary" aria-pressed="false">Living HQ</button>
+      </div>
+      <span id="protocol-version-text">Protocol: d1.0</span>
+      <span id="pids-text">Main: - / Kernel: -</span>
+      <button id="btn-refresh-all" class="btn btn-secondary" aria-label="Refresh All Projections">Refresh</button>
+    </div>
+  </header>
+
+  <!-- Navigation Landmark -->
+  <nav id="cc-nav" role="navigation" aria-label="Command Center Surfaces">
+    <button class="nav-btn active" data-surface="surface-overview" role="tab" aria-selected="true" id="tab-overview">Overview</button>
+    <button class="nav-btn" data-surface="surface-work" role="tab" aria-selected="false" id="tab-work">Work Hierarchy</button>
+    <button class="nav-btn" data-surface="surface-execution" role="tab" aria-selected="false" id="tab-execution">Execution</button>
+    <button class="nav-btn" data-surface="surface-verification" role="tab" aria-selected="false" id="tab-verification">Verification</button>
+    <button class="nav-btn" data-surface="surface-approvals" data-badge="true" role="tab" aria-selected="false" id="tab-approvals">Approvals (<span id="approvals-badge-count">0</span>)</button>
+    <button class="nav-btn" data-surface="surface-system" role="tab" aria-selected="false" id="tab-system">System</button>
+  </nav>
+
+  <!-- Main Content Landmark -->
+  <main id="cc-main" role="main">
+
+    <!-- SURFACE 1: OVERVIEW -->
+    <section id="surface-overview" class="surface active" role="tabpanel" aria-labelledby="tab-overview">
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">Active WorkSessions</div>
+          <div class="metric-value" id="metric-sessions">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Runs</div>
+          <div class="metric-value" id="metric-runs">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Tasks</div>
+          <div class="metric-value" id="metric-tasks">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Waiting Approval</div>
+          <div class="metric-value" id="metric-approvals" style="color: var(--badge-waiting)">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Failed / Recovery</div>
+          <div class="metric-value" id="metric-failed" style="color: var(--badge-offline)">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Canonical Revision</div>
+          <div class="metric-value" id="metric-revision">0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Recent Canonical Activity</h2>
+        <ul id="overview-activity-list" class="timeline">
+          <li class="timeline-item">Awaiting canonical kernel activity...</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SURFACE 2: WORK HIERARCHY -->
+    <section id="surface-work" class="surface" role="tabpanel" aria-labelledby="tab-work">
+      <div class="card">
+        <h2 class="card-title">WorkSessions ➔ Runs ➔ Tasks</h2>
+        <div id="work-hierarchy-tree">Loading work hierarchy...</div>
+      </div>
+      <div class="card" id="task-detail-panel" style="display: none;">
+        <h3 class="card-title">Task Inspector: <span id="task-detail-title">-</span></h3>
+        <div class="dialog-field">
+          <span class="dialog-label">Causal Chain</span>
+          <div id="task-causal-chain" style="font-family: monospace; font-size: 12px;"></div>
+        </div>
+        <div class="dialog-field">
+          <span class="dialog-label">Worker Result Output (Untrusted Data Containment)</span>
+          <pre id="task-worker-output" class="untrusted-data"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURFACE 3: EXECUTION -->
+    <section id="surface-execution" class="surface" role="tabpanel" aria-labelledby="tab-execution">
+      <div class="invariant-banner">
+        <strong>ARCHITECTURAL INVARIANT:</strong><br>
+        ROLE ≠ EXECUTOR ≠ HARNESS ≠ MODEL ≠ PROVIDER ≠ GATEWAY ≠ PROCESS<br>
+        WORKER_SUCCESS ≠ VERIFIED_SUCCESS | TOOL_SUCCESS ≠ VERIFIED_SUCCESS
+      </div>
+      <div class="card">
+        <h2 class="card-title">Execution Registry (K1 / K2 / K3 Projections)</h2>
+        <table aria-label="Execution Registry">
+          <thead>
+            <tr>
+              <th>Execution ID</th>
+              <th>Role</th>
+              <th>Executor</th>
+              <th>Harness</th>
+              <th>Model / Provider</th>
+              <th>Cost Eligibility</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="execution-table-body">
+            <tr><td colspan="8">No active executions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SURFACE 4: VERIFICATION -->
+    <section id="surface-verification" class="surface" role="tabpanel" aria-labelledby="tab-verification">
+      <div class="invariant-banner">
+        <strong>EPISTEMOLOGICAL INVARIANTS:</strong><br>
+        WORKER_SUCCESS ≠ VERIFIED_SUCCESS | TOOL_SUCCESS ≠ VERIFIED_SUCCESS<br>
+        VERIFICATION_PASS ≠ HUMAN_APPROVAL<br>
+        HASH ≠ SIGNATURE | HASH ≠ EXTERNAL_TRUST | HASH ≠ IMMUTABILITY<br>
+        EVIDENCE_BUNDLE ≠ TRUSTED_EVIDENCE
+      </div>
+      <div class="card" id="verification-card">
+        <h2 class="card-title">Verification Report (K5 Projection)</h2>
+        <div id="verification-content">Loading verification state...</div>
+      </div>
+    </section>
+
+    <!-- SURFACE 5: APPROVAL INBOX -->
+    <section id="surface-approvals" class="surface" role="tabpanel" aria-labelledby="tab-approvals">
+      <div class="card">
+        <h2 class="card-title">Human Approval Gate Inbox</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 0;">
+          Sovereign operator queue. Approvals recorded here NEVER automatically merge, push, deploy, or release.
+        </p>
+        <div id="approval-queue-container">No pending approval gates.</div>
+      </div>
+    </section>
+
+    <!-- SURFACE 6: SYSTEM -->
+    <section id="surface-system" class="surface" role="tabpanel" aria-labelledby="tab-system">
+      <div class="card">
+        <h2 class="card-title">System Diagnostics</h2>
+        <div id="system-diagnostics-container">Loading system diagnostics...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- D3 LIVING HQ: spatial projection (WebGL) + semantic outline/inspector (DOM). Projection only. -->
+  <section id="living-hq" hidden aria-label="Living HQ">
+    <h2 id="world-heading" tabindex="-1" class="world-heading">Living HQ — spatial projection of canonical runtime</h2>
+    <div id="world-banner" role="status" aria-live="polite" class="invariant-banner"></div>
+    <div class="world-controls" role="group" aria-label="Living HQ controls">
+      <button id="world-btn-refresh" class="btn btn-secondary">Refresh projection</button>
+      <button id="world-btn-reset" class="btn btn-secondary">Reset camera</button>
+      <button id="world-btn-zoom-in" class="btn btn-secondary">Zoom in</button>
+      <button id="world-btn-zoom-out" class="btn btn-secondary">Zoom out</button>
+      <label>3D level
+        <select id="world-quality">
+          <option value="FULL_3D">Full 3D</option>
+          <option value="REDUCED_3D">Reduced 3D</option>
+          <option value="SEMANTIC_ONLY">Semantic only (no WebGL)</option>
+        </select>
+      </label>
+      <button id="world-btn-retry3d" class="btn btn-secondary" hidden>Retry 3D</button>
+    </div>
+    <div class="world-layout">
+      <div id="world-canvas-host" aria-hidden="true"></div>
+      <div class="world-side">
+        <nav id="world-outline" aria-label="Living HQ world outline"></nav>
+        <aside id="world-inspector" role="region" aria-label="Spatial inspector" tabindex="-1" hidden></aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Approval Confirmation Dialog Modal -->
+  <dialog id="approval-dialog" aria-labelledby="dialog-heading">
+    <h3 id="dialog-heading">Record Human Decision</h3>
+    <div class="dialog-field">
+      <span class="dialog-label">Target Item / Plan ID</span>
+      <div id="dialog-target-id" style="font-family: monospace; font-weight: 600;"></div>
+    </div>
+    <div class="dialog-field">
+      <span class="dialog-label">Current Revision</span>
+      <div id="dialog-revision" style="font-family: monospace;"></div>
+    </div>
+    <div class="dialog-field">
+      <span class="dialog-label">Technical Outcome</span>
+      <div id="dialog-outcome" style="font-size: 13px;"></div>
+    </div>
+    <div class="dialog-field">
+      <span class="dialog-label">Operator ID</span>
+      <input type="text" id="dialog-operator-id" value="operator-human-01" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 6px; font-family: monospace;" />
+    </div>
+    <div class="dialog-field">
+      <span class="dialog-label">Decision Rationale</span>
+      <input type="text" id="dialog-rationale" placeholder="Reason for decision" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 6px; font-family: monospace;" />
+    </div>
+    <div class="dialog-actions">
+      <button id="dialog-btn-cancel" class="btn btn-secondary">Cancel</button>
+      <button id="dialog-btn-reject" class="btn btn-danger">Reject</button>
+      <button id="dialog-btn-approve" class="btn">Approve</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
