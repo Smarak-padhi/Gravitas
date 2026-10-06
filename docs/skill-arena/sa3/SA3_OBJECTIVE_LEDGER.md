@@ -1,0 +1,22 @@
+# SA3 Objective Ledger & Capability Transformation Matrix
+
+## 1. Evolution from Historical Rules to Candidate Capabilities
+Skill Arena transforms an ad-hoc collection of historical skill repositories, rulesets, and agent prompt files into a disciplined, provenance-backed engineering knowledge engine. This ledger tracks the qualitative and structural evolution of the capability inventory through Phase SA3.
+
+---
+
+## 2. Capability Transformation Ledger
+
+| Subsystem / Domain | Raw Historical State (Pre-Arena) | SA1 Atomic State | SA2/SA2-R Semantic State | SA3 Canonical & Profile State |
+| :--- | :--- | :--- | :--- | :--- |
+| **Dependency Hygiene** (`ponytail`) | Unchecked prompt directives to "be lazy" and cut code. | 12 atomic rules with provenance locators. | Clustered into semantic equivalence with high conflict warnings. | Synthesized into universal global candidates ([`CANON-GLOB-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_GLOBAL_RULE_CANDIDATES.md#canon-glob-001-local-implementation-reuse) through `004`), contextual test-seam candidate ([`CANON-CTX-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_CONTEXTUAL_RULE_CANDIDATES.md#canon-ctx-001-context-bounded-abstraction--test-seams)), and 4 retained standalone specialist tools. |
+| **Design Aesthetics** (`taste`, `shadcn-ui`, `vercel-agent-skills`) | Competing, contradictory design rules (flat brutalism vs liquid glass vs compound components). | Atomic aesthetic and component rules. | Reclassified as paradigm variants across UI paradigms. | Partitioned into 4 explicit Design Profiles ([`PROFILE-DESIGN-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_DESIGN_PROFILES.md#profile-design-001-minimalist--brutalist-web-design-grammar) through `004`), preventing aesthetic bleed. |
+| **Mobile Platforms** (`android-*`, `swift-*`, `ios-*`) | 370+ platform-specific rules mixed indiscriminately with generic guidelines. | 373 distinct platform-bound atomic rules. | Cross-platform relationships marked as platform variants. | Partitioned into [`PROFILE-PLAT-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_PLATFORM_PROFILES.md#profile-plat-001-android-native-platform-profile) (Android, 188 rules) and [`PROFILE-PLAT-002`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_PLATFORM_PROFILES.md#profile-plat-002-apple-ios-platform-profile) (iOS, 185 rules), plus targeted specialist candidates (`CANON-SPEC-*`). |
+| **Lifecycle Orchestration** (`gsd-*`, `graphify`) | 222 procedural workflow commands. | Structured workflow action and governance rules. | Bounded procedural execution relationships. | Consolidated into [`PROFILE-WORK-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_WORKFLOW_PROFILES.md#profile-work-001-gsd-phased-lifecycle-workflow) (GSD, 206 rules) and [`PROFILE-WORK-002`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_WORKFLOW_PROFILES.md#profile-work-002-graphify-codebase-knowledge-graph-workflow) (Graphify, 16 rules). |
+| **Breaking Version Shifts** (Swift 5 vs 6, Nav 2 vs 3, AGP 8 vs 9) | Overlapping rules creating compiler errors on newer or older SDKs. | Version-tagged atomic rules. | Reconciled as version variants in SA2-R. | Structured into 6 explicit Version Families ([`VERSION-FAMILY-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_VERSION_FAMILIES.md#version-family-001-android-navigation-architecture) through `006`). |
+| **Unverified / Hazardous Directives** | Blindly executed shell scripts and hardware assumptions. | Flagged security-sensitive rules. | Reclassified as context-limited or unresolved. | Bounded into 3 Technical Verification Holds ([`HOLD-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_TECHNICAL_VERIFICATION_HOLDS.md#hold-001-android-xr-display-glasses-glimmer-interaction-model) through `003`) and 3 Rejection Proposals ([`REJECT-001`](file:///c:/Users/smara/Desktop/Multi-agent/docs/skill-arena/sa3/SA3_REJECTION_PROPOSALS.md#reject-001-raw-shell-command-execution-without-sandbox-isolation) through `003`). |
+
+---
+
+## 3. Preservation of GRAVITAS Core Integrity
+Throughout this transformation, the GRAVITAS production codebase (`packages/core`, `packages/orchestrator`, `apps/desktop`) has remained 100% frozen, untouched, and unpolluted by external skill code or unverified heuristics.

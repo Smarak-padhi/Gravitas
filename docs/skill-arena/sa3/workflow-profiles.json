@@ -1,0 +1,1938 @@
+[
+  {
+    "profileId": "PROFILE-WORK-001",
+    "name": "GSD Phased Lifecycle Workflow",
+    "intendedContext": "Structured multi-phase AI and human software delivery lifecycles.",
+    "workflowStages": [
+      "Discuss Phase",
+      "Plan Phase",
+      "Execute Phase",
+      "Verify Phase",
+      "Milestone Close",
+      "Forensics",
+      "Debug"
+    ],
+    "primarySources": [
+      "gsd-*"
+    ],
+    "enforcementMechanisms": [
+      "Mandatory workflow reading",
+      "Atomic commits",
+      "Validation gates",
+      "Context handoff threads"
+    ],
+    "sourceRuleIds": [
+      "RULE-GSD-DISCUSS--000013",
+      "RULE-GSD-DISCUSS--000014",
+      "RULE-GSD-DISCUSS--000015",
+      "RULE-GSD-DISCUSS--000016",
+      "RULE-GSD-DISCUSS--000017",
+      "RULE-GSD-PLAN-PHA-000018",
+      "RULE-GSD-PLAN-PHA-000019",
+      "RULE-GSD-PLAN-PHA-000020",
+      "RULE-GSD-PLAN-PHA-000021",
+      "RULE-GSD-PLAN-PHA-000022",
+      "RULE-GSD-PLAN-PHA-000023",
+      "RULE-GSD-PLAN-PHA-000024",
+      "RULE-GSD-PLAN-PHA-000025",
+      "RULE-GSD-PLAN-PHA-000026",
+      "RULE-GSD-PLAN-PHA-000027",
+      "RULE-GSD-PLAN-PHA-000028",
+      "RULE-GSD-EXECUTE--000029",
+      "RULE-GSD-EXECUTE--000030",
+      "RULE-GSD-EXECUTE--000031",
+      "RULE-GSD-EXECUTE--000032",
+      "RULE-GSD-EXECUTE--000033",
+      "RULE-GSD-EXECUTE--000034",
+      "RULE-GSD-EXECUTE--000035",
+      "RULE-GSD-EXECUTE--000036",
+      "RULE-GSD-EXECUTE--000037",
+      "RULE-GSD-VERIFY-W-000038",
+      "RULE-GSD-PROGRESS-000039",
+      "RULE-GSD-PROGRESS-000040",
+      "RULE-GSD-PROGRESS-000041",
+      "RULE-GSD-PROGRESS-000042",
+      "RULE-GSD-PROGRESS-000043",
+      "RULE-GSD-PROGRESS-000044",
+      "RULE-GSD-PROGRESS-000045",
+      "RULE-GSD-PROGRESS-000046",
+      "RULE-GSD-PROGRESS-000047",
+      "RULE-GSD-PROGRESS-000048",
+      "RULE-GSD-NEXT-000049",
+      "RULE-GSD-FAST-000050",
+      "RULE-GSD-QUICK-000051",
+      "RULE-GSD-QUICK-000052",
+      "RULE-GSD-QUICK-000053",
+      "RULE-GSD-QUICK-000054",
+      "RULE-GSD-QUICK-000055",
+      "RULE-GSD-QUICK-000056",
+      "RULE-GSD-QUICK-000057",
+      "RULE-GSD-QUICK-000058",
+      "RULE-GSD-QUICK-000059",
+      "RULE-GSD-QUICK-000060",
+      "RULE-GSD-QUICK-000061",
+      "RULE-GSD-QUICK-000062",
+      "RULE-GSD-QUICK-000063",
+      "RULE-GSD-PAUSE-WO-000064",
+      "RULE-GSD-RESUME-W-000065",
+      "RULE-GSD-SHIP-000066",
+      "RULE-GSD-UNDO-000067",
+      "RULE-GSD-UNDO-000068",
+      "RULE-GSD-UNDO-000069",
+      "RULE-GSD-CODE-REV-000070",
+      "RULE-GSD-DEBUG-000071",
+      "RULE-GSD-DEBUG-000072",
+      "RULE-GSD-DEBUG-000073",
+      "RULE-GSD-AUDIT-FI-000074",
+      "RULE-GSD-SECURE-P-000075",
+      "RULE-GSD-EVAL-REV-000076",
+      "RULE-GSD-UI-REVIE-000077",
+      "RULE-GSD-AUDIT-UA-000078",
+      "RULE-GSD-VALIDATE-000079",
+      "RULE-GSD-FORENSIC-000080",
+      "RULE-GSD-FORENSIC-000081",
+      "RULE-GSD-FORENSIC-000082",
+      "RULE-GSD-FORENSIC-000083",
+      "RULE-GSD-PLAN-REV-000084",
+      "RULE-GSD-PLAN-REV-000085",
+      "RULE-GSD-PLAN-REV-000086",
+      "RULE-GSD-PLAN-REV-000087",
+      "RULE-GSD-PLAN-REV-000088",
+      "RULE-GSD-PLAN-REV-000089",
+      "RULE-GSD-PLAN-REV-000090",
+      "RULE-GSD-PLAN-REV-000091",
+      "RULE-GSD-PLAN-REV-000092",
+      "RULE-GSD-PLAN-REV-000093",
+      "RULE-GSD-PLAN-REV-000094",
+      "RULE-GSD-PLAN-REV-000095",
+      "RULE-GSD-PLAN-REV-000096",
+      "RULE-GSD-PLAN-REV-000097",
+      "RULE-GSD-PLAN-REV-000098",
+      "RULE-GSD-PLAN-REV-000099",
+      "RULE-GSD-PLAN-REV-000100",
+      "RULE-GSD-NEW-PROJ-000101",
+      "RULE-GSD-NEW-PROJ-000102",
+      "RULE-GSD-NEW-PROJ-000103",
+      "RULE-GSD-NEW-MILE-000104",
+      "RULE-GSD-COMPLETE-000105",
+      "RULE-GSD-COMPLETE-000106",
+      "RULE-GSD-COMPLETE-000107",
+      "RULE-GSD-COMPLETE-000108",
+      "RULE-GSD-COMPLETE-000109",
+      "RULE-GSD-COMPLETE-000110",
+      "RULE-GSD-COMPLETE-000111",
+      "RULE-GSD-COMPLETE-000112",
+      "RULE-GSD-COMPLETE-000113",
+      "RULE-GSD-COMPLETE-000114",
+      "RULE-GSD-COMPLETE-000115",
+      "RULE-GSD-COMPLETE-000116",
+      "RULE-GSD-COMPLETE-000117",
+      "RULE-GSD-COMPLETE-000118",
+      "RULE-GSD-COMPLETE-000119",
+      "RULE-GSD-COMPLETE-000120",
+      "RULE-GSD-COMPLETE-000121",
+      "RULE-GSD-COMPLETE-000122",
+      "RULE-GSD-AUDIT-MI-000123",
+      "RULE-GSD-MILESTON-000124",
+      "RULE-GSD-CLEANUP-000125",
+      "RULE-GSD-STATS-000126",
+      "RULE-GSD-REVIEW-B-000127",
+      "RULE-GSD-REVIEW-B-000128",
+      "RULE-GSD-REVIEW-B-000129",
+      "RULE-GSD-REVIEW-B-000130",
+      "RULE-GSD-REVIEW-B-000131",
+      "RULE-GSD-REVIEW-B-000132",
+      "RULE-GSD-REVIEW-B-000133",
+      "RULE-GSD-IMPORT-000134",
+      "RULE-GSD-IMPORT-000135",
+      "RULE-GSD-INBOX-000136",
+      "RULE-GSD-EXPLORE-000137",
+      "RULE-GSD-SKETCH-000138",
+      "RULE-GSD-SKETCH-000139",
+      "RULE-GSD-SKETCH-000140",
+      "RULE-GSD-SKETCH-000141",
+      "RULE-GSD-SPIKE-000142",
+      "RULE-GSD-SPIKE-000143",
+      "RULE-GSD-SPIKE-000144",
+      "RULE-GSD-SPIKE-000145",
+      "RULE-GSD-SPIKE-000146",
+      "RULE-GSD-SPEC-PHA-000147",
+      "RULE-GSD-SPEC-PHA-000148",
+      "RULE-GSD-SPEC-PHA-000149",
+      "RULE-GSD-SPEC-PHA-000150",
+      "RULE-GSD-SPEC-PHA-000151",
+      "RULE-GSD-MVP-PHAS-000152",
+      "RULE-GSD-CAPTURE-000153",
+      "RULE-GSD-CAPTURE-000154",
+      "RULE-GSD-CAPTURE-000155",
+      "RULE-GSD-CAPTURE-000156",
+      "RULE-GSD-CAPTURE-000157",
+      "RULE-GSD-CAPTURE-000158",
+      "RULE-GSD-MAP-CODE-000159",
+      "RULE-GSD-MAP-CODE-000160",
+      "RULE-GSD-MAP-CODE-000161",
+      "RULE-GSD-MAP-CODE-000162",
+      "RULE-GSD-MAP-CODE-000163",
+      "RULE-GSD-GRAPHIFY-000164",
+      "RULE-GSD-GRAPHIFY-000165",
+      "RULE-GSD-GRAPHIFY-000166",
+      "RULE-GSD-GRAPHIFY-000167",
+      "RULE-GSD-GRAPHIFY-000168",
+      "RULE-GSD-GRAPHIFY-000169",
+      "RULE-GSD-GRAPHIFY-000170",
+      "RULE-GSD-GRAPHIFY-000171",
+      "RULE-GSD-INGEST-D-000172",
+      "RULE-GSD-INGEST-D-000173",
+      "RULE-GSD-INGEST-D-000174",
+      "RULE-GSD-INGEST-D-000175",
+      "RULE-GSD-EXTRACT--000176",
+      "RULE-GSD-MEMPALAC-000177",
+      "RULE-GSD-MEMPALAC-000178",
+      "RULE-GSD-MEMPALAC-000179",
+      "RULE-GSD-MEMPALAC-000180",
+      "RULE-GSD-MEMPALAC-000181",
+      "RULE-GSD-MEMPALAC-000182",
+      "RULE-GSD-MEMPALAC-000183",
+      "RULE-GSD-MEMPALAC-000184",
+      "RULE-GSD-MEMPALAC-000185",
+      "RULE-GSD-MEMPALAC-000186",
+      "RULE-GSD-MEMPALAC-000187",
+      "RULE-GSD-MEMPALAC-000188",
+      "RULE-GSD-MEMPALAC-000189",
+      "RULE-GSD-MEMPALAC-000190",
+      "RULE-GSD-MEMPALAC-000191",
+      "RULE-GSD-MEMPALAC-000192",
+      "RULE-GSD-MEMPALAC-000193",
+      "RULE-GSD-MEMPALAC-000194",
+      "RULE-GSD-DOCS-UPD-000195",
+      "RULE-GSD-DOCS-UPD-000196",
+      "RULE-GSD-DOCS-UPD-000197",
+      "RULE-GSD-DOCS-UPD-000198",
+      "RULE-GSD-DOCS-UPD-000199",
+      "RULE-GSD-MANAGER-000200",
+      "RULE-GSD-WORKSTRE-000201",
+      "RULE-GSD-THREAD-000202",
+      "RULE-GSD-WORKSPAC-000203",
+      "RULE-GSD-WORKSPAC-000204",
+      "RULE-GSD-WORKSPAC-000205",
+      "RULE-GSD-WORKSPAC-000206",
+      "RULE-GSD-WORKSPAC-000207",
+      "RULE-GSD-SURFACE-000208",
+      "RULE-GSD-SETTINGS-000209",
+      "RULE-GSD-CONFIG-000210",
+      "RULE-GSD-CONFIG-000211",
+      "RULE-GSD-CONFIG-000212",
+      "RULE-GSD-CONFIG-000213",
+      "RULE-GSD-CONFIG-000214",
+      "RULE-GSD-UPDATE-000215",
+      "RULE-GSD-UPDATE-000216",
+      "RULE-GSD-UPDATE-000217",
+      "RULE-GSD-UPDATE-000218"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-GSD-DISCUSS--000013",
+        "sourceName": "gsd-discuss-phase",
+        "sourceLocator": "line 18",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DISCUSS--000014",
+        "sourceName": "gsd-discuss-phase",
+        "sourceLocator": "line 27",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DISCUSS--000015",
+        "sourceName": "gsd-discuss-phase",
+        "sourceLocator": "line 53",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DISCUSS--000016",
+        "sourceName": "gsd-discuss-phase",
+        "sourceLocator": "line 55",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DISCUSS--000017",
+        "sourceName": "gsd-discuss-phase",
+        "sourceLocator": "line 59",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000018",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 9",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000019",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000020",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000021",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000022",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 16",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000023",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 18",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000024",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 27",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000025",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 38",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000026",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 39",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000027",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 42",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-PHA-000028",
+        "sourceName": "gsd-plan-phase",
+        "sourceLocator": "line 43",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000029",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000030",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 29",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000031",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 35",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000032",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 36",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000033",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 37",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000034",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 38",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000035",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 40",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000036",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 44",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXECUTE--000037",
+        "sourceName": "gsd-execute-phase",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-VERIFY-W-000038",
+        "sourceName": "gsd-verify-work",
+        "sourceLocator": "line 22",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000039",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 10",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000040",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000041",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000042",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000043",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 17",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000044",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 18",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000045",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 19",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000046",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000047",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 21",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PROGRESS-000048",
+        "sourceName": "gsd-progress",
+        "sourceLocator": "line 22",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-NEXT-000049",
+        "sourceName": "gsd-next",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-FAST-000050",
+        "sourceName": "gsd-fast",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000051",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000052",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 16",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000053",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 18",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000054",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000055",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 22",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000056",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 44",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000057",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 51",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000058",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 63",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000059",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 72",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000060",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 74",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000061",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 160",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000062",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 166",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-QUICK-000063",
+        "sourceName": "gsd-quick",
+        "sourceLocator": "line 167",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PAUSE-WO-000064",
+        "sourceName": "gsd-pause-work",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-RESUME-W-000065",
+        "sourceName": "gsd-resume-work",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SHIP-000066",
+        "sourceName": "gsd-ship",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UNDO-000067",
+        "sourceName": "gsd-undo",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UNDO-000068",
+        "sourceName": "gsd-undo",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UNDO-000069",
+        "sourceName": "gsd-undo",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CODE-REV-000070",
+        "sourceName": "gsd-code-review",
+        "sourceLocator": "line 48",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DEBUG-000071",
+        "sourceName": "gsd-debug",
+        "sourceLocator": "line 10",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DEBUG-000072",
+        "sourceName": "gsd-debug",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DEBUG-000073",
+        "sourceName": "gsd-debug",
+        "sourceLocator": "line 32",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-AUDIT-FI-000074",
+        "sourceName": "gsd-audit-fix",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SECURE-P-000075",
+        "sourceName": "gsd-secure-phase",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EVAL-REV-000076",
+        "sourceName": "gsd-eval-review",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UI-REVIE-000077",
+        "sourceName": "gsd-ui-review",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-AUDIT-UA-000078",
+        "sourceName": "gsd-audit-uat",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-VALIDATE-000079",
+        "sourceName": "gsd-validate-phase",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-FORENSIC-000080",
+        "sourceName": "gsd-forensics",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-FORENSIC-000081",
+        "sourceName": "gsd-forensics",
+        "sourceLocator": "line 46",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-FORENSIC-000082",
+        "sourceName": "gsd-forensics",
+        "sourceLocator": "line 47",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-FORENSIC-000083",
+        "sourceName": "gsd-forensics",
+        "sourceLocator": "line 48",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000084",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000085",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000086",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 26",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000087",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 33",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000088",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 34",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000089",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 35",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000090",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 36",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000091",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 37",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000092",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 38",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000093",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 39",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000094",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 40",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000095",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 41",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000096",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 42",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000097",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 43",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000098",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 44",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000099",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-PLAN-REV-000100",
+        "sourceName": "gsd-plan-review-convergence",
+        "sourceLocator": "line 48",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-NEW-PROJ-000101",
+        "sourceName": "gsd-new-project",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-NEW-PROJ-000102",
+        "sourceName": "gsd-new-project",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-NEW-PROJ-000103",
+        "sourceName": "gsd-new-project",
+        "sourceLocator": "line 26",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-NEW-MILE-000104",
+        "sourceName": "gsd-new-milestone",
+        "sourceLocator": "line 18",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000105",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000106",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 35",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000107",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 37",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000108",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 65",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000109",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 67",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000110",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 78",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000111",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 84",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000112",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 91",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000113",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 98",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000114",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 104",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000115",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 111",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000116",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 130",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000117",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 131",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000118",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 132",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000119",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 133",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000120",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 134",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000121",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 135",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-COMPLETE-000122",
+        "sourceName": "gsd-complete-milestone",
+        "sourceLocator": "line 136",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-AUDIT-MI-000123",
+        "sourceName": "gsd-audit-milestone",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MILESTON-000124",
+        "sourceName": "gsd-milestone-summary",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CLEANUP-000125",
+        "sourceName": "gsd-cleanup",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-STATS-000126",
+        "sourceName": "gsd-stats",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000127",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000128",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000129",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 26",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000130",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 30",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000131",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 41",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000132",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-REVIEW-B-000133",
+        "sourceName": "gsd-review-backlog",
+        "sourceLocator": "line 50",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-IMPORT-000134",
+        "sourceName": "gsd-import",
+        "sourceLocator": "line 10",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-IMPORT-000135",
+        "sourceName": "gsd-import",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-INBOX-000136",
+        "sourceName": "gsd-inbox",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXPLORE-000137",
+        "sourceName": "gsd-explore",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SKETCH-000138",
+        "sourceName": "gsd-sketch",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SKETCH-000139",
+        "sourceName": "gsd-sketch",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SKETCH-000140",
+        "sourceName": "gsd-sketch",
+        "sourceLocator": "line 30",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SKETCH-000141",
+        "sourceName": "gsd-sketch",
+        "sourceLocator": "line 37",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPIKE-000142",
+        "sourceName": "gsd-spike",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPIKE-000143",
+        "sourceName": "gsd-spike",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPIKE-000144",
+        "sourceName": "gsd-spike",
+        "sourceLocator": "line 26",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPIKE-000145",
+        "sourceName": "gsd-spike",
+        "sourceLocator": "line 33",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPIKE-000146",
+        "sourceName": "gsd-spike",
+        "sourceLocator": "line 34",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPEC-PHA-000147",
+        "sourceName": "gsd-spec-phase",
+        "sourceLocator": "line 10",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPEC-PHA-000148",
+        "sourceName": "gsd-spec-phase",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPEC-PHA-000149",
+        "sourceName": "gsd-spec-phase",
+        "sourceLocator": "line 29",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPEC-PHA-000150",
+        "sourceName": "gsd-spec-phase",
+        "sourceLocator": "line 37",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SPEC-PHA-000151",
+        "sourceName": "gsd-spec-phase",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MVP-PHAS-000152",
+        "sourceName": "gsd-mvp-phase",
+        "sourceLocator": "line 24",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000153",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000154",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000155",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000156",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000157",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CAPTURE-000158",
+        "sourceName": "gsd-capture",
+        "sourceLocator": "line 16",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MAP-CODE-000159",
+        "sourceName": "gsd-map-codebase",
+        "sourceLocator": "line 20",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MAP-CODE-000160",
+        "sourceName": "gsd-map-codebase",
+        "sourceLocator": "line 21",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MAP-CODE-000161",
+        "sourceName": "gsd-map-codebase",
+        "sourceLocator": "line 22",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MAP-CODE-000162",
+        "sourceName": "gsd-map-codebase",
+        "sourceLocator": "line 33",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MAP-CODE-000163",
+        "sourceName": "gsd-map-codebase",
+        "sourceLocator": "line 51",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000164",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 9",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000165",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000166",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 59",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000167",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 85",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000168",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 105",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000169",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 183",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000170",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 185",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-GRAPHIFY-000171",
+        "sourceName": "gsd-graphify",
+        "sourceLocator": "line 186",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-INGEST-D-000172",
+        "sourceName": "gsd-ingest-docs",
+        "sourceLocator": "line 10",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-INGEST-D-000173",
+        "sourceName": "gsd-ingest-docs",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-INGEST-D-000174",
+        "sourceName": "gsd-ingest-docs",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-INGEST-D-000175",
+        "sourceName": "gsd-ingest-docs",
+        "sourceLocator": "line 17",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-EXTRACT--000176",
+        "sourceName": "gsd-extract-learnings",
+        "sourceLocator": "line 7",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000177",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000178",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 40",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000179",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 41",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000180",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 46",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000181",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 47",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000182",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 53",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000183",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 54",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000184",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 56",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000185",
+        "sourceName": "gsd-mempalace-capture",
+        "sourceLocator": "line 85",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000186",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000187",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 45",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000188",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 46",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000189",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 51",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000190",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 52",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000191",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 58",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000192",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 61",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000193",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 64",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MEMPALAC-000194",
+        "sourceName": "gsd-mempalace-recall",
+        "sourceLocator": "line 65",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DOCS-UPD-000195",
+        "sourceName": "gsd-docs-update",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DOCS-UPD-000196",
+        "sourceName": "gsd-docs-update",
+        "sourceLocator": "line 25",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DOCS-UPD-000197",
+        "sourceName": "gsd-docs-update",
+        "sourceLocator": "line 27",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DOCS-UPD-000198",
+        "sourceName": "gsd-docs-update",
+        "sourceLocator": "line 29",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-DOCS-UPD-000199",
+        "sourceName": "gsd-docs-update",
+        "sourceLocator": "line 33",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-MANAGER-000200",
+        "sourceName": "gsd-manager",
+        "sourceLocator": "line 15",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSTRE-000201",
+        "sourceName": "gsd-workstreams",
+        "sourceLocator": "line 9",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-THREAD-000202",
+        "sourceName": "gsd-thread",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSPAC-000203",
+        "sourceName": "gsd-workspace",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSPAC-000204",
+        "sourceName": "gsd-workspace",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSPAC-000205",
+        "sourceName": "gsd-workspace",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSPAC-000206",
+        "sourceName": "gsd-workspace",
+        "sourceLocator": "line 38",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-WORKSPAC-000207",
+        "sourceName": "gsd-workspace",
+        "sourceLocator": "line 40",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SURFACE-000208",
+        "sourceName": "gsd-surface",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-SETTINGS-000209",
+        "sourceName": "gsd-settings",
+        "sourceLocator": "line 8",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CONFIG-000210",
+        "sourceName": "gsd-config",
+        "sourceLocator": "line 11",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CONFIG-000211",
+        "sourceName": "gsd-config",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CONFIG-000212",
+        "sourceName": "gsd-config",
+        "sourceLocator": "line 13",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CONFIG-000213",
+        "sourceName": "gsd-config",
+        "sourceLocator": "line 14",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-CONFIG-000214",
+        "sourceName": "gsd-config",
+        "sourceLocator": "line 43",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UPDATE-000215",
+        "sourceName": "gsd-update",
+        "sourceLocator": "line 24",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UPDATE-000216",
+        "sourceName": "gsd-update",
+        "sourceLocator": "line 25",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UPDATE-000217",
+        "sourceName": "gsd-update",
+        "sourceLocator": "line 26",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GSD-UPDATE-000218",
+        "sourceName": "gsd-update",
+        "sourceLocator": "line 27",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  },
+  {
+    "profileId": "PROFILE-WORK-002",
+    "name": "Graphify Codebase Knowledge Graph Workflow",
+    "intendedContext": "Autonomous codebase architectural exploration, AST indexing, and dependency graphing.",
+    "workflowStages": [
+      "Cache Detection",
+      "Scan Root Normalization",
+      "Subagent Dispatch",
+      "Graph Construction"
+    ],
+    "primarySources": [
+      "graphify"
+    ],
+    "enforcementMechanisms": [
+      "Absolute path resolution",
+      "Deep mode flag propagation",
+      "Single-pass extraction"
+    ],
+    "sourceRuleIds": [
+      "RULE-GRAPH-000667",
+      "RULE-GRAPH-000668",
+      "RULE-GRAPH-000669",
+      "RULE-GRAPH-000670",
+      "RULE-GRAPH-000671",
+      "RULE-GRAPH-000672",
+      "RULE-GRAPH-000673",
+      "RULE-GRAPH-000674",
+      "RULE-GRAPH-000675",
+      "RULE-GRAPH-000676",
+      "RULE-GRAPH-000677",
+      "RULE-GRAPH-000678",
+      "RULE-GRAPH-000679",
+      "RULE-GRAPH-000680",
+      "RULE-GRAPH-000681",
+      "RULE-GRAPH-000682"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-GRAPH-000667",
+        "sourceName": "graphify",
+        "sourceLocator": "line 53",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000668",
+        "sourceName": "graphify",
+        "sourceLocator": "line 166",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000669",
+        "sourceName": "graphify",
+        "sourceLocator": "line 169",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000670",
+        "sourceName": "graphify",
+        "sourceLocator": "line 170",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000671",
+        "sourceName": "graphify",
+        "sourceLocator": "line 180",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000672",
+        "sourceName": "graphify",
+        "sourceLocator": "line 186",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000673",
+        "sourceName": "graphify",
+        "sourceLocator": "line 225",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000674",
+        "sourceName": "graphify",
+        "sourceLocator": "line 235",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000675",
+        "sourceName": "graphify",
+        "sourceLocator": "line 284",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000676",
+        "sourceName": "graphify",
+        "sourceLocator": "line 309",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000677",
+        "sourceName": "graphify",
+        "sourceLocator": "line 311",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000678",
+        "sourceName": "graphify",
+        "sourceLocator": "line 422",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000679",
+        "sourceName": "graphify",
+        "sourceLocator": "line 742",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000680",
+        "sourceName": "graphify",
+        "sourceLocator": "line 743",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000681",
+        "sourceName": "graphify",
+        "sourceLocator": "line 744",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-GRAPH-000682",
+        "sourceName": "graphify",
+        "sourceLocator": "line 745",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  },
+  {
+    "profileId": "PROFILE-WORK-003",
+    "name": "App Store Submission & Optimization Workflow",
+    "intendedContext": "Mobile application release engineering, privacy compliance audit, and store listing optimization.",
+    "workflowStages": [
+      "Privacy Manifest Audit",
+      "Review Guideline Triage",
+      "Metadata Strategy",
+      "Custom Product Pages"
+    ],
+    "primarySources": [
+      "app-store-review",
+      "app-store-optimization"
+    ],
+    "enforcementMechanisms": [
+      "Required-reason API declaration",
+      "Third-party SDK validation",
+      "Review rejection triage"
+    ],
+    "sourceRuleIds": [
+      "RULE-IOS-ASO-000588",
+      "RULE-IOS-ASO-000589",
+      "RULE-IOS-ASO-000590",
+      "RULE-IOS-ASO-000591",
+      "RULE-IOS-ASO-000592",
+      "RULE-IOS-ASO-000593",
+      "RULE-IOS-ASO-000594",
+      "RULE-IOS-ASO-000595",
+      "RULE-IOS-ASO-000596",
+      "RULE-IOS-ASO-000597",
+      "RULE-IOS-ASO-000598",
+      "RULE-IOS-ASO-000599",
+      "RULE-IOS-ASO-000600",
+      "RULE-IOS-ASO-000601",
+      "RULE-IOS-ASO-000602",
+      "RULE-IOS-ASO-000603",
+      "RULE-IOS-ASO-000604",
+      "RULE-IOS-ASO-000605",
+      "RULE-IOS-ASO-000606",
+      "RULE-IOS-ASO-000607",
+      "RULE-IOS-ASO-000608",
+      "RULE-IOS-ASO-000609",
+      "RULE-IOS-ASO-000610",
+      "RULE-IOS-ASO-000611",
+      "RULE-IOS-ASO-000612",
+      "RULE-IOS-ASO-000613",
+      "RULE-IOS-ASO-000614",
+      "RULE-IOS-ASO-000615",
+      "RULE-IOS-ASO-000616",
+      "RULE-IOS-REV-000617",
+      "RULE-IOS-REV-000618",
+      "RULE-IOS-REV-000619",
+      "RULE-IOS-REV-000620",
+      "RULE-IOS-REV-000621",
+      "RULE-IOS-REV-000622",
+      "RULE-IOS-REV-000623",
+      "RULE-IOS-REV-000624",
+      "RULE-IOS-REV-000625",
+      "RULE-IOS-REV-000626",
+      "RULE-IOS-REV-000627",
+      "RULE-IOS-REV-000628",
+      "RULE-IOS-REV-000629",
+      "RULE-IOS-REV-000630",
+      "RULE-IOS-REV-000631"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-IOS-ASO-000588",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 51",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000589",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 54",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000590",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 79",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000591",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 86",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000592",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 88",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000593",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 101",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000594",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 102",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000595",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 103",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000596",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 104",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000597",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 108",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000598",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 126",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000599",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 128",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000600",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 134",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000601",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 146",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000602",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 160",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000603",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 194",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000604",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 215",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000605",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 236",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000606",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 252",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000607",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 266",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000608",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 267",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000609",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 268",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000610",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 269",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000611",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 275",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000612",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 276",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000613",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 277",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000614",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 278",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000615",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 279",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-ASO-000616",
+        "sourceName": "app-store-optimization",
+        "sourceLocator": "line 280",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000617",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 12",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000618",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 58",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000619",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 66",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000620",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 70",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000621",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 71",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000622",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 72",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000623",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 73",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000624",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 123",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000625",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 141",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000626",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 142",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000627",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 143",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000628",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 144",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000629",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 145",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000630",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 185",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-IOS-REV-000631",
+        "sourceName": "app-store-review",
+        "sourceLocator": "line 186",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  }
+]

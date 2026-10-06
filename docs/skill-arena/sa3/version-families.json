@@ -1,0 +1,120 @@
+[
+  {
+    "familyId": "VERSION-FAMILY-001",
+    "topic": "Android Navigation Architecture",
+    "platform": "Android",
+    "framework": "Jetpack Navigation",
+    "versionRange": "Navigation 2.x (XML Backstack) -> Navigation 3.x (Compose Scenes)",
+    "variants": [
+      {
+        "generation": "LEGACY_V2",
+        "description": "XML-based navigation graphs and FragmentNavigator backstack management"
+      },
+      {
+        "generation": "MODERN_V3",
+        "description": "Type-safe Scene composables, multi-pane list-detail scenes, and ViewModel scoping"
+      }
+    ],
+    "sourceRuleIds": [
+      "RULE-AND-ADAPT-000245"
+    ],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  },
+  {
+    "familyId": "VERSION-FAMILY-002",
+    "topic": "Android Gradle Plugin Build Architecture",
+    "platform": "Android",
+    "framework": "Android Gradle Plugin (AGP)",
+    "versionRange": "AGP 8.x -> AGP 9.0",
+    "variants": [
+      {
+        "generation": "AGP_8",
+        "description": "Traditional Transform API and legacy R8 configuration flags"
+      },
+      {
+        "generation": "AGP_9",
+        "description": "Artifact API, strict Java 17 toolchain, and modernized R8 keep rule consumers"
+      }
+    ],
+    "sourceRuleIds": [],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  },
+  {
+    "familyId": "VERSION-FAMILY-003",
+    "topic": "Google Play Billing Library Protocol",
+    "platform": "Android",
+    "framework": "Play Billing Library (PBL)",
+    "versionRange": "PBL 5.x / 6.x -> PBL 7.x",
+    "variants": [
+      {
+        "generation": "PBL_6",
+        "description": "Legacy BillingClient queryPurchasesAsync and SkuDetails APIs"
+      },
+      {
+        "generation": "PBL_7",
+        "description": "ProductDetails, multi-offer subscription tokens, and strict lifecycle connection retry"
+      }
+    ],
+    "sourceRuleIds": [],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  },
+  {
+    "familyId": "VERSION-FAMILY-004",
+    "topic": "Android TV User Interface Toolkit",
+    "platform": "Android",
+    "framework": "androidx.tv / Leanback",
+    "versionRange": "Leanback Support Fragments -> Jetpack Compose for TV",
+    "variants": [
+      {
+        "generation": "LEANBACK",
+        "description": "BrowseSupportFragment, Presenter, ArrayObjectAdapter, and TV XML Views"
+      },
+      {
+        "generation": "COMPOSE_TV",
+        "description": "androidx.tv.material3, TransformingLazyColumn, and focusRestorer APIs"
+      }
+    ],
+    "sourceRuleIds": [],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  },
+  {
+    "familyId": "VERSION-FAMILY-005",
+    "topic": "Swift Concurrency & Data-Race Safety",
+    "platform": "Apple",
+    "framework": "Swift Language Runtime",
+    "versionRange": "Swift 5.9 (@preconcurrency) -> Swift 6 (Strict Concurrency)",
+    "variants": [
+      {
+        "generation": "SWIFT_5",
+        "description": "Approachable concurrency with @preconcurrency opt-outs and unchecked Sendable"
+      },
+      {
+        "generation": "SWIFT_6",
+        "description": "Default MainActor isolation, complete Sendable verification, and nonisolated(nonsending)"
+      }
+    ],
+    "sourceRuleIds": [],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  },
+  {
+    "familyId": "VERSION-FAMILY-006",
+    "topic": "Apple Material & Depth Translucency",
+    "platform": "Apple",
+    "framework": "SwiftUI",
+    "versionRange": "iOS 15-17 (Material blurs) -> iOS 26+ (Liquid Glass)",
+    "variants": [
+      {
+        "generation": "MATERIAL_BLUR",
+        "description": ".background(.ultraThinMaterial) static translucent surfaces"
+      },
+      {
+        "generation": "LIQUID_GLASS",
+        "description": "Interactive GlassEffectContainer, morphing glass transitions, and glass toolbar styles"
+      }
+    ],
+    "sourceRuleIds": [
+      "RULE-IOS-GLASS-000454"
+    ],
+    "verificationState": "VERIFIED_FROM_PROVENANCE"
+  }
+]

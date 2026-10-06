@@ -1,0 +1,26 @@
+[
+  {
+    "rejectionId": "REJECT-001",
+    "reasonCategory": "TOOL_INSTALLER_SCRIPT",
+    "rationale": "Rule represents raw local shell installation command without sandbox isolation, error trapping, or general engineering applicability.",
+    "sourceRuleIds": [
+      "RULE-AND-R8-000315"
+    ]
+  },
+  {
+    "rejectionId": "REJECT-002",
+    "reasonCategory": "OBSOLETE_WORKAROUND",
+    "rationale": "Guidance specifies deprecated workarounds for unsupported legacy operating system levels.",
+    "sourceRuleIds": [
+      "RULE-AND-SEC-000261"
+    ]
+  },
+  {
+    "rejectionId": "REJECT-003",
+    "reasonCategory": "PROMPT_FILLER_BOILERPLATE",
+    "rationale": "Text represents conversational wrapper boilerplate rather than reusable technical knowledge.",
+    "sourceRuleIds": [
+      "RULE-AND-R8-000325"
+    ]
+  }
+]

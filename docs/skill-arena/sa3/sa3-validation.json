@@ -1,0 +1,83 @@
+{
+  "timestamp": "2026-10-06T08:47:12.856Z",
+  "identities": {
+    "IDENTITY_1": {
+      "name": "SA1 input corpus unchanged",
+      "status": "PASS"
+    },
+    "IDENTITY_2": {
+      "name": "SA2-R input graph unchanged",
+      "status": "PASS"
+    },
+    "IDENTITY_3": {
+      "name": "Every SA1 rule has exactly one primary disposition",
+      "status": "PASS",
+      "uniqueRules": 708
+    },
+    "IDENTITY_4": {
+      "name": "Primary disposition count sums to total SA1 rules",
+      "status": "PASS",
+      "sum": 708,
+      "target": 708
+    },
+    "IDENTITY_5": {
+      "name": "Every disposition target resolves",
+      "status": "PASS"
+    },
+    "IDENTITY_6": {
+      "name": "Every canonical candidate ID unique",
+      "status": "PASS",
+      "count": 14
+    },
+    "IDENTITY_7": {
+      "name": "Every candidate has source rules",
+      "status": "PASS"
+    },
+    "IDENTITY_8": {
+      "name": "Every source-rule reference exists in SA1",
+      "status": "PASS"
+    },
+    "IDENTITY_9": {
+      "name": "Every profile member exists",
+      "status": "PASS"
+    },
+    "IDENTITY_10": {
+      "name": "Every version-family member exists",
+      "status": "PASS"
+    },
+    "IDENTITY_11": {
+      "name": "Every hold reference exists",
+      "status": "PASS"
+    },
+    "IDENTITY_12": {
+      "name": "Every rejection reference exists",
+      "status": "PASS"
+    },
+    "IDENTITY_13": {
+      "name": "Every canonical candidate has synthesis audit",
+      "status": "PASS",
+      "auditCount": 14
+    },
+    "IDENTITY_14": {
+      "name": "No LOSS_DETECTED candidate is silently accepted",
+      "status": "PASS"
+    },
+    "IDENTITY_15": {
+      "name": "No global candidate contains unresolved context conflict",
+      "status": "PASS"
+    },
+    "IDENTITY_16": {
+      "name": "No technical hold becomes active guidance",
+      "status": "PASS"
+    },
+    "IDENTITY_17": {
+      "name": "No source skill/package installed",
+      "status": "PASS"
+    },
+    "IDENTITY_18": {
+      "name": "No production runtime changed",
+      "status": "PASS"
+    }
+  },
+  "overallStatus": "ALL_18_IDENTITIES_VERIFIED"
+}

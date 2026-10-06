@@ -1,0 +1,360 @@
+{
+  "totalRules": 708,
+  "candidates": [
+    {
+      "candidateId": "CANON-GLOB-001",
+      "type": "GLOBAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-PONY-CORE-000002",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 37",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-GLOB-002",
+      "type": "GLOBAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-PONY-CORE-000003",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 38",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-PONY-CORE-000005",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 40",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-GLOB-003",
+      "type": "GLOBAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-PONY-CORE-000004",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 39",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-GLOB-004",
+      "type": "GLOBAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-PONY-CORE-000007",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 42",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-PONY-CORE-000009",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 59",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-CTX-001",
+      "type": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-PONY-CORE-000001",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 36",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-PONY-CORE-000008",
+          "sourceName": "ponytail",
+          "sourcePath": "C:/Users/smara/.gemini/config/plugins/ponytail/skills/ponytail/SKILL.md",
+          "locator": "line 58",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-CTX-002",
+      "type": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-IOS-NET-000577",
+          "sourceName": "ios-networking",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/ios-networking/SKILL.md",
+          "locator": "line 393",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-IOS-PERF-000467",
+          "sourceName": "swiftui-performance",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/swiftui-performance/SKILL.md",
+          "locator": "line 189",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-CTX-003",
+      "type": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-VCL-000700",
+          "sourceName": "vercel-agent-skills",
+          "sourcePath": "external:vercel-labs/agent-skills",
+          "locator": "curated-spec",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-SHAD-000704",
+          "sourceName": "shadcn-ui",
+          "sourcePath": "reference:shadcn/ui",
+          "locator": "curated-spec",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-SHAD-000705",
+          "sourceName": "shadcn-ui",
+          "sourcePath": "reference:shadcn/ui",
+          "locator": "curated-spec",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-CTX-004",
+      "type": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-AND-SEC-000304",
+          "sourceName": "android-intent-security",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/android-intent-security/SKILL.md",
+          "locator": "line 545",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-CTX-005",
+      "type": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-IOS-CONC-000481",
+          "sourceName": "swift-concurrency",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/swift-concurrency/SKILL.md",
+          "locator": "line 389",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        },
+        {
+          "ruleId": "RULE-IOS-PAT-000431",
+          "sourceName": "swiftui-patterns",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/swiftui-patterns/SKILL.md",
+          "locator": "line 94",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-SPEC-001",
+      "type": "SPECIALIST_RULE_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-AND-CAM-000352",
+          "sourceName": "android-camerax",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/android-camerax/SKILL.md",
+          "locator": "line 126",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-SPEC-002",
+      "type": "SPECIALIST_RULE_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-IOS-MET-000587",
+          "sourceName": "metrickit",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/metrickit/SKILL.md",
+          "locator": "line 8",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-SPEC-003",
+      "type": "SPECIALIST_RULE_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-IOS-MAP-000650",
+          "sourceName": "mapkit",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/mapkit/SKILL.md",
+          "locator": "line 477",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-SPEC-004",
+      "type": "SPECIALIST_RULE_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-IOS-PUSH-000653",
+          "sourceName": "push-notifications",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/push-notifications/SKILL.md",
+          "locator": "line 471",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    },
+    {
+      "candidateId": "CANON-SPEC-005",
+      "type": "SPECIALIST_RULE_CANDIDATE",
+      "sourceRules": [
+        {
+          "ruleId": "RULE-AND-REST-000389",
+          "sourceName": "android-restore-credentials",
+          "sourcePath": "C:/Users/smara/.gemini/config/skills/android-restore-credentials/SKILL.md",
+          "locator": "line 244",
+          "evidenceClass": "EXPLICIT_DIRECTIVE"
+        }
+      ]
+    }
+  ],
+  "profiles": {
+    "design": [
+      {
+        "profileId": "PROFILE-DESIGN-001",
+        "name": "Minimalist & Brutalist Web Design Grammar",
+        "ruleCount": 3
+      },
+      {
+        "profileId": "PROFILE-DESIGN-002",
+        "name": "Apple Liquid Glass Spatial Design Grammar",
+        "ruleCount": 0
+      },
+      {
+        "profileId": "PROFILE-DESIGN-003",
+        "name": "Material 3 Adaptive Design Grammar",
+        "ruleCount": 15
+      },
+      {
+        "profileId": "PROFILE-DESIGN-004",
+        "name": "Headless Accessible Primitives Grammar",
+        "ruleCount": 3
+      }
+    ],
+    "platform": [
+      {
+        "profileId": "PROFILE-PLAT-001",
+        "name": "Android Native Platform Profile",
+        "ruleCount": 188
+      },
+      {
+        "profileId": "PROFILE-PLAT-002",
+        "name": "Apple iOS Platform Profile",
+        "ruleCount": 185
+      },
+      {
+        "profileId": "PROFILE-PLAT-003",
+        "name": "Web & Next.js Ecosystem Profile",
+        "ruleCount": 17
+      }
+    ],
+    "workflow": [
+      {
+        "profileId": "PROFILE-WORK-001",
+        "name": "GSD Phased Lifecycle Workflow",
+        "ruleCount": 206
+      },
+      {
+        "profileId": "PROFILE-WORK-002",
+        "name": "Graphify Codebase Knowledge Graph Workflow",
+        "ruleCount": 16
+      },
+      {
+        "profileId": "PROFILE-WORK-003",
+        "name": "App Store Submission & Optimization Workflow",
+        "ruleCount": 44
+      }
+    ]
+  },
+  "versionFamilies": [
+    {
+      "familyId": "VERSION-FAMILY-001",
+      "topic": "Android Navigation Architecture",
+      "ruleCount": 1
+    },
+    {
+      "familyId": "VERSION-FAMILY-002",
+      "topic": "Android Gradle Plugin Build Architecture",
+      "ruleCount": 0
+    },
+    {
+      "familyId": "VERSION-FAMILY-003",
+      "topic": "Google Play Billing Library Protocol",
+      "ruleCount": 0
+    },
+    {
+      "familyId": "VERSION-FAMILY-004",
+      "topic": "Android TV User Interface Toolkit",
+      "ruleCount": 0
+    },
+    {
+      "familyId": "VERSION-FAMILY-005",
+      "topic": "Swift Concurrency & Data-Race Safety",
+      "ruleCount": 0
+    },
+    {
+      "familyId": "VERSION-FAMILY-006",
+      "topic": "Apple Material & Depth Translucency",
+      "ruleCount": 1
+    }
+  ],
+  "holds": [
+    {
+      "holdId": "HOLD-001",
+      "claim": "Android Display Glasses Glimmer XR interaction model gestures and target sizing",
+      "ruleCount": 0
+    },
+    {
+      "holdId": "HOLD-002",
+      "claim": "R8 Configuration Analyzer internal protobuf report schema guarantees across custom Gradle daemon setups",
+      "ruleCount": 1
+    },
+    {
+      "holdId": "HOLD-003",
+      "claim": "Jetpack Media3 Cast RemoteCastPlayer automated session recovery during continuous Wi-Fi reconnect drops",
+      "ruleCount": 0
+    }
+  ],
+  "rejections": [
+    {
+      "rejectionId": "REJECT-001",
+      "category": "TOOL_INSTALLER_SCRIPT",
+      "ruleCount": 1
+    },
+    {
+      "rejectionId": "REJECT-002",
+      "category": "OBSOLETE_WORKAROUND",
+      "ruleCount": 1
+    },
+    {
+      "rejectionId": "REJECT-003",
+      "category": "PROMPT_FILLER_BOILERPLATE",
+      "ruleCount": 1
+    }
+  ]
+}

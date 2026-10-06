@@ -1,0 +1,28 @@
+[
+  {
+    "holdId": "HOLD-001",
+    "claim": "Android Display Glasses Glimmer XR interaction model gestures and target sizing",
+    "sourceRuleIds": [],
+    "requiredVerification": "Requires physical validation on Android XR display glasses hardware and runtime emulator suite.",
+    "whyUnresolved": "Hardware-specific gestures cannot be validated without physical device verification.",
+    "scope": "EXPERIMENTAL_XR"
+  },
+  {
+    "holdId": "HOLD-002",
+    "claim": "R8 Configuration Analyzer internal protobuf report schema guarantees across custom Gradle daemon setups",
+    "sourceRuleIds": [
+      "RULE-AND-R8-000317"
+    ],
+    "requiredVerification": "Empirical execution against release build outputs across diverse Gradle daemon configurations.",
+    "whyUnresolved": "Internal compiler artifact schemas are subject to non-public AGP patching.",
+    "scope": "BUILD_INTERNAL"
+  },
+  {
+    "holdId": "HOLD-003",
+    "claim": "Jetpack Media3 Cast RemoteCastPlayer automated session recovery during continuous Wi-Fi reconnect drops",
+    "sourceRuleIds": [],
+    "requiredVerification": "Network simulation testing with physical Google Cast hardware devices.",
+    "whyUnresolved": "Unverified network drop tolerance behavior in automated headless tests.",
+    "scope": "CAST_HARDWARE"
+  }
+]

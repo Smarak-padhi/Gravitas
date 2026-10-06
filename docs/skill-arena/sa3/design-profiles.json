@@ -1,0 +1,274 @@
+[
+  {
+    "profileId": "PROFILE-DESIGN-001",
+    "name": "Minimalist & Brutalist Web Design Grammar",
+    "intendedContext": "Data-dense web tools, dashboards, developer documentation, and high-focus productivity applications.",
+    "visualPrinciples": [
+      "Flat surfaces with high-contrast structural borders over decorative shadows",
+      "Zero gratuitous gradients or translucent blur layers",
+      "Monochrome typography with strict functional color accents"
+    ],
+    "motionPrinciples": [
+      "Restrained, snappy state transitions (under 150ms)",
+      "Respect reduced-motion preference strictly"
+    ],
+    "layoutPrinciples": [
+      "Compact information density",
+      "Predictable tabular and grid alignment"
+    ],
+    "typographyPrinciples": [
+      "System and monospace fonts",
+      "Clear typographic scale based on tabular numerals"
+    ],
+    "antiPatterns": [
+      "Glassmorphic overlays",
+      "Floating card soup",
+      "Low-contrast gray-on-gray text"
+    ],
+    "incompatibleContexts": [
+      "Consumer luxury media applications",
+      "Spatial XR environments"
+    ],
+    "sourceRuleIds": [
+      "RULE-TASTE-000701",
+      "RULE-TASTE-000702",
+      "RULE-TASTE-000703"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-TASTE-000701",
+        "sourceName": "taste-skill",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-TASTE-000702",
+        "sourceName": "taste-skill",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-TASTE-000703",
+        "sourceName": "taste-skill",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  },
+  {
+    "profileId": "PROFILE-DESIGN-002",
+    "name": "Apple Liquid Glass Spatial Design Grammar",
+    "intendedContext": "Native Apple consumer applications on iOS 26+ and visionOS requiring tactile spatial depth.",
+    "visualPrinciples": [
+      "Translucent materials with backgroundExtensionEffect and GlassEffectContainer",
+      "Morphing transitions with matched glass effect identifiers",
+      "Dynamic vibrancy responding to system wallpaper and lighting"
+    ],
+    "motionPrinciples": [
+      "Continuous fluid spring animations",
+      "Spatial interactive morphing on drag and press"
+    ],
+    "layoutPrinciples": [
+      "Layered elevation hierarchy",
+      "Edge-to-edge content bleeding under glass chrome"
+    ],
+    "typographyPrinciples": [
+      "SF Pro with Dynamic Type scaling and accessibility tracking"
+    ],
+    "antiPatterns": [
+      "Opaque harsh borders in layered scenes",
+      "Static unreactive glass containers"
+    ],
+    "incompatibleContexts": [
+      "Minimalist brutalist web tooling",
+      "Legacy non-accelerated mobile devices"
+    ],
+    "sourceRuleIds": [],
+    "provenance": []
+  },
+  {
+    "profileId": "PROFILE-DESIGN-003",
+    "name": "Material 3 Adaptive Design Grammar",
+    "intendedContext": "Android multi-form-factor devices (phones, tablets, foldables, TV, and auto).",
+    "visualPrinciples": [
+      "Dynamic color tonal palettes",
+      "Unified Style attributes over ad-hoc modifiers"
+    ],
+    "motionPrinciples": [
+      "Predictive back animations",
+      "Shared element transitions across adaptive panes"
+    ],
+    "layoutPrinciples": [
+      "Flexible Box and Grid layouts",
+      "Navigation rails and bars adapting to window size classes"
+    ],
+    "typographyPrinciples": [
+      "Roboto / System font with scalable text entry targets"
+    ],
+    "antiPatterns": [
+      "Hardcoded DP margins that break on large screens",
+      "Showing back buttons on dual-pane master layouts"
+    ],
+    "incompatibleContexts": [
+      "Fixed-width desktop web shells"
+    ],
+    "sourceRuleIds": [
+      "RULE-AND-STYLE-000223",
+      "RULE-AND-STYLE-000224",
+      "RULE-AND-STYLE-000225",
+      "RULE-AND-STYLE-000226",
+      "RULE-AND-STYLE-000227",
+      "RULE-AND-STYLE-000228",
+      "RULE-AND-STYLE-000229",
+      "RULE-AND-STYLE-000230",
+      "RULE-AND-STYLE-000231",
+      "RULE-AND-STYLE-000232",
+      "RULE-AND-STYLE-000233",
+      "RULE-AND-STYLE-000234",
+      "RULE-AND-STYLE-000235",
+      "RULE-AND-STYLE-000236",
+      "RULE-AND-STYLE-000237"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-AND-STYLE-000223",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 30",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000224",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 31",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000225",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 32",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000226",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 133",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000227",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 134",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000228",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 135",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000229",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 136",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000230",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 137",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000231",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 138",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000232",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 139",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000233",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 140",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000234",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 142",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000235",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 143",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000236",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 144",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-AND-STYLE-000237",
+        "sourceName": "android-styles",
+        "sourceLocator": "line 145",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  },
+  {
+    "profileId": "PROFILE-DESIGN-004",
+    "name": "Headless Accessible Primitives Grammar",
+    "intendedContext": "Accessible component libraries across web applications (Radix, Tailwind, Shadcn).",
+    "visualPrinciples": [
+      "Unstyled functional primitives designed for consumer theme composition"
+    ],
+    "motionPrinciples": [
+      "CSS transition and View Transition API support"
+    ],
+    "layoutPrinciples": [
+      "Modal dialogs with focus trapping and backdrop dismissal"
+    ],
+    "typographyPrinciples": [
+      "ARIA-compliant screen reader announcements"
+    ],
+    "antiPatterns": [
+      "Unreachable keyboard focus",
+      "Missing aria-expanded / aria-selected state indicators"
+    ],
+    "incompatibleContexts": [
+      "Direct canvas/WebGL game interfaces"
+    ],
+    "sourceRuleIds": [
+      "RULE-RADIX-000706",
+      "RULE-RADIX-000707",
+      "RULE-RADIX-000708"
+    ],
+    "provenance": [
+      {
+        "ruleId": "RULE-RADIX-000706",
+        "sourceName": "radix-primitives",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-RADIX-000707",
+        "sourceName": "radix-primitives",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      },
+      {
+        "ruleId": "RULE-RADIX-000708",
+        "sourceName": "radix-primitives",
+        "sourceLocator": "curated-spec",
+        "evidenceClass": "EXPLICIT_DIRECTIVE"
+      }
+    ]
+  }
+]
