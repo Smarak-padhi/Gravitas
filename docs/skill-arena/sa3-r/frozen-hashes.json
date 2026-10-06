@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-10-06T10:32:11.168Z",
+  "hashes": {
+    "docs/skill-arena/sa1/rules.jsonl": "e71f16181f44c95dd63d5f8561197db5615dd4ca42e4abb5c104af73375fcf19",
+    "docs/skill-arena/sa2/relationships.jsonl": "57cfdee1529c5ec72764dc230ecdcdca2d94a58182435e0c82849ecb6f36dd8b",
+    "docs/skill-arena/sa2-r/effective-relationships.jsonl": "8256ff18e6d767ee8f8c9aa0b26cb98a9e510da59b9a7c95b435e86a2cf8c567",
+    "docs/skill-arena/sa3/canonical-candidates.jsonl": "90d09a783643d67cd6603e005db21b0c5a8cd18f731800e57d7e63435ec558e3",
+    "docs/skill-arena/sa3/rule-dispositions.jsonl": "f250cd3a5135e543162453e233aeff812e0f4a1cda3d6765bbfa7d3ce2880af1",
+    "docs/skill-arena/sa3/design-profiles.json": "fb920c88cf2ccbd6d8c2c8bf70b59aee053e5c32ca1242313fc5549c76a28882",
+    "docs/skill-arena/sa3/platform-profiles.json": "0e7af6685380ee74fa485171ff9d4017842cc32eef745d0bf6f285725dc209b1",
+    "docs/skill-arena/sa3/workflow-profiles.json": "aadac761ee0e32228b634120d08c1eb39734755f4c6b2982d1ccce6d54b7ca85",
+    "docs/skill-arena/sa3/version-families.json": "8ac0f0f0a142070806d92fd85db2d5f762c36b985f921221ed4dcbc4ace7d88b",
+    "docs/skill-arena/sa3/technical-verification-holds.json": "ab99dfaddbc527424e82558228ad8839e8af2def0eb84e42b351e7fd199a3db0",
+    "docs/skill-arena/sa3/rejection-proposals.json": "6b14042e9e7c98df876cac4b7066d369eb70f53175149bc1a875271dca290808",
+    "docs/skill-arena/sa3/globalization-falsification.jsonl": "097307efdd690fc328d05507b207f6583e7f202c5373678436bc50f850dc5a5f",
+    "docs/skill-arena/sa3/synthesis-audits.jsonl": "cad6a6bdc19c5945de459fb8106e6a13a4f67548b460d6b06ba12211e5c6da79",
+    "docs/skill-arena/sa3/provenance-map.json": "88cc71ae4ef03500192ae47cb68e76537712841a0da1260a7156f7daefd69b2c",
+    "docs/skill-arena/sa3/sa3-metrics.json": "ce75775ed80700c6ac3b00fb903c255efdc3ab2c6f9ee33355848a057d6cbf17",
+    "docs/skill-arena/sa3/sa3-validation.json": "e06484f773f72e47663120212dfe0fd91f501fe3dde31b8e412ab23be375440b"
+  },
+  "status": {
+    "SA1_CHANGED": "NO",
+    "SA2_CHANGED": "NO",
+    "SA2_R_CHANGED": "NO",
+    "SA3_CHANGED": "NO"
+  }
+}

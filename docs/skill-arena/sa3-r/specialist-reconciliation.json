@@ -1,0 +1,126 @@
+{
+  "explanation": "There are two distinct specialist concepts in SA3: (1) SPECIALIST_RULE_CANDIDATE objects (5 candidates in canonical-candidates.jsonl, containing 5 primary rules whose disposition is SYNTHESIZED_INTO_PROPOSAL), and (2) RETAINED_SEPARATELY rules (4 rules in rule-dispositions.jsonl that are standalone specialist tools with disposition RETAINED_SEPARATELY pointing to RETAIN-RULE-PONY-* target IDs). These represent 9 distinct rules in total (5 synthesized + 4 retained separately).",
+  "specialistCandidateObjectsCount": 5,
+  "specialistCandidates": [
+    {
+      "candidateId": "CANON-SPEC-001",
+      "statement": "In Android CameraX capture pipelines, handle hardware-dependent feature parity fallbacks explicitly (auto-focus and flash variations across physical sensors).",
+      "sourceRuleIds": [
+        "RULE-AND-CAM-000352"
+      ],
+      "primaryDispositionSourceRules": [
+        {
+          "ruleId": "RULE-AND-CAM-000352",
+          "primaryDisposition": "SYNTHESIZED_INTO_PROPOSAL"
+        }
+      ],
+      "isOneToOneWrapper": true,
+      "isSynthesized": true,
+      "isRetainedSeparately": false
+    },
+    {
+      "candidateId": "CANON-SPEC-002",
+      "statement": "Collect production iOS performance telemetry using MetricKit async diagnostic payload subscribers, buffering metrics across system report deliveries.",
+      "sourceRuleIds": [
+        "RULE-IOS-MET-000587"
+      ],
+      "primaryDispositionSourceRules": [
+        {
+          "ruleId": "RULE-IOS-MET-000587",
+          "primaryDisposition": "SYNTHESIZED_INTO_PROPOSAL"
+        }
+      ],
+      "isOneToOneWrapper": true,
+      "isSynthesized": true,
+      "isRetainedSeparately": false
+    },
+    {
+      "candidateId": "CANON-SPEC-003",
+      "statement": "In geocoding and reverse geocoding workflows, gracefully handle empty results, network timeouts, and rate limits without throwing unhandled exceptions.",
+      "sourceRuleIds": [
+        "RULE-IOS-MAP-000650"
+      ],
+      "primaryDispositionSourceRules": [
+        {
+          "ruleId": "RULE-IOS-MAP-000650",
+          "primaryDisposition": "SYNTHESIZED_INTO_PROPOSAL"
+        }
+      ],
+      "isOneToOneWrapper": true,
+      "isSynthesized": true,
+      "isRetainedSeparately": false
+    },
+    {
+      "candidateId": "CANON-SPEC-004",
+      "statement": "In APNs push notification implementations, request user alert/sound authorization before attempting device token registration callback handling.",
+      "sourceRuleIds": [
+        "RULE-IOS-PUSH-000653"
+      ],
+      "primaryDispositionSourceRules": [
+        {
+          "ruleId": "RULE-IOS-PUSH-000653",
+          "primaryDisposition": "SYNTHESIZED_INTO_PROPOSAL"
+        }
+      ],
+      "isOneToOneWrapper": true,
+      "isSynthesized": true,
+      "isRetainedSeparately": false
+    },
+    {
+      "candidateId": "CANON-SPEC-005",
+      "statement": "When implementing Android BackupAgent credential restore keys, complete credential retrieval inside onRestoreFinished callback rather than onRestore.",
+      "sourceRuleIds": [
+        "RULE-AND-REST-000389"
+      ],
+      "primaryDispositionSourceRules": [
+        {
+          "ruleId": "RULE-AND-REST-000389",
+          "primaryDisposition": "SYNTHESIZED_INTO_PROPOSAL"
+        }
+      ],
+      "isOneToOneWrapper": true,
+      "isSynthesized": true,
+      "isRetainedSeparately": false
+    }
+  ],
+  "retainedSeparatelyRulesCount": 4,
+  "retainedSeparatelyRules": [
+    {
+      "ruleId": "RULE-PONY-CORE-000006",
+      "targetId": "RETAIN-RULE-PONY-CORE-000006",
+      "targetType": "SPECIALIST_RULE_CANDIDATE",
+      "rationale": "Retained separately as standalone specialist guidance to prevent constraint loss",
+      "isOneToOneWrapper": true,
+      "isSynthesized": false,
+      "isRetainedSeparately": true
+    },
+    {
+      "ruleId": "RULE-PONY-AUDIT-000010",
+      "targetId": "RETAIN-RULE-PONY-AUDIT-000010",
+      "targetType": "SPECIALIST_RULE_CANDIDATE",
+      "rationale": "Retained separately as standalone specialist guidance to prevent constraint loss",
+      "isOneToOneWrapper": true,
+      "isSynthesized": false,
+      "isRetainedSeparately": true
+    },
+    {
+      "ruleId": "RULE-PONY-DEBT-000011",
+      "targetId": "RETAIN-RULE-PONY-DEBT-000011",
+      "targetType": "SPECIALIST_RULE_CANDIDATE",
+      "rationale": "Retained separately as standalone specialist guidance to prevent constraint loss",
+      "isOneToOneWrapper": true,
+      "isSynthesized": false,
+      "isRetainedSeparately": true
+    },
+    {
+      "ruleId": "RULE-PONY-REV-000012",
+      "targetId": "RETAIN-RULE-PONY-REV-000012",
+      "targetType": "SPECIALIST_RULE_CANDIDATE",
+      "rationale": "Retained separately as standalone specialist guidance to prevent constraint loss",
+      "isOneToOneWrapper": true,
+      "isSynthesized": false,
+      "isRetainedSeparately": true
+    }
+  ],
+  "reconciliationStatus": "RECONCILED_DISTINCT_CONCEPTS"
+}

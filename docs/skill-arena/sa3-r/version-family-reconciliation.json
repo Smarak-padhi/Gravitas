@@ -1,0 +1,156 @@
+{
+  "explanation": "There are 6 VERSION_FAMILY objects defined in version-families.json representing identified architectural version boundaries across Android and Apple platforms. Only 2 of these families (VERSION-FAMILY-001 Navigation Architecture and VERSION-FAMILY-006 Liquid Glass Translucency) have direct primary member rules in rule-dispositions.jsonl (RULE-AND-ADAPT-000245 and RULE-IOS-GLASS-000454, respectively). The remaining 4 version families (AGP Build, Play Billing, Compose TV, Swift Concurrency) were established from SA2/SA2-R relationship patterns as structural families without assigning primary disposition rules directly to the family object. Hence, version family objects (6) and primary version family rules (2) reconcile cleanly without inconsistency.",
+  "versionFamilyObjectCount": 6,
+  "versionFamilyPrimaryRuleCount": 2,
+  "versionFamilyReferenceCount": 2,
+  "versionFamilyUniqueRuleCount": 2,
+  "families": [
+    {
+      "familyId": "VERSION-FAMILY-001",
+      "topic": "Android Navigation Architecture",
+      "platform": "Android",
+      "versionRange": "Navigation 2.x (XML Backstack) -> Navigation 3.x (Compose Scenes)",
+      "variants": [
+        {
+          "generation": "LEGACY_V2",
+          "description": "XML-based navigation graphs and FragmentNavigator backstack management"
+        },
+        {
+          "generation": "MODERN_V3",
+          "description": "Type-safe Scene composables, multi-pane list-detail scenes, and ViewModel scoping"
+        }
+      ],
+      "sourceRuleIds": [
+        "RULE-AND-ADAPT-000245"
+      ],
+      "primaryVersionFamilyMembers": [
+        "RULE-AND-ADAPT-000245"
+      ],
+      "primaryDispositionOfReferencedRules": [
+        {
+          "ruleId": "RULE-AND-ADAPT-000245",
+          "primaryDisposition": "VERSION_FAMILY_MEMBER",
+          "targetId": "VERSION-FAMILY-001"
+        }
+      ],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-002",
+      "topic": "Android Gradle Plugin Build Architecture",
+      "platform": "Android",
+      "versionRange": "AGP 8.x -> AGP 9.0",
+      "variants": [
+        {
+          "generation": "AGP_8",
+          "description": "Traditional Transform API and legacy R8 configuration flags"
+        },
+        {
+          "generation": "AGP_9",
+          "description": "Artifact API, strict Java 17 toolchain, and modernized R8 keep rule consumers"
+        }
+      ],
+      "sourceRuleIds": [],
+      "primaryVersionFamilyMembers": [],
+      "primaryDispositionOfReferencedRules": [],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-003",
+      "topic": "Google Play Billing Library Protocol",
+      "platform": "Android",
+      "versionRange": "PBL 5.x / 6.x -> PBL 7.x",
+      "variants": [
+        {
+          "generation": "PBL_6",
+          "description": "Legacy BillingClient queryPurchasesAsync and SkuDetails APIs"
+        },
+        {
+          "generation": "PBL_7",
+          "description": "ProductDetails, multi-offer subscription tokens, and strict lifecycle connection retry"
+        }
+      ],
+      "sourceRuleIds": [],
+      "primaryVersionFamilyMembers": [],
+      "primaryDispositionOfReferencedRules": [],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-004",
+      "topic": "Android TV User Interface Toolkit",
+      "platform": "Android",
+      "versionRange": "Leanback Support Fragments -> Jetpack Compose for TV",
+      "variants": [
+        {
+          "generation": "LEANBACK",
+          "description": "BrowseSupportFragment, Presenter, ArrayObjectAdapter, and TV XML Views"
+        },
+        {
+          "generation": "COMPOSE_TV",
+          "description": "androidx.tv.material3, TransformingLazyColumn, and focusRestorer APIs"
+        }
+      ],
+      "sourceRuleIds": [],
+      "primaryVersionFamilyMembers": [],
+      "primaryDispositionOfReferencedRules": [],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-005",
+      "topic": "Swift Concurrency & Data-Race Safety",
+      "platform": "Apple",
+      "versionRange": "Swift 5.9 (@preconcurrency) -> Swift 6 (Strict Concurrency)",
+      "variants": [
+        {
+          "generation": "SWIFT_5",
+          "description": "Approachable concurrency with @preconcurrency opt-outs and unchecked Sendable"
+        },
+        {
+          "generation": "SWIFT_6",
+          "description": "Default MainActor isolation, complete Sendable verification, and nonisolated(nonsending)"
+        }
+      ],
+      "sourceRuleIds": [],
+      "primaryVersionFamilyMembers": [],
+      "primaryDispositionOfReferencedRules": [],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-006",
+      "topic": "Apple Material & Depth Translucency",
+      "platform": "Apple",
+      "versionRange": "iOS 15-17 (Material blurs) -> iOS 26+ (Liquid Glass)",
+      "variants": [
+        {
+          "generation": "MATERIAL_BLUR",
+          "description": ".background(.ultraThinMaterial) static translucent surfaces"
+        },
+        {
+          "generation": "LIQUID_GLASS",
+          "description": "Interactive GlassEffectContainer, morphing glass transitions, and glass toolbar styles"
+        }
+      ],
+      "sourceRuleIds": [
+        "RULE-IOS-GLASS-000454"
+      ],
+      "primaryVersionFamilyMembers": [
+        "RULE-IOS-GLASS-000454"
+      ],
+      "primaryDispositionOfReferencedRules": [
+        {
+          "ruleId": "RULE-IOS-GLASS-000454",
+          "primaryDisposition": "VERSION_FAMILY_MEMBER",
+          "targetId": "VERSION-FAMILY-006"
+        }
+      ],
+      "secondaryProfileMembers": [],
+      "comparisonReferences": []
+    }
+  ],
+  "reconciliationStatus": "RECONCILED_STRUCTURAL_FAMILIES_VS_PRIMARY_MEMBERS"
+}

@@ -1,0 +1,15 @@
+{
+  "ruleRecords": 708,
+  "canonicalCandidateRecords": 14,
+  "profileObjects": 10,
+  "profileMembershipReferences": 677,
+  "versionFamilyObjects": 6,
+  "versionFamilyMemberReferences": 2,
+  "technicalHoldObjects": 3,
+  "technicalHoldRuleReferences": 1,
+  "rejectionObjects": 3,
+  "rejectionRuleReferences": 3,
+  "synthesisAuditRecords": 14,
+  "globalizationRecords": 9,
+  "retainedSeparatelyTargetObjects": 4
+}

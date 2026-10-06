@@ -1,0 +1,63 @@
+{
+  "humanMachineCountMismatches": [
+    {
+      "domain": "Specialist accounting",
+      "issue": "Human summary reported 5 specialist canonical candidates in Section 2 table and 4 retained specialist rules in the narrative without explicitly clarifying that 5 + 4 = 9 distinct rules from distinct source streams.",
+      "severity": "DOCUMENTATION_AMBIGUITY",
+      "resolvedInSA3R": true,
+      "resolution": "SA3-R explicitly separates CANON-SPEC-001 through 005 (synthesized) from RETAIN-RULE-PONY-* (retained separately)."
+    },
+    {
+      "domain": "Technical hold accounting",
+      "issue": "Human summary reported 3 technical holds in the entity inventory and 1 technical verification hold in primary dispositions without explaining that only HOLD-002 binds a specific primary rule (RULE-AND-R8-000317) while HOLD-001 and HOLD-003 are architectural holds.",
+      "severity": "DOCUMENTATION_AMBIGUITY",
+      "resolvedInSA3R": true,
+      "resolution": "SA3-R explicitly distinguishes 3 TECHNICAL_HOLD objects from 1 primary held rule."
+    },
+    {
+      "domain": "Version family accounting",
+      "issue": "Human summary reported 6 version families alongside 2 primary version-family disposition rules without explaining that 4 families are structural groupings derived from SA2 relationship topologies rather than direct primary dispositions.",
+      "severity": "DOCUMENTATION_AMBIGUITY",
+      "resolvedInSA3R": true,
+      "resolution": "SA3-R explicitly distinguishes 6 VERSION_FAMILY objects from 2 primary version-family member rules."
+    },
+    {
+      "domain": "Design profile counts exposure",
+      "issue": "Human summary listed 4 design profiles but omitted individual member rule counts (3, 0, 15, 3 = 21 rules).",
+      "severity": "DOCUMENTATION_OMISSION",
+      "resolvedInSA3R": true,
+      "resolution": "SA3-R documents exact counts: PROFILE-DESIGN-001 (3), PROFILE-DESIGN-002 (0), PROFILE-DESIGN-003 (15), PROFILE-DESIGN-004 (3)."
+    }
+  ],
+  "humanMachineTermMismatches": [
+    {
+      "term": "universal truth / genuinely universal",
+      "usageInSA3Doc": "SA3 summary prose claimed surviving global rules are \"genuinely universal\".",
+      "calibratedTerm": "SURVIVED_DEFINED_FALSIFICATION_SET",
+      "rationale": "Falsification across a bounded set of 4 test cases proves non-falsification within that test set, not universal metaphysical truth across all unseen domains."
+    },
+    {
+      "term": "semantic constraint comparison / zero semantic loss proven",
+      "usageInSA3Doc": "SA3 summary prose claimed \"automated semantic constraint comparison proved zero semantic loss\".",
+      "calibratedTerm": "STRUCTURAL_FIELD_COMPARISON / SEMANTIC_LOSS_NOT_DETECTED",
+      "rationale": "The execution script performed deterministic structural field mapping of preconditions and negative boundaries, not semantic theorem proving."
+    }
+  ],
+  "overclaimedEvidenceClaims": [
+    {
+      "claim": "Universal engineering validity proven for global rules",
+      "calibratedClaim": "Global rules survived all 4 defined falsification cases without counter-example",
+      "status": "CALIBRATED_IN_SA3_R"
+    },
+    {
+      "claim": "Semantic losslessness proven through semantic analysis",
+      "calibratedClaim": "Structural field comparison confirmed all source constraints mapped without loss; semantic loss not detected",
+      "status": "CALIBRATED_IN_SA3_R"
+    }
+  ],
+  "missingExplanationsResolved": [
+    "Object vs rule count distinction for specialist, hold, and version family domains",
+    "Separation of primary dispositions (mutually exclusive partition of 708) from profile object references",
+    "Unreferenced primary target objects explained (structural families and hardware holds)"
+  ]
+}

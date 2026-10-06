@@ -1,0 +1,161 @@
+{
+  "totalCandidates": 14,
+  "calibratedCandidates": [
+    {
+      "candidateId": "CANON-GLOB-001",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "LOSSLESS",
+      "calibratedResultLabel": "LOSSLESS_STRUCTURALLY_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-GLOB-002",
+      "sourceRuleCount": 2,
+      "reportedLossClassification": "LOSSLESS",
+      "calibratedResultLabel": "LOSSLESS_STRUCTURALLY_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-GLOB-003",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "LOSSLESS",
+      "calibratedResultLabel": "LOSSLESS_STRUCTURALLY_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-GLOB-004",
+      "sourceRuleCount": 2,
+      "reportedLossClassification": "LOSSLESS",
+      "calibratedResultLabel": "LOSSLESS_STRUCTURALLY_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-CTX-001",
+      "sourceRuleCount": 2,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-CTX-002",
+      "sourceRuleCount": 2,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-CTX-003",
+      "sourceRuleCount": 3,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-CTX-004",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-CTX-005",
+      "sourceRuleCount": 2,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-SPEC-001",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-SPEC-002",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-SPEC-003",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-SPEC-004",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    },
+    {
+      "candidateId": "CANON-SPEC-005",
+      "sourceRuleCount": 1,
+      "reportedLossClassification": "CONTEXT_FACTORIZATION",
+      "calibratedResultLabel": "CONTEXT_FACTORIZATION_SUPPORTED",
+      "preconditionsPreserved": true,
+      "negativeConstraintsPreserved": true,
+      "scopePreserved": true,
+      "manualEvidence": "Forensic inspection of candidate appliesWhen and doesNotApplyWhen boundary specifications",
+      "automatedEvidence": "Deterministic structural field mapping in synthesis-audits.jsonl"
+    }
+  ],
+  "overallStatus": "SEMANTIC_LOSS_NOT_DETECTED",
+  "epistemicNote": "Calibration changes LOSSLESS to LOSSLESS_STRUCTURALLY_SUPPORTED and CONTEXT_FACTORIZATION to CONTEXT_FACTORIZATION_SUPPORTED to reflect the actual structural audit method."
+}

@@ -1,0 +1,131 @@
+{
+  "globalizationInputCount": 9,
+  "survivedGlobal": 4,
+  "demotedContextual": 2,
+  "demotedDesign": 1,
+  "demotedPlatform": 1,
+  "demotedWorkflow": 1,
+  "demotedSpecialist": 0,
+  "held": 0,
+  "rejected": 0,
+  "keepSeparate": 0,
+  "unresolved": 0,
+  "proposals": [
+    {
+      "proposalId": "GLOB-PROP-001",
+      "candidateId": "CANON-GLOB-001",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000002"
+      ],
+      "proposedStatement": "Inspect existing codebase and reuse proven local implementations before introducing new helpers.",
+      "result": "SURVIVES_GLOBAL",
+      "rationale": "Universal engineering hygiene rule. Reduces duplication and maintenance drag without imposing framework or styling constraints.",
+      "falsificationCasesTestedCount": 2,
+      "claimStrengthClassification": "SURVIVED_DEFINED_FALSIFICATION_SET"
+    },
+    {
+      "proposalId": "GLOB-PROP-002",
+      "candidateId": "CANON-GLOB-002",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000003",
+        "RULE-PONY-CORE-000005"
+      ],
+      "proposedStatement": "Prefer standard library capabilities over external third-party dependencies; never import a package for a few lines of code.",
+      "result": "SURVIVES_GLOBAL",
+      "rationale": "Core dependency hygiene principle. Reduces supply-chain attack surface and build bloat.",
+      "falsificationCasesTestedCount": 2,
+      "claimStrengthClassification": "SURVIVED_DEFINED_FALSIFICATION_SET"
+    },
+    {
+      "proposalId": "GLOB-PROP-003",
+      "candidateId": "CANON-GLOB-003",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000004"
+      ],
+      "proposedStatement": "Leverage native platform features before layering custom emulation or heavy abstraction frameworks.",
+      "result": "SURVIVES_GLOBAL",
+      "rationale": "Fundamental software architecture principle. Ensures performance and accessibility out of the box.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "SURVIVED_DEFINED_FALSIFICATION_SET"
+    },
+    {
+      "proposalId": "GLOB-PROP-004",
+      "candidateId": "CANON-GLOB-004",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000007",
+        "RULE-PONY-CORE-000009"
+      ],
+      "proposedStatement": "Implement the minimal verified code that works; avoid speculative scaffolding for hypothetical future needs.",
+      "result": "SURVIVES_GLOBAL",
+      "rationale": "Occam engineering principle. Eliminates dead code, speculative wrappers, and configuration bloat.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "SURVIVED_DEFINED_FALSIFICATION_SET"
+    },
+    {
+      "proposalId": "GLOB-PROP-005",
+      "candidateId": "CANON-CTX-001",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000001",
+        "RULE-PONY-CORE-000008"
+      ],
+      "proposedStatement": "No unrequested abstractions: no interface with one implementation, no factory for one product.",
+      "result": "DEMOTE_CONTEXTUAL",
+      "rationale": "Fails universal globalization test because testability around external seams requires single-implementation interfaces. Restored as contextual rule CANON-CTX-001.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "DEMOTED_DUE_TO_COUNTEREXAMPLE"
+    },
+    {
+      "proposalId": "GLOB-PROP-006",
+      "candidateId": null,
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000006"
+      ],
+      "proposedStatement": "Can it be one line?: One line.",
+      "result": "DEMOTE_CONTEXTUAL",
+      "rationale": "Extreme brevity heuristic is harmful in safety-critical, audited, or multi-developer team environments. Demoted from global status.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "DEMOTED_DUE_TO_COUNTEREXAMPLE"
+    },
+    {
+      "proposalId": "GLOB-PROP-007",
+      "candidateId": null,
+      "sourceRuleIds": [
+        "RULE-TASTE-000701"
+      ],
+      "proposedStatement": "Never use gradients or blur; maintain flat border-separated surfaces.",
+      "result": "DEMOTE_DESIGN_PROFILE",
+      "rationale": "Aesthetic grammar rule cannot be globalized. Assigned exclusively to PROFILE-DESIGN-001.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "DEMOTED_DUE_TO_COUNTEREXAMPLE"
+    },
+    {
+      "proposalId": "GLOB-PROP-008",
+      "candidateId": null,
+      "sourceRuleIds": [
+        "RULE-IOS-CONC-000481"
+      ],
+      "proposedStatement": "All UI-bound observable view models must be isolated on @MainActor.",
+      "result": "DEMOTE_PLATFORM_PROFILE",
+      "rationale": "Platform-specific language feature. Assigned to PROFILE-PLAT-002.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "DEMOTED_DUE_TO_COUNTEREXAMPLE"
+    },
+    {
+      "proposalId": "GLOB-PROP-009",
+      "candidateId": null,
+      "sourceRuleIds": [
+        "RULE-GSD-DISCUSS--000015"
+      ],
+      "proposedStatement": "Mandatory: read the workflow markdown file before executing any task.",
+      "result": "DEMOTE_WORKFLOW_PROFILE",
+      "rationale": "Procedural workflow command specification. Assigned to PROFILE-WORK-001.",
+      "falsificationCasesTestedCount": 1,
+      "claimStrengthClassification": "DEMOTED_DUE_TO_COUNTEREXAMPLE"
+    }
+  ],
+  "claimStrengthCalibration": {
+    "overclaimIdentified": "SA3 summary documentation claimed surviving global rules were genuinely universal or universal truths.",
+    "calibratedStandard": "In formal engineering epistemology, surviving rules have NOT been proven universally true across all possible domains; they have SURVIVED_DEFINED_FALSIFICATION_SET (no counterexample found within the defined test cases). Authoritative wording must strictly use SURVIVED_DEFINED_FALSIFICATION_SET.",
+    "isCalibrated": true
+  }
+}

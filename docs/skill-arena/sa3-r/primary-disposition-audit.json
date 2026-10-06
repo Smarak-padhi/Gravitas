@@ -1,0 +1,18 @@
+{
+  "totalRecords": 708,
+  "uniqueRuleIds": 708,
+  "duplicateRuleIds": [],
+  "duplicateCount": 0,
+  "primaryDispositionCounts": {
+    "SYNTHESIZED_INTO_PROPOSAL": 21,
+    "PROFILE_MEMBER": 677,
+    "VERSION_FAMILY_MEMBER": 2,
+    "TECHNICAL_VERIFICATION_HOLD": 1,
+    "REJECTION_PROPOSED": 3,
+    "RETAINED_SEPARATELY": 4
+  },
+  "primaryDispositionSum": 708,
+  "unexpectedDispositions": [],
+  "requiredIdentitySumMatches708": true,
+  "requiredIdentityDuplicatesZero": true
+}

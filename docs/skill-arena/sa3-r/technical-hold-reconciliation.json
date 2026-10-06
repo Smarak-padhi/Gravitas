@@ -1,0 +1,50 @@
+{
+  "explanation": "There are 3 TECHNICAL_HOLD objects defined in technical-verification-holds.json. However, only HOLD-002 binds a specific source rule from SA1 (RULE-AND-R8-000317), giving exactly 1 primary TECHNICAL_VERIFICATION_HOLD rule in rule-dispositions.jsonl. The other two holds (HOLD-001 for Android XR Display Glasses and HOLD-003 for Media3 Cast Wi-Fi drops) represent architectural-level capability claims held pending hardware verification without directly binding primary rules from the SA1 corpus. Hence, technical-hold objects (3) and primary held rules (1) do not and should not match.",
+  "technicalHoldObjectCount": 3,
+  "technicalHoldPrimaryRuleCount": 1,
+  "technicalHoldReferenceCount": 1,
+  "technicalHoldUniqueRuleCount": 1,
+  "holds": [
+    {
+      "holdId": "HOLD-001",
+      "claim": "Android Display Glasses Glimmer XR interaction model gestures and target sizing",
+      "scope": "EXPERIMENTAL_XR",
+      "sourceRuleIds": [],
+      "primaryHeldRuleIds": [],
+      "primaryDispositionOfReferencedRules": [],
+      "requiredVerification": "Requires physical validation on Android XR display glasses hardware and runtime emulator suite.",
+      "whyUnresolved": "Hardware-specific gestures cannot be validated without physical device verification."
+    },
+    {
+      "holdId": "HOLD-002",
+      "claim": "R8 Configuration Analyzer internal protobuf report schema guarantees across custom Gradle daemon setups",
+      "scope": "BUILD_INTERNAL",
+      "sourceRuleIds": [
+        "RULE-AND-R8-000317"
+      ],
+      "primaryHeldRuleIds": [
+        "RULE-AND-R8-000317"
+      ],
+      "primaryDispositionOfReferencedRules": [
+        {
+          "ruleId": "RULE-AND-R8-000317",
+          "primaryDisposition": "TECHNICAL_VERIFICATION_HOLD",
+          "targetId": "HOLD-002"
+        }
+      ],
+      "requiredVerification": "Empirical execution against release build outputs across diverse Gradle daemon configurations.",
+      "whyUnresolved": "Internal compiler artifact schemas are subject to non-public AGP patching."
+    },
+    {
+      "holdId": "HOLD-003",
+      "claim": "Jetpack Media3 Cast RemoteCastPlayer automated session recovery during continuous Wi-Fi reconnect drops",
+      "scope": "CAST_HARDWARE",
+      "sourceRuleIds": [],
+      "primaryHeldRuleIds": [],
+      "primaryDispositionOfReferencedRules": [],
+      "requiredVerification": "Network simulation testing with physical Google Cast hardware devices.",
+      "whyUnresolved": "Unverified network drop tolerance behavior in automated headless tests."
+    }
+  ],
+  "reconciliationStatus": "RECONCILED_OBJECT_VS_RULE_COUNT"
+}

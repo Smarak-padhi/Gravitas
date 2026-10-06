@@ -1,0 +1,218 @@
+{
+  "totalCanonicalCandidates": 14,
+  "totalPrimarySynthesizedRules": 21,
+  "candidateBreakdown": [
+    {
+      "candidateId": "CANON-GLOB-001",
+      "candidateType": "GLOBAL_ENGINEERING_CANDIDATE",
+      "statement": "Before introducing a new utility, helper, or data structure, inspect the existing codebase and reuse proven local implementations.",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000002"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-PONY-CORE-000002"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-GLOB-002",
+      "candidateType": "GLOBAL_ENGINEERING_CANDIDATE",
+      "statement": "Prefer standard library capabilities over external third-party packages; never import an external dependency for trivial utility functions.",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000003",
+        "RULE-PONY-CORE-000005"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-PONY-CORE-000003",
+        "RULE-PONY-CORE-000005"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-GLOB-003",
+      "candidateType": "GLOBAL_ENGINEERING_CANDIDATE",
+      "statement": "Leverage native platform and runtime primitives before layering custom emulation or heavy abstraction frameworks.",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000004"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-PONY-CORE-000004"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-GLOB-004",
+      "candidateType": "GLOBAL_ENGINEERING_CANDIDATE",
+      "statement": "Implement the minimal verified code that satisfies current requirements; avoid speculative scaffolding for hypothetical future needs.",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000007",
+        "RULE-PONY-CORE-000009"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-PONY-CORE-000007",
+        "RULE-PONY-CORE-000009"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-CTX-001",
+      "candidateType": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "statement": "Within internal business domains, avoid single-implementation speculative interfaces; at external system boundaries (network I/O, databases), isolate dependencies behind explicit test seams.",
+      "sourceRuleIds": [
+        "RULE-PONY-CORE-000001",
+        "RULE-PONY-CORE-000008"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-PONY-CORE-000001",
+        "RULE-PONY-CORE-000008"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-CTX-002",
+      "candidateType": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "statement": "Offload heavy serialization, cryptographic hashing, and parsing of large payloads to cooperative background threads to prevent main-thread latency.",
+      "sourceRuleIds": [
+        "RULE-IOS-NET-000577",
+        "RULE-IOS-PERF-000467"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-IOS-NET-000577",
+        "RULE-IOS-PERF-000467"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-CTX-003",
+      "candidateType": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "statement": "In reusable component libraries, compose state and presentation using compound component patterns rather than multiplying boolean configuration flags.",
+      "sourceRuleIds": [
+        "RULE-VCL-000700",
+        "RULE-SHAD-000704",
+        "RULE-SHAD-000705"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-VCL-000700",
+        "RULE-SHAD-000704",
+        "RULE-SHAD-000705"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-CTX-004",
+      "candidateType": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "statement": "Enforce parameterized query and selection statements in data access layers; strictly forbid dynamic string concatenation of untrusted input.",
+      "sourceRuleIds": [
+        "RULE-AND-SEC-000304"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-AND-SEC-000304"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-CTX-005",
+      "candidateType": "CONTEXTUAL_ENGINEERING_CANDIDATE",
+      "statement": "Isolate UI-bound observable stores and view models on the main actor/thread when observed by reactive view hierarchies.",
+      "sourceRuleIds": [
+        "RULE-IOS-CONC-000481",
+        "RULE-IOS-PAT-000431"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-IOS-CONC-000481",
+        "RULE-IOS-PAT-000431"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-SPEC-001",
+      "candidateType": "SPECIALIST_RULE_CANDIDATE",
+      "statement": "In Android CameraX capture pipelines, handle hardware-dependent feature parity fallbacks explicitly (auto-focus and flash variations across physical sensors).",
+      "sourceRuleIds": [
+        "RULE-AND-CAM-000352"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-AND-CAM-000352"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-SPEC-002",
+      "candidateType": "SPECIALIST_RULE_CANDIDATE",
+      "statement": "Collect production iOS performance telemetry using MetricKit async diagnostic payload subscribers, buffering metrics across system report deliveries.",
+      "sourceRuleIds": [
+        "RULE-IOS-MET-000587"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-IOS-MET-000587"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-SPEC-003",
+      "candidateType": "SPECIALIST_RULE_CANDIDATE",
+      "statement": "In geocoding and reverse geocoding workflows, gracefully handle empty results, network timeouts, and rate limits without throwing unhandled exceptions.",
+      "sourceRuleIds": [
+        "RULE-IOS-MAP-000650"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-IOS-MAP-000650"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-SPEC-004",
+      "candidateType": "SPECIALIST_RULE_CANDIDATE",
+      "statement": "In APNs push notification implementations, request user alert/sound authorization before attempting device token registration callback handling.",
+      "sourceRuleIds": [
+        "RULE-IOS-PUSH-000653"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-IOS-PUSH-000653"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    },
+    {
+      "candidateId": "CANON-SPEC-005",
+      "candidateType": "SPECIALIST_RULE_CANDIDATE",
+      "statement": "When implementing Android BackupAgent credential restore keys, complete credential retrieval inside onRestoreFinished callback rather than onRestore.",
+      "sourceRuleIds": [
+        "RULE-AND-REST-000389"
+      ],
+      "primarySynthesizedRules": [
+        "RULE-AND-REST-000389"
+      ],
+      "secondaryReferences": [],
+      "primaryCountMatchesSourceRuleCount": true,
+      "everySourceRuleExistsInPrimary": true
+    }
+  ],
+  "everySynthesizedRulePointsToValidCandidate": true,
+  "allSourceRulesAccountedForInPrimary": true
+}

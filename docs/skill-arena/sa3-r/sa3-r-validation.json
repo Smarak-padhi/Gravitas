@@ -1,0 +1,108 @@
+{
+  "timestamp": "2026-10-06T10:32:24.280Z",
+  "identities": {
+    "IDENTITY_R1": {
+      "name": "708 SA1 rules exist uniquely",
+      "status": "PASS",
+      "count": 708
+    },
+    "IDENTITY_R2": {
+      "name": "708 primary dispositions exist uniquely",
+      "status": "PASS",
+      "uniqueRules": 708,
+      "duplicates": 0
+    },
+    "IDENTITY_R3": {
+      "name": "Primary-disposition sum = 708",
+      "status": "PASS",
+      "sum": 708,
+      "target": 708
+    },
+    "IDENTITY_R4": {
+      "name": "All disposition targets resolve",
+      "status": "PASS",
+      "invalidTargets": 0
+    },
+    "IDENTITY_R5": {
+      "name": "All 14 candidate IDs unique and valid",
+      "status": "PASS",
+      "count": 14,
+      "invalidCandidates": 0
+    },
+    "IDENTITY_R6": {
+      "name": "All specialist candidate memberships reconcile",
+      "status": "PASS",
+      "specialistCandidateObjects": 5,
+      "retainedSeparatelyRules": 4,
+      "reconciliationStatus": "RECONCILED_DISTINCT_CONCEPTS"
+    },
+    "IDENTITY_R7": {
+      "name": "All technical-hold objects reconcile with primary/secondary rule references",
+      "status": "PASS",
+      "technicalHoldObjects": 3,
+      "primaryHeldRules": 1,
+      "reconciliationStatus": "RECONCILED_OBJECT_VS_RULE_COUNT"
+    },
+    "IDENTITY_R8": {
+      "name": "All version-family objects reconcile with primary/secondary references",
+      "status": "PASS",
+      "versionFamilyObjects": 6,
+      "primaryVersionFamilyRules": 2,
+      "reconciliationStatus": "RECONCILED_STRUCTURAL_FAMILIES_VS_PRIMARY_MEMBERS"
+    },
+    "IDENTITY_R9": {
+      "name": "Primary profile-member union = reported PROFILE_MEMBER count",
+      "status": "PASS",
+      "unionSize": 677,
+      "reportedCount": 677,
+      "pairwiseIntersections": 0
+    },
+    "IDENTITY_R10": {
+      "name": "All cross-references resolve",
+      "status": "PASS",
+      "totalReferencesChecked": 1445,
+      "invalidReferences": 0
+    },
+    "IDENTITY_R11": {
+      "name": "All provenance chains resolve",
+      "status": "PASS",
+      "provenanceCompleteObjects": 36,
+      "incompleteObjects": 0
+    },
+    "IDENTITY_R12": {
+      "name": "Globalization outcome sum = globalization input count",
+      "status": "PASS",
+      "inputCount": 9,
+      "outcomeSum": 9
+    },
+    "IDENTITY_R13": {
+      "name": "Synthesis loss claim is calibrated to actual evidence method",
+      "status": "PASS",
+      "calibratedMethod": "STRUCTURAL_FIELD_COMPARISON",
+      "calibratedClaim": "SEMANTIC_LOSS_NOT_DETECTED"
+    },
+    "IDENTITY_R14": {
+      "name": "SA3 machine artifacts unchanged",
+      "status": "PASS",
+      "sa3Changed": "NO"
+    },
+    "IDENTITY_R15": {
+      "name": "SA1/SA2/SA2-R unchanged",
+      "status": "PASS",
+      "sa1Changed": "NO",
+      "sa2Changed": "NO",
+      "sa2RChanged": "NO"
+    },
+    "IDENTITY_R16": {
+      "name": "Production runtime unchanged",
+      "status": "PASS",
+      "coreChanged": "NO",
+      "orchestratorChanged": "NO",
+      "desktopChanged": "NO",
+      "testsChanged": "NO"
+    }
+  },
+  "overallStatus": "ALL_16_IDENTITIES_VERIFIED",
+  "auditResult": "SA3_VALID_WITH_DOCUMENTATION_OR_CLAIM_CORRECTIONS",
+  "recommendation": "APPROVE_SA3_WITH_SA3_R_CALIBRATION"
+}

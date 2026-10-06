@@ -1,0 +1,15 @@
+{
+  "declaredMethodName": "semantic constraint comparison",
+  "actualMethodClassification": "STRUCTURAL_FIELD_COMPARISON",
+  "evidenceDetails": {
+    "analysisEngine": "Deterministic structural validation script (synthesize_sa3.cjs / schema checks)",
+    "fieldsCompared": [
+      "sourceConstraintsPreserved",
+      "conditionsFactoredIntoContext",
+      "unresolvedLossDetected"
+    ],
+    "natureOfVerification": "Structural assertion verification ensuring that candidate object fields (appliesWhen, doesNotApplyWhen, scope, modality) explicitly capture preconditions and negative constraints without dropping fields present in the source rule metadata.",
+    "semanticLimit": "The algorithm does not execute semantic parsing or proof-theoretic entailment checking. It evaluates structured field mappings and verifies that no source constraints were left unmapped."
+  },
+  "calibrationRecommendation": "Do not label deterministic structural field checking as deep semantic theorem proving. Accurately designate it as STRUCTURAL_FIELD_COMPARISON."
+}

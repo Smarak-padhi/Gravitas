@@ -1,0 +1,18 @@
+{
+  "totalReferences": 1445,
+  "invalidReferences": 0,
+  "invalidReferencesDetails": [],
+  "invalidDispositionTargets": 0,
+  "unreferencedPrimaryTargetsCount": 7,
+  "unreferencedPrimaryTargetsList": [
+    "PROFILE-DESIGN-002",
+    "VERSION-FAMILY-002",
+    "VERSION-FAMILY-003",
+    "VERSION-FAMILY-004",
+    "VERSION-FAMILY-005",
+    "HOLD-001",
+    "HOLD-003"
+  ],
+  "orphanObjectsCount": 0,
+  "reconciliationNotes": "The 7 unreferenced primary target objects are 1 design profile (PROFILE-DESIGN-002, referenced spatially), 4 version families (VERSION-FAMILY-002 through 005, created as structural families from SA2 relationship patterns), and 2 technical holds (HOLD-001 and HOLD-003, created as hardware capability holds). All are valid registered objects; none are orphans."
+}
