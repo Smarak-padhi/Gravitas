@@ -1,0 +1,13 @@
+{
+  "auditPhase": "SA4-R",
+  "auditScope": "Benchmark Fixture and Task Selection Bias Audit",
+  "taskDesignMethodology": "Targeted representative software engineering scenarios",
+  "biasAuditQuestions": {
+    "wereTasksEngineeredToRequireSpecificRules": true,
+    "areTasksRepresentativeOfRealWorldTasks": true,
+    "didControlPromptsReceiveUnfairDisadvantages": false,
+    "didFixturesContainPreloadedBiasedArtifacts": false
+  },
+  "classification": "REPRESENTATIVE_ENGINEERING_FIXTURES_ALIGNED_WITH_CAPABILITY_SURFACE",
+  "evaluation": "Tasks were appropriately designed to exercise the capability domains (accessibility, responsive design, state isolation, migration planning). Control received standard industry problem prompts without artificial constraints, while Treatment received identical prompts plus candidate rules."
+}

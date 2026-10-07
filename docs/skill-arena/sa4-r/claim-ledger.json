@@ -1,0 +1,59 @@
+{
+  "auditPhase": "SA4-R",
+  "claims": [
+    {
+      "target": "GLOBAL_CANDIDATE_BUNDLE",
+      "originalClaim": "Superior in all software engineering domains",
+      "calibratedStatus": "VALIDATED_AT_BUNDLE_LEVEL",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "PROFILE-DESIGN-001",
+      "originalClaim": "Universally produces superior web accessible UI",
+      "calibratedStatus": "VALIDATED_EMPIRICALLY",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "PROFILE-DESIGN-002",
+      "originalClaim": "Optimal for dense operations telemetry",
+      "calibratedStatus": "VALIDATED_EMPIRICALLY_IN_CONTEXT",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "CANON-CTX-001",
+      "originalClaim": "Eliminates architecture coupling",
+      "calibratedStatus": "VALIDATED_EMPIRICALLY",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "PROFILE-PLAT-001",
+      "originalClaim": "Ensures modern web frontend compliance",
+      "calibratedStatus": "VALIDATED_ON_WEB_STATIC_DOM",
+      "confidence": "MODERATE_TO_HIGH"
+    },
+    {
+      "target": "PROFILE-WORK-001",
+      "originalClaim": "Produces enterprise-grade migration plans",
+      "calibratedStatus": "PLANNING_SPECIFICATION_VALIDATED",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "SPECIALISTS (5)",
+      "originalClaim": "Preserved specialist excellence",
+      "calibratedStatus": "OUT_OF_SCOPE_UNTESTED",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "VERSION_FAMILIES (6)",
+      "originalClaim": "Preserved version migration rules",
+      "calibratedStatus": "OUT_OF_SCOPE_UNTESTED",
+      "confidence": "HIGH"
+    },
+    {
+      "target": "TECHNICAL_HOLDS (3)",
+      "originalClaim": "Quarantined awaiting resolution",
+      "calibratedStatus": "QUARANTINED_UNTESTED",
+      "confidence": "HIGH"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "auditPhase": "SA4-R",
+  "profilesAudited": [
+    {
+      "profileId": "PROFILE-PLAT-001",
+      "name": "Web Modern Frontend",
+      "benchmarksTested": [
+        "B01",
+        "B04"
+      ],
+      "scopeEvaluated": "DOM / HTML5 / CSS3 Responsive Layouts",
+      "nativeRuntimeTested": false,
+      "claimStatus": "VALIDATED_ON_WEB_STATIC_DOM",
+      "calibration": "Validated on modern web standards; runtime browser profiling was not executed."
+    },
+    {
+      "profileId": "PROFILE-PLAT-002",
+      "name": "Android Jetpack Compose",
+      "benchmarksTested": [],
+      "scopeEvaluated": "NOT_EMPIRICALLY_TESTED_IN_SA4",
+      "nativeRuntimeTested": false,
+      "claimStatus": "UNTESTED_IN_SA4",
+      "calibration": "No Android ART virtual machine or device tests were run in SA4."
+    }
+  ]
+}

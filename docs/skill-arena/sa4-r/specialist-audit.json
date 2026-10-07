@@ -1,0 +1,36 @@
+{
+  "auditPhase": "SA4-R",
+  "specialists": [
+    {
+      "id": "SPEC-001",
+      "name": "CameraX & Media Recording",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "SPEC-002",
+      "name": "Low-Latency Audio",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "SPEC-003",
+      "name": "Cast & Multi-Device Streaming",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "SPEC-004",
+      "name": "Android Profiler & Heap Dumps",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "SPEC-005",
+      "name": "Glimmer Display Glasses",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    }
+  ],
+  "auditFinding": "Specialist rules were properly excluded from general capability benchmarks. Their preservation as specialized candidates is valid."
+}

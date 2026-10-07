@@ -1,0 +1,42 @@
+{
+  "auditPhase": "SA4-R",
+  "families": [
+    {
+      "id": "VFAM-001",
+      "name": "Compose TV Migration",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "VFAM-002",
+      "name": "Navigation 3 API",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "VFAM-003",
+      "name": "Android Gradle Plugin 9 Upgrade",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "VFAM-004",
+      "name": "Play Billing Library Modernization",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "VFAM-005",
+      "name": "XML Views to Compose Migration",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    },
+    {
+      "id": "VFAM-006",
+      "name": "Wear Compose M3 Adoption",
+      "testedInSA4": false,
+      "status": "NOT_EMPIRICALLY_TESTED_IN_SA4"
+    }
+  ],
+  "auditFinding": "Version families require version-matrix testing. None were claimed or benchmarked in SA4."
+}

@@ -1,0 +1,31 @@
+{
+  "auditPhase": "SA4-R",
+  "totalEvaluatedRows": 16,
+  "controlOutputLabel": "ALPHA",
+  "treatmentOutputLabel": "BETA",
+  "controlScores": [
+    3,
+    3,
+    2,
+    2,
+    3,
+    3,
+    3,
+    2
+  ],
+  "treatmentScores": [
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5
+  ],
+  "controlMean": 2.625,
+  "treatmentMean": 5.0,
+  "meanDelta": 2.375,
+  "reconciliationStatus": "EXACT_ARITHMETIC_MATCH",
+  "notes": "Alpha (Control) scores were 3, 3, 2, 2, 3, 3, 3, 2 resulting in exact mean 2.625. Beta (Treatment) scores were uniformly 5.0 across all 8 benchmarks resulting in exact mean 5.000."
+}

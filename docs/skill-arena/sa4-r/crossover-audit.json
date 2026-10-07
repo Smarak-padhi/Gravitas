@@ -1,0 +1,46 @@
+{
+  "auditPhase": "SA4-R",
+  "crossoversAudited": [
+    {
+      "crossoverId": "CROSSOVER-B02-LIQUID-GLASS",
+      "benchmarkId": "B02",
+      "profileInjected": "PROFILE-DESIGN-002",
+      "intendedContext": "Spatial consumer depth",
+      "testContext": "Dense operations telemetry console",
+      "observedImpact": "Severe degradation of tabular density: heavy 16px blurs, low-contrast text on gradients, and puffy rounded cards reduced visible rows by 50% and increased GPU rendering cost.",
+      "effectClassification": "STRONG_NEGATIVE",
+      "conclusion": "DEMONSTRATES_CONTEXTUALITY"
+    },
+    {
+      "crossoverId": "CROSSOVER-B04-BRUTALIST",
+      "benchmarkId": "B04",
+      "profileInjected": "PROFILE-DESIGN-001",
+      "intendedContext": "Data-dense desktop consoles",
+      "testContext": "Mobile adaptive product layout",
+      "observedImpact": "Severe mobile degradation: fixed 240px grid caused catastrophic horizontal clipping on 360px mobile viewport, failing touch target and responsive transition requirements.",
+      "effectClassification": "STRONG_NEGATIVE",
+      "conclusion": "DEMONSTRATES_CONTEXTUALITY"
+    }
+  ],
+  "evaluations": [
+    {
+      "crossoverId": "CROSSOVER-B02-LIQUID-GLASS",
+      "injectedProfile": "PROFILE-DESIGN-002",
+      "targetBenchmark": "B02",
+      "targetDomain": "Dense Operations Telemetry",
+      "observedImpact": "Heavy blur and low-contrast translucency damaged tabular data readability by 50%.",
+      "effectType": "STRONG_NEGATIVE",
+      "causalInference": "CONFIRMS_CONTEXT_SENSITIVITY_AND_PROFILE_BOUNDARY"
+    },
+    {
+      "crossoverId": "CROSSOVER-B04-BRUTALIST",
+      "injectedProfile": "PROFILE-DESIGN-001 (Misapplied variant)",
+      "targetBenchmark": "B04",
+      "targetDomain": "Adaptive Card Layout",
+      "observedImpact": "Monolithic high-contrast border styling clashed with responsive flow expectations.",
+      "effectType": "NEGATIVE",
+      "causalInference": "CONFIRMS_SPECIALIZED_CONTEXT_ALIGNMENT"
+    }
+  ],
+  "auditConclusion": "Crossover penalties empirically demonstrate that design profiles cannot be applied indiscriminately across unaligned domains."
+}

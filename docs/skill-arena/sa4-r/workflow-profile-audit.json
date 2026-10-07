@@ -1,0 +1,12 @@
+{
+  "auditPhase": "SA4-R",
+  "profileId": "PROFILE-WORK-001",
+  "name": "Refactoring & Migration Planning",
+  "benchmarksTested": [
+    "B08"
+  ],
+  "scopeEvaluated": "DOCUMENT_AND_SPECIFICATION_QUALITY",
+  "runtimeExecutionTested": false,
+  "claimStatus": "PLANNING_SPECIFICATION_VALIDATED",
+  "calibration": "Validated on the structural completeness and risk mitigation of migration architectural plans. Does not claim automated code migration execution."
+}

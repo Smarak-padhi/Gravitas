@@ -1,0 +1,61 @@
+{
+  "auditPhase": "SA4-R",
+  "metricsComparison": [
+    {
+      "metric": "TOTAL_RUNS",
+      "humanDocValue": 22,
+      "machineDataValue": 22,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "PRIMARY_PAIRS",
+      "humanDocValue": 8,
+      "machineDataValue": 8,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "CONTROL_OBJECTIVE_PASSES",
+      "humanDocValue": 6,
+      "machineDataValue": 4,
+      "status": "DISCREPANCY_NOTED",
+      "notes": "Human text in SA4_FINAL_EVIDENCE.md cited 6/16 (37.5%); machine records in objective-results.jsonl contain exactly 4/16 (25.0%). Calibrated to machine data truth: 4/16."
+    },
+    {
+      "metric": "TREATMENT_OBJECTIVE_PASSES",
+      "humanDocValue": 16,
+      "machineDataValue": 16,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "CONTROL_SUBJECTIVE_MEAN",
+      "humanDocValue": 2.625,
+      "machineDataValue": 2.625,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "TREATMENT_SUBJECTIVE_MEAN",
+      "humanDocValue": 5.0,
+      "machineDataValue": 5.0,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "ABLATIONS_EVALUATED",
+      "humanDocValue": 2,
+      "machineDataValue": 2,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "CROSSOVERS_EVALUATED",
+      "humanDocValue": 2,
+      "machineDataValue": 2,
+      "status": "CONSISTENT"
+    },
+    {
+      "metric": "LENGTH_CONTROLS_EVALUATED",
+      "humanDocValue": 2,
+      "machineDataValue": 2,
+      "status": "CONSISTENT"
+    }
+  ],
+  "overallConsistencyStatus": "SUBSTANTIALLY_EXACT_WITH_CALIBRATED_OBJECTIVE_CORRECTION"
+}

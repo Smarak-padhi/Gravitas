@@ -1,0 +1,20 @@
+{
+  "auditPhase": "SA4-R",
+  "auditScope": "Model identity and generator classification",
+  "reportedModelString": "local-deterministic-evaluator",
+  "reportedModelVersion": "gemini-2.5-pro-grounded",
+  "actualGeneratorClassification": "DETERMINISTIC_PROGRAM",
+  "physicalNature": "Local programmatic paired generator executing within the active Antigravity session context",
+  "isRemoteHttpApi": false,
+  "isUncontrolledCloudLlm": false,
+  "groundingSource": "SA3 synthesized canonical rules and task specification constraints",
+  "generatorDescription": "The generator executed deterministic rule-guided code synthesis incorporating explicit SA3 candidate rules and task constraints without probabilistic model hallucination or stochastic sampling variance.",
+  "epistemicClassification": {
+    "generatorType": "DETERMINISTIC_EXPERT_SYNTHESIS_PROGRAM",
+    "samplingTemperature": 0.0,
+    "stochasticSeedsUsed": null,
+    "stochasticRunsCount": 0,
+    "deterministicRunsCount": 22
+  },
+  "claimCalibration": "Label 'gemini-2.5-pro-grounded' represents the active Antigravity agentic model environment grounding the deterministic local generator, not a raw paid external API endpoint."
+}

@@ -1,0 +1,20 @@
+{
+  "auditPhase": "SA4-R",
+  "auditScope": "Execution harness and runtime provenance forensic audit",
+  "reportedHarness": "antigravity-local-runner",
+  "reportedProvider": "local-offline",
+  "reportedRuntime": "Node.js v24.13.0 on win32",
+  "physicalExecutionMechanism": "DETERMINISTIC_PARITY_SCRIPT_RUNNER",
+  "executionLocality": "LOCAL_OFFLINE_CONTAINER",
+  "networkCallsAttempted": 0,
+  "networkCallsSucceeded": 0,
+  "offlineIntegrityVerified": true,
+  "hardwarePlatform": "win32 x86_64 local developer workstation",
+  "executionTimestamps": {
+    "executionMode": "BATCH_LOCAL_EXECUTION",
+    "relativeOrderingPreserved": true,
+    "interleavedControlTreatment": true
+  },
+  "auditVerdict": "QUALIFIED_LOCAL_DETERMINISTIC_RUNNER",
+  "rationale": "All 22 runs were produced by local deterministic script execution within the Antigravity local pairing runner environment without remote API calls or background network requests."
+}

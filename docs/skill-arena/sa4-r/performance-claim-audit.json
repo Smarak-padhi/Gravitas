@@ -1,0 +1,14 @@
+{
+  "auditPhase": "SA4-R",
+  "benchmarkTested": "B05 (Large Data Virtualization)",
+  "inspectedProperties": [
+    "virtual_windowing",
+    "row_memoization",
+    "layout_shift_containment",
+    "dom_node_count_limit"
+  ],
+  "measuredPassRate": "100% on tested criteria (2/2 in B05)",
+  "uncalibratedClaim": "Guaranteed 120 FPS runtime scrolling on all hardware",
+  "calibratedClaim": "ARCHITECTURAL_ADOPTION_OF_VIRTUALIZATION_AND_RENDER_CONTAINMENT_TECHNIQUES",
+  "limitation": "Benchmarked via code structure analysis; Chrome DevTools trace or hardware profiler not run."
+}

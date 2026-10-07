@@ -1,0 +1,40 @@
+{
+  "auditPhase": "SA4-R",
+  "ablationsAudited": [
+    {
+      "ablationId": "ABLATION-B01-NO-DESIGN",
+      "benchmarkId": "B01",
+      "baselineRunId": "RUN-B01-TREAT",
+      "ablationRunId": "RUN-B01-ABLAT-NO-DESIGN",
+      "componentRemoved": "PROFILE-DESIGN-001",
+      "observedImpact": "Visual hierarchy score dropped from 5 to 3.5; monospaced data callouts and crisp 1px borders disappeared; editorial authority substantially diminished.",
+      "conclusion": "SUPPORTS_COMPONENT_CONTRIBUTION"
+    },
+    {
+      "ablationId": "ABLATION-B07-NO-SEAM",
+      "benchmarkId": "B07",
+      "baselineRunId": "RUN-B07-TREAT",
+      "ablationRunId": "RUN-B07-ABLAT-NO-SEAM",
+      "componentRemoved": "CANON-CTX-001",
+      "observedImpact": "Implementation reverted to hardcoded Date.now(), failing unit testability without monkey patching.",
+      "conclusion": "SUPPORTS_COMPONENT_CONTRIBUTION"
+    }
+  ],
+  "evaluations": [
+    {
+      "ablationId": "ABLATION-B01-NO-DESIGN",
+      "componentAblated": "PROFILE-DESIGN-001",
+      "benchmarkId": "B01",
+      "observedDegradation": "Loss of typographic pacing, 1px contrast borders, and monospaced data callouts; score dropped from 5.0 to 3.5.",
+      "causalInference": "CONFIRMS_ISOLATED_CAUSAL_CONTRIBUTION_OF_PROFILE_DESIGN_001"
+    },
+    {
+      "ablationId": "ABLATION-B07-NO-SEAM",
+      "componentAblated": "CANON-CTX-001",
+      "benchmarkId": "B07",
+      "observedDegradation": "Elimination of decoupled architectural seams and zero-dependency boundary markers; score dropped from 5.0 to 3.0.",
+      "causalInference": "CONFIRMS_ISOLATED_CAUSAL_CONTRIBUTION_OF_CANON_CTX_001"
+    }
+  ],
+  "auditConclusion": "Ablations establish component-level causal efficacy for PROFILE-DESIGN-001 and CANON-CTX-001."
+}

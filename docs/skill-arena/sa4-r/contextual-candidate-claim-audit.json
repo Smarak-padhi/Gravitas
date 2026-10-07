@@ -1,0 +1,69 @@
+{
+  "auditPhase": "SA4-R",
+  "contextualCandidates": [
+    {
+      "id": "CANON-CTX-001",
+      "name": "Architectural Seams",
+      "testedIn": [
+        "B07"
+      ],
+      "isolatedViaAblation": true,
+      "claimLevel": "VALIDATED_EMPIRICALLY"
+    },
+    {
+      "id": "CANON-CTX-002",
+      "name": "Auth Form Validation",
+      "testedIn": [
+        "B03"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    },
+    {
+      "id": "CANON-CTX-003",
+      "name": "Virtual Scrolling",
+      "testedIn": [
+        "B05"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    },
+    {
+      "id": "CANON-CTX-004",
+      "name": "Data Grid Pagination",
+      "testedIn": [
+        "B02",
+        "B05"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    },
+    {
+      "id": "CANON-CTX-005",
+      "name": "Fluid Layout Breakpoints",
+      "testedIn": [
+        "B04"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    },
+    {
+      "id": "CANON-CTX-006",
+      "name": "Theme Token Mapping",
+      "testedIn": [
+        "B06"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    },
+    {
+      "id": "CANON-CTX-007",
+      "name": "Safe Refactoring Step",
+      "testedIn": [
+        "B08"
+      ],
+      "isolatedViaAblation": false,
+      "claimLevel": "VALIDATED_AT_BUNDLE_LEVEL"
+    }
+  ]
+}

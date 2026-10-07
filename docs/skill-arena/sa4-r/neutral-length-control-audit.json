@@ -1,0 +1,29 @@
+{
+  "auditPhase": "SA4-R",
+  "runsAudited": [
+    "RUN-B01-LENGTH-CTRL",
+    "RUN-B07-LENGTH-CTRL"
+  ],
+  "promptCharacterComparison": {
+    "B01_CTRL": 830,
+    "B01_TREAT": 1420,
+    "B01_LENGTH_CTRL": 1485,
+    "B07_CTRL": 780,
+    "B07_TREAT": 1390,
+    "B07_LENGTH_CTRL": 1450
+  },
+  "performanceResults": {
+    "RUN-B01-LENGTH-CTRL": {
+      "objectivePasses": 2,
+      "subjectiveScore": 2.5,
+      "deltaVsControl": 0.0
+    },
+    "RUN-B07-LENGTH-CTRL": {
+      "objectivePasses": 1,
+      "subjectiveScore": 2.5,
+      "deltaVsControl": 0.0
+    }
+  },
+  "auditConclusion": "TOKEN_LENGTH_CONFIRMATION_DISPROVED",
+  "rationale": "Neutral verbose prompts matching or exceeding treatment token length did not improve objective compliance or subjective scores. The observed treatment advantage is driven by capability guidance semantics, not prompt verbosity."
+}

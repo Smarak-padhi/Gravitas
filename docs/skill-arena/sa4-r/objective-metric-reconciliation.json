@@ -1,0 +1,45 @@
+{
+  "auditPhase": "SA4-R",
+  "totalObjectiveRecords": 32,
+  "controlPasses": 4,
+  "controlTotal": 16,
+  "controlPassRate": "25.0%",
+  "treatmentPasses": 16,
+  "treatmentTotal": 16,
+  "treatmentPassRate": "100.0%",
+  "humanNarrativeReportedPasses": 6,
+  "humanNarrativeReportedTotal": 16,
+  "humanNarrativeReportedRate": "37.5%",
+  "discrepancyIdentified": true,
+  "discrepancyDetails": {
+    "machineRecordPasses": 4,
+    "narrativeRecordPasses": 6,
+    "delta": 2,
+    "rootCause": "The human narrative in SA4_FINAL_EVIDENCE.md cited 6/16 (37.5%) by counting informal partial credit on B02 layout structure and B05 table pagination, whereas the strict machine records in objective-results.jsonl recorded exactly 4/16 (25.0%) passes (B01 landmarks, B01 measure, B06 dimensions, B07 zero-deps).",
+    "officialCalibratedFigure": "4/16 (25.0%) for Control, 16/16 (100.0%) for Treatment"
+  },
+  "passedCriteriaControl": [
+    "SEMANTIC_LANDMARKS",
+    "READING_MEASURE_CONSTRAINT",
+    "DIMENSIONS_EXACT_MATCH",
+    "ZERO_EXTERNAL_DEPENDENCY"
+  ],
+  "passedCriteriaTreatment": [
+    "SEMANTIC_LANDMARKS",
+    "READING_MEASURE_CONSTRAINT",
+    "TABULAR_NUM_ALIGNMENT",
+    "ARIA_SORT_HEADER_ATTRIBUTES",
+    "ARIA_COMBOBOX_PATTERN",
+    "LIVE_REGION_ANNOUNCER",
+    "TOUCH_TARGET_SIZE",
+    "MULTI_PANE_SUPPORT",
+    "FIELDSET_LEGEND_STRUCTURE",
+    "ARIA_DESCRIBEDBY_ASSOCIATION",
+    "DIMENSIONS_EXACT_MATCH",
+    "STATUS_PILL_COLOR_TOKEN",
+    "ZERO_EXTERNAL_DEPENDENCY",
+    "EXPLICIT_CLOCK_TEST_SEAM",
+    "STRUCTURED_LIFECYCLE_PHASES",
+    "DEPENDENCY_WAVE_PARALLELIZATION"
+  ]
+}

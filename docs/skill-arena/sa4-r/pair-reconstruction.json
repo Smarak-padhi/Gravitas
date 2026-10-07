@@ -1,0 +1,122 @@
+{
+  "auditPhase": "SA4-R",
+  "totalReconstructedPairs": 14,
+  "primaryPairsCount": 8,
+  "ablationPairsCount": 2,
+  "crossoverPairsCount": 2,
+  "lengthControlPairsCount": 2,
+  "pairs": [
+    {
+      "pairId": "PAIR-B01",
+      "benchmarkId": "B01",
+      "domain": "Web Layout & Semantic Navigation",
+      "controlRunId": "RUN-B01-CTRL",
+      "treatmentRunId": "RUN-B01-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B02",
+      "benchmarkId": "B02",
+      "domain": "Dense Data Dashboard",
+      "controlRunId": "RUN-B02-CTRL",
+      "treatmentRunId": "RUN-B02-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B03",
+      "benchmarkId": "B03",
+      "domain": "Authentication & Form Security",
+      "controlRunId": "RUN-B03-CTRL",
+      "treatmentRunId": "RUN-B03-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B04",
+      "benchmarkId": "B04",
+      "domain": "Responsive Card Layout",
+      "controlRunId": "RUN-B04-CTRL",
+      "treatmentRunId": "RUN-B04-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B05",
+      "benchmarkId": "B05",
+      "domain": "Large Data Virtual Table",
+      "controlRunId": "RUN-B05-CTRL",
+      "treatmentRunId": "RUN-B05-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B06",
+      "benchmarkId": "B06",
+      "domain": "Design System Layout Tokens",
+      "controlRunId": "RUN-B06-CTRL",
+      "treatmentRunId": "RUN-B06-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B07",
+      "benchmarkId": "B07",
+      "domain": "Zero-Dependency Tree State",
+      "controlRunId": "RUN-B07-CTRL",
+      "treatmentRunId": "RUN-B07-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B08",
+      "benchmarkId": "B08",
+      "domain": "Architectural Refactoring Plan",
+      "controlRunId": "RUN-B08-CTRL",
+      "treatmentRunId": "RUN-B08-TREAT",
+      "status": "CAUSALLY_VALID"
+    },
+    {
+      "pairId": "PAIR-B01-ABLATION",
+      "benchmarkId": "B01",
+      "domain": "Ablation: Design Profile Removed",
+      "controlRunId": "RUN-B01-TREAT",
+      "treatmentRunId": "RUN-B01-ABLAT-NO-DESIGN",
+      "status": "ISOLATED_COMPONENT_VALID"
+    },
+    {
+      "pairId": "PAIR-B07-ABLATION",
+      "benchmarkId": "B07",
+      "domain": "Ablation: Seam Rule Removed",
+      "controlRunId": "RUN-B07-TREAT",
+      "treatmentRunId": "RUN-B07-ABLAT-NO-SEAM",
+      "status": "ISOLATED_COMPONENT_VALID"
+    },
+    {
+      "pairId": "PAIR-B02-CROSSOVER",
+      "benchmarkId": "B02",
+      "domain": "Crossover: Liquid Glass Injected",
+      "controlRunId": "RUN-B02-TREAT",
+      "treatmentRunId": "RUN-B02-CROSSOVER-GLASS",
+      "status": "CROSSOVER_PENALTY_CONFIRMED"
+    },
+    {
+      "pairId": "PAIR-B04-CROSSOVER",
+      "benchmarkId": "B04",
+      "domain": "Crossover: Neo-Brutalist Injected",
+      "controlRunId": "RUN-B04-TREAT",
+      "treatmentRunId": "RUN-B04-CROSSOVER-BRUTALIST",
+      "status": "CROSSOVER_PENALTY_CONFIRMED"
+    },
+    {
+      "pairId": "PAIR-B01-LENGTH",
+      "benchmarkId": "B01",
+      "domain": "Length Control: Verbose Neutral",
+      "controlRunId": "RUN-B01-CTRL",
+      "treatmentRunId": "RUN-B01-LENGTH-CTRL",
+      "status": "LENGTH_EFFECT_DISPROVED"
+    },
+    {
+      "pairId": "PAIR-B07-LENGTH",
+      "benchmarkId": "B07",
+      "domain": "Length Control: Verbose Neutral",
+      "controlRunId": "RUN-B07-CTRL",
+      "treatmentRunId": "RUN-B07-LENGTH-CTRL",
+      "status": "LENGTH_EFFECT_DISPROVED"
+    }
+  ]
+}

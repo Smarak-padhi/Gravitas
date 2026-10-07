@@ -1,0 +1,44 @@
+{
+  "auditPhase": "SA4-R",
+  "auditScope": "Control vs Treatment Prompt Parity Analysis",
+  "promptConstructionRule": "TREATMENT_PROMPT = CONTROL_PROMPT + \\n\\nCAPABILITY GUIDANCE APPLIED: <BUNDLE_RULES>",
+  "nonCapabilityTextDiffCount": 0,
+  "otherControlOnlyText": "NONE",
+  "otherTreatmentOnlyText": "NONE",
+  "confoundingDirectiveCount": 0,
+  "parityVerdict": "STRICT_CAUSAL_PARITY_VERIFIED",
+  "detailedBenchmarks": {
+    "B01": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, PROFILE-DESIGN-001"
+    },
+    "B02": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, PROFILE-DESIGN-002"
+    },
+    "B03": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, CANON-CTX-002, PROFILE-DESIGN-001"
+    },
+    "B04": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, PROFILE-PLAT-001, PROFILE-DESIGN-001"
+    },
+    "B05": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, CANON-CTX-003, PROFILE-DESIGN-002"
+    },
+    "B06": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, PROFILE-DESIGN-001"
+    },
+    "B07": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, CANON-CTX-001"
+    },
+    "B08": {
+      "baseTaskIdentical": true,
+      "differentialText": "CAPABILITY GUIDANCE APPLIED: CANON-GLOB-001..004, PROFILE-WORK-001"
+    }
+  }
+}

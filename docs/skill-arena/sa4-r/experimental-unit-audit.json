@@ -1,0 +1,8 @@
+{
+  "auditPhase": "SA4-R",
+  "experimentalUnit": "PAIRED_BENCHMARK_TASK_RUN",
+  "numberOfUnits": 8,
+  "totalExecutionRuns": 22,
+  "replicateStructure": "1 primary pair per benchmark archetype + 2 ablations + 2 crossovers + 2 length controls",
+  "statisticalGeneralizability": "High internal validity across targeted software engineering archetypes; bounds on sample size acknowledged."
+}

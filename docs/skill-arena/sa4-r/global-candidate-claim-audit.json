@@ -1,0 +1,14 @@
+{
+  "auditPhase": "SA4-R",
+  "globalCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004"
+  ],
+  "testingRegime": "Included across all 8 benchmark treatments (B01..B08)",
+  "bundleLevelSupport": "STRONG_POSITIVE (Present in all successful treatment runs)",
+  "componentLevelIsolation": "NOT_INDIVIDUALLY_ABLATED",
+  "calibratedClaimLevel": "VALIDATED_AT_BUNDLE_LEVEL",
+  "claimCalibrationNotes": "Global candidates were bundled in all treatments. SA4 demonstrates that the bundle containing them succeeds across all tested domains, but individual global rules were not isolated through single-rule ablations."
+}

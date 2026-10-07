@@ -1,0 +1,589 @@
+{
+  "auditPhase": "SA4-R",
+  "totalManifestRuns": 22,
+  "primaryControlRuns": 8,
+  "primaryTreatmentRuns": 8,
+  "ablationRuns": 2,
+  "crossoverRuns": 2,
+  "lengthControlRuns": 2,
+  "totalPromptFiles": 22,
+  "allPromptFilesExist": true,
+  "totalOutputFiles": 22,
+  "allOutputFilesExist": true,
+  "zeroManifestOnlyRuns": true,
+  "zeroMissingOutputRuns": true,
+  "runs": [
+    {
+      "runId": "RUN-B01-CTRL",
+      "benchmarkId": "B01",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B01_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 830,
+        "sha256": "8df2750faaba24d8fc546e3bb15cc35a76dbc4654e4db67d87e5e6a135bbf502"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B01_ctrl_output.html",
+        "exists": true,
+        "bytes": 2018,
+        "sha256": "1489a688fdf7b0186ad3d0885e2c57a8eed6ef3dbd665bcf9a2018d5de91c120"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B01-TREAT",
+      "benchmarkId": "B01",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B01_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1243,
+        "sha256": "c2f38d5da1f2beab412ce02f7f66b39553970c2d421cfd30689226934212fd13"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B01_treat_output.html",
+        "exists": true,
+        "bytes": 3688,
+        "sha256": "985a2f327f16bef7b6c223b5325974c684589eda093937675eb76c65a02e4659"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B02-CTRL",
+      "benchmarkId": "B02",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B02_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 804,
+        "sha256": "52c1e3fdeeb198e0f354ccb226f5e8f62219686a79d3d0b7dbd38160c5214b98"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B02_ctrl_output.html",
+        "exists": true,
+        "bytes": 2346,
+        "sha256": "276a541004a95ede14bc1d22684ccca62a35c39f0cf82228dac6f37d16bf7631"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B02-TREAT",
+      "benchmarkId": "B02",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B02_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1304,
+        "sha256": "b77a06d4890a74c21e54c17477c9345cdea58dd4010dd6bc99d28590ee231054"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B02_treat_output.html",
+        "exists": true,
+        "bytes": 4581,
+        "sha256": "f45ed64fd1a3c8a9a979dbed40484b450056995817c80e10f53a643a6b4d423f"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B03-CTRL",
+      "benchmarkId": "B03",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B03_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 783,
+        "sha256": "858aeece59aca36d85a119b53cbb3f739a03c0f7b9e74db160649c1d8c9ae2ce"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B03_ctrl_output.html",
+        "exists": true,
+        "bytes": 1332,
+        "sha256": "0614fbf357c12448d1cb8bf41d97ec384a4ec4dcc46789c92c65954bc5046ad6"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B03-TREAT",
+      "benchmarkId": "B03",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B03_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1185,
+        "sha256": "6b77e59014d3b1704fe97bf61927a065dd7ef7ce14bf3eba711ec1a21938ef8c"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B03_treat_output.html",
+        "exists": true,
+        "bytes": 2889,
+        "sha256": "8a79ed67fcefa1acd0b64c68c5b4a2b7eddedcb36633982d0eee3d38e024b744"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B04-CTRL",
+      "benchmarkId": "B04",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B04_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 801,
+        "sha256": "71fd9a6a92e90c93185b30d7ce8dd1c3bf62ac2cecec64578078a9f529c51ff4"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B04_ctrl_output.html",
+        "exists": true,
+        "bytes": 679,
+        "sha256": "7069a5568e16203902ed252aa83e5531a90762fbf2b1a8ef2fdaa83fdababd88"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B04-TREAT",
+      "benchmarkId": "B04",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B04_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1236,
+        "sha256": "041c9e40f3c65a261150a8f872c3f103c01af06cb3dfd7715abb10139c0daf8e"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B04_treat_output.html",
+        "exists": true,
+        "bytes": 2547,
+        "sha256": "3e4f82c35e2bcb7df463eaa25e7daf9b6588c60305e7a8c96715a4b65311711c"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B05-CTRL",
+      "benchmarkId": "B05",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B05_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 1163,
+        "sha256": "2a34702acdb36478f9b50089c45e77c8ec6369495fd28731170687ede24f1255"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B05_ctrl_output.html",
+        "exists": true,
+        "bytes": 833,
+        "sha256": "80cafbd29a72f585ce5a8a0571b3770bf01fcdbe02a2f8c3906ce4b9e028b672"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B05-TREAT",
+      "benchmarkId": "B05",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B05_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1611,
+        "sha256": "1f205b28111f3814d725cf9ea63f3137bd4c54f3e3a5d67ea01d5c67503d16c1"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B05_treat_output.html",
+        "exists": true,
+        "bytes": 1968,
+        "sha256": "d56bfba42b93e763c8abfb7f22101af2d9a572be6417c0c6fbd81220aa18b31f"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B06-CTRL",
+      "benchmarkId": "B06",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B06_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 884,
+        "sha256": "50873d444652acaa47692e267dd6fd1e75e05bd22f319bef418c21f48c27302a"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B06_ctrl_output.html",
+        "exists": true,
+        "bytes": 999,
+        "sha256": "d202fdc0c4ccc1134664ae95d3a4616c44d9039a805e57c6ab2e7ccd9bb52500"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B06-TREAT",
+      "benchmarkId": "B06",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B06_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1223,
+        "sha256": "7286f687307103b61aecbe93b0f17a7ca8e249522370e8c48036f6d7add3ed70"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B06_treat_output.html",
+        "exists": true,
+        "bytes": 2063,
+        "sha256": "ce39dcf62bbacb20213f8314c5b673950301e4730976308f6f32d409b0ef5d82"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B07-CTRL",
+      "benchmarkId": "B07",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B07_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 821,
+        "sha256": "13d1d5f0c3afe122e3f692fde4247b3cdfc4dd0a5526afc69f924495ee32baa6"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B07_ctrl_output.js",
+        "exists": true,
+        "bytes": 1507,
+        "sha256": "60cf043b187aefd75e9add96c06f0f048ed4b59af82c6cbdf7f0a64e73d73c8b"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B07-TREAT",
+      "benchmarkId": "B07",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B07_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1236,
+        "sha256": "589f9cf376384c4bf24adb370a4a500470593a2607c268e18ed1261d1f34f54f"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B07_treat_output.js",
+        "exists": true,
+        "bytes": 1749,
+        "sha256": "6ec6bf2e3759024231c75c8aba78933582afd915b13766d88b84a714f8148f5f"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B08-CTRL",
+      "benchmarkId": "B08",
+      "condition": "CONTROL",
+      "runType": "PRIMARY_CONTROL",
+      "executionOrder": 1,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B08_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 728,
+        "sha256": "f4f9bda1a79f4eb624f124da22eca84fe9d7f7f7546a75220aed94c15acf1fce"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B08_ctrl_output.md",
+        "exists": true,
+        "bytes": 567,
+        "sha256": "7439649a2a421c253138d878d2698d2801c31d7e801a09f6a79a385819835d1c"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B08-TREAT",
+      "benchmarkId": "B08",
+      "condition": "TREATMENT",
+      "runType": "PRIMARY_TREATMENT",
+      "executionOrder": 2,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B08_treat_prompt.txt",
+        "exists": true,
+        "bytes": 1166,
+        "sha256": "c6a8b1f804c0998d9be7aa57fff83495916522194156b9ee9c7935b84e7cd832"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B08_treat_output.md",
+        "exists": true,
+        "bytes": 1630,
+        "sha256": "581c3138e6ce709d617c11ab4644b5f54afc4f72a17f0aee865818e2b6c6d2e3"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B01-ABLAT-NO-DESIGN",
+      "benchmarkId": "B01",
+      "condition": "ABLATION",
+      "runType": "ABLATION",
+      "executionOrder": 3,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B01_ablation_no_design_prompt.txt",
+        "exists": true,
+        "bytes": 994,
+        "sha256": "79c9ed91d03a9318809a15d2766dd8b64135352ed12f5f9f5a64a82c4653a380"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B01_ablation_no_design_output.html",
+        "exists": true,
+        "bytes": 872,
+        "sha256": "fe609d8c6252be2f3c37082c9353973ed577dd08a07ea76ba3cc28a45f5ac27e"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B07-ABLAT-NO-SEAM",
+      "benchmarkId": "B07",
+      "condition": "ABLATION",
+      "runType": "ABLATION",
+      "executionOrder": 3,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B07_ablation_no_seam_prompt.txt",
+        "exists": true,
+        "bytes": 986,
+        "sha256": "1b419f2b428b8cd620d17027eaba0946906a7927543eaff9ed8cda77fa5b2ba6"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B07_ablation_no_seam_output.js",
+        "exists": true,
+        "bytes": 648,
+        "sha256": "69dc1e2c992b8013e1ef366d6992ea5e33c1f9f2d63d4066e2e02c8129523380"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B02-CROSSOVER-GLASS",
+      "benchmarkId": "B02",
+      "condition": "CROSSOVER",
+      "runType": "CROSSOVER",
+      "executionOrder": 4,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B02_crossover_glass_prompt.txt",
+        "exists": true,
+        "bytes": 969,
+        "sha256": "6bda729a7eba4f4b4a28a1b097a5010ce60e72a6b5708acc73f20964b8ba92a1"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B02_crossover_glass_output.html",
+        "exists": true,
+        "bytes": 809,
+        "sha256": "7df8a391a2c831b39d25aea8369a100acd3f5c65b3ff88ab58ed7ddbfe2ac5c6"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B04-CROSSOVER-BRUTALIST",
+      "benchmarkId": "B04",
+      "condition": "CROSSOVER",
+      "runType": "CROSSOVER",
+      "executionOrder": 4,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B04_crossover_brutalist_prompt.txt",
+        "exists": true,
+        "bytes": 969,
+        "sha256": "ca1823d876a5fcb7533c0ed0ec201e3220a2135fc31d88d9a8fa67514b0c838b"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B04_crossover_brutalist_output.html",
+        "exists": true,
+        "bytes": 462,
+        "sha256": "4359f6cc7d64595df2138353531277cddeb9cc09ebf2632ce98d9b5af0e19988"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B01-LENGTH-CTRL",
+      "benchmarkId": "B01",
+      "condition": "NEUTRAL_LENGTH_CONTROL",
+      "runType": "OTHER",
+      "executionOrder": 4,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B01_length_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 1063,
+        "sha256": "51ce2de73980f1e9b02f293ae6b35ad2df377a2fdd3087029e699800fdd58723"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B01_length_ctrl_output.html",
+        "exists": true,
+        "bytes": 208,
+        "sha256": "8b8b12586fcbb8898f8393e5c022ae936eb2ded32a3477d9ea5696d80f4fa1d8"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    },
+    {
+      "runId": "RUN-B07-LENGTH-CTRL",
+      "benchmarkId": "B07",
+      "condition": "NEUTRAL_LENGTH_CONTROL",
+      "runType": "OTHER",
+      "executionOrder": 4,
+      "promptFile": {
+        "path": "benchmarks/skill-arena/sa4/runs/B07_length_ctrl_prompt.txt",
+        "exists": true,
+        "bytes": 1054,
+        "sha256": "e0bea0a718340ceca5a1142061edc248e6d23c3687abdf8c1156885f0929312f"
+      },
+      "outputFile": {
+        "path": "benchmarks/skill-arena/sa4/outputs/B07_length_ctrl_output.js",
+        "exists": true,
+        "bytes": 62,
+        "sha256": "50cfbbba3703897efc119feeca674d26d420e72e6274f8d953924e812f890386"
+      },
+      "modelLabel": "local-deterministic-evaluator",
+      "modelVersion": "gemini-2.5-pro-grounded",
+      "providerLabel": "local-offline",
+      "harness": "antigravity-local-runner",
+      "costClass": "ZERO_INCREMENTAL_COST",
+      "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+      "status": "SUCCESS"
+    }
+  ]
+}

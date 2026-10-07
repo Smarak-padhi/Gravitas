@@ -1,0 +1,28 @@
+{
+  "auditPhase": "SA4-R",
+  "anonymizationScheme": "ALPHA_BETA_MAPPING",
+  "blindingTable": {
+    "OUTPUT-B01-ALPHA": "RUN-B01-CTRL",
+    "OUTPUT-B01-BETA": "RUN-B01-TREAT",
+    "OUTPUT-B02-ALPHA": "RUN-B02-CTRL",
+    "OUTPUT-B02-BETA": "RUN-B02-TREAT",
+    "OUTPUT-B03-ALPHA": "RUN-B03-CTRL",
+    "OUTPUT-B03-BETA": "RUN-B03-TREAT",
+    "OUTPUT-B04-ALPHA": "RUN-B04-CTRL",
+    "OUTPUT-B04-BETA": "RUN-B04-TREAT",
+    "OUTPUT-B05-ALPHA": "RUN-B05-CTRL",
+    "OUTPUT-B05-BETA": "RUN-B05-TREAT",
+    "OUTPUT-B06-ALPHA": "RUN-B06-CTRL",
+    "OUTPUT-B06-BETA": "RUN-B06-TREAT",
+    "OUTPUT-B07-ALPHA": "RUN-B07-CTRL",
+    "OUTPUT-B07-BETA": "RUN-B07-TREAT",
+    "OUTPUT-B08-ALPHA": "RUN-B08-CTRL",
+    "OUTPUT-B08-BETA": "RUN-B08-TREAT"
+  },
+  "blindingIntegrityLevel": "STRUCTURALLY_PARTIAL",
+  "leakageAssessment": {
+    "nominalLeakage": "NONE (Condition labels 'CONTROL' and 'TREATMENT' were completely stripped)",
+    "structuralLeakage": "MODERATE (Evaluator rubrics checked for architectural features like token variables, ARIA landmarks, and seam comments which are uniquely present in treatment outputs)"
+  },
+  "auditRecommendation": "Acknowledge blinding as programmatic identifier masking, not sensory double-blinding."
+}

@@ -1,0 +1,39 @@
+{
+  "auditPhase": "SA4-R",
+  "evaluatorScript": "benchmarks/skill-arena/sa4/evaluators/subjective-evaluator.py",
+  "totalSubjectiveRows": 16,
+  "judgeClass": "ROLE_ONLY_JUDGE",
+  "numberOfJudges": 8,
+  "judgeRoles": [
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "ACCESSIBILITY_AND_STRUCTURE",
+    "ACCESSIBILITY_AND_STRUCTURE",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "ACCESSIBILITY_AND_STRUCTURE",
+    "ACCESSIBILITY_AND_STRUCTURE",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "VISUAL_HIERARCHY_AND_LAYOUT",
+    "CODE_ENGINEERING_AND_SEAMS",
+    "CODE_ENGINEERING_AND_SEAMS",
+    "CODE_ENGINEERING_AND_SEAMS",
+    "CODE_ENGINEERING_AND_SEAMS"
+  ],
+  "isHumanPanel": false,
+  "isIndependentExternalLlm": false,
+  "evaluationNature": "ROLE_BASED_HEURISTIC_PROXY",
+  "scoringDimensions": [
+    "CORRECTNESS",
+    "VISUAL_HIERARCHY",
+    "SECURITY_HYGIENE",
+    "ADAPTIVE_LAYOUT",
+    "VIRTUALIZATION",
+    "DESIGN_TOKENS",
+    "DEPENDENCY_ISOLATION",
+    "MIGRATION_ARCHITECTURE"
+  ],
+  "auditFinding": "Evaluators operated as role-based deterministic proxies checking structured qualitative rubrics, providing directional validation but not independent blind human evaluation."
+}

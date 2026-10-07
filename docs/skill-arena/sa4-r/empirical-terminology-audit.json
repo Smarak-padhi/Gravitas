@@ -1,0 +1,12 @@
+{
+  "auditPhase": "SA4-R",
+  "termCalibrations": {
+    "benchmark": "Controlled paired software engineering prompt scenario (B01..B08)",
+    "control": "Standard industry prompt without specialized capability guidance",
+    "treatment": "Identical base prompt with synthesized candidate capability guidance appended",
+    "evaluator": "Deterministic local script executing objective pattern matching and role rubrics",
+    "blinded": "Masking of condition identity (Alpha/Beta) during heuristic proxy scoring",
+    "effect": "Measured differential performance between paired treatment and control outputs"
+  },
+  "verdict": "Terminology harmonized with empirical software engineering standards."
+}
