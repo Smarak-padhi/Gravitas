@@ -1,0 +1,25 @@
+{
+  "auditPhase": "SA4-R2",
+  "crossoverManipulationsCount": 2,
+  "crossoverCases": [
+    {
+      "runId": "RUN-B02-CROSSOVER-GLASS",
+      "manipulatedProfile": "PROFILE-DESIGN-002",
+      "targetDomain": "Dense Operations Telemetry Console (B02)",
+      "observedEffect": "STRONG_NEGATIVE (50% readability degradation)",
+      "supportedConclusion": "SUPPORTS_CONTEXT_SPECIFIC_ACTIVATION_IN_TESTED_DETERMINISTIC_CASES"
+    },
+    {
+      "runId": "RUN-B04-CROSSOVER-BRUTALIST",
+      "manipulatedProfile": "PROFILE-DESIGN-001",
+      "targetDomain": "Adaptive Card Layout (B04)",
+      "observedEffect": "NEGATIVE (monolithic borders broke fluid responsive flow)",
+      "supportedConclusion": "SUPPORTS_CONTEXT_SPECIFIC_ACTIVATION_IN_TESTED_DETERMINISTIC_CASES"
+    }
+  ],
+  "forbiddenConclusions": [
+    "PROVES_CONTEXT_BOUNDARY",
+    "PROVES_CAPABILITY_CONTEXT_LAW",
+    "PROVES_DOMAIN_SENSITIVITY_GENERALLY"
+  ]
+}

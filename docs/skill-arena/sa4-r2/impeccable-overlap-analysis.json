@@ -1,0 +1,26 @@
+{
+  "auditPhase": "SA4-R2",
+  "comparisonsWithExistingSkillArena": {
+    "Ponytail": {
+      "relationship": "COMPLEMENTS",
+      "nature": "Ponytail hunts over-engineering, code bloat, and redundant abstractions. Impeccable hunts aesthetic clutter, visual noise, and decorative over-engineering (e.g., /impeccable distill aligns with Ponytail simplicity)."
+    },
+    "Taste": {
+      "relationship": "COMPLEMENTS_AND_OPERATIONALIZES",
+      "nature": "Taste provides high-level aesthetic sensibilities; Impeccable operationalizes taste into concrete commands, anti-pattern rules, and token persistence (PRODUCT.md/DESIGN.md)."
+    },
+    "PROFILE-DESIGN-001 (Web Accessible Design)": {
+      "relationship": "COMPLEMENTS_AND_EXPANDS",
+      "nature": "PROFILE-DESIGN-001 focuses on semantic landmarks, keyboard trapping, and contrast. Impeccable expands this with anti-slop rules, typographic pacing, and visual hierarchy."
+    },
+    "PROFILE-DESIGN-002 (Responsive UI / Liquid Glass)": {
+      "relationship": "COMPLEMENTS_WITH_GUARDRAILS",
+      "nature": "Impeccable provides guardrails against the misapplication of heavy decorative glass and blur effects (as observed in SA4 crossover R19)."
+    },
+    "React Bits / Codrops / 21st.dev / Skiper UI": {
+      "relationship": "SUBSUMES_UNDER_GOVERNANCE",
+      "nature": "Component libraries provide isolated UI widgets; Impeccable provides the architectural design governance to ensure external widgets fit a cohesive visual system."
+    }
+  },
+  "recommendedFutureRole": "LATE_SOURCE_FOR_SA5_MARGINAL_VALUE_ANALYSIS"
+}

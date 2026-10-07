@@ -1,0 +1,11 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeClassification": "DETERMINISTIC_CAPABILITY_GUIDANCE_EXPERIMENT",
+  "rejectedClassifications": [
+    "REAL_AGENT_CAPABILITY_EXPERIMENT",
+    "REAL_MODEL_CAPABILITY_EXPERIMENT",
+    "STATIC_CAPABILITY_COMPARISON",
+    "MIXED_EMPIRICAL_EVIDENCE"
+  ],
+  "definition": "A controlled empirical testbed measuring deterministic code generation conditioned on standard problem specifications versus specifications supplemented with candidate capability rules."
+}

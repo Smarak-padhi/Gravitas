@@ -1,0 +1,14 @@
+{
+  "auditPhase": "SA4-R2",
+  "sourceUrl": "https://github.com/pbakaus/impeccable",
+  "repository": "pbakaus/impeccable",
+  "author": "Paul Bakaus",
+  "classification": "PRIMARY_DESIGN_RULEBOOK_CANDIDATE",
+  "license": "Apache-2.0",
+  "intakeMode": "EVIDENCE_ONLY (READ_ONLY)",
+  "impeccableInstallExecuted": "NO",
+  "impeccableBinaryExecuted": "NO",
+  "impeccableHooksInstalled": "NO",
+  "sourceVerified": true,
+  "summary": "Impeccable is an open-source design language and skill system designed to guide AI coding agents toward expert-grade frontend design and eliminate generic AI aesthetic failure modes (AI slop)."
+}

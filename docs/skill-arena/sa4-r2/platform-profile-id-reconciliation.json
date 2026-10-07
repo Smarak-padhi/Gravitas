@@ -1,0 +1,32 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeSource": "docs/skill-arena/sa3/platform-profiles.json",
+  "authoritativeMapping": {
+    "ANDROID_PROFILE_ID": "PROFILE-PLAT-001",
+    "IOS_PROFILE_ID": "PROFILE-PLAT-002",
+    "WEB_PROFILE_ID": "PROFILE-PLAT-003"
+  },
+  "misattributionAudit": [
+    {
+      "artifact": "docs/skill-arena/sa4/bundle-manifests.jsonl",
+      "issue": "B04 bundle incorrectly used PROFILE-PLAT-001 for Modern Web Frontend."
+    },
+    {
+      "artifact": "docs/skill-arena/sa4/SA4_BENCHMARK_TASKS.md",
+      "issue": "Labeled PROFILE-PLAT-001 as Modern Web Frontend."
+    },
+    {
+      "artifact": "docs/skill-arena/sa4-r/platform-profile-audit.json",
+      "issue": "Listed PROFILE-PLAT-001 as Web Modern Frontend and PROFILE-PLAT-002 as Android Jetpack Compose."
+    },
+    {
+      "artifact": "docs/skill-arena/sa4-r/SA4_R_PLATFORM_AND_WORKFLOW_SCOPE.md",
+      "issue": "Described PROFILE-PLAT-001 as Web Modern Frontend and PROFILE-PLAT-002 as Android Compose."
+    },
+    {
+      "artifact": "docs/skill-arena/sa4-r/SA4_R_FINAL_EVIDENCE.md (Section 46 Q37)",
+      "issue": "Referred to PROFILE-PLAT-002 as Android Compose."
+    }
+  ],
+  "authoritativeCorrection": "SA4 and SA4-R artifacts remain immutable. SA4-R2 establishes the authoritative truth: PROFILE-PLAT-001 is Android, PROFILE-PLAT-002 is iOS, and PROFILE-PLAT-003 is Web. Any prior references swapping these are documented misattributions."
+}

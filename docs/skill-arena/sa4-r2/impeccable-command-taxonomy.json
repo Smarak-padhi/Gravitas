@@ -1,0 +1,116 @@
+{
+  "auditPhase": "SA4-R2",
+  "totalCommands": 24,
+  "commandTaxonomy": {
+    "FOUNDATIONAL_SETUP": [
+      {
+        "command": "init",
+        "description": "Initialize durable PRODUCT.md and DESIGN.md context files"
+      },
+      {
+        "command": "onboard",
+        "description": "Analyze existing repository to bootstrap initial design context"
+      }
+    ],
+    "END_TO_END_CREATION": [
+      {
+        "command": "craft",
+        "description": "Full end-to-end design and build lifecycle with iterative refinement"
+      },
+      {
+        "command": "shape",
+        "description": "Architect interface layout, information hierarchy, and content model"
+      },
+      {
+        "command": "generate",
+        "description": "Produce component code adhering to active DESIGN.md tokens"
+      }
+    ],
+    "AUDIT_AND_CRITIQUE": [
+      {
+        "command": "critique",
+        "description": "UX and visual hierarchy critique across clarity, pacing, and typography"
+      },
+      {
+        "command": "audit",
+        "description": "Technical audit of accessibility, responsive layout, and contrast"
+      },
+      {
+        "command": "harden",
+        "description": "Add robust boundary states: empty, loading, error, and overflow handling"
+      }
+    ],
+    "POLISH_AND_REFINEMENT": [
+      {
+        "command": "polish",
+        "description": "Final high-precision visual pass to refine spacing, borders, and rhythm"
+      },
+      {
+        "command": "distill",
+        "description": "Remove unnecessary decorative clutter, cards-inside-cards, and visual noise"
+      },
+      {
+        "command": "clarify",
+        "description": "Enhance affordance clarity, label readability, and state indicators"
+      }
+    ],
+    "EXPRESSIVE_TUNING": [
+      {
+        "command": "bolder",
+        "description": "Increase contrast, scale differentials, and visual assertiveness"
+      },
+      {
+        "command": "quieter",
+        "description": "Reduce visual assertiveness, soften contrasts, and increase whitespace"
+      },
+      {
+        "command": "colorize",
+        "description": "Refine or diversify color palette while maintaining contrast"
+      },
+      {
+        "command": "typeset",
+        "description": "Tune typographic scale, measure, leading, and pairing"
+      },
+      {
+        "command": "layout",
+        "description": "Adjust spatial distribution, grid alignment, and flow structure"
+      },
+      {
+        "command": "animate",
+        "description": "Add purposeful, subtle motion transitions respecting reduce-motion"
+      },
+      {
+        "command": "delight",
+        "description": "Introduce tasteful micro-interactions and textural details"
+      },
+      {
+        "command": "overdrive",
+        "description": "Maximal expressive exploration for frontier UI experiments"
+      }
+    ],
+    "ADAPTATION_AND_EXTRACTION": [
+      {
+        "command": "adapt",
+        "description": "Adjust layout for mobile viewports, touch targets, and responsive shifts"
+      },
+      {
+        "command": "optimize",
+        "description": "Streamline DOM depth, reduce repaint areas, and optimize layout shifts"
+      },
+      {
+        "command": "extract",
+        "description": "Extract reusable design tokens and components into DESIGN.md"
+      },
+      {
+        "command": "document",
+        "description": "Generate comprehensive design system documentation"
+      }
+    ],
+    "LIVE_INTERACTION": [
+      {
+        "command": "live",
+        "description": "Interactive browser preview synchronization session"
+      }
+    ]
+  }
+}

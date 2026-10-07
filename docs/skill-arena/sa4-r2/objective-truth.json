@@ -1,0 +1,11 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeControlObjectivePasses": 4,
+  "authoritativeControlObjectiveTotal": 16,
+  "authoritativeControlObjectiveRate": "25.0%",
+  "authoritativeTreatmentObjectivePasses": 16,
+  "authoritativeTreatmentObjectiveTotal": 16,
+  "authoritativeTreatmentObjectiveRate": "100.0%",
+  "sa4HumanNarrative37_5_Percent": "SUPERSEDED_BY_MACHINE_LEDGER",
+  "notes": "Machine records in objective-results.jsonl are authoritative. Control passed 4/16 (25.0%), Treatment passed 16/16 (100.0%)."
+}

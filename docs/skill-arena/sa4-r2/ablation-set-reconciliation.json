@@ -1,0 +1,19 @@
+{
+  "auditPhase": "SA4-R2",
+  "directAblationIsolatedComponentsCount": 2,
+  "ablationCases": [
+    {
+      "runId": "RUN-B01-ABLAT-NO-DESIGN",
+      "componentAblated": "PROFILE-DESIGN-001",
+      "benchmarkId": "B01",
+      "supportedConclusion": "SUPPORTS_COMPONENT_CONTRIBUTION_IN_TESTED_DETERMINISTIC_CASE"
+    },
+    {
+      "runId": "RUN-B07-ABLAT-NO-SEAM",
+      "componentAblated": "CANON-CTX-001",
+      "benchmarkId": "B07",
+      "supportedConclusion": "SUPPORTS_COMPONENT_CONTRIBUTION_IN_TESTED_DETERMINISTIC_CASE"
+    }
+  ],
+  "ablationVsCrossoverDistinction": "Direct ablation tests component subtraction from a valid bundle. Crossover tests profile injection into an incongruous domain."
+}

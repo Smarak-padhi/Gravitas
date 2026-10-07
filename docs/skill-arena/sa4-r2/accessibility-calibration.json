@@ -1,0 +1,21 @@
+{
+  "auditPhase": "SA4-R2",
+  "calibratedStatus": "STATIC_TESTED_ACCESSIBILITY_CRITERIA_PASS",
+  "secondaryStatus": "STATIC_ARIA_AND_FOCUS_PATTERNS_CONFIRMED",
+  "disallowedTerms": [
+    "WCAG COMPLIANT",
+    "ARIA COMPLIANT",
+    "AAA CERTIFIED",
+    "FULL ACCESSIBILITY COMPLIANCE"
+  ],
+  "testedChecks": [
+    "SEMANTIC_LANDMARKS (B01)",
+    "READING_MEASURE_CONSTRAINT (B01)",
+    "ARIA_COMBOBOX_PATTERN (B03)",
+    "LIVE_REGION_ANNOUNCER (B03)",
+    "TOUCH_TARGET_SIZE (B04)",
+    "FIELDSET_LEGEND_STRUCTURE (B05)",
+    "ARIA_DESCRIBEDBY_ASSOCIATION (B05)"
+  ],
+  "limitation": "Checks verified static source presence of ARIA attributes and DOM landmarks. No screen-reader auditory tests or assistive-device hardware tests were executed."
+}

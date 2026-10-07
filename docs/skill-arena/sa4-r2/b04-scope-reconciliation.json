@@ -1,0 +1,11 @@
+{
+  "auditPhase": "SA4-R2",
+  "benchmarkId": "B04",
+  "testedFixture": "Responsive master-detail card layout implemented in HTML5/CSS3",
+  "guidanceContentApplied": "Material 3 responsive design tokens and breakpoint guidelines applied to web DOM elements",
+  "classification": "MATERIAL_3_DESIGN_GUIDANCE_TESTED_ON_WEB_FIXTURE",
+  "androidNativeRuntimeTested": "NO",
+  "iosNativeRuntimeTested": "NO",
+  "webFixtureTested": "YES",
+  "boundaryConclusion": "No native Android ART or iOS Darwin runtime code was executed. B04 tested design guidance on a static web DOM fixture."
+}

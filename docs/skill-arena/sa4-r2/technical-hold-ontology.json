@@ -1,0 +1,28 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeSource": "docs/skill-arena/sa3/technical-verification-holds.json",
+  "technicalHoldObjects": 3,
+  "objects": [
+    {
+      "holdId": "HOLD-001",
+      "name": "Android Display Glasses Glimmer XR",
+      "sourceRuleIds": []
+    },
+    {
+      "holdId": "HOLD-002",
+      "name": "R8 Configuration Analyzer Internal Protobuf",
+      "sourceRuleIds": [
+        "RULE-AND-R8-000317"
+      ]
+    },
+    {
+      "holdId": "HOLD-003",
+      "name": "Jetpack Media3 Cast RemoteCastPlayer",
+      "sourceRuleIds": []
+    }
+  ],
+  "technicalHoldPrimaryAtomicRules": 1,
+  "technicalHoldLeakage": 0,
+  "technicalHoldsResolved": 0,
+  "ontologyCorrection": "HOLD-001, HOLD-002, HOLD-003 are 3 capability objects enclosing exactly 1 primary atomic rule from SA1 (RULE-AND-R8-000317). They must not be described as '3 held rules'."
+}

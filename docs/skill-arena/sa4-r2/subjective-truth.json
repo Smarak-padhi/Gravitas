@@ -1,0 +1,11 @@
+{
+  "auditPhase": "SA4-R2",
+  "controlProxyMean": 2.625,
+  "treatmentProxyMean": 5.0,
+  "proxyDelta": 2.375,
+  "subjectiveEvidenceClass": "DETERMINISTIC_ROLE_BASED_PROXY_SCORING",
+  "independentHumanJudges": 0,
+  "independentModelJudges": 0,
+  "perfectScoreInterpretation": "HIGH_ALIGNMENT_WITH_PROXY_RUBRIC",
+  "disallowedInterpretation": "PERFECT_DESIGN_QUALITY"
+}

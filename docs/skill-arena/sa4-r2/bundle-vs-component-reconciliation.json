@@ -1,0 +1,30 @@
+{
+  "auditPhase": "SA4-R2",
+  "profileDesign002Reconciliation": {
+    "profileId": "PROFILE-DESIGN-002",
+    "finding": "PROFILE-DESIGN-002 was mistakenly listed under COMPONENT_LEVEL_ISOLATED in SA4-R because of its crossover evaluation in B02. It was never directly ablated in an isolation trial.",
+    "correctedClassification": "CROSSOVER_ISOLATED_NEGATIVE_CONTEXT_EFFECT",
+    "positiveContributionStatus": "BUNDLE_LEVEL_SUPPORT_IN_B02_AND_B05"
+  },
+  "ablationIsolatedComponents": [
+    "PROFILE-DESIGN-001",
+    "CANON-CTX-001"
+  ],
+  "crossoverIsolatedComponents": [
+    "PROFILE-DESIGN-002"
+  ],
+  "bundleOnlyComponents": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004",
+    "CANON-CTX-002",
+    "CANON-CTX-003",
+    "CANON-CTX-004",
+    "CANON-CTX-005",
+    "CANON-CTX-006",
+    "CANON-CTX-007",
+    "PROFILE-PLAT-003",
+    "PROFILE-WORK-001"
+  ]
+}

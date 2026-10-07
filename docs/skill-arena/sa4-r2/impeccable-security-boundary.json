@@ -1,0 +1,16 @@
+{
+  "auditPhase": "SA4-R2",
+  "toolQualificationStatus": "TOOL_QUALIFICATION_REQUIRED (NOT INSTALLED)",
+  "executableSurfaces": [
+    "npx impeccable install",
+    "npx impeccable update",
+    "engine binary execution (native precompiled binaries)",
+    "binary download fallback over network",
+    "provider-native hooks (may execute automatically in some agent harnesses)",
+    "live browser preview server and websocket listener",
+    "shell command validation on file saves",
+    "URL detector browser launching"
+  ],
+  "securityNotice": "Impeccable documentation states that certain provider hooks can trigger automatically on file saves and download/cache engine binaries. In an enterprise agentic setup, tool installation must remain subject to strict human tool qualification gates. SA4-R2 inspects Impeccable strictly as a static knowledge source, with zero execution.",
+  "executionVerdict": "ZERO_EXECUTABLES_RUN"
+}

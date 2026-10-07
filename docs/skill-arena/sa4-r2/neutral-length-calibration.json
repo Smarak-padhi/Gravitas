@@ -1,0 +1,12 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeInterpretation": "PROMPT_LENGTH_EFFECT_NOT_OBSERVED_IN_TESTED_CASES",
+  "neutralLengthControlsCount": 2,
+  "testedRuns": [
+    "RUN-B01-LENGTH-CTRL",
+    "RUN-B07-LENGTH-CTRL"
+  ],
+  "generalPromptLengthHypothesisDisproven": "NO",
+  "supersededClaim": "NEUTRAL_LENGTH_EFFECT_DISPROVED = true",
+  "calibratedRationale": "Two deterministic cases show that adding neutral verbose text did not produce capability compliance in B01 and B07; this is insufficient to claim the prompt-length hypothesis is disproven generally across all LLM systems."
+}

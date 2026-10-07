@@ -1,0 +1,127 @@
+{
+  "auditPhase": "SA4-R2",
+  "totalCriteria": 16,
+  "independentCriteriaCount": 9,
+  "independentControlPasses": 4,
+  "independentControlRate": "44.4%",
+  "independentTreatmentPasses": 9,
+  "independentTreatmentRate": "100.0%",
+  "capabilityDerivedCriteriaCount": 7,
+  "capabilityDerivedControlPasses": 0,
+  "capabilityDerivedTreatmentPasses": 7,
+  "criteria": [
+    {
+      "criterion": "B01: SEMANTIC_LANDMARKS",
+      "origin": "TASK_DERIVED",
+      "isIndependent": true,
+      "ctrl": true,
+      "treat": true
+    },
+    {
+      "criterion": "B01: READING_MEASURE_CONSTRAINT",
+      "origin": "GENERAL_QUALITY",
+      "isIndependent": true,
+      "ctrl": true,
+      "treat": true
+    },
+    {
+      "criterion": "B02: TABULAR_NUM_ALIGNMENT",
+      "origin": "GENERAL_QUALITY",
+      "isIndependent": true,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B02: ARIA_SORT_HEADER_ATTRIBUTES",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B03: ARIA_COMBOBOX_PATTERN",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B03: LIVE_REGION_ANNOUNCER",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B04: TOUCH_TARGET_SIZE",
+      "origin": "GENERAL_QUALITY",
+      "isIndependent": true,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B04: MULTI_PANE_SUPPORT",
+      "origin": "TASK_DERIVED",
+      "isIndependent": true,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B05: FIELDSET_LEGEND_STRUCTURE",
+      "origin": "GENERAL_QUALITY",
+      "isIndependent": true,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B05: ARIA_DESCRIBEDBY_ASSOCIATION",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B06: DIMENSIONS_EXACT_MATCH",
+      "origin": "TASK_DERIVED",
+      "isIndependent": true,
+      "ctrl": true,
+      "treat": true
+    },
+    {
+      "criterion": "B06: STATUS_PILL_COLOR_TOKEN",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B07: ZERO_EXTERNAL_DEPENDENCY",
+      "origin": "TASK_DERIVED",
+      "isIndependent": true,
+      "ctrl": true,
+      "treat": true
+    },
+    {
+      "criterion": "B07: EXPLICIT_CLOCK_TEST_SEAM",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B08: STRUCTURED_LIFECYCLE_PHASES",
+      "origin": "GENERAL_QUALITY",
+      "isIndependent": true,
+      "ctrl": false,
+      "treat": true
+    },
+    {
+      "criterion": "B08: DEPENDENCY_WAVE_PARALLELIZATION",
+      "origin": "CAPABILITY_DERIVED",
+      "isIndependent": false,
+      "ctrl": false,
+      "treat": true
+    }
+  ],
+  "analysis": "Even when restricting analysis exclusively to the 9 independent criteria, Treatment outperforms Control (9/9 = 100.0% vs 4/9 = 44.4%). However, the 7 capability-derived criteria directly test candidate rule tokens where Control predictably scored 0/7."
+}

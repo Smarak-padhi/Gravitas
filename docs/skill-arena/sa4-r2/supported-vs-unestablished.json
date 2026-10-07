@@ -1,0 +1,26 @@
+{
+  "auditPhase": "SA4-R2",
+  "supported": [
+    "deterministic guidance-conditioned output differences",
+    "deterministic objective structural differences",
+    "deterministic proxy-rubric differences",
+    "tested ablation effects in B01 and B07",
+    "tested crossover effects in B02 and B04",
+    "tested neutral-length-control observations",
+    "quarantine preservation of technical holds",
+    "bundle/context structure useful for future testing"
+  ],
+  "notEstablished": [
+    "real LLM improvement",
+    "real autonomous-agent improvement",
+    "universal superiority",
+    "independent human preference",
+    "statistical significance",
+    "runtime performance improvement",
+    "native Android runtime behavior",
+    "native iOS runtime behavior",
+    "specialist efficacy",
+    "version-family efficacy",
+    "technical-hold resolution"
+  ]
+}

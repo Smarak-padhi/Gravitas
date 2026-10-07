@@ -1,0 +1,10 @@
+{
+  "auditPhase": "SA4-R2",
+  "generatorConsumptionClass": "GENERATOR_TEMPLATE_SELECTED_BY_RULE_IDS",
+  "branchSelectedByCondition": true,
+  "outputPreconstructed": true,
+  "mechanismDetails": "The local runner selected preconstructed code templates and branched on the condition (CONTROL vs TREATMENT) and explicit capability candidate IDs.",
+  "causalClaimClassification": "DETERMINISTIC_GENERATOR_RESPONSE_TO_CAPABILITY_CONDITION",
+  "disallowedClaim": "PROVES_REAL_AGENT_CAPABILITY_IMPROVEMENT",
+  "allowedClaim": "DETERMINISTIC_GENERATOR_RESPONSE_TO_CAPABILITY_CONDITION"
+}

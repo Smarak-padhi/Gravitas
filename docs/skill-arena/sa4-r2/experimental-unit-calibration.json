@@ -1,0 +1,8 @@
+{
+  "auditPhase": "SA4-R2",
+  "distinctPrimaryPairCases": 8,
+  "stochasticIndependentReplicates": 0,
+  "trueIndependentPairUnits": "NOT_APPLICABLE_FOR_INFERENTIAL_STATISTICS",
+  "inferentialStatisticsProhibited": true,
+  "explanation": "Outputs were produced deterministically without sampling variance. Therefore, the 8 primary pairs represent distinct benchmark engineering cases, not independent stochastic random samples for p-value calculation."
+}

@@ -1,0 +1,11 @@
+{
+  "auditPhase": "SA4-R2",
+  "generatorClass": "DETERMINISTIC_PROGRAM",
+  "generatorRuntime": "Python 3.12 / Node.js v24.13.0 on win32 (local deterministic script execution)",
+  "liveModel": "NONE",
+  "liveModelVersion": "NONE",
+  "liveModelProvider": "NONE",
+  "geminiSessionProvenanceStatus": "Session context only; no API calls executed",
+  "geminiInvocationProven": "NO",
+  "calibrationNote": "The label 'gemini-2.5-pro-grounded' recorded in SA4/SA4-R must NOT appear as MODEL_VERSION for the actual SA4 generator because no Gemini invocation occurred."
+}

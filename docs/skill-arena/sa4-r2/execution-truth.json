@@ -1,0 +1,16 @@
+{
+  "auditPhase": "SA4-R2",
+  "physicalRuns": 22,
+  "generatorClass": "DETERMINISTIC_PROGRAM",
+  "liveGeminiInvocation": "NO",
+  "liveExternalModelInvocation": "NO",
+  "stochasticRuns": 0,
+  "paidCalls": 0,
+  "sa4AgentCapabilityEvidence": "NOT_ESTABLISHED",
+  "sa4DeterministicGuidanceEvidence": "ESTABLISHED_WITHIN_TESTED_FIXTURES",
+  "experimentDistinction": {
+    "experimentType": "CAPABILITY_GUIDANCE_EXPERIMENT",
+    "agentExperimentType": "AGENT_CAPABILITY_EXPERIMENT",
+    "explanation": "SA4 did NOT empirically test whether Gemini, Antigravity, Claude, Codex, or another AI model performs better when supplied SA3 capability bundles. SA4 tested deterministic implementations conditioned on CONTROL specification versus CONTROL specification + SA3 capability guidance."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "auditPhase": "SA4-R2",
+  "candidateRole": "UNIVERSAL_DESIGN_ENGINEERING_CANDIDATE",
+  "isUniversalAestheticGrammar": "NO",
+  "designEngineeringDomains": [
+    "VISUAL_HIERARCHY",
+    "TYPOGRAPHY_PACING",
+    "SPACING_SCALES",
+    "RESPONSIVE_BREAKPOINTS",
+    "INTERACTION_CLARITY",
+    "MOTION_DISCIPLINE",
+    "ACCESSIBILITY_HARDENING",
+    "ANTI_PATTERN_DETECTION",
+    "DESIGN_SYSTEM_CONSISTENCY"
+  ],
+  "requiredSeparations": {
+    "impeccableDesignEngineeringVsProjectAesthetic": "Impeccable encodes foundational design engineering discipline (hierarchy, contrast, rhythm), not a single monolithic aesthetic style.",
+    "detectorRuleVsUniversalDesignTruth": "Deterministic detector rules flag specific code patterns; they do not replace human architectural or artistic judgment.",
+    "impeccablePassVsGoodDesignProof": "Passing detector heuristics does not prove an interface is well-designed or functional.",
+    "impeccablePassVsAccessibilityCertification": "Static contrast/tag checks do not constitute full WCAG AAA certification.",
+    "impeccableSkillVsExecutionAuthority": "Impeccable provides knowledge and heuristics; human developer maintains sovereign execution authority.",
+    "impeccableInstallerVsKnowledgeSource": "The knowledge resides in the design heuristics and markdown specifications, not the npx execution wrapper."
+  },
+  "contextArchitecture": {
+    "productContext": "PRODUCT.md (durable product truth, target audience, intent, voice)",
+    "designContext": "DESIGN.md (chosen visual system, design tokens, typography scales, components)",
+    "surfaceContext": "Task/surface specific direction (e.g., checkout page, telemetry dashboard)"
+  }
+}

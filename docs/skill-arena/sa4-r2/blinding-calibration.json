@@ -1,0 +1,7 @@
+{
+  "auditPhase": "SA4-R2",
+  "blindingClass": "OUTPUT_LABEL_MASKING_WITH_STRUCTURAL_FEATURE_VISIBILITY",
+  "outputLabelBlinding": true,
+  "evaluatorImplementationBlinding": false,
+  "explanation": "Condition names ('Control' / 'Treatment') were masked as 'Alpha' and 'Beta'. However, evaluators inspected structural tokens that inherently indicated the presence of candidate guidance. Thus, the experiment was partially blinded at the label layer, but not blinded against structural implementation features."
+}

@@ -1,0 +1,43 @@
+{
+  "auditPhase": "SA4-R2",
+  "authoritativeSource": "docs/skill-arena/sa3/version-families.json",
+  "versionFamilyObjects": 6,
+  "objects": [
+    {
+      "familyId": "VERSION-FAMILY-001",
+      "topic": "Android Navigation Architecture",
+      "sourceRuleIds": [
+        "RULE-AND-ADAPT-000245"
+      ]
+    },
+    {
+      "familyId": "VERSION-FAMILY-002",
+      "topic": "Android Gradle Plugin Build Architecture",
+      "sourceRuleIds": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-003",
+      "topic": "Play Billing Library Modernization",
+      "sourceRuleIds": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-004",
+      "topic": "Android View to Jetpack Compose",
+      "sourceRuleIds": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-005",
+      "topic": "Android TV Leanback to Compose",
+      "sourceRuleIds": []
+    },
+    {
+      "familyId": "VERSION-FAMILY-006",
+      "topic": "iOS SwiftUI Liquid Glass Adoption",
+      "sourceRuleIds": [
+        "RULE-IOS-GLASS-000454"
+      ]
+    }
+  ],
+  "versionFamilyPrimaryRules": 2,
+  "ontologyCorrection": "6 version family objects enclosing exactly 2 primary atomic rules from SA1. They must not be casually described as '6 atomic rules'."
+}

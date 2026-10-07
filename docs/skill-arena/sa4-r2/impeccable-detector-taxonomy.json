@@ -1,0 +1,72 @@
+{
+  "auditPhase": "SA4-R2",
+  "totalDetectorRules": 61,
+  "detectorExecutionMode": "DETERMINISTIC_STATIC_REGEX_AND_AST_ANALYSIS (NO LLM REQUIRED)",
+  "categories": {
+    "AI_SLOP_ANTI_PATTERNS": {
+      "ruleCount": 12,
+      "examples": [
+        "nested-card-proliferation (cards inside cards inside cards)",
+        "purple-blue-gradient-default (generic SaaS gradient cliches)",
+        "pure-black-pure-white-monotony (#000000 on #ffffff without nuance)",
+        "icon-in-rounded-tile-syndrome (every list item wrapped in pastel squircle)",
+        "floating-pill-button-overuse (pill radius applied universally without hierarchy)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    },
+    "TYPOGRAPHY_AND_TEXT": {
+      "ruleCount": 10,
+      "examples": [
+        "overused-default-font (defaulting blindly to Inter without intentionality)",
+        "unconstrained-reading-measure (text lines exceeding 75ch)",
+        "tight-body-leading (line-height below 1.4 for paragraph text)",
+        "gray-text-on-colored-bg (low contrast muted gray on tinted backgrounds)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    },
+    "COLOR_AND_CONTRAST": {
+      "ruleCount": 9,
+      "examples": [
+        "low-contrast-body-text (failing 4.5:1 ratio)",
+        "uncalibrated-dark-mode-inversion (naive inversion creating radioactive contrasts)",
+        "color-only-state-indicators (using solely color without icons or text for error/success)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    },
+    "LAYOUT_AND_SPACING": {
+      "ruleCount": 11,
+      "examples": [
+        "inconsistent-spacing-units (mixing 7px, 13px, 21px arbitrarily)",
+        "side-stripe-border-cliche (decorative colored vertical left-border on cards)",
+        "uncontained-layout-shift (images/tables without explicit aspect ratios)"
+      ],
+      "evaluation": "CONTEXT_DEPENDENT"
+    },
+    "RESPONSIVE_AND_TOUCH": {
+      "ruleCount": 8,
+      "examples": [
+        "sub-44px-touch-targets (interactive buttons below 44x44px or 48x48px)",
+        "fixed-width-overflow (hardcoded px widths breaking on 360px viewports)",
+        "horizontal-scrollbar-leak (unintentional horizontal overflow on mobile)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    },
+    "MOTION_AND_TRANSITIONS": {
+      "ruleCount": 6,
+      "examples": [
+        "bouncy-elastic-easing-overkill (jarring spring oscillations on simple menus)",
+        "excessive-duration (>400ms for routine state transitions)",
+        "missing-prefers-reduced-motion (ignoring user vestibular preferences)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    },
+    "DESIGN_SYSTEM_CONSISTENCY": {
+      "ruleCount": 5,
+      "examples": [
+        "hardcoded-ad-hoc-hex-colors (bypassing designated token palette)",
+        "arbitrary-z-index-arms-race (z-index: 999999 hacks)"
+      ],
+      "evaluation": "GENERAL_DESIGN_HEURISTIC"
+    }
+  }
+}
