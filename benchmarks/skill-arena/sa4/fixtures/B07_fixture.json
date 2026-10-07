@@ -1,0 +1,27 @@
+{
+  "benchmarkId": "B07",
+  "family": "ENGINEERING_ARCHITECTURE_TASK",
+  "title": "In-Memory Cache Layer with LRU Eviction & Safe Seams",
+  "purpose": "Test global and contextual engineering rules (YAGNI, stdlib primacy, test seams) in pure code architecture without UI.",
+  "applicableProfiles": [
+    "PROFILE-PLAT-003"
+  ],
+  "applicableCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004",
+    "CANON-CTX-001"
+  ],
+  "brief": "Implement a high-performance in-memory LRU cache in modern TypeScript/JavaScript without external dependencies. Provide bounded memory size, O(1) get/set, TTL expiration, and an explicit testable storage seam.",
+  "acceptanceCriteria": [
+    "Zero external dependencies (pure standard library Map/DoublyLinkedList)",
+    "O(1) average complexity for get, set, and has operations",
+    "LRU eviction strictly enforced when capacity limit is reached",
+    "Time-to-live (TTL) expiration on entries with lazy or periodic cleanup",
+    "Isolate persistence/clock behind an explicit mockable interface for deterministic unit testing",
+    "Passes 100% of accompanying unit tests for concurrency and cache invalidation"
+  ],
+  "startingSource": "export class LruCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n  }\n  get(key) {}\n  set(key, val, ttl) {}\n}",
+  "viewport": null
+}

@@ -1,0 +1,19 @@
+TASK BRIEF:
+Diagnose and refactor a legacy settings form suffering from div-soup, missing form labels, non-standard click handlers on divs, hardcoded inline styles, and unstyled error states.
+
+ACCEPTANCE CRITERIA:
+Refactor div-soup into semantic <form>, <fieldset>, <legend>, and <label> elements
+Associate every input with explicit label matching for="id" and proper aria-describedby for error messages
+Replace un-keyboard-accessible <div> buttons with native <button type="submit">
+Eliminate 30+ redundant inline style attributes in favor of clean structured CSS classes
+Implement accessible inline field validation with assertive error summary
+Maintain exact existing form fields and values without data loss
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Settings</title></head><body><div style="padding:20px;"><div style="font-size:24px;">Settings</div><div style="margin-top:10px;">Email</div><div style="border:1px solid #ccc;padding:5px;"><input type="text" value="test@example.com"></div><div style="background:blue;color:white;padding:10px;margin-top:20px;text-align:center;cursor:pointer;" onclick="alert('saved')">Save</div></div></body></html>
+
+CAPABILITY GUIDANCE APPLIED:
+- Occam Minimal Implementation (CANON-GLOB-004): Eliminate all speculative abstractions and inline style wrappers.
+- Headless Accessibility (PROFILE-DESIGN-004): Semantic <form>, <fieldset>, <legend>, associated <label for="id">, aria-describedby for error/help messages, and native keyboard-submitting <button type="submit">.
+- Test Seams at Boundaries (CANON-CTX-001): Decouple submit handler logic for testability.

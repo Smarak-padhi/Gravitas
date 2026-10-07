@@ -1,0 +1,58 @@
+[
+  {
+    "benchmarkId": "B01",
+    "controlRunId": "RUN-B01-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control satisfied all functional criteria including header, main, summary, and footnote drawer."
+  },
+  {
+    "benchmarkId": "B02",
+    "controlRunId": "RUN-B02-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control implemented full 4-metric summary bar and node table."
+  },
+  {
+    "benchmarkId": "B03",
+    "controlRunId": "RUN-B03-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control implemented basic chip layout and dropdown list."
+  },
+  {
+    "benchmarkId": "B04",
+    "controlRunId": "RUN-B04-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control implemented responsive breakpoint shift between side and bottom bar."
+  },
+  {
+    "benchmarkId": "B05",
+    "controlRunId": "RUN-B05-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control eliminated inline styles and provided standard HTML label and button."
+  },
+  {
+    "benchmarkId": "B06",
+    "controlRunId": "RUN-B06-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control implemented 480px container and flex row layout."
+  },
+  {
+    "benchmarkId": "B07",
+    "controlRunId": "RUN-B07-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control correctly implemented Doubly-Linked List + Map for O(1) eviction."
+  },
+  {
+    "benchmarkId": "B08",
+    "controlRunId": "RUN-B08-CTRL",
+    "controlUnderspecified": false,
+    "verdict": "COMPETENT_CONTROL",
+    "notes": "Control provided standard migration steps and basic rollback idea."
+  }
+]

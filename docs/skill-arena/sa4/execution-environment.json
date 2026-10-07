@@ -1,0 +1,15 @@
+{
+  "harness": "antigravity-local-runner",
+  "model": "local-deterministic-evaluator",
+  "modelVersion": "gemini-2.5-pro-grounded",
+  "provider": "local-offline",
+  "costClass": "ZERO_INCREMENTAL_COST",
+  "qualificationState": "QUALIFIED_OFFLINE",
+  "unknownCostCalls": 0,
+  "paidCalls": 0,
+  "paidFallbacks": 0,
+  "executionDiversityLimited": true,
+  "generationMode": "DETERMINISTIC_PARITY_PAIRED",
+  "toolParity": "IDENTICAL_READ_WRITE_TEST",
+  "runtime": "Node.js v24.13.0 on win32"
+}

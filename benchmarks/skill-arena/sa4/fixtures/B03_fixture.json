@@ -1,0 +1,41 @@
+{
+  "benchmarkId": "B03",
+  "family": "ACCESSIBLE_HEADLESS_INTERFACE",
+  "title": "Accessible Multi-Select Tag Combobox with Live Region",
+  "purpose": "Test strict WCAG AA/AAA compliance, focus trapping, and ARIA 1.2 combobox pattern.",
+  "applicableProfiles": [
+    "PROFILE-DESIGN-004",
+    "PROFILE-PLAT-003"
+  ],
+  "applicableCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004",
+    "CANON-CTX-003"
+  ],
+  "brief": "Build a fully accessible headless multi-select autocomplete tag component compliant with WAI-ARIA 1.2 Combobox pattern.",
+  "acceptanceCriteria": [
+    "Complete ARIA combobox markup (role=\"combobox\", aria-expanded, aria-controls, aria-activedescendant)",
+    "Full keyboard navigation (ArrowDown/Up navigation, Enter selection, Escape close, Backspace chip removal)",
+    "Dynamic aria-live region announcing filtered count and active item updates",
+    "Visible high-contrast focus rings on all interactive tags and inputs",
+    "Reduced-motion awareness for dropdown transitions",
+    "Zero keyboard traps; clean tab order restoration on blur"
+  ],
+  "startingSource": "<!DOCTYPE html>\n<html><head><title>Combobox</title></head><body><label for=\"cb\">Tags</label><input id=\"cb\" type=\"text\"><ul id=\"list\"></ul></body></html>",
+  "viewport": {
+    "desktop": [
+      1280,
+      800
+    ],
+    "tablet": [
+      768,
+      1024
+    ],
+    "mobile": [
+      375,
+      667
+    ]
+  }
+}

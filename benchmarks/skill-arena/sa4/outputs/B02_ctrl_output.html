@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ops Console</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f2f5; }
+    .metrics { display: flex; gap: 16px; margin-bottom: 20px; }
+    .card { background: white; padding: 12px; border-radius: 6px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+    th { background: #eee; cursor: pointer; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; color: white; background: green; }
+    .btn-filter { margin-right: 8px; padding: 6px 12px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Cluster Operations Console</h1>
+  <div class="metrics">
+    <div class="card"><strong>Nodes:</strong> 12 Online</div>
+    <div class="card"><strong>CPU Avg:</strong> 34.2%</div>
+    <div class="card"><strong>Memory Avg:</strong> 61.8%</div>
+    <div class="card"><strong>Latency P99:</strong> 14.2ms</div>
+  </div>
+  <div style="margin-bottom: 12px;">
+    <button class="btn-filter" onclick="filterTable('all')">All Nodes</button>
+    <button class="btn-filter" onclick="filterTable('eu')">EU-West</button>
+    <button class="btn-filter" onclick="filterTable('us')">US-East</button>
+  </div>
+  <table id="telemetry">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Node ID</th>
+        <th onclick="sortTable(1)">Cluster</th>
+        <th onclick="sortTable(2)">Status</th>
+        <th onclick="sortTable(3)">Latency</th>
+        <th onclick="sortTable(4)">CPU</th>
+        <th onclick="sortTable(5)">Memory</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>node-01</td><td>eu-west-1</td><td><span class="badge">Healthy</span></td><td>8.4ms</td><td>22.1%</td><td>48.2%</td></tr>
+      <tr><td>node-02</td><td>eu-west-1</td><td><span class="badge">Healthy</span></td><td>9.1ms</td><td>28.4%</td><td>51.0%</td></tr>
+      <tr><td>node-03</td><td>us-east-1</td><td><span class="badge">Healthy</span></td><td>14.8ms</td><td>44.2%</td><td>69.4%</td></tr>
+      <tr><td>node-04</td><td>us-east-1</td><td><span class="badge">Healthy</span></td><td>15.2ms</td><td>42.0%</td><td>68.1%</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

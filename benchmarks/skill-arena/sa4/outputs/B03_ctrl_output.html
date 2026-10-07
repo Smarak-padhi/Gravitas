@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Combobox</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .tag-container { display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid #ccc; padding: 6px; border-radius: 4px; }
+    .chip { background: #e0e0e0; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
+    .chip button { background: none; border: none; cursor: pointer; }
+    input { border: none; outline: none; flex: 1; min-width: 120px; padding: 4px; }
+    ul { list-style: none; padding: 0; margin: 4px 0 0 0; border: 1px solid #ccc; max-height: 150px; overflow-y: auto; display: none; }
+    li { padding: 8px; cursor: pointer; }
+    li:hover { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <label id="cb-label" for="cb-input">Select Tags:</label>
+  <div class="tag-container" onclick="document.getElementById('cb-input').focus()">
+    <span class="chip">Engineering <button type="button" onclick="this.parentElement.remove()">&times;</button></span>
+    <input id="cb-input" type="text" placeholder="Type tag...">
+  </div>
+  <ul id="dropdown">
+    <li onclick="addTag('Architecture')">Architecture</li>
+    <li onclick="addTag('Design')">Design</li>
+    <li onclick="addTag('Security')">Security</li>
+  </ul>
+</body>
+</html>

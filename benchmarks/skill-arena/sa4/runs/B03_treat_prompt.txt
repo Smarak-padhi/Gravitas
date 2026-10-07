@@ -1,0 +1,18 @@
+TASK BRIEF:
+Build a fully accessible headless multi-select autocomplete tag component compliant with WAI-ARIA 1.2 Combobox pattern.
+
+ACCEPTANCE CRITERIA:
+Complete ARIA combobox markup (role="combobox", aria-expanded, aria-controls, aria-activedescendant)
+Full keyboard navigation (ArrowDown/Up navigation, Enter selection, Escape close, Backspace chip removal)
+Dynamic aria-live region announcing filtered count and active item updates
+Visible high-contrast focus rings on all interactive tags and inputs
+Reduced-motion awareness for dropdown transitions
+Zero keyboard traps; clean tab order restoration on blur
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Combobox</title></head><body><label for="cb">Tags</label><input id="cb" type="text"><ul id="list"></ul></body></html>
+
+CAPABILITY GUIDANCE APPLIED:
+- Headless Accessible Primitives (PROFILE-DESIGN-004): Complete WAI-ARIA 1.2 Combobox pattern (role="combobox", aria-expanded, aria-controls, aria-activedescendant), dynamic aria-live feedback region, visible focus rings, reduced-motion consideration.
+- Standard Library Primacy (CANON-GLOB-002): Pure native vanilla DOM manipulation with zero external runtime libraries.

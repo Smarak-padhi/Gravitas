@@ -1,0 +1,126 @@
+{
+  "seed": "GRAVITAS_SA4_PRNG_SEED_42",
+  "description": "Deterministic precomputed execution order across 8 primary benchmark pairs, 2 ablations, 2 crossovers, and 2 length controls",
+  "pairs": [
+    {
+      "benchmarkId": "B01",
+      "replicate": 1,
+      "firstCondition": "TREATMENT",
+      "executionOrder": [
+        "TREATMENT",
+        "CONTROL"
+      ]
+    },
+    {
+      "benchmarkId": "B02",
+      "replicate": 1,
+      "firstCondition": "CONTROL",
+      "executionOrder": [
+        "CONTROL",
+        "TREATMENT"
+      ]
+    },
+    {
+      "benchmarkId": "B03",
+      "replicate": 1,
+      "firstCondition": "TREATMENT",
+      "executionOrder": [
+        "TREATMENT",
+        "CONTROL"
+      ]
+    },
+    {
+      "benchmarkId": "B04",
+      "replicate": 1,
+      "firstCondition": "CONTROL",
+      "executionOrder": [
+        "CONTROL",
+        "TREATMENT"
+      ]
+    },
+    {
+      "benchmarkId": "B05",
+      "replicate": 1,
+      "firstCondition": "TREATMENT",
+      "executionOrder": [
+        "TREATMENT",
+        "CONTROL"
+      ]
+    },
+    {
+      "benchmarkId": "B06",
+      "replicate": 1,
+      "firstCondition": "CONTROL",
+      "executionOrder": [
+        "CONTROL",
+        "TREATMENT"
+      ]
+    },
+    {
+      "benchmarkId": "B07",
+      "replicate": 1,
+      "firstCondition": "TREATMENT",
+      "executionOrder": [
+        "TREATMENT",
+        "CONTROL"
+      ]
+    },
+    {
+      "benchmarkId": "B08",
+      "replicate": 1,
+      "firstCondition": "CONTROL",
+      "executionOrder": [
+        "CONTROL",
+        "TREATMENT"
+      ]
+    }
+  ],
+  "ablations": [
+    {
+      "benchmarkId": "B01",
+      "ablationId": "ABLATION_NO_DESIGN",
+      "executionOrder": [
+        "ABLATION"
+      ]
+    },
+    {
+      "benchmarkId": "B07",
+      "ablationId": "ABLATION_NO_SEAM",
+      "executionOrder": [
+        "ABLATION"
+      ]
+    }
+  ],
+  "crossovers": [
+    {
+      "benchmarkId": "B02",
+      "crossoverId": "CROSSOVER_LIQUID_GLASS",
+      "executionOrder": [
+        "CROSSOVER"
+      ]
+    },
+    {
+      "benchmarkId": "B04",
+      "crossoverId": "CROSSOVER_BRUTALIST",
+      "executionOrder": [
+        "CROSSOVER"
+      ]
+    }
+  ],
+  "neutralLengthControls": [
+    {
+      "benchmarkId": "B01",
+      "controlType": "NEUTRAL_LENGTH_CONTROL",
+      "executionOrder": [
+        "LENGTH_CONTROL"
+      ]
+    },
+    {
+      "benchmarkId": "B07",
+      "controlType": "NEUTRAL_LENGTH_CONTROL",
+      "executionOrder": [
+        "LENGTH_CONTROL"
+      ]
+    }
+  ]
+}

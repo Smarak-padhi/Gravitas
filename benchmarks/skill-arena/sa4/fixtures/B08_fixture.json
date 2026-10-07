@@ -1,0 +1,25 @@
+{
+  "benchmarkId": "B08",
+  "family": "WORKFLOW_DOCUMENTATION_TASK",
+  "title": "Phased Migration Plan & Forensic Architecture Contract",
+  "purpose": "Test workflow profile contribution (GSD phased lifecycle, ambiguity scoring, verification gates).",
+  "applicableProfiles": [
+    "PROFILE-WORK-001"
+  ],
+  "applicableCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-004"
+  ],
+  "brief": "Author an exhaustive, phased technical migration specification and verification gate contract for transitioning a monolithic user service to an event-driven decoupled architecture.",
+  "acceptanceCriteria": [
+    "Structured lifecycle phases: Discovery & Ambiguity Scoping, Design Contract, Phased Wave Execution, Verification UAT",
+    "Explicit gate conditions and rollback criteria for each execution phase",
+    "Traceable requirement matrix mapping capabilities to verification tests",
+    "Dependency-ordered wave parallelization matrix",
+    "Post-mortem forensic checkpoint definitions",
+    "Zero hand-waving: every migration phase specifies exact inputs, outputs, and halt triggers"
+  ],
+  "startingSource": "# Migration Plan\n\n## 1. Intro\nMigrate user service.",
+  "viewport": null
+}

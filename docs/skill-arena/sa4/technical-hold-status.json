@@ -1,0 +1,32 @@
+{
+  "totalHolds": 3,
+  "holds": [
+    {
+      "holdId": "HOLD-001",
+      "topic": "Android XR Display Glasses Glimmer Interaction Model",
+      "requiredVerification": "Physical test execution on certified Android XR display glasses hardware with human subject evaluation",
+      "status": "UNRESOLVED",
+      "reason": "Optical see-through display glasses hardware and specialized XR sensors are unavailable in offline execution environment. Cannot be resolved through software simulation.",
+      "activatedInBenchmark": false
+    },
+    {
+      "holdId": "HOLD-002",
+      "topic": "R8 Configuration Analyzer Internal Protobuf Schema Guarantees",
+      "requiredVerification": "Multi-daemon automated matrix builds across 10+ open-source Android projects with varied Gradle daemon memory and caching parameters",
+      "status": "UNRESOLVED",
+      "reason": "Multi-daemon Gradle matrix across distributed build workers not executed in zero-cost offline suite. Remains held.",
+      "activatedInBenchmark": false
+    },
+    {
+      "holdId": "HOLD-003",
+      "topic": "Jetpack Media3 Cast RemoteCastPlayer Wi-Fi Disconnect Recovery",
+      "requiredVerification": "Hardware Wi-Fi attenuation testing with physical Chromecast and Nest Hub devices over 24-hour continuous reconnect test loop",
+      "status": "UNRESOLVED",
+      "reason": "Physical Google Cast hardware and mDNS RF attenuation testing gear unavailable. Remains held.",
+      "activatedInBenchmark": false
+    }
+  ],
+  "technicalHoldsResolved": 0,
+  "technicalHoldsUnresolved": 3,
+  "quarantineEnforced": true
+}

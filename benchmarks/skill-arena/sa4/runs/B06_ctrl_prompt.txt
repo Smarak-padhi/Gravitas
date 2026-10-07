@@ -1,0 +1,14 @@
+TASK BRIEF:
+Reconstruct a formal engineering specification card matching an exact geometric wireframe specification: 480px width, 16px internal padding, 1px solid #1a1a1a border, 24px header with 12px uppercase tracking, 2-column key-value spec grid with 1px dotted dividers.
+
+ACCEPTANCE CRITERIA:
+Container matches exact dimensions: 480px width, 16px padding, 1px border (#1a1a1a)
+Header: 14px uppercase bold with 0.08em letter spacing, separated by 1px solid rule
+Grid: 2-column layout (40% label, 60% value) with 1px dotted divider between rows
+Typography: monospaced font stack (ui-monospace, SFMono-Regular, Menlo, monospace)
+Status pill: 10px height indicator with exact color token (#10b981 for nominal)
+Zero visual bleed or horizontal scrollbar
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Spec Card</title></head><body><div class="card">Spec Card</div></body></html>

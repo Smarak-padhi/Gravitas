@@ -1,0 +1,41 @@
+{
+  "benchmarkId": "B01",
+  "family": "PREMIUM_EDITORIAL_FRONTEND",
+  "title": "Financial Analysis Long-Form Editorial Page",
+  "purpose": "Test expressive editorial design hierarchy, typography pacing, and reading surfaces.",
+  "applicableProfiles": [
+    "PROFILE-DESIGN-001",
+    "PROFILE-PLAT-003"
+  ],
+  "applicableCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004",
+    "CANON-CTX-003"
+  ],
+  "brief": "Create a semantic, responsive HTML/CSS/JS article template featuring a high-density executive summary, interactive data callout cards, footnote toggles, and legible editorial typography.",
+  "acceptanceCriteria": [
+    "Semantic article structure with header, main, aside, and footer landmarks",
+    "Readable typography with clear fluid scale (16px body, 1.6 line-height, constrained 65ch measure)",
+    "High-contrast data callouts with monospaced metrics",
+    "Interactive footnote drawer/toggle operating via keyboard and ARIA disclosure",
+    "Zero layout shift across desktop (1280px), tablet (768px), and mobile (375px)",
+    "Clean CSS without external unpinned framework bloat"
+  ],
+  "startingSource": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><title>Article</title></head>\n<body><h1>Market Report</h1><p>Content goes here.</p></body></html>",
+  "viewport": {
+    "desktop": [
+      1280,
+      800
+    ],
+    "tablet": [
+      768,
+      1024
+    ],
+    "mobile": [
+      375,
+      667
+    ]
+  }
+}

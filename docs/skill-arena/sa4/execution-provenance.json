@@ -1,0 +1,34 @@
+{
+  "provenanceVerification": {
+    "runsEvaluated": 22,
+    "physicalArtifactsPresent": 44,
+    "promptFilesPresent": 22,
+    "outputFilesPresent": 22,
+    "hashesConsistent": true,
+    "zeroManifestOnlyRuns": true
+  },
+  "runMapping": {
+    "RUN-B01-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B01_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B01_ctrl_output.html" },
+    "RUN-B01-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B01_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B01_treat_output.html" },
+    "RUN-B02-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B02_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B02_ctrl_output.html" },
+    "RUN-B02-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B02_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B02_treat_output.html" },
+    "RUN-B03-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B03_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B03_ctrl_output.html" },
+    "RUN-B03-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B03_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B03_treat_output.html" },
+    "RUN-B04-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B04_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B04_ctrl_output.html" },
+    "RUN-B04-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B04_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B04_treat_output.html" },
+    "RUN-B05-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B05_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B05_ctrl_output.html" },
+    "RUN-B05-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B05_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B05_treat_output.html" },
+    "RUN-B06-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B06_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B06_ctrl_output.html" },
+    "RUN-B06-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B06_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B06_treat_output.html" },
+    "RUN-B07-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B07_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B07_ctrl_output.js" },
+    "RUN-B07-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B07_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B07_treat_output.js" },
+    "RUN-B08-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B08_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B08_ctrl_output.md" },
+    "RUN-B08-TREAT": { "prompt": "benchmarks/skill-arena/sa4/runs/B08_treat_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B08_treat_output.md" },
+    "RUN-B01-ABLAT-NO-DESIGN": { "prompt": "benchmarks/skill-arena/sa4/runs/B01_ablation_no_design_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B01_ablation_no_design_output.html" },
+    "RUN-B07-ABLAT-NO-SEAM": { "prompt": "benchmarks/skill-arena/sa4/runs/B07_ablation_no_seam_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B07_ablation_no_seam_output.js" },
+    "RUN-B02-CROSSOVER-GLASS": { "prompt": "benchmarks/skill-arena/sa4/runs/B02_crossover_glass_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B02_crossover_glass_output.html" },
+    "RUN-B04-CROSSOVER-BRUTALIST": { "prompt": "benchmarks/skill-arena/sa4/runs/B04_crossover_brutalist_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B04_crossover_brutalist_output.html" },
+    "RUN-B01-LENGTH-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B01_length_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B01_length_ctrl_output.html" },
+    "RUN-B07-LENGTH-CTRL": { "prompt": "benchmarks/skill-arena/sa4/runs/B07_length_ctrl_prompt.txt", "output": "benchmarks/skill-arena/sa4/outputs/B07_length_ctrl_output.js" }
+  }
+}

@@ -1,0 +1,21 @@
+TASK BRIEF:
+Create a semantic, responsive HTML/CSS/JS article template featuring a high-density executive summary, interactive data callout cards, footnote toggles, and legible editorial typography.
+
+ACCEPTANCE CRITERIA:
+Semantic article structure with header, main, aside, and footer landmarks
+Readable typography with clear fluid scale (16px body, 1.6 line-height, constrained 65ch measure)
+High-contrast data callouts with monospaced metrics
+Interactive footnote drawer/toggle operating via keyboard and ARIA disclosure
+Zero layout shift across desktop (1280px), tablet (768px), and mobile (375px)
+Clean CSS without external unpinned framework bloat
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Article</title></head>
+<body><h1>Market Report</h1><p>Content goes here.</p></body></html>
+
+CAPABILITY GUIDANCE APPLIED:
+- Occam Minimal Implementation (CANON-GLOB-004)
+- Compound UI Patterns (CANON-CTX-003)
+(NOTE: PROFILE-DESIGN-001 OMITTED IN ABLATION)

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Account Settings</title>
+  <style>
+    :root { --border: #111; --focus: #0284c7; --error: #b91c1c; }
+    body { font-family: system-ui, sans-serif; line-height: 1.5; padding: 32px 16px; max-width: 480px; margin: 0 auto; color: #111; }
+    fieldset { border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+    legend { font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; padding: 0 8px; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    input[type="email"] { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px; border: 1px solid var(--border); }
+    input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+    .hint { font-size: 12px; color: #555; margin-top: 4px; }
+    .error-msg { font-size: 12px; color: var(--error); margin-top: 4px; font-weight: 600; display: none; }
+    button[type="submit"] { font-size: 13px; text-transform: uppercase; font-weight: 700; padding: 10px 18px; border: 1px solid var(--border); background: #111; color: #fff; cursor: pointer; }
+    button[type="submit"]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <form id="settings-form" novalidate>
+    <fieldset>
+      <legend>Account Credentials</legend>
+      <div class="field">
+        <label for="user-email">Primary Work Email</label>
+        <input id="user-email" type="email" value="test@example.com" aria-describedby="email-hint email-error" required>
+        <div id="email-hint" class="hint">Notifications and billing invoices will be sent to this address.</div>
+        <div id="email-error" class="error-msg" role="alert">Please enter a valid RFC-compliant email address.</div>
+      </div>
+      <button type="submit">Save Changes</button>
+    </fieldset>
+  </form>
+</body>
+</html>

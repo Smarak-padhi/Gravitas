@@ -1,0 +1,19 @@
+TASK BRIEF:
+Implement a high-density real-time system operations dashboard with a 4-metric summary bar, sortable node telemetry table, interactive filter tags, and visual status badges.
+
+ACCEPTANCE CRITERIA:
+Dense tabular layout displaying 10+ node records with status, latency, CPU, and memory
+Compact monospaced numerical formatting with right-aligned tabular figures
+Keyboard-accessible table header sorting with aria-sort attributes
+Filter tags that toggle cluster views instantly (< 16ms)
+Monochrome / crisp border hierarchy without gradients or decorative blurs
+Responsive horizontal overflow containment with sticky column headers
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Ops Console</title></head><body><h1>Nodes</h1><table><tr><th>Node</th><th>Status</th></tr></table></body></html>
+
+CAPABILITY GUIDANCE APPLIED:
+- Minimalist & Brutalist Web Grammar (PROFILE-DESIGN-001): Dense tabular grid, 1px solid #111 borders, zero drop shadows/gradients, monospaced tabular figures, sticky table headers.
+- Contextual Background Processing (CANON-CTX-002): Offload sorting of large telemetry tables to cooperative requestAnimationFrame/Web Worker without UI blocking.
+- Compound Component Pattern (CANON-CTX-003): Cohesive status pill and sortable header component composition with aria-sort.

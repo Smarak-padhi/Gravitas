@@ -1,0 +1,300 @@
+[
+  {
+    "benchmarkId": "B01",
+    "family": "PREMIUM_EDITORIAL_FRONTEND",
+    "title": "Financial Analysis Long-Form Editorial Page",
+    "purpose": "Test expressive editorial design hierarchy, typography pacing, and reading surfaces.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-001",
+      "PROFILE-PLAT-003"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-003"
+    ],
+    "brief": "Create a semantic, responsive HTML/CSS/JS article template featuring a high-density executive summary, interactive data callout cards, footnote toggles, and legible editorial typography.",
+    "acceptanceCriteria": [
+      "Semantic article structure with header, main, aside, and footer landmarks",
+      "Readable typography with clear fluid scale (16px body, 1.6 line-height, constrained 65ch measure)",
+      "High-contrast data callouts with monospaced metrics",
+      "Interactive footnote drawer/toggle operating via keyboard and ARIA disclosure",
+      "Zero layout shift across desktop (1280px), tablet (768px), and mobile (375px)",
+      "Clean CSS without external unpinned framework bloat"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"UTF-8\"><title>Article</title></head>\n<body><h1>Market Report</h1><p>Content goes here.</p></body></html>",
+    "viewport": {
+      "desktop": [
+        1280,
+        800
+      ],
+      "tablet": [
+        768,
+        1024
+      ],
+      "mobile": [
+        375,
+        667
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B02",
+    "family": "DENSE_OPERATIONS_DASHBOARD",
+    "title": "Multi-Tenant Telemetry Operations Console",
+    "purpose": "Test high-density information architecture, tabular alignment, and real-time status readability.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-001",
+      "PROFILE-PLAT-003"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-002",
+      "CANON-CTX-003"
+    ],
+    "brief": "Implement a high-density real-time system operations dashboard with a 4-metric summary bar, sortable node telemetry table, interactive filter tags, and visual status badges.",
+    "acceptanceCriteria": [
+      "Dense tabular layout displaying 10+ node records with status, latency, CPU, and memory",
+      "Compact monospaced numerical formatting with right-aligned tabular figures",
+      "Keyboard-accessible table header sorting with aria-sort attributes",
+      "Filter tags that toggle cluster views instantly (< 16ms)",
+      "Monochrome / crisp border hierarchy without gradients or decorative blurs",
+      "Responsive horizontal overflow containment with sticky column headers"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html><head><title>Ops Console</title></head><body><h1>Nodes</h1><table><tr><th>Node</th><th>Status</th></tr></table></body></html>",
+    "viewport": {
+      "desktop": [
+        1440,
+        900
+      ],
+      "tablet": [
+        1024,
+        768
+      ],
+      "mobile": [
+        375,
+        667
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B03",
+    "family": "ACCESSIBLE_HEADLESS_INTERFACE",
+    "title": "Accessible Multi-Select Tag Combobox with Live Region",
+    "purpose": "Test strict WCAG AA/AAA compliance, focus trapping, and ARIA 1.2 combobox pattern.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-004",
+      "PROFILE-PLAT-003"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-003"
+    ],
+    "brief": "Build a fully accessible headless multi-select autocomplete tag component compliant with WAI-ARIA 1.2 Combobox pattern.",
+    "acceptanceCriteria": [
+      "Complete ARIA combobox markup (role=\"combobox\", aria-expanded, aria-controls, aria-activedescendant)",
+      "Full keyboard navigation (ArrowDown/Up navigation, Enter selection, Escape close, Backspace chip removal)",
+      "Dynamic aria-live region announcing filtered count and active item updates",
+      "Visible high-contrast focus rings on all interactive tags and inputs",
+      "Reduced-motion awareness for dropdown transitions",
+      "Zero keyboard traps; clean tab order restoration on blur"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html><head><title>Combobox</title></head><body><label for=\"cb\">Tags</label><input id=\"cb\" type=\"text\"><ul id=\"list\"></ul></body></html>",
+    "viewport": {
+      "desktop": [
+        1280,
+        800
+      ],
+      "tablet": [
+        768,
+        1024
+      ],
+      "mobile": [
+        375,
+        667
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B04",
+    "family": "MOBILE_ADAPTIVE_PRODUCT_UI",
+    "title": "Adaptive Multi-Pane Workspace Layout",
+    "purpose": "Test adaptive screen-size layout shifts, navigation rails vs bottom bars, and fold awareness.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-003",
+      "PROFILE-PLAT-003"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-003"
+    ],
+    "brief": "Implement an adaptive responsive product layout conforming to Material 3 Adaptive window size classes (Compact < 600px, Medium 600-840px, Expanded > 840px).",
+    "acceptanceCriteria": [
+      "Expanded (> 840px): Persistent navigation rail (72px) with dual-pane master-detail view",
+      "Medium (600-840px): Collapsible modal navigation rail with flexible pane split",
+      "Compact (< 600px): Bottom navigation bar (80px) with single-pane stacked navigation and back button",
+      "Touch target sizes >= 48x48px on compact and medium viewports",
+      "Fluid transitions between window size classes without state or input loss",
+      "Accessible semantic structure with proper landmark scoping"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html><head><title>Adaptive</title></head><body><div id=\"app\"><nav>Nav</nav><main>List</main></div></body></html>",
+    "viewport": {
+      "desktop": [
+        1200,
+        800
+      ],
+      "tablet": [
+        700,
+        900
+      ],
+      "mobile": [
+        360,
+        640
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B05",
+    "family": "EXISTING_BAD_UI_REDESIGN",
+    "title": "Refactor Bloated Form with Broken Hierarchy & Missing Labels",
+    "purpose": "Test refactoring, diagnosis of anti-patterns, and removal of speculative abstractions.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-001",
+      "PROFILE-DESIGN-004"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-001",
+      "CANON-CTX-003"
+    ],
+    "brief": "Diagnose and refactor a legacy settings form suffering from div-soup, missing form labels, non-standard click handlers on divs, hardcoded inline styles, and unstyled error states.",
+    "acceptanceCriteria": [
+      "Refactor div-soup into semantic <form>, <fieldset>, <legend>, and <label> elements",
+      "Associate every input with explicit label matching for=\"id\" and proper aria-describedby for error messages",
+      "Replace un-keyboard-accessible <div> buttons with native <button type=\"submit\">",
+      "Eliminate 30+ redundant inline style attributes in favor of clean structured CSS classes",
+      "Implement accessible inline field validation with assertive error summary",
+      "Maintain exact existing form fields and values without data loss"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html><head><title>Settings</title></head><body><div style=\"padding:20px;\"><div style=\"font-size:24px;\">Settings</div><div style=\"margin-top:10px;\">Email</div><div style=\"border:1px solid #ccc;padding:5px;\"><input type=\"text\" value=\"test@example.com\"></div><div style=\"background:blue;color:white;padding:10px;margin-top:20px;text-align:center;cursor:pointer;\" onclick=\"alert('saved')\">Save</div></div></body></html>",
+    "viewport": {
+      "desktop": [
+        1280,
+        800
+      ],
+      "tablet": [
+        768,
+        1024
+      ],
+      "mobile": [
+        375,
+        667
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B06",
+    "family": "REFERENCE_FIDELITY_RECONSTRUCTION",
+    "title": "Pixel-Accurate Architectural Blueprint Spec Sheet",
+    "purpose": "Test adherence to a fixed visual geometric reference layout, exact spacing, and typography tokens.",
+    "applicableProfiles": [
+      "PROFILE-DESIGN-001"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004"
+    ],
+    "brief": "Reconstruct a formal engineering specification card matching an exact geometric wireframe specification: 480px width, 16px internal padding, 1px solid #1a1a1a border, 24px header with 12px uppercase tracking, 2-column key-value spec grid with 1px dotted dividers.",
+    "acceptanceCriteria": [
+      "Container matches exact dimensions: 480px width, 16px padding, 1px border (#1a1a1a)",
+      "Header: 14px uppercase bold with 0.08em letter spacing, separated by 1px solid rule",
+      "Grid: 2-column layout (40% label, 60% value) with 1px dotted divider between rows",
+      "Typography: monospaced font stack (ui-monospace, SFMono-Regular, Menlo, monospace)",
+      "Status pill: 10px height indicator with exact color token (#10b981 for nominal)",
+      "Zero visual bleed or horizontal scrollbar"
+    ],
+    "startingSource": "<!DOCTYPE html>\n<html><head><title>Spec Card</title></head><body><div class=\"card\">Spec Card</div></body></html>",
+    "viewport": {
+      "desktop": [
+        800,
+        600
+      ],
+      "tablet": [
+        600,
+        600
+      ],
+      "mobile": [
+        375,
+        667
+      ]
+    }
+  },
+  {
+    "benchmarkId": "B07",
+    "family": "ENGINEERING_ARCHITECTURE_TASK",
+    "title": "In-Memory Cache Layer with LRU Eviction & Safe Seams",
+    "purpose": "Test global and contextual engineering rules (YAGNI, stdlib primacy, test seams) in pure code architecture without UI.",
+    "applicableProfiles": [
+      "PROFILE-PLAT-003"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-003",
+      "CANON-GLOB-004",
+      "CANON-CTX-001"
+    ],
+    "brief": "Implement a high-performance in-memory LRU cache in modern TypeScript/JavaScript without external dependencies. Provide bounded memory size, O(1) get/set, TTL expiration, and an explicit testable storage seam.",
+    "acceptanceCriteria": [
+      "Zero external dependencies (pure standard library Map/DoublyLinkedList)",
+      "O(1) average complexity for get, set, and has operations",
+      "LRU eviction strictly enforced when capacity limit is reached",
+      "Time-to-live (TTL) expiration on entries with lazy or periodic cleanup",
+      "Isolate persistence/clock behind an explicit mockable interface for deterministic unit testing",
+      "Passes 100% of accompanying unit tests for concurrency and cache invalidation"
+    ],
+    "startingSource": "export class LruCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n  }\n  get(key) {}\n  set(key, val, ttl) {}\n}",
+    "viewport": null
+  },
+  {
+    "benchmarkId": "B08",
+    "family": "WORKFLOW_DOCUMENTATION_TASK",
+    "title": "Phased Migration Plan & Forensic Architecture Contract",
+    "purpose": "Test workflow profile contribution (GSD phased lifecycle, ambiguity scoring, verification gates).",
+    "applicableProfiles": [
+      "PROFILE-WORK-001"
+    ],
+    "applicableCandidates": [
+      "CANON-GLOB-001",
+      "CANON-GLOB-002",
+      "CANON-GLOB-004"
+    ],
+    "brief": "Author an exhaustive, phased technical migration specification and verification gate contract for transitioning a monolithic user service to an event-driven decoupled architecture.",
+    "acceptanceCriteria": [
+      "Structured lifecycle phases: Discovery & Ambiguity Scoping, Design Contract, Phased Wave Execution, Verification UAT",
+      "Explicit gate conditions and rollback criteria for each execution phase",
+      "Traceable requirement matrix mapping capabilities to verification tests",
+      "Dependency-ordered wave parallelization matrix",
+      "Post-mortem forensic checkpoint definitions",
+      "Zero hand-waving: every migration phase specifies exact inputs, outputs, and halt triggers"
+    ],
+    "startingSource": "# Migration Plan\n\n## 1. Intro\nMigrate user service.",
+    "viewport": null
+  }
+]

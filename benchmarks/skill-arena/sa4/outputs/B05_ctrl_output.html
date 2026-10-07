@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Settings</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input { width: 100%; max-width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <form onsubmit="event.preventDefault(); alert('saved');">
+    <h1>Account Settings</h1>
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input id="email" type="email" value="test@example.com" required>
+    </div>
+    <button type="submit">Save Changes</button>
+  </form>
+</body>
+</html>

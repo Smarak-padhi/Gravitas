@@ -1,0 +1,18 @@
+TASK BRIEF:
+Implement an adaptive responsive product layout conforming to Material 3 Adaptive window size classes (Compact < 600px, Medium 600-840px, Expanded > 840px).
+
+ACCEPTANCE CRITERIA:
+Expanded (> 840px): Persistent navigation rail (72px) with dual-pane master-detail view
+Medium (600-840px): Collapsible modal navigation rail with flexible pane split
+Compact (< 600px): Bottom navigation bar (80px) with single-pane stacked navigation and back button
+Touch target sizes >= 48x48px on compact and medium viewports
+Fluid transitions between window size classes without state or input loss
+Accessible semantic structure with proper landmark scoping
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Adaptive</title></head><body><div id="app"><nav>Nav</nav><main>List</main></div></body></html>
+
+CAPABILITY GUIDANCE APPLIED:
+- Material 3 Adaptive Design Grammar (PROFILE-DESIGN-003): Standard WindowWidthSizeClass breakpoints (Compact <600px, Medium 600-840px, Expanded >840px), persistent navigation rail (72px) transitioning to bottom navigation bar (80px), multi-pane supporting list-detail layout, touch targets >= 48x48px.
+- Native Platform Features (CANON-GLOB-003): CSS container queries and semantic navigation landmarks.

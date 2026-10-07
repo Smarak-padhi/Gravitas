@@ -1,0 +1,58 @@
+[
+  {
+    "benchmarkId": "B01",
+    "family": "PREMIUM_EDITORIAL_FRONTEND",
+    "title": "Financial Analysis Long-Form Editorial Page",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B01_fixture.json",
+    "fixtureHash": "ad3152152575cda2d572a34f29d98c0a719a53d46b6c32adc7465ee1adb10b74"
+  },
+  {
+    "benchmarkId": "B02",
+    "family": "DENSE_OPERATIONS_DASHBOARD",
+    "title": "Multi-Tenant Telemetry Operations Console",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B02_fixture.json",
+    "fixtureHash": "599c9b902ac0095ebf1f2143ae28f7e4eda292a8e3a9a70189e7b26bd8174ec4"
+  },
+  {
+    "benchmarkId": "B03",
+    "family": "ACCESSIBLE_HEADLESS_INTERFACE",
+    "title": "Accessible Multi-Select Tag Combobox with Live Region",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B03_fixture.json",
+    "fixtureHash": "bbe77958424d0971355acf8466e4cdae84e2754402156db2867c6a009713f519"
+  },
+  {
+    "benchmarkId": "B04",
+    "family": "MOBILE_ADAPTIVE_PRODUCT_UI",
+    "title": "Adaptive Multi-Pane Workspace Layout",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B04_fixture.json",
+    "fixtureHash": "525ef64a31143213aa76a585a987acd4030e624da73de8308eba33cf178dff10"
+  },
+  {
+    "benchmarkId": "B05",
+    "family": "EXISTING_BAD_UI_REDESIGN",
+    "title": "Refactor Bloated Form with Broken Hierarchy & Missing Labels",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B05_fixture.json",
+    "fixtureHash": "ccc8a5e57956f7411647c868e7287017a965dc3096ea71764361a6ad75b5d3df"
+  },
+  {
+    "benchmarkId": "B06",
+    "family": "REFERENCE_FIDELITY_RECONSTRUCTION",
+    "title": "Pixel-Accurate Architectural Blueprint Spec Sheet",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B06_fixture.json",
+    "fixtureHash": "6e573206bc01fa8ac78d4c8a7c3366a460e9014daa293e2b1a4196e2ce802471"
+  },
+  {
+    "benchmarkId": "B07",
+    "family": "ENGINEERING_ARCHITECTURE_TASK",
+    "title": "In-Memory Cache Layer with LRU Eviction & Safe Seams",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B07_fixture.json",
+    "fixtureHash": "8d69040a86835fcef70de05da7682c2aba4ad4deb303cd8d01d82b7d2c57c26a"
+  },
+  {
+    "benchmarkId": "B08",
+    "family": "WORKFLOW_DOCUMENTATION_TASK",
+    "title": "Phased Migration Plan & Forensic Architecture Contract",
+    "fixturePath": "benchmarks/skill-arena/sa4/fixtures/B08_fixture.json",
+    "fixtureHash": "7b28bbc4ab7900c36052d8a0461a8143d0838c7a445a05c92db31ad3ed606e02"
+  }
+]

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>System Specification Sheet</title>
+  <style>
+    :root { --border: #1a1a1a; --mono: ui-monospace, SFMono-Regular, Menlo, monospace; --pill-ok: #10b981; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--mono); background: #fff; padding: 32px; color: #1a1a1a; }
+    .spec-card { width: 480px; padding: 16px; border: 1px solid var(--border); background: #fff; }
+    .spec-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
+    .spec-title { font-size: 14px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--pill-ok); }
+    .spec-grid { display: grid; grid-template-columns: 40% 60%; font-size: 12px; }
+    .spec-cell { padding: 8px 0; border-bottom: 1px dotted #888; }
+    .spec-label { color: #555; text-transform: uppercase; }
+    .spec-value { font-weight: 600; }
+    .spec-grid .spec-cell:nth-last-child(-n+2) { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <div class="spec-card">
+    <div class="spec-header">
+      <span class="spec-title">System Specification</span>
+      <span class="status-pill"><span class="status-dot"></span>Nominal</span>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-cell spec-label">Host Node</div><div class="spec-cell spec-value">node-01.eu-west.internal</div>
+      <div class="spec-cell spec-label">Architecture</div><div class="spec-cell spec-value">x86_64 Dual Socket 64-Core</div>
+      <div class="spec-cell spec-label">Memory</div><div class="spec-cell spec-value">64,512 MB ECC DDR5</div>
+      <div class="spec-cell spec-label">Kernel</div><div class="spec-cell spec-value">Linux 6.8.0-45-generic</div>
+    </div>
+  </div>
+</body>
+</html>

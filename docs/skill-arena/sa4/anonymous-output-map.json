@@ -1,0 +1,66 @@
+{
+  "RUN-B01-CTRL": {
+    "anonymousId": "OUTPUT-B01-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B01_ctrl_output.html"
+  },
+  "RUN-B01-TREAT": {
+    "anonymousId": "OUTPUT-B01-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B01_treat_output.html"
+  },
+  "RUN-B02-CTRL": {
+    "anonymousId": "OUTPUT-B02-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B02_ctrl_output.html"
+  },
+  "RUN-B02-TREAT": {
+    "anonymousId": "OUTPUT-B02-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B02_treat_output.html"
+  },
+  "RUN-B03-CTRL": {
+    "anonymousId": "OUTPUT-B03-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B03_ctrl_output.html"
+  },
+  "RUN-B03-TREAT": {
+    "anonymousId": "OUTPUT-B03-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B03_treat_output.html"
+  },
+  "RUN-B04-CTRL": {
+    "anonymousId": "OUTPUT-B04-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B04_ctrl_output.html"
+  },
+  "RUN-B04-TREAT": {
+    "anonymousId": "OUTPUT-B04-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B04_treat_output.html"
+  },
+  "RUN-B05-CTRL": {
+    "anonymousId": "OUTPUT-B05-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B05_ctrl_output.html"
+  },
+  "RUN-B05-TREAT": {
+    "anonymousId": "OUTPUT-B05-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B05_treat_output.html"
+  },
+  "RUN-B06-CTRL": {
+    "anonymousId": "OUTPUT-B06-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B06_ctrl_output.html"
+  },
+  "RUN-B06-TREAT": {
+    "anonymousId": "OUTPUT-B06-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B06_treat_output.html"
+  },
+  "RUN-B07-CTRL": {
+    "anonymousId": "OUTPUT-B07-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B07_ctrl_output.js"
+  },
+  "RUN-B07-TREAT": {
+    "anonymousId": "OUTPUT-B07-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B07_treat_output.js"
+  },
+  "RUN-B08-CTRL": {
+    "anonymousId": "OUTPUT-B08-ALPHA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B08_ctrl_output.md"
+  },
+  "RUN-B08-TREAT": {
+    "anonymousId": "OUTPUT-B08-BETA",
+    "path": "benchmarks/skill-arena/sa4/outputs/B08_treat_output.md"
+  }
+}

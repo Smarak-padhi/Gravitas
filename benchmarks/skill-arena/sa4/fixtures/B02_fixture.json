@@ -1,0 +1,42 @@
+{
+  "benchmarkId": "B02",
+  "family": "DENSE_OPERATIONS_DASHBOARD",
+  "title": "Multi-Tenant Telemetry Operations Console",
+  "purpose": "Test high-density information architecture, tabular alignment, and real-time status readability.",
+  "applicableProfiles": [
+    "PROFILE-DESIGN-001",
+    "PROFILE-PLAT-003"
+  ],
+  "applicableCandidates": [
+    "CANON-GLOB-001",
+    "CANON-GLOB-002",
+    "CANON-GLOB-003",
+    "CANON-GLOB-004",
+    "CANON-CTX-002",
+    "CANON-CTX-003"
+  ],
+  "brief": "Implement a high-density real-time system operations dashboard with a 4-metric summary bar, sortable node telemetry table, interactive filter tags, and visual status badges.",
+  "acceptanceCriteria": [
+    "Dense tabular layout displaying 10+ node records with status, latency, CPU, and memory",
+    "Compact monospaced numerical formatting with right-aligned tabular figures",
+    "Keyboard-accessible table header sorting with aria-sort attributes",
+    "Filter tags that toggle cluster views instantly (< 16ms)",
+    "Monochrome / crisp border hierarchy without gradients or decorative blurs",
+    "Responsive horizontal overflow containment with sticky column headers"
+  ],
+  "startingSource": "<!DOCTYPE html>\n<html><head><title>Ops Console</title></head><body><h1>Nodes</h1><table><tr><th>Node</th><th>Status</th></tr></table></body></html>",
+  "viewport": {
+    "desktop": [
+      1440,
+      900
+    ],
+    "tablet": [
+      1024,
+      768
+    ],
+    "mobile": [
+      375,
+      667
+    ]
+  }
+}

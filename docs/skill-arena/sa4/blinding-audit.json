@@ -1,0 +1,98 @@
+[
+  {
+    "benchmarkId": "B01",
+    "anonymousOutputId": "OUTPUT-B01-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B01",
+    "anonymousOutputId": "OUTPUT-B01-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B02",
+    "anonymousOutputId": "OUTPUT-B02-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B02",
+    "anonymousOutputId": "OUTPUT-B02-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B03",
+    "anonymousOutputId": "OUTPUT-B03-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B03",
+    "anonymousOutputId": "OUTPUT-B03-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B04",
+    "anonymousOutputId": "OUTPUT-B04-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B04",
+    "anonymousOutputId": "OUTPUT-B04-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B05",
+    "anonymousOutputId": "OUTPUT-B05-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B05",
+    "anonymousOutputId": "OUTPUT-B05-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B06",
+    "anonymousOutputId": "OUTPUT-B06-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B06",
+    "anonymousOutputId": "OUTPUT-B06-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B07",
+    "anonymousOutputId": "OUTPUT-B07-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B07",
+    "anonymousOutputId": "OUTPUT-B07-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B08",
+    "anonymousOutputId": "OUTPUT-B08-ALPHA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  },
+  {
+    "benchmarkId": "B08",
+    "anonymousOutputId": "OUTPUT-B08-BETA",
+    "blindingLeakage": false,
+    "leakSource": "NONE"
+  }
+]

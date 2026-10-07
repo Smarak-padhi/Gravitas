@@ -1,0 +1,14 @@
+TASK BRIEF:
+Implement a high-density real-time system operations dashboard with a 4-metric summary bar, sortable node telemetry table, interactive filter tags, and visual status badges.
+
+ACCEPTANCE CRITERIA:
+Dense tabular layout displaying 10+ node records with status, latency, CPU, and memory
+Compact monospaced numerical formatting with right-aligned tabular figures
+Keyboard-accessible table header sorting with aria-sort attributes
+Filter tags that toggle cluster views instantly (< 16ms)
+Monochrome / crisp border hierarchy without gradients or decorative blurs
+Responsive horizontal overflow containment with sticky column headers
+
+STARTING FIXTURE:
+<!DOCTYPE html>
+<html><head><title>Ops Console</title></head><body><h1>Nodes</h1><table><tr><th>Node</th><th>Status</th></tr></table></body></html>

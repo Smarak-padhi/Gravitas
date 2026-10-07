@@ -1,0 +1,1 @@
+export class LruCache { constructor(cap) { this.cap = cap; } }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Accessible Combobox</title>
+  <style>
+    :root { --focus-ring: #0284c7; --border: #0f172a; }
+    body { font-family: system-ui, sans-serif; padding: 24px; color: #0f172a; }
+    .combobox-wrapper { max-width: 440px; position: relative; }
+    .label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .input-box { display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid var(--border); padding: 6px 8px; background: #fff; }
+    .input-box:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+    .tag-chip { display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 8px; font-size: 13px; }
+    .tag-chip button { background: none; border: none; cursor: pointer; padding: 0 2px; font-size: 14px; line-height: 1; }
+    .tag-chip button:focus-visible { outline: 2px solid var(--focus-ring); }
+    input { border: none; outline: none; flex: 1; min-width: 120px; font-size: 14px; padding: 4px 0; }
+    .listbox { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-top: none; margin: 0; padding: 0; list-style: none; max-height: 200px; overflow-y: auto; z-index: 10; display: none; }
+    .listbox[data-open="true"] { display: block; }
+    .option { padding: 8px 10px; font-size: 13px; cursor: pointer; }
+    .option[aria-selected="true"], .option.focused { background: #e0f2fe; color: #0369a1; font-weight: 500; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="combobox-wrapper">
+    <label id="tag-label" for="tag-input" class="label">Assigned Skills &amp; Capabilities</label>
+    <div class="input-box" role="group" aria-labelledby="tag-label">
+      <span class="tag-chip">Engineering <button type="button" aria-label="Remove Engineering tag">&times;</button></span>
+      <input id="tag-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-controls="tag-listbox" aria-activedescendant="" placeholder="Type to filter...">
+    </div>
+    <ul id="tag-listbox" role="listbox" aria-labelledby="tag-label" class="listbox" data-open="false">
+      <li id="opt-1" role="option" aria-selected="false" class="option">Architecture</li>
+      <li id="opt-2" role="option" aria-selected="false" class="option">Design Systems</li>
+      <li id="opt-3" role="option" aria-selected="false" class="option">Security Compliance</li>
+    </ul>
+    <div id="live-region" class="sr-only" role="status" aria-live="polite">3 options available. Use arrow keys to navigate.</div>
+  </div>
+</body>
+</html>

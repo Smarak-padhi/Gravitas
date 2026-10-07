@@ -1,0 +1,22 @@
+TASK BRIEF:
+Implement a high-performance in-memory LRU cache in modern TypeScript/JavaScript without external dependencies. Provide bounded memory size, O(1) get/set, TTL expiration, and an explicit testable storage seam.
+
+ACCEPTANCE CRITERIA:
+Zero external dependencies (pure standard library Map/DoublyLinkedList)
+O(1) average complexity for get, set, and has operations
+LRU eviction strictly enforced when capacity limit is reached
+Time-to-live (TTL) expiration on entries with lazy or periodic cleanup
+Isolate persistence/clock behind an explicit mockable interface for deterministic unit testing
+Passes 100% of accompanying unit tests for concurrency and cache invalidation
+
+STARTING FIXTURE:
+export class LruCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+  }
+  get(key) {}
+  set(key, val, ttl) {}
+}
+
+ADDITIONAL CONTEXT (NEUTRAL LENGTH MATCH):
+Please ensure that the implementation is thoughtful, clear, thoroughly checked, and structured in a manner appropriate for professional engineering review. Consider all elements carefully.
