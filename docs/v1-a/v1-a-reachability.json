@@ -1,0 +1,34 @@
+{
+  "wave": "V1-A",
+  "auditDate": "2026-10-07",
+  "surfaces": {
+    "apps/desktop": {
+      "classification": "ACTIVE_CANONICAL",
+      "canonicalRole": "Single authoritative V1 Command Center GUI",
+      "stateAuthority": "WorkSessionKernel (utilityProcess)",
+      "database": "SQLite (DataRootLock single writer)"
+    },
+    "apps/server": {
+      "classification": "LEGACY_QUARANTINED",
+      "canonicalRole": "NON_CANONICAL_LEGACY",
+      "stateAuthority": "InMemoryRegistry (DISCONNECTED FROM WORKSESSIONKERNEL)",
+      "importsFromDesktop": 0,
+      "importsFromPackages": 0,
+      "quarantinedFromV1": true
+    },
+    "apps/web": {
+      "classification": "LEGACY_QUARANTINED",
+      "canonicalRole": "NON_CANONICAL_LEGACY",
+      "stateAuthority": "HTTP/SSE Client to apps/server",
+      "importsFromDesktop": 0,
+      "importsFromPackages": 0,
+      "quarantinedFromV1": true
+    }
+  },
+  "dependencyGraph": {
+    "desktopToLegacyServer": "NONE",
+    "desktopToLegacyWeb": "NONE",
+    "packagesToLegacyServer": "NONE",
+    "packagesToLegacyWeb": "NONE"
+  }
+}

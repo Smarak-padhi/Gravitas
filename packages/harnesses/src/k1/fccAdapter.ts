@@ -4,8 +4,8 @@
  * Wraps the existing FreeClaudeCodeHarness in the K1 GravitasHarness contract.
  *
  * Qualification state as of 2026-10-02:
- * - Launcher binary: fcc-claude.exe found at C:\Users\smara\.local\bin\fcc-claude.exe
- * - Proxy server: fcc-server.exe found at C:\Users\smara\.local\bin\fcc-server.exe
+ * - Launcher binary: fcc-claude.exe resolved via %USERPROFILE%\.local\bin or PATH
+ * - Proxy server: fcc-server.exe resolved via %USERPROFILE%\.local\bin or PATH
  * - Proxy health: NOT RUNNING (timeout on http://127.0.0.1:8082/health)
  *   → STATE: INSTALLED (binary present, proxy NOT running)
  *   → DISPATCH STATE: NOT_READY until fcc-server is started

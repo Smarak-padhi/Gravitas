@@ -1,0 +1,57 @@
+{
+  "wave": "V1-A",
+  "compilerPackage": "@gravitas/prompts",
+  "compiledProfilesCount": 5,
+  "profiles": [
+    {
+      "id": "PROFILE-GLOB-001",
+      "version": "1.0.0",
+      "title": "Global Software Engineering Discipline",
+      "category": "GLOBAL_ENGINEERING",
+      "rulesCount": 4,
+      "sourceRefs": [
+        "sa3://canonical-candidates/CANON-GLOB-001",
+        "sa3://canonical-candidates/CANON-GLOB-002",
+        "sa3://canonical-candidates/CANON-GLOB-003",
+        "sa3://canonical-candidates/CANON-GLOB-004"
+      ]
+    },
+    {
+      "id": "PROFILE-PLAT-001",
+      "version": "1.0.0",
+      "title": "Android Platform Engineering",
+      "category": "PLATFORM",
+      "platform": "android",
+      "rulesCount": 2,
+      "sourceRefs": ["sa3://platform-profiles/PROFILE-PLAT-001"]
+    },
+    {
+      "id": "PROFILE-PLAT-002",
+      "version": "1.0.0",
+      "title": "iOS / Apple Platform Engineering",
+      "category": "PLATFORM",
+      "platform": "ios",
+      "rulesCount": 2,
+      "sourceRefs": ["sa3://platform-profiles/PROFILE-PLAT-002"]
+    },
+    {
+      "id": "PROFILE-PLAT-003",
+      "version": "1.0.0",
+      "title": "Web Platform Standards & DOM Hygiene",
+      "category": "PLATFORM",
+      "platform": "web",
+      "rulesCount": 2,
+      "sourceRefs": ["sa3://platform-profiles/PROFILE-PLAT-003"]
+    },
+    {
+      "id": "PROFILE-DESIGN-IMPECCABLE",
+      "version": "1.0.0",
+      "title": "Impeccable Design-Engineering Baseline",
+      "category": "DESIGN_ENGINEERING",
+      "rulesCount": 14,
+      "sourceRefs": ["https://github.com/pbakaus/impeccable@bbcb29d9dee6c94915d760bcfc36818ad5be66ad"]
+    }
+  ],
+  "provenanceComplete": true,
+  "deterministicSelection": true
+}

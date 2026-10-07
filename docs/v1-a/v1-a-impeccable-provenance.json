@@ -1,0 +1,21 @@
+{
+  "wave": "V1-A",
+  "sourceRepository": "https://github.com/pbakaus/impeccable",
+  "pinnedCommit": "bbcb29d9dee6c94915d760bcfc36818ad5be66ad",
+  "license": "Apache-2.0",
+  "intakeMode": "STATIC_KNOWLEDGE_ONLY (EVIDENCE_PINNED)",
+  "totalDetectorRules": 61,
+  "totalWorkflowCommands": 24,
+  "runtimeInstalled": false,
+  "hooksExecuted": false,
+  "nativeBinariesExecuted": false,
+  "browserServerStarted": false,
+  "quarantinedSurfaces": [
+    "npx impeccable install",
+    "precompiled engine binaries",
+    "binary network download fallback",
+    "provider-native hooks",
+    "live browser preview server"
+  ],
+  "integratedProfileId": "PROFILE-DESIGN-IMPECCABLE"
+}

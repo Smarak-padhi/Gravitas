@@ -4,7 +4,7 @@
  * Wraps the agy CLI as a K1 ProcessHarness.
  *
  * Qualification state as of 2026-10-02:
- * - Binary: C:\Users\smara\AppData\Local\agy\bin\agy.exe (confirmed via Get-Command)
+ * - Binary: %LOCALAPPDATA%\agy\bin\agy.exe (resolved dynamically via process.env.LOCALAPPDATA)
  * - Version: 1.2.14 (confirmed via agy --version)
  * - Auth: agy uses the logged-in Google account / Gemini subscription.
  *   Auth state has NOT been explicitly re-probed for K1. Classified DISCOVERED→INSTALLED.

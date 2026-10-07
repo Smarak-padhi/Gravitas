@@ -48,3 +48,6 @@ export { compileRuntimeLayer } from './runtime-layer.js'
 
 // Managed compiler (primary public API)
 export { compilePrompt, COMPILER_VERSION } from './compiler.js'
+
+// Capability profiles and contextual resolution
+export * as capabilities from './capabilities/index.js'

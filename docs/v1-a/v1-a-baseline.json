@@ -1,0 +1,11 @@
+{
+  "wave": "V1-A",
+  "branch": "feat/v0-golden-loop",
+  "preV1AHead": "1f6c89943954567b099a3707ebae449f6f869fe7",
+  "baselineTimestamp": "2026-10-07T16:46:27+05:30",
+  "typecheck": "PASS",
+  "baselineVitestTests": 1571,
+  "baselineK0Tests": 51,
+  "baselineTotalTests": 1622,
+  "worktreeClean": true
+}
