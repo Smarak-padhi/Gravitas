@@ -302,6 +302,15 @@ export interface SystemProjection {
     readonly paidFallbackPermitted: false
     readonly autonomousPaymentAuthority: false
   }
+  readonly modelIntelligenceSummary?: {
+    readonly providerStatus: 'AVAILABLE' | 'AUTH_REQUIRED' | 'UNCONFIGURED'
+    readonly qualifiedModelsCount: number
+    readonly qualifiedModelIds: readonly string[]
+    readonly defaultModel: string
+    readonly costPolicy: string
+    readonly outOfPocketUsd: number
+    readonly paidFallbackPermitted: false
+  } | undefined
   readonly recentErrors: readonly string[]
 }
 

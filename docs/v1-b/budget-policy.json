@@ -1,0 +1,12 @@
+{
+  "policyVersion": "2026.10-v1b-zero-dollar",
+  "maxOutOfPocketUsd": 0.00,
+  "allowPaidFallback": false,
+  "allowAutonomousCreditPurchase": false,
+  "allowAutonomousBillingModification": false,
+  "costUnknownHandling": "BLOCK_FAIL_CLOSED",
+  "approvedCostClasses": ["ZERO_DOLLAR_FREE"],
+  "rejectedCostClasses": ["PAID", "UNKNOWN"],
+  "enforcementLayer": "ModelRouter.resolveModel",
+  "auditAssertion": "Zero dollars permitted to be spent autonomously under any circumstance in Wave V1-B"
+}

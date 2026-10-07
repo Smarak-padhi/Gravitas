@@ -1,0 +1,30 @@
+{
+  "policyVersion": "2026.10-v1b-deterministic",
+  "deterministicRankingLadder": [
+    "1. Strict Qualification & Availability Filter",
+    "2. Zero-Dollar Budget Policy Compliance ($0.00)",
+    "3. Required Modality, Tool & Context Window Match",
+    "4. Task Domain / Complexity Preferred Tier (FAST vs BALANCED vs FRONTIER)",
+    "5. Historical K5 Verified Success Rate Tie-Breaker",
+    "6. Context Window Tie-Breaker",
+    "7. Lexicographical Model ID Deterministic Terminal Tie-Breaker"
+  ],
+  "defaultTierMapping": {
+    "LOW": "FAST",
+    "MEDIUM": "BALANCED",
+    "HIGH": "FRONTIER",
+    "CRITICAL": "FRONTIER"
+  },
+  "tierCandidates": {
+    "FAST": ["meta/llama-3.1-8b-instruct"],
+    "BALANCED": ["meta/llama-3.1-8b-instruct", "mistralai/mixtral-8x7b-instruct-v0.1"],
+    "FRONTIER": ["meta/llama-3.1-70b-instruct"]
+  },
+  "failClosedTaxonomy": [
+    "NO_QUALIFIED_MODEL",
+    "AUTH_REQUIRED",
+    "PAID_BLOCKED",
+    "COST_UNKNOWN_BLOCKED",
+    "CAPABILITY_UNSUPPORTED"
+  ]
+}

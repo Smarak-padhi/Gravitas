@@ -78,8 +78,13 @@ import { executeBrowserQa } from '@gravitas/browser-qa'
 import type { AgentRegistry } from '@gravitas/agents'
 import {
   InferenceRouter,
+  ModelRouter,
+  EscalationManager,
+  ModelCapabilityHistory,
   type GatewayRegistry,
   type ResolvedInferenceRoute,
+  type RoutingDecision,
+  type TaskModelRequirements,
 } from '@gravitas/gateways'
 import { composeTaskWorktree, materializeVerifiedResult } from './composition.js'
 import { CompositionConflictError, OrchestratorExecutionError } from './errors.js'
@@ -107,6 +112,9 @@ export interface BoundedSchedulerOptions {
   readonly agentRegistry?: AgentRegistry | undefined
   readonly gatewayRegistry?: GatewayRegistry | undefined
   readonly router?: InferenceRouter | undefined
+  readonly modelRouter?: ModelRouter | undefined
+  readonly escalationManager?: EscalationManager | undefined
+  readonly onModelRouted?: ((taskId: string, decision: RoutingDecision) => void) | undefined
   readonly autoPauseOnWaitingApproval?: boolean | undefined
 }
 
@@ -130,9 +138,12 @@ export class BoundedScheduler {
   private readonly onCompiledPrompt?: ((taskId: string, prompt: ManagedCompiledPrompt) => void) | undefined
   private readonly onBrowserQa?: ((taskId: string, qaResult: BrowserQaResult) => void) | undefined
   private readonly onRouteResolved?: ((taskId: string, route: ResolvedInferenceRoute) => void) | undefined
+  private readonly onModelRouted?: ((taskId: string, decision: RoutingDecision) => void) | undefined
   private readonly agentRegistry?: AgentRegistry | undefined
   private readonly gatewayRegistry?: GatewayRegistry | undefined
   private readonly router?: InferenceRouter | undefined
+  private readonly modelRouter?: ModelRouter | undefined
+  private readonly escalationManager?: EscalationManager | undefined
   private readonly onHandoffUpdated?: ((handoff: TaskHandoff) => void) | undefined
   private readonly onArtifactCreated?: ((artifact: TaskArtifactRef) => void) | undefined
 
@@ -185,6 +196,9 @@ export class BoundedScheduler {
       (options.gatewayRegistry
         ? new InferenceRouter({ registry: options.gatewayRegistry })
         : undefined)
+    this.modelRouter = options.modelRouter
+    this.escalationManager = options.escalationManager
+    this.onModelRouted = options.onModelRouted
     this.autoPauseOnWaitingApproval = options.autoPauseOnWaitingApproval ?? false
 
     this.initializeTasks()
@@ -412,6 +426,14 @@ export class BoundedScheduler {
 
   public getRouter(): InferenceRouter | undefined {
     return this.router
+  }
+
+  public getModelRouter(): ModelRouter | undefined {
+    return this.modelRouter
+  }
+
+  public getEscalationManager(): EscalationManager | undefined {
+    return this.escalationManager
   }
 
   public getTask(taskId: string): Task | undefined {
@@ -669,6 +691,34 @@ export class BoundedScheduler {
       })
       this.onCompiledPrompt?.(taskId, managedPrompt)
 
+      // 4a. Deterministic model selection via ModelRouter (Wave V1-B)
+      let modelDecision: RoutingDecision | undefined
+      let effectiveInferenceRoute = taskDef?.inferenceRoute
+      if (this.modelRouter && (taskDef?.modelRequirements || taskDef?.inferenceRoute?.requestedModel)) {
+        const reqs: TaskModelRequirements = taskDef.modelRequirements ?? {
+          taskDomain: taskDef.title,
+          taskComplexityClass: 'MEDIUM',
+        }
+        modelDecision = this.modelRouter.resolveModel(reqs)
+        this.onModelRouted?.(taskId, modelDecision)
+
+        if (modelDecision.selectedModel) {
+          effectiveInferenceRoute = {
+            ...(taskDef?.inferenceRoute ?? {}),
+            requestedModel: modelDecision.selectedModel,
+            requestedProvider: modelDecision.selectedProvider ?? taskDef?.inferenceRoute?.requestedProvider,
+          }
+        } else if (
+          modelDecision.qualificationDecision === 'AUTH_REQUIRED' ||
+          modelDecision.qualificationDecision === 'NO_QUALIFIED_MODEL' ||
+          modelDecision.costDecision !== 'FREE_APPROVED' ||
+          modelDecision.capabilityDecision === 'CAPABILITY_UNSUPPORTED'
+        ) {
+          this.failTask(taskId, `MODEL_ROUTING_FAILED: ${modelDecision.reason}`)
+          return
+        }
+      }
+
       // 4b. Deterministic route resolution (Wave 11.3)
       const workerIdentity = `${this.harness.id}@${(this.harness as any).cachedVersion ?? '1.0.0'}`
       let resolvedRoute: ResolvedInferenceRoute = {
@@ -685,9 +735,9 @@ export class BoundedScheduler {
           workerId: this.harness.id,
           workerQualificationIdentity: workerIdentity,
           workerProtocol:
-            taskDef?.inferenceRoute?.workerProtocol ??
+            effectiveInferenceRoute?.workerProtocol ??
             (this.harness.id === 'codex' ? 'openai_chat_completions' : undefined),
-          requirement: taskDef?.inferenceRoute,
+          requirement: effectiveInferenceRoute,
         })
       }
 
@@ -851,6 +901,22 @@ export class BoundedScheduler {
         mutation,
         verification,
       })
+
+      // Record verification observation into ModelCapabilityHistory if a model was selected (Wave V1-B)
+      if (modelDecision?.selectedModel) {
+        ModelCapabilityHistory.getInstance().recordObservation({
+          observationId: `obs_${this.runId}_${taskId}_${Date.now()}`,
+          taskDomain: taskDef?.title ?? 'general',
+          taskComplexityClass: taskDef?.modelRequirements?.taskComplexityClass ?? 'MEDIUM',
+          provider: modelDecision.selectedProvider ?? 'nvidia-nim',
+          model: modelDecision.selectedModel,
+          qualificationIdentity: `${modelDecision.selectedModel}@v1b`,
+          attemptNumber: 1,
+          k5VerifiedOutcome: verification.status === 'PASSED' ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
+          latencyMs: executionResult.durationMs,
+          timestamp: new Date().toISOString(),
+        })
+      }
 
       let finalTaskState = outcome.task.state
       let qaResult: BrowserQaResult | undefined

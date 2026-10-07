@@ -1,0 +1,15 @@
+{
+  "testSuite": "packages/gateways/src/__tests__/credentials-and-network-security.test.ts",
+  "providerId": "nvidia-nim",
+  "allowedHosts": ["integrate.api.nvidia.com"],
+  "rulesEnforced": {
+    "protocol": "HTTPS_ONLY",
+    "loopbackProhibited": ["127.0.0.1", "localhost", "0.0.0.0", "::1"],
+    "rfc1918Prohibited": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+    "linkLocalProhibited": ["169.254.0.0/16"],
+    "unauthorizedDomainsProhibited": ["api.openai.com", "subdomain.api.nvidia.com", "evil.attacker.com"],
+    "headerSanitization": "Strips Host and Authorization headers from custom input"
+  },
+  "verificationStatus": "PASSED",
+  "automatedTestsPassed": 7
+}

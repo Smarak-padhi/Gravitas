@@ -1,0 +1,86 @@
+{
+  "catalogSnapshotVersion": "2026.10-v1b-snapshot",
+  "generatedAt": "2026-10-07T12:00:00.000Z",
+  "qualificationLadder": [
+    "DISCOVERED",
+    "METADATA_VALIDATED",
+    "AUTH_AVAILABLE",
+    "ZERO_COST_ELIGIBLE",
+    "CAPABILITY_PROBED",
+    "QUALIFIED"
+  ],
+  "models": [
+    {
+      "id": "meta/llama-3.1-8b-instruct",
+      "providerId": "nvidia-nim",
+      "displayName": "Meta Llama 3.1 8B Instruct (NIM)",
+      "availability": "AVAILABLE",
+      "qualificationState": "QUALIFIED",
+      "modalities": ["TEXT", "CODE"],
+      "toolSupport": true,
+      "streamingSupport": true,
+      "contextWindow": 131072,
+      "reasoningSupport": false,
+      "structuredOutputSupport": true,
+      "costClass": "ZERO_DOLLAR_FREE",
+      "costKnowledge": {
+        "currency": "USD",
+        "pricePer1kPrompt": 0,
+        "pricePer1kCompletion": 0,
+        "isFreeDeveloperTier": true
+      },
+      "privacyClass": "COMMERCIAL_NO_TRAIN",
+      "source": "NVIDIA_CATALOG",
+      "sourceVersion": "2026.10-v1b-snapshot",
+      "ladderStageReached": "QUALIFIED"
+    },
+    {
+      "id": "meta/llama-3.1-70b-instruct",
+      "providerId": "nvidia-nim",
+      "displayName": "Meta Llama 3.1 70B Instruct (NIM)",
+      "availability": "AVAILABLE",
+      "qualificationState": "QUALIFIED",
+      "modalities": ["TEXT", "CODE"],
+      "toolSupport": true,
+      "streamingSupport": true,
+      "contextWindow": 131072,
+      "reasoningSupport": true,
+      "structuredOutputSupport": true,
+      "costClass": "ZERO_DOLLAR_FREE",
+      "costKnowledge": {
+        "currency": "USD",
+        "pricePer1kPrompt": 0,
+        "pricePer1kCompletion": 0,
+        "isFreeDeveloperTier": true
+      },
+      "privacyClass": "COMMERCIAL_NO_TRAIN",
+      "source": "NVIDIA_CATALOG",
+      "sourceVersion": "2026.10-v1b-snapshot",
+      "ladderStageReached": "QUALIFIED"
+    },
+    {
+      "id": "mistralai/mixtral-8x7b-instruct-v0.1",
+      "providerId": "nvidia-nim",
+      "displayName": "Mistral Mixtral 8x7B Instruct (NIM)",
+      "availability": "AVAILABLE",
+      "qualificationState": "QUALIFIED",
+      "modalities": ["TEXT", "CODE"],
+      "toolSupport": true,
+      "streamingSupport": true,
+      "contextWindow": 32768,
+      "reasoningSupport": false,
+      "structuredOutputSupport": true,
+      "costClass": "ZERO_DOLLAR_FREE",
+      "costKnowledge": {
+        "currency": "USD",
+        "pricePer1kPrompt": 0,
+        "pricePer1kCompletion": 0,
+        "isFreeDeveloperTier": true
+      },
+      "privacyClass": "COMMERCIAL_NO_TRAIN",
+      "source": "NVIDIA_CATALOG",
+      "sourceVersion": "2026.10-v1b-snapshot",
+      "ladderStageReached": "QUALIFIED"
+    }
+  ]
+}

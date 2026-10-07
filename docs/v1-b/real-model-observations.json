@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-10-07T12:45:00.000Z",
+  "providerId": "nvidia-nim",
+  "environmentCheck": {
+    "NVIDIA_API_KEY_PRESENT": false,
+    "NIM_API_KEY_PRESENT": false,
+    "credentialsConfiguredLocally": false
+  },
+  "qualificationDisposition": "AUTH_REQUIRED",
+  "liveModelCalls": 0,
+  "liveExecutions": 0,
+  "totalPaidSpendUsd": 0.00,
+  "exitClassification": "V1_B_COMPLETE_LIVE_PROVIDER_BLOCKED",
+  "observations": [],
+  "notes": "No NVIDIA API key was present in developer environment. Per Sections 35 & 42 instructions, zero credentials were fabricated, zero paid inference calls were attempted, and the provider correctly and safely reported AUTH_REQUIRED fail-closed."
+}

@@ -1,0 +1,16 @@
+{
+  "testSuite": "packages/gateways/src/__tests__/escalation-and-k5-history.test.ts",
+  "policy": {
+    "maxEscalations": 2,
+    "maxSameModelRetries": 0,
+    "allowModelSelfEscalation": false
+  },
+  "invariantsVerified": [
+    "MAX_ESCALATIONS = 2 halts execution and requires sovereign human operator decision",
+    "MAX_SAME_MODEL_RETRIES = 0 forbids blind repeated queries to the identical failed candidate",
+    "Critical failure classes (AUTH_REQUIRED, COST_BLOCKED, etc.) trigger immediate STOP_AND_REQUIRE_HUMAN",
+    "MODEL_SAYS_DONE != VERIFIED_SUCCESS: K5 verification alone determines model empirical success rate"
+  ],
+  "verificationStatus": "PASSED",
+  "automatedTestsPassed": 8
+}

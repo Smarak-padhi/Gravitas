@@ -1,0 +1,22 @@
+{
+  "manifestVersion": "2026.10-v1b",
+  "providers": [
+    {
+      "id": "nvidia-nim",
+      "name": "NVIDIA NIM (Hosted API)",
+      "baseUrl": "https://integrate.api.nvidia.com",
+      "chatEndpoint": "https://integrate.api.nvidia.com/v1/chat/completions",
+      "status": "AVAILABLE",
+      "transportSupport": ["DIRECT"],
+      "authType": "BEARER_TOKEN",
+      "credentialRef": "vault:cred:nvidia-nim",
+      "catalogSnapshotVersion": "2026.10-v1b-snapshot",
+      "networkContainment": {
+        "allowedHosts": ["integrate.api.nvidia.com"],
+        "allowInsecureHttp": false,
+        "allowLoopback": false,
+        "allowPrivateSubnets": false
+      }
+    }
+  ]
+}

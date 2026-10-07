@@ -501,6 +501,19 @@ export class DesktopSupervisor {
           paidFallbackPermitted: false,
           autonomousPaymentAuthority: false,
         },
+        modelIntelligenceSummary: {
+          providerStatus: 'AUTH_REQUIRED',
+          qualifiedModelsCount: 3,
+          qualifiedModelIds: [
+            'meta/llama-3.1-8b-instruct',
+            'meta/llama-3.1-70b-instruct',
+            'mistralai/mixtral-8x7b-instruct-v0.1',
+          ],
+          defaultModel: 'meta/llama-3.1-8b-instruct',
+          costPolicy: 'STRICT_ZERO_DOLLAR_FREE',
+          outOfPocketUsd: 0,
+          paidFallbackPermitted: false,
+        },
         recentErrors: ['Kernel offline'],
       }
     }

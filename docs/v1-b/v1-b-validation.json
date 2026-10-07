@@ -1,0 +1,42 @@
+{
+  "wave": "V1-B",
+  "completionStatus": "COMPLETE_LOCAL_VALIDATED",
+  "exitClassification": "V1_B_COMPLETE_LIVE_PROVIDER_BLOCKED",
+  "branch": "feat/v0-golden-loop",
+  "baseCommit": "844ca5383e8b57c340b61e90980c4ccbcb4d6db6",
+  "timestamp": "2026-10-07T12:55:00.000Z",
+  "testAccounting": {
+    "vitest": {
+      "totalPassed": 1643,
+      "totalFailed": 0,
+      "testFiles": 97,
+      "baseline": 1600,
+      "delta": 43
+    },
+    "k0NativeKernel": {
+      "totalPassed": 51,
+      "totalFailed": 0
+    },
+    "totalCombined": 1694,
+    "passRate": 1.0
+  },
+  "desktopDogfood": {
+    "totalSteps": 13,
+    "passedSteps": 13,
+    "status": "PASS"
+  },
+  "buildStatus": {
+    "typecheck": "PASS",
+    "desktopBuild": "PASS"
+  },
+  "financialAccounting": {
+    "outOfPocketSpendUsd": 0.00,
+    "paidFallbackTriggered": false,
+    "autonomousBillingAltered": false
+  },
+  "securityAccounting": {
+    "rawKeysExposed": 0,
+    "ssrfViolationsAllowed": 0,
+    "sentinelRedactionEnforced": true
+  }
+}

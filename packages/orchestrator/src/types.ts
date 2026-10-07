@@ -19,7 +19,7 @@ import type {
 } from '@gravitas/core'
 import type { ProjectPromptContext } from '@gravitas/prompts'
 import type { VerificationPlan } from '@gravitas/verifier'
-import type { InferenceRouteRequirement } from '@gravitas/gateways'
+import type { InferenceRouteRequirement, TaskModelRequirements } from '@gravitas/gateways'
 
 /**
  * Declaration of a single task within a RunPlan.
@@ -42,6 +42,7 @@ export interface TaskPlanDefinition {
   readonly verificationPlan?: VerificationPlan | undefined
   readonly requiredEvidence?: readonly EvidenceRequirement[] | undefined
   readonly inferenceRoute?: InferenceRouteRequirement | undefined
+  readonly modelRequirements?: TaskModelRequirements | undefined
 }
 
 /**

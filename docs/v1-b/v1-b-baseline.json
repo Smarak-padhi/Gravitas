@@ -1,0 +1,24 @@
+{
+  "wave": "V1-B",
+  "baseCommit": "844ca5383e8b57c340b61e90980c4ccbcb4d6db6",
+  "baseBranch": "feat/v0-golden-loop",
+  "timestamp": "2026-10-07T12:05:00.000Z",
+  "preflight": {
+    "gitStatus": "CLEAN",
+    "typecheck": "PASS",
+    "baselineVitestTests": 1600,
+    "baselineVitestFiles": 92,
+    "baselineKernelTests": 51,
+    "baselineTotalTests": 1651,
+    "desktopBuild": "PASS"
+  },
+  "invariants": {
+    "zeroOutofPocketSpend": true,
+    "paidFallbackDisabled": true,
+    "deterministicModelRouting": true,
+    "secretIsolationEnforced": true,
+    "k5SoleQualityAuthority": true,
+    "maxEscalations": 2,
+    "maxSameModelRetries": 0
+  }
+}

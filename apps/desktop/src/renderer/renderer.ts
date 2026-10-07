@@ -461,6 +461,15 @@ export async function refreshSystem(bridge: GravitasDesktopBridge): Promise<void
       ['Autonomous Payment Authority', String(sys.costPolicySummary.autonomousPaymentAuthority)],
     ]
 
+    if (sys.modelIntelligenceSummary) {
+      rows.push(
+        ['Model Provider (NVIDIA NIM)', sys.modelIntelligenceSummary.providerStatus],
+        ['Qualified Models ($0 Free)', String(sys.modelIntelligenceSummary.qualifiedModelsCount)],
+        ['Default Candidate Model', sys.modelIntelligenceSummary.defaultModel],
+        ['Model Spend Policy', `$${sys.modelIntelligenceSummary.outOfPocketUsd} (Paid Fallback: DISABLED)`]
+      )
+    }
+
     for (const [k, v] of rows) {
       const tr = document.createElement('tr')
       const th = document.createElement('th')

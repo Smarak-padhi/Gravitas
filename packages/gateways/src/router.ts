@@ -224,3 +224,10 @@ export class InferenceRouter {
     };
   }
 }
+
+/**
+ * TransportRouter is the explicit domain alias for InferenceRouter,
+ * emphasizing the distinction between Model Selection (ModelRouter)
+ * and Transport Route Selection (TransportRouter).
+ */
+export { InferenceRouter as TransportRouter };
