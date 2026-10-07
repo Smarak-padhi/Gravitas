@@ -211,7 +211,7 @@ describe('GRAVITAS V1-A Capability System Invariant Verification', () => {
     expect(humanDirectiveIdx).toBeGreaterThan(projectDesignIdx)
   })
 
-  // Invariant 12: Mandatory accessibility constraints surface conflicts
+  // Invariant 12: Mandatory accessibility constraints surface conflicts with calibrated semantics
   it('12. mandatory accessibility constraints surface conflicts rather than silently yielding', () => {
     const res = resolver.resolve({
       taskTitle: 'Create ultra-compact toolbar with tiny buttons',
@@ -223,6 +223,9 @@ describe('GRAVITAS V1-A Capability System Invariant Verification', () => {
     const conflict = res.conflicts.find((c) => c.ruleId === 'RULE-IMP-TOUCH-001')
     expect(conflict).toBeDefined()
     expect(conflict?.resolution).toBe('SURFACED_CONFLICT_MANDATORY_FLOOR_HELD')
+    expect(conflict?.conflictType).toBe('STANDARD_FLOOR_VIOLATION')
+    expect(conflict?.complianceClaim).toBe('TESTED_ACCESSIBILITY_CRITERIA_PASS')
+    expect(conflict?.complianceClaim).not.toBe('FULL_ACCESSIBILITY_COMPLIANCE')
     expect(res.compiledPromptText).toContain('CONFLICTS DETECTED WITH MANDATORY SAFETY/ACCESSIBILITY FLOORS')
   })
 
@@ -262,5 +265,41 @@ describe('GRAVITAS V1-A Capability System Invariant Verification', () => {
     expect(manifest.includedPhases).toEqual([
       'SA0', 'SA1', 'SA2', 'SA2-R', 'SA3', 'SA3-R', 'SA4', 'SA4-R', 'SA4-R2'
     ])
+  })
+
+  // V1-A-R Area A: WCAG 2.2 AA vs Gravitas Policy Semantics
+  it('17. WCAG AA 24px minimum vs Gravitas 44px policy distinction is preserved', () => {
+    const touchRule = IMPECCABLE_DESIGN_PROFILE.rules.find((r) => r.id === 'RULE-IMP-TOUCH-001')
+    expect(touchRule).toBeDefined()
+    expect(touchRule?.standardClaim).toBe('NOT_WCAG_AA_MINIMUM')
+    expect(touchRule?.policySource).toBe('GRAVITAS_POLICY')
+    expect(touchRule?.applicableThreshold).toContain('wcag_aa_minimum:24x24px')
+    expect(touchRule?.applicableThreshold).toContain('gravitas_policy:44x44px')
+  })
+
+  // V1-A-R Area A: Contrast differentiation semantics
+  it('18. contrast categories are differentiated and not flattened into a single threshold', () => {
+    const contrastRule = IMPECCABLE_DESIGN_PROFILE.rules.find((r) => r.id === 'RULE-IMP-COLOR-001')
+    expect(contrastRule).toBeDefined()
+    expect(contrastRule?.standardClaim).toBe('WCAG_2_2_AA_SC_1_4_3')
+    expect(contrastRule?.policySource).toBe('WCAG_STANDARD')
+    expect(contrastRule?.applicableThreshold).toBe('normal_text:4.5:1 | large_text:3:1 | ui_graphics:3:1')
+  })
+
+  // V1-A-R Area B: Inactive holds and rejected rules remain strictly inactive
+  it('19. technical holds and rejected rules never become active in resolver', () => {
+    const res = resolver.resolve({
+      taskTitle: 'Android R8 internal protobuf report parsing and build tool script',
+      targetPlatform: 'android',
+      targetFiles: ['build.gradle.kts'],
+    })
+
+    const activeRuleIds = res.activeProfiles.flatMap((p) => p.rules.map((r) => r.sourceRuleId))
+    // HOLD-002 source rule
+    expect(activeRuleIds).not.toContain('RULE-AND-R8-000317')
+    // REJECT-001, REJECT-002, REJECT-003 source rules
+    expect(activeRuleIds).not.toContain('RULE-AND-R8-000315')
+    expect(activeRuleIds).not.toContain('RULE-AND-SEC-000261')
+    expect(activeRuleIds).not.toContain('RULE-AND-R8-000325')
   })
 })

@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-07T12:00:00.000Z",
+  "audit": "V1-A-R Area A: Accessibility Semantics Calibration",
+  "standardsBaseline": {
+    "targetSize": {
+      "wcag_2_2_sc_2_5_8_aa_minimum": {
+        "standard": "WCAG 2.2 SC 2.5.8",
+        "level": "AA",
+        "minimumTargetSizePx": 24,
+        "exceptions": ["Inline targets", "Spacing (24px diameter circle with offset)", "Equivalent target", "Essential presentation"]
+      },
+      "wcag_2_2_sc_2_5_5_aaa_enhanced": {
+        "standard": "WCAG 2.2 SC 2.5.5",
+        "level": "AAA",
+        "enhancedTargetSizePx": 44,
+        "exceptions": ["Inline targets", "User agent controls", "Essential presentation"]
+      },
+      "gravitasPolicy": {
+        "source": "GRAVITAS_POLICY",
+        "standardClaim": "NOT_WCAG_AA_MINIMUM",
+        "targetSizePx": 44,
+        "conflictClassification": {
+          "below_24px": "STANDARD_FLOOR_VIOLATION",
+          "between_24px_and_43px": "ENHANCED_POLICY_DEVIATION"
+        }
+      }
+    },
+    "contrastThresholds": {
+      "sc_1_4_3_normal_text": {
+        "standard": "WCAG 2.2 SC 1.4.3",
+        "level": "AA",
+        "minimumRatio": "4.5:1",
+        "scope": "Body text and text below 18pt (or 14pt bold)"
+      },
+      "sc_1_4_3_large_text": {
+        "standard": "WCAG 2.2 SC 1.4.3",
+        "level": "AA",
+        "minimumRatio": "3.0:1",
+        "scope": "Text at or above 18pt regular or 14pt bold"
+      },
+      "sc_1_4_11_non_text_graphics": {
+        "standard": "WCAG 2.2 SC 1.4.11",
+        "level": "AA",
+        "minimumRatio": "3.0:1",
+        "scope": "Active user interface components and graphical objects"
+      },
+      "sc_1_4_6_enhanced_text": {
+        "standard": "WCAG 2.2 SC 1.4.6",
+        "level": "AAA",
+        "minimumRatioNormal": "7.0:1",
+        "minimumRatioLarge": "4.5:1",
+        "scope": "Enhanced contrast compliance"
+      }
+    }
+  },
+  "complianceCertificationSemantics": {
+    "sovereignty": "Human operator direction is sovereign product authority for runtime trade-offs",
+    "certificationBoundary": "Human direction does NOT constitute compliance certification",
+    "certifiedClaim": "TESTED_ACCESSIBILITY_CRITERIA_PASS",
+    "prohibitedClaim": "FULL_ACCESSIBILITY_COMPLIANCE",
+    "rationale": "Automated checks test specific bounded heuristics; full legal/regulatory compliance requires comprehensive multi-modal human and assistive-tech audits"
+  },
+  "ruleCalibrations": [
+    {
+      "ruleId": "RULE-IMP-COLOR-001",
+      "calibratedRatio": "4.5:1 normal text, 3:1 large text (18pt+ / 14pt bold), 3:1 non-text UI graphics (WCAG 2.2 SC 1.4.3 / 1.4.11)",
+      "standardClaim": "WCAG_2_2_SC_1_4_3_AND_1_4_11",
+      "policySource": "WCAG_2_2_LEVEL_AA",
+      "applicableThreshold": "4.5:1 normal, 3:1 large / UI components"
+    },
+    {
+      "ruleId": "RULE-IMP-TOUCH-001",
+      "calibratedSize": "44x44 CSS px",
+      "standardClaim": "NOT_WCAG_AA_MINIMUM",
+      "policySource": "GRAVITAS_POLICY",
+      "applicableThreshold": "44x44px Gravitas Policy (WCAG AA floor is 24x24px per SC 2.5.8; 44x44px is WCAG AAA per SC 2.5.5)"
+    }
+  ],
+  "status": "CALIBRATED"
+}

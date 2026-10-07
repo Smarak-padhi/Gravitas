@@ -79,10 +79,13 @@ export const IMPECCABLE_DESIGN_PROFILE: CapabilityProfile = {
     {
       id: 'RULE-IMP-COLOR-001',
       sourceRuleId: 'IMP-COLOR-CONTRAST',
-      statement: 'Enforce WCAG AA minimum 4.5:1 contrast ratio for normal body text and 3:1 for large text / graphical controls.',
+      statement: 'Enforce differentiated WCAG 2.2 AA contrast thresholds: minimum 4.5:1 for normal body text (<18pt / <14pt bold, SC 1.4.3), 3:1 for large text (>=18pt or >=14pt bold, SC 1.4.3), and 3:1 for active graphical UI components / focus indicators (SC 1.4.11). Decorative or inactive elements are exempt.',
       severity: 'MANDATORY',
       category: 'COLOR_AND_CONTRAST',
       isAccessibilityFloor: true,
+      standardClaim: 'WCAG_2_2_AA_SC_1_4_3',
+      policySource: 'WCAG_STANDARD',
+      applicableThreshold: 'normal_text:4.5:1 | large_text:3:1 | ui_graphics:3:1',
     },
     {
       id: 'RULE-IMP-COLOR-002',
@@ -124,14 +127,17 @@ export const IMPECCABLE_DESIGN_PROFILE: CapabilityProfile = {
       category: 'LAYOUT_AND_SPACING',
     },
 
-    // 5. Responsive & Touch (Mandatory Touch Floor)
+    // 5. Responsive & Touch (Stricter Gravitas Policy Floor)
     {
       id: 'RULE-IMP-TOUCH-001',
       sourceRuleId: 'IMP-TOUCH-TARGET',
-      statement: 'Enforce minimum 44px by 44px interactive touch target size for buttons, inputs, and clickable list rows.',
+      statement: 'Enforce minimum 44px by 44px interactive touch target size per Gravitas / Impeccable design policy (exceeds WCAG 2.2 AA SC 2.5.8 minimum of 24x24 CSS px, satisfying Level AAA SC 2.5.5 Target Size Enhanced). Exemptions apply to inline links and native browser controls.',
       severity: 'MANDATORY',
       category: 'RESPONSIVE_AND_TOUCH',
       isAccessibilityFloor: true,
+      standardClaim: 'NOT_WCAG_AA_MINIMUM',
+      policySource: 'GRAVITAS_POLICY',
+      applicableThreshold: 'gravitas_policy:44x44px | wcag_aa_minimum:24x24px | wcag_aaa_enhanced:44x44px',
     },
     {
       id: 'RULE-IMP-TOUCH-002',

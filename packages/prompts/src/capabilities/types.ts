@@ -34,6 +34,9 @@ export interface CapabilityRule {
   readonly category: string
   readonly isAccessibilityFloor?: boolean | undefined
   readonly isSecurityFloor?: boolean | undefined
+  readonly standardClaim?: 'WCAG_2_2_AA_SC_1_4_3' | 'WCAG_2_2_AA_SC_1_4_11' | 'WCAG_2_2_AA_SC_2_5_8' | 'NOT_WCAG_AA_MINIMUM' | undefined
+  readonly policySource?: 'WCAG_STANDARD' | 'GRAVITAS_POLICY' | 'IMPECCABLE_POLICY' | undefined
+  readonly applicableThreshold?: string | undefined
 }
 
 export interface ActivationConditions {
@@ -86,6 +89,8 @@ export interface AccessibilityConflict {
   readonly conflictingDirective: string
   readonly source: 'HUMAN_DIRECTIVE' | 'PROJECT_DESIGN_MD'
   readonly resolution: 'SURFACED_CONFLICT_MANDATORY_FLOOR_HELD'
+  readonly conflictType: 'STANDARD_FLOOR_VIOLATION' | 'ENHANCED_POLICY_DEVIATION'
+  readonly complianceClaim: 'TESTED_ACCESSIBILITY_CRITERIA_PASS'
 }
 
 export interface CapabilityResolutionResult {

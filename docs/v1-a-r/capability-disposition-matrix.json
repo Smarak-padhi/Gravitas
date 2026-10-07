@@ -1,0 +1,305 @@
+{
+  "timestamp": "2026-10-07T12:00:00.000Z",
+  "audit": "V1-A-R Area B: Frozen SA3/SA3-R Canonical Capability Disposition Matrix",
+  "summary": {
+    "totalAudited": 36,
+    "compiledActive": 7,
+    "compiledOnDemand": 11,
+    "subsumedByProfile": 3,
+    "provenanceOnly": 6,
+    "deferredWithReason": 3,
+    "technicalHold": 3,
+    "rejected": 3,
+    "unaccounted": 0
+  },
+  "dispositions": [
+    {
+      "id": "CANON-GLOB-001",
+      "name": "Codebase & Directory Inspection Baseline",
+      "category": "GLOBAL_CANDIDATE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "PROFILE-GLOB-001",
+      "rationale": "Essential global foundation for repository context and structure inspection."
+    },
+    {
+      "id": "CANON-GLOB-002",
+      "name": "Minimalist YAGNI Engineering Doctrine",
+      "category": "GLOBAL_CANDIDATE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "PROFILE-GLOB-001",
+      "rationale": "Always-active core principle enforcing simplest, least-bloated solution."
+    },
+    {
+      "id": "CANON-GLOB-003",
+      "name": "Verification-First & Empirical Evidence",
+      "category": "GLOBAL_CANDIDATE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "PROFILE-GLOB-001",
+      "rationale": "Core invariant requiring test proof before claiming success."
+    },
+    {
+      "id": "CANON-GLOB-004",
+      "name": "Strict Sandboxing & Epistemological Containment",
+      "category": "GLOBAL_CANDIDATE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "PROFILE-GLOB-001",
+      "rationale": "Kernel security invariant preventing untrusted agent escalation."
+    },
+    {
+      "id": "CANON-CTX-001",
+      "name": "Git & SCM History Traversal",
+      "category": "CONTEXTUAL_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CONTEXTUAL_REGISTRY",
+      "rationale": "Injected when git operations, commits, or diffs are targeted."
+    },
+    {
+      "id": "CANON-CTX-002",
+      "name": "Build System & Package Dependency Analysis",
+      "category": "CONTEXTUAL_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CONTEXTUAL_REGISTRY",
+      "rationale": "Injected when package manifests and build configs are touched."
+    },
+    {
+      "id": "CANON-CTX-003",
+      "name": "Security Audit & Vulnerability Scanning",
+      "category": "CONTEXTUAL_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CONTEXTUAL_REGISTRY",
+      "rationale": "Injected during security audit and authentication workflows."
+    },
+    {
+      "id": "CANON-CTX-004",
+      "name": "Refactoring & Structural Cleanliness",
+      "category": "CONTEXTUAL_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CONTEXTUAL_REGISTRY",
+      "rationale": "Injected during multi-file refactoring and migration passes."
+    },
+    {
+      "id": "CANON-CTX-005",
+      "name": "Test Generation & Regression Containment",
+      "category": "CONTEXTUAL_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CONTEXTUAL_REGISTRY",
+      "rationale": "Injected when test suites and assertions are authored or debugged."
+    },
+    {
+      "id": "CANON-SPEC-001",
+      "name": "Accessibility Auditor Specialist",
+      "category": "SPECIALIST_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "SPECIALIST_REGISTRY",
+      "rationale": "Injected when agent is assigned accessibility auditing role."
+    },
+    {
+      "id": "CANON-SPEC-002",
+      "name": "UI/UX Micro-Interactions Specialist",
+      "category": "SPECIALIST_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "SPECIALIST_REGISTRY",
+      "rationale": "Injected when agent handles frontend component layout and styling."
+    },
+    {
+      "id": "CANON-SPEC-003",
+      "name": "Concurrency & Data-Race Specialist",
+      "category": "SPECIALIST_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "SPECIALIST_REGISTRY",
+      "rationale": "Injected for asynchronous concurrency, thread-safety, and actors."
+    },
+    {
+      "id": "CANON-SPEC-004",
+      "name": "Performance & Memory Profiling Specialist",
+      "category": "SPECIALIST_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "SPECIALIST_REGISTRY",
+      "rationale": "Injected when analyzing traces, heap allocations, and bottlenecks."
+    },
+    {
+      "id": "CANON-SPEC-005",
+      "name": "Platform Policy & Store Compliance Specialist",
+      "category": "SPECIALIST_CANDIDATE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "SPECIALIST_REGISTRY",
+      "rationale": "Injected when verifying platform store guidelines and privacy manifests."
+    },
+    {
+      "id": "PROFILE-PLAT-001",
+      "name": "Android Platform Guidance",
+      "category": "PLATFORM_PROFILE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "CAPABILITY_REGISTRY",
+      "rationale": "Compiled platform capability; active when target platform is Android."
+    },
+    {
+      "id": "PROFILE-PLAT-002",
+      "name": "iOS / Apple Platform Guidance",
+      "category": "PLATFORM_PROFILE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "CAPABILITY_REGISTRY",
+      "rationale": "Compiled platform capability; active when target platform is iOS/macOS."
+    },
+    {
+      "id": "PROFILE-PLAT-003",
+      "name": "Web / Browser Platform Guidance",
+      "category": "PLATFORM_PROFILE",
+      "disposition": "COMPILED_ACTIVE",
+      "targetContainer": "CAPABILITY_REGISTRY",
+      "rationale": "Compiled platform capability; active when target platform is Web."
+    },
+    {
+      "id": "PROFILE-DESIGN-001",
+      "name": "Minimalist / Brutalist Design Profile",
+      "category": "DESIGN_PROFILE",
+      "disposition": "SUBSUMED_BY_PROFILE",
+      "targetContainer": "PROFILE-GLOB-001",
+      "rationale": "Subsumed into global Ponytail minimalism doctrine; no distinct bundle needed."
+    },
+    {
+      "id": "PROFILE-DESIGN-002",
+      "name": "Liquid Glass Spatial Design Profile",
+      "category": "DESIGN_PROFILE",
+      "disposition": "COMPILED_ON_DEMAND",
+      "targetContainer": "CAPABILITY_REGISTRY",
+      "rationale": "Compiled design capability; active specifically on Apple visionOS/Liquid Glass."
+    },
+    {
+      "id": "PROFILE-DESIGN-003",
+      "name": "Material 3 Design Profile",
+      "category": "DESIGN_PROFILE",
+      "disposition": "SUBSUMED_BY_PROFILE",
+      "targetContainer": "PROFILE-PLAT-001",
+      "rationale": "Subsumed directly into Android Platform Guidance Profile."
+    },
+    {
+      "id": "PROFILE-DESIGN-004",
+      "name": "Headless Design Primitives Profile",
+      "category": "DESIGN_PROFILE",
+      "disposition": "SUBSUMED_BY_PROFILE",
+      "targetContainer": "PROFILE-DESIGN-IMPECCABLE",
+      "rationale": "Subsumed directly into Impeccable Design Profile."
+    },
+    {
+      "id": "PROFILE-WORK-001",
+      "name": "GSD Phased Lifecycle Workflow",
+      "category": "WORKFLOW_PROFILE",
+      "disposition": "DEFERRED_WITH_REASON",
+      "targetContainer": "V2_BACKLOG",
+      "rationale": "Runtime orchestration natively handled by K0-K5 Kernel; external CLI wrappers deferred."
+    },
+    {
+      "id": "PROFILE-WORK-002",
+      "name": "Graphify Knowledge Graph Workflow",
+      "category": "WORKFLOW_PROFILE",
+      "disposition": "DEFERRED_WITH_REASON",
+      "targetContainer": "V2_BACKLOG",
+      "rationale": "Knowledge-graph generation deferred to offline developer tooling in V2."
+    },
+    {
+      "id": "PROFILE-WORK-003",
+      "name": "App Store Submission Workflow",
+      "category": "WORKFLOW_PROFILE",
+      "disposition": "DEFERRED_WITH_REASON",
+      "targetContainer": "V2_BACKLOG",
+      "rationale": "Store publishing/signing out of scope for local V1 orchestrator."
+    },
+    {
+      "id": "HOLD-001",
+      "name": "Jetpack Compose Glimmer XR",
+      "category": "TECHNICAL_HOLD",
+      "disposition": "TECHNICAL_HOLD",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Experimental/unstable Android XR API; quarantined with zero active prompt inclusion."
+    },
+    {
+      "id": "HOLD-002",
+      "name": "R8 Protobuf Keep Rules",
+      "category": "TECHNICAL_HOLD",
+      "disposition": "TECHNICAL_HOLD",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Overly broad Proguard optimizations; quarantined with zero active prompt inclusion."
+    },
+    {
+      "id": "HOLD-003",
+      "name": "Media3 Cast Reconnect Lifecycle",
+      "category": "TECHNICAL_HOLD",
+      "disposition": "TECHNICAL_HOLD",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Flaky Cast SDK session reconnect state; quarantined with zero active prompt inclusion."
+    },
+    {
+      "id": "VERSION-FAMILY-001",
+      "name": "Jetpack Navigation 2 vs 3",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for framework version selection; not prompt content."
+    },
+    {
+      "id": "VERSION-FAMILY-002",
+      "name": "Android Gradle Plugin 8 vs 9",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for build tool version selection; not prompt content."
+    },
+    {
+      "id": "VERSION-FAMILY-003",
+      "name": "Google Play Billing Library 6 vs 7",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for billing version migration; not prompt content."
+    },
+    {
+      "id": "VERSION-FAMILY-004",
+      "name": "Android TV Leanback vs TV Compose",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for legacy TV view migration; not prompt content."
+    },
+    {
+      "id": "VERSION-FAMILY-005",
+      "name": "Swift 5 vs Swift 6 Strict Concurrency",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for compiler concurrency migration; not prompt content."
+    },
+    {
+      "id": "VERSION-FAMILY-006",
+      "name": "Apple Translucency vs Liquid Glass",
+      "category": "VERSION_FAMILY",
+      "disposition": "PROVENANCE_ONLY",
+      "targetContainer": "PROVENANCE_METADATA",
+      "rationale": "Metadata for visual material version selection; not prompt content."
+    },
+    {
+      "id": "REJECT-001",
+      "name": "External Tool Installer Script",
+      "category": "REJECTION_PROPOSAL",
+      "disposition": "REJECTED",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Violates sandbox and local security boundaries; permanently rejected."
+    },
+    {
+      "id": "REJECT-002",
+      "name": "Obsolete Platform Workaround",
+      "category": "REJECTION_PROPOSAL",
+      "disposition": "REJECTED",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Deprecated platform patch no longer applicable; permanently rejected."
+    },
+    {
+      "id": "REJECT-003",
+      "name": "Boilerplate Filler Code Generator",
+      "category": "REJECTION_PROPOSAL",
+      "disposition": "REJECTED",
+      "targetContainer": "QUARANTINE",
+      "rationale": "Directly contradicts anti-bloat/Ponytail minimal engineering doctrine; permanently rejected."
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-10-07T12:00:00.000Z",
+  "audit": "V1-A-R Area B: Impeccable Overlap Reconciliation",
+  "provenance": {
+    "pinnedCommit": "bbcb29d9dee6c94915d760bcfc36818ad5be66ad",
+    "pinStatus": "VERIFIED_UNCHANGED",
+    "upstreamRulesObserved": 61,
+    "rulesIntegrated": 14,
+    "rulesNotIntegrated": 47,
+    "runtimeExecuted": false
+  },
+  "taxonomyCounts": {
+    "EXACT_DUPLICATE": 0,
+    "SEMANTIC_EQUIVALENT": 4,
+    "COMPLEMENTARY": 8,
+    "CONTEXT_VARIANT": 2,
+    "CONFLICT": 0,
+    "INDEPENDENT": 0,
+    "SUBSUMED": 0
+  },
+  "integratedRules": [
+    {
+      "ruleId": "RULE-IMP-COLOR-001",
+      "name": "Accessible Color Contrast Ratios",
+      "upstreamReference": "rules/color/contrast-ratio.md",
+      "normalizedGravitasRule": "Enforce minimum contrast: 4.5:1 normal text, 3:1 large text, 3:1 non-text UI graphics",
+      "relationship": "SEMANTIC_EQUIVALENT",
+      "notes": "Calibrated to WCAG 2.2 SC 1.4.3 (Level AA) and SC 1.4.11 (Level AA)."
+    },
+    {
+      "ruleId": "RULE-IMP-COLOR-002",
+      "name": "Restricted Accent Palette",
+      "upstreamReference": "rules/color/accent-palette.md",
+      "normalizedGravitasRule": "Limit accent colors to maximum two semantic hues to avoid visual noise",
+      "relationship": "CONTEXT_VARIANT",
+      "notes": "Prevents color clutter across multi-pane agent dashboards."
+    },
+    {
+      "ruleId": "RULE-IMP-TYPO-001",
+      "name": "Font Family Pairing Discipline",
+      "upstreamReference": "rules/typography/font-pairing.md",
+      "normalizedGravitasRule": "Limit typography to at most two typefaces (body + monospace for code)",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Complements core desktop UI styling."
+    },
+    {
+      "ruleId": "RULE-IMP-TYPO-002",
+      "name": "Optimal Reading Line Length",
+      "upstreamReference": "rules/typography/line-length.md",
+      "normalizedGravitasRule": "Enforce measure between 45 and 75 characters per line for body prose",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Improves reading comfort in documentation and log projections."
+    },
+    {
+      "ruleId": "RULE-IMP-TOUCH-001",
+      "name": "Interactive Target Minimum Sizing",
+      "upstreamReference": "rules/layout/target-size.md",
+      "normalizedGravitasRule": "Enforce 44x44 CSS px target sizing under Gravitas Policy (WCAG AA floor is 24x24px)",
+      "relationship": "SEMANTIC_EQUIVALENT",
+      "notes": "Gravitas Policy standard claim calibrated: NOT_WCAG_AA_MINIMUM."
+    },
+    {
+      "ruleId": "RULE-IMP-TOUCH-002",
+      "name": "Interactive Target Insets & Spacing",
+      "upstreamReference": "rules/layout/target-spacing.md",
+      "normalizedGravitasRule": "Enforce minimum 8px physical spacing between interactive touch/click targets",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Prevents accidental trigger of adjacent controls."
+    },
+    {
+      "ruleId": "RULE-IMP-MOTION-001",
+      "name": "Respect Prefers-Reduced-Motion",
+      "upstreamReference": "rules/animation/reduced-motion.md",
+      "normalizedGravitasRule": "Wrap all transitions in prefers-reduced-motion media query and provide instant state changes",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Essential accessibility requirement for motion sensitivity."
+    },
+    {
+      "ruleId": "RULE-IMP-MOTION-002",
+      "name": "Bounded Animation Duration",
+      "upstreamReference": "rules/animation/duration-bounds.md",
+      "normalizedGravitasRule": "Limit UI transition durations between 150ms and 300ms",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Guarantees UI feels responsive and eliminates sluggish animations."
+    },
+    {
+      "ruleId": "RULE-IMP-LAYOUT-001",
+      "name": "Centralized 4/8pt Spacing Grid",
+      "upstreamReference": "rules/layout/spacing-grid.md",
+      "normalizedGravitasRule": "Align all padding, margins, and component dimensions to multiples of 4px or 8px",
+      "relationship": "SEMANTIC_EQUIVALENT",
+      "notes": "Establishes rhythmic visual harmony across surfaces."
+    },
+    {
+      "ruleId": "RULE-IMP-LAYOUT-002",
+      "name": "Whitespace & Spatial Hierarchy",
+      "upstreamReference": "rules/layout/whitespace-hierarchy.md",
+      "normalizedGravitasRule": "Ensure space between unrelated sections is strictly greater than space within sections",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Strengthens visual gestalt grouping."
+    },
+    {
+      "ruleId": "RULE-IMP-TOKENS-001",
+      "name": "Design Token Centralization",
+      "upstreamReference": "rules/architecture/design-tokens.md",
+      "normalizedGravitasRule": "Define all colors, spacing, and font sizes as centralized CSS custom properties",
+      "relationship": "COMPLEMENTARY",
+      "notes": "Avoids magic numbers and hardcoded colors in CSS."
+    },
+    {
+      "ruleId": "RULE-IMP-STATES-001",
+      "name": "Preserve Visible Focus Indicators",
+      "upstreamReference": "rules/accessibility/focus-visible.md",
+      "normalizedGravitasRule": "Never remove outline: none without providing an accessible :focus-visible replacement",
+      "relationship": "CONTEXT_VARIANT",
+      "notes": "WCAG 2.2 SC 2.4.7 Level AA compliance requirement."
+    },
+    {
+      "ruleId": "RULE-IMP-STATES-002",
+      "name": "Accessible Semantic Status Badges",
+      "upstreamReference": "rules/accessibility/status-badges.md",
+      "normalizedGravitasRule": "Pair status colors with text labels or symbols; never convey status solely through color",
+      "relationship": "COMPLEMENTARY",
+      "notes": "WCAG 2.2 SC 1.4.1 Level A compliance requirement."
+    },
+    {
+      "ruleId": "RULE-IMP-AI-001",
+      "name": "Anti-AI-Slop Layout Hygiene",
+      "upstreamReference": "rules/style/anti-slop.md",
+      "normalizedGravitasRule": "Avoid gratuitous purple gradients, meaningless floating blur blobs, and repetitive cards",
+      "relationship": "SEMANTIC_EQUIVALENT",
+      "notes": "Aligns with Ponytail minimalist brutalist engineering principles."
+    }
+  ],
+  "unintegratedRulesSummary": {
+    "count": 47,
+    "categories": [
+      "Static linter detector rules (deferred to build-time linters)",
+      "Framework-specific AST heuristics (not applicable to runtime prompt guidance)",
+      "Experimental/speculative design checks (quarantined)"
+    ]
+  }
+}

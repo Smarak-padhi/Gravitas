@@ -138,22 +138,36 @@ export class DeterministicCapabilityResolver {
 
         for (const dir of checkDirectives) {
           const lower = dir.text.toLowerCase()
-          if (lower.includes('low contrast') || lower.includes('contrast 2:') || lower.includes('ignore wcag')) {
+          if (lower.includes('low contrast') || lower.includes('contrast 2:') || lower.includes('ignore wcag') || lower.includes('contrast below 3:1')) {
             conflicts.push({
               ruleId: 'RULE-IMP-COLOR-001',
-              ruleStatement: 'Enforce WCAG AA minimum 4.5:1 contrast ratio.',
+              ruleStatement: 'Enforce differentiated WCAG 2.2 AA contrast thresholds: 4.5:1 normal text, 3:1 large text, 3:1 active UI components (SC 1.4.3 / SC 1.4.11).',
               conflictingDirective: dir.text,
               source: dir.source,
               resolution: 'SURFACED_CONFLICT_MANDATORY_FLOOR_HELD',
+              conflictType: 'STANDARD_FLOOR_VIOLATION',
+              complianceClaim: 'TESTED_ACCESSIBILITY_CRITERIA_PASS',
             })
           }
-          if (lower.includes('touch target 20') || lower.includes('smaller than 44px') || lower.includes('compact touch')) {
+          if (lower.includes('touch target 20') || lower.includes('target below 24') || lower.includes('compact touch 16')) {
             conflicts.push({
               ruleId: 'RULE-IMP-TOUCH-001',
-              ruleStatement: 'Enforce minimum 44px by 44px interactive touch target size.',
+              ruleStatement: 'Target size below WCAG 2.2 AA SC 2.5.8 minimum (24x24 CSS px).',
               conflictingDirective: dir.text,
               source: dir.source,
               resolution: 'SURFACED_CONFLICT_MANDATORY_FLOOR_HELD',
+              conflictType: 'STANDARD_FLOOR_VIOLATION',
+              complianceClaim: 'TESTED_ACCESSIBILITY_CRITERIA_PASS',
+            })
+          } else if (lower.includes('smaller than 44px') || lower.includes('compact touch') || lower.includes('touch target 30')) {
+            conflicts.push({
+              ruleId: 'RULE-IMP-TOUCH-001',
+              ruleStatement: 'Target size deviates from Gravitas / Impeccable 44x44 CSS px design policy (satisfies WCAG AA 24px, but below Level AAA enhanced policy).',
+              conflictingDirective: dir.text,
+              source: dir.source,
+              resolution: 'SURFACED_CONFLICT_MANDATORY_FLOOR_HELD',
+              conflictType: 'ENHANCED_POLICY_DEVIATION',
+              complianceClaim: 'TESTED_ACCESSIBILITY_CRITERIA_PASS',
             })
           }
         }
