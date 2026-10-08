@@ -3,6 +3,7 @@ import {
   killProcessTree,
   runSubprocess,
   sanitizeOutput,
+  sanitizeSubprocessEnv,
   type SubprocessHandle,
 } from './process.js'
 
@@ -137,6 +138,64 @@ describe('Subprocess Boundary (process.ts)', () => {
 
     const rawNoUser = 'Connecting to https://token456@github.com/test ...'
     expect(sanitizeOutput(rawNoUser)).toBe('Connecting to https://***@github.com/test ...')
+
+    const rawBearer = 'Authorization: Bearer secret-bearer-token-12345'
+    expect(sanitizeOutput(rawBearer)).toBe('Authorization: Bearer [REDACTED]')
+
+    const rawNvapi = 'Using key nvapi-abc123def45678901234 in header'
+    expect(sanitizeOutput(rawNvapi)).toBe('Using key [REDACTED_NVIDIA_KEY] in header')
+  })
+
+  it('sanitizeSubprocessEnv purges provider API keys from child process environment', () => {
+    const dirtyEnv = {
+      PATH: 'C:\\Windows',
+      HOME: 'C:\\Users\\test',
+      NVIDIA_API_KEY: 'nvapi-dirty-key-1',
+      NIM_API_KEY: 'nvapi-dirty-key-2',
+      SAFE_VAR: 'hello',
+    }
+
+    const sanitized = sanitizeSubprocessEnv(dirtyEnv)
+    expect(sanitized.NVIDIA_API_KEY).toBeUndefined()
+    expect(sanitized.NIM_API_KEY).toBeUndefined()
+    expect(sanitized.PATH).toBe('C:\\Windows')
+    expect(sanitized.SAFE_VAR).toBe('hello')
+  })
+
+  it('runSubprocess does not expose process.env provider keys to spawned child process', async () => {
+    const origNvidiaKey = process.env.NVIDIA_API_KEY
+    const origNimKey = process.env.NIM_API_KEY
+    try {
+      process.env.NVIDIA_API_KEY = 'nvapi-leaked-key-test'
+      process.env.NIM_API_KEY = 'nvapi-nim-leaked-key-test'
+
+      const script = `
+        const k1 = process.env.NVIDIA_API_KEY || 'CLEAN';
+        const k2 = process.env.NIM_API_KEY || 'CLEAN';
+        console.log(k1 + ':' + k2);
+      `
+
+      const result = await runSubprocess({
+        executable: process.execPath,
+        args: ['-e', script],
+        cwd: process.cwd(),
+        timeoutMs: 5000,
+      })
+
+      expect(result.exitCode).toBe(0)
+      expect(result.stdout.trim()).toBe('CLEAN:CLEAN')
+    } finally {
+      if (origNvidiaKey !== undefined) {
+        process.env.NVIDIA_API_KEY = origNvidiaKey
+      } else {
+        delete process.env.NVIDIA_API_KEY
+      }
+      if (origNimKey !== undefined) {
+        process.env.NIM_API_KEY = origNimKey
+      } else {
+        delete process.env.NIM_API_KEY
+      }
+    }
   })
 
   it('killProcessTree completes safely for already exited or non-existent PID', async () => {

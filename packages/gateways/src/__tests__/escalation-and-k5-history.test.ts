@@ -97,6 +97,9 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         attemptNumber: 1,
         k5VerifiedOutcome: 'VERIFIED_PASS',
         latencyMs: 250,
+        verificationPlanId: 'plan-k5-pass-001',
+        verificationReceiptId: 'receipt-k5-001',
+        verificationCompletedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
       });
 
@@ -121,6 +124,9 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         attemptNumber: 1,
         k5VerifiedOutcome: 'VERIFIED_PASS',
         latencyMs: 300,
+        verificationPlanId: 'plan-k5-domain-001',
+        verificationReceiptId: 'receipt-k5-domain-001',
+        verificationCompletedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
       });
 
@@ -154,6 +160,56 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
       expect(stats.totalAttempts).toBe(0);
       expect(stats.successRate).toBe(0);
       expect(stats.averageLatencyMs).toBe(0);
+    });
+
+    it('9. Receipt-Bound Invariant — VERIFIED_PASS strictly rejects missing verificationPlanId', () => {
+      const history = new ModelCapabilityHistory();
+
+      expect(() => {
+        history.recordObservation({
+          observationId: 'obs-no-receipt',
+          taskDomain: 'code_generation',
+          taskComplexityClass: 'LOW',
+          provider: 'nvidia-nim',
+          model: 'meta/llama-3.1-8b-instruct',
+          qualificationIdentity: 'test-v1b',
+          attemptNumber: 1,
+          k5VerifiedOutcome: 'VERIFIED_PASS',
+          latencyMs: 100,
+          timestamp: new Date().toISOString(),
+          // verificationPlanId omitted!
+        });
+      }).toThrow(/Cannot record VERIFIED_PASS observation .* without valid K5 verificationPlanId/);
+    });
+
+    it('10. Observation Idempotency — duplicate observationId is deduplicated safely', () => {
+      const history = new ModelCapabilityHistory();
+
+      const obs = {
+        observationId: 'obs-idempotent-1',
+        taskDomain: 'code_generation',
+        taskComplexityClass: 'LOW' as const,
+        provider: 'nvidia-nim',
+        model: 'meta/llama-3.1-8b-instruct',
+        qualificationIdentity: 'test-v1b',
+        attemptNumber: 1,
+        k5VerifiedOutcome: 'VERIFIED_PASS' as const,
+        latencyMs: 100,
+        verificationPlanId: 'plan-k5-idempotent-1',
+        timestamp: new Date().toISOString(),
+      };
+
+      history.recordObservation(obs);
+      history.recordObservation(obs); // duplicate!
+
+      const stats = history.queryVerifiedSuccessRate('meta/llama-3.1-8b-instruct');
+      expect(stats.totalAttempts).toBe(1);
+      expect(stats.verifiedPasses).toBe(1);
+    });
+
+    it('11. Durability Disclosure — explicitly discloses in-memory non-durable store', () => {
+      const history = new ModelCapabilityHistory();
+      expect(history.isDurable).toBe(false);
     });
   });
 });

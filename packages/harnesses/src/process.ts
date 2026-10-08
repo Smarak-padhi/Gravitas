@@ -21,15 +21,32 @@ const execFileAsync = promisify(execFile)
 export const DEFAULT_MAX_OUTPUT_BYTES = 2 * 1024 * 1024
 
 /**
- * Strips basic-auth credentials from URLs.
+ * Strips basic-auth credentials, Bearer tokens, and provider keys from output text.
  */
 export function sanitizeOutput(text: string): string {
-  return text.replace(/(https?:\/\/)([^@\s/]+)@/g, (_match, protocol, userInfo) => {
+  let sanitized = text.replace(/(https?:\/\/)([^@\s/]+)@/g, (_match, protocol, userInfo) => {
     if (userInfo.includes(':')) {
       return `${protocol}***:***@`
     }
     return `${protocol}***@`
   })
+  sanitized = sanitized.replace(/Bearer\s+([A-Za-z0-9_\-\.]+)/gi, 'Bearer [REDACTED]')
+  sanitized = sanitized.replace(/nvapi-[A-Za-z0-9_\-]{10,}/gi, '[REDACTED_NVIDIA_KEY]')
+  return sanitized
+}
+
+/**
+ * Strips provider secrets from subprocess environments so worker child processes
+ * never inherit raw provider keys.
+ */
+export function sanitizeSubprocessEnv(
+  baseEnv: NodeJS.ProcessEnv,
+  overrides?: Readonly<Record<string, string | undefined>> | undefined
+): Record<string, string | undefined> {
+  const clean: Record<string, string | undefined> = { ...baseEnv, ...(overrides ?? {}) }
+  delete clean['NVIDIA_API_KEY']
+  delete clean['NIM_API_KEY']
+  return clean
 }
 
 /**
@@ -114,7 +131,7 @@ export async function runSubprocess(
       shell: false,
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: options.env ? { ...process.env, ...options.env } : process.env,
+      env: sanitizeSubprocessEnv(process.env, options.env),
     })
 
     const pid = child.pid

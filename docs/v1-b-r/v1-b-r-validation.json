@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "gravitas.v1-b-r.validation.v1",
+  "wave": "V1-B-R",
+  "timestamp": "2026-10-08T05:33:00Z",
+  "baseCommit": "a8bb8ba7e68bde2081a9ce3698c88124bed34cdd",
+  "branch": "feat/v0-golden-loop",
+  "verificationSummary": {
+    "typecheck": {
+      "status": "PASS",
+      "command": "npx tsc --noEmit",
+      "errors": 0
+    },
+    "kernelTests": {
+      "status": "PASS",
+      "command": "npm run test:kernel",
+      "total": 51,
+      "passed": 51,
+      "failed": 0
+    },
+    "vitest": {
+      "status": "PASS",
+      "command": "npx vitest run --fileParallelism=false",
+      "files": 97,
+      "total": 1651,
+      "passed": 1651,
+      "failed": 0
+    },
+    "desktopBuild": {
+      "status": "PASS",
+      "command": "node apps/desktop/build.mjs",
+      "output": "Desktop package bundled successfully."
+    },
+    "desktopDogfood": {
+      "status": "PASS",
+      "command": "node scripts/dogfood-view-switch.mjs",
+      "totalSteps": 13,
+      "passedSteps": 13,
+      "orphanProcesses": 0,
+      "telemetryPath": "docs/v1-b-r/desktop-dogfood.json"
+    }
+  },
+  "invariantsVerified": {
+    "zeroPaidSpend": true,
+    "paidFallbackDisabled": true,
+    "k3DispatchEnforced": true,
+    "k5ReceiptBindingEnforced": true,
+    "historyIdempotent": true,
+    "historyInMemDisclosed": true,
+    "subprocessEnvSanitized": true,
+    "streamCredentialsScrubbed": true,
+    "ssrfRedirectBlocked": true,
+    "modelQualificationHonest": true,
+    "offlineCandidatesTrue": true,
+    "failClosedOnAuthMissing": true,
+    "maxEscalationsBounded": true,
+    "zeroSameModelRetries": true,
+    "desktopRendererSandboxed": true
+  },
+  "finalDisposition": "READY_FOR_LOCAL_COMMIT"
+}

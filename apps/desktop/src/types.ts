@@ -306,6 +306,8 @@ export interface SystemProjection {
     readonly providerStatus: 'AVAILABLE' | 'AUTH_REQUIRED' | 'UNCONFIGURED'
     readonly qualifiedModelsCount: number
     readonly qualifiedModelIds: readonly string[]
+    readonly candidateModelsCount?: number
+    readonly candidateModelIds?: readonly string[]
     readonly defaultModel: string
     readonly costPolicy: string
     readonly outOfPocketUsd: number

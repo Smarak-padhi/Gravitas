@@ -19,3 +19,4 @@ export * from './providers/types.js';
 export * from './providers/nvidia.js';
 export * from './credentials/modelCredentialBroker.js';
 export * from './security/networkContainment.js';
+export * from './security/k3DispatchEnforcement.js';

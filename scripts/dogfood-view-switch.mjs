@@ -103,6 +103,20 @@ async function runDogfood() {
       sessionsCount: workHierarchy.sessions.length
     }
 
+    // Step 3b: Verify Model Intelligence projection
+    const system = await win.evaluate(async () => {
+      return await window.gravitasDesktop.getSystem()
+    })
+    log(`Step 3b Model Intelligence: providerStatus=${system.modelIntelligenceSummary?.providerStatus}, qualifiedCount=${system.modelIntelligenceSummary?.qualifiedModelsCount}, candidateCount=${system.modelIntelligenceSummary?.candidateModelsCount}`)
+    telemetry.step3b_modelIntelligence = {
+      providerStatus: system.modelIntelligenceSummary?.providerStatus,
+      qualifiedModelsCount: system.modelIntelligenceSummary?.qualifiedModelsCount,
+      candidateModelsCount: system.modelIntelligenceSummary?.candidateModelsCount,
+      costPolicy: system.modelIntelligenceSummary?.costPolicy,
+      outOfPocketUsd: system.modelIntelligenceSummary?.outOfPocketUsd,
+      paidFallbackPermitted: system.modelIntelligenceSummary?.paidFallbackPermitted,
+    }
+
     // Step 4: Activate Spatial / Living HQ using actual operator UI path
     log(`Step 4: Clicking #btn-view-world to activate Living HQ...`)
     await win.click('#btn-view-world')
@@ -293,9 +307,9 @@ async function runDogfood() {
     telemetry
   }
 
-  mkdirSync(join(process.cwd(), 'docs/v1-a-r'), { recursive: true })
+  mkdirSync(join(process.cwd(), 'docs/v1-b-r'), { recursive: true })
   writeFileSync(
-    join(process.cwd(), 'docs/v1-a-r/desktop-dogfood.json'),
+    join(process.cwd(), 'docs/v1-b-r/desktop-dogfood.json'),
     JSON.stringify(output, null, 2),
     'utf8'
   )

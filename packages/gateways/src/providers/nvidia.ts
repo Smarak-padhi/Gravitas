@@ -12,6 +12,7 @@
 import { ModelCredentialBroker } from '../credentials/modelCredentialBroker.js';
 import type { ModelDescriptor, ProviderDescriptor } from '../models/types.js';
 import { assertAllowedProviderEndpoint, sanitizeProviderHeaders } from '../security/networkContainment.js';
+import { verifyK3DispatchGrant } from '../security/k3DispatchEnforcement.js';
 import type {
   ProviderAdapter,
   ProviderErrorTaxonomy,
@@ -24,15 +25,20 @@ export const NVIDIA_DEFAULT_BASE_URL = 'https://integrate.api.nvidia.com';
 export const NVIDIA_CHAT_ENDPOINT = 'https://integrate.api.nvidia.com/v1/chat/completions';
 export const NVIDIA_CATALOG_SNAPSHOT_VERSION = '2026.10-v1b-snapshot';
 
-export const NVIDIA_PROVIDER_DESCRIPTOR: ProviderDescriptor = {
-  id: NVIDIA_PROVIDER_ID,
-  name: 'NVIDIA NIM (Hosted API)',
-  baseUrl: NVIDIA_DEFAULT_BASE_URL,
-  status: 'AVAILABLE',
-  transportSupport: ['DIRECT'],
-  authType: 'BEARER_TOKEN',
-  credentialRef: `vault:cred:${NVIDIA_PROVIDER_ID}`,
-};
+export function getNvidiaProviderDescriptor(): ProviderDescriptor {
+  const hasAuth = ModelCredentialBroker.getInstance().getCredentialHandle(NVIDIA_PROVIDER_ID).isAvailable;
+  return {
+    id: NVIDIA_PROVIDER_ID,
+    name: 'NVIDIA NIM (Hosted API)',
+    baseUrl: NVIDIA_DEFAULT_BASE_URL,
+    status: hasAuth ? 'AVAILABLE' : 'AUTH_REQUIRED',
+    transportSupport: ['DIRECT'],
+    authType: 'BEARER_TOKEN',
+    credentialRef: `vault:cred:${NVIDIA_PROVIDER_ID}`,
+  };
+}
+
+export const NVIDIA_PROVIDER_DESCRIPTOR: ProviderDescriptor = getNvidiaProviderDescriptor();
 
 /**
  * Versioned catalog snapshot of NVIDIA NIM free developer-tier candidate models.
@@ -43,8 +49,8 @@ export const NVIDIA_SEEDED_MODELS: readonly ModelDescriptor[] = [
     id: 'meta/llama-3.1-8b-instruct',
     providerId: NVIDIA_PROVIDER_ID,
     displayName: 'Meta Llama 3.1 8B Instruct (NIM)',
-    availability: 'AVAILABLE',
-    qualificationState: 'QUALIFIED',
+    availability: 'UNAVAILABLE',
+    qualificationState: 'METADATA_VALIDATED',
     modalities: ['TEXT', 'CODE'],
     toolSupport: true,
     streamingSupport: true,
@@ -61,14 +67,13 @@ export const NVIDIA_SEEDED_MODELS: readonly ModelDescriptor[] = [
     privacyClass: 'COMMERCIAL_NO_TRAIN',
     source: 'NVIDIA_CATALOG',
     sourceVersion: NVIDIA_CATALOG_SNAPSHOT_VERSION,
-    lastQualifiedAt: '2026-10-07T12:00:00.000Z',
   },
   {
     id: 'meta/llama-3.1-70b-instruct',
     providerId: NVIDIA_PROVIDER_ID,
     displayName: 'Meta Llama 3.1 70B Instruct (NIM)',
-    availability: 'AVAILABLE',
-    qualificationState: 'QUALIFIED',
+    availability: 'UNAVAILABLE',
+    qualificationState: 'METADATA_VALIDATED',
     modalities: ['TEXT', 'CODE'],
     toolSupport: true,
     streamingSupport: true,
@@ -85,14 +90,13 @@ export const NVIDIA_SEEDED_MODELS: readonly ModelDescriptor[] = [
     privacyClass: 'COMMERCIAL_NO_TRAIN',
     source: 'NVIDIA_CATALOG',
     sourceVersion: NVIDIA_CATALOG_SNAPSHOT_VERSION,
-    lastQualifiedAt: '2026-10-07T12:00:00.000Z',
   },
   {
     id: 'mistralai/mixtral-8x7b-instruct-v0.1',
     providerId: NVIDIA_PROVIDER_ID,
     displayName: 'Mistral Mixtral 8x7B Instruct (NIM)',
-    availability: 'AVAILABLE',
-    qualificationState: 'QUALIFIED',
+    availability: 'UNAVAILABLE',
+    qualificationState: 'METADATA_VALIDATED',
     modalities: ['TEXT', 'CODE'],
     toolSupport: true,
     streamingSupport: true,
@@ -109,7 +113,6 @@ export const NVIDIA_SEEDED_MODELS: readonly ModelDescriptor[] = [
     privacyClass: 'COMMERCIAL_NO_TRAIN',
     source: 'NVIDIA_CATALOG',
     sourceVersion: NVIDIA_CATALOG_SNAPSHOT_VERSION,
-    lastQualifiedAt: '2026-10-07T12:00:00.000Z',
   },
 ];
 
@@ -121,7 +124,9 @@ export interface NvidiaNimAdapterOptions {
 
 export class NvidiaNimAdapter implements ProviderAdapter {
   public readonly providerId = NVIDIA_PROVIDER_ID;
-  public readonly descriptor = NVIDIA_PROVIDER_DESCRIPTOR;
+  public get descriptor(): ProviderDescriptor {
+    return getNvidiaProviderDescriptor();
+  }
   private readonly baseUrl: string;
   private readonly broker: ModelCredentialBroker;
   private readonly customFetch?: typeof fetch | undefined;
@@ -165,7 +170,30 @@ export class NvidiaNimAdapter implements ProviderAdapter {
     // 1. Strict Endpoint Containment Assertion
     assertAllowedProviderEndpoint(this.providerId, endpoint);
 
-    // 2. Resolve Credential Reference
+    // 2. K3 Dispatch-Time CapabilityGrant Verification
+    const k3Check = verifyK3DispatchGrant({
+      grant: request.capabilityGrant,
+      expectedProvider: this.providerId,
+      endpointUrl: endpoint,
+      model: request.model,
+      credentialRef: request.credentialRef ?? `vault:cred:${this.providerId}`,
+    });
+
+    if (!k3Check.authorized) {
+      return {
+        provider: this.providerId,
+        requestedModel: request.model,
+        actualModel: request.model,
+        latencyMs: Date.now() - startTime,
+        terminationStatus: 'ERROR',
+        errorTaxonomy: 'CAPABILITY_GRANT_REQUIRED',
+        errorMessage: `K3 dispatch authorization failed: ${k3Check.message}`,
+        transport: 'DIRECT',
+        fallbackStatus: false,
+      };
+    }
+
+    // 3. Resolve Credential Reference
     const credRef = request.credentialRef ?? `vault:cred:${this.providerId}`;
     const rawSecret = this.broker.resolveSecret(credRef);
 
@@ -183,7 +211,7 @@ export class NvidiaNimAdapter implements ProviderAdapter {
       };
     }
 
-    // 3. Prepare OpenAI-compatible payload
+    // 4. Prepare OpenAI-compatible payload
     const body: Record<string, unknown> = {
       model: request.model,
       messages: request.messages,
@@ -192,7 +220,7 @@ export class NvidiaNimAdapter implements ProviderAdapter {
     if (request.maxTokens !== undefined) body['max_tokens'] = request.maxTokens;
     if (request.temperature !== undefined) body['temperature'] = request.temperature;
 
-    // 4. Sanitize and construct headers (no worker header override for auth or host)
+    // 5. Sanitize and construct headers (no worker header override for auth or host)
     const sanitizedCustom = request.customHeaders ? sanitizeProviderHeaders(request.customHeaders) : {};
     const headers: Record<string, string> = {
       ...sanitizedCustom,
@@ -201,7 +229,7 @@ export class NvidiaNimAdapter implements ProviderAdapter {
       Authorization: `Bearer ${rawSecret}`,
     };
 
-    // 5. Setup timeout / cancellation signal
+    // 6. Setup timeout / cancellation signal
     const timeoutMs = options?.timeoutMs ?? 30000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -219,6 +247,7 @@ export class NvidiaNimAdapter implements ProviderAdapter {
         headers,
         body: JSON.stringify(body),
         signal: combinedSignal,
+        redirect: 'error',
       });
 
       clearTimeout(timeoutId);

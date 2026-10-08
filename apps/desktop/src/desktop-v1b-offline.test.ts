@@ -29,14 +29,16 @@ describe('GRAVITAS V1-B Desktop Offline & Model Intelligence Projection Suite', 
     // Provider status
     expect(['AVAILABLE', 'AUTH_REQUIRED']).toContain(summary.providerStatus);
 
-    // Qualified models presence
-    expect(summary.qualifiedModelsCount).toBeGreaterThanOrEqual(1);
-    expect(summary.qualifiedModelIds).toContain('meta/llama-3.1-8b-instruct');
-    expect(summary.qualifiedModelIds).toContain('meta/llama-3.1-70b-instruct');
-    expect(summary.qualifiedModelIds).toContain('mistralai/mixtral-8x7b-instruct-v0.1');
+    // Qualified models presence (unprobed/uncredentialed offline reflects 0 qualified, 3 candidate)
+    expect(summary.qualifiedModelsCount).toBe(0);
+    expect(summary.qualifiedModelIds).toEqual([]);
+    expect(summary.candidateModelsCount).toBe(3);
+    expect(summary.candidateModelIds).toContain('meta/llama-3.1-8b-instruct');
+    expect(summary.candidateModelIds).toContain('meta/llama-3.1-70b-instruct');
+    expect(summary.candidateModelIds).toContain('mistralai/mixtral-8x7b-instruct-v0.1');
 
     // Default model and policy
-    expect(summary.defaultModel).toBe('meta/llama-3.1-8b-instruct');
+    expect(summary.defaultModel).toContain('meta/llama-3.1-8b-instruct');
     expect(summary.costPolicy).toBe('STRICT_ZERO_DOLLAR_FREE');
     expect(summary.outOfPocketUsd).toBe(0);
     expect(summary.paidFallbackPermitted).toBe(false);
@@ -54,7 +56,8 @@ describe('GRAVITAS V1-B Desktop Offline & Model Intelligence Projection Suite', 
 
     expect(system.modelIntelligenceSummary).toBeDefined();
     expect(['AVAILABLE', 'AUTH_REQUIRED']).toContain(system.modelIntelligenceSummary?.providerStatus);
-    expect(system.modelIntelligenceSummary?.qualifiedModelsCount).toBeGreaterThanOrEqual(1);
+    expect(system.modelIntelligenceSummary?.qualifiedModelsCount).toBe(0);
+    expect(system.modelIntelligenceSummary?.candidateModelsCount).toBe(3);
     expect(system.modelIntelligenceSummary?.costPolicy).toBe('STRICT_ZERO_DOLLAR_FREE');
     expect(system.modelIntelligenceSummary?.outOfPocketUsd).toBe(0);
     expect(system.modelIntelligenceSummary?.paidFallbackPermitted).toBe(false);

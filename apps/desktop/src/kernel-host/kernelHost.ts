@@ -525,13 +525,15 @@ export class KernelHost {
       },
       modelIntelligenceSummary: {
         providerStatus: (process.env.NVIDIA_API_KEY || process.env.NIM_API_KEY) ? 'AVAILABLE' : 'AUTH_REQUIRED',
-        qualifiedModelsCount: 3,
-        qualifiedModelIds: [
+        qualifiedModelsCount: 0,
+        qualifiedModelIds: [],
+        candidateModelsCount: 3,
+        candidateModelIds: [
           'meta/llama-3.1-8b-instruct',
           'meta/llama-3.1-70b-instruct',
           'mistralai/mixtral-8x7b-instruct-v0.1',
         ],
-        defaultModel: 'meta/llama-3.1-8b-instruct',
+        defaultModel: 'meta/llama-3.1-8b-instruct (unprobed)',
         costPolicy: 'STRICT_ZERO_DOLLAR_FREE',
         outOfPocketUsd: 0,
         paidFallbackPermitted: false,

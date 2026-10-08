@@ -4,9 +4,28 @@ import { ModelRegistry } from '../models/registry.js';
 import { ModelCapabilityHistory } from '../models/history.js';
 import type { TaskModelRequirements } from '../models/types.js';
 
+function createQualifiedFixtureRegistry(): ModelRegistry {
+  const registry = new ModelRegistry();
+  registry.registerProvider({
+    id: 'nvidia-nim',
+    name: 'NVIDIA NIM (Cloud Inference)',
+    category: 'CLOUD_INFERENCE',
+    endpoint: 'https://integrate.api.nvidia.com/v1',
+    status: 'AVAILABLE',
+    isFreeTierAvailable: true,
+    zeroCostPolicyEnforced: true,
+    requiresCredentials: true,
+    supportedCostClasses: ['FREE_TIER'],
+  });
+  registry.qualifyModel('meta/llama-3.1-8b-instruct');
+  registry.qualifyModel('meta/llama-3.1-70b-instruct');
+  registry.qualifyModel('mistralai/mixtral-8x7b-instruct-v0.1');
+  return registry;
+}
+
 describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
-  it('1. Deterministic Decision — Identical input always yields identical routing decision', () => {
-    const registry = new ModelRegistry();
+  it('1. Deterministic Decision — Identical input always yields identical routing decision on qualified models', () => {
+    const registry = createQualifiedFixtureRegistry();
     const history = new ModelCapabilityHistory();
     const router = new ModelRouter({ registry, history });
 
@@ -30,7 +49,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('2. Qualified Candidate Selected — Fast candidate selected when FAST tier requested', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     const router = new ModelRouter({ registry });
 
     const decision = router.resolveModel({ preferredTier: 'FAST' });
@@ -41,7 +60,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('3. Frontier Candidate Selected — 70B candidate selected when FRONTIER tier requested', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     const router = new ModelRouter({ registry });
 
     const decision = router.resolveModel({ preferredTier: 'FRONTIER' });
@@ -49,23 +68,37 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
     expect(decision.qualificationDecision).toBe('QUALIFIED');
   });
 
-  it('4. Unqualified Candidate Rejected — Unqualified models cannot be selected', () => {
-    const registry = new ModelRegistry();
-    registry.updateQualificationState('meta/llama-3.1-8b-instruct', 'UNAVAILABLE');
-    registry.updateQualificationState('meta/llama-3.1-70b-instruct', 'DEGRADED');
-    registry.updateQualificationState('mistralai/mixtral-8x7b-instruct-v0.1', 'DISABLED');
+  it('4. Unprobed Catalog Default — Fails closed with AUTH_REQUIRED or NO_QUALIFIED_MODEL', () => {
+    // 4a. Default uncredentialed catalog reports AUTH_REQUIRED
+    const defaultRegistry = new ModelRegistry();
+    const router1 = new ModelRouter({ registry: defaultRegistry });
+    const decision1 = router1.resolveModel({});
+    expect(decision1.selectedModel).toBeNull();
+    expect(decision1.qualificationDecision).toBe('AUTH_REQUIRED');
 
-    const router = new ModelRouter({ registry });
-    const decision = router.resolveModel({});
-
-    expect(decision.selectedModel).toBeNull();
-    expect(decision.qualificationDecision).toBe('NO_QUALIFIED_MODEL');
-    expect(decision.rejectedCandidates.length).toBe(3);
-    expect(decision.rejectedCandidates[0]?.reason).toContain('MODEL_NOT_QUALIFIED');
+    // 4b. When provider is AVAILABLE but models are unprobed (METADATA_VALIDATED), reports NO_QUALIFIED_MODEL
+    const availableRegistry = new ModelRegistry();
+    availableRegistry.registerProvider({
+      id: 'nvidia-nim',
+      name: 'NVIDIA NIM (Cloud Inference)',
+      category: 'CLOUD_INFERENCE',
+      endpoint: 'https://integrate.api.nvidia.com/v1',
+      status: 'AVAILABLE',
+      isFreeTierAvailable: true,
+      zeroCostPolicyEnforced: true,
+      requiresCredentials: true,
+      supportedCostClasses: ['FREE_TIER'],
+    });
+    const router2 = new ModelRouter({ registry: availableRegistry });
+    const decision2 = router2.resolveModel({});
+    expect(decision2.selectedModel).toBeNull();
+    expect(decision2.qualificationDecision).toBe('NO_QUALIFIED_MODEL');
+    expect(decision2.rejectedCandidates.length).toBe(3);
+    expect(decision2.rejectedCandidates[0]?.reason).toContain('MODEL_NOT_QUALIFIED');
   });
 
   it('5. Unsupported Capability Rejected — Fails closed when required capability is missing', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     const router = new ModelRouter({ registry });
 
     // Request non-existent or unsupported modality / context requirement
@@ -79,14 +112,17 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('6. Provider Unavailable Rejected — Fails closed when provider is unavailable', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     registry.registerProvider({
       id: 'nvidia-nim',
       name: 'NVIDIA NIM',
-      baseUrl: 'https://integrate.api.nvidia.com',
+      category: 'CLOUD_INFERENCE',
+      endpoint: 'https://integrate.api.nvidia.com/v1',
       status: 'UNAVAILABLE',
-      transportSupport: ['DIRECT'],
-      authType: 'BEARER_TOKEN',
+      isFreeTierAvailable: true,
+      zeroCostPolicyEnforced: true,
+      requiresCredentials: true,
+      supportedCostClasses: ['FREE_TIER'],
     });
 
     const router = new ModelRouter({ registry });
@@ -98,14 +134,17 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('7. Provider Auth Required Rejected — Fails closed when provider reports AUTH_REQUIRED', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     registry.registerProvider({
       id: 'nvidia-nim',
       name: 'NVIDIA NIM',
-      baseUrl: 'https://integrate.api.nvidia.com',
+      category: 'CLOUD_INFERENCE',
+      endpoint: 'https://integrate.api.nvidia.com/v1',
       status: 'AUTH_REQUIRED',
-      transportSupport: ['DIRECT'],
-      authType: 'BEARER_TOKEN',
+      isFreeTierAvailable: true,
+      zeroCostPolicyEnforced: true,
+      requiresCredentials: true,
+      supportedCostClasses: ['FREE_TIER'],
     });
 
     const router = new ModelRouter({ registry });
@@ -117,7 +156,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('8. Paid Model Blocked by Zero-Spend Budget — Paid candidates rejected under $0 policy', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     // Register a paid model
     registry.registerModel({
       id: 'custom/paid-model-405b',
@@ -159,7 +198,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('9. Unknown Cost Blocked Fail-Closed — Models with unknown pricing rejected under default policy', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     registry.registerModel({
       id: 'custom/unknown-cost-model',
       providerId: 'nvidia-nim',
@@ -199,10 +238,10 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
   });
 
   it('10. Historical Evidence Tie-Breaking — Model with superior K5 verified pass rate wins tie-break', () => {
-    const registry = new ModelRegistry();
+    const registry = createQualifiedFixtureRegistry();
     const history = new ModelCapabilityHistory();
 
-    // Record high success rate for mixtral (10/10 passes)
+    // Record high success rate for mixtral (10/10 passes) with valid K5 receipt binding
     for (let i = 0; i < 10; i++) {
       history.recordObservation({
         observationId: `obs_mix_${i}`,
@@ -214,6 +253,9 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         attemptNumber: 1,
         k5VerifiedOutcome: 'VERIFIED_PASS',
         latencyMs: 120,
+        verificationPlanId: 'plan-k5-tiebreak-mixtral',
+        verificationReceiptId: `receipt-k5-${i}`,
+        verificationCompletedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
       });
     }
@@ -230,6 +272,9 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         attemptNumber: 1,
         k5VerifiedOutcome: i < 2 ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
         latencyMs: 110,
+        verificationPlanId: 'plan-k5-tiebreak-8b',
+        verificationReceiptId: `receipt-k5-${i}`,
+        verificationCompletedAt: new Date().toISOString(),
         timestamp: new Date().toISOString(),
       });
     }

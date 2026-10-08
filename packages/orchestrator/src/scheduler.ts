@@ -914,6 +914,9 @@ export class BoundedScheduler {
           attemptNumber: 1,
           k5VerifiedOutcome: verification.status === 'PASSED' ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
           latencyMs: executionResult.durationMs,
+          verificationPlanId: verification.planId,
+          verificationReceiptId: `receipt_${this.runId}_${taskId}_${verification.planId}`,
+          verificationCompletedAt: verification.completedAt ?? new Date().toISOString(),
           timestamp: new Date().toISOString(),
         })
       }

@@ -181,5 +181,8 @@ export interface ModelExecutionObservation {
     readonly totalTokens: number;
   } | undefined;
   readonly failureClass?: string | undefined;
+  readonly verificationPlanId?: string | undefined;
+  readonly verificationReceiptId?: string | undefined;
+  readonly verificationCompletedAt?: string | undefined;
   readonly timestamp: string;
 }

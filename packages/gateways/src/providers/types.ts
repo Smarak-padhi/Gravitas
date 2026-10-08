@@ -11,6 +11,26 @@ export interface ProviderChatMessage {
   readonly content: string;
 }
 
+export interface K3DispatchCapabilityGrant {
+  readonly grantId: string;
+  readonly subjectId: string;
+  readonly workSessionId: string;
+  readonly runId: string;
+  readonly taskId: string;
+  readonly grantedCapabilities: readonly string[];
+  readonly authorizedToolIds: readonly string[];
+  readonly resourceScope: {
+    readonly allowedPaths?: readonly string[] | undefined;
+    readonly allowedOrigins?: readonly string[] | undefined;
+    readonly allowedOperations?: readonly string[] | undefined;
+  };
+  readonly authorityCeiling: string;
+  readonly costCeiling: string;
+  readonly expiresAt: string;
+  readonly status: 'ACTIVE' | 'REVOKED' | 'EXPIRED';
+  readonly credentialReferences?: readonly string[] | undefined;
+}
+
 export interface ProviderInferenceRequest {
   readonly model: string;
   readonly messages: readonly ProviderChatMessage[];
@@ -19,10 +39,12 @@ export interface ProviderInferenceRequest {
   readonly stream?: boolean | undefined;
   readonly credentialRef?: string | undefined;
   readonly customHeaders?: Record<string, string> | undefined;
+  readonly capabilityGrant?: K3DispatchCapabilityGrant | undefined;
 }
 
 export type ProviderErrorTaxonomy =
   | 'AUTH_REQUIRED'
+  | 'CAPABILITY_GRANT_REQUIRED'
   | 'COST_BLOCKED'
   | 'RATE_LIMITED'
   | 'PROVIDER_UNAVAILABLE'
