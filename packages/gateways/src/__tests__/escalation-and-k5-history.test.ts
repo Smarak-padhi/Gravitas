@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { K5_AUTHORITY_BRAND } from '@gravitas/core';
+import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
 import { EscalationManager, HUMAN_GATE_FAILURE_CLASSES } from '../models/escalation.js';
 import { ModelCapabilityHistory } from '../models/history.js';
 
@@ -88,7 +88,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
       });
 
       // Model claims completion, and K5 verification PASSES
-      history.registerAuthoritativeReceipt({
+      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
         receiptId: 'receipt-k5-001',
         planId: 'plan-k5-pass-001',
         workSessionId: 'ws-test',
@@ -101,8 +101,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
-        [K5_AUTHORITY_BRAND]: true,
-      });
+      } as any));
 
       history.recordObservation({
         observationId: 'obs-2',
@@ -132,7 +131,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
     it('7. Domain Specific History — can query capability stats by task domain', () => {
       const history = new ModelCapabilityHistory();
 
-      history.registerAuthoritativeReceipt({
+      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
         receiptId: 'receipt-k5-domain-001',
         planId: 'plan-k5-domain-001',
         workSessionId: 'ws-test',
@@ -145,8 +144,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
-        [K5_AUTHORITY_BRAND]: true,
-      });
+      } as any));
 
       history.recordObservation({
         observationId: 'obs-code-1',

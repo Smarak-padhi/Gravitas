@@ -14,9 +14,9 @@ import type {
   ModelExecutionObservation,
 } from './types.js';
 import {
-  K5_AUTHORITY_BRAND,
   type DurableModelObservationStore,
 } from '@gravitas/core';
+import { isAuthoritativeK5Receipt } from '@gravitas/verifier';
 
 export interface ModelHistorySummary {
   readonly modelId: string;
@@ -97,8 +97,7 @@ export class ModelCapabilityHistory {
    * Strictly asserts trusted issuance brand to block forged receipts.
    */
   public registerAuthoritativeReceipt(receipt: K5ReceiptLike): void {
-    const isBranded = (receipt as any)[K5_AUTHORITY_BRAND] === true;
-    if (!isBranded) {
+    if (!isAuthoritativeK5Receipt(receipt)) {
       throw new Error(
         `K5 receipt provenance failure: receipt '${receipt.receiptId}' was not issued by trusted verification authority. Forged receipts are rejected fail-closed.`
       );
@@ -142,17 +141,12 @@ export class ModelCapabilityHistory {
 
   /**
    * Reconstructs history deterministically from the canonical SQLite store.
+   * Persisted receipts are reconstructed only from canonical trusted K0 storage without blind re-branding.
    */
   public reconstructFromDurableStore(writer: DurableModelObservationStore): number {
     this.durableWriter = writer;
     const dbReceipts = writer.listAllK5Receipts();
     for (const r of dbReceipts) {
-      Object.defineProperty(r, K5_AUTHORITY_BRAND, {
-        value: true,
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      });
       this.authoritativeReceipts.set(r.receiptId, r);
     }
 

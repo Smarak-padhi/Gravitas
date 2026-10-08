@@ -58,17 +58,18 @@
 
 #### B. Independent Verifier Receipt Authority
 - **File:** `packages/verifier/src/verifier.ts`
-  - `const verifiedExecutions = new WeakSet<VerificationResult>()` (L18)
-  - In `executeVerification`: `verifiedExecutions.add(result)` (L116)
-  - In `createVerificationReceipt`: asserts `verifiedExecutions.has(verification)` (L135–L139)
-  - Brands issued receipt with `[K5_AUTHORITY_BRAND]: true` (L157–L162)
+  - `const verifiedExecutions = new WeakSet<VerificationResult>()`
+  - `const legitimatelyIssuedReceipts = new WeakSet<object>()`
+  - In `executeVerification`: `verifiedExecutions.add(result)`
+  - In `createVerificationReceipt`: asserts `verifiedExecutions.has(verification)` and records `legitimatelyIssuedReceipts.add(receipt)`
+  - `export function isAuthoritativeK5Receipt(receipt: unknown): boolean` checks `legitimatelyIssuedReceipts.has(receipt as object)`
 
 #### C. Model Capability History Rehydration & Verification
 - **File:** `packages/gateways/src/models/history.ts`
-  - `setDurableWriter(writer: DurableModelObservationStore | null)` (L69–L74)
-  - `detachDurableWriter()` (L76–L78)
-  - `registerAuthoritativeReceipt`: validates `(receipt as any)[K5_AUTHORITY_BRAND] === true` (L97–L105)
-  - `reconstructFromDurableStore`: loads SQLite receipts and observations, marks DB receipts with `[K5_AUTHORITY_BRAND]: true`, and rehydrates memory index (L146–L190)
+  - `setDurableWriter(writer: DurableModelObservationStore | null)`
+  - `detachDurableWriter()`
+  - `registerAuthoritativeReceipt`: validates `isAuthoritativeK5Receipt(receipt)` fail-closed before any database write or cache entry.
+  - `reconstructFromDurableStore`: loads canonical K0 SQLite receipts and observations directly without re-branding into the live verifier `WeakSet`.
 
 #### D. Production Desktop Kernel Host Wiring
 - **File:** `apps/desktop/src/kernel-host/kernelHost.ts`

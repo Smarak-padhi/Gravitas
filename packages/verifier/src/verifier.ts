@@ -16,6 +16,7 @@ import { VerificationPolicyError } from './errors.js'
 import { runVerificationCommand } from './runner.js'
 
 const verifiedExecutions = new WeakSet<VerificationResult>()
+const legitimatelyIssuedReceipts = new WeakSet<object>()
 import type {
   K5VerificationReceipt,
   VerificationCommandResult,
@@ -161,6 +162,7 @@ export function createVerificationReceipt(
     configurable: false,
   })
 
+  legitimatelyIssuedReceipts.add(receipt)
   return receipt
 }
 
@@ -177,5 +179,15 @@ export function createAuthoritativeReceiptForTest(
     writable: false,
     configurable: false,
   })
+  legitimatelyIssuedReceipts.add(receipt)
   return receipt
+}
+
+/**
+ * Asserts whether a given receipt was authoritatively issued by @gravitas/verifier.
+ * Checked at the ModelCapabilityHistory registration boundary via private WeakSet reference.
+ * Prevents in-process forging via Symbol.for or property spoofing.
+ */
+export function isAuthoritativeK5Receipt(receipt: unknown): boolean {
+  return typeof receipt === 'object' && receipt !== null && legitimatelyIssuedReceipts.has(receipt as object)
 }

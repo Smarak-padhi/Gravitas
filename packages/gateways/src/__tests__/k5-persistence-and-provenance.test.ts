@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { SqliteWriter, K5_AUTHORITY_BRAND } from '@gravitas/core';
+import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
 import { ModelCapabilityHistory, type K5ReceiptLike } from '../models/history.js';
 import type { ModelExecutionObservation } from '../models/types.js';
 
@@ -33,7 +34,7 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
   });
 
   function createValidReceipt(overrides: Partial<K5ReceiptLike> = {}): K5ReceiptLike {
-    return {
+    return createAuthoritativeReceiptForTest({
       receiptId: 'k5rcpt_test_task1_plan1_001',
       planId: 'plan-k5-001',
       workSessionId: 'ws-test-001',
@@ -47,9 +48,8 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
       completedAt: '2026-10-08T10:00:00.000Z',
       issuedAt: '2026-10-08T10:00:01.000Z',
       superseded: false,
-      [K5_AUTHORITY_BRAND]: true,
       ...overrides,
-    };
+    } as any);
   }
 
   function createValidObservation(receipt: K5ReceiptLike, overrides: Partial<ModelExecutionObservation> = {}): ModelExecutionObservation {
@@ -308,6 +308,33 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
 
       const allDbObs = writer.listModelObservations();
       expect(allDbObs.length).toBe(1);
+    });
+
+    it('12. Rejection of in-process forged receipt with Symbol.for authority brand (fails closed before persistence)', () => {
+      const history = new ModelCapabilityHistory(writer);
+      const forgedReceipt: any = {
+        receiptId: 'k5rcpt_forged_branded_001',
+        planId: 'plan-001',
+        workSessionId: 'ws-001',
+        taskId: 'task-001',
+        runId: 'run-001',
+        attemptNumber: 1,
+        verdict: 'VERIFIED_PASS',
+        commandsCount: 1,
+        passedCommandsCount: 1,
+        failedCommandsCount: 0,
+        completedAt: new Date().toISOString(),
+        issuedAt: new Date().toISOString(),
+        superseded: false,
+        [K5_AUTHORITY_BRAND]: true,
+      };
+
+      expect(() => {
+        history.registerAuthoritativeReceipt(forgedReceipt);
+      }).toThrow(/K5 receipt provenance failure: receipt 'k5rcpt_forged_branded_001' was not issued by trusted verification authority/);
+
+      // Invariant: forged receipt is rejected BEFORE persistence and never written to SQLite
+      expect(writer.getK5Receipt('k5rcpt_forged_branded_001')).toBeUndefined();
     });
   });
 });

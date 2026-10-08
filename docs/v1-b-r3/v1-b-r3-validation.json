@@ -9,8 +9,8 @@
       "filesTotal": 99,
       "filesPassed": 99,
       "filesFailed": 0,
-      "testsTotal": 1672,
-      "testsPassed": 1672,
+      "testsTotal": 1673,
+      "testsPassed": 1673,
       "testsFailed": 0
     },
     "k0Kernel": {
@@ -18,14 +18,14 @@
       "testsPassed": 51,
       "testsFailed": 0
     },
-    "automatedTotal": 1723,
+    "automatedTotal": 1724,
     "electronDogfood": {
       "stepsTotal": 13,
       "stepsPassed": 13,
       "stepsFailed": 0,
       "status": "PASS"
     },
-    "combinedChecksTotal": 1736
+    "combinedChecksTotal": 1737
   },
   "typecheck": {
     "status": "PASS",

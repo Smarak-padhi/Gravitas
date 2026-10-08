@@ -38,12 +38,12 @@ During the V1-B Final Freeze audit, an architectural gap was verified between un
    - In Desktop, both `WorkSessionKernel` and `ModelCapabilityHistory` reside in the Electron `utilityProcess` (`KernelHost`).
    - In Server, both reside within the server Node.js process.
 
-3. **Authoritative Receipt Branding & Anti-Forgery:**
-   - Added in-memory branding symbol `K5_AUTHORITY_BRAND = Symbol.for('gravitas.k5.authority')`.
-   - In `@gravitas/verifier`, `executeVerification` records genuine execution results into a module-private `WeakSet<VerificationResult>()`.
-   - `createVerificationReceipt` strictly asserts membership in `WeakSet` and attaches `[K5_AUTHORITY_BRAND]: true`.
-   - In `@gravitas/gateways`, `registerAuthoritativeReceipt` checks `receipt[K5_AUTHORITY_BRAND] === true` fail-closed.
-   - When hydrating existing records from SQLite, `reconstructFromDurableStore` brands valid loaded DB receipts with `K5_AUTHORITY_BRAND`.
+3. **Authoritative Receipt Provenance & Anti-Forgery:**
+   - In `@gravitas/verifier`, an unexported module-private `WeakSet<object>` (`legitimatelyIssuedReceipts`) tracks genuine receipts issued by `createVerificationReceipt` (which strictly asserts that `executeVerification` produced the result).
+   - In `@gravitas/gateways`, `registerAuthoritativeReceipt` enforces `isAuthoritativeK5Receipt(receipt)` fail-closed before any database write or cache entry.
+   - Any in-process fabricated receipt—even one attempting to attach `Symbol.for('gravitas.k5.authority')` or synthetic properties—fails closed before persistence.
+   - For restart rehydration, `reconstructFromDurableStore` populates the in-memory cache directly from canonical K0 SQLite storage without live re-branding into the verifier `WeakSet`.
+   - **Threat Model Boundary:** We defend against accidental, unverified, or synthetic receipt registration via public runtime APIs in the same Node.js/Electron process without claiming cryptographic protection against arbitrary memory execution or bytecode patching.
 
 4. **Clean Lifecycle Shutdown:**
    - Both `KernelHost.shutdown()` and `RunService.stopScheduler()` invoke `ModelCapabilityHistory.getInstance().detachDurableWriter()` prior to shutting down `WorkSessionKernel`, preventing dangling handles.

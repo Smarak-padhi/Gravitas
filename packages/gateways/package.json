@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@gravitas/core": "^0.0.1",
+    "@gravitas/verifier": "*",
     "zod": "^3.24.2"
   },
   "devDependencies": {

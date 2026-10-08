@@ -368,6 +368,50 @@ describe('GRAVITAS V1-B-R3 — Production K5 Persistence & Runtime Verification'
       });
     }).toThrow(/Cannot issue authoritative K5 verification receipt: VerificationResult was not produced by executeVerification authority/);
 
+    // Test C: In-process forged receipt with matching fields and Symbol.for brand is rejected fail-closed before persistence
+    const forgedBrandedReceipt = {
+      receiptId: 'k5rcpt_forged_branded_999',
+      planId: 'plan-forged',
+      workSessionId: 'ws-forged',
+      taskId: 'task-forged',
+      runId: 'run-forged',
+      attemptNumber: 1,
+      verdict: 'VERIFIED_PASS' as const,
+      commandsCount: 1,
+      passedCommandsCount: 1,
+      failedCommandsCount: 0,
+      completedAt: new Date().toISOString(),
+      issuedAt: new Date().toISOString(),
+      superseded: false,
+      [Symbol.for('gravitas.k5.authority')]: true,
+    };
+
+    expect(() => {
+      history.registerAuthoritativeReceipt(forgedBrandedReceipt as any);
+    }).toThrow(/K5 receipt provenance failure: receipt 'k5rcpt_forged_branded_999' was not issued by trusted verification authority/);
+
+    // Verify forged receipt was rejected BEFORE persistence and never committed to SQLite
+    expect(store.getK5Receipt('k5rcpt_forged_branded_999')).toBeUndefined();
+
+    // Verify observation referencing forged receipt is rejected fail-closed
+    expect(() => {
+      history.recordObservation({
+        observationId: 'obs_forged_001',
+        taskId: 'task-forged',
+        taskDomain: 'code_generation',
+        taskComplexityClass: 'LOW',
+        provider: 'nvidia-nim',
+        model: 'meta/llama-3.1-70b-instruct',
+        qualificationIdentity: 'test',
+        attemptNumber: 1,
+        k5VerifiedOutcome: 'VERIFIED_PASS',
+        latencyMs: 100,
+        verificationPlanId: 'plan-forged',
+        verificationReceiptId: 'k5rcpt_forged_branded_999',
+        timestamp: new Date().toISOString(),
+      });
+    }).toThrow(/does not exist in authoritative verification records/);
+
     await kernel.shutdown();
   });
 

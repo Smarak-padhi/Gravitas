@@ -36,6 +36,7 @@ export {
   executeVerification,
   createVerificationReceipt,
   createAuthoritativeReceiptForTest,
+  isAuthoritativeK5Receipt,
   type ExecuteVerificationInput,
 } from './verifier.js'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { K5_AUTHORITY_BRAND } from '@gravitas/core';
+import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
 import { ModelRouter, MODEL_ROUTER_POLICY_VERSION } from '../models/router.js';
 import { ModelRegistry } from '../models/registry.js';
 import { ModelCapabilityHistory } from '../models/history.js';
@@ -245,7 +245,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
     // Record high success rate for mixtral (10/10 passes) with valid K5 receipt binding
     for (let i = 0; i < 10; i++) {
       const receiptId = `receipt-k5-mix-${i}`;
-      history.registerAuthoritativeReceipt({
+      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
         receiptId,
         planId: 'plan-k5-tiebreak-mixtral',
         workSessionId: 'ws-test',
@@ -258,8 +258,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
-        [K5_AUTHORITY_BRAND]: true,
-      });
+      } as any));
       history.recordObservation({
         observationId: `obs_mix_${i}`,
         taskId: `task-mix-${i}`,
@@ -282,7 +281,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
     for (let i = 0; i < 10; i++) {
       const receiptId = `receipt-k5-8b-${i}`;
       const verdict = i < 2 ? 'VERIFIED_PASS' : 'VERIFIED_FAIL';
-      history.registerAuthoritativeReceipt({
+      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
         receiptId,
         planId: 'plan-k5-tiebreak-8b',
         workSessionId: 'ws-test',
@@ -295,8 +294,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         failedCommandsCount: verdict === 'VERIFIED_FAIL' ? 1 : 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
-        [K5_AUTHORITY_BRAND]: true,
-      });
+      } as any));
       history.recordObservation({
         observationId: `obs_8b_${i}`,
         taskId: `task-8b-${i}`,
