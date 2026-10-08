@@ -1,0 +1,175 @@
+﻿{
+  "timestamp": "2026-10-08T10:49:01.050Z",
+  "overallStatus": "PASS",
+  "exitCode": 0,
+  "platform": {
+    "os": "win32 (10.0.26300)",
+    "arch": "x64",
+    "nodeVersion": "v24.13.0"
+  },
+  "paths": {
+    "dataRoot": "C:\\Users\\smara\\AppData\\Roaming\\gravitas",
+    "databasePath": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\kernel.db",
+    "lockPath": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\kernel.lock",
+    "logsDir": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\logs",
+    "artifactsDir": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\artifacts",
+    "configPath": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\config.json",
+    "isTestOverride": false
+  },
+  "checks": [
+    {
+      "code": "PLATFORM_WINDOWS_CHECK",
+      "name": "Windows Platform Environment",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Running on Windows (10.0.26300, arch: x64)",
+      "details": {
+        "platform": "win32",
+        "release": "10.0.26300",
+        "arch": "x64"
+      }
+    },
+    {
+      "code": "NODE_RUNTIME_CHECK",
+      "name": "Node.js Engine Version",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Node.js version v24.13.0 meets requirement (>= v22.0.0)",
+      "details": {
+        "currentVersion": "v24.13.0",
+        "requiredMajor": 22
+      }
+    },
+    {
+      "code": "DATA_ROOT_WRITABLE_CHECK",
+      "name": "User Data Root & Directory Writability",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Data root is writable: C:\\Users\\smara\\AppData\\Roaming\\gravitas",
+      "details": {
+        "dataRoot": "C:\\Users\\smara\\AppData\\Roaming\\gravitas",
+        "isTestOverride": false
+      }
+    },
+    {
+      "code": "SQLITE_KERNEL_DB_CHECK",
+      "name": "SQLite Kernel Store",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Database file does not exist yet. It will be initialized cleanly on first launch at: C:\\Users\\smara\\AppData\\Roaming\\gravitas\\kernel.db",
+      "details": {
+        "exists": false,
+        "databasePath": "C:\\Users\\smara\\AppData\\Roaming\\gravitas\\kernel.db"
+      }
+    },
+    {
+      "code": "SCHEMA_MIGRATION_CHECK",
+      "name": "Schema Version Compatibility",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Fresh installation: schema will initialize at version 1.",
+      "details": {
+        "targetSchemaVersion": 1
+      }
+    },
+    {
+      "code": "ELECTRON_ASSETS_CHECK",
+      "name": "Electron Desktop Bundle Assets",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "All compiled desktop bundles are present in apps/desktop/dist.",
+      "details": {
+        "distMainExists": true,
+        "distPreloadExists": true,
+        "distRendererExists": true,
+        "distKernelHostExists": true
+      }
+    },
+    {
+      "code": "HARNESS_POWERSHELL_CHECK",
+      "name": "PowerShell Harness (Deterministic Execution)",
+      "severity": "OPTIONAL",
+      "status": "OK",
+      "message": "PowerShell CLI is available (version 5.1.26100.9549).",
+      "details": {
+        "version": "5.1.26100.9549",
+        "surface": "CLI_DETERMINISTIC"
+      }
+    },
+    {
+      "code": "HARNESS_CLAUDE_CODE_CHECK",
+      "name": "Claude Code Agent Harness",
+      "severity": "OPTIONAL",
+      "status": "OK",
+      "message": "Claude Code binary detected at: C:\\Users\\smara\\AppData\\Roaming\\npm\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.exe (qualification requires separate human authorization)",
+      "details": {
+        "installed": true,
+        "executablePath": "C:\\Users\\smara\\AppData\\Roaming\\npm\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.exe"
+      }
+    },
+    {
+      "code": "HARNESS_CODEX_CHECK",
+      "name": "Codex Agent Harness",
+      "severity": "OPTIONAL",
+      "status": "UNAVAILABLE",
+      "message": "Codex CLI binary not found (optional harness; deterministic-only mode operates cleanly without it).",
+      "details": {
+        "installed": false
+      }
+    },
+    {
+      "code": "HARNESS_AGY_CHECK",
+      "name": "Google Antigravity CLI (agy)",
+      "severity": "OPTIONAL",
+      "status": "OK",
+      "message": "Antigravity CLI detected at: C:\\Users\\smara\\AppData\\Local\\agy\\bin\\agy.exe",
+      "details": {
+        "installed": true,
+        "executablePath": "C:\\Users\\smara\\AppData\\Local\\agy\\bin\\agy.exe"
+      }
+    },
+    {
+      "code": "CREDENTIAL_NVIDIA_CHECK",
+      "name": "NVIDIA NIM Provider Configuration",
+      "severity": "OPTIONAL",
+      "status": "UNAVAILABLE",
+      "message": "NVIDIA NIM API key not configured (AUTH_REQUIRED). Deterministic-only mode active.",
+      "details": {
+        "configured": false,
+        "maskedState": "[NOT_CONFIGURED]",
+        "liveProbesSent": 0
+      },
+      "remediation": "Optional: Set NVIDIA_API_KEY or use setup wizard if model intelligence is desired."
+    },
+    {
+      "code": "NETWORK_SPEND_POLICY_CHECK",
+      "name": "Network Containment & Zero-Spend Policy",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Zero-dollar default spend enforced: paidFallbackPermitted=false, autonomousPaymentAuthority=false.",
+      "details": {
+        "defaultTier": "FREE_OPEN_SOURCE_LOCAL",
+        "paidFallbackPermitted": false,
+        "autonomousPaymentAuthority": false,
+        "outOfPocketSpendUsd": 0
+      }
+    },
+    {
+      "code": "RECOVERY_LOCK_CHECK",
+      "name": "Data Root Single-Writer Lock",
+      "severity": "REQUIRED",
+      "status": "OK",
+      "message": "Zero active lock files: data root is clean and ready for kernel acquisition.",
+      "details": {
+        "lockHeld": false
+      }
+    }
+  ],
+  "summary": {
+    "total": 13,
+    "ok": 11,
+    "warning": 0,
+    "blocked": 0,
+    "unavailable": 2
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-10-08T10:50:00.000Z",
+  "wave": "V1-C",
+  "status": "VERIFIED_PASS",
+  "invariants": {
+    "zeroSecretLeakageToDisk": true,
+    "atomicPersistence": true,
+    "nonDestructiveCorruptionRecovery": true,
+    "restartPreservation": true,
+    "deterministicOnlyDefault": true
+  },
+  "evidence": {
+    "freshEnvironmentDefaults": {
+      "completed": false,
+      "step": "WELCOME",
+      "operatingMode": "DETERMINISTIC_ONLY",
+      "selectedHarnesses": [
+        "harness:powershell:desktop"
+      ],
+      "providerConfigured": false
+    },
+    "atomicWriteMechanism": {
+      "strategy": "temp_file_write_plus_rename",
+      "temporaryPrefix": ".config-tmp-",
+      "fallbackForContention": "direct_sync_overwrite_with_cleanup"
+    },
+    "corruptionRecovery": {
+      "backupPattern": "config.json.corrupt-<timestamp>",
+      "dataPreserved": true,
+      "unhandledExceptions": 0,
+      "fallbackAction": "return_default_configuration_and_flag_wasCorrupt"
+    },
+    "credentialIsolation": {
+      "storageTier": "VOLATILE_MEMORY_ONLY",
+      "broker": "ModelCredentialBroker",
+      "persistedInConfig": false,
+      "redactedPreviewPattern": "[CREDENTIAL_PRESENT:nvidia-nim]"
+    },
+    "restartRecoveryTest": {
+      "preRestartConfig": {
+        "completed": true,
+        "operatingMode": "ASSISTED",
+        "selectedHarnesses": [
+          "harness:antigravity:host",
+          "harness:powershell"
+        ],
+        "providerConfigured": true
+      },
+      "postRestartConfig": {
+        "completed": true,
+        "operatingMode": "ASSISTED",
+        "selectedHarnesses": [
+          "harness:antigravity:host",
+          "harness:powershell"
+        ],
+        "providerConfigured": true
+      },
+      "fidelity": "EXACT_MATCH"
+    }
+  }
+}

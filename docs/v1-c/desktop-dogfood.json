@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-10-08T10:49:25.862Z",
+  "status": "PASS",
+  "totalSteps": 13,
+  "passedSteps": 13,
+  "telemetry": {
+    "step1_commandCenterDefault": true,
+    "step2_kernelPid": 11660,
+    "step2_mainPid": 25048,
+    "step3_workSessionProjection": {
+      "activeWorkSessionsCount": 0,
+      "canonicalRevision": 1,
+      "sessionsCount": 0
+    },
+    "step4_spatialActivated": true,
+    "step5_spatialViewActive": true,
+    "step6_kernelPidAfterSpatial": 11660,
+    "step6_pidStable": true,
+    "step7_sessionProjectionStable": true,
+    "step8_returnedToCommandCenter": true,
+    "step9_canonicalStateStable": true,
+    "step10_noDuplicateKernelProcess": true,
+    "step11_rendererSandboxed": true,
+    "step12_normalShutdown": true,
+    "step13_noOrphans": true,
+    "errors": [],
+    "logs": [
+      "[2026-10-08T10:49:19.160Z] Launching Electron with main path: C:\\Users\\smara\\Desktop\\Multi-agent\\apps\\desktop\\dist\\main\\index.js",
+      "[2026-10-08T10:49:21.562Z] Step 1: #cc-main visible: true, #living-hq visible: false, command pressed: true, world pressed: false",
+      "[2026-10-08T10:49:21.567Z] Step 2: #pids-text: \"Main: 25048 / Kernel: 0\", badge: \"READY\"",
+      "[2026-10-08T10:49:21.572Z] Step 2 Health: mainPid=25048, kernelPid=11660, status=READY",
+      "[2026-10-08T10:49:21.596Z] Step 3: activeSessions=0, canonicalRevision=1, hierarchySessions=0",
+      "[2026-10-08T10:49:21.604Z] Step 3b Model Intelligence: providerStatus=AUTH_REQUIRED, qualifiedCount=0, candidateCount=3",
+      "[2026-10-08T10:49:21.604Z] Step 4: Clicking #btn-view-world to activate Living HQ...",
+      "[2026-10-08T10:49:22.367Z] Step 5: #living-hq visible: true, #cc-main visible: false, world pressed: true",
+      "[2026-10-08T10:49:22.376Z] Step 6: kernelPid after spatial: 11660 (initial: 11660)",
+      "[2026-10-08T10:49:22.385Z] Step 7: overview after spatial: activeSessions=0, canonicalRevision=1",
+      "[2026-10-08T10:49:22.385Z] Step 8: Clicking #btn-view-command to return to Command Center...",
+      "[2026-10-08T10:49:23.076Z] Step 8: #cc-main visible: true, #living-hq visible: false, cmd pressed: true",
+      "[2026-10-08T10:49:23.083Z] Step 9: final canonical revision=1, kernelPid=11660",
+      "[2026-10-08T10:49:23.083Z] Step 10: Checking kernel process uniqueness...",
+      "[2026-10-08T10:49:23.086Z] Step 11: Sandbox check: {\"hasProcess\":false,\"hasRequire\":false,\"hasBuffer\":false,\"hasIpcRenderer\":false,\"hasElectron\":false,\"hasBridge\":true}",
+      "[2026-10-08T10:49:23.086Z] Step 12: Requesting normal shutdown via gravitas:quit-app (requestQuitApplication)...",
+      "[2026-10-08T10:49:23.297Z] Step 12: Received electronApp close event",
+      "[2026-10-08T10:49:23.297Z] Step 13: Checking if mainPid 25048 or kernelPid 11660 are still running...",
+      "[2026-10-08T10:49:25.862Z] Step 13: mainPid 25048 alive: false, kernelPid 11660 alive: false",
+      "[2026-10-08T10:49:25.862Z] Step 13: Confirmed zero orphan processes remaining"
+    ],
+    "step3b_modelIntelligence": {
+      "providerStatus": "AUTH_REQUIRED",
+      "qualifiedModelsCount": 0,
+      "candidateModelsCount": 3,
+      "costPolicy": "STRICT_ZERO_DOLLAR_FREE",
+      "outOfPocketUsd": 0,
+      "paidFallbackPermitted": false
+    }
+  }
+}

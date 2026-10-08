@@ -28,7 +28,20 @@ import {
   type ActivityProjection,
   type OperatorIntent,
   type IntentResult,
+  type OnboardingStateProjection,
+  type SaveOnboardingPayload,
+  type ConfigureProviderPayload,
+  type ConfigureProviderResult,
 } from '../types.js'
+
+import {
+  resolveGravitasDataRoot,
+  readGravitasConfig,
+  writeGravitasConfig,
+  runGravitasDoctor,
+  type DoctorReport,
+} from '@gravitas/core'
+import { ModelCredentialBroker } from '@gravitas/gateways'
 
 export interface ProcessBridge {
   postMessage(msg: unknown): void
@@ -45,6 +58,7 @@ export interface DesktopSupervisorOptions {
   readonly onError?: (err: SafeDesktopError) => void
   readonly onProjectionUpdate?: (projectionType: string) => void
   readonly protocolVersion?: string
+  readonly dataRoot?: string
 }
 
 export class DesktopSupervisor {
@@ -58,6 +72,7 @@ export class DesktopSupervisor {
   private onError?: (err: SafeDesktopError) => void
   private onProjectionUpdate?: (projectionType: string) => void
   private readonly protocolVersion: string
+  private readonly dataRoot: string
   private isShuttingDown = false
 
   constructor(opts: DesktopSupervisorOptions = {}) {
@@ -68,6 +83,11 @@ export class DesktopSupervisor {
     this.onError = opts.onError
     this.onProjectionUpdate = opts.onProjectionUpdate
     this.protocolVersion = opts.protocolVersion ?? D0_PROTOCOL_VERSION
+    this.dataRoot = opts.dataRoot ?? resolveGravitasDataRoot().dataRoot
+  }
+
+  public getDataRoot(): string {
+    return this.dataRoot
   }
 
   public setOnProjectionUpdate(listener: (projectionType: string) => void): void {
@@ -578,6 +598,93 @@ export class DesktopSupervisor {
       },
       requestId
     )
+  }
+
+  public async getOnboarding(): Promise<OnboardingStateProjection> {
+    const cfg = readGravitasConfig(this.dataRoot)
+    const paths = resolveGravitasDataRoot(this.dataRoot)
+    const isTest = process.env.NODE_ENV === 'test' || paths.isTestOverride
+    return {
+      completed: cfg.onboarding.completed,
+      completedAt: cfg.onboarding.completedAt,
+      step: cfg.onboarding.step,
+      operatingMode: cfg.onboarding.operatingMode,
+      selectedHarnesses: cfg.onboarding.selectedHarnesses,
+      providerConfigured: cfg.onboarding.providerConfigured,
+      dataRoot: this.dataRoot,
+      isTest,
+    }
+  }
+
+  public async saveOnboarding(payload: SaveOnboardingPayload): Promise<boolean> {
+    try {
+      const current = readGravitasConfig(this.dataRoot)
+      const step = (payload.step as any) ?? current.onboarding.step
+      writeGravitasConfig(this.dataRoot, {
+        onboarding: {
+          ...current.onboarding,
+          completed: payload.completed,
+          completedAt: payload.completed ? (current.onboarding.completedAt ?? new Date().toISOString()) : undefined,
+          step,
+          operatingMode: payload.operatingMode ?? current.onboarding.operatingMode,
+          selectedHarnesses: payload.selectedHarnesses ?? current.onboarding.selectedHarnesses,
+        },
+      })
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  public async runDoctor(): Promise<DoctorReport> {
+    return runGravitasDoctor({ customDataRoot: this.dataRoot })
+  }
+
+  public async configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult> {
+    if (payload.providerId !== 'nvidia-nim') {
+      return {
+        success: false,
+        providerId: payload.providerId,
+        maskedHandle: '[UNSUPPORTED_PROVIDER]',
+        status: 'AUTH_REQUIRED',
+      }
+    }
+
+    const key = (payload.apiKey || '').trim()
+    if (!key) {
+      ModelCredentialBroker.getInstance().clearSecret('nvidia-nim')
+      const current = readGravitasConfig(this.dataRoot)
+      writeGravitasConfig(this.dataRoot, {
+        onboarding: {
+          ...current.onboarding,
+          providerConfigured: false,
+        },
+      })
+      return {
+        success: true,
+        providerId: 'nvidia-nim',
+        maskedHandle: '[NO_CREDENTIAL]',
+        status: 'AUTH_REQUIRED',
+      }
+    }
+
+    // Register into volatile in-memory broker only (zero persistence of key to disk)
+    ModelCredentialBroker.getInstance().registerSecret('nvidia-nim', key)
+    const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
+    const current = readGravitasConfig(this.dataRoot)
+    writeGravitasConfig(this.dataRoot, {
+      onboarding: {
+        ...current.onboarding,
+        providerConfigured: true,
+      },
+    })
+
+    return {
+      success: true,
+      providerId: 'nvidia-nim',
+      maskedHandle: handle.redactedPreview,
+      status: 'METADATA_VALIDATED',
+    }
   }
 
   public async shutdown(): Promise<void> {

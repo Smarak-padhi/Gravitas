@@ -73,6 +73,22 @@ const bridge: GravitasDesktopBridge = {
     return ipcRenderer.invoke('gravitas:submit-intent', intent)
   },
 
+  getOnboarding: async () => {
+    return ipcRenderer.invoke('gravitas:get-onboarding')
+  },
+
+  saveOnboarding: async (payload) => {
+    return ipcRenderer.invoke('gravitas:save-onboarding', payload)
+  },
+
+  runDoctor: async () => {
+    return ipcRenderer.invoke('gravitas:run-doctor')
+  },
+
+  configureProvider: async (payload) => {
+    return ipcRenderer.invoke('gravitas:configure-provider', payload)
+  },
+
   requestHideWindow: async (): Promise<void> => {
     return ipcRenderer.invoke('gravitas:hide-window')
   },

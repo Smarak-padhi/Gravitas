@@ -15,6 +15,7 @@ import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativ
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { DesktopSupervisor } from './supervisor.js'
+import { resolveGravitasDataRoot } from '@gravitas/core'
 import type { KernelLifecycleStatus, SafeDesktopError, OperatorIntent, DesktopLifecycleState } from '../types.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -245,6 +246,23 @@ export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWind
     return sup.submitIntent(intent)
   })
 
+  // V1-C Onboarding, Doctor & Provider Configuration IPC Handlers
+  ipcMain.handle('gravitas:get-onboarding', async () => {
+    return sup.getOnboarding()
+  })
+
+  ipcMain.handle('gravitas:save-onboarding', async (_event, payload) => {
+    return sup.saveOnboarding(payload)
+  })
+
+  ipcMain.handle('gravitas:run-doctor', async () => {
+    return sup.runDoctor()
+  })
+
+  ipcMain.handle('gravitas:configure-provider', async (_event, payload) => {
+    return sup.configureProvider(payload)
+  })
+
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)
   ipcMain.handle('gravitas:hide-window', async () => {
     hideCommandCenter()
@@ -270,9 +288,17 @@ export async function bootstrapDesktopApp(): Promise<void> {
   await app.whenReady()
   configureSecurityPolicies()
 
+  const customDataRoot = process.env.GRAVITAS_DATA_ROOT || resolveGravitasDataRoot().dataRoot
+
   supervisor = new DesktopSupervisor({
+    dataRoot: customDataRoot,
     forkProcess: () => {
-      const child = utilityProcess.fork(KERNEL_HOST_PATH)
+      const child = utilityProcess.fork(KERNEL_HOST_PATH, [], {
+        env: {
+          ...process.env,
+          GRAVITAS_DATA_ROOT: customDataRoot,
+        },
+      })
       return {
         postMessage: (msg: unknown) => child.postMessage(msg),
         on: (event: string, listener: any) => child.on(event as any, listener),

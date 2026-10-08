@@ -44,7 +44,8 @@
     "qualify:omniroute:dry": "npx tsx packages/gateways/scripts/qualify-omniroute.ts -- --dry-run",
     "test:gateway-composition": "npx tsx scripts/test-gateway-composition.ts",
     "test:d3": "vitest run apps/desktop/src/d3.test.ts",
-    "test:d4": "vitest run apps/desktop/src/d4.test.ts"
+    "test:d4": "vitest run apps/desktop/src/d4.test.ts",
+    "doctor": "node scripts/doctor.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

@@ -18,6 +18,9 @@
  * - HUMAN_APPROVAL != AUTO_MERGE / AUTO_DEPLOY / AUTO_RELEASE
  */
 
+import type { DoctorReport } from '@gravitas/core'
+export type { DoctorReport }
+
 export const D0_PROTOCOL_VERSION = 'd0.1'
 export const D1_PROTOCOL_VERSION = 'd1.0'
 export const D2_PROTOCOL_VERSION = 'd2.0'
@@ -313,6 +316,13 @@ export interface SystemProjection {
     readonly outOfPocketUsd: number
     readonly paidFallbackPermitted: false
   } | undefined
+  readonly onboardingSummary?: {
+    readonly completed: boolean
+    readonly operatingMode: 'DETERMINISTIC_ONLY' | 'ASSISTED'
+    readonly selectedHarnesses: readonly string[]
+    readonly providerConfigured: boolean
+    readonly isPortableDataRoot: boolean
+  } | undefined
   readonly recentErrors: readonly string[]
 }
 
@@ -549,6 +559,36 @@ export interface SafeDesktopError {
   readonly message: string
 }
 
+export interface OnboardingStateProjection {
+  readonly completed: boolean
+  readonly completedAt?: string | undefined
+  readonly step: string
+  readonly operatingMode: 'DETERMINISTIC_ONLY' | 'ASSISTED'
+  readonly selectedHarnesses: readonly string[]
+  readonly providerConfigured: boolean
+  readonly dataRoot: string
+  readonly isTest?: boolean | undefined
+}
+
+export interface SaveOnboardingPayload {
+  readonly completed: boolean
+  readonly step?: string | undefined
+  readonly operatingMode?: 'DETERMINISTIC_ONLY' | 'ASSISTED' | undefined
+  readonly selectedHarnesses?: readonly string[] | undefined
+}
+
+export interface ConfigureProviderPayload {
+  readonly providerId: 'nvidia-nim'
+  readonly apiKey: string
+}
+
+export interface ConfigureProviderResult {
+  readonly success: boolean
+  readonly providerId: string
+  readonly maskedHandle: string
+  readonly status: 'METADATA_VALIDATED' | 'AUTH_REQUIRED'
+}
+
 /**
  * Allowlisted Preload API exposed on `window.gravitasDesktop`.
  * Strictly typed, zero direct Node/IPC primitive exposure.
@@ -565,6 +605,10 @@ export interface GravitasDesktopBridge {
   getSystem(): Promise<SystemProjection>
   getActivity(): Promise<ActivityProjection>
   submitIntent(intent: OperatorIntent): Promise<IntentResult>
+  getOnboarding(): Promise<OnboardingStateProjection>
+  saveOnboarding(payload: SaveOnboardingPayload): Promise<boolean>
+  runDoctor(): Promise<DoctorReport>
+  configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult>
   requestHideWindow(): Promise<void>
   requestQuitApplication(): Promise<void>
   onKernelStatus(callback: (status: KernelLifecycleStatus) => void): () => void

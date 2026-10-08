@@ -78,8 +78,11 @@ export class ModelCredentialBroker {
   /**
    * Clears a credential reference.
    */
-  public clearSecret(credentialRef: string): boolean {
-    return this.vault.delete(credentialRef);
+  public clearSecret(credentialRefOrProviderId: string): boolean {
+    const ref = credentialRefOrProviderId.startsWith('vault:cred:')
+      ? credentialRefOrProviderId
+      : `vault:cred:${credentialRefOrProviderId}`
+    return this.vault.delete(ref);
   }
 
   /**

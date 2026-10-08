@@ -474,6 +474,14 @@
       <div class="card">
         <h2 class="card-title">System Diagnostics</h2>
         <div id="system-diagnostics-container">Loading system diagnostics...</div>
+        <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="btn-run-setup-wizard" class="btn btn-secondary">Open First-Run Setup Wizard</button>
+          <button id="btn-run-doctor" class="btn btn-secondary">Run System Doctor</button>
+        </div>
+      </div>
+      <div class="card" id="card-doctor-results" style="display: none; margin-top: 16px;">
+        <h2 class="card-title">Doctor Diagnostic Report</h2>
+        <div id="doctor-results-container"></div>
       </div>
     </section>
 
@@ -533,6 +541,164 @@
       <button id="dialog-btn-cancel" class="btn btn-secondary">Cancel</button>
       <button id="dialog-btn-reject" class="btn btn-danger">Reject</button>
       <button id="dialog-btn-approve" class="btn">Approve</button>
+    </div>
+  </dialog>
+
+  <!-- First-Run Setup Wizard (Wave V1-C) -->
+  <dialog id="onboarding-dialog" aria-labelledby="onboarding-heading" style="max-width: 640px; width: 90%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px;">
+      <h3 id="onboarding-heading" style="margin: 0; font-size: 16px;">GRAVITAS — Setup Wizard</h3>
+      <span id="onboarding-step-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Step 1 of 8</span>
+    </div>
+
+    <!-- Step A: Welcome -->
+    <div id="onboarding-step-1" class="onboarding-step" data-step="1">
+      <h4 style="margin-top: 0; color: #38bdf8;">Welcome & Local-First Architecture</h4>
+      <p style="font-size: 13px; line-height: 1.6; color: var(--text-main);">
+        GRAVITAS operates on a strict <strong>local-first, fail-closed</strong> foundation. All orchestration, state machines, and verification gates execute entirely within your local Windows environment.
+      </p>
+      <div class="invariant-banner" style="margin-top: 12px;">
+        INVARIANT: DETERMINISTIC VERIFICATION PRECEDES ALL DISPATCH.<br>
+        ZERO OUT-OF-POCKET EXPENSE REQUIRED. NO EXTERNAL ACCOUNTS MANDATED.
+      </div>
+    </div>
+
+    <!-- Step B: Environment Diagnostics -->
+    <div id="onboarding-step-2" class="onboarding-step" data-step="2" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Environment Diagnostics</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        The diagnostic engine verifies runtime environment readiness, single-writer SQLite integrity, and tool availability.
+      </p>
+      <div id="onboarding-doctor-preview" style="background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;">
+        Click "Run Diagnostics" to inspect local environment.
+      </div>
+      <div style="margin-top: 10px;">
+        <button id="onboarding-btn-run-doctor" class="btn btn-secondary">Run Diagnostics</button>
+      </div>
+    </div>
+
+    <!-- Step C: Data Location -->
+    <div id="onboarding-step-3" class="onboarding-step" data-step="3" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Data Root & Storage Readiness</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        Canonical state is preserved in an isolated directory with single-writer SQLite transaction guarantees.
+      </p>
+      <div class="dialog-field">
+        <span class="dialog-label">Active Data Root Directory</span>
+        <div id="onboarding-data-root-display" style="font-family: monospace; font-size: 12px; background: #000; padding: 8px; border: 1px solid var(--border); word-break: break-all;">
+          Loading...
+        </div>
+      </div>
+      <div class="dialog-field">
+        <span class="dialog-label">Storage Integrity</span>
+        <div id="onboarding-storage-status" style="font-size: 12px; color: var(--success);">
+          Database schema version: 1 | Single-writer lock verified
+        </div>
+      </div>
+    </div>
+
+    <!-- Step D: Operating Mode -->
+    <div id="onboarding-step-4" class="onboarding-step" data-step="4" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Operating Mode</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        Choose the initial execution mode for GRAVITAS:
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <input type="radio" name="onboarding-mode" id="onboarding-mode-deterministic" value="DETERMINISTIC_ONLY" checked style="margin-top: 3px;" />
+          <div>
+            <div style="font-weight: 600; font-size: 13px;">DETERMINISTIC_ONLY (Recommended Default)</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Zero external LLMs or APIs. Uses purely deterministic code, unit tests, and verified tools. Fully functional without an internet connection.</div>
+          </div>
+        </label>
+        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+          <input type="radio" name="onboarding-mode" id="onboarding-mode-assisted" value="ASSISTED" style="margin-top: 3px;" />
+          <div>
+            <div style="font-weight: 600; font-size: 13px;">ASSISTED</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Enables optional model intelligence using zero-spend NVIDIA NIM or local models under K3/K5 governance.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step E: Harness Discovery -->
+    <div id="onboarding-step-5" class="onboarding-step" data-step="5" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Harness Discovery & Selection</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        Select available execution harnesses in your environment:
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+        <label style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="harness-agy" value="harness:antigravity:host" checked disabled />
+          <span><strong>Antigravity Host</strong> (Built-in primary host runtime)</span>
+        </label>
+        <label style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="harness-powershell" value="harness:powershell" checked />
+          <span><strong>PowerShell</strong> (Native Windows shell execution)</span>
+        </label>
+        <label style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="harness-claude" value="harness:claude-code" />
+          <span><strong>Claude Code</strong> (Optional CLI harness)</span>
+        </label>
+        <label style="display: flex; gap: 8px; align-items: center;">
+          <input type="checkbox" id="harness-codex" value="harness:codex" />
+          <span><strong>Codex</strong> (Optional CLI harness)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step F: Optional NVIDIA NIM Setup -->
+    <div id="onboarding-step-6" class="onboarding-step" data-step="6" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Optional AI Provider: NVIDIA NIM</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        Configure a zero-spend NVIDIA NIM API key for assisted tasks. Keys are kept <strong>strictly in volatile memory</strong> and never saved to plaintext configuration or disk.
+      </p>
+      <div class="dialog-field">
+        <span class="dialog-label">API Key (nvapi-...)</span>
+        <input type="password" id="onboarding-nim-key-input" placeholder="nvapi-..." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-family: monospace; font-size: 12px;" />
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+        <button id="onboarding-btn-test-key" class="btn btn-secondary">Store Key in Volatile Memory</button>
+        <button id="onboarding-btn-clear-key" class="btn btn-secondary">Clear / Skip</button>
+        <span id="onboarding-nim-status" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Unconfigured</span>
+      </div>
+    </div>
+
+    <!-- Step G: Security & Spend Policy -->
+    <div id="onboarding-step-7" class="onboarding-step" data-step="7" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Security & Spend Policy</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        GRAVITAS enforces zero-dollar out-of-pocket spend and fail-closed security invariants:
+      </p>
+      <table style="margin-top: 10px;">
+        <tr><th>Policy Invariant</th><th>Enforcement Status</th></tr>
+        <tr><td>Autonomous Financial Spend</td><td style="color: var(--success);">BLOCKED ($0.00 Limit)</td></tr>
+        <tr><td>Paid Provider Fallback</td><td style="color: var(--success);">DISABLED</td></tr>
+        <tr><td>Architectural Decisions & Deployments</td><td style="color: var(--badge-ready);">HUMAN APPROVAL REQUIRED</td></tr>
+        <tr><td>Secret Storage</td><td style="color: var(--badge-ready);">VOLATILE IN-MEMORY ONLY</td></tr>
+      </table>
+    </div>
+
+    <!-- Step H: Review & Finish -->
+    <div id="onboarding-step-8" class="onboarding-step" data-step="8" style="display: none;">
+      <h4 style="margin-top: 0; color: #38bdf8;">Review & Complete Setup</h4>
+      <p style="font-size: 13px; color: var(--text-muted);">
+        Review your configuration before completing initial onboarding:
+      </p>
+      <div id="onboarding-review-summary" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; font-family: monospace; line-height: 1.6;">
+        Loading summary...
+      </div>
+    </div>
+
+    <div class="dialog-actions" style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 12px; justify-content: space-between;">
+      <div>
+        <button id="onboarding-btn-close" class="btn btn-secondary">Close</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="onboarding-btn-prev" class="btn btn-secondary" style="display: none;">Back</button>
+        <button id="onboarding-btn-next" class="btn">Next</button>
+        <button id="onboarding-btn-finish" class="btn" style="display: none;">Finish Setup</button>
+      </div>
     </div>
   </dialog>
 

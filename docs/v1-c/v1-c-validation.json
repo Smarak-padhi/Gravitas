@@ -1,0 +1,55 @@
+{
+  "wave": "V1-C",
+  "title": "Portability, First-Run Onboarding & Clean-Machine Readiness",
+  "timestamp": "2026-10-08T10:50:30.000Z",
+  "git": {
+    "branch": "feat/v0-golden-loop",
+    "baseHead": "910531cd44277225788409eaca21baa1f8c98c38",
+    "targetCommit": "LOCAL_COMMIT_ONLY_AWAITING_REVIEW"
+  },
+  "metrics": {
+    "baseline": {
+      "vitestTests": 1676,
+      "vitestFiles": 100,
+      "k0NativeTests": 51,
+      "totalAutomatedTests": 1727,
+      "electronDogfoodSteps": 13
+    },
+    "postImplementation": {
+      "vitestTests": 1699,
+      "vitestFiles": 104,
+      "k0NativeTests": 51,
+      "totalAutomatedTests": 1750,
+      "electronDogfoodSteps": 13,
+      "deltaAutomatedTests": 23,
+      "deltaTestFiles": 4
+    }
+  },
+  "verificationGates": {
+    "typecheck": "PASS",
+    "desktopBundle": "PASS",
+    "vitestSuite": "PASS",
+    "k0KernelSuite": "PASS",
+    "electronPhysicalDogfood": "PASS",
+    "doctorCli": "PASS",
+    "zeroSpendInvariant": "PASS",
+    "inMemoryCredentialIsolation": "PASS"
+  },
+  "doctor": {
+    "totalChecks": 13,
+    "okCount": 11,
+    "warningCount": 0,
+    "unavailableCount": 2,
+    "blockedCount": 0,
+    "exitCode": 0,
+    "overallStatus": "PASS"
+  },
+  "boundaries": {
+    "pushAttempted": false,
+    "mergeAttempted": false,
+    "liveModelCalls": 0,
+    "outOfPocketSpendUsd": 0.0,
+    "paidFallbackPermitted": false,
+    "v1DStarted": false
+  }
+}

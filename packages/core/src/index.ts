@@ -245,3 +245,39 @@ export {
   K5_AUTHORITY_BRAND,
 } from './kernel/persistence/sqliteWriter.js'
 
+// Portable runtime paths
+export {
+  type GravitasPaths,
+  PathResolutionError,
+  validateSafeDirectoryPath,
+  resolveGravitasDataRoot,
+  resolveGravitasPaths,
+  testDataRootWritable,
+  ensureDataRootDirectories,
+} from './paths.js'
+
+// Configuration and first-run onboarding
+export {
+  type GravitasOperatingMode,
+  type OnboardingStep,
+  type OnboardingState,
+  type GravitasConfig,
+  getDefaultOnboardingState,
+  getDefaultGravitasConfig,
+  loadGravitasConfig,
+  saveGravitasConfig,
+  readGravitasConfig,
+  writeGravitasConfig,
+} from './config.js'
+
+// System & environment diagnostics (Doctor)
+export {
+  type DiagnosticSeverity,
+  type DiagnosticStatus,
+  type DiagnosticCheckResult,
+  type DoctorReport,
+  type RunDoctorOptions,
+  GravitasDoctor,
+  runGravitasDoctor,
+} from './doctor.js'
+

@@ -19,6 +19,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { WorkSessionKernel, type WorkSessionSnapshot } from '@gravitas/core/kernel'
+import { resolveGravitasDataRoot, readGravitasConfig } from '@gravitas/core'
 import { ModelCapabilityHistory } from '@gravitas/gateways'
 import {
   D0_PROTOCOL_VERSION,
@@ -139,7 +140,7 @@ export class KernelHost {
       }
     })
 
-    this.dataRoot = opts.dataRoot ?? opts.dbPath ?? process.env.GRAVITAS_DATA_ROOT ?? join(tmpdir(), 'gravitas-desktop-kernel')
+    this.dataRoot = opts.dataRoot ?? opts.dbPath ?? process.env.GRAVITAS_DATA_ROOT ?? resolveGravitasDataRoot().dataRoot
     this.kernel = new WorkSessionKernel({
       dataRoot: this.dataRoot,
     })
@@ -506,6 +507,9 @@ export class KernelHost {
   }
 
   public generateSystemProjection(): SystemProjection {
+    const config = readGravitasConfig(this.dataRoot)
+    const paths = resolveGravitasDataRoot(this.dataRoot)
+
     return {
       supervisorStatus: this.status,
       kernelStatus: this.status,
@@ -540,6 +544,13 @@ export class KernelHost {
         costPolicy: 'STRICT_ZERO_DOLLAR_FREE',
         outOfPocketUsd: 0,
         paidFallbackPermitted: false,
+      },
+      onboardingSummary: {
+        completed: Boolean(config.onboarding?.completed),
+        operatingMode: config.onboarding?.operatingMode ?? 'DETERMINISTIC_ONLY',
+        selectedHarnesses: config.onboarding?.selectedHarnesses ?? ['harness:antigravity:host'],
+        providerConfigured: Boolean(config.onboarding?.providerConfigured),
+        isPortableDataRoot: !paths.isTestOverride,
       },
       recentErrors: [...this.recentErrors],
     }

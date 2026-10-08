@@ -24,6 +24,7 @@ import type {
   SystemProjection,
   ApprovalQueueItem,
   RecordHumanDecisionIntent,
+  DoctorReport,
 } from '../types.js'
 import { initWorldView } from './world/worldView.js'
 import type { WorldViewController } from './world/worldView.js'
@@ -516,6 +517,240 @@ export async function refreshAll(bridge: GravitasDesktopBridge): Promise<void> {
   ])
 }
 
+export function renderDoctorReport(container: HTMLElement, report: DoctorReport): void {
+  container.innerHTML = ''
+
+  const summary = document.createElement('div')
+  summary.style.marginBottom = '12px'
+  summary.style.display = 'flex'
+  summary.style.justifyContent = 'space-between'
+  summary.style.alignItems = 'center'
+  summary.style.padding = '8px 12px'
+  summary.style.borderRadius = '4px'
+  summary.style.background = '#0b0f19'
+  summary.style.border = '1px solid var(--border)'
+
+  const statusColor =
+    report.overallStatus === 'PASS'
+      ? 'var(--badge-ready)'
+      : report.overallStatus === 'WARN'
+      ? 'var(--badge-waiting)'
+      : 'var(--badge-offline)'
+
+  summary.innerHTML = `
+    <span><strong>Overall Status:</strong> <span style="color: ${statusColor}; font-family: monospace;">${report.overallStatus}</span> (Exit Code: ${report.exitCode})</span>
+    <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${report.timestamp}</span>
+  `
+  container.appendChild(summary)
+
+  const table = document.createElement('table')
+  const thead = document.createElement('thead')
+  thead.innerHTML = '<tr><th>Code</th><th>Name</th><th>Severity</th><th>Status</th><th>Message</th><th>Remediation</th></tr>'
+  table.appendChild(thead)
+
+  const tbody = document.createElement('tbody')
+  for (const c of report.checks) {
+    const tr = document.createElement('tr')
+    const color =
+      c.status === 'OK'
+        ? 'var(--badge-ready)'
+        : c.status === 'WARNING'
+        ? 'var(--badge-waiting)'
+        : 'var(--badge-offline)'
+
+    tr.innerHTML = `
+      <td style="font-family: monospace; font-size: 11px;">${c.code}</td>
+      <td style="font-weight: 600;">${c.name}</td>
+      <td style="font-size: 11px; color: var(--text-muted);">${c.severity}</td>
+      <td style="color: ${color}; font-weight: 600;">${c.status}</td>
+      <td style="font-family: sans-serif; font-size: 12px;">${c.message}</td>
+      <td style="font-size: 11px; color: var(--text-muted);">${c.remediation ?? '—'}</td>
+    `
+    tbody.appendChild(tr)
+  }
+  table.appendChild(tbody)
+  container.appendChild(table)
+}
+
+export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
+  const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
+  if (!dialog) return
+
+  let currentStep = 1
+  const TOTAL_STEPS = 8
+
+  function setStep(step: number): void {
+    if (step < 1 || step > TOTAL_STEPS) return
+    currentStep = step
+
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+      const stepEl = document.getElementById(`onboarding-step-${i}`)
+      if (stepEl) {
+        stepEl.style.display = i === currentStep ? 'block' : 'none'
+      }
+    }
+
+    const indicator = document.getElementById('onboarding-step-indicator')
+    if (indicator) indicator.textContent = `Step ${currentStep} of ${TOTAL_STEPS}`
+
+    const btnPrev = document.getElementById('onboarding-btn-prev')
+    const btnNext = document.getElementById('onboarding-btn-next')
+    const btnFinish = document.getElementById('onboarding-btn-finish')
+
+    if (btnPrev) btnPrev.style.display = currentStep > 1 ? 'inline-block' : 'none'
+    if (btnNext) btnNext.style.display = currentStep < TOTAL_STEPS ? 'inline-block' : 'none'
+    if (btnFinish) btnFinish.style.display = currentStep === TOTAL_STEPS ? 'inline-block' : 'none'
+
+    if (currentStep === 3) {
+      void bridge.getOnboarding().then((ob) => {
+        const rootDisplay = document.getElementById('onboarding-data-root-display')
+        if (rootDisplay) rootDisplay.textContent = ob.dataRoot
+      })
+    }
+
+    if (currentStep === 8) {
+      updateReviewSummary()
+    }
+  }
+
+  function updateReviewSummary(): void {
+    const summaryEl = document.getElementById('onboarding-review-summary')
+    if (!summaryEl) return
+
+    const isAssisted = (document.getElementById('onboarding-mode-assisted') as HTMLInputElement)?.checked
+    const mode = isAssisted ? 'ASSISTED' : 'DETERMINISTIC_ONLY'
+
+    const harnesses: string[] = ['harness:antigravity:host']
+    if ((document.getElementById('harness-powershell') as HTMLInputElement)?.checked) harnesses.push('harness:powershell')
+    if ((document.getElementById('harness-claude') as HTMLInputElement)?.checked) harnesses.push('harness:claude-code')
+    if ((document.getElementById('harness-codex') as HTMLInputElement)?.checked) harnesses.push('harness:codex')
+
+    const nimStatus = document.getElementById('onboarding-nim-status')?.textContent || 'Unconfigured'
+
+    summaryEl.innerHTML = `
+      <div><strong>Operating Mode:</strong> ${mode}</div>
+      <div><strong>Active Harnesses:</strong> ${harnesses.join(', ')}</div>
+      <div><strong>AI Provider (NVIDIA NIM):</strong> ${nimStatus}</div>
+      <div><strong>Autonomous Spend Ceiling:</strong> $0.00 (Zero out-of-pocket guarantee)</div>
+      <div><strong>Storage Guarantees:</strong> Single-writer SQLite transaction journal</div>
+    `
+  }
+
+  // Stepper navigation
+  document.getElementById('onboarding-btn-prev')?.addEventListener('click', () => {
+    setStep(currentStep - 1)
+  })
+
+  document.getElementById('onboarding-btn-next')?.addEventListener('click', () => {
+    setStep(currentStep + 1)
+  })
+
+  document.getElementById('onboarding-btn-close')?.addEventListener('click', () => {
+    dialog.close()
+  })
+
+  // Step 2 Doctor preview
+  document.getElementById('onboarding-btn-run-doctor')?.addEventListener('click', async () => {
+    const preview = document.getElementById('onboarding-doctor-preview')
+    if (preview) preview.textContent = 'Running diagnostics...'
+    try {
+      const rep = await bridge.runDoctor()
+      if (preview) renderDoctorReport(preview, rep)
+    } catch (err) {
+      if (preview) preview.textContent = `Diagnostic error: ${(err as Error).message}`
+    }
+  })
+
+  // Step 6 NIM Key configuration
+  document.getElementById('onboarding-btn-test-key')?.addEventListener('click', async () => {
+    const keyInput = document.getElementById('onboarding-nim-key-input') as HTMLInputElement | null
+    const key = keyInput?.value.trim() || ''
+    const statusEl = document.getElementById('onboarding-nim-status')
+    if (!key) {
+      if (statusEl) statusEl.textContent = 'Please enter key or click skip'
+      return
+    }
+    if (statusEl) statusEl.textContent = 'Storing key...'
+    try {
+      const res = await bridge.configureProvider({ providerId: 'nvidia-nim', apiKey: key })
+      if (statusEl) {
+        statusEl.textContent = res.success ? `Configured (${res.maskedHandle})` : 'Configuration failed'
+        statusEl.style.color = res.success ? 'var(--badge-ready)' : 'var(--badge-offline)'
+      }
+      if (keyInput) keyInput.value = ''
+    } catch (err) {
+      if (statusEl) statusEl.textContent = `Error: ${(err as Error).message}`
+    }
+  })
+
+  document.getElementById('onboarding-btn-clear-key')?.addEventListener('click', async () => {
+    const statusEl = document.getElementById('onboarding-nim-status')
+    const keyInput = document.getElementById('onboarding-nim-key-input') as HTMLInputElement | null
+    if (keyInput) keyInput.value = ''
+    try {
+      await bridge.configureProvider({ providerId: 'nvidia-nim', apiKey: '' })
+      if (statusEl) {
+        statusEl.textContent = 'Skipped / Unconfigured'
+        statusEl.style.color = 'var(--text-muted)'
+      }
+    } catch (err) {
+      if (statusEl) statusEl.textContent = `Error: ${(err as Error).message}`
+    }
+  })
+
+  // Step 8 Finish Setup
+  document.getElementById('onboarding-btn-finish')?.addEventListener('click', async () => {
+    const isAssisted = (document.getElementById('onboarding-mode-assisted') as HTMLInputElement)?.checked
+    const mode = isAssisted ? 'ASSISTED' : 'DETERMINISTIC_ONLY'
+
+    const harnesses: string[] = ['harness:antigravity:host']
+    if ((document.getElementById('harness-powershell') as HTMLInputElement)?.checked) harnesses.push('harness:powershell')
+    if ((document.getElementById('harness-claude') as HTMLInputElement)?.checked) harnesses.push('harness:claude-code')
+    if ((document.getElementById('harness-codex') as HTMLInputElement)?.checked) harnesses.push('harness:codex')
+
+    try {
+      await bridge.saveOnboarding({
+        completed: true,
+        operatingMode: mode,
+        selectedHarnesses: harnesses,
+      })
+      announce('Onboarding configuration saved successfully.')
+      dialog.close()
+      await refreshAll(bridge)
+    } catch (err) {
+      alert(`Failed to save setup: ${(err as Error).message}`)
+    }
+  })
+
+  // System Surface Buttons
+  document.getElementById('btn-run-setup-wizard')?.addEventListener('click', () => {
+    setStep(1)
+    dialog.showModal()
+  })
+
+  document.getElementById('btn-run-doctor')?.addEventListener('click', async () => {
+    const card = document.getElementById('card-doctor-results')
+    const container = document.getElementById('doctor-results-container')
+    if (card) card.style.display = 'block'
+    if (container) container.textContent = 'Running Gravitas Doctor diagnostics...'
+    try {
+      const rep = await bridge.runDoctor()
+      if (container) renderDoctorReport(container, rep)
+      announce(`Doctor report complete: ${rep.overallStatus}`)
+    } catch (err) {
+      if (container) container.textContent = `Doctor execution failed: ${(err as Error).message}`
+    }
+  })
+
+  // Auto-prompt on initial launch if not completed and not running under automated test override
+  void bridge.getOnboarding().then((ob) => {
+    if (!ob.completed && !ob.isTest) {
+      setStep(1)
+      dialog.show()
+    }
+  })
+}
+
 // ─── Initialization ──────────────────────────────────────────────────────────
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
@@ -525,6 +760,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       announce('Desktop bridge unavailable')
       return
     }
+
+    // Initialize onboarding & doctor controller
+    setupOnboardingController(bridge)
 
     // Tab navigation logic
     const tabs = document.querySelectorAll<HTMLButtonElement>('.nav-btn')
