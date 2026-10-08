@@ -57,6 +57,7 @@ import {
   SqliteWriter,
   type SQLiteContentionPolicy,
   type SQLiteDurabilityPolicy,
+  type DurableModelObservationStore,
 } from './persistence/sqliteWriter.js'
 import { StartupReconciler, type ReconciliationReport } from './reconciliation/startupReconciler.js'
 
@@ -838,6 +839,17 @@ export class WorkSessionKernel {
       }
       throw new KernelNotReadyError(this.lifecycleState)
     }
+  }
+
+  /**
+   * Narrow persistence port exposing only K5 receipts and model observations.
+   * Keeps raw SQLite database operations encapsulated within the kernel.
+   */
+  public getModelObservationStore(): DurableModelObservationStore {
+    if (this.lifecycleState !== 'READY' || !this.writer) {
+      throw new KernelNotReadyError(this.lifecycleState)
+    }
+    return this.writer
   }
 
   private getWriter(): SqliteWriter {

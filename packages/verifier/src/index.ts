@@ -32,7 +32,12 @@ export {
 export { runVerificationCommand } from './runner.js'
 
 // Independent verifier
-export { executeVerification, createVerificationReceipt, type ExecuteVerificationInput } from './verifier.js'
+export {
+  executeVerification,
+  createVerificationReceipt,
+  createAuthoritativeReceiptForTest,
+  type ExecuteVerificationInput,
+} from './verifier.js'
 
 // State transition authority
 export {

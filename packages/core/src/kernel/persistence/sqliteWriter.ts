@@ -37,6 +37,12 @@ export interface SQLiteDurabilityPolicy {
   readonly synchronous: 'NORMAL' | 'FULL'
 }
 
+/**
+ * Well-known brand symbol for authoritative K5 receipts issued by @gravitas/verifier.
+ * Prevents generic in-process callers from manufacturing unverified receipts.
+ */
+export const K5_AUTHORITY_BRAND = Symbol.for('gravitas.k5.authority')
+
 export interface K5ReceiptRecord {
   readonly receiptId: string
   readonly planId: string
@@ -76,6 +82,23 @@ export interface DurableModelObservation {
   readonly createdAt: string
 }
 
+/**
+ * Narrow persistence port for model capability observations and K5 receipts.
+ * Keeps raw database access restricted while providing durable storage.
+ */
+export interface DurableModelObservationStore {
+  insertK5Receipt(receipt: K5ReceiptRecord): void
+  getK5Receipt(receiptId: string): K5ReceiptRecord | undefined
+  listK5ReceiptsForTask(taskId: string): readonly K5ReceiptRecord[]
+  listAllK5Receipts(): readonly K5ReceiptRecord[]
+  markK5ReceiptSuperseded(receiptId: string): void
+  insertModelObservation(obs: DurableModelObservation): void
+  getModelObservation(observationId: string): DurableModelObservation | undefined
+  getModelObservationByReceiptId(receiptId: string): DurableModelObservation | undefined
+  listModelObservations(): readonly DurableModelObservation[]
+  listModelObservationsForModel(providerId: string, modelId: string): readonly DurableModelObservation[]
+}
+
 export interface SqliteWriterOptions {
   readonly databasePath: string
   readonly contentionPolicy?: SQLiteContentionPolicy | undefined
@@ -84,7 +107,7 @@ export interface SqliteWriterOptions {
   readonly synchronous?: 'NORMAL' | 'FULL' | undefined // Backward-compatibility convenience
 }
 
-export class SqliteWriter {
+export class SqliteWriter implements DurableModelObservationStore {
   private readonly db: DatabaseSync
   private readonly databasePath: string
   private readonly contentionPolicy: SQLiteContentionPolicy

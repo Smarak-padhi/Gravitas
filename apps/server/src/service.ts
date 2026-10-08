@@ -95,9 +95,11 @@ import {
   CURRENT_GATEWAY_NEXT_VERSION,
   GATEWAY_SECURITY_PROFILE_VERSION,
   computeRuntimeDependencyDigest,
+  ModelCapabilityHistory,
   type GatewayDescriptor,
   type GatewayRegistry,
 } from '@gravitas/gateways'
+import { WorkSessionKernel } from '@gravitas/core/kernel'
 import {
   applyVerificationOutcome,
   executeVerification,
@@ -154,6 +156,8 @@ export interface RunServiceOptions {
   readonly connectorRegistry?: ConnectorRegistry | undefined
   readonly connectorDbPath?: string | undefined
   readonly seedCalendarJobs?: boolean | undefined
+  readonly kernel?: WorkSessionKernel | undefined
+  readonly kernelDataRoot?: string | undefined
 }
 
 export class RunService {
@@ -176,6 +180,10 @@ export class RunService {
   public readonly connectorRegistry: ConnectorRegistry
   private readonly clock: Clock
 
+  private readonly kernel?: WorkSessionKernel | undefined
+  private readonly ownsKernel: boolean
+  private kernelStarted = false
+
   public constructor(options: RunServiceOptions) {
     this.registry = options.registry
     this.eventHub = options.eventHub
@@ -186,6 +194,16 @@ export class RunService {
     this.clock = options.clock ?? new SystemClock()
 
     mkdirSync(this.runtimeRoot, { recursive: true })
+
+    if (options.kernel) {
+      this.kernel = options.kernel
+      this.ownsKernel = false
+    } else {
+      this.kernel = new WorkSessionKernel({
+        dataRoot: options.kernelDataRoot ?? join(this.runtimeRoot, 'kernel'),
+      })
+      this.ownsKernel = true
+    }
     const dbPath = options.jobDbPath ?? join(this.runtimeRoot, 'jobs.db')
     this.jobStore = options.jobStore ?? new SqliteJobStore(dbPath)
 
@@ -285,6 +303,20 @@ export class RunService {
       })
       this.gatewayRegistry.loadEvidence('omniroute-local', './omniroute-qualification.json')
     }
+  }
+
+  public getKernel(): WorkSessionKernel | undefined {
+    return this.kernel
+  }
+
+  public async ensureKernelStarted(): Promise<void> {
+    if (!this.kernel || this.kernelStarted) return
+    if (this.kernel.getLifecycleState() === 'STOPPED') {
+      await this.kernel.start()
+    }
+    this.kernelStarted = true
+    const store = this.kernel.getModelObservationStore()
+    ModelCapabilityHistory.getInstance(store)
   }
 
   public listGateways(): GatewayDescriptor[] {
@@ -544,6 +576,9 @@ export class RunService {
       throw new InvalidRequestError('NO_HARNESS', 'No agent harness configured on RunService')
     }
 
+    await this.ensureKernelStarted()
+    const durableWriter = this.kernel?.getModelObservationStore()
+
     const scheduler = new BoundedScheduler({
       runId,
       plan,
@@ -551,6 +586,7 @@ export class RunService {
       baseBranch,
       runtimeRoot,
       harness: this.harness,
+      durableWriter,
       defaultVerificationPlan: this.registry.getVerificationPlan(runId) ?? this.defaultVerificationPlan,
       autoPauseOnWaitingApproval: true,
       onEvent: (event) => {
@@ -1207,6 +1243,13 @@ export class RunService {
     await this.jobScheduler.waitForActiveRuns()
     this.jobStore.close()
     this.connectorStore.close()
+    if (this.kernel && this.ownsKernel && this.kernelStarted) {
+      ModelCapabilityHistory.getInstance().detachDurableWriter()
+      await this.kernel.shutdown()
+      this.kernelStarted = false
+    } else if (this.kernelStarted) {
+      ModelCapabilityHistory.getInstance().detachDurableWriter()
+    }
   }
 
   public listJobs(filter?: JobFilter): BackgroundJob[] {

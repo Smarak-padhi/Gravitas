@@ -73,6 +73,7 @@ import {
   type TaskHandoff,
   type TaskRoleRequirement,
   type TaskState,
+  type DurableModelObservationStore,
 } from '@gravitas/core'
 import { executeGit, removeWorktree, type WorktreeAllocation } from '@gravitas/git'
 import { executeBrowserQa } from '@gravitas/browser-qa'
@@ -118,6 +119,7 @@ export interface BoundedSchedulerOptions {
   readonly onModelRouted?: ((taskId: string, decision: RoutingDecision) => void) | undefined
   readonly autoPauseOnWaitingApproval?: boolean | undefined
   readonly workSessionId?: string | undefined
+  readonly durableWriter?: DurableModelObservationStore | undefined
 }
 
 export class BoundedScheduler {
@@ -173,6 +175,10 @@ export class BoundedScheduler {
 
   public constructor(options: BoundedSchedulerOptions) {
     validateRunPlan(options.plan)
+
+    if (options.durableWriter) {
+      ModelCapabilityHistory.getInstance(options.durableWriter)
+    }
 
     this.runId = options.runId
     this.plan = options.plan

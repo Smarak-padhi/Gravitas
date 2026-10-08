@@ -13,9 +13,9 @@
 import type {
   ModelExecutionObservation,
 } from './types.js';
-import type {
-  SqliteWriter,
-  K5ReceiptRecord,
+import {
+  K5_AUTHORITY_BRAND,
+  type DurableModelObservationStore,
 } from '@gravitas/core';
 
 export interface ModelHistorySummary {
@@ -50,9 +50,9 @@ export class ModelCapabilityHistory {
   private readonly seenObservationIds = new Set<string>();
   private readonly authoritativeReceipts = new Map<string, K5ReceiptLike>();
   private readonly receiptToObservationId = new Map<string, string>();
-  private durableWriter: SqliteWriter | null = null;
+  private durableWriter: DurableModelObservationStore | null = null;
 
-  public constructor(durableWriter?: SqliteWriter | null) {
+  public constructor(durableWriter?: DurableModelObservationStore | null) {
     if (durableWriter) {
       this.setDurableWriter(durableWriter);
     }
@@ -65,14 +65,18 @@ export class ModelCapabilityHistory {
     return this.durableWriter !== null;
   }
 
-  public setDurableWriter(writer: SqliteWriter | null): void {
+  public setDurableWriter(writer: DurableModelObservationStore | null): void {
     this.durableWriter = writer;
     if (writer) {
       this.reconstructFromDurableStore(writer);
     }
   }
 
-  public static getInstance(durableWriter?: SqliteWriter | null): ModelCapabilityHistory {
+  public detachDurableWriter(): void {
+    this.durableWriter = null;
+  }
+
+  public static getInstance(durableWriter?: DurableModelObservationStore | null): ModelCapabilityHistory {
     if (!ModelCapabilityHistory.instance) {
       ModelCapabilityHistory.instance = new ModelCapabilityHistory(durableWriter);
     } else if (durableWriter && !ModelCapabilityHistory.instance.durableWriter) {
@@ -90,8 +94,16 @@ export class ModelCapabilityHistory {
 
   /**
    * Registers an authoritative K5 verification receipt.
+   * Strictly asserts trusted issuance brand to block forged receipts.
    */
   public registerAuthoritativeReceipt(receipt: K5ReceiptLike): void {
+    const isBranded = (receipt as any)[K5_AUTHORITY_BRAND] === true;
+    if (!isBranded) {
+      throw new Error(
+        `K5 receipt provenance failure: receipt '${receipt.receiptId}' was not issued by trusted verification authority. Forged receipts are rejected fail-closed.`
+      );
+    }
+
     this.authoritativeReceipts.set(receipt.receiptId, receipt);
     if (this.durableWriter) {
       this.durableWriter.insertK5Receipt({
@@ -131,10 +143,16 @@ export class ModelCapabilityHistory {
   /**
    * Reconstructs history deterministically from the canonical SQLite store.
    */
-  public reconstructFromDurableStore(writer: SqliteWriter): number {
+  public reconstructFromDurableStore(writer: DurableModelObservationStore): number {
     this.durableWriter = writer;
     const dbReceipts = writer.listAllK5Receipts();
     for (const r of dbReceipts) {
+      Object.defineProperty(r, K5_AUTHORITY_BRAND, {
+        value: true,
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      });
       this.authoritativeReceipts.set(r.receiptId, r);
     }
 

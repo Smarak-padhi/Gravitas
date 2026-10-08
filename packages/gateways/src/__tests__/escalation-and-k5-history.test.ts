@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { K5_AUTHORITY_BRAND } from '@gravitas/core';
 import { EscalationManager, HUMAN_GATE_FAILURE_CLASSES } from '../models/escalation.js';
 import { ModelCapabilityHistory } from '../models/history.js';
 
@@ -100,6 +101,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
+        [K5_AUTHORITY_BRAND]: true,
       });
 
       history.recordObservation({
@@ -143,6 +145,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
+        [K5_AUTHORITY_BRAND]: true,
       });
 
       history.recordObservation({

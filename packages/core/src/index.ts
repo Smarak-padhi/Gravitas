@@ -238,6 +238,10 @@ export {
 export type {
   K5ReceiptRecord,
   DurableModelObservation,
+  DurableModelObservationStore,
 } from './kernel/persistence/sqliteWriter.js'
-export { SqliteWriter } from './kernel/persistence/sqliteWriter.js'
+export {
+  SqliteWriter,
+  K5_AUTHORITY_BRAND,
+} from './kernel/persistence/sqliteWriter.js'
 

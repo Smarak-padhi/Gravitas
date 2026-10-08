@@ -19,6 +19,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { WorkSessionKernel, type WorkSessionSnapshot } from '@gravitas/core/kernel'
+import { ModelCapabilityHistory } from '@gravitas/gateways'
 import {
   D0_PROTOCOL_VERSION,
   D1_PROTOCOL_VERSION,
@@ -175,6 +176,8 @@ export class KernelHost {
     this.status = 'STARTING'
     try {
       await this.kernel.start()
+      const observationStore = this.kernel.getModelObservationStore()
+      ModelCapabilityHistory.getInstance(observationStore)
       this.status = 'READY'
       this.sendMessage({
         type: 'HELLO',
@@ -983,6 +986,7 @@ export class KernelHost {
 
       case 'SHUTDOWN_REQUEST': {
         this.status = 'STOPPING'
+        ModelCapabilityHistory.getInstance().detachDurableWriter()
         await this.kernel.shutdown()
         this.status = 'STOPPED'
         this.sendMessage({
@@ -1009,6 +1013,7 @@ export class KernelHost {
 
   public async shutdown(): Promise<void> {
     this.status = 'STOPPING'
+    ModelCapabilityHistory.getInstance().detachDurableWriter()
     await this.kernel.shutdown()
     this.status = 'STOPPED'
   }

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@gravitas/core": "*",
+    "@gravitas/gateways": "*",
     "@gravitas/harnesses": "*",
     "@gravitas/orchestrator": "*",
     "three": "^0.186.0"

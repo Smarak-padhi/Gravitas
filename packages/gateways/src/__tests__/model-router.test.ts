@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { K5_AUTHORITY_BRAND } from '@gravitas/core';
 import { ModelRouter, MODEL_ROUTER_POLICY_VERSION } from '../models/router.js';
 import { ModelRegistry } from '../models/registry.js';
 import { ModelCapabilityHistory } from '../models/history.js';
@@ -257,6 +258,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         failedCommandsCount: 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
+        [K5_AUTHORITY_BRAND]: true,
       });
       history.recordObservation({
         observationId: `obs_mix_${i}`,
@@ -293,6 +295,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         failedCommandsCount: verdict === 'VERIFIED_FAIL' ? 1 : 0,
         completedAt: new Date(Date.now() - 1000).toISOString(),
         issuedAt: new Date(Date.now() - 1000).toISOString(),
+        [K5_AUTHORITY_BRAND]: true,
       });
       history.recordObservation({
         observationId: `obs_8b_${i}`,

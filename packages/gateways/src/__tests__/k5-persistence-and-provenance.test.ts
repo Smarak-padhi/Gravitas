@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { SqliteWriter } from '@gravitas/core';
+import { SqliteWriter, K5_AUTHORITY_BRAND } from '@gravitas/core';
 import { ModelCapabilityHistory, type K5ReceiptLike } from '../models/history.js';
 import type { ModelExecutionObservation } from '../models/types.js';
 
@@ -47,6 +47,7 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
       completedAt: '2026-10-08T10:00:00.000Z',
       issuedAt: '2026-10-08T10:00:01.000Z',
       superseded: false,
+      [K5_AUTHORITY_BRAND]: true,
       ...overrides,
     };
   }

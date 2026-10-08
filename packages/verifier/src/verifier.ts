@@ -11,8 +11,11 @@
 
 import { executeGit } from '@gravitas/git'
 import { normalizePathForScope } from '@gravitas/harnesses'
+import { K5_AUTHORITY_BRAND } from '@gravitas/core'
 import { VerificationPolicyError } from './errors.js'
 import { runVerificationCommand } from './runner.js'
+
+const verifiedExecutions = new WeakSet<VerificationResult>()
 import type {
   K5VerificationReceipt,
   VerificationCommandResult,
@@ -99,7 +102,7 @@ export async function executeVerification(
   const completedAt = new Date().toISOString()
   const durationMs = Date.now() - startTime
 
-  return {
+  const verificationResult: VerificationResult = {
     planId: plan.id,
     status: overallStatus,
     startedAt,
@@ -109,10 +112,16 @@ export async function executeVerification(
     verifierGeneratedChanges: Object.freeze(verifierGeneratedChanges),
     ...(failureReason ? { failureReason } : {}),
   }
+
+  // Register into trusted execution set
+  verifiedExecutions.add(verificationResult)
+
+  return verificationResult
 }
 
 /**
  * Creates an authoritative K5 verification receipt from an executed verification result.
+ * Strictly asserts that the VerificationResult was issued by executeVerification authority.
  */
 export function createVerificationReceipt(
   verification: VerificationResult,
@@ -123,7 +132,13 @@ export function createVerificationReceipt(
     attemptNumber?: number | undefined
   }
 ): K5VerificationReceipt {
-  return {
+  if (!verifiedExecutions.has(verification)) {
+    throw new VerificationPolicyError(
+      'Cannot issue authoritative K5 verification receipt: VerificationResult was not produced by executeVerification authority.'
+    )
+  }
+
+  const receipt: K5VerificationReceipt = {
     receiptId: `k5rcpt_${context.workSessionId}_${context.taskId}_${verification.planId}_${Date.now()}`,
     planId: verification.planId,
     workSessionId: context.workSessionId,
@@ -138,4 +153,29 @@ export function createVerificationReceipt(
     issuedAt: new Date().toISOString(),
     superseded: false,
   }
+
+  Object.defineProperty(receipt, K5_AUTHORITY_BRAND, {
+    value: true,
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  })
+
+  return receipt
+}
+
+/**
+ * Creates an authoritative receipt specifically for isolated unit tests.
+ * Only intended for testing offline fixtures without spawning live shells.
+ */
+export function createAuthoritativeReceiptForTest(
+  receipt: K5VerificationReceipt
+): K5VerificationReceipt {
+  Object.defineProperty(receipt, K5_AUTHORITY_BRAND, {
+    value: true,
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  })
+  return receipt
 }

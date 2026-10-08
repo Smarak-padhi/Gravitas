@@ -7,7 +7,7 @@
  * DISCOVERED -> METADATA_VALIDATED -> AUTH_AVAILABLE -> ZERO_COST_ELIGIBLE -> CAPABILITY_PROBED -> QUALIFIED
  */
 
-import { getNvidiaProviderDescriptor, NVIDIA_PROVIDER_DESCRIPTOR, NVIDIA_SEEDED_MODELS } from '../providers/nvidia.js';
+import { getNvidiaProviderDescriptor, NVIDIA_SEEDED_MODELS } from '../providers/nvidia.js';
 import type {
   ModelCapabilityDomain,
   ModelCapabilityProfile,
