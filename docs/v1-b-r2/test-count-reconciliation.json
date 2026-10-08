@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-10-08T12:05:00.000Z",
+  "baseline_commit_v1_b": "a8bb8ba7e68bde2081a9ce3698c88124bed34cdd",
+  "baseline_commit_v1_b_r": "b9db995a259b2090298fa85cf4787d68eacb1696",
+  "test_count_evolution": {
+    "v1_b": {
+      "vitest_passed": 1643,
+      "vitest_files": 96,
+      "k0_native_passed": 51,
+      "automated_total": 1694,
+      "dogfood_steps": 13,
+      "combined_checks": 1707
+    },
+    "v1_b_r": {
+      "vitest_passed": 1651,
+      "vitest_files": 97,
+      "k0_native_passed": 51,
+      "automated_total": 1702,
+      "dogfood_steps": 13,
+      "combined_checks": 1715,
+      "incremental_tests_added": 8,
+      "breakdown_of_8_tests": [
+        "packages/gateways/src/__tests__/nvidia-provider.test.ts: +3 tests (Tests 4a-4g K3 falsification suite, Test 13 HTTP redirect policy)",
+        "packages/gateways/src/__tests__/escalation-and-k5-history.test.ts: +3 tests (Test 9 receipt-bound invariant, Test 10 observation idempotency, Test 11 durability disclosure)",
+        "packages/harnesses/src/process.test.ts: +2 tests (Subprocess env key purging, spawn env isolation)"
+      ]
+    },
+    "v1_b_r2": {
+      "vitest_passed": 1662,
+      "vitest_files": 98,
+      "k0_native_passed": 51,
+      "automated_total": 1713,
+      "dogfood_steps": 13,
+      "combined_checks": 1726,
+      "incremental_tests_added": 11,
+      "breakdown_of_11_tests": [
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 1 (Rejection of unrecorded / fabricated receipt)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 2 (Rejection of receipt from another task / substitution)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 3 (Rejection of receipt with plan ID mismatch)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 4 (Rejection of postdated receipt)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 5 (Rejection of receipt verdict mismatch)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 6 (Rejection of revoked or superseded receipt)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 7 (Rejection of reused receipt / 1:1 binding violation)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 8 (Rejection of observation without receipt ID in durable mode)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 9 (Durable persistence to SQLite tables)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 10 (Deterministic reconstruction on restart)",
+        "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts: Test 11 (Restart-safe idempotency without duplicate count inflation)"
+      ]
+    }
+  },
+  "reconciliation_verdict": "CONFIRMED_EXACT"
+}

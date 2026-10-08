@@ -307,9 +307,10 @@ async function runDogfood() {
     telemetry
   }
 
-  mkdirSync(join(process.cwd(), 'docs/v1-b-r'), { recursive: true })
+  const outDir = process.env.DOGFOOD_OUT_DIR || 'docs/v1-b-r2'
+  mkdirSync(join(process.cwd(), outDir), { recursive: true })
   writeFileSync(
-    join(process.cwd(), 'docs/v1-b-r/desktop-dogfood.json'),
+    join(process.cwd(), outDir, 'desktop-dogfood.json'),
     JSON.stringify(output, null, 2),
     'utf8'
   )

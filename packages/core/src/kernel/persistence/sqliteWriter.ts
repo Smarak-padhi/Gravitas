@@ -37,6 +37,45 @@ export interface SQLiteDurabilityPolicy {
   readonly synchronous: 'NORMAL' | 'FULL'
 }
 
+export interface K5ReceiptRecord {
+  readonly receiptId: string
+  readonly planId: string
+  readonly workSessionId: string
+  readonly taskId: string
+  readonly runId: string
+  readonly attemptNumber: number
+  readonly verdict: 'VERIFIED_PASS' | 'VERIFIED_FAIL'
+  readonly commandsCount: number
+  readonly passedCommandsCount: number
+  readonly failedCommandsCount: number
+  readonly completedAt: string
+  readonly issuedAt: string
+  readonly superseded: boolean
+}
+
+export interface DurableModelObservation {
+  readonly observationId: string
+  readonly workSessionId: string
+  readonly runId: string
+  readonly taskId: string
+  readonly attemptNumber: number
+  readonly providerId: string
+  readonly modelId: string
+  readonly taskDomain: string
+  readonly taskComplexity: string
+  readonly qualificationIdentity: string
+  readonly k5PlanId: string
+  readonly k5ReceiptId: string
+  readonly verifiedOutcome: 'VERIFIED_PASS' | 'VERIFIED_FAIL'
+  readonly latencyMs: number
+  readonly promptTokens: number
+  readonly completionTokens: number
+  readonly totalTokens: number
+  readonly failureClass?: string | undefined
+  readonly schemaVersion: number
+  readonly createdAt: string
+}
+
 export interface SqliteWriterOptions {
   readonly databasePath: string
   readonly contentionPolicy?: SQLiteContentionPolicy | undefined
@@ -498,6 +537,162 @@ export class SqliteWriter {
       leaseExpiresAt: row['lease_expires_at'] ? String(row['lease_expires_at']) : undefined,
       createdAt: String(row['created_at']),
       updatedAt: String(row['updated_at']),
+    }
+  }
+
+  // --- K5 Verification Receipts ---
+
+  public insertK5Receipt(receipt: K5ReceiptRecord): void {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO k5_verification_receipts (
+        receipt_id, plan_id, work_session_id, task_id, run_id, attempt_number,
+        verdict, commands_count, passed_commands_count, failed_commands_count,
+        completed_at, issued_at, superseded
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `)
+    stmt.run(
+      receipt.receiptId,
+      receipt.planId,
+      receipt.workSessionId,
+      receipt.taskId,
+      receipt.runId,
+      receipt.attemptNumber,
+      receipt.verdict,
+      receipt.commandsCount,
+      receipt.passedCommandsCount,
+      receipt.failedCommandsCount,
+      receipt.completedAt,
+      receipt.issuedAt,
+      receipt.superseded ? 1 : 0
+    )
+  }
+
+  public getK5Receipt(receiptId: string): K5ReceiptRecord | undefined {
+    const stmt = this.db.prepare('SELECT * FROM k5_verification_receipts WHERE receipt_id = ?;')
+    const row = stmt.get(receiptId) as Record<string, unknown> | undefined
+    if (!row) return undefined
+    return this.mapK5ReceiptRow(row)
+  }
+
+  public listK5ReceiptsForTask(taskId: string): readonly K5ReceiptRecord[] {
+    const stmt = this.db.prepare('SELECT * FROM k5_verification_receipts WHERE task_id = ? ORDER BY issued_at ASC;')
+    const rows = stmt.all(taskId) as Record<string, unknown>[]
+    return rows.map((r) => this.mapK5ReceiptRow(r))
+  }
+
+  public listAllK5Receipts(): readonly K5ReceiptRecord[] {
+    const stmt = this.db.prepare('SELECT * FROM k5_verification_receipts ORDER BY issued_at ASC;')
+    const rows = stmt.all() as Record<string, unknown>[]
+    return rows.map((r) => this.mapK5ReceiptRow(r))
+  }
+
+  public markK5ReceiptSuperseded(receiptId: string): void {
+    const stmt = this.db.prepare('UPDATE k5_verification_receipts SET superseded = 1 WHERE receipt_id = ?;')
+    stmt.run(receiptId)
+  }
+
+  private mapK5ReceiptRow(row: Record<string, unknown>): K5ReceiptRecord {
+    return {
+      receiptId: String(row['receipt_id']),
+      planId: String(row['plan_id']),
+      workSessionId: String(row['work_session_id']),
+      taskId: String(row['task_id']),
+      runId: String(row['run_id']),
+      attemptNumber: Number(row['attempt_number']),
+      verdict: row['verdict'] as 'VERIFIED_PASS' | 'VERIFIED_FAIL',
+      commandsCount: Number(row['commands_count']),
+      passedCommandsCount: Number(row['passed_commands_count']),
+      failedCommandsCount: Number(row['failed_commands_count']),
+      completedAt: String(row['completed_at']),
+      issuedAt: String(row['issued_at']),
+      superseded: Number(row['superseded']) === 1,
+    }
+  }
+
+  // --- Durable Model Observations ---
+
+  public insertModelObservation(obs: DurableModelObservation): void {
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO model_observations (
+        observation_id, work_session_id, run_id, task_id, attempt_number,
+        provider_id, model_id, task_domain, task_complexity, qualification_identity,
+        k5_plan_id, k5_receipt_id, verified_outcome, latency_ms,
+        prompt_tokens, completion_tokens, total_tokens, failure_class,
+        schema_version, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `)
+    stmt.run(
+      obs.observationId,
+      obs.workSessionId,
+      obs.runId,
+      obs.taskId,
+      obs.attemptNumber,
+      obs.providerId,
+      obs.modelId,
+      obs.taskDomain,
+      obs.taskComplexity,
+      obs.qualificationIdentity,
+      obs.k5PlanId,
+      obs.k5ReceiptId,
+      obs.verifiedOutcome,
+      obs.latencyMs,
+      obs.promptTokens,
+      obs.completionTokens,
+      obs.totalTokens,
+      obs.failureClass ?? null,
+      obs.schemaVersion,
+      obs.createdAt
+    )
+  }
+
+  public getModelObservation(observationId: string): DurableModelObservation | undefined {
+    const stmt = this.db.prepare('SELECT * FROM model_observations WHERE observation_id = ?;')
+    const row = stmt.get(observationId) as Record<string, unknown> | undefined
+    if (!row) return undefined
+    return this.mapModelObservationRow(row)
+  }
+
+  public getModelObservationByReceiptId(receiptId: string): DurableModelObservation | undefined {
+    const stmt = this.db.prepare('SELECT * FROM model_observations WHERE k5_receipt_id = ?;')
+    const row = stmt.get(receiptId) as Record<string, unknown> | undefined
+    if (!row) return undefined
+    return this.mapModelObservationRow(row)
+  }
+
+  public listModelObservations(): readonly DurableModelObservation[] {
+    const stmt = this.db.prepare('SELECT * FROM model_observations ORDER BY created_at ASC;')
+    const rows = stmt.all() as Record<string, unknown>[]
+    return rows.map((r) => this.mapModelObservationRow(r))
+  }
+
+  public listModelObservationsForModel(providerId: string, modelId: string): readonly DurableModelObservation[] {
+    const stmt = this.db.prepare('SELECT * FROM model_observations WHERE provider_id = ? AND model_id = ? ORDER BY created_at ASC;')
+    const rows = stmt.all(providerId, modelId) as Record<string, unknown>[]
+    return rows.map((r) => this.mapModelObservationRow(r))
+  }
+
+  private mapModelObservationRow(row: Record<string, unknown>): DurableModelObservation {
+    return {
+      observationId: String(row['observation_id']),
+      workSessionId: String(row['work_session_id']),
+      runId: String(row['run_id']),
+      taskId: String(row['task_id']),
+      attemptNumber: Number(row['attempt_number']),
+      providerId: String(row['provider_id']),
+      modelId: String(row['model_id']),
+      taskDomain: String(row['task_domain']),
+      taskComplexity: String(row['task_complexity']),
+      qualificationIdentity: String(row['qualification_identity']),
+      k5PlanId: String(row['k5_plan_id']),
+      k5ReceiptId: String(row['k5_receipt_id']),
+      verifiedOutcome: row['verified_outcome'] as 'VERIFIED_PASS' | 'VERIFIED_FAIL',
+      latencyMs: Number(row['latency_ms']),
+      promptTokens: Number(row['prompt_tokens']),
+      completionTokens: Number(row['completion_tokens']),
+      totalTokens: Number(row['total_tokens']),
+      failureClass: row['failure_class'] ? String(row['failure_class']) : undefined,
+      schemaVersion: Number(row['schema_version'] ?? 1),
+      createdAt: String(row['created_at']),
     }
   }
 

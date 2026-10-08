@@ -243,8 +243,24 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
 
     // Record high success rate for mixtral (10/10 passes) with valid K5 receipt binding
     for (let i = 0; i < 10; i++) {
+      const receiptId = `receipt-k5-mix-${i}`;
+      history.registerAuthoritativeReceipt({
+        receiptId,
+        planId: 'plan-k5-tiebreak-mixtral',
+        workSessionId: 'ws-test',
+        taskId: `task-mix-${i}`,
+        runId: 'run-test',
+        attemptNumber: 1,
+        verdict: 'VERIFIED_PASS',
+        commandsCount: 1,
+        passedCommandsCount: 1,
+        failedCommandsCount: 0,
+        completedAt: new Date(Date.now() - 1000).toISOString(),
+        issuedAt: new Date(Date.now() - 1000).toISOString(),
+      });
       history.recordObservation({
         observationId: `obs_mix_${i}`,
+        taskId: `task-mix-${i}`,
         taskDomain: 'code_generation',
         taskComplexityClass: 'LOW',
         provider: 'nvidia-nim',
@@ -254,27 +270,44 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
         k5VerifiedOutcome: 'VERIFIED_PASS',
         latencyMs: 120,
         verificationPlanId: 'plan-k5-tiebreak-mixtral',
-        verificationReceiptId: `receipt-k5-${i}`,
-        verificationCompletedAt: new Date().toISOString(),
+        verificationReceiptId: receiptId,
+        verificationCompletedAt: new Date(Date.now() - 1000).toISOString(),
         timestamp: new Date().toISOString(),
       });
     }
 
     // Record low success rate for llama-8b (2/10 passes)
     for (let i = 0; i < 10; i++) {
+      const receiptId = `receipt-k5-8b-${i}`;
+      const verdict = i < 2 ? 'VERIFIED_PASS' : 'VERIFIED_FAIL';
+      history.registerAuthoritativeReceipt({
+        receiptId,
+        planId: 'plan-k5-tiebreak-8b',
+        workSessionId: 'ws-test',
+        taskId: `task-8b-${i}`,
+        runId: 'run-test',
+        attemptNumber: 1,
+        verdict,
+        commandsCount: 1,
+        passedCommandsCount: verdict === 'VERIFIED_PASS' ? 1 : 0,
+        failedCommandsCount: verdict === 'VERIFIED_FAIL' ? 1 : 0,
+        completedAt: new Date(Date.now() - 1000).toISOString(),
+        issuedAt: new Date(Date.now() - 1000).toISOString(),
+      });
       history.recordObservation({
         observationId: `obs_8b_${i}`,
+        taskId: `task-8b-${i}`,
         taskDomain: 'code_generation',
         taskComplexityClass: 'LOW',
         provider: 'nvidia-nim',
         model: 'meta/llama-3.1-8b-instruct',
         qualificationIdentity: 'llama8b@v1b',
         attemptNumber: 1,
-        k5VerifiedOutcome: i < 2 ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
+        k5VerifiedOutcome: verdict,
         latencyMs: 110,
         verificationPlanId: 'plan-k5-tiebreak-8b',
-        verificationReceiptId: `receipt-k5-${i}`,
-        verificationCompletedAt: new Date().toISOString(),
+        verificationReceiptId: receiptId,
+        verificationCompletedAt: new Date(Date.now() - 1000).toISOString(),
         timestamp: new Date().toISOString(),
       });
     }

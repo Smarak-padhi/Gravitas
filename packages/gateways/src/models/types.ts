@@ -167,6 +167,9 @@ export interface EscalationAction {
 
 export interface ModelExecutionObservation {
   readonly observationId: string;
+  readonly workSessionId?: string | undefined;
+  readonly runId?: string | undefined;
+  readonly taskId?: string | undefined;
   readonly taskDomain: string;
   readonly taskComplexityClass: 'LOW' | 'MEDIUM' | 'HIGH';
   readonly provider: string;
@@ -184,5 +187,6 @@ export interface ModelExecutionObservation {
   readonly verificationPlanId?: string | undefined;
   readonly verificationReceiptId?: string | undefined;
   readonly verificationCompletedAt?: string | undefined;
+  readonly schemaVersion?: number | undefined;
   readonly timestamp: string;
 }

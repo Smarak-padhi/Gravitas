@@ -437,6 +437,8 @@ test('GRAVITAS K0 WORKSESSION KERNEL TEST SUITE', async (t) => {
       assert.ok(tableNames.includes('durable_events'))
       assert.ok(tableNames.includes('command_receipts'))
       assert.ok(tableNames.includes('durable_jobs'))
+      assert.ok(tableNames.includes('k5_verification_receipts'))
+      assert.ok(tableNames.includes('model_observations'))
       db.close()
 
       await kernel.shutdown()

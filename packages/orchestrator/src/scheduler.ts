@@ -13,6 +13,7 @@
 import { join } from 'node:path'
 import {
   applyVerificationOutcome,
+  createVerificationReceipt,
   executeVerification,
   writeEvidenceBundle,
   type VerificationPlan,
@@ -116,12 +117,14 @@ export interface BoundedSchedulerOptions {
   readonly escalationManager?: EscalationManager | undefined
   readonly onModelRouted?: ((taskId: string, decision: RoutingDecision) => void) | undefined
   readonly autoPauseOnWaitingApproval?: boolean | undefined
+  readonly workSessionId?: string | undefined
 }
 
 export class BoundedScheduler {
   public readonly runId: string
   public readonly plan: RunPlan
   public readonly maxConcurrency: number
+  public readonly workSessionId?: string | undefined
 
   private readonly autoPauseOnWaitingApproval: boolean
 
@@ -174,6 +177,7 @@ export class BoundedScheduler {
     this.runId = options.runId
     this.plan = options.plan
     this.maxConcurrency = options.plan.maxConcurrency ?? 2
+    this.workSessionId = options.workSessionId
     this.repositoryRoot = options.repositoryRoot
     this.baseBranch = options.baseBranch
     this.runtimeRoot = options.runtimeRoot
@@ -902,10 +906,22 @@ export class BoundedScheduler {
         verification,
       })
 
+      // Issue and register authoritative K5 receipt (Wave V1-B-R2)
+      const k5Receipt = createVerificationReceipt(verification, {
+        workSessionId: this.workSessionId ?? 'session-default',
+        taskId,
+        runId: this.runId,
+        attemptNumber: 1,
+      })
+      ModelCapabilityHistory.getInstance().registerAuthoritativeReceipt(k5Receipt)
+
       // Record verification observation into ModelCapabilityHistory if a model was selected (Wave V1-B)
       if (modelDecision?.selectedModel) {
         ModelCapabilityHistory.getInstance().recordObservation({
           observationId: `obs_${this.runId}_${taskId}_${Date.now()}`,
+          workSessionId: this.workSessionId ?? 'session-default',
+          runId: this.runId,
+          taskId,
           taskDomain: taskDef?.title ?? 'general',
           taskComplexityClass: taskDef?.modelRequirements?.taskComplexityClass ?? 'MEDIUM',
           provider: modelDecision.selectedProvider ?? 'nvidia-nim',
@@ -915,8 +931,8 @@ export class BoundedScheduler {
           k5VerifiedOutcome: verification.status === 'PASSED' ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
           latencyMs: executionResult.durationMs,
           verificationPlanId: verification.planId,
-          verificationReceiptId: `receipt_${this.runId}_${taskId}_${verification.planId}`,
-          verificationCompletedAt: verification.completedAt ?? new Date().toISOString(),
+          verificationReceiptId: k5Receipt.receiptId,
+          verificationCompletedAt: k5Receipt.completedAt,
           timestamp: new Date().toISOString(),
         })
       }

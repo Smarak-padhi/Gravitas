@@ -14,6 +14,7 @@ import { normalizePathForScope } from '@gravitas/harnesses'
 import { VerificationPolicyError } from './errors.js'
 import { runVerificationCommand } from './runner.js'
 import type {
+  K5VerificationReceipt,
   VerificationCommandResult,
   VerificationPlan,
   VerificationResult,
@@ -107,5 +108,34 @@ export async function executeVerification(
     commands: Object.freeze(commandResults),
     verifierGeneratedChanges: Object.freeze(verifierGeneratedChanges),
     ...(failureReason ? { failureReason } : {}),
+  }
+}
+
+/**
+ * Creates an authoritative K5 verification receipt from an executed verification result.
+ */
+export function createVerificationReceipt(
+  verification: VerificationResult,
+  context: {
+    workSessionId: string
+    taskId: string
+    runId?: string | undefined
+    attemptNumber?: number | undefined
+  }
+): K5VerificationReceipt {
+  return {
+    receiptId: `k5rcpt_${context.workSessionId}_${context.taskId}_${verification.planId}_${Date.now()}`,
+    planId: verification.planId,
+    workSessionId: context.workSessionId,
+    taskId: context.taskId,
+    runId: context.runId ?? 'run-default',
+    attemptNumber: context.attemptNumber ?? 1,
+    verdict: verification.status === 'PASSED' ? 'VERIFIED_PASS' : 'VERIFIED_FAIL',
+    commandsCount: verification.commands.length,
+    passedCommandsCount: verification.commands.filter((c) => c.exitCode === 0).length,
+    failedCommandsCount: verification.commands.filter((c) => c.exitCode !== 0).length,
+    completedAt: verification.completedAt,
+    issuedAt: new Date().toISOString(),
+    superseded: false,
   }
 }

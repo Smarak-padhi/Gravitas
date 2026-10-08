@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-10-08T12:05:25.000Z",
+  "restart_idempotency_suite": "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts",
+  "properties_verified": [
+    {
+      "property": "DURABLE_SQLITE_PERSISTENCE",
+      "test_name": "9. Durable Persistence — records are committed to SQLite tables",
+      "status": "PASS",
+      "details": "Model observation and K5 receipt records survive beyond application runtime memory and are stored directly in SQLite tables k5_verification_receipts and model_observations."
+    },
+    {
+      "property": "DETERMINISTIC_RECONSTRUCTION",
+      "test_name": "10. Deterministic Reconstruction — survives process restart and restores exact state",
+      "status": "PASS",
+      "details": "New instance of ModelCapabilityHistory connected to existing database reconstructs exact observation count, success rates, latency averages, and active receipt bindings."
+    },
+    {
+      "property": "RESTART_SAFE_IDEMPOTENCY",
+      "test_name": "11. Restart-Safe Idempotency — re-recording existing observations causes zero duplicate inflation",
+      "status": "PASS",
+      "details": "Re-recording observations on cold start or after restart causes zero duplicate row insertions in SQLite and zero inflation in queryVerifiedSuccessRate."
+    }
+  ],
+  "verification_verdict": "VERIFIED_DETERMINISTIC"
+}

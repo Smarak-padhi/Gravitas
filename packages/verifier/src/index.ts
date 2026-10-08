@@ -15,6 +15,7 @@ export type {
   VerificationPlan,
   VerificationCommandResult,
   VerificationResult,
+  K5VerificationReceipt,
   EvidenceManifest,
   EvidenceBundleInput,
   EvidenceBundleResult,
@@ -31,7 +32,7 @@ export {
 export { runVerificationCommand } from './runner.js'
 
 // Independent verifier
-export { executeVerification, type ExecuteVerificationInput } from './verifier.js'
+export { executeVerification, createVerificationReceipt, type ExecuteVerificationInput } from './verifier.js'
 
 // State transition authority
 export {

@@ -138,6 +138,56 @@ CREATE TABLE IF NOT EXISTS durable_jobs (
 
 CREATE INDEX IF NOT EXISTS idx_jobs_state ON durable_jobs(state);
 CREATE INDEX IF NOT EXISTS idx_jobs_session ON durable_jobs(work_session_id);
+
+-- 7. K5 Verification Receipts (independent deterministic verification authority)
+CREATE TABLE IF NOT EXISTS k5_verification_receipts (
+  receipt_id TEXT PRIMARY KEY,
+  plan_id TEXT NOT NULL,
+  work_session_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  run_id TEXT NOT NULL,
+  attempt_number INTEGER NOT NULL DEFAULT 1,
+  verdict TEXT NOT NULL CHECK (verdict IN ('VERIFIED_PASS', 'VERIFIED_FAIL')),
+  commands_count INTEGER NOT NULL DEFAULT 0,
+  passed_commands_count INTEGER NOT NULL DEFAULT 0,
+  failed_commands_count INTEGER NOT NULL DEFAULT 0,
+  completed_at TEXT NOT NULL,
+  issued_at TEXT NOT NULL,
+  superseded INTEGER NOT NULL DEFAULT 0 CHECK (superseded IN (0, 1))
+);
+
+CREATE INDEX IF NOT EXISTS idx_k5_receipts_session ON k5_verification_receipts(work_session_id);
+CREATE INDEX IF NOT EXISTS idx_k5_receipts_task ON k5_verification_receipts(task_id);
+CREATE INDEX IF NOT EXISTS idx_k5_receipts_plan ON k5_verification_receipts(plan_id);
+
+-- 8. Model Execution Observations (durable empirical evidence bound to K5 receipts)
+CREATE TABLE IF NOT EXISTS model_observations (
+  observation_id TEXT PRIMARY KEY,
+  work_session_id TEXT NOT NULL,
+  run_id TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  attempt_number INTEGER NOT NULL DEFAULT 1,
+  provider_id TEXT NOT NULL,
+  model_id TEXT NOT NULL,
+  task_domain TEXT NOT NULL,
+  task_complexity TEXT NOT NULL,
+  qualification_identity TEXT NOT NULL,
+  k5_plan_id TEXT NOT NULL,
+  k5_receipt_id TEXT NOT NULL REFERENCES k5_verification_receipts(receipt_id) ON DELETE CASCADE,
+  verified_outcome TEXT NOT NULL CHECK (verified_outcome IN ('VERIFIED_PASS', 'VERIFIED_FAIL')),
+  latency_ms INTEGER NOT NULL DEFAULT 0,
+  prompt_tokens INTEGER NOT NULL DEFAULT 0,
+  completion_tokens INTEGER NOT NULL DEFAULT 0,
+  total_tokens INTEGER NOT NULL DEFAULT 0,
+  failure_class TEXT,
+  schema_version INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_model_obs_session ON model_observations(work_session_id);
+CREATE INDEX IF NOT EXISTS idx_model_obs_task ON model_observations(task_id);
+CREATE INDEX IF NOT EXISTS idx_model_obs_model ON model_observations(provider_id, model_id);
+CREATE INDEX IF NOT EXISTS idx_model_obs_receipt ON model_observations(k5_receipt_id);
 `
 
 export function inspectSchema(db: DatabaseSync, databasePath: string): SchemaInspectionResult {
@@ -212,6 +262,54 @@ export function initializeOrMigrateSchema(db: DatabaseSync, databasePath: string
   const inspection = inspectSchema(db, databasePath)
 
   if (inspection.status === 'SUPPORTED_SCHEMA') {
+    // Ensure newly introduced tables in schema v1 exist (idempotent addition)
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS k5_verification_receipts (
+        receipt_id TEXT PRIMARY KEY,
+        plan_id TEXT NOT NULL,
+        work_session_id TEXT NOT NULL,
+        task_id TEXT NOT NULL,
+        run_id TEXT NOT NULL,
+        attempt_number INTEGER NOT NULL DEFAULT 1,
+        verdict TEXT NOT NULL CHECK (verdict IN ('VERIFIED_PASS', 'VERIFIED_FAIL')),
+        commands_count INTEGER NOT NULL DEFAULT 0,
+        passed_commands_count INTEGER NOT NULL DEFAULT 0,
+        failed_commands_count INTEGER NOT NULL DEFAULT 0,
+        completed_at TEXT NOT NULL,
+        issued_at TEXT NOT NULL,
+        superseded INTEGER NOT NULL DEFAULT 0 CHECK (superseded IN (0, 1))
+      );
+      CREATE INDEX IF NOT EXISTS idx_k5_receipts_session ON k5_verification_receipts(work_session_id);
+      CREATE INDEX IF NOT EXISTS idx_k5_receipts_task ON k5_verification_receipts(task_id);
+      CREATE INDEX IF NOT EXISTS idx_k5_receipts_plan ON k5_verification_receipts(plan_id);
+
+      CREATE TABLE IF NOT EXISTS model_observations (
+        observation_id TEXT PRIMARY KEY,
+        work_session_id TEXT NOT NULL,
+        run_id TEXT NOT NULL,
+        task_id TEXT NOT NULL,
+        attempt_number INTEGER NOT NULL DEFAULT 1,
+        provider_id TEXT NOT NULL,
+        model_id TEXT NOT NULL,
+        task_domain TEXT NOT NULL,
+        task_complexity TEXT NOT NULL,
+        qualification_identity TEXT NOT NULL,
+        k5_plan_id TEXT NOT NULL,
+        k5_receipt_id TEXT NOT NULL REFERENCES k5_verification_receipts(receipt_id) ON DELETE CASCADE,
+        verified_outcome TEXT NOT NULL CHECK (verified_outcome IN ('VERIFIED_PASS', 'VERIFIED_FAIL')),
+        latency_ms INTEGER NOT NULL DEFAULT 0,
+        prompt_tokens INTEGER NOT NULL DEFAULT 0,
+        completion_tokens INTEGER NOT NULL DEFAULT 0,
+        total_tokens INTEGER NOT NULL DEFAULT 0,
+        failure_class TEXT,
+        schema_version INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_model_obs_session ON model_observations(work_session_id);
+      CREATE INDEX IF NOT EXISTS idx_model_obs_task ON model_observations(task_id);
+      CREATE INDEX IF NOT EXISTS idx_model_obs_model ON model_observations(provider_id, model_id);
+      CREATE INDEX IF NOT EXISTS idx_model_obs_receipt ON model_observations(k5_receipt_id);
+    `)
     return
   }
 

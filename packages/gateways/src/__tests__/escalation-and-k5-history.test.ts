@@ -87,8 +87,24 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
       });
 
       // Model claims completion, and K5 verification PASSES
+      history.registerAuthoritativeReceipt({
+        receiptId: 'receipt-k5-001',
+        planId: 'plan-k5-pass-001',
+        workSessionId: 'ws-test',
+        taskId: 'task-test-001',
+        runId: 'run-test',
+        attemptNumber: 1,
+        verdict: 'VERIFIED_PASS',
+        commandsCount: 1,
+        passedCommandsCount: 1,
+        failedCommandsCount: 0,
+        completedAt: new Date(Date.now() - 1000).toISOString(),
+        issuedAt: new Date(Date.now() - 1000).toISOString(),
+      });
+
       history.recordObservation({
         observationId: 'obs-2',
+        taskId: 'task-test-001',
         taskDomain: 'code_generation',
         taskComplexityClass: 'LOW',
         provider: 'nvidia-nim',
@@ -99,7 +115,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         latencyMs: 250,
         verificationPlanId: 'plan-k5-pass-001',
         verificationReceiptId: 'receipt-k5-001',
-        verificationCompletedAt: new Date().toISOString(),
+        verificationCompletedAt: new Date(Date.now() - 1000).toISOString(),
         timestamp: new Date().toISOString(),
       });
 
@@ -114,8 +130,24 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
     it('7. Domain Specific History — can query capability stats by task domain', () => {
       const history = new ModelCapabilityHistory();
 
+      history.registerAuthoritativeReceipt({
+        receiptId: 'receipt-k5-domain-001',
+        planId: 'plan-k5-domain-001',
+        workSessionId: 'ws-test',
+        taskId: 'task-code-001',
+        runId: 'run-test',
+        attemptNumber: 1,
+        verdict: 'VERIFIED_PASS',
+        commandsCount: 1,
+        passedCommandsCount: 1,
+        failedCommandsCount: 0,
+        completedAt: new Date(Date.now() - 1000).toISOString(),
+        issuedAt: new Date(Date.now() - 1000).toISOString(),
+      });
+
       history.recordObservation({
         observationId: 'obs-code-1',
+        taskId: 'task-code-001',
         taskDomain: 'code_generation',
         taskComplexityClass: 'LOW',
         provider: 'nvidia-nim',
@@ -126,7 +158,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
         latencyMs: 300,
         verificationPlanId: 'plan-k5-domain-001',
         verificationReceiptId: 'receipt-k5-domain-001',
-        verificationCompletedAt: new Date().toISOString(),
+        verificationCompletedAt: new Date(Date.now() - 1000).toISOString(),
         timestamp: new Date().toISOString(),
       });
 

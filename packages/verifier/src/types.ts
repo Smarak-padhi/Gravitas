@@ -81,6 +81,25 @@ export interface VerificationResult {
 }
 
 /**
+ * Authoritative, immutable receipt issued upon completion of independent K5 verification.
+ */
+export interface K5VerificationReceipt {
+  readonly receiptId: string
+  readonly planId: string
+  readonly workSessionId: string
+  readonly taskId: string
+  readonly runId: string
+  readonly attemptNumber: number
+  readonly verdict: 'VERIFIED_PASS' | 'VERIFIED_FAIL'
+  readonly commandsCount: number
+  readonly passedCommandsCount: number
+  readonly failedCommandsCount: number
+  readonly completedAt: string
+  readonly issuedAt: string
+  readonly superseded?: boolean | undefined
+}
+
+/**
  * Audit-ready manifest documenting complete evidence for a task.
  */
 export interface EvidenceManifest {

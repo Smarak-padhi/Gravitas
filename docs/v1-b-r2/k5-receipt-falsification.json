@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-10-08T12:05:15.000Z",
+  "provenance_security_suite": "packages/gateways/src/__tests__/k5-persistence-and-provenance.test.ts",
+  "invariants_tested": [
+    {
+      "invariant": "INVARIANT_A_EXISTENCE",
+      "description": "Receipt ID must exist in authoritative verification records",
+      "test_name": "1. Rejection of unrecorded / fabricated receipt (fail-closed)",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt '...' does not exist in authoritative verification records."
+    },
+    {
+      "invariant": "INVARIANT_B_TASK_BINDING",
+      "description": "Receipt taskId must match observation taskId; caller cannot substitute another task's receipt",
+      "test_name": "2. Rejection of receipt from another task (task ID mismatch / substitution)",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt task ID '...' does not match observation task ID '...'. Caller cannot substitute another task's receipt."
+    },
+    {
+      "invariant": "INVARIANT_C_PLAN_BINDING",
+      "description": "Receipt planId must match observation verificationPlanId",
+      "test_name": "3. Rejection of receipt with plan ID mismatch",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt plan ID '...' does not match observation verificationPlanId '...'."
+    },
+    {
+      "invariant": "INVARIANT_D_TIME_MONOTONICITY",
+      "description": "Receipt must be completed before or at observation timestamp",
+      "test_name": "4. Rejection of postdated receipt (receipt completed after observation timestamp)",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt completion time '...' postdates observation timestamp '...'."
+    },
+    {
+      "invariant": "INVARIANT_E_VERDICT_CONSISTENCY",
+      "description": "Receipt verdict must match observation outcome",
+      "test_name": "5. Rejection of receipt verdict mismatch (receipt failed but observation claims pass)",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt verdict 'VERIFIED_FAIL' does not match observation outcome 'VERIFIED_PASS'."
+    },
+    {
+      "invariant": "INVARIANT_F_REVOCATION_STATUS",
+      "description": "Receipt must not be revoked or superseded",
+      "test_name": "6. Rejection of revoked or superseded receipt",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt '...' was superseded or revoked."
+    },
+    {
+      "invariant": "INVARIANT_G_SINGLE_USE_BINDING",
+      "description": "Receipt must not be reused across multiple observations (1:1 binding)",
+      "test_name": "7. Rejection of reused receipt (1:1 binding violation)",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "K5 receipt provenance failure: receipt '...' is already bound to observation '...'. Receipts cannot be reused across multiple observations."
+    },
+    {
+      "invariant": "INVARIANT_H_DURABLE_MANDATORY_RECEIPT",
+      "description": "Observation recorded in durable store must carry valid receipt ID",
+      "test_name": "8. Rejection of observation without receipt ID in durable mode",
+      "status": "VERIFIED_FAIL_CLOSED",
+      "error_message": "Cannot record durable observation for model ... without authoritative K5 verification receipt ID."
+    }
+  ],
+  "anti_fabrication_guarantee": "PROVEN_EXHAUSTIVE"
+}

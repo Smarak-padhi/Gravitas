@@ -233,3 +233,11 @@ export {
   type CalendarEventsQuery,
   type CalendarEventsPage,
 } from './connectors.js'
+
+// Kernel exports
+export type {
+  K5ReceiptRecord,
+  DurableModelObservation,
+} from './kernel/persistence/sqliteWriter.js'
+export { SqliteWriter } from './kernel/persistence/sqliteWriter.js'
+
