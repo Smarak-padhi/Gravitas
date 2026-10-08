@@ -20,7 +20,7 @@ import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { WorkSessionKernel, type WorkSessionSnapshot } from '@gravitas/core/kernel'
 import { resolveGravitasDataRoot, readGravitasConfig } from '@gravitas/core'
-import { ModelCapabilityHistory } from '@gravitas/gateways'
+import { ModelCapabilityHistory, ModelCredentialBroker } from '@gravitas/gateways'
 import {
   D0_PROTOCOL_VERSION,
   D1_PROTOCOL_VERSION,
@@ -52,6 +52,8 @@ import {
   type IntentResult,
   type RecordHumanDecisionIntent,
   type CancelTaskIntent,
+  type ConfigureProviderRequest,
+  type ConfigureProviderResponse,
 } from '../types.js'
 
 export interface KernelHostOptions {
@@ -531,7 +533,7 @@ export class KernelHost {
         autonomousPaymentAuthority: false,
       },
       modelIntelligenceSummary: {
-        providerStatus: (process.env.NVIDIA_API_KEY || process.env.NIM_API_KEY) ? 'AVAILABLE' : 'AUTH_REQUIRED',
+        providerStatus: (process.env.NVIDIA_API_KEY || process.env.NIM_API_KEY || ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim').isAvailable) ? 'AVAILABLE' : 'AUTH_REQUIRED',
         qualifiedModelsCount: 0,
         qualifiedModelIds: [],
         candidateModelsCount: 3,
@@ -549,7 +551,7 @@ export class KernelHost {
         completed: Boolean(config.onboarding?.completed),
         operatingMode: config.onboarding?.operatingMode ?? 'DETERMINISTIC_ONLY',
         selectedHarnesses: config.onboarding?.selectedHarnesses ?? ['harness:antigravity:host'],
-        providerConfigured: Boolean(config.onboarding?.providerConfigured),
+        providerConfigured: Boolean(config.onboarding?.providerConfigured) && ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim').isAvailable,
         isPortableDataRoot: !paths.isTestOverride,
       },
       recentErrors: [...this.recentErrors],
@@ -992,6 +994,88 @@ export class KernelHost {
           result,
           timestamp: new Date().toISOString(),
         })
+        break
+      }
+
+      case 'CONFIGURE_PROVIDER_REQUEST': {
+        const req = m as ConfigureProviderRequest
+        if (req.expectedKernelPid && req.expectedKernelPid !== this.pid) {
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            success: false,
+            providerId: req.providerId,
+            maskedHandle: '[HOST_MISMATCH]',
+            status: 'AUTH_REQUIRED',
+            error: `Host instance mismatch: expected PID ${req.expectedKernelPid}, got ${this.pid}`,
+            timestamp: new Date().toISOString(),
+          })
+          break
+        }
+
+        if (req.providerId !== 'nvidia-nim') {
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            success: false,
+            providerId: req.providerId,
+            maskedHandle: '[UNSUPPORTED_PROVIDER]',
+            status: 'AUTH_REQUIRED',
+            error: `Unsupported provider: ${req.providerId}`,
+            timestamp: new Date().toISOString(),
+          })
+          break
+        }
+
+        const key = (req.apiKey || '').trim()
+        if (!key) {
+          ModelCredentialBroker.getInstance().clearSecret('nvidia-nim')
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            success: true,
+            providerId: 'nvidia-nim',
+            maskedHandle: '[NO_CREDENTIAL]',
+            status: 'AUTH_REQUIRED',
+            timestamp: new Date().toISOString(),
+          })
+          break
+        }
+
+        try {
+          ModelCredentialBroker.getInstance().registerSecret('nvidia-nim', key)
+          const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            success: true,
+            providerId: 'nvidia-nim',
+            maskedHandle: handle.redactedPreview,
+            status: 'METADATA_VALIDATED',
+            timestamp: new Date().toISOString(),
+          })
+        } catch (err) {
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            success: false,
+            providerId: req.providerId,
+            maskedHandle: '[ERROR]',
+            status: 'AUTH_REQUIRED',
+            error: sanitizeText((err as Error).message),
+            timestamp: new Date().toISOString(),
+          })
+        }
         break
       }
 

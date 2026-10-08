@@ -32,6 +32,8 @@ import {
   type SaveOnboardingPayload,
   type ConfigureProviderPayload,
   type ConfigureProviderResult,
+  type ConfigureProviderRequest,
+  type ConfigureProviderResponse,
 } from '../types.js'
 
 import {
@@ -170,6 +172,7 @@ export class DesktopSupervisor {
         this.kernelPid = msg.kernelPid
         this.kernelNodeVersion = msg.nodeVersion
         this.setStatus('READY')
+        this.syncCredentialsToKernel().catch(() => {})
         break
       }
 
@@ -282,6 +285,15 @@ export class DesktopSupervisor {
         if (p) {
           this.pendingRequests.delete(msg.requestId)
           p.resolve(true)
+        }
+        break
+      }
+
+      case 'CONFIGURE_PROVIDER_RESPONSE': {
+        const p = this.pendingRequests.get(msg.requestId)
+        if (p) {
+          this.pendingRequests.delete(msg.requestId)
+          p.resolve(msg)
         }
         break
       }
@@ -600,17 +612,48 @@ export class DesktopSupervisor {
     )
   }
 
+  private async syncCredentialsToKernel(): Promise<void> {
+    if (!this.kernelProcess || this.status !== 'READY') {
+      return
+    }
+    const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
+    if (handle.isAvailable && handle.credentialRef) {
+      const secret = ModelCredentialBroker.getInstance().resolveSecret(handle.credentialRef)
+      if (secret) {
+        const requestId = `req_sync_${randomUUID().slice(0, 8)}`
+        try {
+          await this.sendToKernel<ConfigureProviderResponse>(
+            {
+              type: 'CONFIGURE_PROVIDER_REQUEST',
+              protocolVersion: D1_PROTOCOL_VERSION,
+              requestId,
+              expectedKernelPid: this.kernelPid,
+              providerId: 'nvidia-nim',
+              apiKey: secret,
+              timestamp: new Date().toISOString(),
+            },
+            requestId,
+            3000
+          )
+        } catch {
+          // Handshake sync warning / non-blocking on initial hello
+        }
+      }
+    }
+  }
+
   public async getOnboarding(): Promise<OnboardingStateProjection> {
     const cfg = readGravitasConfig(this.dataRoot)
     const paths = resolveGravitasDataRoot(this.dataRoot)
     const isTest = process.env.NODE_ENV === 'test' || paths.isTestOverride
+    const hasInMemoryCredential = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim').isAvailable
     return {
       completed: cfg.onboarding.completed,
       completedAt: cfg.onboarding.completedAt,
       step: cfg.onboarding.step,
       operatingMode: cfg.onboarding.operatingMode,
       selectedHarnesses: cfg.onboarding.selectedHarnesses,
-      providerConfigured: cfg.onboarding.providerConfigured,
+      providerConfigured: cfg.onboarding.providerConfigured && hasInMemoryCredential,
       dataRoot: this.dataRoot,
       isTest,
     }
@@ -660,6 +703,29 @@ export class DesktopSupervisor {
           providerConfigured: false,
         },
       })
+
+      // Forward revocation to execution host if active
+      if (this.kernelProcess && this.status === 'READY') {
+        const requestId = `req_prov_clear_${randomUUID().slice(0, 8)}`
+        try {
+          await this.sendToKernel<ConfigureProviderResponse>(
+            {
+              type: 'CONFIGURE_PROVIDER_REQUEST',
+              protocolVersion: D1_PROTOCOL_VERSION,
+              requestId,
+              expectedKernelPid: this.kernelPid,
+              providerId: 'nvidia-nim',
+              apiKey: '',
+              timestamp: new Date().toISOString(),
+            },
+            requestId,
+            3000
+          )
+        } catch {
+          // Revocation acknowledged locally even if execution process unreachable
+        }
+      }
+
       return {
         success: true,
         providerId: 'nvidia-nim',
@@ -668,7 +734,7 @@ export class DesktopSupervisor {
       }
     }
 
-    // Register into volatile in-memory broker only (zero persistence of key to disk)
+    // Register into volatile in-memory broker only in Main process (zero disk persistence)
     ModelCredentialBroker.getInstance().registerSecret('nvidia-nim', key)
     const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
     const current = readGravitasConfig(this.dataRoot)
@@ -678,6 +744,43 @@ export class DesktopSupervisor {
         providerConfigured: true,
       },
     })
+
+    // Forward to execution process if active
+    if (this.kernelProcess && this.status === 'READY') {
+      const requestId = `req_prov_set_${randomUUID().slice(0, 8)}`
+      try {
+        const kernelRes = await this.sendToKernel<ConfigureProviderResponse>(
+          {
+            type: 'CONFIGURE_PROVIDER_REQUEST',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId,
+            expectedKernelPid: this.kernelPid,
+            providerId: 'nvidia-nim',
+            apiKey: key,
+            timestamp: new Date().toISOString(),
+          },
+          requestId,
+          5000
+        )
+
+        if (!kernelRes.success || (kernelRes.kernelPid && this.kernelPid && kernelRes.kernelPid !== this.kernelPid)) {
+          return {
+            success: false,
+            providerId: 'nvidia-nim',
+            maskedHandle: kernelRes.maskedHandle || '[HANDOFF_REJECTED]',
+            status: 'AUTH_REQUIRED',
+          }
+        }
+      } catch {
+        // If handoff to execution process failed, fail closed
+        return {
+          success: false,
+          providerId: 'nvidia-nim',
+          maskedHandle: '[IPC_HANDOFF_FAILED]',
+          status: 'AUTH_REQUIRED',
+        }
+      }
+    }
 
     return {
       success: true,

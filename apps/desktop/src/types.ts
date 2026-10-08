@@ -502,6 +502,25 @@ export interface D1OperatorIntentResponse extends BaseProtocolMessage {
   readonly result: IntentResult
 }
 
+export interface ConfigureProviderRequest extends BaseProtocolMessage {
+  readonly type: 'CONFIGURE_PROVIDER_REQUEST'
+  readonly requestId: string
+  readonly expectedKernelPid?: number
+  readonly providerId: 'nvidia-nim'
+  readonly apiKey: string
+}
+
+export interface ConfigureProviderResponse extends BaseProtocolMessage {
+  readonly type: 'CONFIGURE_PROVIDER_RESPONSE'
+  readonly requestId: string
+  readonly kernelPid: number
+  readonly success: boolean
+  readonly providerId: string
+  readonly maskedHandle: string
+  readonly status: 'METADATA_VALIDATED' | 'AUTH_REQUIRED'
+  readonly error?: string
+}
+
 export interface D1ProjectionUpdatedNotification extends BaseProtocolMessage {
   readonly type: 'PROJECTION_UPDATED'
   readonly projectionType: string
@@ -520,6 +539,7 @@ export type D1MainToKernelMessage =
   | D1GetSystemRequest
   | D1GetActivityRequest
   | D1OperatorIntentRequest
+  | ConfigureProviderRequest
 
 export type D1KernelToMainMessage =
   | HelloMessage
@@ -537,6 +557,7 @@ export type D1KernelToMainMessage =
   | D1GetActivityResponse
   | D1OperatorIntentResponse
   | D1ProjectionUpdatedNotification
+  | ConfigureProviderResponse
 
 export type MainToKernelMessage = D1MainToKernelMessage
 export type KernelToMainMessage = D1KernelToMainMessage
