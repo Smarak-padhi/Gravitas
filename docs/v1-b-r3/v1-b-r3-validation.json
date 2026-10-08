@@ -6,11 +6,11 @@
   "preHead": "cf08d16e865d8d497c921f2aee773341b6470eec",
   "testMetrics": {
     "vitest": {
-      "filesTotal": 99,
-      "filesPassed": 99,
+      "filesTotal": 100,
+      "filesPassed": 100,
       "filesFailed": 0,
-      "testsTotal": 1673,
-      "testsPassed": 1673,
+      "testsTotal": 1676,
+      "testsPassed": 1676,
       "testsFailed": 0
     },
     "k0Kernel": {
@@ -18,14 +18,14 @@
       "testsPassed": 51,
       "testsFailed": 0
     },
-    "automatedTotal": 1724,
+    "automatedTotal": 1727,
     "electronDogfood": {
       "stepsTotal": 13,
       "stepsPassed": 13,
       "stepsFailed": 0,
       "status": "PASS"
     },
-    "combinedChecksTotal": 1737
+    "combinedChecksTotal": 1740
   },
   "typecheck": {
     "status": "PASS",

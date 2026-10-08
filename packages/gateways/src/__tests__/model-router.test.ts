@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
+import { describe, expect, it, beforeAll } from 'vitest';
+import { initTestReceiptFixture, createTestAuthoritativeReceipt } from './test-receipt-fixture.js';
 import { ModelRouter, MODEL_ROUTER_POLICY_VERSION } from '../models/router.js';
 import { ModelRegistry } from '../models/registry.js';
 import { ModelCapabilityHistory } from '../models/history.js';
@@ -25,6 +25,10 @@ function createQualifiedFixtureRegistry(): ModelRegistry {
 }
 
 describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
+  beforeAll(async () => {
+    await initTestReceiptFixture();
+  });
+
   it('1. Deterministic Decision — Identical input always yields identical routing decision on qualified models', () => {
     const registry = createQualifiedFixtureRegistry();
     const history = new ModelCapabilityHistory();
@@ -245,7 +249,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
     // Record high success rate for mixtral (10/10 passes) with valid K5 receipt binding
     for (let i = 0; i < 10; i++) {
       const receiptId = `receipt-k5-mix-${i}`;
-      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
+      history.registerAuthoritativeReceipt(createTestAuthoritativeReceipt({
         receiptId,
         planId: 'plan-k5-tiebreak-mixtral',
         workSessionId: 'ws-test',
@@ -281,7 +285,7 @@ describe('GRAVITAS V1-B — Deterministic Model Router Suite', () => {
     for (let i = 0; i < 10; i++) {
       const receiptId = `receipt-k5-8b-${i}`;
       const verdict = i < 2 ? 'VERIFIED_PASS' : 'VERIFIED_FAIL';
-      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
+      history.registerAuthoritativeReceipt(createTestAuthoritativeReceipt({
         receiptId,
         planId: 'plan-k5-tiebreak-8b',
         workSessionId: 'ws-test',

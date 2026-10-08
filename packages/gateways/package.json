@@ -21,6 +21,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@gravitas/git": "*",
     "@types/node": "^22.15.0",
     "omniroute": "^3.8.50",
     "typescript": "^5.8.3"

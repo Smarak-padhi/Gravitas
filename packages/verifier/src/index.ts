@@ -35,7 +35,6 @@ export { runVerificationCommand } from './runner.js'
 export {
   executeVerification,
   createVerificationReceipt,
-  createAuthoritativeReceiptForTest,
   isAuthoritativeK5Receipt,
   type ExecuteVerificationInput,
 } from './verifier.js'

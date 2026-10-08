@@ -1,9 +1,9 @@
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeAll, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { SqliteWriter, K5_AUTHORITY_BRAND } from '@gravitas/core';
-import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
+import { initTestReceiptFixture, createTestAuthoritativeReceipt } from './test-receipt-fixture.js';
 import { ModelCapabilityHistory, type K5ReceiptLike } from '../models/history.js';
 import type { ModelExecutionObservation } from '../models/types.js';
 
@@ -11,6 +11,10 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
   let tempDir: string;
   let dbPath: string;
   let writer: SqliteWriter;
+
+  beforeAll(async () => {
+    await initTestReceiptFixture();
+  });
 
   beforeEach(() => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gravitas-k5-test-'));
@@ -34,7 +38,7 @@ describe('GRAVITAS V1-B-R2 — K5 Persistence & Receipt Provenance Suite', () =>
   });
 
   function createValidReceipt(overrides: Partial<K5ReceiptLike> = {}): K5ReceiptLike {
-    return createAuthoritativeReceiptForTest({
+    return createTestAuthoritativeReceipt({
       receiptId: 'k5rcpt_test_task1_plan1_001',
       planId: 'plan-k5-001',
       workSessionId: 'ws-test-001',

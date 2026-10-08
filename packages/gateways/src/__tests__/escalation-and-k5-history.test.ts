@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest';
-import { createAuthoritativeReceiptForTest } from '@gravitas/verifier';
+import { describe, expect, it, beforeAll } from 'vitest';
+import { initTestReceiptFixture, createTestAuthoritativeReceipt } from './test-receipt-fixture.js';
 import { EscalationManager, HUMAN_GATE_FAILURE_CLASSES } from '../models/escalation.js';
 import { ModelCapabilityHistory } from '../models/history.js';
 
 describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', () => {
+  beforeAll(async () => {
+    await initTestReceiptFixture();
+  });
   describe('EscalationManager', () => {
     it('1. Bounded Escalation Limit — halts for human operator when max escalations reached', () => {
       const manager = new EscalationManager({
@@ -88,7 +91,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
       });
 
       // Model claims completion, and K5 verification PASSES
-      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
+      history.registerAuthoritativeReceipt(createTestAuthoritativeReceipt({
         receiptId: 'receipt-k5-001',
         planId: 'plan-k5-pass-001',
         workSessionId: 'ws-test',
@@ -131,7 +134,7 @@ describe('GRAVITAS V1-B — Escalation Policy & K5 Verification History Suite', 
     it('7. Domain Specific History — can query capability stats by task domain', () => {
       const history = new ModelCapabilityHistory();
 
-      history.registerAuthoritativeReceipt(createAuthoritativeReceiptForTest({
+      history.registerAuthoritativeReceipt(createTestAuthoritativeReceipt({
         receiptId: 'receipt-k5-domain-001',
         planId: 'plan-k5-domain-001',
         workSessionId: 'ws-test',

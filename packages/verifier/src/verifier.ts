@@ -167,23 +167,6 @@ export function createVerificationReceipt(
 }
 
 /**
- * Creates an authoritative receipt specifically for isolated unit tests.
- * Only intended for testing offline fixtures without spawning live shells.
- */
-export function createAuthoritativeReceiptForTest(
-  receipt: K5VerificationReceipt
-): K5VerificationReceipt {
-  Object.defineProperty(receipt, K5_AUTHORITY_BRAND, {
-    value: true,
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  })
-  legitimatelyIssuedReceipts.add(receipt)
-  return receipt
-}
-
-/**
  * Asserts whether a given receipt was authoritatively issued by @gravitas/verifier.
  * Checked at the ModelCapabilityHistory registration boundary via private WeakSet reference.
  * Prevents in-process forging via Symbol.for or property spoofing.
