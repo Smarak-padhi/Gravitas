@@ -62,6 +62,7 @@ export interface KernelHostOptions {
   readonly onMessage?: (msg: KernelToMainMessage) => void
   readonly initialDiagnosticContext?: string
   readonly pid?: number
+  readonly kernelInstanceId?: string
 }
 
 const DEFAULT_PATTERNS: readonly RegExp[] = [
@@ -124,6 +125,7 @@ export class KernelHost {
   private readonly startedAt: string
   private diagnosticContext?: string
   private readonly pid: number
+  private readonly kernelInstanceId: string
   private readonly dataRoot: string
 
   // Canonical auxiliary stores managed under single writer
@@ -136,6 +138,7 @@ export class KernelHost {
     this.startedAt = new Date().toISOString()
     this.diagnosticContext = opts.initialDiagnosticContext
     this.pid = opts.pid ?? process.pid
+    this.kernelInstanceId = opts.kernelInstanceId ?? randomUUID()
     this.sendMessage = opts.onMessage ?? ((msg) => {
       if (process.parentPort) {
         process.parentPort.postMessage(msg)
@@ -149,6 +152,10 @@ export class KernelHost {
 
     // Seed default execution harness data for K1/K2/K3 projections
     this.seedExecutionRegistry()
+  }
+
+  public getInstanceId(): string {
+    return this.kernelInstanceId
   }
 
   private seedExecutionRegistry(): void {
@@ -186,6 +193,7 @@ export class KernelHost {
         type: 'HELLO',
         protocolVersion: D1_PROTOCOL_VERSION,
         kernelPid: this.pid,
+        kernelInstanceId: this.kernelInstanceId,
         nodeVersion: process.version,
         electronVersion: process.versions?.electron,
         timestamp: new Date().toISOString(),
@@ -999,12 +1007,37 @@ export class KernelHost {
 
       case 'CONFIGURE_PROVIDER_REQUEST': {
         const req = m as ConfigureProviderRequest
+        const op = req.op ?? 'CONFIGURE'
+        const generation = req.generation ?? 0
+
+        if (req.expectedKernelInstanceId && req.expectedKernelInstanceId !== this.kernelInstanceId) {
+          this.sendMessage({
+            type: 'CONFIGURE_PROVIDER_RESPONSE',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            requestId: req.requestId,
+            kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op,
+            generation,
+            success: false,
+            providerId: req.providerId,
+            maskedHandle: '[INSTANCE_MISMATCH]',
+            status: 'AUTH_REQUIRED',
+            error: `Kernel instance mismatch: expected ${req.expectedKernelInstanceId}, got ${this.kernelInstanceId}`,
+            timestamp: new Date().toISOString(),
+          })
+          break
+        }
+
         if (req.expectedKernelPid && req.expectedKernelPid !== this.pid) {
           this.sendMessage({
             type: 'CONFIGURE_PROVIDER_RESPONSE',
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId: req.requestId,
             kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op,
+            generation,
             success: false,
             providerId: req.providerId,
             maskedHandle: '[HOST_MISMATCH]',
@@ -1021,6 +1054,9 @@ export class KernelHost {
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId: req.requestId,
             kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op,
+            generation,
             success: false,
             providerId: req.providerId,
             maskedHandle: '[UNSUPPORTED_PROVIDER]',
@@ -1032,13 +1068,16 @@ export class KernelHost {
         }
 
         const key = (req.apiKey || '').trim()
-        if (!key) {
+        if (op === 'REVOKE' || !key) {
           ModelCredentialBroker.getInstance().clearSecret('nvidia-nim')
           this.sendMessage({
             type: 'CONFIGURE_PROVIDER_RESPONSE',
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId: req.requestId,
             kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op: 'REVOKE',
+            generation,
             success: true,
             providerId: 'nvidia-nim',
             maskedHandle: '[NO_CREDENTIAL]',
@@ -1056,6 +1095,9 @@ export class KernelHost {
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId: req.requestId,
             kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op: 'CONFIGURE',
+            generation,
             success: true,
             providerId: 'nvidia-nim',
             maskedHandle: handle.redactedPreview,
@@ -1068,6 +1110,9 @@ export class KernelHost {
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId: req.requestId,
             kernelPid: this.pid,
+            kernelInstanceId: this.kernelInstanceId,
+            op: 'CONFIGURE',
+            generation,
             success: false,
             providerId: req.providerId,
             maskedHandle: '[ERROR]',

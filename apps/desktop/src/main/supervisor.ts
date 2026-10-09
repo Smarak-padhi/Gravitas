@@ -63,12 +63,29 @@ export interface DesktopSupervisorOptions {
   readonly dataRoot?: string
 }
 
+interface PendingRequestEntry {
+  readonly requestId: string
+  readonly resolve: (val: any) => void
+  readonly reject: (err: any) => void
+  readonly timer: NodeJS.Timeout
+  readonly processRef: ProcessBridge
+  readonly generation: number
+  readonly kernelInstanceId?: string
+  readonly opSequence?: number
+  readonly providerId?: string
+  readonly op?: 'CONFIGURE' | 'REVOKE'
+}
+
 export class DesktopSupervisor {
   private status: KernelLifecycleStatus = 'NOT_STARTED'
   private kernelProcess?: ProcessBridge
   private kernelPid: number = 0
+  private kernelInstanceId?: string
   private kernelNodeVersion: string = ''
-  private readonly pendingRequests = new Map<string, { resolve: (val: any) => void; reject: (err: any) => void }>()
+  private generation: number = 0
+  private providerOpSequence: number = 0
+  private executionProviderConfigured: boolean = false
+  private readonly pendingRequests = new Map<string, PendingRequestEntry>()
   private readonly forkProcess: () => ProcessBridge
   private readonly onStatusChange?: (status: KernelLifecycleStatus) => void
   private onError?: (err: SafeDesktopError) => void
@@ -104,14 +121,42 @@ export class DesktopSupervisor {
     return this.kernelPid
   }
 
+  public getKernelInstanceId(): string | undefined {
+    return this.kernelInstanceId
+  }
+
+  public getGeneration(): number {
+    return this.generation
+  }
+
   public getMainPid(): number {
     return process.pid
+  }
+
+  public isExecutionCredentialReady(providerId: string = 'nvidia-nim'): boolean {
+    if (providerId !== 'nvidia-nim') return false
+    if (this.status !== 'READY') return false
+    if (!this.kernelProcess) return false
+    if (!this.kernelInstanceId) return false
+    if (!this.executionProviderConfigured) return false
+    const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
+    return handle.isAvailable
   }
 
   private setStatus(status: KernelLifecycleStatus): void {
     if (this.status !== status) {
       this.status = status
       this.onStatusChange?.(status)
+    }
+  }
+
+  private clearPendingRequestsForHost(reason: string, targetProcess?: ProcessBridge): void {
+    for (const [reqId, entry] of this.pendingRequests.entries()) {
+      if (!targetProcess || entry.processRef === targetProcess) {
+        clearTimeout(entry.timer)
+        this.pendingRequests.delete(reqId)
+        entry.reject(new Error(`Kernel host terminated before responding: ${reason}`))
+      }
     }
   }
 
@@ -122,33 +167,49 @@ export class DesktopSupervisor {
     }
 
     this.setStatus('STARTING')
+    this.generation++
+    this.kernelInstanceId = undefined
+    this.executionProviderConfigured = false
 
     try {
       this.kernelProcess = this.forkProcess()
       this.kernelPid = this.kernelProcess.pid ?? 0
+      const activeProcess = this.kernelProcess
 
       this.kernelProcess.on('message', (msg: unknown) => {
-        this.handleKernelMessage(msg)
+        if (this.kernelProcess === activeProcess) {
+          this.handleKernelMessage(msg)
+        }
       })
 
       this.kernelProcess.on('exit', (code: number) => {
-        if (!this.isShuttingDown) {
-          this.setStatus('OFFLINE')
-          this.onError?.({
-            code: 'KERNEL_UNEXPECTED_EXIT',
-            message: `Kernel process exited unexpectedly with code ${code}`,
-          })
-        } else {
-          this.setStatus('STOPPED')
+        this.executionProviderConfigured = false
+        this.clearPendingRequestsForHost(`Kernel process exited with code ${code}`, activeProcess)
+        if (this.kernelProcess === activeProcess) {
+          this.kernelInstanceId = undefined
+          if (!this.isShuttingDown) {
+            this.setStatus('OFFLINE')
+            this.onError?.({
+              code: 'KERNEL_UNEXPECTED_EXIT',
+              message: `Kernel process exited unexpectedly with code ${code}`,
+            })
+          } else {
+            this.setStatus('STOPPED')
+          }
         }
       })
 
       this.kernelProcess.on('error', (err: Error) => {
-        this.setStatus('FAILED')
-        this.onError?.({
-          code: 'KERNEL_PROCESS_ERROR',
-          message: err.message,
-        })
+        this.executionProviderConfigured = false
+        this.clearPendingRequestsForHost(`Kernel process error: ${err.message}`, activeProcess)
+        if (this.kernelProcess === activeProcess) {
+          this.kernelInstanceId = undefined
+          this.setStatus('FAILED')
+          this.onError?.({
+            code: 'KERNEL_PROCESS_ERROR',
+            message: err.message,
+          })
+        }
       })
     } catch (err) {
       this.setStatus('FAILED')
@@ -171,14 +232,21 @@ export class DesktopSupervisor {
       case 'HELLO': {
         this.kernelPid = msg.kernelPid
         this.kernelNodeVersion = msg.nodeVersion
+        this.kernelInstanceId = msg.kernelInstanceId
         this.setStatus('READY')
-        this.syncCredentialsToKernel().catch(() => {})
+        void this.syncCredentialsToKernel().catch((err) => {
+          this.onError?.({
+            code: 'CREDENTIAL_SYNC_FAILED',
+            message: `Credential synchronization error: ${(err as Error).message}`,
+          })
+        })
         break
       }
 
       case 'HEALTH_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg)
         }
@@ -188,6 +256,7 @@ export class DesktopSupervisor {
       case 'SNAPSHOT_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.snapshot)
         }
@@ -197,6 +266,7 @@ export class DesktopSupervisor {
       case 'GET_OVERVIEW_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -206,6 +276,7 @@ export class DesktopSupervisor {
       case 'GET_WORK_HIERARCHY_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -215,6 +286,7 @@ export class DesktopSupervisor {
       case 'GET_TASK_DETAIL_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -224,6 +296,7 @@ export class DesktopSupervisor {
       case 'GET_EXECUTION_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -233,6 +306,7 @@ export class DesktopSupervisor {
       case 'GET_VERIFICATION_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -242,6 +316,7 @@ export class DesktopSupervisor {
       case 'GET_APPROVAL_QUEUE_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -251,6 +326,7 @@ export class DesktopSupervisor {
       case 'GET_SYSTEM_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -260,6 +336,7 @@ export class DesktopSupervisor {
       case 'GET_ACTIVITY_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.projection)
         }
@@ -269,6 +346,7 @@ export class DesktopSupervisor {
       case 'OPERATOR_INTENT_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg.result)
         }
@@ -283,6 +361,7 @@ export class DesktopSupervisor {
       case 'SHUTDOWN_ACK': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(true)
         }
@@ -292,8 +371,31 @@ export class DesktopSupervisor {
       case 'CONFIGURE_PROVIDER_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
         if (p) {
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
+
+          if (
+            msg.providerId !== 'nvidia-nim' ||
+            (p.kernelInstanceId && msg.kernelInstanceId !== p.kernelInstanceId) ||
+            (p.generation !== undefined && msg.generation !== p.generation) ||
+            (p.op && msg.op !== p.op)
+          ) {
+            p.reject(new Error(`Corrupted or mismatched CONFIGURE_PROVIDER_RESPONSE: op=${msg.op}, inst=${msg.kernelInstanceId}`))
+            break
+          }
+
+          if (p.opSequence !== undefined && p.opSequence < this.providerOpSequence) {
+            // Superseded response; caller resolves, but state mutation ignored
+            p.resolve(msg)
+            break
+          }
+
           p.resolve(msg)
+        } else {
+          this.onError?.({
+            code: 'UNSOLICITED_PROVIDER_ACK',
+            message: `Received unexpected or duplicate provider ACK for requestId: ${msg.requestId}`,
+          })
         }
         break
       }
@@ -301,6 +403,7 @@ export class DesktopSupervisor {
       case 'KERNEL_ERROR': {
         if (msg.correlationId && this.pendingRequests.has(msg.correlationId)) {
           const p = this.pendingRequests.get(msg.correlationId)!
+          clearTimeout(p.timer)
           this.pendingRequests.delete(msg.correlationId)
           p.reject(new Error(msg.safeMessage))
         }
@@ -314,11 +417,26 @@ export class DesktopSupervisor {
     }
   }
 
-  private sendToKernel<T>(msg: MainToKernelMessage, requestId: string, timeoutMs = 10000): Promise<T> {
+  private sendToKernel<T>(
+    msg: MainToKernelMessage,
+    requestId: string,
+    timeoutMs = 10000,
+    meta?: {
+      opSequence?: number
+      providerId?: string
+      op?: 'CONFIGURE' | 'REVOKE'
+      generation?: number
+      kernelInstanceId?: string
+    }
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.kernelProcess || this.status === 'OFFLINE' || this.status === 'FAILED' || this.status === 'STOPPED') {
         return reject(new Error('Kernel process is not running or is offline'))
       }
+
+      const activeProcess = this.kernelProcess
+      const activeGen = this.generation
+      const activeInst = this.kernelInstanceId
 
       const timer = setTimeout(() => {
         this.pendingRequests.delete(requestId)
@@ -326,6 +444,7 @@ export class DesktopSupervisor {
       }, timeoutMs)
 
       this.pendingRequests.set(requestId, {
+        requestId,
         resolve: (val) => {
           clearTimeout(timer)
           resolve(val)
@@ -334,9 +453,16 @@ export class DesktopSupervisor {
           clearTimeout(timer)
           reject(err)
         },
+        timer,
+        processRef: activeProcess,
+        generation: meta?.generation ?? activeGen,
+        kernelInstanceId: meta?.kernelInstanceId ?? activeInst,
+        opSequence: meta?.opSequence,
+        providerId: meta?.providerId,
+        op: meta?.op,
       })
 
-      this.kernelProcess.postMessage(msg)
+      activeProcess.postMessage(msg)
     })
   }
 
@@ -612,48 +738,87 @@ export class DesktopSupervisor {
     )
   }
 
-  private async syncCredentialsToKernel(): Promise<void> {
+  private async syncCredentialsToKernel(): Promise<boolean> {
     if (!this.kernelProcess || this.status !== 'READY') {
-      return
+      this.executionProviderConfigured = false
+      return false
     }
     const handle = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim')
     if (handle.isAvailable && handle.credentialRef) {
       const secret = ModelCredentialBroker.getInstance().resolveSecret(handle.credentialRef)
       if (secret) {
         const requestId = `req_sync_${randomUUID().slice(0, 8)}`
+        const opSeq = ++this.providerOpSequence
+        const currentGen = this.generation
+        const currentInst = this.kernelInstanceId
         try {
-          await this.sendToKernel<ConfigureProviderResponse>(
+          const res = await this.sendToKernel<ConfigureProviderResponse>(
             {
               type: 'CONFIGURE_PROVIDER_REQUEST',
               protocolVersion: D1_PROTOCOL_VERSION,
               requestId,
               expectedKernelPid: this.kernelPid,
+              expectedKernelInstanceId: currentInst,
+              kernelInstanceId: currentInst,
+              op: 'CONFIGURE',
+              generation: currentGen,
               providerId: 'nvidia-nim',
               apiKey: secret,
               timestamp: new Date().toISOString(),
             },
             requestId,
-            3000
+            3000,
+            {
+              opSequence: opSeq,
+              providerId: 'nvidia-nim',
+              op: 'CONFIGURE',
+              generation: currentGen,
+              kernelInstanceId: currentInst,
+            }
           )
-        } catch {
-          // Handshake sync warning / non-blocking on initial hello
+
+          if (
+            res.success &&
+            res.providerId === 'nvidia-nim' &&
+            res.kernelInstanceId === currentInst &&
+            res.generation === currentGen &&
+            opSeq === this.providerOpSequence
+          ) {
+            this.executionProviderConfigured = true
+            return true
+          } else {
+            this.executionProviderConfigured = false
+            this.onError?.({
+              code: 'CREDENTIAL_SYNC_REJECTED',
+              message: `Execution host rejected credential synchronization: ${res.error || res.maskedHandle}`,
+            })
+            return false
+          }
+        } catch (err) {
+          this.executionProviderConfigured = false
+          this.onError?.({
+            code: 'CREDENTIAL_SYNC_FAILED',
+            message: `Failed to synchronize credentials to execution host: ${(err as Error).message}`,
+          })
+          return false
         }
       }
     }
+    this.executionProviderConfigured = false
+    return false
   }
 
   public async getOnboarding(): Promise<OnboardingStateProjection> {
     const cfg = readGravitasConfig(this.dataRoot)
     const paths = resolveGravitasDataRoot(this.dataRoot)
     const isTest = process.env.NODE_ENV === 'test' || paths.isTestOverride
-    const hasInMemoryCredential = ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim').isAvailable
     return {
       completed: cfg.onboarding.completed,
       completedAt: cfg.onboarding.completedAt,
       step: cfg.onboarding.step,
       operatingMode: cfg.onboarding.operatingMode,
       selectedHarnesses: cfg.onboarding.selectedHarnesses,
-      providerConfigured: cfg.onboarding.providerConfigured && hasInMemoryCredential,
+      providerConfigured: this.isExecutionCredentialReady('nvidia-nim'),
       dataRoot: this.dataRoot,
       isTest,
     }
@@ -694,8 +859,15 @@ export class DesktopSupervisor {
     }
 
     const key = (payload.apiKey || '').trim()
-    if (!key) {
+    const op: 'CONFIGURE' | 'REVOKE' = key ? 'CONFIGURE' : 'REVOKE'
+    const opSeq = ++this.providerOpSequence
+    const currentGeneration = this.generation
+    const currentInstanceId = this.kernelInstanceId
+    const currentProcess = this.kernelProcess
+
+    if (op === 'REVOKE') {
       ModelCredentialBroker.getInstance().clearSecret('nvidia-nim')
+      this.executionProviderConfigured = false
       const current = readGravitasConfig(this.dataRoot)
       writeGravitasConfig(this.dataRoot, {
         onboarding: {
@@ -705,7 +877,7 @@ export class DesktopSupervisor {
       })
 
       // Forward revocation to execution host if active
-      if (this.kernelProcess && this.status === 'READY') {
+      if (currentProcess && this.status === 'READY') {
         const requestId = `req_prov_clear_${randomUUID().slice(0, 8)}`
         try {
           await this.sendToKernel<ConfigureProviderResponse>(
@@ -714,12 +886,23 @@ export class DesktopSupervisor {
               protocolVersion: D1_PROTOCOL_VERSION,
               requestId,
               expectedKernelPid: this.kernelPid,
+              expectedKernelInstanceId: currentInstanceId,
+              kernelInstanceId: currentInstanceId,
+              op: 'REVOKE',
+              generation: currentGeneration,
               providerId: 'nvidia-nim',
               apiKey: '',
               timestamp: new Date().toISOString(),
             },
             requestId,
-            3000
+            3000,
+            {
+              opSequence: opSeq,
+              providerId: 'nvidia-nim',
+              op: 'REVOKE',
+              generation: currentGeneration,
+              kernelInstanceId: currentInstanceId,
+            }
           )
         } catch {
           // Revocation acknowledged locally even if execution process unreachable
@@ -746,7 +929,7 @@ export class DesktopSupervisor {
     })
 
     // Forward to execution process if active
-    if (this.kernelProcess && this.status === 'READY') {
+    if (currentProcess && this.status === 'READY') {
       const requestId = `req_prov_set_${randomUUID().slice(0, 8)}`
       try {
         const kernelRes = await this.sendToKernel<ConfigureProviderResponse>(
@@ -755,15 +938,33 @@ export class DesktopSupervisor {
             protocolVersion: D1_PROTOCOL_VERSION,
             requestId,
             expectedKernelPid: this.kernelPid,
+            expectedKernelInstanceId: currentInstanceId,
+            kernelInstanceId: currentInstanceId,
+            op: 'CONFIGURE',
+            generation: currentGeneration,
             providerId: 'nvidia-nim',
             apiKey: key,
             timestamp: new Date().toISOString(),
           },
           requestId,
-          5000
+          5000,
+          {
+            opSequence: opSeq,
+            providerId: 'nvidia-nim',
+            op: 'CONFIGURE',
+            generation: currentGeneration,
+            kernelInstanceId: currentInstanceId,
+          }
         )
 
-        if (!kernelRes.success || (kernelRes.kernelPid && this.kernelPid && kernelRes.kernelPid !== this.kernelPid)) {
+        if (
+          !kernelRes.success ||
+          kernelRes.providerId !== 'nvidia-nim' ||
+          kernelRes.kernelInstanceId !== this.kernelInstanceId ||
+          kernelRes.generation !== this.generation ||
+          (this.kernelPid && kernelRes.kernelPid !== this.kernelPid)
+        ) {
+          this.executionProviderConfigured = false
           return {
             success: false,
             providerId: 'nvidia-nim',
@@ -771,8 +972,12 @@ export class DesktopSupervisor {
             status: 'AUTH_REQUIRED',
           }
         }
+
+        if (opSeq === this.providerOpSequence) {
+          this.executionProviderConfigured = true
+        }
       } catch {
-        // If handoff to execution process failed, fail closed
+        this.executionProviderConfigured = false
         return {
           success: false,
           providerId: 'nvidia-nim',
@@ -780,6 +985,8 @@ export class DesktopSupervisor {
           status: 'AUTH_REQUIRED',
         }
       }
+    } else {
+      this.executionProviderConfigured = false
     }
 
     return {
@@ -800,6 +1007,8 @@ export class DesktopSupervisor {
     }
     this.isShuttingDown = true
     this.setStatus('STOPPING')
+    this.executionProviderConfigured = false
+    this.clearPendingRequestsForHost('Supervisor shutdown initiated', this.kernelProcess)
 
     if (this.kernelProcess) {
       try {
@@ -822,5 +1031,6 @@ export class DesktopSupervisor {
 
     this.setStatus('STOPPED')
     this.kernelProcess = undefined
+    this.kernelInstanceId = undefined
   }
 }

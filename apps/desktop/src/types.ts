@@ -56,6 +56,7 @@ export interface BaseProtocolMessage {
 export interface HelloMessage extends BaseProtocolMessage {
   readonly type: 'HELLO'
   readonly kernelPid: number
+  readonly kernelInstanceId?: string
   readonly nodeVersion: string
   readonly electronVersion?: string
 }
@@ -506,6 +507,10 @@ export interface ConfigureProviderRequest extends BaseProtocolMessage {
   readonly type: 'CONFIGURE_PROVIDER_REQUEST'
   readonly requestId: string
   readonly expectedKernelPid?: number
+  readonly expectedKernelInstanceId?: string
+  readonly kernelInstanceId?: string
+  readonly op: 'CONFIGURE' | 'REVOKE'
+  readonly generation: number
   readonly providerId: 'nvidia-nim'
   readonly apiKey: string
 }
@@ -514,8 +519,11 @@ export interface ConfigureProviderResponse extends BaseProtocolMessage {
   readonly type: 'CONFIGURE_PROVIDER_RESPONSE'
   readonly requestId: string
   readonly kernelPid: number
+  readonly kernelInstanceId: string
+  readonly op: 'CONFIGURE' | 'REVOKE'
+  readonly generation: number
   readonly success: boolean
-  readonly providerId: string
+  readonly providerId: 'nvidia-nim'
   readonly maskedHandle: string
   readonly status: 'METADATA_VALIDATED' | 'AUTH_REQUIRED'
   readonly error?: string
