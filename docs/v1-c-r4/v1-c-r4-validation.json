@@ -1,0 +1,99 @@
+{
+  "auditWave": "V1-C-R4",
+  "timestamp": "2026-10-10T19:24:00.000Z",
+  "baseCommit": "b91077761dae771ff4ee6d374ab49dbdb7d7e611",
+  "frozenV1BParent": "910531cd44277225788409eaca21baa1f8c98c38",
+  "ancestryVerified": true,
+  "callerAuthorization": {
+    "ipcChannel": "gravitas:restart-kernel",
+    "handlerEnforcement": "isAuthorizedRestartCaller",
+    "checks": [
+      "activeWindowExistsAndNotDestroyed",
+      "senderMatchesActiveWindowWebContents",
+      "senderFrameIsTopLevelFrame (parent === null)",
+      "senderFrameUrlMatchesCanonicalRendererHtml"
+    ],
+    "unitTestsCount": 5,
+    "unitTestsFile": "apps/desktop/src/onboarding.test.ts",
+    "unitTestsStatus": "PASS"
+  },
+  "navigationBoundaryHardening": {
+    "event": "will-navigate",
+    "rule": "Allow only pathToFileURL(RENDERER_HTML_PATH).href, preventDefault() on all other URLs including arbitrary file:// schemes",
+    "status": "PASS"
+  },
+  "securityFalsification": {
+    "unauthorizedRendererIframe": {
+      "hasPreloadBridge": false,
+      "isolated": true,
+      "verdict": "PASS"
+    },
+    "arbitraryNavigationBlocked": {
+      "navAttempt": "file:///.../evil.html",
+      "currentUrlRemainsCanonical": true,
+      "verdict": "PASS"
+    },
+    "kernelRestartLifecycle": {
+      "initialState": "HEALTHY",
+      "killTerminatedUtilityProcess": true,
+      "supervisorStateAfterKill": "OFFLINE",
+      "onboardingStatusAfterKill": "AUTH_REQUIRED",
+      "authorizedRestartInvoked": true,
+      "replacementSpawned": true,
+      "oldPid": 21008,
+      "newPid": 23044,
+      "credentialResynchronized": "AVAILABLE",
+      "orphanProcessesRemaining": 0,
+      "verdict": "PASS"
+    }
+  },
+  "fullRegression": {
+    "typecheck": {
+      "command": "npm run typecheck",
+      "workspaces": 12,
+      "status": "PASS"
+    },
+    "vitest": {
+      "command": "npx vitest run --fileParallelism=false",
+      "filesPassed": 104,
+      "testsPassed": 1717,
+      "testsFailed": 0,
+      "status": "PASS"
+    },
+    "kernelK0": {
+      "command": "npm run test:kernel",
+      "testsPassed": 51,
+      "testsFailed": 0,
+      "status": "PASS"
+    },
+    "desktopBuild": {
+      "command": "node apps/desktop/build.mjs",
+      "status": "PASS"
+    },
+    "dogfood": {
+      "command": "node scripts/dogfood-view-switch.mjs",
+      "stepsPassed": 13,
+      "stepsTotal": 13,
+      "status": "PASS"
+    },
+    "doctor": {
+      "command": "node scripts/doctor.mjs --json",
+      "checksOk": 11,
+      "checksUnavailable": 2,
+      "checksBlocked": 0,
+      "exitCode": 0,
+      "status": "PASS"
+    }
+  },
+  "verdicts": {
+    "RESTART_IPC_CALLER_AUTHORIZATION": "PROVEN",
+    "NAVIGATION_BOUNDARY_CONTAINMENT": "PROVEN",
+    "V1_C_PROVIDER_CREDENTIAL_BRIDGE": "IMPLEMENTED_AND_PHYSICALLY_TESTED",
+    "NVIDIA_ADAPTER_PRODUCTION_UTILITY_DISPATCH": "NOT_IMPLEMENTED",
+    "ADAPTER_PRODUCTION_SECRET_RESOLUTION": "NOT_PROVEN",
+    "LIVE_PROVIDER_QUALIFICATION": "BLOCKED",
+    "INDEPENDENT_CLEAN_MACHINE_ACCEPTANCE": "BLOCKED",
+    "NETWORK_SPEND_USD": 0,
+    "LIVE_NVIDIA_API_CALLS": 0
+  }
+}

@@ -2,9 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as os from 'node:os'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { fork, type ChildProcess } from 'node:child_process'
 import { DesktopSupervisor } from './main/supervisor.js'
+import { isAuthorizedRestartCaller } from './main/index.js'
 import { KernelHost } from './kernel-host/kernelHost.js'
 import { ModelCredentialBroker } from '@gravitas/gateways'
 import { readGravitasConfig } from '@gravitas/core'
@@ -836,4 +837,100 @@ describe('GRAVITAS Desktop Onboarding & Doctor Subsystem (Wave V1-C-R2)', () => 
       expect(sup.isExecutionCredentialReady('nvidia-nim')).toBe(true)
     })
   })
+
+  describe('V1-C-R4 Restart IPC Caller Authorization Tests', () => {
+    it('authorizes invocation from active authorized main window loading canonical renderer HTML', () => {
+      const mockWebContents = {}
+      const mockWindow = {
+        isDestroyed: () => false,
+        webContents: mockWebContents,
+      } as any
+
+      const mockEvent = {
+        sender: mockWebContents,
+        senderFrame: {
+          parent: null,
+          url: pathToFileURL(path.resolve(__dirname, 'renderer/index.html')).href,
+        },
+      } as any
+
+      expect(isAuthorizedRestartCaller(mockEvent, mockWindow)).toBe(true)
+    })
+
+    it('rejects invocation when active window is null or destroyed', () => {
+      const mockWebContents = {}
+      const mockEvent = {
+        sender: mockWebContents,
+        senderFrame: {
+          parent: null,
+          url: pathToFileURL(path.resolve(__dirname, 'renderer/index.html')).href,
+        },
+      } as any
+
+      expect(isAuthorizedRestartCaller(mockEvent, null)).toBe(false)
+
+      const destroyedWindow = {
+        isDestroyed: () => true,
+        webContents: mockWebContents,
+      } as any
+      expect(isAuthorizedRestartCaller(mockEvent, destroyedWindow)).toBe(false)
+    })
+
+    it('rejects invocation when event.sender does not match authorized window webContents', () => {
+      const authorizedWebContents = { id: 'win1' }
+      const unauthorizedWebContents = { id: 'other' }
+
+      const mockWindow = {
+        isDestroyed: () => false,
+        webContents: authorizedWebContents,
+      } as any
+
+      const mockEvent = {
+        sender: unauthorizedWebContents,
+        senderFrame: {
+          parent: null,
+          url: pathToFileURL(path.resolve(__dirname, 'renderer/index.html')).href,
+        },
+      } as any
+
+      expect(isAuthorizedRestartCaller(mockEvent, mockWindow)).toBe(false)
+    })
+
+    it('rejects invocation originating from a subframe or iframe', () => {
+      const mockWebContents = {}
+      const mockWindow = {
+        isDestroyed: () => false,
+        webContents: mockWebContents,
+      } as any
+
+      const mockEvent = {
+        sender: mockWebContents,
+        senderFrame: {
+          parent: { parent: null }, // nested frame / iframe
+          url: pathToFileURL(path.resolve(__dirname, 'renderer/index.html')).href,
+        },
+      } as any
+
+      expect(isAuthorizedRestartCaller(mockEvent, mockWindow)).toBe(false)
+    })
+
+    it('rejects invocation from an unexpected document URL or scheme', () => {
+      const mockWebContents = {}
+      const mockWindow = {
+        isDestroyed: () => false,
+        webContents: mockWebContents,
+      } as any
+
+      const mockEvent = {
+        sender: mockWebContents,
+        senderFrame: {
+          parent: null,
+          url: 'file:///C:/Users/smara/AppData/Local/Temp/evil.html',
+        },
+      } as any
+
+      expect(isAuthorizedRestartCaller(mockEvent, mockWindow)).toBe(false)
+    })
+  })
 })
+

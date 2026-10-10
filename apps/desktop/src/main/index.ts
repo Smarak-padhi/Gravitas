@@ -12,7 +12,7 @@
  */
 
 import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativeImage } from 'electron'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { DesktopSupervisor } from './supervisor.js'
 import { resolveGravitasDataRoot } from '@gravitas/core'
@@ -79,9 +79,14 @@ export function createDesktopWindow(): BrowserWindow {
     },
   })
 
-  // 2. Strict navigation policy: block unrequested navigation and window opening
+  // 2. Strict navigation policy: block all in-app navigation away from canonical application document
   win.webContents.on('will-navigate', (event, url) => {
-    if (!url.startsWith('file://')) {
+    try {
+      const allowedUrl = pathToFileURL(RENDERER_HTML_PATH).href
+      if (url !== allowedUrl) {
+        event.preventDefault()
+      }
+    } catch {
       event.preventDefault()
     }
   })
@@ -201,6 +206,38 @@ export function createDesktopTray(): Tray | null {
   }
 }
 
+export function isAuthorizedRestartCaller(
+  event: Electron.IpcMainInvokeEvent,
+  activeWindow: BrowserWindow | null
+): boolean {
+  if (!activeWindow || activeWindow.isDestroyed()) {
+    return false
+  }
+
+  // 1. Sender identity validation: must originate from the active authorized BrowserWindow's webContents
+  if (!event.sender || event.sender !== activeWindow.webContents) {
+    return false
+  }
+
+  // 2. Frame identity & entry context validation: must be top-level frame loading canonical renderer HTML
+  if (event.senderFrame) {
+    if (event.senderFrame.parent !== null) {
+      // Subframes, iframes, or embedded contexts are unauthorized
+      return false
+    }
+    try {
+      const allowedUrl = pathToFileURL(RENDERER_HTML_PATH).href
+      if (event.senderFrame.url !== allowedUrl) {
+        return false
+      }
+    } catch {
+      return false
+    }
+  }
+
+  return true
+}
+
 export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWindow | null): void {
   ipcMain.handle('gravitas:get-health', async () => {
     return sup.getHealth()
@@ -263,7 +300,11 @@ export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWind
     return sup.configureProvider(payload)
   })
 
-  ipcMain.handle('gravitas:restart-kernel', async () => {
+  ipcMain.handle('gravitas:restart-kernel', async (event) => {
+    const activeWindow = winGetter()
+    if (!isAuthorizedRestartCaller(event, activeWindow)) {
+      throw new Error('Unauthorized restart request: caller is not an active authorized application frame')
+    }
     await sup.start()
     return sup.getStatus() === 'READY' || sup.getStatus() === 'STARTING'
   })
