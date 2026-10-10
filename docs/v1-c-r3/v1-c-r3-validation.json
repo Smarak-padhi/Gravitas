@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-10-10T12:32:00Z",
+  "wave": "V1-C-R3",
+  "branch": "feat/v0-golden-loop",
+  "preHead": "a9c34ee03a485dd442ffd396bcc6a9422e4496c0",
+  "status": "PASS",
+  "metrics": {
+    "kernelRestartLifecycle": "PASS",
+    "deadProcessReferenceCleared": "PASS",
+    "hostTerminationIdempotence": "PASS",
+    "lateOldHostEventSafety": "PASS",
+    "pendingRequestExitRejection": "PASS",
+    "restartResynchronization": "PASS",
+    "physicalElectronUtilityProcessRestart": "PASS",
+    "distinctHostPidsProven": "PASS",
+    "zeroOrphanProcesses": "PASS",
+    "secretIsolation": "PASS",
+    "k3DispatchSecurity": "PASS"
+  },
+  "physicalExecution": {
+    "host1Pid": 18172,
+    "host2Pid": 20724,
+    "distinctPids": true,
+    "providerConfigured": true,
+    "postCrashStatus": "OFFLINE",
+    "postRestartStatus": "READY",
+    "resyncProviderStatus": "AVAILABLE",
+    "host2TerminatedCleanly": true
+  },
+  "verification": {
+    "typecheck": "PASS",
+    "vitestFiles": 104,
+    "vitestTests": 1712,
+    "k0Tests": 51,
+    "automatedTotal": 1763,
+    "desktopBuild": "PASS",
+    "electronDogfoodPassed": 13,
+    "electronDogfoodTotal": 13,
+    "doctorTotal": 13,
+    "doctorOk": 11,
+    "doctorUnavailable": 2,
+    "doctorBlocked": 0,
+    "doctorExitCode": 0
+  },
+  "environment": {
+    "cleanMachineEnvironment": "ISOLATED_PROFILE",
+    "independentCleanMachineAcceptance": "BLOCKED",
+    "liveNvidiaCalls": 0,
+    "incrementalSpendUsd": 0.00
+  },
+  "constraints": {
+    "worktreeClean": true,
+    "commitCreated": true,
+    "pushExecuted": false,
+    "v1dStarted": false
+  }
+}

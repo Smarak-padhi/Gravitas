@@ -93,6 +93,7 @@ export class DesktopSupervisor {
   private readonly protocolVersion: string
   private readonly dataRoot: string
   private isShuttingDown = false
+  private isStarting = false
 
   constructor(opts: DesktopSupervisorOptions = {}) {
     this.forkProcess = opts.forkProcess ?? (() => {
@@ -160,12 +161,48 @@ export class DesktopSupervisor {
     }
   }
 
+  private handleHostTermination(
+    eventProcess: ProcessBridge,
+    reason: string,
+    errorCode?: string,
+    isError?: boolean
+  ): void {
+    // 1. Clear and reject pending requests for the terminating process
+    this.clearPendingRequestsForHost(reason, eventProcess)
+
+    // 2. Only mutate active state if the event originated from the CURRENT active process
+    if (this.kernelProcess === eventProcess) {
+      this.kernelProcess = undefined
+      this.kernelInstanceId = undefined
+      this.kernelPid = 0
+      this.executionProviderConfigured = false
+
+      if (this.isShuttingDown || this.status === 'STOPPING') {
+        this.setStatus('STOPPED')
+      } else if (isError) {
+        this.setStatus('FAILED')
+        this.onError?.({
+          code: errorCode ?? 'KERNEL_PROCESS_ERROR',
+          message: reason,
+        })
+      } else {
+        this.setStatus('OFFLINE')
+        this.onError?.({
+          code: 'KERNEL_UNEXPECTED_EXIT',
+          message: reason,
+        })
+      }
+    }
+  }
+
   public async start(): Promise<void> {
-    if (this.kernelProcess) {
-      // Single supervisor: prevent duplicate Kernel creation
+    if (this.kernelProcess || this.isStarting || this.status === 'STOPPING') {
+      // Single supervisor: prevent duplicate Kernel creation, concurrent launches, or resurrection during shutdown
       return
     }
 
+    this.isStarting = true
+    this.isShuttingDown = false
     this.setStatus('STARTING')
     this.generation++
     this.kernelInstanceId = undefined
@@ -183,40 +220,21 @@ export class DesktopSupervisor {
       })
 
       this.kernelProcess.on('exit', (code: number) => {
-        this.executionProviderConfigured = false
-        this.clearPendingRequestsForHost(`Kernel process exited with code ${code}`, activeProcess)
-        if (this.kernelProcess === activeProcess) {
-          this.kernelInstanceId = undefined
-          if (!this.isShuttingDown) {
-            this.setStatus('OFFLINE')
-            this.onError?.({
-              code: 'KERNEL_UNEXPECTED_EXIT',
-              message: `Kernel process exited unexpectedly with code ${code}`,
-            })
-          } else {
-            this.setStatus('STOPPED')
-          }
-        }
+        this.handleHostTermination(activeProcess, `Kernel process exited unexpectedly with code ${code}`)
       })
 
       this.kernelProcess.on('error', (err: Error) => {
-        this.executionProviderConfigured = false
-        this.clearPendingRequestsForHost(`Kernel process error: ${err.message}`, activeProcess)
-        if (this.kernelProcess === activeProcess) {
-          this.kernelInstanceId = undefined
-          this.setStatus('FAILED')
-          this.onError?.({
-            code: 'KERNEL_PROCESS_ERROR',
-            message: err.message,
-          })
-        }
+        this.handleHostTermination(activeProcess, err.message, 'KERNEL_PROCESS_ERROR', true)
       })
     } catch (err) {
+      this.kernelProcess = undefined
       this.setStatus('FAILED')
       this.onError?.({
         code: 'STARTUP_FAILURE',
         message: (err as Error).message,
       })
+    } finally {
+      this.isStarting = false
     }
   }
 
@@ -1032,5 +1050,6 @@ export class DesktopSupervisor {
     this.setStatus('STOPPED')
     this.kernelProcess = undefined
     this.kernelInstanceId = undefined
+    this.isShuttingDown = false
   }
 }

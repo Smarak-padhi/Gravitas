@@ -263,6 +263,11 @@ export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWind
     return sup.configureProvider(payload)
   })
 
+  ipcMain.handle('gravitas:restart-kernel', async () => {
+    await sup.start()
+    return sup.getStatus() === 'READY' || sup.getStatus() === 'STARTING'
+  })
+
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)
   ipcMain.handle('gravitas:hide-window', async () => {
     hideCommandCenter()

@@ -638,6 +638,7 @@ export interface GravitasDesktopBridge {
   saveOnboarding(payload: SaveOnboardingPayload): Promise<boolean>
   runDoctor(): Promise<DoctorReport>
   configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult>
+  restartKernel(): Promise<boolean>
   requestHideWindow(): Promise<void>
   requestQuitApplication(): Promise<void>
   onKernelStatus(callback: (status: KernelLifecycleStatus) => void): () => void

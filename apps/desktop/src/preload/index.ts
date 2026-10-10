@@ -89,6 +89,10 @@ const bridge: GravitasDesktopBridge = {
     return ipcRenderer.invoke('gravitas:configure-provider', payload)
   },
 
+  restartKernel: async (): Promise<boolean> => {
+    return ipcRenderer.invoke('gravitas:restart-kernel')
+  },
+
   requestHideWindow: async (): Promise<void> => {
     return ipcRenderer.invoke('gravitas:hide-window')
   },

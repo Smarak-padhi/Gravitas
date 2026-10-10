@@ -534,4 +534,306 @@ describe('GRAVITAS Desktop Onboarding & Doctor Subsystem (Wave V1-C-R2)', () => 
     expect(sys.onboardingSummary?.operatingMode).toBe('DETERMINISTIC_ONLY')
     expect(typeof sys.onboardingSummary?.isPortableDataRoot).toBe('boolean')
   })
+
+  describe('V1-C-R3 Lifecycle and Host Restart Falsification Tests', () => {
+    it('clears kernelProcess on unexpected exit and allows explicit start() to launch replacement', async () => {
+      let activeBridge: any = null
+      let exitHandler: ((code: number) => void) | null = null
+      let messageHandler: ((msg: any) => void) | null = null
+      let forkCount = 0
+
+      const sup = new DesktopSupervisor({
+        dataRoot: tempDir,
+        forkProcess: () => {
+          forkCount++
+          const currentPid = 6000 + forkCount
+          const bridge = {
+            pid: currentPid,
+            postMessage: (msg: any) => {
+              if (msg.type === 'HELLO') {
+                // not expected from main to kernel
+              }
+            },
+            on: (event: string, handler: any) => {
+              if (event === 'exit') exitHandler = handler
+              if (event === 'message') messageHandler = handler
+            },
+            kill: () => {},
+          }
+          activeBridge = bridge
+          return bridge
+        },
+      })
+
+      // 1. Initial start
+      await sup.start()
+      expect(sup.getStatus()).toBe('STARTING')
+      expect(sup.getGeneration()).toBe(1)
+      expect(sup.getKernelPid()).toBe(6001)
+
+      // Simulate HELLO from host 1
+      messageHandler!({
+        type: 'HELLO',
+        kernelPid: 6001,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_1',
+      })
+      expect(sup.getStatus()).toBe('READY')
+      expect(sup.getKernelInstanceId()).toBe('inst_uuid_1')
+
+      // 2. Simulate unexpected exit of host 1
+      exitHandler!(1)
+      expect(sup.getStatus()).toBe('OFFLINE')
+      expect(sup.getKernelPid()).toBe(0)
+      expect(sup.getKernelInstanceId()).toBeUndefined()
+
+      // 3. Restart supervisor -> MUST succeed and not exit early
+      await sup.start()
+      expect(sup.getStatus()).toBe('STARTING')
+      expect(sup.getGeneration()).toBe(2)
+      expect(sup.getKernelPid()).toBe(6002)
+
+      // Simulate HELLO from host 2
+      messageHandler!({
+        type: 'HELLO',
+        kernelPid: 6002,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_2',
+      })
+      expect(sup.getStatus()).toBe('READY')
+      expect(sup.getKernelInstanceId()).toBe('inst_uuid_2')
+    })
+
+    it('handles process error followed by exit idempotently without corrupting state', async () => {
+      let errorHandler: ((err: Error) => void) | null = null
+      let exitHandler: ((code: number) => void) | null = null
+      let errorsReported: any[] = []
+
+      const sup = new DesktopSupervisor({
+        dataRoot: tempDir,
+        forkProcess: () => ({
+          pid: 7001,
+          postMessage: () => {},
+          on: (event: string, handler: any) => {
+            if (event === 'error') errorHandler = handler
+            if (event === 'exit') exitHandler = handler
+          },
+          kill: () => {},
+        }),
+        onError: (err) => errorsReported.push(err),
+      })
+
+      await sup.start()
+      expect(sup.getStatus()).toBe('STARTING')
+
+      // 1. Error event occurs
+      errorHandler!(new Error('Process spawned error'))
+      expect(sup.getStatus()).toBe('FAILED')
+      expect(sup.getKernelPid()).toBe(0)
+      expect(errorsReported.length).toBe(1)
+      expect(errorsReported[0].code).toBe('KERNEL_PROCESS_ERROR')
+
+      // 2. Follow-on exit event occurs for the SAME process -> must be a no-op
+      exitHandler!(1)
+      expect(sup.getStatus()).toBe('FAILED')
+      expect(sup.getKernelPid()).toBe(0)
+      // No duplicate error pushed for the already-terminated process
+      expect(errorsReported.length).toBe(1)
+
+      // 3. Restart works after error
+      await sup.start()
+      expect(sup.getStatus()).toBe('STARTING')
+      expect(sup.getGeneration()).toBe(2)
+    })
+
+    it('ignores late termination events from a retired previous host', async () => {
+      let host1Exit: ((code: number) => void) | null = null
+      let host2Message: ((msg: any) => void) | null = null
+      let launchCount = 0
+
+      const sup = new DesktopSupervisor({
+        dataRoot: tempDir,
+        forkProcess: () => {
+          launchCount++
+          const pid = 8000 + launchCount
+          return {
+            pid,
+            postMessage: () => {},
+            on: (event: string, handler: any) => {
+              if (launchCount === 1 && event === 'exit') host1Exit = handler
+              if (launchCount === 2 && event === 'message') host2Message = handler
+            },
+            kill: () => {},
+          }
+        },
+      })
+
+      await sup.start()
+      expect(sup.getKernelPid()).toBe(8001)
+
+      // Force host 1 termination so supervisor clears reference
+      host1Exit!(1)
+      expect(sup.getStatus()).toBe('OFFLINE')
+
+      // Launch host 2
+      await sup.start()
+      expect(sup.getKernelPid()).toBe(8002)
+      host2Message!({
+        type: 'HELLO',
+        kernelPid: 8002,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_host2',
+      })
+      expect(sup.getStatus()).toBe('READY')
+
+      // Now host 1 fires a late exit or error event
+      host1Exit!(0)
+      // Host 2 must remain untouched
+      expect(sup.getStatus()).toBe('READY')
+      expect(sup.getKernelPid()).toBe(8002)
+      expect(sup.getKernelInstanceId()).toBe('inst_uuid_host2')
+    })
+
+    it('rejects in-flight pending requests synchronously when host terminates', async () => {
+      let exitHandler: ((code: number) => void) | null = null
+      let messageHandler: ((msg: any) => void) | null = null
+
+      const sup = new DesktopSupervisor({
+        dataRoot: tempDir,
+        forkProcess: () => ({
+          pid: 9001,
+          postMessage: () => {},
+          on: (event: string, handler: any) => {
+            if (event === 'exit') exitHandler = handler
+            if (event === 'message') messageHandler = handler
+          },
+          kill: () => {},
+        }),
+      })
+
+      await sup.start()
+      messageHandler!({
+        type: 'HELLO',
+        kernelPid: 9001,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_9001',
+      })
+
+      // Initiate in-flight request
+      const healthPromise = sup.getHealth()
+
+      // Host terminates unexpectedly
+      exitHandler!(1)
+
+      // Pending request MUST reject with kernel termination error
+      await expect(healthPromise).rejects.toThrow('Kernel host terminated before responding')
+    })
+
+    it('resynchronizes retained Main credentials to new host upon restart', async () => {
+      let messageHandler: ((msg: any) => void) | null = null
+      let exitHandler: ((code: number) => void) | null = null
+      let lastPostedMessage: any = null
+      let forkCount = 0
+
+      const sup = new DesktopSupervisor({
+        dataRoot: tempDir,
+        forkProcess: () => {
+          forkCount++
+          const pid = 9500 + forkCount
+          return {
+            pid,
+            postMessage: (msg: any) => {
+              lastPostedMessage = msg
+            },
+            on: (event: string, handler: any) => {
+              if (event === 'message') messageHandler = handler
+              if (event === 'exit') exitHandler = handler
+            },
+            kill: () => {},
+          }
+        },
+      })
+
+      // 1. Initial start & configure provider
+      await sup.start()
+      messageHandler!({
+        type: 'HELLO',
+        kernelPid: 9501,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_9501',
+      })
+
+      // Supervisor configures provider in Main and tells host
+      const confPromise = sup.configureProvider({
+        providerId: 'nvidia-nim',
+        apiKey: 'nvapi-synthetic-key-test',
+      })
+
+      expect(lastPostedMessage.type).toBe('CONFIGURE_PROVIDER_REQUEST')
+      expect(lastPostedMessage.op).toBe('CONFIGURE')
+      expect(lastPostedMessage.expectedKernelInstanceId).toBe('inst_uuid_9501')
+
+      // ACK from host 1
+      messageHandler!({
+        type: 'CONFIGURE_PROVIDER_RESPONSE',
+        protocolVersion: 'd1.0',
+        requestId: lastPostedMessage.requestId,
+        kernelInstanceId: 'inst_uuid_9501',
+        kernelPid: 9501,
+        generation: 1,
+        op: 'CONFIGURE',
+        providerId: 'nvidia-nim',
+        success: true,
+        maskedHandle: 'nvapi-synt...',
+        status: 'METADATA_VALIDATED',
+        timestamp: new Date().toISOString(),
+      })
+
+      await confPromise
+      expect(sup.isExecutionCredentialReady('nvidia-nim')).toBe(true)
+
+      // 2. Host 1 crashes
+      exitHandler!(1)
+      expect(sup.isExecutionCredentialReady('nvidia-nim')).toBe(false)
+
+      // 3. Supervisor restarts (host 2 spawned)
+      await sup.start()
+      expect(sup.isExecutionCredentialReady('nvidia-nim')).toBe(false)
+
+      // Host 2 sends HELLO
+      lastPostedMessage = null
+      messageHandler!({
+        type: 'HELLO',
+        kernelPid: 9502,
+        nodeVersion: 'v20.0.0',
+        kernelInstanceId: 'inst_uuid_9502',
+      })
+
+      // Supervisor MUST automatically initiate credential sync to host 2
+      expect(lastPostedMessage).toBeDefined()
+      expect(lastPostedMessage.type).toBe('CONFIGURE_PROVIDER_REQUEST')
+      expect(lastPostedMessage.expectedKernelInstanceId).toBe('inst_uuid_9502')
+      expect(lastPostedMessage.expectedKernelPid).toBe(9502)
+
+      // Host 2 ACKs
+      messageHandler!({
+        type: 'CONFIGURE_PROVIDER_RESPONSE',
+        protocolVersion: 'd1.0',
+        requestId: lastPostedMessage.requestId,
+        kernelInstanceId: 'inst_uuid_9502',
+        kernelPid: 9502,
+        generation: 2,
+        op: 'CONFIGURE',
+        providerId: 'nvidia-nim',
+        success: true,
+        maskedHandle: 'nvapi-synt...',
+        status: 'METADATA_VALIDATED',
+        timestamp: new Date().toISOString(),
+      })
+
+      // Allow async tick for sync resolution
+      await new Promise((r) => setTimeout(r, 10))
+      expect(sup.isExecutionCredentialReady('nvidia-nim')).toBe(true)
+    })
+  })
 })
