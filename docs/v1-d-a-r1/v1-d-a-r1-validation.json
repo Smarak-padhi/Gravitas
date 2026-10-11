@@ -1,0 +1,54 @@
+{
+  "wave": "V1-D-A-R1",
+  "timestamp": "2026-10-11T12:48:30Z",
+  "headCommit": "ac8f07c462c73888919bec0841e0531f1172f34f",
+  "frozenV1CAncestor": "9839eee27fa7273343bf05ecb56d3996ff4687cd",
+  "statusLabels": {
+    "HASH_EQUALS_SIGNATURE": false,
+    "INSTALLER_SIGNED": "NO",
+    "PUBLISHER_AUTHENTICATION": "NOT_IMPLEMENTED",
+    "INSTALLER_BUILT_EQUALS_ACCEPTED": false,
+    "LOCAL_INSTALL_PASS_EQUALS_CLEAN_MACHINE": false,
+    "INDEPENDENT_CLEAN_MACHINE_ACCEPTANCE": "BLOCKED",
+    "LIVE_PROVIDER_QUALIFICATION": "BLOCKED"
+  },
+  "artifacts": {
+    "builtAt": "2026-10-11T04:23:24.000Z",
+    "gravitasExeSha256": "49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa",
+    "gravitasExeSizeBytes": 245726208,
+    "gravitasZipSha256": "683aaa2bd75996595910c5ab2b349cb502ea6d57b7b9bd6d15307e6883b10bc9",
+    "gravitasZipSizeBytes": 161635732,
+    "payloadFileCount": 122,
+    "reproducibleBitForBit": true
+  },
+  "securityReview": {
+    "reviewer": "Independent Security Reviewer (Subagent 052d6f19-a092-4b63-941e-6bc0b97e483c)",
+    "verdict": "PASS",
+    "gates": {
+      "pathBoundary": "PASS",
+      "reparsePointsJunctions": "PASS",
+      "directoryOwnershipCollision": "PASS",
+      "processTermination": "PASS",
+      "preInstallPayloadIntegrity": "PASS",
+      "leastPrivilegeNonElevation": "PASS"
+    }
+  },
+  "validationReview": {
+    "reviewer": "Independent Validation Reviewer (Subagent aa19a148-7429-406b-8f74-972603057020)",
+    "verdict": "PASS",
+    "dualBuildDeterministicMatch": true,
+    "adversarialIntegrityEnforced": true,
+    "lifecycleProcessRecovery": "PASS",
+    "packagedRuntimeSmokeSuite": "PASS"
+  },
+  "testSuites": {
+    "typecheck": { "workspacesClean": 13, "status": "PASS" },
+    "vitest": { "files": 104, "testsPassed": 1717, "testsFailed": 0, "status": "PASS" },
+    "kernel": { "testsPassed": 51, "testsFailed": 0, "status": "PASS" },
+    "desktopBuild": { "status": "PASS" },
+    "desktopDogfood": { "stepsPassed": 13, "status": "PASS" },
+    "doctor": { "exitCode": 0, "overallStatus": "PASS" },
+    "installLifecycle": { "stepsPassed": 11, "status": "PASS" },
+    "packagedSmoke": { "stepsPassed": 15, "status": "PASS" }
+  }
+}
