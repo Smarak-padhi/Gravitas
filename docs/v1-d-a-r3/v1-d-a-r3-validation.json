@@ -1,0 +1,75 @@
+{
+  "wave": "V1-D-A-R3",
+  "status": "PASS",
+  "preHead": "ca361dbdc9e5e1529b2d4d6ab3f29fe86688575e",
+  "r1ImplementationCommit": "b95e120fc4090eb0b71845b904690d20a08698ce",
+  "frozenBaseAncestor": "9839eee27fa7273343bf05ecb56d3996ff4687cd",
+  "timestamp": "2026-10-11T15:16:00Z",
+  "inventoryMetrics": {
+    "packagedTotalFiles": 122,
+    "payloadFiles": 121,
+    "inventoryMetadataFiles": 1,
+    "inventoriedPayloadFiles": 121,
+    "uninventoriedPayloadFiles": 0
+  },
+  "securityGates": {
+    "pathTraversalRejection": "PASS",
+    "uninstallInventoryTamperSafety": "PASS",
+    "independentOwnershipAnchor": "PASS",
+    "unrelatedFilePreservation": "PASS",
+    "reparsePointSafety": "PASS",
+    "userDataPreservation": "PASS",
+    "processTerminationSafety": "PASS",
+    "securityReview": "PASS"
+  },
+  "validationGates": {
+    "fileInventoryReproducible": "PASS",
+    "packagedFileBytesReproducible": "PASS",
+    "zipBytesReproducible": "PASS",
+    "manifestBytesReproducible": "PASS",
+    "installerScriptBytesReproducible": "PASS",
+    "uninstallerScriptBytesReproducible": "PASS",
+    "validationReview": "PASS"
+  },
+  "artifactHashes": {
+    "zipSha256": "bdc7a2844760fb4fc28bc64f22527efb7723a1a1d0d30daef23e69af2d983543",
+    "zipBytes": 161635805,
+    "manifestSha256": "3a5be15bf16d4d6f49568c36dda1cf722fdfbffb22d647389c5cf1183abfdbaf",
+    "manifestBytes": 754,
+    "installGravitasPs1Sha256": "d51c88d51aadbaa858fcad2f3d3e6718cf8a5637aa83455cb88778601b47cc2d",
+    "installGravitasCmdSha256": "609c901696ffa341cd102e5a894dd898411cafe6db1f6aa17a89c4ad08215f4d",
+    "uninstallPs1Sha256": "466bf9bbf131b63d890d4ee695529184d49b6329ebde91ccf442f79f2cc5ee8d",
+    "gravitasExeSha256": "49b61a030a520fc36a4b8fa5cce53fb4e935a7bdbbe4b80e9222f598e49cc7fa",
+    "payloadInventoryJsonSha256": "4c6af8d02b62bb7e8d4153f051add400f69653418e89a4738ef66ba5e573a43a"
+  },
+  "subagents": {
+    "subagentsUsed": true,
+    "securityAuditorId": "67df143e-f13c-4dcd-8b61-9b993f92bb85",
+    "buildAuditorId": "bc3e8372-5397-4418-8aed-f183f03b0c69",
+    "bothReviewedFinalCandidate": true,
+    "reviewCycles": 1
+  },
+  "regressions": {
+    "adversarialUninstallTests": "20/20",
+    "installerLifecycle": "11/11",
+    "packagedRuntimeSmoke": "15/15",
+    "typecheck": "PASS",
+    "vitestTests": 1717,
+    "vitestFiles": 104,
+    "k0Tests": 51,
+    "automatedTotal": 1814,
+    "electronDogfood": "13/13",
+    "doctor": "PASS"
+  },
+  "platformClassifications": {
+    "roleNotExe": true,
+    "hashNotSignature": true,
+    "installerSigned": "NO",
+    "publisherAuthentication": "NOT_IMPLEMENTED",
+    "independentCleanMachineAcceptance": "BLOCKED",
+    "liveProviderQualification": "BLOCKED",
+    "liveNvidiaCalls": 0,
+    "incrementalSpendUsd": 0.00
+  },
+  "decision": "PASS"
+}

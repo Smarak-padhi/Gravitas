@@ -203,36 +203,55 @@ export async function packageWindows() {
   const payloadInventory = payloadFiles.map(f => {
     const buf = readFileSync(f.fullPath)
     return {
-      path: f.relPath,
+      path: f.relPath.replace(/\\/g, '/'),
       sha256: createHash('sha256').update(buf).digest('hex'),
       sizeBytes: buf.length
     }
   })
 
-  // 7. Write payload inventory file inside resources/app/payload-inventory.json
+  // 7. Write payload inventory metadata file inside resources/app/payload-inventory.json
+  // Non-self-referential design: metadata file inventories all 121 payload files without circular self-hash.
   const inventoryPath = join(RESOURCES_APP_DIR, 'payload-inventory.json')
-  writeFileSync(inventoryPath, JSON.stringify({
+  const inventoryMetadata = {
     version: '0.0.1',
     builtAt: epochIso,
-    fileCount: payloadInventory.length,
+    metadataFile: 'resources/app/payload-inventory.json',
+    packagedTotalFiles: payloadFiles.length + 1,
+    payloadFileCount: payloadFiles.length,
+    inventoryMetadataFileCount: 1,
     files: payloadInventory
-  }, null, 2))
+  }
+  writeFileSync(inventoryPath, JSON.stringify(inventoryMetadata, null, 2))
 
-  // Add the newly created payload-inventory.json itself to payloadInventory
-  const invBuf = readFileSync(inventoryPath)
-  payloadInventory.push({
-    path: 'resources/app/payload-inventory.json',
-    sha256: createHash('sha256').update(invBuf).digest('hex'),
-    sizeBytes: invBuf.length
+  // Construct embedded allowlist for Uninstaller (independent ownership authority)
+  const allowlistPs = payloadInventory.map(entry =>
+    `    @{ Path = '${entry.path}'; Sha256 = '${entry.sha256}' }`
+  ).join(',\r\n')
+
+  // Derive owned directories from payload files (sorted by depth descending)
+  const ownedDirsSet = new Set()
+  for (const entry of payloadInventory) {
+    const parts = entry.path.split('/')
+    for (let i = 1; i < parts.length; i++) {
+      ownedDirsSet.add(parts.slice(0, i).join('\\'))
+    }
+  }
+  const ownedDirsSorted = Array.from(ownedDirsSet).sort((a, b) => {
+    const depthA = a.split('\\').length
+    const depthB = b.split('\\').length
+    if (depthA !== depthB) return depthB - depthA
+    return a.localeCompare(b)
   })
-  payloadInventory.sort((a, b) => a.path.localeCompare(b.path))
+  const ownedDirsPs = ownedDirsSorted.map(d => `    '${d}'`).join(',\r\n')
 
   // 8. Generate hardened, secure install and uninstall scripts
   const installerScript = `@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Install-Gravitas.ps1" %*\r\n`
   writeFileSync(join(OUTPUT_BASE, 'Install-Gravitas.cmd'), installerScript)
 
   const uninstallScriptContent = `# Gravitas Hardened Uninstaller
-# Strict deletion boundary: only deletes recognized owned files from payload-inventory.json
+# Independent trust anchor: statically embedded build-time allowlist
+# Candidate deletion targets are sourced exclusively from the embedded allowlist.
+# Changing payload-inventory.json does NOT authorize any additional deletion.
 param (
     [string]$CustomTargetDir,
     [switch]$Force
@@ -241,38 +260,61 @@ param (
 $ErrorActionPreference = 'Stop'
 $AppName = "Gravitas"
 $AppExe = "Gravitas.exe"
-$ScriptDir = [System.IO.Path]::GetFullPath($PSScriptRoot)
+$ScriptDir = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\\')
 
 # 1. Target boundary canonicalization & ownership verification
-# Verify that ScriptDir contains the canonical ownership markers: Gravitas.exe and resources/app/payload-inventory.json
-$ownExe = Join-Path $ScriptDir "Gravitas.exe"
-$ownInv = Join-Path $ScriptDir "resources/app/payload-inventory.json"
-if ((-not (Test-Path -LiteralPath $ownExe)) -or (-not (Test-Path -LiteralPath $ownInv))) {
-    Write-Error "Uninstall refused: Current directory ($ScriptDir) is missing Gravitas ownership markers."
-    exit 1
-}
-
-# Verify against protected locations
-$AppDataGravitas = [System.IO.Path]::GetFullPath((Join-Path $env:APPDATA "gravitas"))
-$WindowsDir = [System.IO.Path]::GetFullPath($env:SystemRoot)
+# Reject drive root, filesystem root, Windows SystemRoot, or %APPDATA%\\gravitas
+$AppDataGravitas = [System.IO.Path]::GetFullPath((Join-Path $env:APPDATA "gravitas")).TrimEnd('\\')
+$WindowsDir = [System.IO.Path]::GetFullPath($env:SystemRoot).TrimEnd('\\')
 $pathRoot = [System.IO.Path]::GetPathRoot($ScriptDir)
 if ($pathRoot -eq $ScriptDir -or $ScriptDir -eq '\\' -or $ScriptDir.StartsWith($AppDataGravitas, [System.StringComparison]::OrdinalIgnoreCase) -or $ScriptDir.StartsWith($WindowsDir, [System.StringComparison]::OrdinalIgnoreCase)) {
     Write-Error "Uninstall refused: Current directory ($ScriptDir) overlaps protected system or user data path."
     exit 1
 }
 
-# 2. Prevent deletion if TargetDir or parent is a junction or symlink
+# Reject if ScriptDir itself is a reparse point (junction/symlink)
 $targetItem = Get-Item -LiteralPath $ScriptDir -Force
 if ($targetItem.Attributes.HasFlag([System.IO.FileAttributes]::ReparsePoint)) {
-    Write-Error "Uninstall refused: Installation directory is a reparse point (junction/symlink). Refusing deletion."
+    Write-Error "Uninstall refused: Installation directory ($ScriptDir) is a reparse point (junction/symlink)."
     exit 1
 }
 
-# 3. Terminate strictly active GRAVITAS processes running from this exact install directory
+# Verify ownership markers: either Gravitas.exe, payload-inventory.json, or Uninstall.cmd must exist
+$ownExe = Join-Path $ScriptDir "Gravitas.exe"
+$ownInv = Join-Path $ScriptDir "resources\\app\\payload-inventory.json"
+$ownCmd = Join-Path $ScriptDir "Uninstall.cmd"
+if ((-not (Test-Path -LiteralPath $ownExe)) -and (-not (Test-Path -LiteralPath $ownInv)) -and (-not (Test-Path -LiteralPath $ownCmd))) {
+    Write-Error "Uninstall refused: Directory ($ScriptDir) is missing Gravitas installation markers."
+    exit 1
+}
+
+# Helper function: Check if any segment in path is a reparse point (junction/symlink)
+function Test-ReparsePointInPath {
+    param (
+        [string]$Path,
+        [string]$Root
+    )
+    $curr = [System.IO.Path]::GetFullPath($Path)
+    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd('\\')
+    while ($curr.Length -gt $rootFull.Length) {
+        if (Test-Path -LiteralPath $curr) {
+            $item = Get-Item -LiteralPath $curr -Force
+            if ($item.Attributes.HasFlag([System.IO.FileAttributes]::ReparsePoint)) {
+                return $true
+            }
+        }
+        $parent = [System.IO.Path]::GetDirectoryName($curr)
+        if ($parent -eq $curr -or [string]::IsNullOrEmpty($parent)) { break }
+        $curr = $parent
+    }
+    return $false
+}
+
+# 2. Terminate active GRAVITAS processes running strictly from this target directory
 $running = Get-Process -Name "Gravitas" -ErrorAction SilentlyContinue
 foreach ($proc in $running) {
     try {
-        if ($proc.MainModule.FileName.StartsWith($ScriptDir, [System.StringComparison]::OrdinalIgnoreCase)) {
+        if ($proc.MainModule.FileName.StartsWith($ScriptDir + '\\', [System.StringComparison]::OrdinalIgnoreCase)) {
             Write-Host "Stopping active instance (PID $($proc.Id))..."
             Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
             $proc.WaitForExit(3000)
@@ -283,48 +325,95 @@ foreach ($proc in $running) {
 }
 Start-Sleep -Milliseconds 500
 
-# 4. Remove Desktop and Start Menu Shortcuts
+# 3. Remove Desktop and Start Menu Shortcuts
 $DesktopPath = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)
 $StartMenuPath = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Programs)
 Remove-Item -LiteralPath (Join-Path $DesktopPath "$AppName.lnk") -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath (Join-Path $StartMenuPath "$AppName.lnk") -Force -ErrorAction SilentlyContinue
 
-# 5. Read payload inventory to perform selective, owned-only deletion
-$invPath = Join-Path $ScriptDir "resources/app/payload-inventory.json"
-if (Test-Path -LiteralPath $invPath) {
-    try {
-        $inv = Get-Content -LiteralPath $invPath -Raw | ConvertFrom-Json
-        foreach ($fileEntry in $inv.files) {
-            $rel = $fileEntry.path.Replace('/', '\\')
-            $full = Join-Path $ScriptDir $rel
-            if (Test-Path -LiteralPath $full -PathType Leaf) {
-                $fItem = Get-Item -LiteralPath $full -Force
-                # Check that leaf is not a junction
-                if (-not $fItem.Attributes.HasFlag([System.IO.FileAttributes]::ReparsePoint)) {
-                    Remove-Item -LiteralPath $full -Force -ErrorAction SilentlyContinue
+# 4. Embedded Independent Ownership Allowlist
+# Candidate deletion targets are defined strictly at build time.
+# Installed payload-inventory.json is NEVER consulted to discover candidate deletion paths.
+$EmbeddedAllowlist = @(
+${allowlistPs}
+)
+
+$scriptDirPrefix = $ScriptDir + '\\'
+
+foreach ($entry in $EmbeddedAllowlist) {
+    $rel = $entry.Path.Replace('/', '\\')
+    # Path Traversal and Structure Hardening
+    if ($rel.Contains('..') -or $rel.Contains(':') -or $rel.StartsWith('\\') -or [string]::IsNullOrWhiteSpace($rel)) {
+        Write-Warning "Skipping invalid allowlist entry: $rel"
+        continue
+    }
+
+    $full = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir $rel))
+
+    # Strict prefix boundary containment check
+    if (-not $full.StartsWith($scriptDirPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Write-Warning "Skipping out-of-bounds candidate path: $full"
+        continue
+    }
+
+    if (-not (Test-Path -LiteralPath $full -PathType Leaf)) {
+        continue
+    }
+
+    # Intermediate and leaf reparse point check
+    if (Test-ReparsePointInPath -Path $full -Root $ScriptDir) {
+        Write-Warning "Refusing to delete file through reparse point/junction: $full"
+        continue
+    }
+
+    # Hash verification against embedded build-time digest
+    $fileHash = (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash.ToLower()
+    if ($fileHash -eq $entry.Sha256.ToLower()) {
+        Remove-Item -LiteralPath $full -Force -ErrorAction SilentlyContinue
+    } else {
+        # Policy for modified application files:
+        if ($Force) {
+            Write-Host "Force removing modified application file: $rel"
+            Remove-Item -LiteralPath $full -Force -ErrorAction SilentlyContinue
+        } else {
+            Write-Warning "Application file modified since installation; preserved for safety: $rel"
+        }
+    }
+}
+
+# 5. Remove expected metadata and uninstaller wrapper files
+$MetadataFile = "resources\\app\\payload-inventory.json"
+$fullMeta = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir $MetadataFile))
+if ($fullMeta.StartsWith($scriptDirPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    if ((Test-Path -LiteralPath $fullMeta) -and (-not (Test-ReparsePointInPath -Path $fullMeta -Root $ScriptDir))) {
+        Remove-Item -LiteralPath $fullMeta -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Remove-Item -LiteralPath (Join-Path $ScriptDir "Uninstall.cmd") -Force -ErrorAction SilentlyContinue
+
+# 6. Clean up known owned directories (only if empty and not reparse points)
+$OwnedDirectories = @(
+${ownedDirsPs}
+)
+
+foreach ($ownedRel in $OwnedDirectories) {
+    $fullDir = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir $ownedRel))
+    if ($fullDir.StartsWith($scriptDirPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        if (Test-Path -LiteralPath $fullDir -PathType Container) {
+            if (-not (Test-ReparsePointInPath -Path $fullDir -Root $ScriptDir)) {
+                if ((Get-ChildItem -LiteralPath $fullDir -Force).Count -eq 0) {
+                    Remove-Item -LiteralPath $fullDir -Force -ErrorAction SilentlyContinue
                 }
             }
         }
-    } catch {
-        Write-Warning "Could not parse payload-inventory.json. Falling back to safe directory cleanup."
     }
 }
 
-# Remove inventory and uninstaller scripts
-Remove-Item -LiteralPath $invPath -Force -ErrorAction SilentlyContinue
-Remove-Item -LiteralPath (Join-Path $ScriptDir "Uninstall.cmd") -Force -ErrorAction SilentlyContinue
-Remove-Item -LiteralPath (Join-Path $ScriptDir "Uninstall.ps1") -Force -ErrorAction SilentlyContinue
+# 7. Final uninstaller self-cleanup and root evaluation
+$selfScript = Join-Path $ScriptDir "Uninstall.ps1"
+Remove-Item -LiteralPath $selfScript -Force -ErrorAction SilentlyContinue
 
-# 6. Clean up empty subdirectories without deleting unrelated user files
-Get-ChildItem -LiteralPath $ScriptDir -Recurse -Directory -Force | Sort-Object -Property FullName -Descending | ForEach-Object {
-    if (-not $_.Attributes.HasFlag([System.IO.FileAttributes]::ReparsePoint)) {
-        if ((Get-ChildItem -LiteralPath $_.FullName -Force).Count -eq 0) {
-            Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
-        }
-    }
-}
-
-# If installation root is empty, remove it; if unrelated files remain, preserve root
 $remainingItems = Get-ChildItem -LiteralPath $ScriptDir -Force
 if ($remainingItems.Count -eq 0) {
     Remove-Item -LiteralPath $ScriptDir -Force -ErrorAction SilentlyContinue
@@ -403,7 +492,7 @@ $verifiedCount = 0
 foreach ($fileEntry in $inventory.files) {
     $rel = $fileEntry.path.Replace('/', '\\')
     # Traversal escape prevention
-    if ($rel.Contains('..') -or [System.IO.Path]::IsPathRooted($rel)) {
+    if ($rel.Contains('..') -or [System.IO.Path]::IsPathRooted($rel) -or $rel.Contains(':') -or $rel.StartsWith('\\')) {
         Write-Error "Malicious payload entry detected: '$rel' contains path traversal or absolute path."
         exit 1
     }
@@ -568,7 +657,9 @@ Write-Host "User data preserved at: %APPDATA%\\gravitas"
         sizeBytes: readFileSync(zipPath).length
       }
     ],
-    payloadFileCount: payloadInventory.length
+    packagedTotalFiles: payloadFiles.length + 1,
+    payloadFileCount: payloadFiles.length,
+    inventoryMetadataFileCount: 1
   }
 
   writeFileSync(join(OUTPUT_BASE, 'manifest.json'), JSON.stringify(manifest, null, 2))
