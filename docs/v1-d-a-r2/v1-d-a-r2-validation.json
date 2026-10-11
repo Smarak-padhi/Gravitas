@@ -1,0 +1,70 @@
+{
+  "wave": "V1-D-A-R2",
+  "status": "REPAIR_REQUIRED",
+  "auditedHead": "b95e120fc4090eb0b71845b904690d20a08698ce",
+  "baseAncestor": "9839eee27fa7273343bf05ecb56d3996ff4687cd",
+  "timestamp": "2026-10-11T13:48:00Z",
+  "inventoryMetrics": {
+    "payloadFileCount": 122,
+    "inventoriedFileCount": 121,
+    "uninventoriedRequiredFiles": 1,
+    "duplicateInventoryPaths": 0,
+    "pathEscapeEntries": 0
+  },
+  "securityGates": {
+    "installTimeHashEnforcement": "PASS",
+    "uninstallInventoryTamperSafety": "FAIL",
+    "reparsePointSafety": "PASS",
+    "unrelatedFilePreservation": "FAIL",
+    "securityReview": "FAIL"
+  },
+  "reproducibilityGates": {
+    "fileInventoryReproducible": "PASS",
+    "packagedFileBytesReproducible": "PASS",
+    "zipBytesReproducible": "PASS",
+    "manifestBytesReproducible": "PASS",
+    "installerScriptBytesReproducible": "PASS",
+    "uninstallerScriptBytesReproducible": "PASS",
+    "zipSha256": "82a6c43de188b82347403834931b5779b6de30b5f29ba454cb68a76a41645b4e",
+    "zipBytes": 161635732
+  },
+  "provenanceGates": {
+    "securityReviewedHead": "NOT_PROVEN",
+    "validationReviewedHead": "NOT_PROVEN",
+    "bothReviewedExactFinalHead": "NO",
+    "validationReview": "PASS"
+  },
+  "platformClassifications": {
+    "roleNotExe": true,
+    "hashNotSignature": true,
+    "installerSigned": "NO",
+    "publisherAuthentication": "NOT_IMPLEMENTED",
+    "independentCleanMachineAcceptance": "BLOCKED",
+    "liveProviderQualification": "BLOCKED"
+  },
+  "defects": [
+    {
+      "id": "DEFECT-1",
+      "severity": "CRITICAL",
+      "title": "Uninstall.ps1 Path Traversal Vulnerability",
+      "description": "Uninstall.ps1 blindly resolves relative paths in payload-inventory.json without checking for '..' or verifying boundary within install directory, allowing deletion of arbitrary files outside installation root.",
+      "file": "scripts/package-windows.mjs"
+    },
+    {
+      "id": "DEFECT-2",
+      "severity": "HIGH",
+      "title": "Unverified Deletion in Uninstall.ps1",
+      "description": "Uninstall.ps1 does not verify SHA-256 file hashes before deleting files, allowing arbitrary deletion of unrelated files if payload-inventory.json is tampered.",
+      "file": "scripts/package-windows.mjs"
+    },
+    {
+      "id": "DEFECT-3",
+      "severity": "MEDIUM",
+      "title": "Inventory File Count Mismatch (121 vs 122)",
+      "description": "resources/app/payload-inventory.json is physically present in package (122 files) but omitted from its own inventory list (121 files).",
+      "file": "scripts/package-windows.mjs"
+    }
+  ],
+  "decision": "REPAIR_REQUIRED",
+  "nextWave": "V1-D-A-R3"
+}
