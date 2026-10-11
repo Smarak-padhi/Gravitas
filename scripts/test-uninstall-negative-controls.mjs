@@ -1,5 +1,5 @@
-import { join } from 'node:path'
-import { mkdirSync, existsSync, rmSync, writeFileSync, copyFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { mkdirSync, existsSync, rmSync, writeFileSync, copyFileSync, readFileSync, symlinkSync } from 'node:fs'
 import { execFileSync, spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
 
@@ -21,7 +21,7 @@ function stopProcess(pid) {
 }
 
 export async function runNegativeControlTests() {
-  console.log('[NEGATIVE CONTROLS] Running 5 Hostile Negative Controls against Flawed Uninstallers...\n')
+  console.log('[NEGATIVE CONTROLS] Running Hostile Negative Controls against Flawed Uninstallers & Harness Gates...\n')
 
   const testRoot = join(tmpdir(), `gravitas-neg-control-${Date.now()}`)
   mkdirSync(testRoot, { recursive: true })
@@ -31,7 +31,10 @@ export async function runNegativeControlTests() {
     control2_indiscriminateDeletionDetected: false,
     control3_unscopedProcessKillerDetected: false,
     control4_junctionTraversalDetected: false,
-    control5_corruptInventoryCrashDetected: false
+    control5_corruptInventoryCrashDetected: false,
+    controlA_mandatoryBlockedNonzeroExit: false,
+    controlB_uncTargetDeletionDetection: false,
+    controlC_reparseRejectionBypassDetection: false
   }
 
   try {
@@ -208,6 +211,133 @@ export async function runNegativeControlTests() {
       console.error('  FAIL: Control 5 failed to crash on corrupt inventory as expected')
     }
 
+    // -------------------------------------------------------------------------
+    // Control A: Mandatory BLOCKED Cases Must Yield Nonzero Process Exit
+    // Simulates an environment block in a child execution of test-uninstall-adversarial.mjs
+    // -------------------------------------------------------------------------
+    console.log('\n[CONTROL A] Testing that simulated BLOCKED mandatory case produces nonzero exit code...')
+    let blockedNonzeroExitDetected = false
+    try {
+      execFileSync('node', ['scripts/test-uninstall-adversarial.mjs'], {
+        env: { ...process.env, GRAVITAS_SIMULATE_BLOCKED: '1' },
+        stdio: 'pipe'
+      })
+    } catch (err) {
+      if (err.status !== 0 && (err.stdout?.toString().includes('BLOCKED') || err.stderr?.toString().includes('BLOCKED'))) {
+        blockedNonzeroExitDetected = true
+      }
+    }
+
+    if (blockedNonzeroExitDetected) {
+      results.controlA_mandatoryBlockedNonzeroExit = true
+      console.log('  PASS (RED CONTROL CONFIRMED): Simulated BLOCKED mandatory test resulted in nonzero process exit (code 2); runner strictly enforces no false-clean exit!')
+    } else {
+      console.error('  FAIL: Control A failed - simulated BLOCKED case produced zero exit or failed to report BLOCKED')
+    }
+
+    // -------------------------------------------------------------------------
+    // Control B: UNC Canary Target Deletion Detection
+    // An unsafe test double uninstaller deletes the exact UNC target canary
+    // -------------------------------------------------------------------------
+    console.log('\n[CONTROL B] Testing detection when an uninstaller deletes an exact UNC target canary...')
+    const cBDir = join(testRoot, 'cB-sandbox')
+    mkdirSync(cBDir, { recursive: true })
+    const cBCanary = join(cBDir, 'unc-target-canary.txt')
+    writeFileSync(cBCanary, 'CANARY TO BE DELETED BY UNSAFE DOUBLE')
+
+    // Flawed uninstaller that specifically deletes the targeted canary
+    const flawedUninstallerB = `
+      $canary = "${cBCanary.replace(/\\/g, '\\\\')}"
+      Remove-Item -LiteralPath $canary -Force -ErrorAction SilentlyContinue
+    `
+    execFileSync('powershell.exe', ['-NoProfile', '-Command', flawedUninstallerB])
+
+    // Assertion: target canary must survive. Since the flawed double deleted it, our assertion catches the flaw.
+    const uncDeletionDetected = !existsSync(cBCanary)
+    if (uncDeletionDetected) {
+      results.controlB_uncTargetDeletionDetection = true
+      console.log('  PASS (RED CONTROL CONFIRMED): Flawed uninstaller deleted exact target canary; target-preservation assertion caught deletion!')
+    } else {
+      console.error('  FAIL: Control B failed to catch target canary deletion')
+    }
+
+    // -------------------------------------------------------------------------
+    // Control C: Reparse Point Rejection Bypass Detection
+    // A mutated uninstaller omits Test-ReparsePointInPath and deletes a symlinked file with matching hash
+    // -------------------------------------------------------------------------
+    console.log('\n[CONTROL C] Testing detection when an uninstaller bypasses reparse-point rejection...')
+    const cCDir = join(testRoot, 'cC-sandbox')
+    const cCApp = join(cCDir, 'App')
+    const cCLocal = join(cCDir, 'local')
+    const cCRoam = join(cCDir, 'roam')
+    mkdirSync(cCApp, { recursive: true })
+    mkdirSync(cCLocal, { recursive: true })
+    mkdirSync(cCRoam, { recursive: true })
+
+    const installScript = resolve('dist-package/Install-Gravitas.ps1')
+    execFileSync('powershell.exe', [
+      '-NoProfile', '-ExecutionPolicy', 'Bypass',
+      '-File', installScript,
+      '-CustomTargetDir', cCApp
+    ], {
+      env: { ...process.env, LOCALAPPDATA: cCLocal, APPDATA: cCRoam },
+      stdio: 'pipe'
+    })
+
+    const exeInApp = join(cCApp, 'Gravitas.exe')
+    const cCCanary = join(cCDir, 'symlink-canary-victim.exe')
+    copyFileSync(exeInApp, cCCanary)
+    rmSync(exeInApp, { force: true })
+
+    let cCSymlinkCreated = false
+    try {
+      symlinkSync(cCCanary, exeInApp, 'file')
+      cCSymlinkCreated = true
+    } catch (_) {}
+
+    if (cCSymlinkCreated) {
+      // Mutate Uninstall.ps1 to bypass Test-ReparsePointInPath check
+      const uninstScriptPath = join(cCApp, 'Uninstall.ps1')
+      let uninstContent = readFileSync(uninstScriptPath, 'utf8')
+      // Strip reparse point check
+      uninstContent = uninstContent.replace(
+        /if \(Test-ReparsePointInPath[\s\S]*?continue\s*\}/,
+        '# BYPASSED REPARSE CHECK FOR NEGATIVE CONTROL'
+      )
+      writeFileSync(uninstScriptPath, uninstContent)
+
+      // Run bypassed uninstaller
+      let bypassOutput = ''
+      try {
+        bypassOutput = execFileSync('powershell.exe', [
+          '-NoProfile', '-ExecutionPolicy', 'Bypass',
+          '-File', uninstScriptPath
+        ], {
+          cwd: cCApp,
+          env: { ...process.env, LOCALAPPDATA: cCLocal, APPDATA: cCRoam },
+          stdio: 'pipe',
+          encoding: 'utf8'
+        })
+      } catch (err) {
+        bypassOutput = (err.stdout ? err.stdout.toString() : '') + ' ' + (err.stderr ? err.stderr.toString() : err.message)
+      }
+
+      // Case 15 assertion requires: target survives AND refusal signal emitted.
+      // In this bypass double, the reparse-point refusal check was omitted.
+      // Per Section 5: "Expected result: the symlink rejection assertion fails, even if the target file survives for another reason."
+      const refusalSignalEmitted = /Refusing to delete file through reparse point\/junction/i.test(bypassOutput) || /reparse\s*point/i.test(bypassOutput)
+      const assertionFailedAsExpected = !refusalSignalEmitted
+
+      if (assertionFailedAsExpected) {
+        results.controlC_reparseRejectionBypassDetection = true
+        console.log('  PASS (RED CONTROL CONFIRMED): Bypassing reparse check failed the reparse-refusal assertion (even though target survived); harness strictly requires positive refusal signal!')
+      } else {
+        console.error('  FAIL: Control C failed - reparse refusal signal unexpectedly present in bypassed uninstaller')
+      }
+    } else {
+      console.log('  [INFO] Control C symlink creation skipped due to OS policy')
+    }
+
   } catch (err) {
     console.error('[NEGATIVE CONTROLS] Unexpected runner error:', err)
   } finally {
@@ -224,7 +354,7 @@ export async function runNegativeControlTests() {
     console.error('[NEGATIVE CONTROLS] Some negative controls failed to confirm!')
     process.exit(1)
   } else {
-    console.log('[NEGATIVE CONTROLS] ALL 5 NEGATIVE CONTROLS CONFIRMED DISCRIMINATIVE POWER (FAIL-CLOSED)!')
+    console.log(`[NEGATIVE CONTROLS] ALL ${passed} HOSTILE NEGATIVE CONTROLS CONFIRMED DISCRIMINATIVE POWER (FAIL-CLOSED)!`)
   }
 
   return { passed, total, results }

@@ -1,0 +1,89 @@
+{
+  "wave": "V1-D-A-R5",
+  "title": "Final Adversarial Test-Evidence Repair",
+  "timestamp": "2026-10-12T04:55:00.000Z",
+  "repository": "C:\\Users\\smara\\Desktop\\Multi-agent",
+  "branch": "feat/v0-golden-loop",
+  "preHead": "cb723e09dadfa90748d5e19e7821b31ec7f8426a",
+  "ancestorBaselineV1C": "9839eee27fa7273343bf05ecb56d3996ff4687cd",
+  "status": "BLOCKED",
+  "subagentsUsed": true,
+  "subagentReviews": {
+    "securityReview": "PASS",
+    "validationReview": "BLOCKED",
+    "bothReviewedExactCandidate": true,
+    "reviewers": {
+      "securityAuditor": "67df143e-f13c-4dcd-8b61-9b993f92bb85",
+      "validationAuditor": "bc3e8372-5397-4418-8aed-f183f03b0c69"
+    }
+  },
+  "findingsAndRepairs": {
+    "r5_01_runnerExitLogic": "RESOLVED_FAIL_CLOSED_EXIT_CODE_2",
+    "r5_02_uncTargetAndFixture": "RESOLVED_SAFE_CANARY_ALIGNMENT_AND_BLOCKED_CLASSIFICATION",
+    "r5_03_symlinkReparseRefusal": "RESOLVED_IDENTICAL_HASH_CANARY_AND_POSITIVE_REFUSAL_SIGNAL"
+  },
+  "adversarialAcceptanceTests": {
+    "total": 20,
+    "passed": 19,
+    "blocked": 1,
+    "failed": 0,
+    "processExitCode": 2,
+    "case5_uncOrDevicePath": "BLOCKED: Safe non-administrative UNC fixture cannot be provisioned without administrator rights; device path preserved locally",
+    "case15_symlinkReparseRefusal": "PASS: Real NTFS file symlink detected, identical SHA-256 hash canary preserved, refusal signal emitted",
+    "case18_processTermination": "PASS: Active internal process terminated cleanly, external process preserved"
+  },
+  "negativeControls": {
+    "total": 8,
+    "passed": 8,
+    "discriminativePower": "CONFIRMED_FAIL_CLOSED",
+    "controls": [
+      { "id": "control1_pathTraversal", "result": "PASS" },
+      { "id": "control2_indiscriminateDeletion", "result": "PASS" },
+      { "id": "control3_unscopedProcessKiller", "result": "PASS" },
+      { "id": "control4_junctionTraversal", "result": "PASS" },
+      { "id": "control5_corruptInventoryCrash", "result": "PASS" },
+      { "id": "controlA_blockedCaseNonZeroExit", "result": "PASS" },
+      { "id": "controlB_uncTargetDeletionDetection", "result": "PASS" },
+      { "id": "controlC_reparseRefusalBypassDetection", "result": "PASS" }
+    ]
+  },
+  "securityGates": {
+    "pathTraversalRejection": "PASS",
+    "inventoryTamperResistance": "PASS",
+    "reparsePointSafety": "PASS",
+    "userDataPreservation": "PASS",
+    "processTerminationScoping": "PASS"
+  },
+  "regressionSuite": {
+    "typecheck": "PASS",
+    "vitestTests": 1717,
+    "k0Tests": 51,
+    "electronDogfood": "13/13",
+    "installerLifecycle": "11/11",
+    "packagedRuntimeSmoke": "15/15",
+    "doctor": "PASS"
+  },
+  "reproducibility": {
+    "zipReproducible": "PASS",
+    "manifestReproducible": "PASS",
+    "installerScriptsReproducible": "PASS",
+    "uninstallerReproducible": "PASS",
+    "payloadInventoryReproducible": "PASS",
+    "stagedRuntimeReproducible": "PASS",
+    "zipSha256": "da761a7e5f277718ce065a041a16bb11c00a18c6c7d6dd25004dd6813fbd5cb3",
+    "manifestSha256": "1e277514552f5ef1a44b469a507ccf56c3a71d450694d4c0fc4934410462fb2b",
+    "totalPackagedFiles": 126,
+    "mismatches": 0
+  },
+  "governanceInvariants": {
+    "pushExecuted": false,
+    "mainModified": false,
+    "releasePublished": false,
+    "v1dbStarted": false,
+    "independentCleanMachineAcceptance": "BLOCKED",
+    "publisherAuthentication": "NOT_IMPLEMENTED",
+    "liveProviderQualification": "BLOCKED",
+    "liveNvidiaCalls": 0,
+    "incrementalSpendUsd": 0.00
+  }
+}

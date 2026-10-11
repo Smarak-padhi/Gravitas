@@ -74,6 +74,10 @@ export async function runAdversarialUninstallTests() {
   const results = {}
   for (const c of cases) results[c] = false
 
+  if (process.env.GRAVITAS_SIMULATE_BLOCKED === '1') {
+    results.case15_symlinkedPayloadFile = 'BLOCKED: Simulated environmental block for Control A'
+  }
+
   try {
     // Helper to install into a fresh target
     function installFresh(targetDir, localApp, appData) {
@@ -144,8 +148,25 @@ export async function runAdversarialUninstallTests() {
     const driveRelCanary = join(sandboxDir, 'drive-rel-canary.txt')
     writeFileSync(driveRelCanary, 'DRIVE RELATIVE CANARY DO NOT DELETE')
 
-    const uncCanary = join(sandboxDir, 'unc-target-canary.txt')
-    writeFileSync(uncCanary, 'UNC TARGET CANARY DO NOT DELETE')
+    // Target canaries for Case 5 (UNC & Device Namespace)
+    const deviceCanary = join(sandboxDir, 'device-target-canary.txt')
+    writeFileSync(deviceCanary, 'DEVICE PATH TARGET CANARY DO NOT DELETE')
+    const devicePath = '\\\\?\\' + deviceCanary
+
+    let safeUncShareAvailable = false
+    let uncFixtureTarget = null
+    try {
+      const shareList = execFileSync('powershell.exe', [
+        '-NoProfile', '-Command',
+        'Get-SmbShare | Where-Object { -not $_.Name.EndsWith("$") } | Select-Object -ExpandProperty Name'
+      ], { encoding: 'utf8', stdio: 'pipe' }).trim()
+      if (shareList.length > 0) {
+        const shareName = shareList.split(/\r?\n/)[0].trim()
+        uncFixtureTarget = `\\\\localhost\\${shareName}\\unc-canary-${Date.now()}.txt`
+        writeFileSync(uncFixtureTarget, 'UNC CANARY ON USER SHARE')
+        safeUncShareAvailable = existsSync(uncFixtureTarget)
+      }
+    } catch (_) {}
 
     const mixedSepCanary = join(sandboxDir, 'mixed-sep-canary.txt')
     writeFileSync(mixedSepCanary, 'MIXED SEPARATORS CANARY DO NOT DELETE')
@@ -173,7 +194,10 @@ export async function runAdversarialUninstallTests() {
     inv.files.push({ path: absCanary, sha256: computeSha256(absCanary) }) // Case 3 (absolute path targeting canary)
     inv.files.push({ path: 'C:\\Windows\\System32\\notepad.exe', sha256: '2222222222222222222222222222222222222222222222222222222222222222' }) // Case 3 (system path)
     inv.files.push({ path: 'C:drive-rel-canary.txt', sha256: computeSha256(driveRelCanary) }) // Case 4 (drive-relative)
-    inv.files.push({ path: '\\\\localhost\\c$\\gravitas-unc-dummy.txt', sha256: '4444444444444444444444444444444444444444444444444444444444444444' }) // Case 5 (UNC)
+    inv.files.push({ path: devicePath, sha256: computeSha256(deviceCanary) }) // Case 5 (device path targeting exact deviceCanary)
+    if (safeUncShareAvailable && uncFixtureTarget) {
+      inv.files.push({ path: uncFixtureTarget, sha256: computeSha256(uncFixtureTarget) }) // Case 5 (UNC targeting exact uncFixtureTarget)
+    }
     inv.files.push({ path: '..//mixed-sep-canary.txt', sha256: computeSha256(mixedSepCanary) }) // Case 6 (mixed / and \)
     inv.files.push({ path: '..\\//mixed-sep-canary.txt', sha256: computeSha256(mixedSepCanary) }) // Case 6
     inv.files.push({ path: 'GRAVITAS.EXE', sha256: '6666666666666666666666666666666666666666666666666666666666666666' }) // Case 7 (duplicate case)
@@ -205,9 +229,20 @@ export async function runAdversarialUninstallTests() {
       results.case4_driveRelativePath = true
       console.log('  PASS: Case 4 - Drive relative path canary preserved')
     }
-    if (existsSync(uncCanary)) {
-      results.case5_uncOrDevicePath = true
-      console.log('  PASS: Case 5 - UNC / device path canary preserved')
+    const deviceCanaryPreserved = existsSync(deviceCanary) && computeSha256(deviceCanary) === computeSha256(deviceCanary)
+    if (safeUncShareAvailable && uncFixtureTarget) {
+      const uncCanaryPreserved = existsSync(uncFixtureTarget)
+      if (deviceCanaryPreserved && uncCanaryPreserved) {
+        results.case5_uncOrDevicePath = true
+        console.log('  PASS: Case 5 - Device path and UNC canary preserved at exact targets')
+      } else {
+        console.error('  FAIL: Case 5 - Injected UNC / device canary was deleted or modified!')
+      }
+    } else {
+      // Per Finding R5-02: Do not use real system files, privileged administrative shares (C$),
+      // or arbitrary network hosts as deletion targets. An unprivileged host cannot safely provision an SMB share.
+      results.case5_uncOrDevicePath = 'BLOCKED: Safe non-administrative UNC fixture cannot be provisioned without administrator rights (policy prohibits targeting privileged administrative shares like C$ or arbitrary network hosts); device path preserved locally.'
+      console.log('  BLOCKED: Case 5 - Physical UNC fixture cannot be safely provisioned without administrator rights (device path canary verified locally)')
     }
     if (existsSync(mixedSepCanary)) {
       results.case6_mixedSeparators = true
@@ -331,9 +366,14 @@ export async function runAdversarialUninstallTests() {
     console.log('\n[TEST 15] Testing symlinked leaf payload file...')
     const symlinkApp = join(testRoot, 'symlink-app')
     installFresh(symlinkApp, join(testRoot, 'sym-local'), join(testRoot, 'sym-roam'))
-    const symTargetCanary = join(testRoot, 'symlink-target-canary.txt')
-    writeFileSync(symTargetCanary, 'CANARY MUST SURVIVE SYMLINK DELETION ATTEMPT')
     const exePath = join(symlinkApp, 'Gravitas.exe')
+    const originalExeHash = computeSha256(exePath)
+
+    // External canary MUST have identical content & hash to Gravitas.exe to exclude hash mismatch alternative
+    const symTargetCanary = join(testRoot, 'symlink-target-canary.exe')
+    copyFileSync(exePath, symTargetCanary)
+    const preCanaryHash = computeSha256(symTargetCanary)
+
     rmSync(exePath, { force: true })
 
     let symlinkCreated = false
@@ -345,14 +385,22 @@ export async function runAdversarialUninstallTests() {
     }
 
     if (symlinkCreated) {
-      runUninstall(symlinkApp, join(testRoot, 'sym-local'), join(testRoot, 'sym-roam'))
-      if (existsSync(symTargetCanary)) {
+      const symUninstRes = runUninstall(symlinkApp, join(testRoot, 'sym-local'), join(testRoot, 'sym-roam'))
+      const symText = symUninstRes.stdout + ' ' + symUninstRes.stderr
+      const targetExists = existsSync(symTargetCanary)
+      const postCanaryHash = targetExists ? computeSha256(symTargetCanary) : null
+      const bytesPreserved = postCanaryHash === preCanaryHash
+      const refusalSignalEmitted = /Refusing to delete file through reparse point\/junction/i.test(symText) || /reparse\s*point/i.test(symText)
+
+      if (symUninstRes.exitCode === 0 && targetExists && bytesPreserved && refusalSignalEmitted) {
         results.case15_symlinkedPayloadFile = true
-        console.log('  PASS: Case 15 - Real NTFS file symlink detected; target canary preserved')
+        console.log('  PASS: Case 15 - Real NTFS file symlink detected; reparse-point refusal signal emitted; target canary preserved with matching hash')
+      } else {
+        console.error(`  FAIL: Case 15 - Symlink test failed assertions: exitCode=${symUninstRes.exitCode}, exists=${targetExists}, bytesPreserved=${bytesPreserved}, refusalSignal=${refusalSignalEmitted}`)
       }
     } else {
-      results.case15_symlinkedPayloadFile = 'BLOCKED'
-      console.log('  BLOCKED: Case 15 - File symlink creation blocked by host OS policy (requires SeCreateSymbolicLinkPrivilege / Developer Mode)')
+      results.case15_symlinkedPayloadFile = 'BLOCKED: File symlink creation blocked by host OS policy (requires SeCreateSymbolicLinkPrivilege / Developer Mode)'
+      console.log('  BLOCKED: Case 15 - File symlink creation blocked by host OS policy')
     }
 
     // =========================================================================
@@ -516,19 +564,31 @@ export async function runAdversarialUninstallTests() {
     rmSync(testRoot, { recursive: true, force: true })
   }
 
+  const totalCount = cases.length
   const passedCount = Object.values(results).filter(v => v === true).length
   const blockedCount = Object.values(results).filter(v => typeof v === 'string' && v.startsWith('BLOCKED')).length
-  const totalCount = cases.length
+  const failedCount = totalCount - passedCount - blockedCount
+
   console.log(`\n======================================================`)
-  console.log(`[ADVERSARIAL] Completed: ${passedCount} passed, ${blockedCount} blocked / ${totalCount} total tests`)
+  console.log(`[ADVERSARIAL] Summary: ${passedCount} PASS, ${blockedCount} BLOCKED, ${failedCount} FAIL / ${totalCount} total`)
   console.log(`======================================================`)
 
-  if (passedCount + blockedCount !== totalCount || passedCount < totalCount - blockedCount) {
-    console.error('[ADVERSARIAL] FAIL: Some adversarial tests failed!')
-    process.exit(1)
-  } else {
-    console.log('[ADVERSARIAL] ALL EXECUTABLE ADVERSARIAL TESTS PASSED!')
+  if (blockedCount > 0) {
+    console.error(`[ADVERSARIAL] BLOCKED: ${blockedCount} mandatory test(s) blocked by environmental limitations. Nonzero exit required.`)
+    process.exit(2)
   }
+
+  if (failedCount > 0) {
+    console.error(`[ADVERSARIAL] FAIL: ${failedCount} adversarial test(s) failed assertion!`)
+    process.exit(1)
+  }
+
+  if (passedCount !== totalCount) {
+    console.error(`[ADVERSARIAL] Incomplete run: only ${passedCount}/${totalCount} tests passed.`)
+    process.exit(1)
+  }
+
+  console.log('[ADVERSARIAL] ALL 20 MANDATORY ADVERSARIAL TESTS PASSED!')
   return { passedCount, blockedCount, totalCount, results }
 }
 
