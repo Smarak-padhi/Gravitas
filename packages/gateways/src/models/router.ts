@@ -69,6 +69,15 @@ export class ModelRouter {
     let seenCapabilityUnsupported = false;
 
     for (const model of allModels) {
+      // 0. Requested model filter if specified
+      if (requirements.requestedModelId && model.id !== requirements.requestedModelId) {
+        rejectedCandidates.push({
+          modelId: model.id,
+          reason: `NOT_REQUESTED_MODEL: expected ${requirements.requestedModelId}`,
+        });
+        continue;
+      }
+
       // 1. Excluded models from previous failed attempts in this escalation chain
       if (requirements.excludedModelIds?.includes(model.id)) {
         rejectedCandidates.push({

@@ -34,6 +34,10 @@ import {
   type ConfigureProviderResult,
   type ConfigureProviderRequest,
   type ConfigureProviderResponse,
+  type DesktopModelDispatchPayload,
+  type DesktopModelDispatchResult,
+  type DispatchModelRequest,
+  type DispatchModelResponse,
 } from '../types.js'
 
 import {
@@ -414,6 +418,16 @@ export class DesktopSupervisor {
             code: 'UNSOLICITED_PROVIDER_ACK',
             message: `Received unexpected or duplicate provider ACK for requestId: ${msg.requestId}`,
           })
+        }
+        break
+      }
+
+      case 'DISPATCH_MODEL_RESPONSE': {
+        const p = this.pendingRequests.get(msg.requestId)
+        if (p) {
+          clearTimeout(p.timer)
+          this.pendingRequests.delete(msg.requestId)
+          p.resolve(msg)
         }
         break
       }
@@ -1013,6 +1027,42 @@ export class DesktopSupervisor {
       maskedHandle: handle.redactedPreview,
       status: 'METADATA_VALIDATED',
     }
+  }
+
+  public async dispatchModel(payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult> {
+    if (this.status !== 'READY') {
+      return {
+        success: false,
+        workSessionId: payload.workSessionId ?? '',
+        runId: '',
+        taskId: '',
+        executionId: '',
+        provider: 'nvidia-nim',
+        requestedModel: payload.modelId ?? 'meta/llama-3.1-8b-instruct',
+        actualModel: payload.modelId ?? 'meta/llama-3.1-8b-instruct',
+        terminationStatus: 'ERROR',
+        errorTaxonomy: 'KERNEL_OFFLINE',
+        errorMessage: `Kernel is not ready (status=${this.status})`,
+      }
+    }
+
+    const requestId = randomUUID()
+    const reqMsg: DispatchModelRequest = {
+      type: 'DISPATCH_MODEL_REQUEST',
+      protocolVersion: this.protocolVersion,
+      requestId,
+      timestamp: new Date().toISOString(),
+      workSessionId: payload.workSessionId,
+      modelId: payload.modelId,
+      prompt: payload.prompt,
+      messages: payload.messages,
+      maxTokens: payload.maxTokens,
+      temperature: payload.temperature,
+      timeoutMs: payload.timeoutMs,
+    }
+
+    const timeout = (payload.timeoutMs ?? 30000) + 5000
+    return this.sendToKernel<DispatchModelResponse>(reqMsg, requestId, timeout)
   }
 
   public async shutdown(): Promise<void> {

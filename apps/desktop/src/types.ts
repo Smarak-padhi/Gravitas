@@ -529,6 +529,53 @@ export interface ConfigureProviderResponse extends BaseProtocolMessage {
   readonly error?: string
 }
 
+export interface DesktopModelDispatchPayload {
+  readonly workSessionId?: string | undefined
+  readonly modelId?: string | undefined
+  readonly prompt: string
+  readonly messages?: readonly { readonly role: 'system' | 'user' | 'assistant'; readonly content: string }[] | undefined
+  readonly maxTokens?: number | undefined
+  readonly temperature?: number | undefined
+  readonly timeoutMs?: number | undefined
+}
+
+export interface DesktopModelDispatchResult {
+  readonly success: boolean
+  readonly workSessionId: string
+  readonly runId: string
+  readonly taskId: string
+  readonly executionId: string
+  readonly provider: string
+  readonly requestedModel: string
+  readonly actualModel: string
+  readonly terminationStatus: 'COMPLETED' | 'ERROR' | 'TIMED_OUT' | 'CANCELLED'
+  readonly outputContent?: string | undefined
+  readonly errorTaxonomy?: string | undefined
+  readonly errorMessage?: string | undefined
+  readonly tokenUsage?: {
+    readonly promptTokens: number
+    readonly completionTokens: number
+    readonly totalTokens: number
+  } | undefined
+}
+
+export interface DispatchModelRequest extends BaseProtocolMessage {
+  readonly type: 'DISPATCH_MODEL_REQUEST'
+  readonly requestId: string
+  readonly workSessionId?: string | undefined
+  readonly modelId?: string | undefined
+  readonly prompt: string
+  readonly messages?: readonly { readonly role: 'system' | 'user' | 'assistant'; readonly content: string }[] | undefined
+  readonly maxTokens?: number | undefined
+  readonly temperature?: number | undefined
+  readonly timeoutMs?: number | undefined
+}
+
+export interface DispatchModelResponse extends BaseProtocolMessage, DesktopModelDispatchResult {
+  readonly type: 'DISPATCH_MODEL_RESPONSE'
+  readonly requestId: string
+}
+
 export interface D1ProjectionUpdatedNotification extends BaseProtocolMessage {
   readonly type: 'PROJECTION_UPDATED'
   readonly projectionType: string
@@ -548,6 +595,7 @@ export type D1MainToKernelMessage =
   | D1GetActivityRequest
   | D1OperatorIntentRequest
   | ConfigureProviderRequest
+  | DispatchModelRequest
 
 export type D1KernelToMainMessage =
   | HelloMessage
@@ -566,6 +614,7 @@ export type D1KernelToMainMessage =
   | D1OperatorIntentResponse
   | D1ProjectionUpdatedNotification
   | ConfigureProviderResponse
+  | DispatchModelResponse
 
 export type MainToKernelMessage = D1MainToKernelMessage
 export type KernelToMainMessage = D1KernelToMainMessage
@@ -638,6 +687,7 @@ export interface GravitasDesktopBridge {
   saveOnboarding(payload: SaveOnboardingPayload): Promise<boolean>
   runDoctor(): Promise<DoctorReport>
   configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult>
+  dispatchModel(payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult>
   restartKernel(): Promise<boolean>
   requestHideWindow(): Promise<void>
   requestQuitApplication(): Promise<void>

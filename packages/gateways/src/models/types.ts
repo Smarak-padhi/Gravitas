@@ -100,6 +100,7 @@ export interface TaskModelRequirements {
   readonly taskComplexityClass?: 'LOW' | 'MEDIUM' | 'HIGH' | undefined;
   readonly riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | undefined;
   readonly excludedModelIds?: readonly string[] | undefined;
+  readonly requestedModelId?: string | undefined;
 }
 
 export interface RoutingPolicy {

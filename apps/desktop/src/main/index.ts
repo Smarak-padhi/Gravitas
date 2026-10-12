@@ -300,6 +300,10 @@ export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWind
     return sup.configureProvider(payload)
   })
 
+  ipcMain.handle('gravitas:dispatch-model', async (_event, payload) => {
+    return sup.dispatchModel(payload)
+  })
+
   ipcMain.handle('gravitas:restart-kernel', async (event) => {
     const activeWindow = winGetter()
     if (!isAuthorizedRestartCaller(event, activeWindow)) {

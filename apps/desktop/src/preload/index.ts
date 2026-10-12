@@ -26,6 +26,8 @@ import type {
   ActivityProjection,
   OperatorIntent,
   IntentResult,
+  DesktopModelDispatchPayload,
+  DesktopModelDispatchResult,
 } from '../types.js'
 
 const bridge: GravitasDesktopBridge = {
@@ -87,6 +89,10 @@ const bridge: GravitasDesktopBridge = {
 
   configureProvider: async (payload) => {
     return ipcRenderer.invoke('gravitas:configure-provider', payload)
+  },
+
+  dispatchModel: async (payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult> => {
+    return ipcRenderer.invoke('gravitas:dispatch-model', payload)
   },
 
   restartKernel: async (): Promise<boolean> => {

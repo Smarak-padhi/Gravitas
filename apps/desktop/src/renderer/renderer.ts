@@ -751,6 +751,89 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   })
 }
 
+export function initModelDispatch(bridge: GravitasDesktopBridge): void {
+  const btn = document.getElementById('btn-dispatch-model')
+  const selectModel = document.getElementById('select-dispatch-model') as HTMLSelectElement | null
+  const inputPrompt = document.getElementById('input-dispatch-prompt') as HTMLInputElement | null
+  const statusIndicator = document.getElementById('dispatch-status-indicator')
+  const resultContainer = document.getElementById('dispatch-result-container')
+  const resultMeta = document.getElementById('dispatch-result-meta')
+  const resultOutput = document.getElementById('dispatch-result-output')
+
+  if (!btn) return
+
+  btn.addEventListener('click', async () => {
+    const requestedModelId = selectModel?.value || 'meta/llama-3.1-8b-instruct'
+    const prompt = inputPrompt?.value.trim() || 'Explain cryptographic signatures vs hashes.'
+
+    if (statusIndicator) {
+      statusIndicator.textContent = 'Dispatching via KernelHost...'
+      statusIndicator.style.color = '#38bdf8'
+    }
+    btn.setAttribute('disabled', 'true')
+
+    try {
+      const result = await bridge.dispatchModel({
+        modelId: requestedModelId,
+        prompt,
+      })
+
+      if (result.success) {
+        if (statusIndicator) {
+          statusIndicator.textContent = `Succeeded (${result.provider}) — Task ${result.taskId}`
+          statusIndicator.style.color = 'var(--badge-ready)'
+        }
+        if (resultMeta) {
+          resultMeta.textContent = `Model: ${result.actualModel} | Tokens: ${result.tokenUsage?.totalTokens ?? 0} | Execution ID: ${result.executionId} | Task: ${result.taskId}`
+        }
+        if (resultOutput) {
+          resultOutput.textContent = result.outputContent || ''
+        }
+        if (resultContainer) {
+          resultContainer.style.display = 'block'
+        }
+        announce(`Model dispatch succeeded for task ${result.taskId}`)
+      } else {
+        const errCat = result.errorTaxonomy || 'UNKNOWN'
+        const errMsg = result.errorMessage || 'Unknown error'
+        if (statusIndicator) {
+          statusIndicator.textContent = `Failed [${errCat}]: ${errMsg}`
+          statusIndicator.style.color = 'var(--badge-offline)'
+        }
+        if (resultMeta) {
+          resultMeta.textContent = `Model: ${result.actualModel || requestedModelId} | Error Taxonomy: ${errCat}`
+        }
+        if (resultOutput) {
+          resultOutput.textContent = errMsg
+        }
+        if (resultContainer) {
+          resultContainer.style.display = 'block'
+        }
+        announce(`Model dispatch failed: ${errMsg}`)
+      }
+    } catch (err) {
+      const msg = (err as Error).message
+      if (statusIndicator) {
+        statusIndicator.textContent = `IPC Error: ${msg}`
+        statusIndicator.style.color = 'var(--badge-offline)'
+      }
+      if (resultMeta) {
+        resultMeta.textContent = `Error: IPC failure`
+      }
+      if (resultOutput) {
+        resultOutput.textContent = msg
+      }
+      if (resultContainer) {
+        resultContainer.style.display = 'block'
+      }
+      announce(`Model dispatch error: ${msg}`)
+    } finally {
+      btn.removeAttribute('disabled')
+      await refreshAll(bridge)
+    }
+  })
+}
+
 // ─── Initialization ──────────────────────────────────────────────────────────
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
@@ -763,6 +846,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 
     // Initialize onboarding & doctor controller
     setupOnboardingController(bridge)
+
+    // Initialize model selection & router dispatch
+    initModelDispatch(bridge)
 
     // Tab navigation logic
     const tabs = document.querySelectorAll<HTMLButtonElement>('.nav-btn')

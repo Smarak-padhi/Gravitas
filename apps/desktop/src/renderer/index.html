@@ -421,6 +421,31 @@
         ROLE ≠ EXECUTOR ≠ HARNESS ≠ MODEL ≠ PROVIDER ≠ GATEWAY ≠ PROCESS<br>
         WORKER_SUCCESS ≠ VERIFIED_SUCCESS | TOOL_SUCCESS ≠ VERIFIED_SUCCESS
       </div>
+      <div class="card" id="card-model-dispatch">
+        <h2 class="card-title">Model Selection & Production Dispatch (NVIDIA NIM)</h2>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <label for="select-dispatch-model" class="dialog-label">Model Router Selection</label>
+            <select id="select-dispatch-model" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-family: monospace; font-size: 13px;">
+              <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Fast Tier)</option>
+              <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct (Frontier Tier)</option>
+              <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1 (MoE)</option>
+            </select>
+          </div>
+          <div style="flex: 2; min-width: 280px;">
+            <label for="input-dispatch-prompt" class="dialog-label">Task Prompt / Instruction</label>
+            <input type="text" id="input-dispatch-prompt" value="Explain how cryptographic signatures differ from hashes in one paragraph." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-size: 13px;" />
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btn-dispatch-model" class="btn btn-secondary">Dispatch via ModelRouter</button>
+          <span id="dispatch-status-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Ready</span>
+        </div>
+        <div id="dispatch-result-container" style="display: none; margin-top: 12px;">
+          <div style="font-size: 12px; color: #38bdf8; margin-bottom: 4px;" id="dispatch-result-meta"></div>
+          <pre class="untrusted-data" id="dispatch-result-output"></pre>
+        </div>
+      </div>
       <div class="card">
         <h2 class="card-title">Execution Registry (K1 / K2 / K3 Projections)</h2>
         <table aria-label="Execution Registry">

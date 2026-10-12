@@ -20,7 +20,19 @@ import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { WorkSessionKernel, type WorkSessionSnapshot } from '@gravitas/core/kernel'
 import { resolveGravitasDataRoot, readGravitasConfig } from '@gravitas/core'
-import { ModelCapabilityHistory, ModelCredentialBroker } from '@gravitas/gateways'
+import {
+  ModelCapabilityHistory,
+  ModelCredentialBroker,
+  ModelRegistry,
+  ModelRouter,
+  NvidiaNimAdapter,
+  getNvidiaProviderDescriptor,
+  NVIDIA_PROVIDER_ID,
+  type K3DispatchCapabilityGrant,
+  type ProviderChatMessage,
+  type ProviderInferenceRequest,
+  type TaskModelRequirements,
+} from '@gravitas/gateways'
 import {
   D0_PROTOCOL_VERSION,
   D1_PROTOCOL_VERSION,
@@ -54,6 +66,9 @@ import {
   type CancelTaskIntent,
   type ConfigureProviderRequest,
   type ConfigureProviderResponse,
+  type DispatchModelRequest,
+  type DispatchModelResponse,
+  type DesktopModelDispatchResult,
 } from '../types.js'
 
 export interface KernelHostOptions {
@@ -63,6 +78,8 @@ export interface KernelHostOptions {
   readonly initialDiagnosticContext?: string
   readonly pid?: number
   readonly kernelInstanceId?: string
+  readonly customFetch?: typeof fetch | undefined
+  readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
 }
 
 const DEFAULT_PATTERNS: readonly RegExp[] = [
@@ -127,6 +144,10 @@ export class KernelHost {
   private readonly pid: number
   private readonly kernelInstanceId: string
   private readonly dataRoot: string
+  private readonly modelRegistry: ModelRegistry
+  private readonly modelRouter: ModelRouter
+  private readonly customFetch?: typeof fetch | undefined
+  private readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
 
   // Canonical auxiliary stores managed under single writer
   private readonly verificationPlans = new Map<string, StoredVerificationPlan>()
@@ -144,6 +165,11 @@ export class KernelHost {
         process.parentPort.postMessage(msg)
       }
     })
+
+    this.customFetch = opts.customFetch
+    this.nvidiaAdapter = opts.nvidiaAdapter
+    this.modelRegistry = ModelRegistry.getInstance()
+    this.modelRouter = new ModelRouter({ registry: this.modelRegistry })
 
     this.dataRoot = opts.dataRoot ?? opts.dbPath ?? process.env.GRAVITAS_DATA_ROOT ?? resolveGravitasDataRoot().dataRoot
     this.kernel = new WorkSessionKernel({
@@ -400,6 +426,7 @@ export class KernelHost {
         const task = snap.tasks.find((t) => t.id === taskId)
         if (task) {
           const matchingPlan = Array.from(this.verificationPlans.values()).find((p) => p.taskId === taskId)
+          const matchingExec = Array.from(this.executionRegistry.values()).find((e) => e.taskId === taskId)
           return {
             task: {
               id: task.id,
@@ -419,15 +446,15 @@ export class KernelHost {
               taskId: task.id,
             },
             executionContext: {
-              executorId: 'executor_agy_node24',
+              executorId: matchingExec?.executorId ?? 'executor_agy_node24',
               roleId: task.assignedRoleId,
-              harnessId: 'harness:antigravity:host',
-              status: task.state === 'SUCCEEDED' ? 'COMPLETED' : 'READY',
+              harnessId: matchingExec?.harnessId ?? 'harness:antigravity:host',
+              status: task.state === 'SUCCEEDED' ? 'COMPLETED' : (task.state === 'FAILED' ? 'FAILED' : 'READY'),
             },
             workerResult: {
               resultSummary: `Execution of ${task.title} finished with state ${task.state}`,
-              outputText: sanitizeText(`Worker stdout output for task ${task.id}`),
-              completedAt: task.updatedAt,
+              outputText: sanitizeText(matchingExec?.boundedOutput ?? `Worker stdout output for task ${task.id}`),
+              completedAt: matchingExec?.completedAt ?? task.updatedAt,
             },
             verificationRef: matchingPlan
               ? {
@@ -542,15 +569,17 @@ export class KernelHost {
       },
       modelIntelligenceSummary: {
         providerStatus: (process.env.NVIDIA_API_KEY || process.env.NIM_API_KEY || ModelCredentialBroker.getInstance().getCredentialHandle('nvidia-nim').isAvailable) ? 'AVAILABLE' : 'AUTH_REQUIRED',
-        qualifiedModelsCount: 0,
-        qualifiedModelIds: [],
+        qualifiedModelsCount: this.modelRegistry.listQualifiedModels().length,
+        qualifiedModelIds: this.modelRegistry.listQualifiedModels().map((m) => m.id),
         candidateModelsCount: 3,
         candidateModelIds: [
           'meta/llama-3.1-8b-instruct',
           'meta/llama-3.1-70b-instruct',
           'mistralai/mixtral-8x7b-instruct-v0.1',
         ],
-        defaultModel: 'meta/llama-3.1-8b-instruct (unprobed)',
+        defaultModel: this.modelRegistry.listQualifiedModels().length > 0
+          ? this.modelRegistry.listQualifiedModels()[0].id
+          : 'meta/llama-3.1-8b-instruct (unprobed)',
         costPolicy: 'STRICT_ZERO_DOLLAR_FREE',
         outOfPocketUsd: 0,
         paidFallbackPermitted: false,
@@ -818,6 +847,254 @@ export class KernelHost {
           authorizesDeploy: false,
         }
       }
+    }
+  }
+
+  // ─── Production Model Dispatch (Wave V1-E) ────────────────────────────────
+
+  public async dispatchModel(req: DispatchModelRequest): Promise<DesktopModelDispatchResult> {
+    const targetModelId = req.modelId ?? 'meta/llama-3.1-8b-instruct'
+
+    // 1. Model Catalog Validation
+    const modelDesc = this.modelRegistry.getModel(targetModelId)
+    if (!modelDesc) {
+      return {
+        success: false,
+        workSessionId: req.workSessionId ?? '',
+        runId: '',
+        taskId: '',
+        executionId: '',
+        provider: 'nvidia-nim',
+        requestedModel: targetModelId,
+        actualModel: targetModelId,
+        terminationStatus: 'ERROR',
+        errorTaxonomy: 'MODEL_NOT_FOUND',
+        errorMessage: `Unsupported model: '${targetModelId}'. Model is not registered in catalog.`,
+      }
+    }
+
+    // 2. Provider credential verification
+    const broker = ModelCredentialBroker.getInstance()
+    const credHandle = broker.getCredentialHandle(modelDesc.providerId)
+    if (!credHandle.isAvailable) {
+      return {
+        success: false,
+        workSessionId: req.workSessionId ?? '',
+        runId: '',
+        taskId: '',
+        executionId: '',
+        provider: modelDesc.providerId,
+        requestedModel: targetModelId,
+        actualModel: targetModelId,
+        terminationStatus: 'ERROR',
+        errorTaxonomy: 'AUTH_REQUIRED',
+        errorMessage: 'No NVIDIA API credentials configured in broker. Authentication required.',
+      }
+    }
+
+    // 3. Model Qualification & ModelRouter Resolution
+    this.modelRegistry.registerProvider(getNvidiaProviderDescriptor())
+    this.modelRegistry.qualifyModel(targetModelId)
+
+    const routeReq: TaskModelRequirements = {
+      taskDomain: 'code_generation',
+      taskComplexityClass: 'MEDIUM',
+      preferredTier: targetModelId.includes('70b') ? 'FRONTIER' : 'FAST',
+      requestedModelId: targetModelId,
+    }
+    const decision = this.modelRouter.resolveModel(routeReq)
+    if (!decision.selectedModel || !decision.selectedProvider) {
+      return {
+        success: false,
+        workSessionId: req.workSessionId ?? '',
+        runId: '',
+        taskId: '',
+        executionId: '',
+        provider: modelDesc.providerId,
+        requestedModel: targetModelId,
+        actualModel: targetModelId,
+        terminationStatus: 'ERROR',
+        errorTaxonomy: decision.qualificationDecision === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' : 'COST_BLOCKED',
+        errorMessage: `Model router rejected selection: ${decision.reason}`,
+      }
+    }
+
+    const selectedModel = decision.selectedModel
+    const selectedProvider = decision.selectedProvider
+
+    // 4. Ensure WorkSession, Run, and Task exist in canonical kernel
+    let workSessionId = req.workSessionId
+    if (!workSessionId) {
+      workSessionId = `ws_nim_${randomUUID().slice(0, 8)}`
+      await this.kernel.execute({
+        commandId: `cmd_create_ws_${randomUUID().slice(0, 8)}`,
+        commandType: 'CREATE_WORKSESSION',
+        workSessionId,
+        payload: {
+          id: workSessionId,
+          title: `NVIDIA Model Dispatch Session`,
+        },
+      })
+    }
+
+    const runId = `run_${randomUUID().slice(0, 8)}`
+    await this.kernel.execute({
+      commandId: `cmd_create_run_${randomUUID().slice(0, 8)}`,
+      commandType: 'CREATE_RUN',
+      workSessionId,
+      payload: {
+        runId,
+        workSessionId,
+        goal: `Inference Run: ${selectedModel}`,
+      },
+    })
+
+    const taskId = `task_${randomUUID().slice(0, 8)}`
+    await this.kernel.execute({
+      commandId: `cmd_create_task_${randomUUID().slice(0, 8)}`,
+      commandType: 'CREATE_TASK',
+      workSessionId,
+      payload: {
+        taskId,
+        runId,
+        workSessionId,
+        title: `Model Dispatch: ${selectedModel}`,
+        assignedRoleId: 'role:engineering:backend-engineer',
+      },
+    })
+
+    await this.kernel.execute({
+      commandId: `cmd_trans_task_running_${randomUUID().slice(0, 8)}`,
+      commandType: 'TRANSITION_TASK',
+      workSessionId,
+      payload: {
+        taskId,
+        toState: 'RUNNING',
+        reason: `Model dispatch initiated for ${selectedModel}`,
+      },
+    })
+
+    // 5. Construct K3 Dispatch CapabilityGrant
+    const grant: K3DispatchCapabilityGrant = {
+      grantId: `grant_nim_${randomUUID().slice(0, 8)}`,
+      subjectId: this.kernelInstanceId,
+      workSessionId,
+      runId,
+      taskId,
+      grantedCapabilities: ['provider:nvidia-nim', 'nvidia-nim'],
+      authorizedToolIds: ['nvidia-nim', 'tool:nvidia-nim:chat'],
+      resourceScope: {
+        allowedOrigins: ['https://integrate.api.nvidia.com', 'integrate.api.nvidia.com'],
+        allowedOperations: ['chat_completions'],
+        allowedPaths: [selectedModel],
+      },
+      authorityCeiling: 'RESTRICTED_INFERENCE',
+      costCeiling: 'ZERO_DOLLAR_FREE',
+      expiresAt: new Date(Date.now() + 60000).toISOString(),
+      status: 'ACTIVE',
+      credentialReferences: ['vault:cred:nvidia-nim'],
+    }
+
+    // 6. Execute through production NvidiaNimAdapter
+    const adapter = this.nvidiaAdapter ?? new NvidiaNimAdapter({
+      credentialBroker: broker,
+      fetchFn: this.customFetch,
+    })
+
+    const messages: ProviderChatMessage[] = req.messages
+      ? [...req.messages]
+      : [{ role: 'user', content: req.prompt }]
+
+    const inferenceReq: ProviderInferenceRequest = {
+      model: selectedModel,
+      messages,
+      maxTokens: req.maxTokens ?? 1024,
+      temperature: req.temperature ?? 0.2,
+      credentialRef: 'vault:cred:nvidia-nim',
+      capabilityGrant: grant,
+    }
+
+    const adapterRes = await adapter.execute(inferenceReq, {
+      timeoutMs: req.timeoutMs ?? 30000,
+    })
+
+    const executionId = `exec_nim_${randomUUID().slice(0, 8)}`
+    const isSuccess = adapterRes.terminationStatus === 'COMPLETED'
+
+    // 7. Transition Task & Record Execution
+    await this.kernel.execute({
+      commandId: `cmd_trans_task_finish_${randomUUID().slice(0, 8)}`,
+      commandType: 'TRANSITION_TASK',
+      workSessionId,
+      payload: {
+        taskId,
+        toState: isSuccess ? 'SUCCEEDED' : 'FAILED',
+        reason: isSuccess
+          ? `Model inference completed: ${adapterRes.actualModel}`
+          : sanitizeText(adapterRes.errorMessage ?? 'Model inference failed'),
+      },
+    })
+
+    const execItem: ExecutionItem = {
+      executionId,
+      taskId,
+      roleId: 'role:engineering:backend-engineer',
+      executorId: 'executor_utility_process',
+      harnessId: 'harness:nvidia:nim',
+      surface: 'DESKTOP',
+      provider: selectedProvider,
+      model: adapterRes.actualModel || selectedModel,
+      processId: `proc_${this.pid}`,
+      qualificationStatus: 'QUALIFIED',
+      readinessStatus: 'READY',
+      costEligibility: 'OPERATOR_INCLUDED_ACCOUNT',
+      dispatchAuthorization: 'AUTHORIZED',
+      grantedCapabilities: ['provider:nvidia-nim'],
+      status: isSuccess ? 'COMPLETED' : 'FAILED',
+      startedAt: new Date(Date.now() - adapterRes.latencyMs).toISOString(),
+      completedAt: new Date().toISOString(),
+      boundedOutput: sanitizeText(
+        isSuccess
+          ? (adapterRes.outputContent ?? '')
+          : (adapterRes.errorMessage ?? 'Model execution failed')
+      ),
+    }
+    this.executionRegistry.set(executionId, execItem)
+
+    // Notify listeners of state mutation
+    this.sendMessage({
+      type: 'PROJECTION_UPDATED',
+      protocolVersion: D1_PROTOCOL_VERSION,
+      projectionType: 'WORK_HIERARCHY',
+      timestamp: new Date().toISOString(),
+    })
+    this.sendMessage({
+      type: 'PROJECTION_UPDATED',
+      protocolVersion: D1_PROTOCOL_VERSION,
+      projectionType: 'EXECUTION',
+      timestamp: new Date().toISOString(),
+    })
+    this.sendMessage({
+      type: 'PROJECTION_UPDATED',
+      protocolVersion: D1_PROTOCOL_VERSION,
+      projectionType: 'OVERVIEW',
+      timestamp: new Date().toISOString(),
+    })
+
+    return {
+      success: isSuccess,
+      workSessionId,
+      runId,
+      taskId,
+      executionId,
+      provider: selectedProvider,
+      requestedModel: selectedModel,
+      actualModel: adapterRes.actualModel || selectedModel,
+      terminationStatus: adapterRes.terminationStatus,
+      outputContent: adapterRes.outputContent,
+      errorTaxonomy: adapterRes.errorTaxonomy,
+      errorMessage: adapterRes.errorMessage,
+      tokenUsage: adapterRes.tokenUsage,
     }
   }
 
@@ -1121,6 +1398,19 @@ export class KernelHost {
             timestamp: new Date().toISOString(),
           })
         }
+        break
+      }
+
+      case 'DISPATCH_MODEL_REQUEST': {
+        const req = m as DispatchModelRequest
+        const result = await this.dispatchModel(req)
+        this.sendMessage({
+          type: 'DISPATCH_MODEL_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          ...result,
+          timestamp: new Date().toISOString(),
+        })
         break
       }
 
