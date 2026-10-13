@@ -3,70 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self';">
-  <title>GRAVITAS — Desktop Command Center D1</title>
+  <title>GRAVITAS — Workspace</title>
   <style>
+    /* ─── Warm Graphite Design Tokens ────────────────────────────────────────── */
     :root {
-      --bg-primary: #0b0f19;
-      --bg-surface: #111827;
-      --bg-card: #1f2937;
-      --border: #374151;
-      --border-focus: #38bdf8;
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --badge-ready: #34d399;
-      --badge-offline: #f87171;
-      --badge-waiting: #fbbf24;
+      --bg-app: #171A1D;
+      --bg-surface: #22262A;
+      --bg-surface-hover: #2B3036;
+      --bg-surface-subtle: #1C2024;
+      --border: #34383D;
+      --border-subtle: #272B2F;
+      --border-focus: #A9B9AC;
+      --text-primary: #F0EEE8;
+      --text-secondary: #A4A6A5;
+      --text-tertiary: #6E7173;
+      --accent-sage: #A9B9AC;
+      --accent-sage-hover: #BAC9BD;
+      --accent-sage-subtle: rgba(169, 185, 172, 0.12);
+      --accent-sage-text: #171A1D;
+      --success: #8FA693;
+      --warning: #C29F6C;
+      --danger: #C77369;
+      --badge-ready: #8FA693;
+      --badge-waiting: #C29F6C;
+      --badge-offline: #C77369;
+      --font-stack: "Segoe UI Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
     }
 
     body.light-theme, [data-theme="light"] {
-      --bg-primary: #f8fafc;
-      --bg-surface: #ffffff;
-      --bg-card: #f1f5f9;
-      --border: #cbd5e1;
-      --border-focus: #0284c7;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --success: #059669;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --badge-ready: #10b981;
-      --badge-offline: #ef4444;
-      --badge-waiting: #f59e0b;
+      --bg-app: #F5F4F0;
+      --bg-surface: #FFFFFF;
+      --bg-surface-hover: #ECEAE4;
+      --bg-surface-subtle: #FAFAF8;
+      --border: #D8D6CE;
+      --border-subtle: #E8E6DF;
+      --border-focus: #4E6352;
+      --text-primary: #1C1E21;
+      --text-secondary: #5C6065;
+      --text-tertiary: #8C9095;
+      --accent-sage: #4E6352;
+      --accent-sage-hover: #3E5142;
+      --accent-sage-subtle: rgba(78, 99, 82, 0.12);
+      --accent-sage-text: #FFFFFF;
+      --success: #3E7348;
+      --warning: #946927;
+      --danger: #A6473D;
+      --badge-ready: #3E7348;
+      --badge-waiting: #946927;
+      --badge-offline: #A6473D;
     }
 
-    * { box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-main);
+    /* ─── Global Reset & Typography ────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
     }
 
-    /* Focus accessibility baseline */
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      line-height: 1.55;
+      font-size: 14px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
     :focus-visible {
       outline: 2px solid var(--border-focus);
       outline-offset: 2px;
     }
 
-    header {
+    /* ─── Header Navigation ────────────────────────────────────────────────── */
+    header[role="banner"] {
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
+      padding: 0 24px;
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 10;
     }
 
     .brand {
@@ -75,115 +98,477 @@
       gap: 12px;
     }
 
-    .brand h1 {
-      font-size: 16px;
-      font-weight: 700;
-      margin: 0;
-      letter-spacing: 0.05em;
-      color: #38bdf8;
+    .brand-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
     }
 
     .badge {
       font-size: 11px;
       padding: 3px 8px;
       border-radius: 9999px;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-family: monospace;
+      font-weight: 500;
+      font-family: var(--font-stack);
     }
-    .badge-ready { background: #064e3b; color: var(--badge-ready); border: 1px solid #059669; }
-    .badge-offline { background: #7f1d1d; color: var(--badge-offline); border: 1px solid #dc2626; }
-    .badge-starting { background: #78350f; color: var(--badge-waiting); border: 1px solid #d97706; }
+    .badge-ready { background: rgba(143, 166, 147, 0.15); color: var(--badge-ready); border: 1px solid rgba(143, 166, 147, 0.3); }
+    .badge-offline { background: rgba(199, 115, 105, 0.15); color: var(--badge-offline); border: 1px solid rgba(199, 115, 105, 0.3); }
+    .badge-starting { background: rgba(194, 159, 108, 0.15); color: var(--badge-waiting); border: 1px solid rgba(194, 159, 108, 0.3); }
 
-    .header-meta {
-      font-size: 12px;
-      font-family: monospace;
-      color: var(--text-muted);
+    .nav-tabs {
       display: flex;
-      gap: 16px;
-    }
-
-    nav {
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      padding: 0 20px;
-      gap: 8px;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
     }
 
     .nav-btn {
       background: transparent;
       border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-muted);
-      padding: 10px 16px;
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font-stack);
+      transition: color 0.15s, background-color 0.15s;
+    }
+    .nav-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface-hover);
+    }
+    .nav-btn.active {
+      color: var(--text-primary);
+      background: var(--accent-sage-subtle);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-meta-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    /* ─── Buttons & Inputs ─────────────────────────────────────────────────── */
+    .btn {
+      background: var(--accent-sage);
+      color: var(--accent-sage-text);
+      border: 1px solid var(--accent-sage);
+      padding: 7px 16px;
+      border-radius: 6px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-stack);
+      transition: background-color 0.15s, border-color 0.15s;
     }
-    .nav-btn:hover { color: var(--text-main); }
-    .nav-btn.active {
-      color: #38bdf8;
-      border-bottom-color: #38bdf8;
+    .btn:hover {
+      background: var(--accent-sage-hover);
+      border-color: var(--accent-sage-hover);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-hover);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      padding: 6px 12px;
+    }
+    .btn-ghost:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface-hover);
+    }
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+      border: 1px solid var(--danger);
     }
 
-    main {
+    input[type="text"], input[type="time"], input[type="date"], select, textarea {
+      background: var(--bg-surface-subtle);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: var(--font-stack);
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      outline: none;
+    }
+
+    kbd {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+
+    /* ─── Developer Tools Sub-Navigation ───────────────────────────────────── */
+    #devtools-subnav {
+      background: var(--bg-surface-subtle);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 42px;
+      flex-shrink: 0;
+    }
+    .subnav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font-stack);
+    }
+    .subnav-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface-hover);
+    }
+    .subnav-btn.active {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      font-weight: 600;
+    }
+
+    /* ─── Main Content Container ───────────────────────────────────────────── */
+    main#cc-main {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      background: var(--bg-app);
+      display: flex;
+      flex-direction: column;
     }
 
     .surface { display: none; }
     .surface.active { display: block; }
 
-    /* Overview Grid */
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    /* ─── Home Workspace Styles ────────────────────────────────────────────── */
+    .workspace-wrapper {
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .workspace-greeting-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
       gap: 16px;
-      margin-bottom: 24px;
     }
 
-    .metric-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px;
-    }
-    .metric-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-    .metric-value {
-      font-size: 24px;
-      font-weight: 700;
-      font-family: monospace;
-    }
-
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-size: 14px;
+    .workspace-greeting-title {
+      font-size: 26px;
       font-weight: 600;
-      color: #38bdf8;
-      margin-top: 0;
-      margin-bottom: 12px;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
+      margin-bottom: 4px;
+    }
+    .workspace-greeting-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .workspace-prompt-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .workspace-prompt-input {
+      flex: 1;
+      background: transparent !important;
+      border: none !important;
+      color: var(--text-primary);
+      font-size: 14px;
+      padding: 4px 6px;
+    }
+    .workspace-prompt-input:focus {
+      outline: none;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Workspace Cards ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+    }
+    .card:last-child {
+      margin-bottom: 0;
+    }
+
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 18px;
     }
 
-    /* Activity timeline */
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-count-badge {
+      font-size: 12px;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: var(--bg-surface-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* Tasks list */
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-subtle);
+      margin-bottom: 8px;
+      transition: background-color 0.15s;
+    }
+    .task-item:hover {
+      background: var(--bg-surface-hover);
+    }
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+    .task-checkbox {
+      margin-top: 3px;
+      cursor: pointer;
+      accent-color: var(--accent-sage);
+      width: 16px;
+      height: 16px;
+    }
+    .task-content {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .task-text {
+      font-size: 13.5px;
+      color: var(--text-primary);
+    }
+    .task-tag {
+      font-size: 11px;
+      color: var(--accent-sage);
+      background: var(--accent-sage-subtle);
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* Notes list */
+    .note-item {
+      padding: 12px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-subtle);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+    .note-item:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border);
+    }
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .note-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .note-date {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .note-preview {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Subjects grid */
+    .subjects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .subject-pill {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-subtle);
+    }
+    .subject-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .subject-code {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .subject-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .subject-credits {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ─── Developer Surfaces & Diagnostics ─────────────────────────────────── */
+    .dev-surface-content {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 32px;
+      width: 100%;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td { font-family: var(--font-mono); font-size: 12px; }
+
+    pre.untrusted-data {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-sage);
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
     .timeline {
       list-style: none;
       padding: 0;
@@ -192,121 +577,144 @@
     .timeline-item {
       padding: 8px 12px;
       border-left: 2px solid var(--border);
-      font-family: monospace;
+      font-family: var(--font-mono);
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       margin-bottom: 6px;
     }
-    .timeline-item:last-child { margin-bottom: 0; }
 
-    /* Untrusted data containment */
-    pre.untrusted-data {
-      background: #000;
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #a7f3d0;
-      white-space: pre-wrap;
-      word-break: break-all;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      text-align: left;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    th {
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-    td { font-family: monospace; }
-
-    /* Buttons */
-    .btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn:hover { background: var(--accent-hover); }
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-    }
-    .btn-secondary:hover { background: var(--border); }
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-    .btn-danger:hover { background: #b91c1c; }
-
-    /* Epistemological Banner */
     .invariant-banner {
-      background: #1e1b4b;
-      border: 1px solid #4338ca;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 10px 14px;
-      font-size: 11px;
-      font-family: monospace;
-      color: #c7d2fe;
-      margin-bottom: 16px;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      margin-bottom: 18px;
       line-height: 1.5;
     }
 
-    /* Modal Dialog */
-    dialog {
-      background: var(--bg-surface);
+    /* ─── Onboarding Modal Dialog ─────────────────────────────────────────── */
+    dialog#onboarding-dialog {
+      max-width: 680px;
+      width: 92%;
+      border-radius: 12px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-main);
-      padding: 24px;
-      max-width: 500px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      padding: 32px;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+      margin: auto;
+      position: relative;
+      overflow: hidden;
     }
     dialog::backdrop {
-      background: rgba(0, 0, 0, 0.7);
-    }
-    dialog h3 {
-      margin-top: 0;
-      color: #38bdf8;
-      font-size: 16px;
-    }
-    .dialog-field {
-      margin-bottom: 12px;
-      font-size: 13px;
-    }
-    .dialog-label {
-      color: var(--text-muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
+      background: rgba(14, 16, 18, 0.75);
+      backdrop-filter: blur(4px);
     }
 
-    /* Live Region */
+    /* Subtle static grid pattern for Welcome Screen only */
+    .welcome-canvas {
+      position: relative;
+    }
+    .welcome-grid-bg {
+      position: absolute;
+      top: -32px;
+      left: -32px;
+      right: -32px;
+      bottom: -32px;
+      pointer-events: none;
+      background-size: 24px 24px;
+      background-image: 
+        linear-gradient(to right, rgba(240, 238, 232, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(240, 238, 232, 0.04) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at 40% 30%, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 70%);
+      -webkit-mask-image: radial-gradient(circle at 40% 30%, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 70%);
+      z-index: 0;
+    }
+    .welcome-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ob-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ob-progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .ob-dot {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background-color 0.2s;
+    }
+
+    .ob-persona-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .ob-persona-card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: var(--bg-surface-subtle);
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .ob-persona-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-surface-hover);
+    }
+    .ob-persona-card.selected {
+      border: 1.5px solid var(--accent-sage);
+      background: var(--accent-sage-subtle);
+    }
+
+    .ob-details {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      background: var(--bg-surface-subtle);
+      margin-bottom: 16px;
+    }
+    .ob-details summary {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .ob-feature-card {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+
+    .ob-actions-footer {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Live status announcer */
     .sr-live {
       position: absolute;
       width: 1px;
@@ -317,28 +725,28 @@
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
-    /* D3 Living HQ */
-    #living-hq { flex: 1; overflow: auto; padding: 12px 20px; }
+
+    /* Living HQ spatial outline */
+    #living-hq { flex: 1; overflow: auto; padding: 16px 24px; }
     #living-hq[hidden], #cc-nav[hidden], #cc-main[hidden] { display: none; }
-    .world-heading { font-size: 15px; margin: 0 0 8px 0; color: #38bdf8; }
-    .world-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; font-size: 12px; }
-    .world-layout { display: grid; grid-template-columns: minmax(320px, 1.4fr) minmax(300px, 1fr); gap: 12px; min-height: 420px; }
-    #world-canvas-host { background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; min-height: 420px; height: 60vh; position: relative; }
+    .world-heading { font-size: 16px; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
+    .world-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .world-layout { display: grid; grid-template-columns: minmax(320px, 1.4fr) minmax(300px, 1fr); gap: 16px; min-height: 420px; }
+    #world-canvas-host { background: var(--bg-app); border: 1px solid var(--border); border-radius: 8px; min-height: 420px; height: 60vh; position: relative; }
     #world-canvas-host[hidden] { display: none; }
-    .world-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-    #world-outline { max-height: 40vh; overflow: auto; border: 1px solid var(--border); border-radius: 6px; padding: 8px; background: var(--bg-surface); }
-    .world-zone-title { font-size: 12px; margin: 8px 0 4px; color: var(--text-muted); text-transform: uppercase; }
-    .world-outline-list { list-style: none; margin: 0; padding: 0; }
-    .world-outline-btn { width: 100%; text-align: left; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; margin-bottom: 3px; font-family: monospace; font-size: 11px; cursor: pointer; }
-    .world-outline-btn[aria-pressed="true"] { border-color: var(--border-focus); background: #0c4a6e; }
-    .world-empty { font-size: 11px; color: var(--text-muted); margin: 2px 0; }
-    #world-inspector { border: 1px solid var(--border-focus); border-radius: 6px; padding: 10px; background: var(--bg-card); font-size: 12px; max-height: 40vh; overflow: auto; }
+    .world-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    #world-outline { max-height: 40vh; overflow: auto; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg-surface); }
+    .world-outline-btn { width: 100%; text-align: left; background: transparent; color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; margin-bottom: 4px; font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+    .world-outline-btn[aria-pressed="true"] { border-color: var(--accent-sage); background: var(--accent-sage-subtle); }
+    #world-inspector { border: 1px solid var(--accent-sage); border-radius: 8px; padding: 14px; background: var(--bg-surface-subtle); font-size: 13px; max-height: 40vh; overflow: auto; }
     #world-inspector[hidden] { display: none; }
-    .world-inspector-dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-family: monospace; margin: 0 0 8px; }
-    .world-inspector-dl dt { color: var(--text-muted); }
+    .world-inspector-dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-family: var(--font-mono); font-size: 12px; margin-bottom: 10px; }
+    .world-inspector-dl dt { color: var(--text-secondary); }
     .world-inspector-dl dd { margin: 0; word-break: break-all; }
-    .world-inspector-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -349,202 +757,355 @@
   <!-- Header Landmark -->
   <header role="banner">
     <div class="brand">
-      <h1>GRAVITAS COMMAND CENTER</h1>
-      <span id="kernel-status-badge" class="badge badge-starting" role="status">STARTING</span>
+      <h1 class="brand-title">GRAVITAS</h1>
+      <span id="kernel-status-badge" class="badge badge-starting" role="status">Starting</span>
     </div>
-    <div class="header-meta">
-      <div role="group" aria-label="Switch view" style="display:flex; gap:6px;">
-        <button id="btn-view-command" class="btn btn-secondary" aria-pressed="true">Command Center</button>
-        <button id="btn-view-world" class="btn btn-secondary" aria-pressed="false">Living HQ</button>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="navigation" aria-label="Main Navigation">
+      <button class="nav-btn active" data-surface="surface-workspace" role="tab" aria-selected="true" id="tab-workspace">Workspace</button>
+      <button class="nav-btn" data-surface="surface-notes" role="tab" aria-selected="false" id="tab-notes">Notes & Ideas</button>
+      <button class="nav-btn" data-surface="surface-tasks" role="tab" aria-selected="false" id="tab-tasks">Tasks</button>
+      <button class="nav-btn" data-surface="surface-subjects" role="tab" aria-selected="false" id="tab-subjects">Subjects</button>
+      <button class="nav-btn" data-surface="surface-devtools" role="tab" aria-selected="false" id="tab-devtools">Developer Tools</button>
+    </nav>
+
+    <div class="header-actions">
+      <span id="protocol-version-text" class="header-meta-text" style="display:none;">d1.0</span>
+      <span id="pids-text" class="header-meta-text" style="display:none;">Main: - / Kernel: -</span>
+      <button id="btn-toggle-companion" class="btn btn-secondary" aria-label="Summon Floating Companion (Alt+Space)">Companion <kbd>Alt+Space</kbd></button>
+      <button id="btn-refresh-all" class="btn btn-ghost" aria-label="Refresh Projections">Refresh</button>
+      <button id="btn-header-theme" class="btn btn-ghost" aria-label="Toggle Theme">Theme</button>
+      <button id="btn-header-onboarding" class="btn btn-ghost" aria-label="First-Run Setup">Setup</button>
+      <div role="group" aria-label="Switch 3D View" style="display:none;">
+        <button id="btn-view-command" class="btn btn-secondary" aria-pressed="true">Command</button>
+        <button id="btn-view-world" class="btn btn-secondary" aria-pressed="false">3D</button>
       </div>
-      <span id="protocol-version-text">Protocol: d1.0</span>
-      <span id="pids-text">Main: - / Kernel: -</span>
-      <button id="btn-toggle-companion" class="btn btn-primary" aria-label="Toggle Floating Companion (Ctrl+Shift+Space)">Companion</button>
-      <button id="btn-refresh-all" class="btn btn-secondary" aria-label="Refresh All Projections">Refresh</button>
     </div>
   </header>
 
-  <!-- Navigation Landmark -->
-  <nav id="cc-nav" role="navigation" aria-label="Command Center Surfaces">
-    <button class="nav-btn active" data-surface="surface-overview" role="tab" aria-selected="true" id="tab-overview">Overview</button>
-    <button class="nav-btn" data-surface="surface-work" role="tab" aria-selected="false" id="tab-work">Work Hierarchy</button>
-    <button class="nav-btn" data-surface="surface-execution" role="tab" aria-selected="false" id="tab-execution">Execution</button>
-    <button class="nav-btn" data-surface="surface-verification" role="tab" aria-selected="false" id="tab-verification">Verification</button>
-    <button class="nav-btn" data-surface="surface-approvals" data-badge="true" role="tab" aria-selected="false" id="tab-approvals">Approvals (<span id="approvals-badge-count">0</span>)</button>
-    <button class="nav-btn" data-surface="surface-system" role="tab" aria-selected="false" id="tab-system">System</button>
+  <!-- Developer Tools Sub-Navigation (Visible only when tab-devtools is active) -->
+  <nav id="devtools-subnav" style="display: none;" role="navigation" aria-label="Developer Tools Sub-Surfaces">
+    <button class="subnav-btn active" data-surface="surface-overview" id="tab-overview">Overview</button>
+    <button class="subnav-btn" data-surface="surface-work" id="tab-work">Work Hierarchy</button>
+    <button class="subnav-btn" data-surface="surface-execution" id="tab-execution">Execution</button>
+    <button class="subnav-btn" data-surface="surface-verification" id="tab-verification">Verification</button>
+    <button class="subnav-btn" data-surface="surface-approvals" id="tab-approvals">Approvals (<span id="approvals-badge-count">0</span>)</button>
+    <button class="subnav-btn" data-surface="surface-system" id="tab-system">System & Doctor</button>
   </nav>
 
   <!-- Main Content Landmark -->
   <main id="cc-main" role="main">
 
-    <!-- SURFACE 1: OVERVIEW -->
-    <section id="surface-overview" class="surface active" role="tabpanel" aria-labelledby="tab-overview">
-      <div class="metric-grid">
-        <div class="metric-card">
-          <div class="metric-label">Active WorkSessions</div>
-          <div class="metric-value" id="metric-sessions">0</div>
+    <!-- SURFACE 0: HOME WORKSPACE (Default Active View) -->
+    <section id="surface-workspace" class="surface active" role="tabpanel" aria-labelledby="tab-workspace">
+      <div class="workspace-wrapper">
+
+        <!-- Greeting Header -->
+        <div class="workspace-greeting-section">
+          <div>
+            <h2 id="workspace-greeting" class="workspace-greeting-title">Good afternoon</h2>
+            <p class="workspace-subtitle">Here is what is happening across your workspace today.</p>
+          </div>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Active Runs</div>
-          <div class="metric-value" id="metric-runs">0</div>
+
+        <!-- Quick Capture / Assistant Prompt Bar -->
+        <div class="workspace-prompt-bar">
+          <input type="text" id="workspace-quick-input" class="workspace-prompt-input" placeholder="Capture a note, add a task, or ask a question..." aria-label="Quick capture" />
+          <button id="workspace-btn-quick-note" class="btn btn-secondary">+ Note</button>
+          <button id="workspace-btn-quick-task" class="btn btn-secondary">+ Task</button>
+          <button id="workspace-btn-companion" class="btn">Ask Alt+Space</button>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Active Tasks</div>
-          <div class="metric-value" id="metric-tasks">0</div>
+
+        <!-- Core Workspace Grid -->
+        <div class="workspace-grid">
+          <!-- Left Column: Tasks and Notes -->
+          <div>
+            <!-- Upcoming Tasks Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Upcoming Tasks
+                  <span id="workspace-tasks-count" class="card-count-badge">0</span>
+                </h3>
+                <button id="workspace-btn-add-task-modal" class="btn btn-ghost" style="font-size: 12px;">+ Add Task</button>
+              </div>
+              <div id="workspace-tasks-list">
+                <div class="empty-state">No pending tasks. You are all caught up!</div>
+              </div>
+            </div>
+
+            <!-- Recent Notes & Ideas Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Recent Notes & Ideas
+                  <span id="workspace-notes-count" class="card-count-badge">0</span>
+                </h3>
+                <button id="workspace-btn-add-note-modal" class="btn btn-ghost" style="font-size: 12px;">+ New Note</button>
+              </div>
+              <div id="workspace-notes-list">
+                <div class="empty-state">No recent notes. Use the bar above to write one.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Subjects and Sync -->
+          <div>
+            <!-- Semester Subjects & Projects Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  Subjects & Collections
+                  <span id="workspace-subjects-count" class="card-count-badge">0</span>
+                </h3>
+              </div>
+              <div id="workspace-subjects-list" class="subjects-list">
+                <div class="empty-state">Loading enrolled subjects...</div>
+              </div>
+            </div>
+
+            <!-- Inbox & Phone Sync Status Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Phone & Inbox Sync</h3>
+                <span id="workspace-inbox-status-pill" class="badge badge-ready">Connected</span>
+              </div>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;" id="workspace-inbox-desc">
+                Watching folder for assignment PDFs and lecture notes from your phone.
+              </p>
+              <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-tertiary); margin-bottom: 14px; word-break: break-all;" id="workspace-inbox-path">
+                iCloud Drive/GRAVITAS/Inbox
+              </div>
+              <button id="workspace-btn-check-inbox" class="btn btn-secondary" style="width: 100%; font-size: 12px;">Check for incoming files</button>
+            </div>
+
+            <!-- Companion Guide Card -->
+            <div class="card" style="background: var(--bg-surface-subtle);">
+              <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Desktop Companion</h4>
+              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+                Press <kbd>Alt+Space</kbd> anywhere on Windows to summon your assistant. Use voice push-to-talk or natural text commands offline.
+              </p>
+              <button id="workspace-btn-summon-assistant" class="btn btn-secondary" style="font-size: 12px;">Open Companion Window</button>
+            </div>
+          </div>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Waiting Approval</div>
-          <div class="metric-value" id="metric-approvals" style="color: var(--badge-waiting)">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Failed / Recovery</div>
-          <div class="metric-value" id="metric-failed" style="color: var(--badge-offline)">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Canonical Revision</div>
-          <div class="metric-value" id="metric-revision">0</div>
+
+      </div>
+    </section>
+
+    <!-- SURFACE 0B: FULL NOTES VIEW -->
+    <section id="surface-notes" class="surface" role="tabpanel" aria-labelledby="tab-notes">
+      <div class="workspace-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Notes & Knowledge Hub</h2>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="notes-search-input" placeholder="Search notes..." style="width: 220px;" />
+              <button id="notes-btn-create" class="btn">+ New Note</button>
+            </div>
+          </div>
+          <div id="notes-full-list"></div>
         </div>
       </div>
+    </section>
 
-      <div class="card">
-        <h2 class="card-title">Recent Canonical Activity</h2>
-        <ul id="overview-activity-list" class="timeline">
-          <li class="timeline-item">Awaiting canonical kernel activity...</li>
-        </ul>
+    <!-- SURFACE 0C: FULL TASKS VIEW -->
+    <section id="surface-tasks" class="surface" role="tabpanel" aria-labelledby="tab-tasks">
+      <div class="workspace-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Tasks & Revisions</h2>
+            <button id="tasks-btn-create" class="btn">+ Add Task</button>
+          </div>
+          <div id="tasks-full-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURFACE 0D: FULL SUBJECTS VIEW -->
+    <section id="surface-subjects" class="surface" role="tabpanel" aria-labelledby="tab-subjects">
+      <div class="workspace-wrapper">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Enrolled Semester Subjects</h2>
+            <button id="subjects-btn-refresh" class="btn btn-secondary">Refresh</button>
+          </div>
+          <div id="subjects-full-list" class="subjects-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEVELOPER SURFACES (Preserved under Developer Tools) -->
+    <!-- SURFACE 1: OVERVIEW -->
+    <section id="surface-overview" class="surface" role="tabpanel" aria-labelledby="tab-overview">
+      <div class="dev-surface-content">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-label">Active WorkSessions</div>
+            <div class="metric-value" id="metric-sessions">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Active Runs</div>
+            <div class="metric-value" id="metric-runs">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Active Tasks</div>
+            <div class="metric-value" id="metric-tasks">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Waiting Approval</div>
+            <div class="metric-value" id="metric-approvals" style="color: var(--badge-waiting)">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Failed / Recovery</div>
+            <div class="metric-value" id="metric-failed" style="color: var(--badge-offline)">0</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Canonical Revision</div>
+            <div class="metric-value" id="metric-revision">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Recent Canonical Activity</h2>
+          <ul id="overview-activity-list" class="timeline">
+            <li class="timeline-item">Awaiting canonical kernel activity...</li>
+          </ul>
+        </div>
       </div>
     </section>
 
     <!-- SURFACE 2: WORK HIERARCHY -->
     <section id="surface-work" class="surface" role="tabpanel" aria-labelledby="tab-work">
-      <div class="card">
-        <h2 class="card-title">WorkSessions ➔ Runs ➔ Tasks</h2>
-        <div id="work-hierarchy-tree">Loading work hierarchy...</div>
-      </div>
-      <div class="card" id="task-detail-panel" style="display: none;">
-        <h3 class="card-title">Task Inspector: <span id="task-detail-title">-</span></h3>
-        <div class="dialog-field">
-          <span class="dialog-label">Causal Chain</span>
-          <div id="task-causal-chain" style="font-family: monospace; font-size: 12px;"></div>
+      <div class="dev-surface-content">
+        <div class="card">
+          <h2 class="card-title">WorkSessions ➔ Runs ➔ Tasks</h2>
+          <div id="work-hierarchy-tree" style="font-family: var(--font-mono); font-size: 13px;">Loading work hierarchy...</div>
         </div>
-        <div class="dialog-field">
-          <span class="dialog-label">Worker Result Output (Untrusted Data Containment)</span>
-          <pre id="task-worker-output" class="untrusted-data"></pre>
+        <div class="card" id="task-detail-panel" style="display: none;">
+          <h3 class="card-title">Task Inspector: <span id="task-detail-title">-</span></h3>
+          <div style="margin-bottom: 12px;">
+            <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Causal Chain</span>
+            <div id="task-causal-chain" style="font-family: var(--font-mono); font-size: 12px; margin-top: 4px;"></div>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Worker Output</span>
+            <pre id="task-worker-output" class="untrusted-data" style="margin-top: 4px;"></pre>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- SURFACE 3: EXECUTION -->
     <section id="surface-execution" class="surface" role="tabpanel" aria-labelledby="tab-execution">
-      <div class="invariant-banner">
-        <strong>ARCHITECTURAL INVARIANT:</strong><br>
-        ROLE ≠ EXECUTOR ≠ HARNESS ≠ MODEL ≠ PROVIDER ≠ GATEWAY ≠ PROCESS<br>
-        WORKER_SUCCESS ≠ VERIFIED_SUCCESS | TOOL_SUCCESS ≠ VERIFIED_SUCCESS
-      </div>
-      <div class="card" id="card-model-dispatch">
-        <h2 class="card-title">Model Selection & Production Dispatch (NVIDIA NIM)</h2>
-        <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 220px;">
-            <label for="select-dispatch-model" class="dialog-label">Model Router Selection</label>
-            <select id="select-dispatch-model" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-family: monospace; font-size: 13px;">
-              <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Fast Tier)</option>
-              <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct (Frontier Tier)</option>
-              <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1 (MoE)</option>
-            </select>
+      <div class="dev-surface-content">
+        <div class="card" id="card-model-dispatch">
+          <h2 class="card-title">Model Selection & Dispatch (NVIDIA NIM)</h2>
+          <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px;">
+              <label for="select-dispatch-model" style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Model Router Selection</label>
+              <select id="select-dispatch-model" style="width: 100%;">
+                <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Fast Tier)</option>
+                <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct (Frontier Tier)</option>
+                <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1 (MoE)</option>
+              </select>
+            </div>
+            <div style="flex: 2; min-width: 280px;">
+              <label for="input-dispatch-prompt" style="display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Task Prompt</label>
+              <input type="text" id="input-dispatch-prompt" value="Explain cryptographic signatures vs hashes." style="width: 100%;" />
+            </div>
           </div>
-          <div style="flex: 2; min-width: 280px;">
-            <label for="input-dispatch-prompt" class="dialog-label">Task Prompt / Instruction</label>
-            <input type="text" id="input-dispatch-prompt" value="Explain how cryptographic signatures differ from hashes in one paragraph." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-size: 13px;" />
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button id="btn-dispatch-model" class="btn btn-secondary">Dispatch via ModelRouter</button>
+            <span id="dispatch-status-indicator" style="font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary);">Ready</span>
+          </div>
+          <div id="dispatch-result-container" style="display: none; margin-top: 14px;">
+            <div style="font-size: 12px; color: var(--accent-sage); margin-bottom: 4px;" id="dispatch-result-meta"></div>
+            <pre class="untrusted-data" id="dispatch-result-output"></pre>
           </div>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="btn-dispatch-model" class="btn btn-secondary">Dispatch via ModelRouter</button>
-          <span id="dispatch-status-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Ready</span>
+
+        <div class="card">
+          <h2 class="card-title">Execution Registry (K1 / K2 / K3 Projections)</h2>
+          <table aria-label="Execution Registry">
+            <thead>
+              <tr>
+                <th>Execution ID</th>
+                <th>Role</th>
+                <th>Executor</th>
+                <th>Harness</th>
+                <th>Model / Provider</th>
+                <th>Cost</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="execution-table-body">
+              <tr><td colspan="8">No active executions.</td></tr>
+            </tbody>
+          </table>
         </div>
-        <div id="dispatch-result-container" style="display: none; margin-top: 12px;">
-          <div style="font-size: 12px; color: #38bdf8; margin-bottom: 4px;" id="dispatch-result-meta"></div>
-          <pre class="untrusted-data" id="dispatch-result-output"></pre>
-        </div>
-      </div>
-      <div class="card">
-        <h2 class="card-title">Execution Registry (K1 / K2 / K3 Projections)</h2>
-        <table aria-label="Execution Registry">
-          <thead>
-            <tr>
-              <th>Execution ID</th>
-              <th>Role</th>
-              <th>Executor</th>
-              <th>Harness</th>
-              <th>Model / Provider</th>
-              <th>Cost Eligibility</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="execution-table-body">
-            <tr><td colspan="8">No active executions.</td></tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
     <!-- SURFACE 4: VERIFICATION -->
     <section id="surface-verification" class="surface" role="tabpanel" aria-labelledby="tab-verification">
-      <div class="invariant-banner">
-        <strong>EPISTEMOLOGICAL INVARIANTS:</strong><br>
-        WORKER_SUCCESS ≠ VERIFIED_SUCCESS | TOOL_SUCCESS ≠ VERIFIED_SUCCESS<br>
-        VERIFICATION_PASS ≠ HUMAN_APPROVAL<br>
-        HASH ≠ SIGNATURE | HASH ≠ EXTERNAL_TRUST | HASH ≠ IMMUTABILITY<br>
-        EVIDENCE_BUNDLE ≠ TRUSTED_EVIDENCE
-      </div>
-      <div class="card" id="verification-card">
-        <h2 class="card-title">Verification Report (K5 Projection)</h2>
-        <div id="verification-content">Loading verification state...</div>
-      </div>
-    </section>
-
-    <!-- SURFACE 5: APPROVAL INBOX -->
-    <section id="surface-approvals" class="surface" role="tabpanel" aria-labelledby="tab-approvals">
-      <div class="card">
-        <h2 class="card-title">Human Approval Gate Inbox</h2>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 0;">
-          Sovereign operator queue. Approvals recorded here NEVER automatically merge, push, deploy, or release.
-        </p>
-        <div id="approval-queue-container">No pending approval gates.</div>
-      </div>
-    </section>
-
-    <!-- SURFACE 6: SYSTEM -->
-    <section id="surface-system" class="surface" role="tabpanel" aria-labelledby="tab-system">
-      <div class="card">
-        <h2 class="card-title">System Diagnostics</h2>
-        <div id="system-diagnostics-container">Loading system diagnostics...</div>
-        <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
-          <button id="btn-run-setup-wizard" class="btn btn-secondary">Open First-Run Setup Wizard</button>
-          <button id="btn-run-doctor" class="btn btn-secondary">Run System Doctor</button>
+      <div class="dev-surface-content">
+        <div class="card" id="verification-card">
+          <h2 class="card-title">Verification Report (K5 Projection)</h2>
+          <div id="verification-content" style="font-size: 13px;">Loading verification state...</div>
         </div>
       </div>
-      <div class="card" id="card-doctor-results" style="display: none; margin-top: 16px;">
-        <h2 class="card-title">Doctor Diagnostic Report</h2>
-        <div id="doctor-results-container"></div>
+    </section>
+
+    <!-- SURFACE 5: APPROVALS -->
+    <section id="surface-approvals" class="surface" role="tabpanel" aria-labelledby="tab-approvals">
+      <div class="dev-surface-content">
+        <div class="card">
+          <h2 class="card-title">Human Decision Gate Inbox</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+            Operator queue. Approvals recorded here never automatically merge, push, or deploy.
+          </p>
+          <div id="approval-queue-container" style="font-size: 13px;">No pending approval gates.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURFACE 6: SYSTEM & DOCTOR -->
+    <section id="surface-system" class="surface" role="tabpanel" aria-labelledby="tab-system">
+      <div class="dev-surface-content">
+        <div class="card">
+          <h2 class="card-title">System Diagnostics</h2>
+          <div id="system-diagnostics-container" style="font-size: 13px;">Loading system diagnostics...</div>
+          <div style="margin-top: 16px; display: flex; gap: 10px;">
+            <button id="btn-run-setup-wizard" class="btn btn-secondary">Open First-Run Setup Wizard</button>
+            <button id="btn-run-doctor" class="btn btn-secondary">Run System Doctor</button>
+          </div>
+        </div>
+        <div class="card" id="card-doctor-results" style="display: none; margin-top: 16px;">
+          <h2 class="card-title">Doctor Diagnostic Report</h2>
+          <div id="doctor-results-container"></div>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- D3 LIVING HQ: spatial projection (WebGL) + semantic outline/inspector (DOM). Projection only. -->
+  <!-- D3 LIVING HQ (Spatial projection) -->
   <section id="living-hq" hidden aria-label="Living HQ">
-    <h2 id="world-heading" tabindex="-1" class="world-heading">Living HQ — spatial projection of canonical runtime</h2>
+    <h2 id="world-heading" tabindex="-1" class="world-heading">Living HQ Spatial Projection</h2>
     <div id="world-banner" role="status" aria-live="polite" class="invariant-banner"></div>
     <div class="world-controls" role="group" aria-label="Living HQ controls">
-      <button id="world-btn-refresh" class="btn btn-secondary">Refresh projection</button>
-      <button id="world-btn-reset" class="btn btn-secondary">Reset camera</button>
-      <button id="world-btn-zoom-in" class="btn btn-secondary">Zoom in</button>
-      <button id="world-btn-zoom-out" class="btn btn-secondary">Zoom out</button>
-      <label>3D level
+      <button id="world-btn-refresh" class="btn btn-secondary">Refresh</button>
+      <button id="world-btn-reset" class="btn btn-secondary">Reset Camera</button>
+      <button id="world-btn-zoom-in" class="btn btn-secondary">Zoom In</button>
+      <button id="world-btn-zoom-out" class="btn btn-secondary">Zoom Out</button>
+      <label style="font-size: 12px; color: var(--text-secondary);">Quality
         <select id="world-quality">
           <option value="FULL_3D">Full 3D</option>
           <option value="REDUCED_3D">Reduced 3D</option>
-          <option value="SEMANTIC_ONLY">Semantic only (no WebGL)</option>
+          <option value="SEMANTIC_ONLY">Semantic Only</option>
         </select>
       </label>
       <button id="world-btn-retry3d" class="btn btn-secondary" hidden>Retry 3D</button>
@@ -552,280 +1113,278 @@
     <div class="world-layout">
       <div id="world-canvas-host" aria-hidden="true"></div>
       <div class="world-side">
-        <nav id="world-outline" aria-label="Living HQ world outline"></nav>
-        <aside id="world-inspector" role="region" aria-label="Spatial inspector" tabindex="-1" hidden></aside>
+        <nav id="world-outline" aria-label="World Outline"></nav>
+        <aside id="world-inspector" role="region" aria-label="Spatial Inspector" tabindex="-1" hidden></aside>
       </div>
     </div>
   </section>
 
-  <!-- Approval Confirmation Dialog Modal -->
-  <dialog id="approval-dialog" aria-labelledby="dialog-heading">
-    <h3 id="dialog-heading">Record Human Decision</h3>
-    <div class="dialog-field">
-      <span class="dialog-label">Target Item / Plan ID</span>
-      <div id="dialog-target-id" style="font-family: monospace; font-weight: 600;"></div>
+  <!-- Approval Confirmation Dialog -->
+  <dialog id="approval-dialog" aria-labelledby="dialog-heading" style="border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); padding: 24px; max-width: 480px;">
+    <h3 id="dialog-heading" style="margin-bottom: 14px; font-size: 16px;">Record Human Decision</h3>
+    <div style="margin-bottom: 10px;">
+      <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Plan ID</span>
+      <div id="dialog-target-id" style="font-family: var(--font-mono); font-size: 13px;"></div>
     </div>
-    <div class="dialog-field">
-      <span class="dialog-label">Current Revision</span>
-      <div id="dialog-revision" style="font-family: monospace;"></div>
+    <div style="margin-bottom: 10px;">
+      <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Revision</span>
+      <div id="dialog-revision" style="font-family: var(--font-mono); font-size: 13px;"></div>
     </div>
-    <div class="dialog-field">
-      <span class="dialog-label">Technical Outcome</span>
+    <div style="margin-bottom: 12px;">
+      <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Outcome</span>
       <div id="dialog-outcome" style="font-size: 13px;"></div>
     </div>
-    <div class="dialog-field">
-      <span class="dialog-label">Operator ID</span>
-      <input type="text" id="dialog-operator-id" value="operator-human-01" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 6px; font-family: monospace;" />
+    <div style="margin-bottom: 12px;">
+      <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Operator ID</span>
+      <input type="text" id="dialog-operator-id" value="operator-human-01" style="width: 100%; margin-top: 4px;" />
     </div>
-    <div class="dialog-field">
-      <span class="dialog-label">Decision Rationale</span>
-      <input type="text" id="dialog-rationale" placeholder="Reason for decision" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 6px; font-family: monospace;" />
+    <div style="margin-bottom: 18px;">
+      <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Rationale</span>
+      <input type="text" id="dialog-rationale" placeholder="Reason for decision" style="width: 100%; margin-top: 4px;" />
     </div>
-    <div class="dialog-actions">
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
       <button id="dialog-btn-cancel" class="btn btn-secondary">Cancel</button>
       <button id="dialog-btn-reject" class="btn btn-danger">Reject</button>
       <button id="dialog-btn-approve" class="btn">Approve</button>
     </div>
   </dialog>
 
-  <!-- Premium First-Run Setup Wizard (Wave V1-G-02) -->
-  <dialog id="onboarding-dialog" aria-labelledby="onboarding-heading" style="max-width: 680px; width: 92%; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-main); padding: 20px;">
+  <!-- ─── Premium First-Run Setup Wizard (Wave V1-G-02 R2) ────────────────── -->
+  <dialog id="onboarding-dialog" aria-labelledby="onboarding-heading">
     <!-- Wizard Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+    <div class="ob-header">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 18px; font-weight: 700; color: #38bdf8;">GRAVITAS</span>
-        <span id="onboarding-heading" style="font-size: 14px; font-weight: 600; color: var(--text-muted);">First-Run Setup</span>
+        <span style="font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em;">GRAVITAS</span>
+        <span id="onboarding-heading" style="font-size: 13px; color: var(--text-secondary);">Setup</span>
       </div>
       <div style="display: flex; align-items: center; gap: 12px;">
-        <button id="ob-btn-theme-toggle" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" aria-label="Toggle light or dark theme">Theme: Dark</button>
-        <span id="onboarding-step-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Screen 1 of 5</span>
+        <button id="ob-btn-theme-toggle" class="btn btn-ghost" style="font-size: 12px;">Theme</button>
+        <span id="onboarding-step-indicator" style="font-size: 12px; color: var(--text-secondary);">1 of 5</span>
       </div>
     </div>
 
-    <!-- Step Progress Dots / Bar -->
-    <div style="display: flex; gap: 6px; margin-bottom: 20px;" id="onboarding-dots-bar" aria-label="Setup progress">
-      <div class="ob-dot" data-step="1" style="flex: 1; height: 4px; background: #38bdf8; border-radius: 2px;"></div>
-      <div class="ob-dot" data-step="2" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
-      <div class="ob-dot" data-step="3" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
-      <div class="ob-dot" data-step="4" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
-      <div class="ob-dot" data-step="5" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
+    <!-- Progress Indicator -->
+    <div class="ob-progress-bar" id="onboarding-dots-bar" aria-label="Setup progress">
+      <div class="ob-dot" data-step="1" style="background: var(--accent-sage);"></div>
+      <div class="ob-dot" data-step="2"></div>
+      <div class="ob-dot" data-step="3"></div>
+      <div class="ob-dot" data-step="4"></div>
+      <div class="ob-dot" data-step="5"></div>
     </div>
 
-    <!-- SCREEN 1: Welcome -->
-    <div id="onboarding-screen-1" class="onboarding-screen" data-screen="1">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #38bdf8;">Welcome to GRAVITAS</h2>
-        <p style="font-size: 14px; line-height: 1.5; color: var(--text-main); max-width: 540px; margin: 0 auto;">
-          Your local-first intelligence operating system. Capture ideas, organize semester subjects, track assignments, and orchestrate daily workflows with zero forced cloud accounts.
+    <!-- SCREEN 1: Welcome (With subtle static grid canvas) -->
+    <div id="onboarding-screen-1" class="onboarding-screen welcome-canvas" data-screen="1">
+      <div class="welcome-grid-bg"></div>
+      <div class="welcome-content">
+        <h2 style="font-size: 24px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.015em;">Welcome to your workspace</h2>
+        <p style="font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); max-width: 580px; margin-bottom: 24px;">
+          GRAVITAS is a calm, local-first intelligence environment for your ideas, semester studies, tasks, and daily focus. Everything stays securely on your machine.
         </p>
-      </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #38bdf8;">100% Local-First</h4>
-          <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-            All notes, SQLite databases, and task state live locally on your machine. No accounts, subscriptions, or forced telemetry.
-          </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px;">
+          <div class="ob-feature-card">
+            <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Local by design</h4>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+              Notes, SQLite databases, and task state live entirely on your computer without accounts or subscriptions.
+            </p>
+          </div>
+          <div class="ob-feature-card">
+            <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Quick summon</h4>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+              Press <kbd>Alt+Space</kbd> anytime to capture thoughts, schedule tasks, or ask a question from any application.
+            </p>
+          </div>
         </div>
-        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #38bdf8;">Universal Companion</h4>
-          <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-            Summon the assistant with <kbd style="background: #000; color: #fff; padding: 2px 5px; border-radius: 3px; font-family: monospace;">Alt+Space</kbd> from any app to capture thoughts or schedule tasks.
-          </p>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <button id="ob-btn-get-started" class="btn" style="padding: 10px 24px; font-size: 14px;">Get started</button>
+          <button id="ob-btn-explore-demo" class="btn btn-ghost" style="font-size: 13px;">Explore sample workspace</button>
         </div>
-      </div>
-
-      <div class="invariant-banner" style="margin-bottom: 20px; font-size: 11px;">
-        PRIVACY GUARANTEE: Zero audio or file data is ever transmitted to cloud providers without explicit manual configuration.
-      </div>
-
-      <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
-        <button id="ob-btn-get-started" class="btn" style="padding: 10px 24px; font-size: 14px;">Get Started</button>
-        <button id="ob-btn-explore-demo" class="btn btn-secondary" style="padding: 10px 20px; font-size: 13px;">Explore Demo</button>
       </div>
     </div>
 
     <!-- SCREEN 2: Personalize -->
     <div id="onboarding-screen-2" class="onboarding-screen" data-screen="2" style="display: none;">
-      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Personalize Your Workspace</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-        Choose the starter template that matches your focus. You can always customize collections later.
+      <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Choose your primary focus</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+        Select a starting template for your workspace. You can customize collections anytime.
       </p>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border-focus); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
-          <input type="radio" name="ob-persona" value="STUDENT" checked style="margin-right: 6px;" />
-          <strong style="font-size: 13px;">STUDENT</strong>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Semester subjects, lecture notes, assignments, solution drafts, and revision tasks.</div>
+      <div class="ob-persona-grid">
+        <label class="ob-persona-card selected" style="cursor: pointer;">
+          <input type="radio" name="ob-persona" value="STUDENT" checked style="margin-right: 8px; accent-color: var(--accent-sage);" />
+          <strong style="font-size: 14px; color: var(--text-primary);">Student</strong>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;">Semester subjects, lecture notes, assignments, solution drafts, and revision tasks.</div>
         </label>
-        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
-          <input type="radio" name="ob-persona" value="WORK" style="margin-right: 6px;" />
-          <strong style="font-size: 13px;">WORK</strong>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Roadmaps, sprint tasks, meeting agendas, architecture decisions, and documents.</div>
+        <label class="ob-persona-card" style="cursor: pointer;">
+          <input type="radio" name="ob-persona" value="WORK" style="margin-right: 8px; accent-color: var(--accent-sage);" />
+          <strong style="font-size: 14px; color: var(--text-primary);">Work</strong>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;">Projects, sprint tasks, meeting agendas, architecture decisions, and documents.</div>
         </label>
-        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
-          <input type="radio" name="ob-persona" value="PERSONAL" style="margin-right: 6px;" />
-          <strong style="font-size: 13px;">PERSONAL</strong>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Daily ideas, habit trackers, reading notes, and personal reminders.</div>
+        <label class="ob-persona-card" style="cursor: pointer;">
+          <input type="radio" name="ob-persona" value="PERSONAL" style="margin-right: 8px; accent-color: var(--accent-sage);" />
+          <strong style="font-size: 14px; color: var(--text-primary);">Personal</strong>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;">Daily ideas, habit trackers, reading notes, and personal tasks.</div>
         </label>
-        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
-          <input type="radio" name="ob-persona" value="EVERYTHING" style="margin-right: 6px;" />
-          <strong style="font-size: 13px;">EVERYTHING</strong>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Unified Knowledge Hub connecting all study, work, and personal collections.</div>
-        </label>
-      </div>
-
-      <!-- Student custom subjects options -->
-      <div id="ob-student-options" style="background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-        <label class="dialog-label" for="ob-custom-subjects-input">Your Subjects (comma-separated)</label>
-        <input type="text" id="ob-custom-subjects-input" placeholder="e.g. Mathematics, Computer Science, Physics" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px; margin-top: 4px; margin-bottom: 8px;" />
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
-          <input type="checkbox" id="ob-use-7-subject-template" />
-          <span>Optional: Use Semester 3 seven-subject template (CSE 2195, CSE 2221, CSE 2631, MTH 2002, MTH 2787, CHM 2041, GET 1433)</span>
+        <label class="ob-persona-card" style="cursor: pointer;">
+          <input type="radio" name="ob-persona" value="EVERYTHING" style="margin-right: 8px; accent-color: var(--accent-sage);" />
+          <strong style="font-size: 14px; color: var(--text-primary);">Everything</strong>
+          <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.45;">Unified Knowledge Hub connecting study, work, and personal collections.</div>
         </label>
       </div>
 
-      <div id="ob-persona-status" style="font-size: 12px; font-family: monospace; color: var(--badge-ready); margin-bottom: 8px; min-height: 18px;"></div>
+      <!-- Progressive disclosure for custom subjects -->
+      <details id="ob-student-details" class="ob-details">
+        <summary>Customize semester subjects (optional)</summary>
+        <div style="margin-top: 12px;">
+          <label for="ob-custom-subjects-input" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Your subjects (comma-separated)</label>
+          <input type="text" id="ob-custom-subjects-input" placeholder="e.g. Mathematics, Systems, Economics" style="width: 100%; margin-bottom: 10px;" />
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+            <input type="checkbox" id="ob-use-7-subject-template" style="accent-color: var(--accent-sage);" />
+            <span>Optional: Include Semester 3 curriculum template (7 subjects)</span>
+          </label>
+        </div>
+      </details>
+
+      <div id="ob-persona-status" style="font-size: 13px; color: var(--accent-sage); min-height: 20px;"></div>
     </div>
 
-    <!-- SCREEN 3: Universal Phone and Inbox Setup -->
+    <!-- SCREEN 3: Phone Setup -->
     <div id="onboarding-screen-3" class="onboarding-screen" data-screen="3" style="display: none;">
-      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Phone & Inbox Setup</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-        Import notes and assignments seamlessly from your phone into GRAVITAS using local folders.
+      <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Connect your phone</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 18px;">
+        Import notes and assignment PDFs seamlessly from your mobile device using local folders.
       </p>
 
-      <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
         <button class="btn btn-secondary ob-phone-tab active" data-platform="IPHONE">iPhone</button>
         <button class="btn btn-secondary ob-phone-tab" data-platform="ANDROID">Android</button>
         <button class="btn btn-secondary ob-phone-tab" data-platform="BOTH">Both</button>
-        <button class="btn btn-secondary ob-phone-tab" data-platform="NONE">No Phone (Local Only)</button>
+        <button class="btn btn-secondary ob-phone-tab" data-platform="NONE">Local only</button>
       </div>
 
-      <div id="ob-phone-instructions" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.6; margin-bottom: 14px;">
-        <!-- Dynamic instructions rendered by JS -->
-      </div>
+      <!-- Dynamic phone instructions -->
+      <div id="ob-phone-instructions" class="card" style="padding: 16px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; background: var(--bg-surface-subtle);"></div>
 
-      <div class="dialog-field" style="margin-bottom: 12px;">
-        <label class="dialog-label" for="ob-inbox-folder-input">Windows Inbox Folder</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="ob-inbox-folder-input" readonly placeholder="Click Browse to select Windows Inbox directory..." style="flex: 1; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-family: monospace; font-size: 11px;" />
-          <button id="ob-btn-browse-inbox" class="btn btn-secondary" style="font-size: 12px;">Browse Folder</button>
+      <!-- Progressive disclosure for custom inbox folder -->
+      <details class="ob-details">
+        <summary>Inbox folder location</summary>
+        <div style="margin-top: 10px;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="ob-inbox-folder-input" readonly placeholder="Select Inbox directory..." style="flex: 1; font-family: var(--font-mono); font-size: 12px;" />
+            <button id="ob-btn-browse-inbox" class="btn btn-secondary" style="font-size: 12px;">Browse</button>
+          </div>
         </div>
-      </div>
+      </details>
 
-      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
-        <button id="ob-btn-test-inbox" class="btn btn-secondary" style="font-size: 12px;">Test Inbox Connection</button>
-        <span id="ob-inbox-status-badge" class="badge" style="display: none;">-</span>
+      <div style="display: flex; gap: 12px; align-items: center; margin-top: 14px;">
+        <button id="ob-btn-test-inbox" class="btn btn-secondary" style="font-size: 13px;">Test connection</button>
+        <span id="ob-inbox-status-badge" class="badge" style="display: none;"></span>
+        <span id="ob-inbox-test-message" style="font-size: 13px; color: var(--text-secondary);"></span>
       </div>
-
-      <div id="ob-inbox-test-message" style="font-size: 12px; color: var(--text-muted); min-height: 20px;"></div>
     </div>
 
     <!-- SCREEN 4: Assistant Preferences -->
     <div id="onboarding-screen-4" class="onboarding-screen" data-screen="4" style="display: none;">
-      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Assistant & Notification Preferences</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-        Configure your floating companion shortcut and notification schedule.
+      <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Companion & quiet hours</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+        Configure your assistant shortcut, reminder schedules, and quiet hours.
       </p>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
         <div>
-          <label class="dialog-label" for="ob-shortcut-input">Floating Assistant Shortcut</label>
-          <input type="text" id="ob-shortcut-input" value="Alt+Space" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-family: monospace; font-size: 12px;" />
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Press anywhere on Windows to summon or dismiss.</div>
+          <label for="ob-shortcut-input" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Summon shortcut</label>
+          <input type="text" id="ob-shortcut-input" value="Alt+Space" style="width: 100%; font-family: var(--font-mono);" />
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Summon companion from any application.</div>
         </div>
         <div>
-          <label class="dialog-label" for="ob-reminder-frequency-select">Reminder Frequency</label>
-          <select id="ob-reminder-frequency-select" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;">
+          <label for="ob-reminder-frequency-select" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Briefing interval</label>
+          <select id="ob-reminder-frequency-select" style="width: 100%;">
             <option value="30">Every 30 minutes</option>
             <option value="60" selected>Every 60 minutes (Default)</option>
             <option value="120">Every 2 hours</option>
             <option value="240">Every 4 hours</option>
           </select>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Interval for upcoming assignment briefings.</div>
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Frequency of task and assignment checks.</div>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
         <div>
-          <label class="dialog-label" for="ob-quiet-start">Quiet Hours Start</label>
-          <input type="time" id="ob-quiet-start" value="22:00" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+          <label for="ob-quiet-start" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Quiet hours start</label>
+          <input type="time" id="ob-quiet-start" value="22:00" style="width: 100%;" />
         </div>
         <div>
-          <label class="dialog-label" for="ob-quiet-end">Quiet Hours End</label>
-          <input type="time" id="ob-quiet-end" value="08:00" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+          <label for="ob-quiet-end" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Quiet hours end</label>
+          <input type="time" id="ob-quiet-end" value="08:00" style="width: 100%;" />
         </div>
       </div>
 
-      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; margin-bottom: 8px;">
-          <input type="checkbox" id="ob-notifications-enabled" checked />
-          <span><strong>Enable desktop notifications</strong> (Ask for reminder preference before sending notifications)</span>
+      <div class="card" style="padding: 14px 16px; background: var(--bg-surface-subtle); margin-bottom: 0;">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; margin-bottom: 10px;">
+          <input type="checkbox" id="ob-notifications-enabled" checked style="accent-color: var(--accent-sage);" />
+          <span>Enable desktop notifications</span>
         </label>
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
-          <input type="checkbox" id="ob-start-with-windows" />
-          <span>Optional: Start GRAVITAS companion minimized when Windows boots</span>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" id="ob-start-with-windows" style="accent-color: var(--accent-sage);" />
+          <span>Launch companion minimized on Windows startup</span>
         </label>
-      </div>
-
-      <div class="invariant-banner" style="font-size: 11px;">
-        OFFLINE SPEECH & EGRESS: Voice push-to-talk uses local offline Vosk models with text fallback. Real network egress is default-denied.
       </div>
     </div>
 
-    <!-- SCREEN 5: First Success -->
+    <!-- SCREEN 5: First Action -->
     <div id="onboarding-screen-5" class="onboarding-screen" data-screen="5" style="display: none;">
-      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Your First Action</h3>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-        Complete one real action to verify persistence and see GRAVITAS in action.
+      <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Take your first step</h3>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 18px;">
+        Save an idea, create a task, or explore your new workspace.
       </p>
 
-      <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
         <button class="btn btn-secondary ob-first-action-tab active" data-action="SAVE_IDEA">1. Save Idea</button>
         <button class="btn btn-secondary ob-first-action-tab" data-action="CREATE_TASK">2. Create Task</button>
         <button class="btn btn-secondary ob-first-action-tab" data-action="IMPORT_ASSIGNMENT">3. Import Assignment</button>
         <button class="btn btn-secondary ob-first-action-tab" data-action="EXPLORE_SAMPLE">4. Explore Sample</button>
       </div>
 
-      <!-- Action Inputs -->
-      <div id="ob-first-action-inputs" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
-        <div id="ob-input-row-title" style="margin-bottom: 8px;">
-          <label class="dialog-label" for="ob-action-title">Title</label>
-          <input type="text" id="ob-action-title" value="My first note in GRAVITAS" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+      <div class="card" style="padding: 16px; background: var(--bg-surface-subtle); margin-bottom: 16px;">
+        <div id="ob-input-row-title" style="margin-bottom: 10px;">
+          <label for="ob-action-title" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Title</label>
+          <input type="text" id="ob-action-title" value="My first note in GRAVITAS" style="width: 100%;" />
         </div>
-        <div id="ob-input-row-text" style="margin-bottom: 8px;">
-          <label class="dialog-label" for="ob-action-text">Details / Note</label>
-          <input type="text" id="ob-action-text" value="Testing local knowledge hub persistence and floating companion." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        <div id="ob-input-row-text" style="margin-bottom: 10px;">
+          <label for="ob-action-text" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Details</label>
+          <input type="text" id="ob-action-text" value="Testing local knowledge hub persistence and workspace." style="width: 100%;" />
         </div>
-        <div id="ob-input-row-extra" style="display: none; margin-bottom: 8px;">
-          <label class="dialog-label" for="ob-action-extra">Due Date</label>
-          <input type="date" id="ob-action-extra" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        <div id="ob-input-row-extra" style="display: none; margin-bottom: 10px;">
+          <label for="ob-action-extra" style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Due date</label>
+          <input type="date" id="ob-action-extra" style="width: 100%;" />
         </div>
-        <button id="ob-btn-do-action" class="btn" style="margin-top: 6px;">Execute Action & Save to Hub</button>
+        <button id="ob-btn-do-action" class="btn" style="margin-top: 6px;">Save to workspace</button>
       </div>
 
-      <!-- Persistence Confirmation Banner -->
-      <div id="ob-persistence-card" style="display: none; background: #064e3b; border: 1px solid #059669; border-radius: 6px; padding: 10px; margin-bottom: 14px; font-size: 12px;">
-        <div style="font-weight: 600; color: #34d399; margin-bottom: 4px;">Verified Local Persistence</div>
-        <div id="ob-persistence-detail" style="font-family: monospace; font-size: 11px; color: #d1fae5;"></div>
+      <!-- Friendly Persistence Confirmation Card (No raw UUID or SQLite technical text) -->
+      <div id="ob-persistence-card" style="display: none; background: var(--bg-surface-subtle); border: 1px solid var(--accent-sage); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <span style="color: var(--accent-sage); font-weight: 600; font-size: 13px;">✓ Saved to workspace</span>
+          <span id="ob-persistence-type-pill" class="task-tag">Idea</span>
+        </div>
+        <div id="ob-persistence-detail" style="font-size: 13px; color: var(--text-secondary); line-height: 1.45;"></div>
       </div>
 
-      <!-- Companion Quick Guide -->
-      <div style="background: #1e1b4b; border: 1px solid #4338ca; border-radius: 6px; padding: 10px; font-size: 12px; color: #c7d2fe;">
-        <strong>Companion Ready:</strong> Press <kbd style="background: #000; padding: 2px 5px; border-radius: 3px; font-family: monospace;">Alt+Space</kbd> anytime to open the floating companion. Hold microphone for offline speech, or type natural commands like <em>"Save this idea..."</em> or <em>"Show my unfinished tasks"</em>.
+      <div style="padding: 12px 14px; border-radius: 6px; background: var(--bg-surface-subtle); border: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+        <strong>Companion Ready:</strong> Press <kbd>Alt+Space</kbd> anytime to open the floating companion. Type or hold mic to dictate.
       </div>
     </div>
 
     <!-- Wizard Navigation Footer -->
-    <div class="dialog-actions" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="ob-actions-footer">
       <div>
-        <button id="onboarding-btn-close" class="btn btn-secondary" style="font-size: 12px;">Close</button>
+        <button id="onboarding-btn-close" class="btn btn-ghost" style="font-size: 13px;">Close</button>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button id="onboarding-btn-prev" class="btn btn-secondary" style="display: none; font-size: 12px;">Back</button>
-        <button id="onboarding-btn-next" class="btn" style="font-size: 12px;">Continue</button>
-        <button id="onboarding-btn-finish" class="btn" style="display: none; font-size: 12px; background: var(--success);">Finish & Open Dashboard</button>
+      <div style="display: flex; gap: 10px;">
+        <button id="onboarding-btn-prev" class="btn btn-secondary" style="display: none; font-size: 13px;">Back</button>
+        <button id="onboarding-btn-next" class="btn" style="font-size: 13px;">Continue</button>
+        <button id="onboarding-btn-finish" class="btn" style="display: none; font-size: 13px;">Open my workspace</button>
       </div>
     </div>
   </dialog>

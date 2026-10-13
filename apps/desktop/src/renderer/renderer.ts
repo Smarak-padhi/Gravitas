@@ -35,13 +35,40 @@ let activeDialogTriggerButton: HTMLElement | null = null
 let currentDialogItem: { targetId: string; revision: number; outcome: string } | null = null
 let worldView: WorldViewController | null = null
 
-/** Select a Command Center surface (tab + panel). Pure navigation. */
+/** Select a surface (tab + panel). Pure navigation. */
 export function activateSurface(surfaceId: string): void {
+  if (surfaceId === 'surface-devtools') {
+    surfaceId = 'surface-overview'
+  }
+
+  const isDevSurface = [
+    'surface-overview',
+    'surface-work',
+    'surface-execution',
+    'surface-verification',
+    'surface-approvals',
+    'surface-system',
+  ].includes(surfaceId)
+
+  const devSubnav = document.getElementById('devtools-subnav')
+  if (devSubnav) {
+    devSubnav.style.display = isDevSurface ? 'flex' : 'none'
+  }
+
   document.querySelectorAll<HTMLButtonElement>('.nav-btn').forEach((t) => {
-    const on = t.getAttribute('data-surface') === surfaceId
+    const sId = t.getAttribute('data-surface')
+    const on = isDevSurface ? sId === 'surface-devtools' : sId === surfaceId
     t.classList.toggle('active', on)
     t.setAttribute('aria-selected', on ? 'true' : 'false')
   })
+
+  if (isDevSurface) {
+    document.querySelectorAll<HTMLButtonElement>('.subnav-btn').forEach((st) => {
+      const sId = st.getAttribute('data-surface')
+      st.classList.toggle('active', sId === surfaceId)
+    })
+  }
+
   document.querySelectorAll<HTMLElement>('.surface').forEach((s) => s.classList.toggle('active', s.id === surfaceId))
   document.getElementById('btn-view-world')?.setAttribute('aria-pressed', 'false')
   document.getElementById('btn-view-command')?.setAttribute('aria-pressed', 'true')
@@ -489,6 +516,202 @@ export async function refreshSystem(bridge: GravitasDesktopBridge): Promise<void
   }
 }
 
+export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<void> {
+  // 1. Dynamic Greeting
+  const greetingEl = document.getElementById('workspace-greeting')
+  if (greetingEl) {
+    const hour = new Date().getHours()
+    if (hour < 12) greetingEl.textContent = 'Good morning'
+    else if (hour < 17) greetingEl.textContent = 'Good afternoon'
+    else greetingEl.textContent = 'Good evening'
+  }
+
+  // 2. Load Tasks
+  try {
+    const tasks = (await bridge.listIdeas?.({ collection: 'PLAN_TASK' })) || []
+    const countEl = document.getElementById('workspace-tasks-count')
+    if (countEl) countEl.textContent = String(tasks.length)
+
+    const listEl = document.getElementById('workspace-tasks-list')
+    const fullTasksEl = document.getElementById('tasks-full-list')
+
+    const renderTaskNodes = (target: HTMLElement, maxItems?: number) => {
+      if (tasks.length === 0) {
+        target.innerHTML = '<div class="empty-state">No pending tasks. You are all caught up!</div>'
+        return
+      }
+      target.innerHTML = ''
+      const sorted = [...tasks].sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0))
+      const slice = maxItems ? sorted.slice(0, maxItems) : sorted
+      for (const t of slice) {
+        const item = document.createElement('div')
+        item.className = `task-item ${t.completed ? 'completed' : ''}`
+
+        const chk = document.createElement('input')
+        chk.type = 'checkbox'
+        chk.className = 'task-checkbox'
+        chk.checked = Boolean(t.completed)
+        chk.title = 'Mark task complete'
+        chk.addEventListener('change', async () => {
+          if (bridge.completeTask) {
+            await bridge.completeTask(t.id, chk.checked)
+            await refreshWorkspace(bridge)
+          }
+        })
+
+        const content = document.createElement('div')
+        content.className = 'task-content'
+
+        const text = document.createElement('span')
+        text.className = 'task-text'
+        text.textContent = t.title
+
+        content.appendChild(text)
+
+        if (t.tags && t.tags.length > 0) {
+          const tag = document.createElement('span')
+          tag.className = 'task-tag'
+          tag.textContent = t.tags[0]!
+          content.appendChild(tag)
+        } else if (t.category) {
+          const tag = document.createElement('span')
+          tag.className = 'task-tag'
+          tag.textContent = t.category
+          content.appendChild(tag)
+        }
+
+        item.appendChild(chk)
+        item.appendChild(content)
+        target.appendChild(item)
+      }
+    }
+
+    if (listEl) renderTaskNodes(listEl, 6)
+    if (fullTasksEl) renderTaskNodes(fullTasksEl)
+  } catch {
+    // Graceful fallback
+  }
+
+  // 3. Load Recent Notes & Ideas
+  try {
+    const allIdeas = (await bridge.listIdeas?.()) || []
+    const notesOnly = allIdeas.filter((i) => i.collection !== 'PLAN_TASK')
+    const countEl = document.getElementById('workspace-notes-count')
+    if (countEl) countEl.textContent = String(notesOnly.length)
+
+    const listEl = document.getElementById('workspace-notes-list')
+    const fullNotesEl = document.getElementById('notes-full-list')
+
+    const renderNoteNodes = (target: HTMLElement, maxItems?: number) => {
+      if (notesOnly.length === 0) {
+        target.innerHTML = '<div class="empty-state">No recent notes. Use the prompt bar above to capture thoughts.</div>'
+        return
+      }
+      target.innerHTML = ''
+      const slice = maxItems ? notesOnly.slice(0, maxItems) : notesOnly
+      for (const n of slice) {
+        const item = document.createElement('div')
+        item.className = 'note-item'
+
+        const header = document.createElement('div')
+        header.className = 'note-header'
+
+        const title = document.createElement('div')
+        title.className = 'note-title'
+        title.textContent = n.title
+
+        const date = document.createElement('div')
+        date.className = 'note-date'
+        date.textContent = new Date(n.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+
+        header.appendChild(title)
+        header.appendChild(date)
+        item.appendChild(header)
+
+        const preview = document.createElement('div')
+        preview.className = 'note-preview'
+        preview.textContent = n.originalText || n.summary || 'No text preview.'
+        item.appendChild(preview)
+
+        target.appendChild(item)
+      }
+    }
+
+    if (listEl) renderNoteNodes(listEl, 4)
+    if (fullNotesEl) renderNoteNodes(fullNotesEl)
+  } catch {
+    // Graceful fallback
+  }
+
+  // 4. Load Subjects & Collections
+  try {
+    const subjects = (await bridge.listStudySubjects?.()) || []
+    const countEl = document.getElementById('workspace-subjects-count')
+    if (countEl) countEl.textContent = String(subjects.length)
+
+    const listEl = document.getElementById('workspace-subjects-list')
+    const fullSubjectsEl = document.getElementById('subjects-full-list')
+
+    const renderSubjectNodes = (target: HTMLElement, maxItems?: number) => {
+      if (subjects.length === 0) {
+        target.innerHTML = '<div class="empty-state">No study subjects enrolled yet. Configure in First-Run Setup.</div>'
+        return
+      }
+      target.innerHTML = ''
+      const slice = maxItems ? subjects.slice(0, maxItems) : subjects
+      for (const s of slice) {
+        const pill = document.createElement('div')
+        pill.className = 'subject-pill'
+
+        const info = document.createElement('div')
+        info.className = 'subject-info'
+
+        const title = document.createElement('div')
+        title.className = 'subject-code'
+        title.textContent = s.subject
+
+        const meta = document.createElement('div')
+        meta.className = 'subject-name'
+        meta.textContent = `${s.noteCount || 0} notes · ${s.taskCount || 0} tasks`
+
+        info.appendChild(title)
+        info.appendChild(meta)
+        pill.appendChild(info)
+
+        target.appendChild(pill)
+      }
+    }
+
+    if (listEl) renderSubjectNodes(listEl, 5)
+    if (fullSubjectsEl) renderSubjectNodes(fullSubjectsEl)
+  } catch {
+    // Graceful fallback
+  }
+
+  // 5. Load Inbox Configuration
+  try {
+    if (bridge.executeStudyGuardianOperation) {
+      const res = await bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' })
+      const pathEl = document.getElementById('workspace-inbox-path')
+      const pillEl = document.getElementById('workspace-inbox-status-pill')
+      const descEl = document.getElementById('workspace-inbox-desc')
+
+      if (res.inboxConfig?.inboxFolderPath) {
+        if (pathEl) pathEl.textContent = res.inboxConfig.inboxFolderPath
+        if (pillEl) {
+          pillEl.textContent = res.inboxConfig.watcherActive ? 'Connected' : 'Paused'
+          pillEl.className = 'badge ' + (res.inboxConfig.watcherActive ? 'badge-ready' : 'badge-waiting')
+        }
+        if (descEl) {
+          descEl.textContent = 'Watching folder for assignment PDFs and notes from your phone.'
+        }
+      }
+    }
+  } catch {
+    // Graceful fallback
+  }
+}
+
 export async function refreshAll(bridge: GravitasDesktopBridge): Promise<void> {
   const health = await bridge.getHealth()
   const badge = document.getElementById('kernel-status-badge')
@@ -509,6 +732,7 @@ export async function refreshAll(bridge: GravitasDesktopBridge): Promise<void> {
   if (proto) proto.textContent = `Protocol: ${health.protocolVersion}`
 
   await Promise.all([
+    refreshWorkspace(bridge),
     refreshOverview(bridge),
     refreshWorkHierarchy(bridge),
     refreshExecution(bridge),
@@ -612,9 +836,10 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     dots.forEach((d) => {
       const step = Number((d as HTMLElement).dataset.step || '1')
       if (step === screen) {
-        ;(d as HTMLElement).style.background = '#38bdf8'
+        ;(d as HTMLElement).style.background = 'var(--accent-sage)'
       } else if (step < screen) {
-        ;(d as HTMLElement).style.background = 'var(--success)'
+        ;(d as HTMLElement).style.background = 'var(--accent-sage-subtle)'
+        ;(d as HTMLElement).style.borderColor = 'var(--accent-sage)'
       } else {
         ;(d as HTMLElement).style.background = 'var(--border)'
       }
@@ -633,7 +858,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     }
 
     const indicator = document.getElementById('onboarding-step-indicator')
-    if (indicator) indicator.textContent = `Screen ${currentScreen} of ${TOTAL_SCREENS}`
+    if (indicator) indicator.textContent = `${currentScreen} of ${TOTAL_SCREENS}`
 
     updateDots(currentScreen)
 
@@ -695,7 +920,11 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     const detail = document.getElementById('ob-persistence-detail')
     if (card && detail) {
       card.style.display = 'block'
-      detail.textContent = 'Explore Demo Mode: Sample Knowledge Hub workspace populated with projects, notes, and tasks.'
+      card.style.background = 'var(--bg-surface-subtle)'
+      card.style.border = '1px solid var(--accent-sage)'
+      const pill = document.getElementById('ob-persistence-type-pill')
+      if (pill) pill.textContent = 'Workspace Sample'
+      detail.textContent = 'Sample workspace collections have been seeded with projects, notes, and tasks.'
     }
   })
 
@@ -703,14 +932,14 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   const personaCards = document.querySelectorAll('.ob-persona-card')
   personaCards.forEach((card) => {
     card.addEventListener('click', () => {
-      personaCards.forEach((c) => ((c as HTMLElement).style.borderColor = 'var(--border)'))
-      ;(card as HTMLElement).style.borderColor = 'var(--border-focus)'
+      personaCards.forEach((c) => c.classList.remove('selected'))
+      card.classList.add('selected')
       const radio = card.querySelector('input[type="radio"]') as HTMLInputElement | null
       if (radio) radio.checked = true
 
-      const studentOpts = document.getElementById('ob-student-options')
-      if (studentOpts) {
-        studentOpts.style.display = radio?.value === 'STUDENT' ? 'block' : 'none'
+      const studentDetails = document.getElementById('ob-student-details')
+      if (studentDetails) {
+        studentDetails.style.display = radio?.value === 'STUDENT' ? 'block' : 'none'
       }
     })
   })
@@ -747,7 +976,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     if (badge) {
       badge.style.display = 'inline-block'
       badge.className = 'badge badge-waiting'
-      badge.textContent = 'TESTING...'
+      badge.textContent = 'Testing...'
     }
     if (messageEl) messageEl.textContent = 'Verifying inbox accessibility and sync status...'
 
@@ -761,21 +990,15 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
 
         const v = res.inboxVerificationResult
         if (badge && v) {
-          if (v.state === 'CROSS_DEVICE_SYNC_VERIFIED') {
+          if (v.state === 'CROSS_DEVICE_SYNC_VERIFIED' || v.state === 'LOCAL_IMPORT_VERIFIED' || v.state === 'FOLDER_ACCESSIBLE') {
             badge.className = 'badge badge-ready'
-            badge.textContent = 'CROSS-DEVICE SYNC VERIFIED'
-          } else if (v.state === 'LOCAL_IMPORT_VERIFIED') {
-            badge.className = 'badge badge-ready'
-            badge.textContent = 'LOCAL IMPORT VERIFIED'
+            badge.textContent = 'Connected'
           } else if (v.state === 'AWAITING_FIRST_FILE') {
             badge.className = 'badge badge-waiting'
-            badge.textContent = 'AWAITING FIRST FILE'
-          } else if (v.state === 'FOLDER_ACCESSIBLE') {
-            badge.className = 'badge badge-ready'
-            badge.textContent = 'FOLDER ACCESSIBLE'
+            badge.textContent = 'Waiting for files'
           } else {
             badge.className = 'badge badge-offline'
-            badge.textContent = 'UNCONFIGURED / INVALID'
+            badge.textContent = 'Not configured'
           }
         }
         if (messageEl && v) {
@@ -785,7 +1008,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     } catch (err) {
       if (badge) {
         badge.className = 'badge badge-offline'
-        badge.textContent = 'ERROR'
+        badge.textContent = 'Error'
       }
       if (messageEl) messageEl.textContent = `Verification error: ${(err as Error).message}`
     }
@@ -848,15 +1071,19 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
 
         if (res.firstSuccessResult && card && detail) {
           card.style.display = 'block'
-          card.style.background = '#064e3b'
-          detail.textContent = `Created ${res.firstSuccessResult.collection} "${res.firstSuccessResult.itemTitle}" (ID: ${res.firstSuccessResult.createdItemId}). Persisted to local SQLite: true.`
+          card.style.background = 'var(--bg-surface-subtle)'
+          card.style.border = '1px solid var(--accent-sage)'
+          const pill = document.getElementById('ob-persistence-type-pill')
+          if (pill) pill.textContent = res.firstSuccessResult.collection || 'Item'
+          detail.textContent = `"${res.firstSuccessResult.itemTitle}" has been saved to your local Knowledge Hub.`
           announce(`Action complete: ${res.firstSuccessResult.message}`)
         }
       }
     } catch (err) {
       if (card && detail) {
         card.style.display = 'block'
-        card.style.background = '#7f1d1d'
+        card.style.background = 'var(--bg-surface-subtle)'
+        card.style.border = '1px solid var(--danger)'
         detail.textContent = `Action failed: ${(err as Error).message}`
       }
     }
@@ -1130,6 +1357,87 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       { probe: typeof location !== 'undefined' && location.search.includes('d3probe=1') }
     )
 
+    // Workspace prompt bar interactions
+    const quickInput = document.getElementById('workspace-quick-input') as HTMLInputElement | null
+
+    const handleCreateItem = async (type: 'IDEA' | 'TASK') => {
+      const val = quickInput?.value.trim()
+      if (!val) return
+      if (bridge.saveIdea) {
+        await bridge.saveIdea({
+          title: val,
+          originalText: val,
+          collection: type === 'TASK' ? 'PLAN_TASK' : 'IDEA',
+        })
+        if (quickInput) quickInput.value = ''
+        await refreshWorkspace(bridge)
+        announce(`${type === 'TASK' ? 'Task' : 'Note'} saved`)
+      }
+    }
+
+    document.getElementById('workspace-btn-quick-note')?.addEventListener('click', () => {
+      void handleCreateItem('IDEA')
+    })
+    document.getElementById('workspace-btn-quick-task')?.addEventListener('click', () => {
+      void handleCreateItem('TASK')
+    })
+    quickInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = quickInput.value.trim().toLowerCase()
+        const isTask = val.startsWith('todo:') || val.startsWith('task:') || val.startsWith('[]')
+        void handleCreateItem(isTask ? 'TASK' : 'IDEA')
+      }
+    })
+
+    document.getElementById('workspace-btn-companion')?.addEventListener('click', () => {
+      void bridge.toggleCompanionWindow?.()
+    })
+    document.getElementById('workspace-btn-summon-assistant')?.addEventListener('click', () => {
+      void bridge.toggleCompanionWindow?.()
+    })
+    document.getElementById('workspace-btn-check-inbox')?.addEventListener('click', async () => {
+      if (bridge.executeStudyGuardianOperation) {
+        const res = await bridge.executeStudyGuardianOperation({ action: 'TEST_INBOX_SETUP' })
+        announce(res.inboxVerificationResult?.message || 'Inbox scan complete')
+        await refreshWorkspace(bridge)
+      }
+    })
+
+    document.getElementById('btn-header-theme')?.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme')
+    })
+    document.getElementById('btn-header-onboarding')?.addEventListener('click', () => {
+      const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
+      dialog?.showModal()
+    })
+
+    // Subnav buttons in devtools
+    document.querySelectorAll<HTMLButtonElement>('.subnav-btn').forEach((st) => {
+      st.addEventListener('click', () => {
+        const surfaceId = st.getAttribute('data-surface')
+        if (surfaceId) activateSurface(surfaceId)
+      })
+    })
+
+    // Notes / Tasks / Subjects actions
+    document.getElementById('notes-btn-create')?.addEventListener('click', async () => {
+      const title = prompt('Enter note title:')
+      if (title && bridge.saveIdea) {
+        await bridge.saveIdea({ title, originalText: title, collection: 'IDEA' })
+        await refreshWorkspace(bridge)
+      }
+    })
+    document.getElementById('tasks-btn-create')?.addEventListener('click', async () => {
+      const title = prompt('Enter task title:')
+      if (title && bridge.saveIdea) {
+        await bridge.saveIdea({ title, originalText: title, collection: 'PLAN_TASK' })
+        await refreshWorkspace(bridge)
+      }
+    })
+    document.getElementById('subjects-btn-refresh')?.addEventListener('click', () => {
+      void refreshWorkspace(bridge)
+    })
+
     // Refresh all button
     document.getElementById('btn-refresh-all')?.addEventListener('click', () => {
       refreshAll(bridge)
@@ -1174,7 +1482,8 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       if (worldView?.isVisible()) void worldView.refresh()
     })
 
-    // Initial load
+    // Initial load: start on workspace surface
+    activateSurface('surface-workspace')
     refreshAll(bridge)
   })
 }
