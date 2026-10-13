@@ -921,15 +921,21 @@ export interface GravitasDesktopBridge {
   onKernelError(callback: (err: SafeDesktopError) => void): () => void
   onProjectionUpdate(callback: (projectionType: string) => void): () => void
 
-  // V1-F-01 Floating Companion, Ideas Vault, Voice PTT & Supervised Capabilities
+  // V1-F-01 / V1-F-02 Floating Companion, Knowledge Hub, Voice PTT & Supervised Capabilities
   executeAssistantCommand?(payload: AssistantCommandPayload): Promise<AssistantCommandResult>
   cancelAssistantCommand?(commandId?: string): Promise<CancelAssistantCommandResult>
   saveIdea?(input: SaveIdeaInput): Promise<IdeaRecord>
-  listIdeas?(): Promise<readonly IdeaRecord[]>
+  listIdeas?(filter?: KnowledgeFilterInput): Promise<readonly IdeaRecord[]>
   searchIdeas?(query: string): Promise<readonly IdeaRecord[]>
   getIdea?(id: string): Promise<IdeaRecord | null>
   updateIdea?(input: UpdateIdeaInput): Promise<IdeaRecord>
   deleteIdea?(id: string, confirmed: boolean): Promise<DeleteIdeaResult>
+  completeTask?(id: string, completed: boolean): Promise<IdeaRecord>
+  linkKnowledgeItems?(sourceId: string, targetId: string, relationship?: string): Promise<KnowledgeLinkRecord>
+  unlinkKnowledgeItems?(sourceId: string, targetId: string): Promise<boolean>
+  listStudySubjects?(): Promise<readonly StudySubjectSummary[]>
+  exportKnowledgeMarkdown?(targetDirectory?: string): Promise<MarkdownExportResult>
+  importKnowledgeMarkdown?(markdownContent: string): Promise<IdeaRecord>
   getVoiceSttStatus?(): Promise<VoiceSttStatusProjection>
   startPushToTalk?(userInitiated: boolean): Promise<PttSessionStartResult>
   stopPushToTalk?(pttSessionId: string, audioSampleBase64?: string): Promise<PttTranscriptionResult>

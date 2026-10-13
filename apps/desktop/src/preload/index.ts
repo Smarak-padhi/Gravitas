@@ -137,7 +137,7 @@ const bridge: GravitasDesktopBridge = {
     }
   },
 
-  // V1-F-01 Floating Companion & Ideas Vault
+  // V1-F-01 / V1-F-02 Floating Companion & Unified Knowledge Hub
   executeAssistantCommand: async (payload) => {
     return ipcRenderer.invoke('gravitas:assistant-command', payload)
   },
@@ -150,8 +150,8 @@ const bridge: GravitasDesktopBridge = {
     return ipcRenderer.invoke('gravitas:vault-save-idea', input)
   },
 
-  listIdeas: async () => {
-    return ipcRenderer.invoke('gravitas:vault-list-ideas')
+  listIdeas: async (filter) => {
+    return ipcRenderer.invoke('gravitas:vault-list-ideas', filter)
   },
 
   searchIdeas: async (query: string) => {
@@ -168,6 +168,30 @@ const bridge: GravitasDesktopBridge = {
 
   deleteIdea: async (id: string, confirmed: boolean) => {
     return ipcRenderer.invoke('gravitas:vault-delete-idea', { id, confirmed })
+  },
+
+  completeTask: async (id: string, completed: boolean) => {
+    return ipcRenderer.invoke('gravitas:vault-complete-task', { id, completed })
+  },
+
+  linkKnowledgeItems: async (sourceId: string, targetId: string, relationship?: string) => {
+    return ipcRenderer.invoke('gravitas:vault-link-items', { sourceId, targetId, relationship })
+  },
+
+  unlinkKnowledgeItems: async (sourceId: string, targetId: string) => {
+    return ipcRenderer.invoke('gravitas:vault-unlink-items', { sourceId, targetId })
+  },
+
+  listStudySubjects: async () => {
+    return ipcRenderer.invoke('gravitas:vault-list-subjects')
+  },
+
+  exportKnowledgeMarkdown: async (targetDirectory?: string) => {
+    return ipcRenderer.invoke('gravitas:vault-export-markdown', targetDirectory)
+  },
+
+  importKnowledgeMarkdown: async (markdownContent: string) => {
+    return ipcRenderer.invoke('gravitas:vault-import-markdown', markdownContent)
   },
 
   getVoiceSttStatus: async () => {

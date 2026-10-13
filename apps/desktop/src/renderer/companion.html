@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self';">
-  <title>GRAVITAS Companion</title>
+  <title>GRAVITAS Companion — Knowledge Hub</title>
   <style>
     :root {
       --bg-primary: #0b0f19;
@@ -104,7 +104,7 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
     }
 
     .command-row {
@@ -138,15 +138,26 @@
     }
     .ptt-banner.active { display: block; }
 
+    .approval-banner {
+      display: none;
+      background: #1e3a8a;
+      border: 1px solid #38bdf8;
+      color: #e0f2fe;
+      padding: 8px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+    }
+    .approval-banner.active { display: block; }
+
     .status-box {
       background: #090d16;
       border: 1px solid var(--border);
       border-radius: 5px;
-      padding: 7px 10px;
+      padding: 6px 10px;
       font-size: 12px;
       color: #e5e7eb;
-      min-height: 32px;
-      line-height: 1.4;
+      min-height: 30px;
+      line-height: 1.35;
     }
 
     .quick-chips {
@@ -164,7 +175,7 @@
       font-size: 10px;
       cursor: pointer;
     }
-    .chip:hover { border-color: #38bdf8; color: #fff; }
+    .chip:hover, .chip.active { border-color: #38bdf8; color: #fff; background: #0c4a6e; }
 
     .tabs-bar {
       display: flex;
@@ -200,8 +211,36 @@
     .search-row {
       display: flex;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
+
+    .collection-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .collection-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .collection-badge {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .col-IDEA { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
+    .col-STUDY_NOTE { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+    .col-PROJECT { background: #4c1d95; color: #ddd6fe; border: 1px solid #7c3aed; }
+    .col-PLAN_TASK { background: #78350f; color: #fde68a; border: 1px solid #d97706; }
 
     .idea-card {
       background: var(--bg-card);
@@ -257,6 +296,33 @@
       font-size: 10px;
       margin-right: 4px;
     }
+    .subject-pill {
+      background: #064e3b;
+      color: #a7f3d0;
+      border: 1px solid #10b981;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      margin-right: 4px;
+    }
+    .due-pill {
+      background: #451a03;
+      color: #fcd34d;
+      border: 1px solid #f59e0b;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      margin-right: 4px;
+    }
+    .link-pill {
+      background: #2e1065;
+      color: #c4b5fd;
+      border: 1px solid #8b5cf6;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      margin-right: 4px;
+    }
 
     .detail-panel {
       display: none;
@@ -278,7 +344,7 @@
       margin-bottom: 3px;
       font-weight: 700;
     }
-    .field-group input, .field-group textarea {
+    .field-group input, .field-group textarea, .field-group select {
       width: 100%;
       background: #090d16;
       color: var(--text-main);
@@ -305,7 +371,7 @@
   <!-- Draggable Header -->
   <header class="companion-header" id="companion-drag-header">
     <div class="companion-title">
-      <span>GRAVITAS COMPANION</span>
+      <span>GRAVITAS KNOWLEDGE HUB</span>
       <span id="companion-state-badge" class="state-badge state-IDLE">IDLE</span>
     </div>
     <div class="header-controls">
@@ -321,7 +387,7 @@
         id="companion-command-input"
         class="command-input"
         type="text"
-        placeholder="Save this idea: ... | Show my ideas. | Open Notepad."
+        placeholder="Save this idea... | Add these notes to Physics: ... | Remind me to revise chapter 3 tomorrow."
         aria-label="Natural language command input"
       />
       <button id="companion-send-btn" class="btn btn-primary">Run</button>
@@ -332,44 +398,85 @@
       LISTENING — Microphone active (User-initiated Push-to-Talk). Click "Mic PTT" again to finish or "STOP" to cancel.
     </div>
 
+    <div id="notepad-approval-bar" class="approval-banner" role="region" aria-label="Notepad Save Approval">
+      <div id="notepad-approval-text" style="margin-bottom:6px; font-weight:600;">
+        Approve saving note file and opening in Windows Notepad?
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button id="notepad-approval-confirm-btn" class="btn btn-primary btn-sm">Approve &amp; Save in Notepad</button>
+        <button id="notepad-approval-cancel-btn" class="btn btn-sm">Cancel</button>
+      </div>
+    </div>
+
     <div id="companion-status-box" class="status-box" role="status" aria-live="polite">
-      Ready. Enter a command or click a quick action below.
+      Ready. Enter a voice/text command or use the Knowledge Hub below.
     </div>
 
     <div class="quick-chips">
-      <button class="chip" data-quick-cmd="Save this idea: build a free AI study planner.">+ Study Planner Idea</button>
-      <button class="chip" data-quick-cmd="Show my ideas.">Show Ideas</button>
-      <button class="chip" data-quick-cmd="Find my study planner idea.">Find Study Planner</button>
+      <button class="chip" data-quick-cmd="Save this idea: build a free AI study planner.">+ Idea</button>
+      <button class="chip" data-quick-cmd="Add these notes to Physics: Newton's second law states F = m * a.">+ Physics Note</button>
+      <button class="chip" data-quick-cmd="Create a project called Study Planner.">+ Project</button>
+      <button class="chip" data-quick-cmd="Remind me to revise chapter 3 tomorrow.">+ Task Tomorrow</button>
+      <button class="chip" data-quick-cmd="Show my unfinished tasks.">Unfinished Tasks</button>
       <button class="chip" data-quick-cmd="Open Notepad.">Open Notepad</button>
     </div>
   </section>
 
   <!-- Navigation Tabs -->
   <nav class="tabs-bar" aria-label="Companion Views">
-    <button class="tab-btn active" data-tab="panel-vault" id="tab-btn-vault">Ideas Vault (<span id="vault-count-badge">0</span>)</button>
+    <button class="tab-btn active" data-tab="panel-vault" id="tab-btn-vault">Knowledge Hub (<span id="vault-count-badge">0</span>)</button>
     <button class="tab-btn" data-tab="panel-capabilities" id="tab-btn-capabilities">Voice &amp; Capabilities</button>
   </nav>
 
   <!-- Main Scrollable Body -->
   <main class="companion-body">
-    <!-- Panel 1: Local Ideas Vault -->
+    <!-- Panel 1: Unified Local Knowledge Hub -->
     <div id="panel-vault" class="tab-panel active">
       <div class="search-row">
         <input
           id="vault-search-input"
           class="command-input"
           type="text"
-          placeholder="Search ideas by title, text, or tag..."
-          aria-label="Search saved ideas"
+          placeholder="Search ideas, study notes, subjects, projects, or tasks..."
+          aria-label="Search saved knowledge items"
         />
         <button id="vault-search-btn" class="btn btn-sm">Search</button>
         <button id="vault-reset-btn" class="btn btn-sm">All</button>
       </div>
 
-      <!-- Idea Edit & Delete Confirmation Drawer -->
+      <div class="collection-bar">
+        <div class="collection-pills" id="collection-filter-bar">
+          <button class="chip active" data-collection-filter="ALL">All</button>
+          <button class="chip" data-collection-filter="IDEA">Ideas</button>
+          <button class="chip" data-collection-filter="STUDY_NOTE">Study Notes</button>
+          <button class="chip" data-collection-filter="PROJECT">Projects</button>
+          <button class="chip" data-collection-filter="PLAN_TASK">Plans/Tasks</button>
+          <button class="chip" data-collection-filter="UNFINISHED_TASKS">Unfinished</button>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <button id="knowledge-export-md-btn" class="btn btn-sm" title="Export Knowledge Hub to Obsidian-compatible Markdown files">Export MD</button>
+          <button id="knowledge-import-md-toggle-btn" class="btn btn-sm" title="Import a Markdown note into Knowledge Hub">Import MD</button>
+        </div>
+      </div>
+
+      <div id="knowledge-subjects-bar" class="quick-chips" style="margin-bottom:8px;"></div>
+
+      <!-- Markdown Import Drawer -->
+      <div id="knowledge-import-md-panel" class="detail-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="font-size:11px; color:#38bdf8;">Import Markdown Note (Obsidian Frontmatter Supported)</strong>
+          <button id="knowledge-import-md-close-btn" class="btn btn-sm">Close</button>
+        </div>
+        <div class="field-group">
+          <textarea id="knowledge-import-md-textarea" rows="4" placeholder="---&#10;title: Quantum Notes&#10;collection: STUDY_NOTE&#10;subject: Physics&#10;---&#10;Wave-particle duality notes..."></textarea>
+        </div>
+        <button id="knowledge-import-md-submit-btn" class="btn btn-primary btn-sm">Import into Knowledge Hub</button>
+      </div>
+
+      <!-- Item Edit, Links & Delete Confirmation Drawer -->
       <div id="idea-detail-panel" class="detail-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <strong style="font-size:12px; color:#38bdf8;">Inspect / Edit Idea</strong>
+          <strong style="font-size:12px; color:#38bdf8;">Inspect / Edit Knowledge Item</strong>
           <button id="detail-close-btn" class="btn btn-sm">Close</button>
         </div>
         <input type="hidden" id="detail-idea-id" />
@@ -377,13 +484,46 @@
           <label>Original User Text / Transcript (Preserved Verbatim)</label>
           <div id="detail-original-text" class="idea-original" style="margin:0;"></div>
         </div>
-        <div class="field-group">
-          <label for="detail-title-input">Title</label>
-          <input id="detail-title-input" type="text" />
+        <div class="field-group" style="display:flex; gap:6px;">
+          <div style="flex:1;">
+            <label for="detail-title-input">Title</label>
+            <input id="detail-title-input" type="text" />
+          </div>
+          <div style="width:130px;">
+            <label for="detail-collection-select">Collection</label>
+            <select id="detail-collection-select">
+              <option value="IDEA">IDEA</option>
+              <option value="STUDY_NOTE">STUDY_NOTE</option>
+              <option value="PROJECT">PROJECT</option>
+              <option value="PLAN_TASK">PLAN_TASK</option>
+            </select>
+          </div>
         </div>
         <div class="field-group">
-          <label for="detail-summary-input">Cleaned-Up Summary</label>
+          <label for="detail-summary-input">Cleaned-Up Summary / Notes</label>
           <textarea id="detail-summary-input" rows="2"></textarea>
+        </div>
+        <div class="field-group" style="display:flex; gap:6px;">
+          <div style="flex:1;">
+            <label for="detail-subject-input">Study Subject</label>
+            <input id="detail-subject-input" type="text" placeholder="e.g. Physics, CS" />
+          </div>
+          <div style="flex:1;">
+            <label for="detail-topic-input">Topic / Chapter</label>
+            <input id="detail-topic-input" type="text" placeholder="e.g. Chapter 3" />
+          </div>
+        </div>
+        <div class="field-group" style="display:flex; gap:6px; align-items:center;">
+          <div style="flex:1;">
+            <label for="detail-duedate-input">Due Date (Optional)</label>
+            <input id="detail-duedate-input" type="text" placeholder="YYYY-MM-DD" />
+          </div>
+          <div style="flex:1; padding-top:14px;">
+            <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer; text-transform:none; color:#f9fafb;">
+              <input id="detail-completed-checkbox" type="checkbox" style="width:auto;" />
+              Task Completed
+            </label>
+          </div>
         </div>
         <div class="field-group" style="display:flex; gap:6px;">
           <div style="flex:1;">
@@ -395,21 +535,29 @@
             <input id="detail-tags-input" type="text" />
           </div>
         </div>
+        <div class="field-group">
+          <label for="detail-link-target-select">Linked Items (Ideas, Notes, Projects, Tasks)</label>
+          <div style="display:flex; gap:6px; margin-bottom:4px;">
+            <select id="detail-link-target-select" style="flex:1;"></select>
+            <button id="detail-link-add-btn" class="btn btn-sm" type="button">Link Item</button>
+          </div>
+          <div id="detail-linked-items-list" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+        </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
           <button id="detail-save-btn" class="btn btn-primary btn-sm">Save Edits</button>
-          <button id="detail-delete-request-btn" class="btn btn-danger btn-sm">Delete Idea...</button>
+          <button id="detail-delete-request-btn" class="btn btn-danger btn-sm">Delete Item...</button>
         </div>
         <div id="detail-delete-confirm-bar" class="confirm-delete-bar">
-          <div style="margin-bottom:6px; font-weight:600;">Confirm permanent deletion of this idea from Local Ideas Vault?</div>
+          <div style="margin-bottom:6px; font-weight:600;">Confirm permanent deletion of this item from Local Knowledge Hub?</div>
           <div style="display:flex; gap:6px;">
             <button id="detail-delete-confirm-btn" class="btn btn-danger btn-sm">Confirm Delete</button>
-            <button id="detail-delete-cancel-btn" class="btn btn-sm">Keep Idea</button>
+            <button id="detail-delete-cancel-btn" class="btn btn-sm">Keep Item</button>
           </div>
         </div>
       </div>
 
       <div id="vault-ideas-list" aria-live="polite">
-        <div style="color:var(--text-muted); font-size:12px;">Loading Local Ideas Vault...</div>
+        <div style="color:var(--text-muted); font-size:12px;">Loading Local Knowledge Hub...</div>
       </div>
     </div>
 

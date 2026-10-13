@@ -511,8 +511,8 @@ export function initMainIpc(
     return sup.saveIdea(input)
   })
 
-  handle('gravitas:vault-list-ideas', async () => {
-    return sup.listIdeas()
+  handle('gravitas:vault-list-ideas', async (_event, filter) => {
+    return sup.listIdeas(filter)
   })
 
   handle('gravitas:vault-search-ideas', async (_event, query: string) => {
@@ -529,6 +529,30 @@ export function initMainIpc(
 
   handle('gravitas:vault-delete-idea', async (_event, payload: { id: string; confirmed: boolean }) => {
     return sup.deleteIdea(payload?.id, payload?.confirmed)
+  })
+
+  handle('gravitas:vault-complete-task', async (_event, payload: { id: string; completed: boolean }) => {
+    return sup.completeTask(payload?.id, payload?.completed ?? true)
+  })
+
+  handle('gravitas:vault-link-items', async (_event, payload: { sourceId: string; targetId: string; relationship?: string }) => {
+    return sup.linkKnowledgeItems(payload?.sourceId, payload?.targetId, payload?.relationship)
+  })
+
+  handle('gravitas:vault-unlink-items', async (_event, payload: { sourceId: string; targetId: string }) => {
+    return sup.unlinkKnowledgeItems(payload?.sourceId, payload?.targetId)
+  })
+
+  handle('gravitas:vault-list-subjects', async () => {
+    return sup.listStudySubjects()
+  })
+
+  handle('gravitas:vault-export-markdown', async (_event, targetDir?: string) => {
+    return sup.exportKnowledgeMarkdown(targetDir)
+  })
+
+  handle('gravitas:vault-import-markdown', async (_event, markdown: string) => {
+    return sup.importKnowledgeMarkdown(markdown)
   })
 
   handle('gravitas:voice-ptt-status', async () => {

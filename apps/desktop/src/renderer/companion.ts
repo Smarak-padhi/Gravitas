@@ -1,5 +1,5 @@
 /**
- * GRAVITAS V1-F-01 — Floating Desktop Companion Renderer Controller
+ * GRAVITAS V1-F-01 / V1-F-02 — Floating Desktop Companion & Local Knowledge Hub Renderer Controller
  *
  * Runs inside sandboxed Chromium renderer with zero Node privileges.
  * Communicates exclusively through allowlisted window.gravitasDesktop bridge.
@@ -9,6 +9,8 @@ import type {
   GravitasDesktopBridge,
   CompanionVisualState,
   IdeaRecord,
+  KnowledgeCollection,
+  KnowledgeFilterInput,
   AssistantCapabilityRecord,
   ImprovementProposal,
   VoiceSttStatusProjection,
@@ -18,6 +20,9 @@ let currentState: CompanionVisualState = 'IDLE'
 let activeCommandId: string | null = null
 let activePttSessionId: string | null = null
 let cachedIdeas: readonly IdeaRecord[] = []
+let activeCollectionFilter: string = 'ALL'
+let activeSubjectFilter: string | null = null
+let pendingNotepadCommandText: string | null = null
 
 export function setCompanionVisualState(state: CompanionVisualState, statusMessage?: string): void {
   currentState = state
@@ -46,6 +51,20 @@ export function getCompanionVisualState(): CompanionVisualState {
   return currentState
 }
 
+function formatCollectionLabel(col?: KnowledgeCollection): string {
+  switch (col) {
+    case 'STUDY_NOTE':
+      return 'STUDY NOTE'
+    case 'PROJECT':
+      return 'PROJECT'
+    case 'PLAN_TASK':
+      return 'TASK'
+    case 'IDEA':
+    default:
+      return 'IDEA'
+  }
+}
+
 export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasDesktopBridge): void {
   cachedIdeas = ideas
   const countBadge = document.getElementById('vault-count-badge')
@@ -61,7 +80,7 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
     const empty = document.createElement('div')
     empty.style.color = '#9ca3af'
     empty.style.fontSize = '12px'
-    empty.textContent = 'No ideas found in Local Ideas Vault.'
+    empty.textContent = 'No items found in Local Knowledge Hub.'
     container.appendChild(empty)
     return
   }
@@ -70,13 +89,52 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
     const card = document.createElement('div')
     card.className = 'idea-card'
     card.setAttribute('data-idea-id', idea.id)
+    card.setAttribute('data-collection', idea.collection || 'IDEA')
 
     const header = document.createElement('div')
     header.className = 'idea-card-header'
 
+    const titleWrap = document.createElement('div')
+    titleWrap.style.display = 'flex'
+    titleWrap.style.alignItems = 'center'
+    titleWrap.style.gap = '6px'
+    titleWrap.style.flexWrap = 'wrap'
+
+    if (idea.collection === 'PLAN_TASK') {
+      const cb = document.createElement('input')
+      cb.type = 'checkbox'
+      cb.checked = Boolean(idea.completed)
+      cb.setAttribute('data-task-toggle', idea.id)
+      cb.title = 'Toggle task completion'
+      cb.addEventListener('change', async () => {
+        if (bridge?.completeTask) {
+          const updated = await bridge.completeTask(idea.id, cb.checked)
+          setCompanionVisualState(
+            'SUCCESS',
+            updated.completed
+              ? `Completed task "${updated.title}".`
+              : `Reopened task "${updated.title}".`
+          )
+          await refreshVault(bridge)
+        }
+      })
+      titleWrap.appendChild(cb)
+    }
+
+    const colBadge = document.createElement('span')
+    const colKey = idea.collection || 'IDEA'
+    colBadge.className = `collection-badge col-${colKey}`
+    colBadge.textContent = formatCollectionLabel(colKey)
+    titleWrap.appendChild(colBadge)
+
     const titleEl = document.createElement('h3')
     titleEl.className = 'idea-title'
+    if (idea.completed) {
+      titleEl.style.textDecoration = 'line-through'
+      titleEl.style.color = '#9ca3af'
+    }
     titleEl.textContent = idea.title
+    titleWrap.appendChild(titleEl)
 
     const actionsWrap = document.createElement('div')
     actionsWrap.style.display = 'flex'
@@ -86,19 +144,19 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
     openBtn.className = 'btn btn-sm'
     openBtn.textContent = 'Open / Edit'
     openBtn.addEventListener('click', () => {
-      openIdeaDetailPanel(idea, false)
+      openIdeaDetailPanel(idea, false, bridge)
     })
 
     const delBtn = document.createElement('button')
     delBtn.className = 'btn btn-danger btn-sm'
     delBtn.textContent = 'Delete'
     delBtn.addEventListener('click', () => {
-      openIdeaDetailPanel(idea, true)
+      openIdeaDetailPanel(idea, true, bridge)
     })
 
     actionsWrap.appendChild(openBtn)
     actionsWrap.appendChild(delBtn)
-    header.appendChild(titleEl)
+    header.appendChild(titleWrap)
     header.appendChild(actionsWrap)
     card.appendChild(header)
 
@@ -124,6 +182,27 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
     catPill.textContent = idea.category
     tagsWrap.appendChild(catPill)
 
+    if (idea.subject) {
+      const subjPill = document.createElement('span')
+      subjPill.className = 'subject-pill'
+      subjPill.textContent = idea.topic ? `${idea.subject}: ${idea.topic}` : idea.subject
+      tagsWrap.appendChild(subjPill)
+    }
+
+    if (idea.dueDate) {
+      const duePill = document.createElement('span')
+      duePill.className = 'due-pill'
+      duePill.textContent = `Due: ${idea.dueDate}`
+      tagsWrap.appendChild(duePill)
+    }
+
+    if (idea.linkedItemIds && idea.linkedItemIds.length > 0) {
+      const linkPill = document.createElement('span')
+      linkPill.className = 'link-pill'
+      linkPill.textContent = `${idea.linkedItemIds.length} link(s)`
+      tagsWrap.appendChild(linkPill)
+    }
+
     for (const tag of idea.tags) {
       const pill = document.createElement('span')
       pill.className = 'tag-pill'
@@ -140,16 +219,23 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
 
     container.appendChild(card)
   }
-
-  void bridge
 }
 
-export function openIdeaDetailPanel(idea: IdeaRecord, showDeleteConfirmation = false): void {
+export function openIdeaDetailPanel(
+  idea: IdeaRecord,
+  showDeleteConfirmation = false,
+  bridge?: GravitasDesktopBridge
+): void {
   const panel = document.getElementById('idea-detail-panel')
   const idInput = document.getElementById('detail-idea-id') as HTMLInputElement | null
   const origEl = document.getElementById('detail-original-text')
   const titleInput = document.getElementById('detail-title-input') as HTMLInputElement | null
+  const colSelect = document.getElementById('detail-collection-select') as HTMLSelectElement | null
   const summaryInput = document.getElementById('detail-summary-input') as HTMLTextAreaElement | null
+  const subjectInput = document.getElementById('detail-subject-input') as HTMLInputElement | null
+  const topicInput = document.getElementById('detail-topic-input') as HTMLInputElement | null
+  const dueInput = document.getElementById('detail-duedate-input') as HTMLInputElement | null
+  const completedCb = document.getElementById('detail-completed-checkbox') as HTMLInputElement | null
   const catInput = document.getElementById('detail-category-input') as HTMLInputElement | null
   const tagsInput = document.getElementById('detail-tags-input') as HTMLInputElement | null
   const confirmBar = document.getElementById('detail-delete-confirm-bar')
@@ -157,11 +243,84 @@ export function openIdeaDetailPanel(idea: IdeaRecord, showDeleteConfirmation = f
   if (idInput) idInput.value = idea.id
   if (origEl) origEl.textContent = idea.originalText
   if (titleInput) titleInput.value = idea.title
+  if (colSelect) colSelect.value = idea.collection || 'IDEA'
   if (summaryInput) summaryInput.value = idea.summary ?? ''
+  if (subjectInput) subjectInput.value = idea.subject ?? ''
+  if (topicInput) topicInput.value = idea.topic ?? ''
+  if (dueInput) dueInput.value = idea.dueDate ?? ''
+  if (completedCb) completedCb.checked = Boolean(idea.completed)
   if (catInput) catInput.value = idea.category
   if (tagsInput) tagsInput.value = idea.tags.join(', ')
   if (confirmBar) confirmBar.classList.toggle('active', showDeleteConfirmation)
+
+  renderDetailLinksSection(idea, bridge)
   if (panel) panel.classList.add('active')
+}
+
+function renderDetailLinksSection(idea: IdeaRecord, bridge?: GravitasDesktopBridge): void {
+  const targetSelect = document.getElementById('detail-link-target-select') as HTMLSelectElement | null
+  const linkedList = document.getElementById('detail-linked-items-list')
+  if (targetSelect) {
+    targetSelect.innerHTML = ''
+    const placeholder = document.createElement('option')
+    placeholder.value = ''
+    placeholder.textContent = '-- Select item to link --'
+    targetSelect.appendChild(placeholder)
+
+    for (const candidate of cachedIdeas) {
+      if (candidate.id === idea.id) continue
+      if (idea.linkedItemIds?.includes(candidate.id)) continue
+      const opt = document.createElement('option')
+      opt.value = candidate.id
+      opt.textContent = `[${formatCollectionLabel(candidate.collection)}] ${candidate.title}`
+      targetSelect.appendChild(opt)
+    }
+  }
+
+  if (linkedList) {
+    linkedList.innerHTML = ''
+    const linkedIds = idea.linkedItemIds ?? []
+    if (linkedIds.length === 0) {
+      const none = document.createElement('span')
+      none.style.fontSize = '10px'
+      none.style.color = '#9ca3af'
+      none.textContent = 'No linked items yet.'
+      linkedList.appendChild(none)
+      return
+    }
+    for (const linkedId of linkedIds) {
+      const linkedRecord = cachedIdeas.find((it) => it.id === linkedId)
+      const pill = document.createElement('span')
+      pill.className = 'link-pill'
+      pill.style.display = 'inline-flex'
+      pill.style.alignItems = 'center'
+      pill.style.gap = '4px'
+      pill.textContent = linkedRecord ? linkedRecord.title : linkedId
+
+      if (bridge?.unlinkKnowledgeItems) {
+        const unlinkBtn = document.createElement('button')
+        unlinkBtn.type = 'button'
+        unlinkBtn.style.background = 'transparent'
+        unlinkBtn.style.border = 'none'
+        unlinkBtn.style.color = '#fca5a5'
+        unlinkBtn.style.cursor = 'pointer'
+        unlinkBtn.style.fontSize = '10px'
+        unlinkBtn.style.padding = '0 2px'
+        unlinkBtn.textContent = '×'
+        unlinkBtn.title = 'Unlink item'
+        unlinkBtn.addEventListener('click', async () => {
+          await bridge.unlinkKnowledgeItems!(idea.id, linkedId)
+          await refreshVault(bridge)
+          const refreshed = cachedIdeas.find((it) => it.id === idea.id)
+          if (refreshed) {
+            openIdeaDetailPanel(refreshed, false, bridge)
+          }
+        })
+        pill.appendChild(unlinkBtn)
+      }
+      linkedList.appendChild(pill)
+    }
+  }
 }
 
 export function closeIdeaDetailPanel(): void {
@@ -243,10 +402,44 @@ export function renderCapabilitiesAndStt(
   }
 }
 
-export async function refreshVault(bridge: GravitasDesktopBridge): Promise<void> {
+export async function refreshSubjectsBar(bridge: GravitasDesktopBridge): Promise<void> {
+  const bar = document.getElementById('knowledge-subjects-bar')
+  if (!bar || !bridge.listStudySubjects) return
+  const subjects = await bridge.listStudySubjects()
+  bar.innerHTML = ''
+  if (subjects.length === 0) return
+
+  for (const s of subjects) {
+    const subj = s.subject
+    const chip = document.createElement('button')
+    chip.className = `chip${activeSubjectFilter === subj ? ' active' : ''}`
+    chip.textContent = `Subject: ${subj} (${s.noteCount + s.taskCount})`
+    chip.addEventListener('click', () => {
+      activeSubjectFilter = activeSubjectFilter === subj ? null : subj
+      void refreshVault(bridge)
+    })
+    bar.appendChild(chip)
+  }
+}
+
+export async function refreshVault(bridge: GravitasDesktopBridge, customFilter?: KnowledgeFilterInput): Promise<void> {
   if (!bridge.listIdeas) return
-  const ideas = await bridge.listIdeas()
+
+  let filter: KnowledgeFilterInput | undefined = customFilter
+  if (!filter) {
+    if (activeCollectionFilter === 'UNFINISHED_TASKS') {
+      filter = { collection: 'PLAN_TASK', unfinishedTasksOnly: true }
+    } else if (activeCollectionFilter !== 'ALL') {
+      filter = { collection: activeCollectionFilter as KnowledgeCollection }
+    }
+    if (activeSubjectFilter) {
+      filter = { ...(filter ?? {}), subject: activeSubjectFilter }
+    }
+  }
+
+  const ideas = filter ? await bridge.listIdeas(filter) : await bridge.listIdeas()
   renderIdeasList(ideas, bridge)
+  await refreshSubjectsBar(bridge)
 }
 
 export async function refreshCapabilitiesView(bridge: GravitasDesktopBridge): Promise<void> {
@@ -257,7 +450,11 @@ export async function refreshCapabilitiesView(bridge: GravitasDesktopBridge): Pr
   renderCapabilitiesAndStt(stt, capRes.capabilities, capRes.proposals)
 }
 
-export async function runCompanionCommand(bridge: GravitasDesktopBridge, rawInput: string): Promise<void> {
+export async function runCompanionCommand(
+  bridge: GravitasDesktopBridge,
+  rawInput: string,
+  options?: { notepadSaveApproved?: boolean }
+): Promise<void> {
   const trimmed = rawInput.trim()
   if (!trimmed) {
     setCompanionVisualState('ERROR', 'Please enter a command first.')
@@ -276,6 +473,7 @@ export async function runCompanionCommand(bridge: GravitasDesktopBridge, rawInpu
     const res = await bridge.executeAssistantCommand({
       commandId: cmdId,
       input: trimmed,
+      saveApproved: options?.notepadSaveApproved,
     })
 
     if (activeCommandId !== cmdId && currentState === 'CANCELLED') {
@@ -290,7 +488,22 @@ export async function runCompanionCommand(bridge: GravitasDesktopBridge, rawInpu
 
     if (res.status === 'CONFIRMATION_REQUIRED' && res.pendingDeleteIdea) {
       setCompanionVisualState('IDLE', res.message)
-      openIdeaDetailPanel(res.pendingDeleteIdea, true)
+      openIdeaDetailPanel(res.pendingDeleteIdea, true, bridge)
+      return
+    }
+
+    if (
+      res.status === 'CONFIRMATION_REQUIRED' &&
+      (res.notepadAutomation?.status === 'CONFIRMATION_REQUIRED' || res.pendingApprovalCommand)
+    ) {
+      pendingNotepadCommandText = res.pendingApprovalCommand ?? trimmed
+      setCompanionVisualState('IDLE', res.message)
+      const approvalBar = document.getElementById('notepad-approval-bar')
+      const approvalText = document.getElementById('notepad-approval-text')
+      if (approvalText) {
+        approvalText.textContent = res.message
+      }
+      approvalBar?.classList.add('active')
       return
     }
 
@@ -315,6 +528,8 @@ export async function runCompanionCommand(bridge: GravitasDesktopBridge, rawInpu
 export async function stopActiveAction(bridge: GravitasDesktopBridge): Promise<void> {
   const targetCmdId = activeCommandId ?? undefined
   activeCommandId = null
+  pendingNotepadCommandText = null
+  document.getElementById('notepad-approval-bar')?.classList.remove('active')
 
   if (activePttSessionId && bridge.cancelPushToTalk) {
     activePttSessionId = null
@@ -393,6 +608,22 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
     void b.hideCompanionWindow?.()
   })
 
+  // Notepad approval bar buttons
+  document.getElementById('notepad-approval-confirm-btn')?.addEventListener('click', () => {
+    const cmdToApprove = pendingNotepadCommandText
+    pendingNotepadCommandText = null
+    document.getElementById('notepad-approval-bar')?.classList.remove('active')
+    if (cmdToApprove) {
+      void runCompanionCommand(b, cmdToApprove, { notepadSaveApproved: true })
+    }
+  })
+
+  document.getElementById('notepad-approval-cancel-btn')?.addEventListener('click', () => {
+    pendingNotepadCommandText = null
+    document.getElementById('notepad-approval-bar')?.classList.remove('active')
+    setCompanionVisualState('CANCELLED', 'Cancelled Notepad file save.')
+  })
+
   // Quick chips
   document.querySelectorAll<HTMLButtonElement>('[data-quick-cmd]').forEach((chip) => {
     chip.addEventListener('click', () => {
@@ -400,6 +631,54 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
       if (cmdInput) cmdInput.value = cmd
       void runCompanionCommand(b, cmd)
     })
+  })
+
+  // Collection filter pills
+  document.querySelectorAll<HTMLButtonElement>('[data-collection-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeCollectionFilter = btn.getAttribute('data-collection-filter') || 'ALL'
+      document.querySelectorAll('[data-collection-filter]').forEach((el) =>
+        el.classList.toggle('active', el === btn)
+      )
+      void refreshVault(b)
+    })
+  })
+
+  // Markdown Export & Import
+  document.getElementById('knowledge-export-md-btn')?.addEventListener('click', async () => {
+    if (!b.exportKnowledgeMarkdown) return
+    try {
+      const res = await b.exportKnowledgeMarkdown()
+      setCompanionVisualState(
+        'SUCCESS',
+        `Exported ${res.exportedCount} item(s) to Markdown at ${res.exportDirectory}.`
+      )
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Markdown export failed: ${(err as Error).message}`)
+    }
+  })
+
+  document.getElementById('knowledge-import-md-toggle-btn')?.addEventListener('click', () => {
+    document.getElementById('knowledge-import-md-panel')?.classList.toggle('active')
+  })
+
+  document.getElementById('knowledge-import-md-close-btn')?.addEventListener('click', () => {
+    document.getElementById('knowledge-import-md-panel')?.classList.remove('active')
+  })
+
+  document.getElementById('knowledge-import-md-submit-btn')?.addEventListener('click', async () => {
+    const textarea = document.getElementById('knowledge-import-md-textarea') as HTMLTextAreaElement | null
+    const rawMd = textarea?.value.trim() ?? ''
+    if (!rawMd || !b.importKnowledgeMarkdown) return
+    try {
+      const imported = await b.importKnowledgeMarkdown(rawMd)
+      if (textarea) textarea.value = ''
+      document.getElementById('knowledge-import-md-panel')?.classList.remove('active')
+      await refreshVault(b)
+      setCompanionVisualState('SUCCESS', `Imported "${imported.title}" (${imported.collection}) from Markdown.`)
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Markdown import failed: ${(err as Error).message}`)
+    }
   })
 
   // Tabs
@@ -423,7 +702,7 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
     const q = searchInput?.value.trim() ?? ''
     if (!q) {
       await refreshVault(b)
-      setCompanionVisualState('IDLE', 'Showing all saved ideas.')
+      setCompanionVisualState('IDLE', 'Showing all saved items.')
       return
     }
     if (b.searchIdeas) {
@@ -432,8 +711,8 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
       setCompanionVisualState(
         'SUCCESS',
         results.length > 0
-          ? `Found ${results.length} idea(s) matching "${q}": "${results[0]!.originalText}"`
-          : `No saved ideas matched "${q}".`
+          ? `Found ${results.length} item(s) matching "${q}": "${results[0]!.originalText}"`
+          : `No saved items matched "${q}".`
       )
     }
   }
@@ -451,19 +730,47 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
 
   resetBtn?.addEventListener('click', () => {
     if (searchInput) searchInput.value = ''
+    activeCollectionFilter = 'ALL'
+    activeSubjectFilter = null
+    document.querySelectorAll('[data-collection-filter]').forEach((el) =>
+      el.classList.toggle('active', el.getAttribute('data-collection-filter') === 'ALL')
+    )
     void refreshVault(b)
-    setCompanionVisualState('IDLE', 'Showing all saved ideas.')
+    setCompanionVisualState('IDLE', 'Showing all saved items.')
   })
 
-  // Idea Detail Edit / Confirm Delete
+  // Idea Detail Edit / Link / Confirm Delete
   document.getElementById('detail-close-btn')?.addEventListener('click', () => {
     closeIdeaDetailPanel()
+  })
+
+  document.getElementById('detail-link-add-btn')?.addEventListener('click', async () => {
+    const id = (document.getElementById('detail-idea-id') as HTMLInputElement | null)?.value
+    const targetId = (document.getElementById('detail-link-target-select') as HTMLSelectElement | null)?.value
+    if (!id || !targetId || !b.linkKnowledgeItems) return
+    try {
+      await b.linkKnowledgeItems(id, targetId)
+      await refreshVault(b)
+      const refreshed = cachedIdeas.find((it) => it.id === id)
+      if (refreshed) {
+        openIdeaDetailPanel(refreshed, false, b)
+      }
+      setCompanionVisualState('SUCCESS', 'Linked knowledge items.')
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Link failed: ${(err as Error).message}`)
+    }
   })
 
   document.getElementById('detail-save-btn')?.addEventListener('click', async () => {
     const id = (document.getElementById('detail-idea-id') as HTMLInputElement | null)?.value
     const title = (document.getElementById('detail-title-input') as HTMLInputElement | null)?.value
+    const collection = (document.getElementById('detail-collection-select') as HTMLSelectElement | null)
+      ?.value as KnowledgeCollection | undefined
     const summary = (document.getElementById('detail-summary-input') as HTMLTextAreaElement | null)?.value
+    const subject = (document.getElementById('detail-subject-input') as HTMLInputElement | null)?.value
+    const topic = (document.getElementById('detail-topic-input') as HTMLInputElement | null)?.value
+    const dueDate = (document.getElementById('detail-duedate-input') as HTMLInputElement | null)?.value
+    const completed = (document.getElementById('detail-completed-checkbox') as HTMLInputElement | null)?.checked
     const category = (document.getElementById('detail-category-input') as HTMLInputElement | null)?.value
     const tagsRaw = (document.getElementById('detail-tags-input') as HTMLInputElement | null)?.value ?? ''
 
@@ -477,13 +784,18 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
       const updated = await b.updateIdea({
         id,
         title,
+        collection,
         summary,
+        subject: subject ? subject.trim() : null,
+        topic: topic ? topic.trim() : null,
+        dueDate: dueDate ? dueDate.trim() : null,
+        completed,
         category,
         tags,
       })
-      openIdeaDetailPanel(updated, false)
+      openIdeaDetailPanel(updated, false, b)
       await refreshVault(b)
-      setCompanionVisualState('SUCCESS', `Updated idea "${updated.title}" (original wording preserved).`)
+      setCompanionVisualState('SUCCESS', `Updated "${updated.title}" (original wording preserved).`)
     } catch (err) {
       setCompanionVisualState('ERROR', `Update failed: ${(err as Error).message}`)
     }

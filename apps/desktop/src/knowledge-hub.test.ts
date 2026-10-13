@@ -477,5 +477,69 @@ describe('GRAVITAS Wave V1-F-02 — Voice/Text Intents, Offline STT & Bounded Wi
       ])
     )
   })
+
+  it('Supports direct supervisor Knowledge Hub methods for task completion, linking/unlinking, subjects, and Markdown import/export (Slice 3)', async () => {
+    const idea = await supervisor.saveIdea({
+      title: 'Study Planner Architecture',
+      originalText: 'Use local SQLite and Markdown export for study planner.',
+      collection: 'IDEA',
+    })
+    const note = await supervisor.saveIdea({
+      title: 'Thermodynamics Notes',
+      originalText: 'First law of thermodynamics: conservation of energy.',
+      collection: 'STUDY_NOTE',
+      subject: 'Physics',
+      topic: 'Chapter 4',
+    })
+    const task = await supervisor.saveIdea({
+      title: 'Solve Chapter 4 Problem Set',
+      originalText: 'Remind me to solve Chapter 4 problems tomorrow.',
+      collection: 'PLAN_TASK',
+      subject: 'Physics',
+      dueDate: '2026-10-15',
+      completed: false,
+    })
+
+    const subjects = await supervisor.listStudySubjects()
+    expect(subjects.map((s) => s.subject)).toEqual(['Physics'])
+
+    const linkRes = await supervisor.linkKnowledgeItems(idea.id, note.id, 'RELATES_TO')
+    expect(linkRes.sourceId).toBe(idea.id)
+    expect(linkRes.targetId).toBe(note.id)
+
+    const refreshedIdea = await supervisor.getIdea(idea.id)
+    expect(refreshedIdea?.linkedItemIds).toContain(note.id)
+
+    const completedTask = await supervisor.completeTask(task.id, true)
+    expect(completedTask.completed).toBe(true)
+    expect(completedTask.taskStatus).toBe('DONE')
+
+    const unlinkRes = await supervisor.unlinkKnowledgeItems(idea.id, note.id)
+    expect(unlinkRes).toBe(true)
+
+    const mdExport = await supervisor.exportKnowledgeMarkdown()
+    expect(mdExport.exportedCount).toBe(3)
+
+    const imported = await supervisor.importKnowledgeMarkdown(
+      [
+        '---',
+        'title: "Imported Optics Summary"',
+        'collection: STUDY_NOTE',
+        'subject: "Physics"',
+        'topic: "Optics"',
+        'tags: ["optics", "waves"]',
+        '---',
+        '',
+        '## Original Transcript / Wording',
+        '',
+        'Snell law of refraction: n1 sin(theta1) = n2 sin(theta2).',
+      ].join('\n')
+    )
+    expect(imported.collection).toBe('STUDY_NOTE')
+    expect(imported.subject).toBe('Physics')
+    expect(imported.topic).toBe('Optics')
+    expect(imported.originalText).toBe('Snell law of refraction: n1 sin(theta1) = n2 sin(theta2).')
+  })
 })
+
 
