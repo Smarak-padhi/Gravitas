@@ -571,6 +571,44 @@ export interface DispatchModelRequest extends BaseProtocolMessage {
   readonly timeoutMs?: number | undefined
 }
 
+import type {
+  IdeaRecord,
+  SaveIdeaInput,
+  UpdateIdeaInput,
+  DeleteIdeaResult,
+} from './assistant/ideasVault.js'
+import type {
+  AssistantIntentKind,
+} from './assistant/commandParser.js'
+import type {
+  AppLaunchResult,
+} from './assistant/appLauncher.js'
+import type {
+  VoiceSttStatusProjection,
+  PttSessionStartResult,
+  PttTranscriptionResult,
+} from './assistant/voiceStt.js'
+import type {
+  AssistantCapabilityRecord,
+  ImprovementProposal,
+  CapabilityFeedbackItem,
+} from './assistant/capabilityRegistry.js'
+
+export type {
+  IdeaRecord,
+  SaveIdeaInput,
+  UpdateIdeaInput,
+  DeleteIdeaResult,
+  AssistantIntentKind,
+  AppLaunchResult,
+  VoiceSttStatusProjection,
+  PttSessionStartResult,
+  PttTranscriptionResult,
+  AssistantCapabilityRecord,
+  ImprovementProposal,
+  CapabilityFeedbackItem,
+}
+
 export interface DispatchModelResponse extends BaseProtocolMessage, DesktopModelDispatchResult {
   readonly type: 'DISPATCH_MODEL_RESPONSE'
   readonly requestId: string
@@ -579,6 +617,150 @@ export interface DispatchModelResponse extends BaseProtocolMessage, DesktopModel
 export interface D1ProjectionUpdatedNotification extends BaseProtocolMessage {
   readonly type: 'PROJECTION_UPDATED'
   readonly projectionType: string
+}
+
+// ─── V1-F-01 Floating Companion & Ideas Vault IPC Contracts ──────────────────
+
+export type CompanionVisualState =
+  | 'IDLE'
+  | 'LISTENING'
+  | 'PROCESSING'
+  | 'SUCCESS'
+  | 'ERROR'
+  | 'CANCELLED'
+
+export interface AssistantCommandPayload {
+  readonly commandId?: string | undefined
+  readonly input: string
+}
+
+export interface AssistantCommandResult {
+  readonly commandId: string
+  readonly workSessionId: string
+  readonly runId: string
+  readonly taskId: string
+  readonly intentKind: AssistantIntentKind
+  readonly status: 'SUCCESS' | 'ERROR' | 'CANCELLED' | 'CONFIRMATION_REQUIRED'
+  readonly terminalState: 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | 'WAITING_CONFIRMATION'
+  readonly message: string
+  readonly savedIdea?: IdeaRecord | undefined
+  readonly ideas?: readonly IdeaRecord[] | undefined
+  readonly launchedApp?: AppLaunchResult | undefined
+  readonly improvementProposal?: ImprovementProposal | undefined
+  readonly pendingDeleteIdea?: IdeaRecord | undefined
+}
+
+export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
+  readonly type: 'EXECUTE_ASSISTANT_COMMAND_REQUEST'
+  readonly requestId: string
+  readonly commandId?: string | undefined
+  readonly input: string
+}
+
+export interface ExecuteAssistantCommandResponse extends BaseProtocolMessage {
+  readonly type: 'EXECUTE_ASSISTANT_COMMAND_RESPONSE'
+  readonly requestId: string
+  readonly result: AssistantCommandResult
+}
+
+export interface CancelAssistantCommandResult {
+  readonly cancelled: boolean
+  readonly commandId: string
+  readonly terminalState: 'CANCELLED'
+  readonly message: string
+}
+
+export interface CancelAssistantCommandRequest extends BaseProtocolMessage {
+  readonly type: 'CANCEL_ASSISTANT_COMMAND_REQUEST'
+  readonly requestId: string
+  readonly commandId?: string | undefined
+}
+
+export interface CancelAssistantCommandResponse extends BaseProtocolMessage {
+  readonly type: 'CANCEL_ASSISTANT_COMMAND_RESPONSE'
+  readonly requestId: string
+  readonly result: CancelAssistantCommandResult
+}
+
+export type IdeasVaultRequestPayload =
+  | { readonly action: 'SAVE'; readonly input: SaveIdeaInput }
+  | { readonly action: 'LIST' }
+  | { readonly action: 'SEARCH'; readonly query: string }
+  | { readonly action: 'GET'; readonly id: string }
+  | { readonly action: 'UPDATE'; readonly input: UpdateIdeaInput }
+  | { readonly action: 'DELETE'; readonly id: string; readonly confirmed: boolean }
+
+export interface IdeasVaultOperationRequest extends BaseProtocolMessage {
+  readonly type: 'IDEAS_VAULT_REQUEST'
+  readonly requestId: string
+  readonly payload: IdeasVaultRequestPayload
+}
+
+export interface IdeasVaultOperationResult {
+  readonly success: boolean
+  readonly action: IdeasVaultRequestPayload['action']
+  readonly idea?: IdeaRecord | null | undefined
+  readonly ideas?: readonly IdeaRecord[] | undefined
+  readonly deleteResult?: DeleteIdeaResult | undefined
+  readonly errorMessage?: string | undefined
+}
+
+export interface IdeasVaultOperationResponse extends BaseProtocolMessage {
+  readonly type: 'IDEAS_VAULT_RESPONSE'
+  readonly requestId: string
+  readonly result: IdeasVaultOperationResult
+}
+
+export type VoicePttRequestPayload =
+  | { readonly action: 'STATUS' }
+  | { readonly action: 'START'; readonly userInitiated: boolean }
+  | { readonly action: 'STOP'; readonly pttSessionId: string; readonly audioSampleBase64?: string | undefined }
+  | { readonly action: 'CANCEL' }
+
+export interface VoicePttRequest extends BaseProtocolMessage {
+  readonly type: 'VOICE_PTT_REQUEST'
+  readonly requestId: string
+  readonly payload: VoicePttRequestPayload
+}
+
+export interface VoicePttOperationResult {
+  readonly action: VoicePttRequestPayload['action']
+  readonly statusProjection: VoiceSttStatusProjection
+  readonly startResult?: PttSessionStartResult | undefined
+  readonly transcriptionResult?: PttTranscriptionResult | undefined
+}
+
+export interface VoicePttResponse extends BaseProtocolMessage {
+  readonly type: 'VOICE_PTT_RESPONSE'
+  readonly requestId: string
+  readonly result: VoicePttOperationResult
+}
+
+export type CapabilityRegistryRequestPayload =
+  | { readonly action: 'LIST' }
+  | {
+      readonly action: 'FEEDBACK'
+      readonly capabilityId: string
+      readonly rating: 'POSITIVE' | 'NEGATIVE'
+      readonly comment: string
+    }
+
+export interface CapabilityRegistryRequest extends BaseProtocolMessage {
+  readonly type: 'CAPABILITY_REGISTRY_REQUEST'
+  readonly requestId: string
+  readonly payload: CapabilityRegistryRequestPayload
+}
+
+export interface CapabilityRegistryResult {
+  readonly capabilities: readonly AssistantCapabilityRecord[]
+  readonly proposals: readonly ImprovementProposal[]
+  readonly recordedFeedback?: CapabilityFeedbackItem | undefined
+}
+
+export interface CapabilityRegistryResponse extends BaseProtocolMessage {
+  readonly type: 'CAPABILITY_REGISTRY_RESPONSE'
+  readonly requestId: string
+  readonly result: CapabilityRegistryResult
 }
 
 export type D1MainToKernelMessage =
@@ -596,6 +778,11 @@ export type D1MainToKernelMessage =
   | D1OperatorIntentRequest
   | ConfigureProviderRequest
   | DispatchModelRequest
+  | ExecuteAssistantCommandRequest
+  | CancelAssistantCommandRequest
+  | IdeasVaultOperationRequest
+  | VoicePttRequest
+  | CapabilityRegistryRequest
 
 export type D1KernelToMainMessage =
   | HelloMessage
@@ -615,6 +802,11 @@ export type D1KernelToMainMessage =
   | D1ProjectionUpdatedNotification
   | ConfigureProviderResponse
   | DispatchModelResponse
+  | ExecuteAssistantCommandResponse
+  | CancelAssistantCommandResponse
+  | IdeasVaultOperationResponse
+  | VoicePttResponse
+  | CapabilityRegistryResponse
 
 export type MainToKernelMessage = D1MainToKernelMessage
 export type KernelToMainMessage = D1KernelToMainMessage
@@ -694,6 +886,24 @@ export interface GravitasDesktopBridge {
   onKernelStatus(callback: (status: KernelLifecycleStatus) => void): () => void
   onKernelError(callback: (err: SafeDesktopError) => void): () => void
   onProjectionUpdate(callback: (projectionType: string) => void): () => void
+
+  // V1-F-01 Floating Companion, Ideas Vault, Voice PTT & Supervised Capabilities
+  executeAssistantCommand?(payload: AssistantCommandPayload): Promise<AssistantCommandResult>
+  cancelAssistantCommand?(commandId?: string): Promise<CancelAssistantCommandResult>
+  saveIdea?(input: SaveIdeaInput): Promise<IdeaRecord>
+  listIdeas?(): Promise<readonly IdeaRecord[]>
+  searchIdeas?(query: string): Promise<readonly IdeaRecord[]>
+  getIdea?(id: string): Promise<IdeaRecord | null>
+  updateIdea?(input: UpdateIdeaInput): Promise<IdeaRecord>
+  deleteIdea?(id: string, confirmed: boolean): Promise<DeleteIdeaResult>
+  getVoiceSttStatus?(): Promise<VoiceSttStatusProjection>
+  startPushToTalk?(userInitiated: boolean): Promise<PttSessionStartResult>
+  stopPushToTalk?(pttSessionId: string, audioSampleBase64?: string): Promise<PttTranscriptionResult>
+  cancelPushToTalk?(): Promise<VoiceSttStatusProjection>
+  getAssistantCapabilities?(): Promise<CapabilityRegistryResult>
+  submitCapabilityFeedback?(capabilityId: string, rating: 'POSITIVE' | 'NEGATIVE', comment: string): Promise<CapabilityRegistryResult>
+  toggleCompanionWindow?(): Promise<{ visible: boolean }>
+  hideCompanionWindow?(): Promise<{ visible: boolean }>
 }
 
 declare global {

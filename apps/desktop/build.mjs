@@ -49,6 +49,13 @@ async function run() {
       outfile: join(__dirname, 'dist/renderer/renderer.js'),
     }),
     build({
+      entryPoints: [join(__dirname, 'src/renderer/companion.ts')],
+      bundle: true,
+      platform: 'browser',
+      format: 'esm',
+      outfile: join(__dirname, 'dist/renderer/companion.js'),
+    }),
+    build({
       entryPoints: [join(__dirname, 'src/main/index.ts')],
       bundle: true,
       platform: 'node',
@@ -83,6 +90,7 @@ async function run() {
   ])
 
   copyFileSync(join(__dirname, 'src/renderer/index.html'), join(__dirname, 'dist/renderer/index.html'))
+  copyFileSync(join(__dirname, 'src/renderer/companion.html'), join(__dirname, 'dist/renderer/companion.html'))
   console.log('Desktop package bundled successfully.')
 }
 

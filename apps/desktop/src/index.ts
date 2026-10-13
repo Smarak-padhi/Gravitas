@@ -7,3 +7,4 @@
 export * from './types.js'
 export * from './kernel-host/index.js'
 export * from './main/supervisor.js'
+export * from './assistant/index.js'

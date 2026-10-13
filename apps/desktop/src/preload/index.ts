@@ -136,6 +136,71 @@ const bridge: GravitasDesktopBridge = {
       ipcRenderer.removeListener('gravitas:projection-update', handler)
     }
   },
+
+  // V1-F-01 Floating Companion & Ideas Vault
+  executeAssistantCommand: async (payload) => {
+    return ipcRenderer.invoke('gravitas:assistant-command', payload)
+  },
+
+  cancelAssistantCommand: async (commandId?: string) => {
+    return ipcRenderer.invoke('gravitas:assistant-cancel', commandId)
+  },
+
+  saveIdea: async (input) => {
+    return ipcRenderer.invoke('gravitas:vault-save-idea', input)
+  },
+
+  listIdeas: async () => {
+    return ipcRenderer.invoke('gravitas:vault-list-ideas')
+  },
+
+  searchIdeas: async (query: string) => {
+    return ipcRenderer.invoke('gravitas:vault-search-ideas', query)
+  },
+
+  getIdea: async (id: string) => {
+    return ipcRenderer.invoke('gravitas:vault-get-idea', id)
+  },
+
+  updateIdea: async (input) => {
+    return ipcRenderer.invoke('gravitas:vault-update-idea', input)
+  },
+
+  deleteIdea: async (id: string, confirmed: boolean) => {
+    return ipcRenderer.invoke('gravitas:vault-delete-idea', { id, confirmed })
+  },
+
+  getVoiceSttStatus: async () => {
+    return ipcRenderer.invoke('gravitas:voice-ptt-status')
+  },
+
+  startPushToTalk: async (userInitiated: boolean) => {
+    return ipcRenderer.invoke('gravitas:voice-ptt-start', userInitiated)
+  },
+
+  stopPushToTalk: async (pttSessionId: string, audioSampleBase64?: string) => {
+    return ipcRenderer.invoke('gravitas:voice-ptt-stop', { pttSessionId, audioSampleBase64 })
+  },
+
+  cancelPushToTalk: async () => {
+    return ipcRenderer.invoke('gravitas:voice-ptt-cancel')
+  },
+
+  getAssistantCapabilities: async () => {
+    return ipcRenderer.invoke('gravitas:assistant-capabilities')
+  },
+
+  submitCapabilityFeedback: async (capabilityId: string, rating: 'POSITIVE' | 'NEGATIVE', comment: string) => {
+    return ipcRenderer.invoke('gravitas:assistant-feedback', { capabilityId, rating, comment })
+  },
+
+  toggleCompanionWindow: async () => {
+    return ipcRenderer.invoke('gravitas:toggle-companion')
+  },
+
+  hideCompanionWindow: async () => {
+    return ipcRenderer.invoke('gravitas:hide-companion')
+  },
 }
 
 contextBridge.exposeInMainWorld('gravitasDesktop', bridge)

@@ -900,6 +900,11 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       refreshAll(bridge)
     })
 
+    // Toggle Floating Companion button
+    document.getElementById('btn-toggle-companion')?.addEventListener('click', () => {
+      void bridge.toggleCompanionWindow?.()
+    })
+
     // Dialog buttons
     document.getElementById('dialog-btn-cancel')?.addEventListener('click', () => {
       closeApprovalDialog()

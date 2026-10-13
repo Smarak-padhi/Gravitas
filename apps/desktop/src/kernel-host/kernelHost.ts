@@ -72,7 +72,26 @@ import {
   type DispatchModelRequest,
   type DispatchModelResponse,
   type DesktopModelDispatchResult,
+  type ExecuteAssistantCommandRequest,
+  type CancelAssistantCommandRequest,
+  type IdeasVaultOperationRequest,
+  type VoicePttRequest,
+  type CapabilityRegistryRequest,
+  type AssistantCommandResult,
+  type CancelAssistantCommandResult,
+  type IdeasVaultOperationResult,
+  type VoicePttOperationResult,
+  type CapabilityRegistryResult,
 } from '../types.js'
+import {
+  IdeasVaultStore,
+  AssistantCapabilityRegistry,
+  parseAssistantCommand,
+  AllowlistedAppLauncher,
+  OfflineVoiceController,
+  type CustomAppSpawnFn,
+  type LocalOfflineTranscriberFn,
+} from '../assistant/index.js'
 
 export interface KernelHostOptions {
   readonly dbPath?: string
@@ -85,6 +104,9 @@ export interface KernelHostOptions {
   readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
   readonly shutdownDrainTimeoutMs?: number | undefined
   readonly kernelCommandTimeoutMs?: number | undefined
+  readonly customAppSpawn?: CustomAppSpawnFn | undefined
+  readonly customLocalTranscriber?: LocalOfflineTranscriberFn | undefined
+  readonly enabledAssistantCapabilities?: readonly string[] | undefined
 }
 
 const DEFAULT_PATTERNS: readonly RegExp[] = [
@@ -155,6 +177,10 @@ export class KernelHost {
   private readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
   private readonly shutdownDrainTimeoutMs: number
   private readonly kernelCommandTimeoutMs: number
+  private ideasVault?: IdeasVaultStore | undefined
+  private capabilityRegistry?: AssistantCapabilityRegistry | undefined
+  private readonly appLauncher: AllowlistedAppLauncher
+  private readonly voiceController: OfflineVoiceController
 
   // Canonical auxiliary stores managed under single writer
   private readonly verificationPlans = new Map<string, StoredVerificationPlan>()
@@ -185,6 +211,14 @@ export class KernelHost {
     this.dataRoot = opts.dataRoot ?? opts.dbPath ?? process.env.GRAVITAS_DATA_ROOT ?? resolveGravitasDataRoot().dataRoot
     this.kernel = new WorkSessionKernel({
       dataRoot: this.dataRoot,
+    })
+    this.appLauncher = new AllowlistedAppLauncher({
+      customSpawn: opts.customAppSpawn,
+      enabledCapabilities: opts.enabledAssistantCapabilities,
+    })
+    this.voiceController = new OfflineVoiceController({
+      dataRoot: this.dataRoot,
+      customLocalTranscriber: opts.customLocalTranscriber,
     })
 
     // Seed default execution harness data for K1/K2/K3 projections
@@ -1622,6 +1656,71 @@ export class KernelHost {
         break
       }
 
+      case 'EXECUTE_ASSISTANT_COMMAND_REQUEST': {
+        const req = m as ExecuteAssistantCommandRequest
+        const result = await this.executeAssistantCommand(req)
+        this.sendMessage({
+          type: 'EXECUTE_ASSISTANT_COMMAND_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
+      case 'CANCEL_ASSISTANT_COMMAND_REQUEST': {
+        const req = m as CancelAssistantCommandRequest
+        const result = await this.cancelAssistantCommand(req.commandId)
+        this.sendMessage({
+          type: 'CANCEL_ASSISTANT_COMMAND_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
+      case 'IDEAS_VAULT_REQUEST': {
+        const req = m as IdeasVaultOperationRequest
+        const result = this.handleIdeasVaultOperation(req.payload)
+        this.sendMessage({
+          type: 'IDEAS_VAULT_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
+      case 'VOICE_PTT_REQUEST': {
+        const req = m as VoicePttRequest
+        const result = await this.handleVoicePttOperation(req.payload)
+        this.sendMessage({
+          type: 'VOICE_PTT_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
+      case 'CAPABILITY_REGISTRY_REQUEST': {
+        const req = m as CapabilityRegistryRequest
+        const result = this.handleCapabilityRegistryOperation(req.payload)
+        this.sendMessage({
+          type: 'CAPABILITY_REGISTRY_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
       case 'SHUTDOWN_REQUEST': {
         await this.shutdown()
         this.sendMessage({
@@ -1646,8 +1745,584 @@ export class KernelHost {
     }
   }
 
+  // ─── V1-F-01 Floating Companion & Ideas Vault Subsystems ──────────────────
+
+  public getIdeasVault(): IdeasVaultStore {
+    if (!this.ideasVault) {
+      this.ideasVault = new IdeasVaultStore(this.dataRoot)
+    }
+    return this.ideasVault
+  }
+
+  public getCapabilityRegistry(): AssistantCapabilityRegistry {
+    if (!this.capabilityRegistry) {
+      const vault = this.getIdeasVault()
+      this.capabilityRegistry = new AssistantCapabilityRegistry(vault.getDatabase())
+    }
+    return this.capabilityRegistry
+  }
+
+  public getVoiceController(): OfflineVoiceController {
+    return this.voiceController
+  }
+
+  public async executeAssistantCommand(req: {
+    readonly commandId?: string | undefined
+    readonly input: string
+  }): Promise<AssistantCommandResult> {
+    const commandId = req.commandId && req.commandId.trim() ? req.commandId.trim() : `cmd_asst_${randomUUID().slice(0, 8)}`
+    const intent = parseAssistantCommand(req.input)
+
+    const workSessionId = `ws_companion_${randomUUID().slice(0, 8)}`
+    const runId = `run_companion_${randomUUID().slice(0, 8)}`
+    const taskId = `task_companion_${randomUUID().slice(0, 8)}`
+    const controller = new AbortController()
+
+    this.activeDispatches.set(commandId, controller)
+    this.activeDispatches.set(taskId, controller)
+    this.inFlightDispatchTasks.set(taskId, workSessionId)
+
+    try {
+      await this.kernel.execute({
+        commandId: `cmd_ws_${commandId}`,
+        commandType: 'CREATE_WORKSESSION',
+        workSessionId,
+        payload: {
+          id: workSessionId,
+          title: 'Desktop Companion Action',
+          objective: sanitizeText(`Assistant command: ${req.input.slice(0, 120)}`),
+          repositoryRoot: this.dataRoot,
+          baseBranch: 'main',
+        },
+      })
+
+      await this.kernel.execute({
+        commandId: `cmd_run_${commandId}`,
+        commandType: 'CREATE_RUN',
+        workSessionId,
+        payload: {
+          runId,
+          workSessionId,
+          goal: sanitizeText(`Execute ${intent.kind}`),
+        },
+      })
+
+      await this.kernel.execute({
+        commandId: `cmd_task_${commandId}`,
+        commandType: 'CREATE_TASK',
+        workSessionId,
+        payload: {
+          taskId,
+          runId,
+          workSessionId,
+          title: sanitizeText(`Companion: ${intent.kind}`),
+          assignedRoleId: 'role:engineering:backend-engineer',
+        },
+      })
+
+      await this.kernel.execute({
+        commandId: `cmd_run_state_${commandId}`,
+        commandType: 'TRANSITION_TASK',
+        workSessionId,
+        payload: {
+          taskId,
+          toState: 'RUNNING',
+          reason: `Executing assistant intent ${intent.kind}`,
+        },
+      })
+
+      if (controller.signal.aborted) {
+        throw new Error('CANCELLED_BY_OPERATOR')
+      }
+
+      switch (intent.kind) {
+        case 'SAVE_IDEA': {
+          const savedIdea = this.getIdeasVault().saveIdea({
+            originalText: intent.ideaText,
+          })
+          const ideas = this.getIdeasVault().listIdeas()
+          await this.kernel.execute({
+            commandId: `cmd_done_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'SUCCEEDED',
+              reason: `Saved idea ${savedIdea.id}`,
+            },
+          })
+          this.sendMessage({
+            type: 'PROJECTION_UPDATED',
+            protocolVersion: D1_PROTOCOL_VERSION,
+            projectionType: 'IDEAS_VAULT',
+            timestamp: new Date().toISOString(),
+          })
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Saved idea "${savedIdea.title}" to Local Ideas Vault.`,
+            savedIdea,
+            ideas,
+          }
+        }
+
+        case 'LIST_IDEAS': {
+          const ideas = this.getIdeasVault().listIdeas()
+          await this.kernel.execute({
+            commandId: `cmd_done_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'SUCCEEDED',
+              reason: `Listed ${ideas.length} ideas`,
+            },
+          })
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              ideas.length > 0
+                ? `Showing ${ideas.length} saved idea(s) from Local Ideas Vault.`
+                : 'Your Local Ideas Vault is currently empty.',
+            ideas,
+          }
+        }
+
+        case 'SEARCH_IDEAS': {
+          const ideas = this.getIdeasVault().searchIdeas(intent.query)
+          await this.kernel.execute({
+            commandId: `cmd_done_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'SUCCEEDED',
+              reason: `Searched ideas for "${intent.query}" (${ideas.length} matches)`,
+            },
+          })
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              ideas.length > 0
+                ? `Found ${ideas.length} matching idea(s) for "${intent.query}": "${ideas[0]!.originalText}"`
+                : `No saved ideas matched "${intent.query}".`,
+            ideas,
+          }
+        }
+
+        case 'LAUNCH_APP': {
+          const launchedApp = await this.appLauncher.launchApp(intent.appId, controller.signal)
+          if (controller.signal.aborted) {
+            throw new Error('CANCELLED_BY_OPERATOR')
+          }
+          await this.kernel.execute({
+            commandId: `cmd_done_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'SUCCEEDED',
+              reason: `Launched allowlisted app ${launchedApp.displayName}`,
+            },
+          })
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: launchedApp.message,
+            launchedApp,
+          }
+        }
+
+        case 'DELETE_IDEA_PROMPT': {
+          const vault = this.getIdeasVault()
+          const target = vault.getIdea(intent.targetQueryOrId) ?? vault.searchIdeas(intent.targetQueryOrId)[0]
+          if (!target) {
+            await this.kernel.execute({
+              commandId: `cmd_fail_${commandId}`,
+              commandType: 'TRANSITION_TASK',
+              workSessionId,
+              payload: {
+                taskId,
+                toState: 'FAILED',
+                reason: `No idea found matching "${intent.targetQueryOrId}"`,
+              },
+            })
+            return {
+              commandId,
+              workSessionId,
+              runId,
+              taskId,
+              intentKind: intent.kind,
+              status: 'ERROR',
+              terminalState: 'FAILED',
+              message: `No idea found matching "${intent.targetQueryOrId}".`,
+            }
+          }
+
+          await this.kernel.execute({
+            commandId: `cmd_wait_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'WAITING_APPROVAL',
+              reason: `Awaiting explicit user confirmation to delete idea ${target.id}`,
+            },
+          })
+
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'CONFIRMATION_REQUIRED',
+            terminalState: 'WAITING_CONFIRMATION',
+            message: `Confirmation required to delete idea "${target.title}". Use the Confirm Delete button to proceed.`,
+            pendingDeleteIdea: target,
+          }
+        }
+
+        case 'SIMULATE_LONG_TASK': {
+          await new Promise<void>((resolve, reject) => {
+            const timer = setTimeout(() => {
+              controller.signal.removeEventListener('abort', onAbort)
+              resolve()
+            }, intent.durationMs)
+            const onAbort = () => {
+              clearTimeout(timer)
+              reject(new Error('CANCELLED_BY_OPERATOR'))
+            }
+            if (controller.signal.aborted) {
+              onAbort()
+            } else {
+              controller.signal.addEventListener('abort', onAbort, { once: true })
+            }
+          })
+
+          await this.kernel.execute({
+            commandId: `cmd_done_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'SUCCEEDED',
+              reason: 'Completed long assistant task',
+            },
+          })
+
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: 'Completed analysis task.',
+          }
+        }
+
+        case 'BLOCKED_APP': {
+          const proposal = this.getCapabilityRegistry().recordFailedAttempt({
+            capabilityId: 'cap:desktop:launch-app',
+            triggerCommand: intent.rawInput,
+            failureReason: intent.reason,
+            suggestedImprovement: `Operator requested launching "${intent.requestedApp}". Propose human-reviewed allowlist evaluation without granting automatic shell or OS execution privileges.`,
+          })
+
+          await this.kernel.execute({
+            commandId: `cmd_fail_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'FAILED',
+              reason: intent.reason,
+            },
+          })
+
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'ERROR',
+            terminalState: 'FAILED',
+            message: intent.reason,
+            improvementProposal: proposal,
+          }
+        }
+
+        case 'UNKNOWN_COMMAND': {
+          const proposal = this.getCapabilityRegistry().recordFailedAttempt({
+            capabilityId: 'cap:assistant:nl-command',
+            triggerCommand: intent.rawInput || req.input,
+            failureReason: intent.reason,
+            suggestedImprovement: `Unrecognized natural-language command "${(intent.rawInput || req.input).slice(0, 120)}". Propose adding a deterministic intent pattern after human review.`,
+          })
+
+          await this.kernel.execute({
+            commandId: `cmd_fail_${commandId}`,
+            commandType: 'TRANSITION_TASK',
+            workSessionId,
+            payload: {
+              taskId,
+              toState: 'FAILED',
+              reason: intent.reason,
+            },
+          })
+
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'ERROR',
+            terminalState: 'FAILED',
+            message: intent.reason,
+            improvementProposal: proposal,
+          }
+        }
+      }
+    } catch (err) {
+      const errMessage = (err as Error).message || 'Assistant command failed'
+      const isCancelled = controller.signal.aborted || errMessage.includes('CANCELLED')
+
+      try {
+        await this.kernel.execute({
+          commandId: `cmd_term_${randomUUID().slice(0, 8)}`,
+          commandType: 'TRANSITION_TASK',
+          workSessionId,
+          payload: {
+            taskId,
+            toState: isCancelled ? 'CANCELLED' : 'FAILED',
+            reason: sanitizeText(errMessage),
+          },
+        })
+      } catch {}
+
+      if (isCancelled) {
+        return {
+          commandId,
+          workSessionId,
+          runId,
+          taskId,
+          intentKind: intent.kind,
+          status: 'CANCELLED',
+          terminalState: 'CANCELLED',
+          message: 'Action cancelled by operator. Safe terminal state (CANCELLED) reached.',
+        }
+      }
+
+      const proposal = this.getCapabilityRegistry().recordFailedAttempt({
+        capabilityId: intent.kind === 'LAUNCH_APP' ? 'cap:desktop:launch-app' : 'cap:assistant:nl-command',
+        triggerCommand: req.input,
+        failureReason: errMessage,
+        suggestedImprovement: `Task failed with "${errMessage}". Recorded for human review.`,
+      })
+
+      return {
+        commandId,
+        workSessionId,
+        runId,
+        taskId,
+        intentKind: intent.kind,
+        status: 'ERROR',
+        terminalState: 'FAILED',
+        message: sanitizeText(errMessage),
+        improvementProposal: proposal,
+      }
+    } finally {
+      this.activeDispatches.delete(commandId)
+      this.activeDispatches.delete(taskId)
+      this.inFlightDispatchTasks.delete(taskId)
+    }
+  }
+
+  public async cancelAssistantCommand(commandId?: string): Promise<CancelAssistantCommandResult> {
+    this.voiceController.cancelPushToTalk()
+
+    if (commandId && this.activeDispatches.has(commandId)) {
+      const ctrl = this.activeDispatches.get(commandId)!
+      ctrl.abort()
+      return {
+        cancelled: true,
+        commandId,
+        terminalState: 'CANCELLED',
+        message: `Cancelled active command ${commandId}. Safe terminal state (CANCELLED) verified.`,
+      }
+    }
+
+    let abortedCount = 0
+    for (const ctrl of this.activeDispatches.values()) {
+      ctrl.abort()
+      abortedCount++
+    }
+
+    return {
+      cancelled: true,
+      commandId: commandId || (abortedCount > 0 ? 'ACTIVE_COMMAND' : 'IDLE_SAFE'),
+      terminalState: 'CANCELLED',
+      message:
+        abortedCount > 0
+          ? 'Cancelled active action immediately. Safe terminal state (CANCELLED) verified.'
+          : 'Stopped assistant activity. Companion is in safe terminal state (CANCELLED).',
+    }
+  }
+
+  public handleIdeasVaultOperation(
+    payload: IdeasVaultOperationRequest['payload']
+  ): IdeasVaultOperationResult {
+    try {
+      const vault = this.getIdeasVault()
+      switch (payload.action) {
+        case 'SAVE': {
+          const idea = vault.saveIdea(payload.input)
+          return {
+            success: true,
+            action: 'SAVE',
+            idea,
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'LIST': {
+          return {
+            success: true,
+            action: 'LIST',
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'SEARCH': {
+          return {
+            success: true,
+            action: 'SEARCH',
+            ideas: vault.searchIdeas(payload.query),
+          }
+        }
+        case 'GET': {
+          return {
+            success: true,
+            action: 'GET',
+            idea: vault.getIdea(payload.id),
+          }
+        }
+        case 'UPDATE': {
+          const idea = vault.updateIdea(payload.input)
+          return {
+            success: true,
+            action: 'UPDATE',
+            idea,
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'DELETE': {
+          const deleteResult = vault.deleteIdea(payload.id, payload.confirmed)
+          return {
+            success: deleteResult.deleted,
+            action: 'DELETE',
+            deleteResult,
+            ideas: vault.listIdeas(),
+          }
+        }
+      }
+    } catch (err) {
+      return {
+        success: false,
+        action: payload.action,
+        errorMessage: sanitizeText((err as Error).message),
+      }
+    }
+  }
+
+  public async handleVoicePttOperation(
+    payload: VoicePttRequest['payload']
+  ): Promise<VoicePttOperationResult> {
+    switch (payload.action) {
+      case 'STATUS': {
+        return {
+          action: 'STATUS',
+          statusProjection: this.voiceController.getStatus(),
+        }
+      }
+      case 'START': {
+        const startResult = this.voiceController.startPushToTalk(payload.userInitiated)
+        return {
+          action: 'START',
+          statusProjection: this.voiceController.getStatus(),
+          startResult,
+        }
+      }
+      case 'STOP': {
+        const transcriptionResult = await this.voiceController.stopPushToTalk({
+          pttSessionId: payload.pttSessionId,
+          audioSampleBase64: payload.audioSampleBase64,
+        })
+        return {
+          action: 'STOP',
+          statusProjection: this.voiceController.getStatus(),
+          transcriptionResult,
+        }
+      }
+      case 'CANCEL': {
+        this.voiceController.cancelPushToTalk()
+        return {
+          action: 'CANCEL',
+          statusProjection: this.voiceController.getStatus(),
+        }
+      }
+    }
+  }
+
+  public handleCapabilityRegistryOperation(
+    payload: CapabilityRegistryRequest['payload']
+  ): CapabilityRegistryResult {
+    const reg = this.getCapabilityRegistry()
+    if (payload.action === 'FEEDBACK') {
+      const recordedFeedback = reg.recordUserFeedback({
+        capabilityId: payload.capabilityId,
+        rating: payload.rating,
+        comment: payload.comment,
+      })
+      return {
+        capabilities: reg.listCapabilities(),
+        proposals: reg.listImprovementProposals(),
+        recordedFeedback,
+      }
+    }
+    return {
+      capabilities: reg.listCapabilities(),
+      proposals: reg.listImprovementProposals(),
+    }
+  }
+
   public async shutdown(): Promise<void> {
     this.status = 'STOPPING'
+    this.voiceController.cancelPushToTalk()
     for (const controller of this.activeDispatches.values()) {
       controller.abort()
     }
@@ -1682,6 +2357,11 @@ export class KernelHost {
       }
       this.activeDispatches.clear()
       this.inFlightDispatchTasks.clear()
+    }
+    if (this.ideasVault) {
+      this.ideasVault.close()
+      this.ideasVault = undefined
+      this.capabilityRegistry = undefined
     }
     ModelCapabilityHistory.getInstance().detachDurableWriter()
     let kernelShutdownTimer: ReturnType<typeof setTimeout> | undefined

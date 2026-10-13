@@ -39,6 +39,19 @@ import {
   type DesktopModelDispatchResult,
   type DispatchModelRequest,
   type DispatchModelResponse,
+  type AssistantCommandPayload,
+  type AssistantCommandResult,
+  type CancelAssistantCommandResult,
+  type IdeaRecord,
+  type SaveIdeaInput,
+  type UpdateIdeaInput,
+  type DeleteIdeaResult,
+  type IdeasVaultOperationResult,
+  type VoiceSttStatusProjection,
+  type PttSessionStartResult,
+  type PttTranscriptionResult,
+  type VoicePttOperationResult,
+  type CapabilityRegistryResult,
 } from '../types.js'
 
 import {
@@ -429,6 +442,20 @@ export class DesktopSupervisor {
           clearTimeout(p.timer)
           this.pendingRequests.delete(msg.requestId)
           p.resolve(msg)
+        }
+        break
+      }
+
+      case 'EXECUTE_ASSISTANT_COMMAND_RESPONSE':
+      case 'CANCEL_ASSISTANT_COMMAND_RESPONSE':
+      case 'IDEAS_VAULT_RESPONSE':
+      case 'VOICE_PTT_RESPONSE':
+      case 'CAPABILITY_REGISTRY_RESPONSE': {
+        const p = this.pendingRequests.get(msg.requestId)
+        if (p) {
+          clearTimeout(p.timer)
+          this.pendingRequests.delete(msg.requestId)
+          p.resolve(msg.result)
         }
         break
       }
@@ -1067,6 +1094,254 @@ export class DesktopSupervisor {
 
     const timeout = (payload.timeoutMs ?? 30000) + 5000
     return this.sendToKernel<DispatchModelResponse>(reqMsg, requestId, timeout)
+  }
+
+  // ─── V1-F-01 Floating Companion & Ideas Vault Methods ──────────────────────
+
+  public async executeAssistantCommand(payload: AssistantCommandPayload): Promise<AssistantCommandResult> {
+    if (!payload || typeof payload.input !== 'string' || payload.input.length > 32768) {
+      throw new Error('Invalid assistant command payload')
+    }
+    const requestId = `req_asst_cmd_${randomUUID().slice(0, 8)}`
+    return this.sendToKernel<AssistantCommandResult>(
+      {
+        type: 'EXECUTE_ASSISTANT_COMMAND_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        commandId: payload.commandId,
+        input: payload.input,
+        timestamp: new Date().toISOString(),
+      },
+      requestId,
+      20000
+    )
+  }
+
+  public async cancelAssistantCommand(commandId?: string): Promise<CancelAssistantCommandResult> {
+    const requestId = `req_asst_cancel_${randomUUID().slice(0, 8)}`
+    return this.sendToKernel<CancelAssistantCommandResult>(
+      {
+        type: 'CANCEL_ASSISTANT_COMMAND_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        commandId,
+        timestamp: new Date().toISOString(),
+      },
+      requestId,
+      5000
+    )
+  }
+
+  public async saveIdea(input: SaveIdeaInput): Promise<IdeaRecord> {
+    const requestId = `req_vault_save_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'SAVE', input },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.idea) {
+      throw new Error(res.errorMessage || 'Failed to save idea')
+    }
+    return res.idea
+  }
+
+  public async listIdeas(): Promise<readonly IdeaRecord[]> {
+    const requestId = `req_vault_list_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'LIST' },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success) {
+      throw new Error(res.errorMessage || 'Failed to list ideas')
+    }
+    return res.ideas ?? []
+  }
+
+  public async searchIdeas(query: string): Promise<readonly IdeaRecord[]> {
+    const requestId = `req_vault_search_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'SEARCH', query },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success) {
+      throw new Error(res.errorMessage || 'Failed to search ideas')
+    }
+    return res.ideas ?? []
+  }
+
+  public async getIdea(id: string): Promise<IdeaRecord | null> {
+    const requestId = `req_vault_get_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'GET', id },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success) {
+      throw new Error(res.errorMessage || 'Failed to get idea')
+    }
+    return res.idea ?? null
+  }
+
+  public async updateIdea(input: UpdateIdeaInput): Promise<IdeaRecord> {
+    const requestId = `req_vault_upd_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'UPDATE', input },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.idea) {
+      throw new Error(res.errorMessage || 'Failed to update idea')
+    }
+    return res.idea
+  }
+
+  public async deleteIdea(id: string, confirmed: boolean): Promise<DeleteIdeaResult> {
+    if (confirmed !== true) {
+      throw new Error('Deletion requires explicit user confirmation (confirmed === true)')
+    }
+    const requestId = `req_vault_del_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'DELETE', id, confirmed },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.deleteResult) {
+      throw new Error(res.errorMessage || 'Failed to delete idea')
+    }
+    return res.deleteResult
+  }
+
+  public async getVoiceSttStatus(): Promise<VoiceSttStatusProjection> {
+    const requestId = `req_ptt_stat_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<VoicePttOperationResult>(
+      {
+        type: 'VOICE_PTT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'STATUS' },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    return res.statusProjection
+  }
+
+  public async startPushToTalk(userInitiated: boolean): Promise<PttSessionStartResult> {
+    if (userInitiated !== true) {
+      throw new Error('Silent microphone capture is forbidden: Push-to-Talk requires explicit userInitiated=true')
+    }
+    const requestId = `req_ptt_start_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<VoicePttOperationResult>(
+      {
+        type: 'VOICE_PTT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'START', userInitiated: true },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.startResult) {
+      throw new Error('Failed to start Push-to-Talk session')
+    }
+    return res.startResult
+  }
+
+  public async stopPushToTalk(pttSessionId: string, audioSampleBase64?: string): Promise<PttTranscriptionResult> {
+    const requestId = `req_ptt_stop_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<VoicePttOperationResult>(
+      {
+        type: 'VOICE_PTT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'STOP', pttSessionId, audioSampleBase64 },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.transcriptionResult) {
+      throw new Error('Failed to stop Push-to-Talk session')
+    }
+    return res.transcriptionResult
+  }
+
+  public async cancelPushToTalk(): Promise<VoiceSttStatusProjection> {
+    const requestId = `req_ptt_cancel_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<VoicePttOperationResult>(
+      {
+        type: 'VOICE_PTT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'CANCEL' },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    return res.statusProjection
+  }
+
+  public async getAssistantCapabilities(): Promise<CapabilityRegistryResult> {
+    const requestId = `req_cap_list_${randomUUID().slice(0, 8)}`
+    return this.sendToKernel<CapabilityRegistryResult>(
+      {
+        type: 'CAPABILITY_REGISTRY_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'LIST' },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+  }
+
+  public async submitCapabilityFeedback(
+    capabilityId: string,
+    rating: 'POSITIVE' | 'NEGATIVE',
+    comment: string
+  ): Promise<CapabilityRegistryResult> {
+    const requestId = `req_cap_fb_${randomUUID().slice(0, 8)}`
+    return this.sendToKernel<CapabilityRegistryResult>(
+      {
+        type: 'CAPABILITY_REGISTRY_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'FEEDBACK', capabilityId, rating, comment },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
   }
 
   public async shutdown(): Promise<void> {
