@@ -466,7 +466,7 @@ describe('Wave V1-E-01 — NVIDIA Model Router Recovery & Production Dispatch', 
     const allTasks = session!.runs.flatMap((r) => r.tasks)
     const taskItem = allTasks.find((t) => t.id === taskId)
     expect(taskItem).toBeDefined()
-    expect(taskItem!.state).toBe('SUCCEEDED')
+    expect(taskItem!.state).toBe('VERIFYING')
 
     // Verify Execution projection reflects execution item and output
     let execRes: D1GetExecutionResponse | undefined

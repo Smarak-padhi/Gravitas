@@ -854,6 +854,7 @@ describe('GRAVITAS Desktop Onboarding & Doctor Subsystem (Wave V1-C-R2)', () => 
         },
       } as any
 
+      mockEvent.sender.mainFrame = mockEvent.senderFrame
       expect(isAuthorizedRestartCaller(mockEvent, mockWindow)).toBe(true)
     })
 

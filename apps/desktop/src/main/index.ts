@@ -220,6 +220,7 @@ export function isAuthorizedRestartCaller(
   }
 
   // 2. Frame identity & entry context validation: must be top-level frame loading canonical renderer HTML
+  if (!event.senderFrame || event.senderFrame !== event.sender.mainFrame) return false
   if (event.senderFrame) {
     if (event.senderFrame.parent !== null) {
       // Subframes, iframes, or embedded contexts are unauthorized
@@ -239,72 +240,76 @@ export function isAuthorizedRestartCaller(
 }
 
 export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWindow | null): void {
-  ipcMain.handle('gravitas:get-health', async () => {
+  const handle: typeof ipcMain.handle = (channel, listener) => ipcMain.handle(channel, (event, ...args) => {
+    if (!isAuthorizedRestartCaller(event, winGetter())) throw new Error('Unauthorized GRAVITAS IPC caller')
+    return listener(event, ...args)
+  })
+  handle('gravitas:get-health', async () => {
     return sup.getHealth()
   })
 
-  ipcMain.handle('gravitas:get-snapshot', async () => {
+  handle('gravitas:get-snapshot', async () => {
     return sup.getSnapshot()
   })
 
-  ipcMain.handle('gravitas:get-overview', async () => {
+  handle('gravitas:get-overview', async () => {
     return sup.getOverview()
   })
 
-  ipcMain.handle('gravitas:get-work-hierarchy', async () => {
+  handle('gravitas:get-work-hierarchy', async () => {
     return sup.getWorkHierarchy()
   })
 
-  ipcMain.handle('gravitas:get-task-detail', async (_event, taskId: string) => {
+  handle('gravitas:get-task-detail', async (_event, taskId: string) => {
     return sup.getTaskDetail(taskId)
   })
 
-  ipcMain.handle('gravitas:get-execution', async () => {
+  handle('gravitas:get-execution', async () => {
     return sup.getExecution()
   })
 
-  ipcMain.handle('gravitas:get-verification', async (_event, planId?: string) => {
+  handle('gravitas:get-verification', async (_event, planId?: string) => {
     return sup.getVerification(planId)
   })
 
-  ipcMain.handle('gravitas:get-approval-queue', async () => {
+  handle('gravitas:get-approval-queue', async () => {
     return sup.getApprovalQueue()
   })
 
-  ipcMain.handle('gravitas:get-system', async () => {
+  handle('gravitas:get-system', async () => {
     return sup.getSystem()
   })
 
-  ipcMain.handle('gravitas:get-activity', async () => {
+  handle('gravitas:get-activity', async () => {
     return sup.getActivity()
   })
 
-  ipcMain.handle('gravitas:submit-intent', async (_event, intent: OperatorIntent) => {
+  handle('gravitas:submit-intent', async (_event, intent: OperatorIntent) => {
     return sup.submitIntent(intent)
   })
 
   // V1-C Onboarding, Doctor & Provider Configuration IPC Handlers
-  ipcMain.handle('gravitas:get-onboarding', async () => {
+  handle('gravitas:get-onboarding', async () => {
     return sup.getOnboarding()
   })
 
-  ipcMain.handle('gravitas:save-onboarding', async (_event, payload) => {
+  handle('gravitas:save-onboarding', async (_event, payload) => {
     return sup.saveOnboarding(payload)
   })
 
-  ipcMain.handle('gravitas:run-doctor', async () => {
+  handle('gravitas:run-doctor', async () => {
     return sup.runDoctor()
   })
 
-  ipcMain.handle('gravitas:configure-provider', async (_event, payload) => {
+  handle('gravitas:configure-provider', async (_event, payload) => {
     return sup.configureProvider(payload)
   })
 
-  ipcMain.handle('gravitas:dispatch-model', async (_event, payload) => {
+  handle('gravitas:dispatch-model', async (_event, payload) => {
     return sup.dispatchModel(payload)
   })
 
-  ipcMain.handle('gravitas:restart-kernel', async (event) => {
+  handle('gravitas:restart-kernel', async (event) => {
     const activeWindow = winGetter()
     if (!isAuthorizedRestartCaller(event, activeWindow)) {
       throw new Error('Unauthorized restart request: caller is not an active authorized application frame')
@@ -314,11 +319,11 @@ export function initMainIpc(sup: DesktopSupervisor, winGetter: () => BrowserWind
   })
 
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)
-  ipcMain.handle('gravitas:hide-window', async () => {
+  handle('gravitas:hide-window', async () => {
     hideCommandCenter()
   })
 
-  ipcMain.handle('gravitas:quit-app', async () => {
+  handle('gravitas:quit-app', async () => {
     await quitDesktopApp()
   })
 }

@@ -193,6 +193,14 @@ export class NvidiaNimAdapter implements ProviderAdapter {
       };
     }
 
+    // No production transport is enabled in this wave. Injection is trusted construction only.
+    if (!this.customFetch) return {
+      provider: this.providerId, requestedModel: request.model, actualModel: request.model,
+      latencyMs: Date.now() - startTime, terminationStatus: 'ERROR',
+      errorTaxonomy: 'CAPABILITY_GRANT_REQUIRED', errorMessage: 'Live NVIDIA egress is disabled',
+      transport: 'DIRECT', fallbackStatus: false,
+    };
+
     // 3. Resolve Credential Reference
     const credRef = request.credentialRef ?? `vault:cred:${this.providerId}`;
     const rawSecret = this.broker.resolveSecret(credRef);
@@ -210,6 +218,8 @@ export class NvidiaNimAdapter implements ProviderAdapter {
         fallbackStatus: false,
       };
     }
+
+    const redact = (text: string) => this.broker.redactSensitive(text.split(rawSecret).join('[REDACTED_SECRET]'));
 
     // 4. Prepare OpenAI-compatible payload
     const body: Record<string, unknown> = {
@@ -233,30 +243,38 @@ export class NvidiaNimAdapter implements ProviderAdapter {
     const timeoutMs = options?.timeoutMs ?? 30000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const onAbort = () => controller.abort(options?.signal?.reason);
+    if (options?.signal?.aborted) onAbort();
 
+    const abortPromise = new Promise<never>((_, reject) => {
+      controller.signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+    });
+    // Consume rejection even if the signal was already aborted before transport starts.
+    void abortPromise.catch(() => {});
+    const bounded = <T>(promise: Promise<T>): Promise<T> => Promise.race([promise, abortPromise]);
     let combinedSignal: AbortSignal = controller.signal;
     if (options?.signal) {
-      options.signal.addEventListener('abort', () => controller.abort());
+      options.signal.addEventListener('abort', onAbort, { once: true });
     }
 
-    const fetchImpl = this.customFetch ?? globalThis.fetch;
+    const fetchImpl = this.customFetch;
 
     try {
-      const response = await fetchImpl(endpoint, {
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
+      const response = await bounded(fetchImpl(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
         signal: combinedSignal,
         redirect: 'error',
-      });
+      }));
 
-      clearTimeout(timeoutId);
       const latencyMs = Date.now() - startTime;
-      const rawText = await response.text();
+      const rawText = await bounded(response.text());
 
       if (!response.ok) {
         const errorTaxonomy = this.classifyHttpStatus(response.status);
-        const cleanMsg = this.broker.redactSensitive(
+        const cleanMsg = redact(
           `NVIDIA NIM API HTTP ${response.status}: ${rawText.slice(0, 300)}`
         );
         return {
@@ -290,11 +308,12 @@ export class NvidiaNimAdapter implements ProviderAdapter {
         };
       }
 
+      if (!parsed || typeof parsed !== 'object' || typeof parsed.choices?.[0]?.message?.content !== 'string' || (parsed.model !== undefined && parsed.model !== request.model)) throw new SyntaxError('Malformed provider response');
       const choice = parsed.choices?.[0];
       const outputContent = choice?.message?.content ?? '';
-      const finishReason = choice?.finish_reason;
+      const finishReason = typeof choice?.finish_reason === 'string' ? redact(choice.finish_reason).slice(0, 100) : undefined;
       const actualModel = parsed.model ?? request.model;
-      const requestId = parsed.id;
+      const requestId = typeof parsed.id === 'string' ? redact(parsed.id).slice(0, 200) : undefined;
 
       const tokenUsage = parsed.usage
         ? {
@@ -311,42 +330,44 @@ export class NvidiaNimAdapter implements ProviderAdapter {
         requestId,
         latencyMs,
         terminationStatus: 'COMPLETED',
-        outputContent,
+        outputContent: redact(outputContent).slice(0, 65536),
         finishReason,
         tokenUsage,
         transport: 'DIRECT',
         fallbackStatus: false,
       };
     } catch (err: any) {
-      clearTimeout(timeoutId);
       const latencyMs = Date.now() - startTime;
 
-      if (err.name === 'AbortError') {
+      if (controller.signal.aborted || err?.name === 'AbortError') {
         return {
           provider: this.providerId,
           requestedModel: request.model,
           actualModel: request.model,
           latencyMs,
-          terminationStatus: 'TIMED_OUT',
-          errorTaxonomy: 'TIMEOUT',
+          terminationStatus: options?.signal?.aborted ? 'CANCELLED' : 'TIMED_OUT',
+          errorTaxonomy: options?.signal?.aborted ? 'CANCELLED' : 'TIMEOUT',
           errorMessage: `Request timed out after ${timeoutMs}ms`,
           transport: 'DIRECT',
           fallbackStatus: false,
         };
       }
 
-      const cleanError = this.broker.redactSensitive(err.message ?? String(err));
+      const cleanError = redact(err?.message ?? String(err));
       return {
         provider: this.providerId,
         requestedModel: request.model,
         actualModel: request.model,
         latencyMs,
         terminationStatus: 'ERROR',
-        errorTaxonomy: 'NETWORK_ERROR',
+        errorTaxonomy: err instanceof SyntaxError ? 'MALFORMED_RESPONSE' : 'NETWORK_ERROR',
         errorMessage: cleanError,
         transport: 'DIRECT',
         fallbackStatus: false,
       };
+    } finally {
+      clearTimeout(timeoutId);
+      options?.signal?.removeEventListener('abort', onAbort);
     }
   }
 

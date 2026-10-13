@@ -1,3 +1,4 @@
+import { validateDispatchPayload } from '../dispatchValidation.js'
 /**
  * GRAVITAS D0/D1 — Desktop Supervisor
  *
@@ -881,6 +882,8 @@ export class DesktopSupervisor {
   }
 
   public async configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult> {
+    if (!payload || typeof payload !== 'object' || typeof payload.providerId !== 'string' ||
+        (payload.apiKey !== undefined && (typeof payload.apiKey !== 'string' || payload.apiKey.length > 4096 || /[\r\n\x00]/.test(payload.apiKey)))) throw new Error('Invalid provider configuration')
     if (payload.providerId !== 'nvidia-nim') {
       return {
         success: false,
@@ -1030,6 +1033,7 @@ export class DesktopSupervisor {
   }
 
   public async dispatchModel(payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult> {
+    validateDispatchPayload(payload)
     if (this.status !== 'READY') {
       return {
         success: false,

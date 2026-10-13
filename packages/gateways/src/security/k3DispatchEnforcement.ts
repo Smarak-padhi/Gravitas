@@ -9,7 +9,42 @@
  * before socket creation without a valid CapabilityGrant.
  */
 
+import { randomUUID } from 'node:crypto';
 import type { K3DispatchCapabilityGrant } from '../providers/types.js';
+
+// Object identity is a process-local authority boundary; serialized/forged grants fail closed.
+const trustedGrants = new WeakSet<object>();
+export function authorizeOfflineNvidiaGrant(grant: K3DispatchCapabilityGrant): K3DispatchCapabilityGrant {
+  const frozen = Object.freeze({ ...grant,
+    grantedCapabilities: Object.freeze([...grant.grantedCapabilities]),
+    authorizedToolIds: Object.freeze([...grant.authorizedToolIds]),
+    credentialReferences: Object.freeze([...(grant.credentialReferences ?? [])]),
+    resourceScope: Object.freeze({
+      allowedOrigins: Object.freeze([...(grant.resourceScope.allowedOrigins ?? [])]),
+      allowedPaths: Object.freeze([...(grant.resourceScope.allowedPaths ?? [])]),
+      allowedOperations: Object.freeze([...(grant.resourceScope.allowedOperations ?? [])]),
+    }),
+  });
+  if (grant.status !== 'ACTIVE' || ![grant.grantId, grant.subjectId, grant.workSessionId, grant.runId, grant.taskId].every(x => typeof x === 'string' && x.length > 0) ||
+      !['0', 'ZERO_DOLLAR_FREE'].includes(grant.costCeiling) || !['NORMAL', 'RESTRICTED_INFERENCE'].includes(grant.authorityCeiling)) throw new Error('Offline dispatch policy denied');
+  trustedGrants.add(frozen);
+  return frozen;
+}
+
+/** Policy-issued offline authority; caller context is supplied by trusted host construction. */
+export function authorizeOfflineNvidiaDispatch(context: {
+  subjectId: string; workSessionId: string; runId: string; taskId: string; model: string;
+}): K3DispatchCapabilityGrant {
+  if (!['meta/llama-3.1-8b-instruct', 'meta/llama-3.1-70b-instruct', 'mistralai/mixtral-8x7b-instruct-v0.1'].includes(context.model)) throw new Error('Model denied by offline policy');
+  return authorizeOfflineNvidiaGrant({
+    grantId: randomUUID(), subjectId: context.subjectId, workSessionId: context.workSessionId,
+    runId: context.runId, taskId: context.taskId, grantedCapabilities: ['provider:nvidia-nim'],
+    authorizedToolIds: ['tool:nvidia-nim:chat'], resourceScope: {
+      allowedOrigins: ['https://integrate.api.nvidia.com'], allowedOperations: ['chat_completions'], allowedPaths: [context.model],
+    }, authorityCeiling: 'RESTRICTED_INFERENCE', costCeiling: 'ZERO_DOLLAR_FREE',
+    expiresAt: new Date(Date.now() + 120000).toISOString(), status: 'ACTIVE', credentialReferences: ['vault:cred:nvidia-nim'],
+  });
+}
 
 export interface K3DispatchGrantVerificationInput {
   readonly grant: K3DispatchCapabilityGrant | undefined | null;
@@ -40,7 +75,7 @@ export function verifyK3DispatchGrant(
   const { grant, expectedProvider, endpointUrl, model, credentialRef } = input;
 
   // 1. Missing grant check
-  if (!grant) {
+  if (!grant || !trustedGrants.has(grant)) {
     return {
       authorized: false,
       failureReasonCode: 'MISSING_CAPABILITY_GRANT',
@@ -49,7 +84,7 @@ export function verifyK3DispatchGrant(
   }
 
   // 2. Grant status check
-  if (grant.status === 'REVOKED') {
+  if (grant.status !== 'ACTIVE' && grant.status !== 'EXPIRED') {
     return {
       authorized: false,
       failureReasonCode: 'GRANT_REVOKED',
@@ -67,7 +102,7 @@ export function verifyK3DispatchGrant(
   // 3. Expiration timestamp check
   const now = Date.now();
   const expiresAtMs = new Date(grant.expiresAt).getTime();
-  if (Number.isFinite(expiresAtMs) && expiresAtMs <= now) {
+  if (!Number.isFinite(expiresAtMs) || expiresAtMs <= now) {
     return {
       authorized: false,
       failureReasonCode: 'GRANT_EXPIRED',
@@ -80,10 +115,8 @@ export function verifyK3DispatchGrant(
   const grantedCaps = grant.grantedCapabilities ?? [];
   const authToolIds = grant.authorizedToolIds ?? [];
   const isProviderAuthorized =
-    grantedCaps.includes(providerKey) ||
-    grantedCaps.includes(expectedProvider) ||
-    authToolIds.includes(expectedProvider) ||
-    authToolIds.includes(`tool:${expectedProvider}:chat`);
+    grantedCaps.includes(providerKey) &&
+    (authToolIds.includes(expectedProvider) || authToolIds.includes(`tool:${expectedProvider}:chat`));
 
   if (!isProviderAuthorized) {
     return {
@@ -97,6 +130,7 @@ export function verifyK3DispatchGrant(
   let endpointHostname = '';
   try {
     const parsed = new URL(endpointUrl);
+    if (parsed.origin !== 'https://integrate.api.nvidia.com' || parsed.pathname !== '/v1/chat/completions' || parsed.search || parsed.hash || parsed.username || parsed.password) throw new Error('Endpoint denied');
     endpointHostname = parsed.hostname.toLowerCase();
   } catch {
     return {
@@ -109,7 +143,7 @@ export function verifyK3DispatchGrant(
   const allowedOrigins = grant.resourceScope?.allowedOrigins ?? [];
   const isHostAuthorized = allowedOrigins.some((origin) => {
     try {
-      const parsedOrigin = origin.startsWith('http') ? new URL(origin).hostname : origin;
+      const parsedOrigin = origin.startsWith('http') ? (new URL(origin).origin === 'https://integrate.api.nvidia.com' ? new URL(origin).hostname : '') : origin;
       return parsedOrigin.toLowerCase() === endpointHostname;
     } catch {
       return origin.toLowerCase() === endpointHostname;
@@ -127,7 +161,6 @@ export function verifyK3DispatchGrant(
   // 6. Operation authorization check
   const allowedOperations = grant.resourceScope?.allowedOperations ?? [];
   const isOpAuthorized =
-    allowedOperations.length === 0 ||
     allowedOperations.includes('chat_completions') ||
     allowedOperations.includes('inference:chat');
 
@@ -141,6 +174,9 @@ export function verifyK3DispatchGrant(
 
   // 7. Model authorization check
   const allowedModels = grant.resourceScope?.allowedPaths;
+  if (!allowedModels?.length || !allowedModels.includes(model)) {
+    return { authorized: false, failureReasonCode: 'MODEL_NOT_AUTHORIZED', message: 'Model scope required' };
+  }
   if (allowedModels && allowedModels.length > 0) {
     if (!allowedModels.includes(model)) {
       return {
@@ -152,6 +188,7 @@ export function verifyK3DispatchGrant(
   }
 
   // 8. Credential reference check
+  if (!credentialRef || !grant.credentialReferences?.includes(credentialRef)) return { authorized: false, failureReasonCode: 'CREDENTIAL_REF_NOT_AUTHORIZED', message: 'Credential reference scope required' };
   if (credentialRef && grant.credentialReferences && grant.credentialReferences.length > 0) {
     if (!grant.credentialReferences.includes(credentialRef)) {
       return {

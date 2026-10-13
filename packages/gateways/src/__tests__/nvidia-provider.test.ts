@@ -1,10 +1,11 @@
+import { authorizeOfflineNvidiaGrant } from '../security/k3DispatchEnforcement.js';
 import { describe, expect, it } from 'vitest';
 import { NvidiaNimAdapter, NVIDIA_CHAT_ENDPOINT, NVIDIA_DEFAULT_BASE_URL, NVIDIA_PROVIDER_ID } from '../providers/nvidia.js';
 import { ModelCredentialBroker } from '../credentials/modelCredentialBroker.js';
 import type { K3DispatchCapabilityGrant, ProviderInferenceRequest } from '../providers/types.js';
 
 function createValidGrant(overrides?: Partial<K3DispatchCapabilityGrant>): K3DispatchCapabilityGrant {
-  return {
+  const grant: K3DispatchCapabilityGrant = {
     grantId: 'grant-test-k3-valid-001',
     subjectId: 'agent-worker-1',
     workSessionId: 'ws-test-1',
@@ -24,6 +25,7 @@ function createValidGrant(overrides?: Partial<K3DispatchCapabilityGrant>): K3Dis
     credentialReferences: ['cred-nvidia-nim-1'],
     ...overrides,
   };
+  return grant.status === 'ACTIVE' ? authorizeOfflineNvidiaGrant(grant) : grant;
 }
 
 describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
@@ -181,7 +183,7 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
       capabilityGrant: revokedGrant,
     });
     expect(resRevoked.errorTaxonomy).toBe('CAPABILITY_GRANT_REQUIRED');
-    expect(resRevoked.errorMessage).toContain('has been revoked');
+    expect(resRevoked.errorMessage).toContain('No K3 CapabilityGrant');
 
     // 4c. Wrong provider in grant
     const wrongProviderGrant = createValidGrant({
@@ -319,7 +321,7 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
     expect(result.errorMessage).toContain('NVIDIA NIM API HTTP 401');
     // Ensure raw secret is redacted from the error message!
     expect(result.errorMessage).not.toContain('nvapi-invalid-key-999');
-    expect(result.errorMessage).toContain('[REDACTED_NVIDIA_KEY]');
+    expect(result.errorMessage).toMatch(/\[REDACTED_(?:NVIDIA_KEY|SECRET)\]/);
   });
 
   it('7. HTTP 402 — maps to COST_BLOCKED', async () => {
@@ -462,8 +464,8 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
       { signal: controller.signal }
     );
 
-    expect(result.terminationStatus).toBe('TIMED_OUT');
-    expect(result.errorTaxonomy).toBe('TIMEOUT');
+    expect(result.terminationStatus).toBe('CANCELLED');
+    expect(result.errorTaxonomy).toBe('CANCELLED');
   });
 
   it('12. Header Sanitization — forbids worker from overriding Host or Authorization headers', async () => {

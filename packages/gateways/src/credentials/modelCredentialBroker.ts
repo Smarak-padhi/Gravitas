@@ -33,7 +33,7 @@ export class ModelCredentialBroker {
    * The raw secret is stored only in this volatile in-memory map.
    */
   public registerSecret(providerId: string, secretValue: string): string {
-    if (!secretValue || secretValue.trim().length === 0) {
+    if (typeof secretValue !== 'string' || !secretValue.trim() || secretValue.length > 4096 || /[\r\n\x00]/.test(secretValue)) {
       throw new Error('Cannot register empty secret');
     }
     const cleanSecret = secretValue.trim();
@@ -107,7 +107,7 @@ export class ModelCredentialBroker {
 
     // 3. Redact any known registered secrets currently in the vault
     for (const secret of this.vault.values()) {
-      if (secret && secret.length > 5) {
+      if (secret && secret.length > 0) {
         sanitized = sanitized.split(secret).join('[REDACTED_SECRET]');
       }
     }
