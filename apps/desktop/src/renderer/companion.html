@@ -408,6 +408,13 @@
       </div>
     </div>
 
+    <div id="assignment-clarification-bar" class="approval-banner" role="region" aria-label="Assignment Clarification">
+      <div id="assignment-clarification-text" style="margin-bottom:6px; font-weight:600;">
+        Multiple assignments matched. Select which assignment to update:
+      </div>
+      <div id="assignment-clarification-options" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+    </div>
+
     <div id="companion-status-box" class="status-box" role="status" aria-live="polite">
       Ready. Enter a voice/text command or use the Knowledge Hub below.
     </div>
@@ -418,6 +425,9 @@
       <button class="chip" data-quick-cmd="Create a project called Study Planner.">+ Project</button>
       <button class="chip" data-quick-cmd="Remind me to revise chapter 3 tomorrow.">+ Task Tomorrow</button>
       <button class="chip" data-quick-cmd="Show my unfinished tasks.">Unfinished Tasks</button>
+      <button class="chip" data-quick-cmd="Show my assignments.">Assignments</button>
+      <button class="chip" data-quick-cmd="What's due this week?">Due This Week</button>
+      <button class="chip" data-quick-cmd="Show Algorithms assignments.">Algorithms HW</button>
       <button class="chip" data-quick-cmd="Open Notepad.">Open Notepad</button>
     </div>
   </section>
@@ -425,6 +435,7 @@
   <!-- Navigation Tabs -->
   <nav class="tabs-bar" aria-label="Companion Views">
     <button class="tab-btn active" data-tab="panel-vault" id="tab-btn-vault">Knowledge Hub (<span id="vault-count-badge">0</span>)</button>
+    <button class="tab-btn" data-tab="panel-study-guardian" id="tab-btn-study-guardian">Study Guardian &amp; Inbox (<span id="guardian-count-badge">0</span>)</button>
     <button class="tab-btn" data-tab="panel-capabilities" id="tab-btn-capabilities">Voice &amp; Capabilities</button>
   </nav>
 
@@ -561,7 +572,137 @@
       </div>
     </div>
 
-    <!-- Panel 2: Offline Voice & Supervised Capabilities -->
+    <!-- Panel 2: V1-G-01 Study Guardian & iCloud Drive Assignment Inbox -->
+    <div id="panel-study-guardian" class="tab-panel">
+      <!-- Startup / Active Session Unfinished Assignment Briefing -->
+      <div id="study-guardian-briefing-box" class="idea-card" style="border-color:#0284c7; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong style="font-size:11px; color:#38bdf8;">STUDY GUARDIAN SESSION BRIEFING</strong>
+          <button id="guardian-eval-reminders-btn" class="btn btn-sm" type="button">Check Reminders</button>
+        </div>
+        <div id="study-guardian-briefing-text" style="font-size:11px; color:#e5e7eb; margin-top:4px;">
+          Loading unfinished semester assignments...
+        </div>
+      </div>
+
+      <!-- iCloud Drive Inbox Controls -->
+      <div class="idea-card" style="margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="font-size:11px; color:#38bdf8;">iCloud Drive Assignment Inbox (iPhone → Windows → GRAVITAS)</strong>
+          <div style="display:flex; gap:4px;">
+            <button id="inbox-pick-folder-btn" class="btn btn-sm" type="button">Select Inbox Folder</button>
+            <button id="inbox-import-now-btn" class="btn btn-primary btn-sm" type="button">Import now</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:4px;">
+          <input
+            id="inbox-folder-input"
+            class="command-input"
+            type="text"
+            placeholder="Path to iCloud Drive\GRAVITAS\Inbox..."
+            aria-label="iCloud Drive Inbox Folder Path"
+          />
+          <button id="inbox-set-folder-btn" class="btn btn-sm" type="button">Save Folder</button>
+        </div>
+        <div id="inbox-folder-status" style="font-size:10px; color:var(--text-muted);">
+          No iCloud Inbox folder configured yet.
+        </div>
+      </div>
+
+      <!-- Extracted Assignment Drafts Queue & Confirmation Panel -->
+      <div id="confirm-draft-panel" class="detail-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="font-size:12px; color:#fbbf24;">Confirm Extracted Assignment Draft</strong>
+          <button id="confirm-draft-close-btn" class="btn btn-sm" type="button">Close</button>
+        </div>
+        <input type="hidden" id="confirm-draft-id" />
+        <div class="field-group">
+          <label for="confirm-title-input">Assignment Title</label>
+          <input id="confirm-title-input" type="text" />
+        </div>
+        <div class="field-group" style="display:flex; gap:6px;">
+          <div style="flex:1;">
+            <label for="confirm-subject-select">Confirm Semester Subject (7 Real Subjects)</label>
+            <select id="confirm-subject-select"></select>
+          </div>
+          <div style="width:140px;">
+            <label for="confirm-duedate-input">Confirmed Due Date</label>
+            <input id="confirm-duedate-input" type="text" placeholder="YYYY-MM-DD" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="confirm-instructions-textarea">Teacher Instructions (Preserved)</label>
+          <textarea id="confirm-instructions-textarea" rows="3"></textarea>
+        </div>
+        <div class="field-group" style="display:flex; gap:6px;">
+          <div style="flex:1;">
+            <label for="confirm-interval-input">Reminder Interval (min)</label>
+            <input id="confirm-interval-input" type="number" value="180" />
+          </div>
+          <div style="flex:1;">
+            <label for="confirm-quiet-start-input">Quiet Start</label>
+            <input id="confirm-quiet-start-input" type="text" value="22:00" />
+          </div>
+          <div style="flex:1;">
+            <label for="confirm-quiet-end-input">Quiet End</label>
+            <input id="confirm-quiet-end-input" type="text" value="07:00" />
+          </div>
+        </div>
+        <button id="confirm-assignment-submit-btn" class="btn btn-primary btn-sm" type="button">Confirm &amp; Activate Guardian</button>
+      </div>
+
+      <!-- Study Answers Drawer ("Prepare answer draft" + "Copy for ChatGPT/Claude" + Paste-Back) -->
+      <div id="study-answer-panel" class="detail-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="font-size:12px; color:#34d399;">Study Answers Workspace (Teacher Material Separated)</strong>
+          <button id="study-answer-close-btn" class="btn btn-sm" type="button">Close</button>
+        </div>
+        <input type="hidden" id="study-answer-assignment-id" />
+        <div class="field-group">
+          <label>Original Teacher Instructions (Strictly Separate from Drafted Answers)</label>
+          <div id="answer-teacher-verbatim" class="idea-original" style="margin:0;"></div>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <button id="answer-prepare-btn" class="btn btn-primary btn-sm" type="button">Prepare answer draft</button>
+          <button id="answer-copy-prompt-btn" class="btn btn-sm" type="button">Copy for ChatGPT/Claude</button>
+        </div>
+        <div class="field-group">
+          <label for="answer-external-prompt-textarea">Prompt for External AI (ChatGPT / Claude)</label>
+          <textarea id="answer-external-prompt-textarea" rows="3" readonly></textarea>
+        </div>
+        <div class="field-group">
+          <label for="answer-paste-textarea">Drafted / Pasted Study Answer (Saved Under Subject → Answers)</label>
+          <textarea id="answer-paste-textarea" rows="4" placeholder="Paste or write your study answer draft here... (Saving an answer never marks the assignment completed)"></textarea>
+        </div>
+        <button id="answer-save-btn" class="btn btn-primary btn-sm" type="button">Save Answer Draft</button>
+        <div id="study-answers-list" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- Extracted Drafts List -->
+      <div style="font-size:11px; font-weight:700; color:#fbbf24; margin:6px 0 4px 0;">
+        Inbox Assignment Drafts Awaiting Confirmation (<span id="inbox-drafts-count">0</span>)
+      </div>
+      <div id="inbox-drafts-list"></div>
+
+      <!-- Active Study Guardian Assignments -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 4px 0;">
+        <span style="font-size:11px; font-weight:700; color:#38bdf8;">Study Guardian Assignments</span>
+        <div class="quick-chips">
+          <button class="chip active" data-guardian-filter="ALL" type="button">All</button>
+          <button class="chip" data-guardian-filter="UNFINISHED" type="button">Unfinished</button>
+          <button class="chip" data-guardian-filter="DUE_WEEK" type="button">Due This Week</button>
+        </div>
+      </div>
+      <div id="study-assignments-list"></div>
+
+      <!-- 7 Real Semester Subjects Overview -->
+      <div style="font-size:11px; font-weight:700; color:#a7f3d0; margin:10px 0 4px 0;">
+        7 Semester Subjects (Notes · Assignments · Answers · Resources · Revision Tasks)
+      </div>
+      <div id="semester-subjects-list"></div>
+    </div>
+
+    <!-- Panel 3: Offline Voice & Supervised Capabilities -->
     <div id="panel-capabilities" class="tab-panel">
       <div class="idea-card" id="stt-status-card">
         <div class="idea-title" style="margin-bottom:4px;">Offline Speech-to-Text (Push-to-Talk)</div>

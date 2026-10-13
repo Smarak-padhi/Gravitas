@@ -1146,6 +1146,12 @@ export class DesktopSupervisor {
     )
   }
 
+  public async notifyStudyGuardianActiveSession(): Promise<StudyGuardianOperationResult> {
+    const res = await this.executeStudyGuardianOperation({ action: 'GET_SESSION_BRIEFING' })
+    this.onProjectionUpdate?.('STUDY_GUARDIAN_SESSION_ACTIVE')
+    return res
+  }
+
   public async cancelAssistantCommand(commandId?: string): Promise<CancelAssistantCommandResult> {
     const requestId = `req_asst_cancel_${randomUUID().slice(0, 8)}`
     return this.sendToKernel<CancelAssistantCommandResult>(

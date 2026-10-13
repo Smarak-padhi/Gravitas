@@ -1113,6 +1113,8 @@ export interface GravitasDesktopBridge {
   cancelPushToTalk?(): Promise<VoiceSttStatusProjection>
   getAssistantCapabilities?(): Promise<CapabilityRegistryResult>
   submitCapabilityFeedback?(capabilityId: string, rating: 'POSITIVE' | 'NEGATIVE', comment: string): Promise<CapabilityRegistryResult>
+  executeStudyGuardianOperation?(payload: StudyGuardianRequestPayload): Promise<StudyGuardianOperationResult>
+  selectInboxFolder?(): Promise<{ readonly selected: boolean; readonly folderPath: string | null }>
   toggleCompanionWindow?(): Promise<{ visible: boolean }>
   hideCompanionWindow?(): Promise<{ visible: boolean }>
 }

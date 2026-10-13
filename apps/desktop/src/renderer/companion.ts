@@ -14,6 +14,9 @@ import type {
   AssistantCapabilityRecord,
   ImprovementProposal,
   VoiceSttStatusProjection,
+  SemesterSubjectRecord,
+  AssignmentDraftRecord,
+  StudyAssignmentRecord,
 } from '../types.js'
 
 let currentState: CompanionVisualState = 'IDLE'
@@ -23,6 +26,10 @@ let cachedIdeas: readonly IdeaRecord[] = []
 let activeCollectionFilter: string = 'ALL'
 let activeSubjectFilter: string | null = null
 let pendingNotepadCommandText: string | null = null
+let cachedSemesterSubjects: readonly SemesterSubjectRecord[] = []
+let cachedDrafts: readonly AssignmentDraftRecord[] = []
+let cachedStudyAssignments: readonly StudyAssignmentRecord[] = []
+let activeGuardianFilter: 'ALL' | 'UNFINISHED' | 'DUE_WEEK' = 'ALL'
 
 export function setCompanionVisualState(state: CompanionVisualState, statusMessage?: string): void {
   currentState = state
@@ -450,10 +457,263 @@ export async function refreshCapabilitiesView(bridge: GravitasDesktopBridge): Pr
   renderCapabilitiesAndStt(stt, capRes.capabilities, capRes.proposals)
 }
 
+export function openConfirmDraftPanel(
+  draft: AssignmentDraftRecord,
+  subjects: readonly SemesterSubjectRecord[]
+): void {
+  const panel = document.getElementById('confirm-draft-panel')
+  const idInput = document.getElementById('confirm-draft-id') as HTMLInputElement | null
+  const titleInput = document.getElementById('confirm-title-input') as HTMLInputElement | null
+  const subjectSelect = document.getElementById('confirm-subject-select') as HTMLSelectElement | null
+  const dueInput = document.getElementById('confirm-duedate-input') as HTMLInputElement | null
+  const instrArea = document.getElementById('confirm-instructions-textarea') as HTMLTextAreaElement | null
+
+  if (idInput) idInput.value = draft.draftId
+  if (titleInput) titleInput.value = draft.title
+  if (dueInput) dueInput.value = draft.extractedDueDate ?? ''
+  if (instrArea) instrArea.value = draft.teacherInstructions
+
+  if (subjectSelect) {
+    subjectSelect.innerHTML = ''
+    for (const s of subjects) {
+      const opt = document.createElement('option')
+      opt.value = s.code
+      opt.textContent = `${s.code} — ${s.name} (${s.credits} cr)`
+      if (draft.suggestedSubjectCode === s.code) {
+        opt.selected = true
+      }
+      subjectSelect.appendChild(opt)
+    }
+  }
+  panel?.classList.add('active')
+}
+
+export async function openStudyAnswerPanel(
+  assignment: StudyAssignmentRecord,
+  bridge: GravitasDesktopBridge
+): Promise<void> {
+  const panel = document.getElementById('study-answer-panel')
+  const idInput = document.getElementById('study-answer-assignment-id') as HTMLInputElement | null
+  const teacherEl = document.getElementById('answer-teacher-verbatim')
+  const promptArea = document.getElementById('answer-external-prompt-textarea') as HTMLTextAreaElement | null
+  const pasteArea = document.getElementById('answer-paste-textarea') as HTMLTextAreaElement | null
+  const answersList = document.getElementById('study-answers-list')
+
+  if (idInput) idInput.value = assignment.assignmentId
+  if (teacherEl) teacherEl.textContent = assignment.teacherInstructions
+  if (promptArea) {
+    promptArea.value = `Subject: ${assignment.subjectCode}\nAssignment: ${assignment.title}\nTeacher Instructions:\n${assignment.teacherInstructions}`
+  }
+  if (pasteArea) pasteArea.value = ''
+
+  if (answersList && bridge.executeStudyGuardianOperation) {
+    const res = await bridge.executeStudyGuardianOperation({
+      action: 'LIST_STUDY_ANSWERS',
+      assignmentId: assignment.assignmentId,
+    })
+    answersList.innerHTML = ''
+    const answers = res.studyAnswers ?? []
+    if (answers.length > 0) {
+      for (const ans of answers) {
+        const card = document.createElement('div')
+        card.className = 'idea-card'
+        card.setAttribute('data-answer-id', ans.answerId)
+        card.innerHTML = `<div class="idea-title">[${ans.provenance}] ${ans.subjectCode} Answer Draft</div>`
+        const body = document.createElement('div')
+        body.className = 'idea-summary'
+        body.style.whiteSpace = 'pre-wrap'
+        body.textContent = ans.answerDraftText
+        card.appendChild(body)
+        answersList.appendChild(card)
+      }
+    }
+  }
+  panel?.classList.add('active')
+}
+
+export async function refreshStudyGuardianView(bridge: GravitasDesktopBridge): Promise<void> {
+  if (!bridge.executeStudyGuardianOperation) return
+
+  const assignmentsOp =
+    activeGuardianFilter === 'DUE_WEEK'
+      ? bridge.executeStudyGuardianOperation({ action: 'LIST_DUE_THIS_WEEK' })
+      : bridge.executeStudyGuardianOperation({
+          action: 'LIST_ASSIGNMENTS',
+          unfinishedOnly: activeGuardianFilter === 'UNFINISHED',
+        })
+
+  const [subjectsRes, inboxCfgRes, inboxImportsRes, draftsRes, assignmentsRes, briefingRes] =
+    await Promise.all([
+      bridge.executeStudyGuardianOperation({ action: 'LIST_SEMESTER_SUBJECTS' }),
+      bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' }),
+      bridge.executeStudyGuardianOperation({ action: 'LIST_INBOX_IMPORTS' }),
+      bridge.executeStudyGuardianOperation({ action: 'LIST_ASSIGNMENT_DRAFTS' }),
+      assignmentsOp,
+      bridge.executeStudyGuardianOperation({ action: 'GET_SESSION_BRIEFING' }),
+    ])
+
+  cachedSemesterSubjects = subjectsRes.semesterSubjects ?? []
+  cachedDrafts = (draftsRes.assignmentDrafts ?? []).filter((d) => !d.promotedAssignmentId)
+  cachedStudyAssignments = assignmentsRes.assignments ?? []
+
+  const guardianBadge = document.getElementById('guardian-count-badge')
+  if (guardianBadge) {
+    const unfinishedCount = cachedStudyAssignments.filter((a) => a.status !== 'COMPLETED').length
+    guardianBadge.textContent = String(unfinishedCount + cachedDrafts.length)
+  }
+
+  const briefingText = document.getElementById('study-guardian-briefing-text')
+  if (briefingText && briefingRes.sessionBriefing) {
+    briefingText.textContent = briefingRes.sessionBriefing.summaryMessage
+  }
+
+  const folderInput = document.getElementById('inbox-folder-input') as HTMLInputElement | null
+  const folderStatus = document.getElementById('inbox-folder-status')
+  if (inboxCfgRes.inboxConfig) {
+    if (folderInput && !folderInput.value) {
+      folderInput.value = inboxCfgRes.inboxConfig.inboxFolderPath ?? ''
+    }
+    if (folderStatus) {
+      folderStatus.textContent = inboxCfgRes.inboxConfig.inboxFolderPath
+        ? `Watching: ${inboxCfgRes.inboxConfig.inboxFolderPath} (Watcher active: ${inboxCfgRes.inboxConfig.watcherActive}) · Imported items: ${(inboxImportsRes.inboxImports ?? []).length}`
+        : 'No iCloud Inbox folder configured yet.'
+    }
+  }
+
+  const draftsCount = document.getElementById('inbox-drafts-count')
+  if (draftsCount) draftsCount.textContent = String(cachedDrafts.length)
+
+  const draftsContainer = document.getElementById('inbox-drafts-list')
+  if (draftsContainer) {
+    draftsContainer.innerHTML = ''
+    if (cachedDrafts.length === 0) {
+      const empty = document.createElement('div')
+      empty.style.fontSize = '11px'
+      empty.style.color = '#9ca3af'
+      empty.textContent = 'No unconfirmed inbox assignment drafts.'
+      draftsContainer.appendChild(empty)
+    } else {
+      for (const draft of cachedDrafts) {
+        const card = document.createElement('div')
+        card.className = 'idea-card'
+        card.setAttribute('data-draft-id', draft.draftId)
+
+        const header = document.createElement('div')
+        header.className = 'idea-card-header'
+        const title = document.createElement('div')
+        title.className = 'idea-title'
+        title.textContent = `${draft.title} [${draft.extractionStatus}]`
+        const reviewBtn = document.createElement('button')
+        reviewBtn.className = 'btn btn-primary btn-sm'
+        reviewBtn.textContent = 'Review & Confirm'
+        reviewBtn.setAttribute('data-confirm-draft-btn', draft.draftId)
+        reviewBtn.addEventListener('click', () => {
+          openConfirmDraftPanel(draft, cachedSemesterSubjects)
+        })
+        header.appendChild(title)
+        header.appendChild(reviewBtn)
+        card.appendChild(header)
+
+        const meta = document.createElement('div')
+        meta.className = 'idea-summary'
+        meta.textContent = `Detected Subject: ${draft.suggestedSubjectCode ?? 'Ambiguous'} (${draft.subjectConfidence}) · Explicit Due: ${draft.extractedDueDate ?? 'None'} · Relative: ${draft.relativeDeadlineExpression ?? 'None'}`
+        card.appendChild(meta)
+        draftsContainer.appendChild(card)
+      }
+    }
+  }
+
+  const assignmentsContainer = document.getElementById('study-assignments-list')
+  if (assignmentsContainer) {
+    assignmentsContainer.innerHTML = ''
+    if (cachedStudyAssignments.length === 0) {
+      const empty = document.createElement('div')
+      empty.style.fontSize = '11px'
+      empty.style.color = '#9ca3af'
+      empty.textContent = 'No Study Guardian assignments match the current filter.'
+      assignmentsContainer.appendChild(empty)
+    } else {
+      for (const asgn of cachedStudyAssignments) {
+        const card = document.createElement('div')
+        card.className = 'idea-card'
+        card.setAttribute('data-assignment-id', asgn.assignmentId)
+
+        const header = document.createElement('div')
+        header.className = 'idea-card-header'
+        const title = document.createElement('div')
+        title.className = 'idea-title'
+        title.textContent = `[${asgn.subjectCode}] ${asgn.title} — ${asgn.status} (${asgn.progressPercent}%)`
+
+        const btnWrap = document.createElement('div')
+        btnWrap.style.display = 'flex'
+        btnWrap.style.gap = '4px'
+
+        const answerBtn = document.createElement('button')
+        answerBtn.className = 'btn btn-sm'
+        answerBtn.textContent = 'Study Answers'
+        answerBtn.setAttribute('data-open-answers-btn', asgn.assignmentId)
+        answerBtn.addEventListener('click', () => {
+          void openStudyAnswerPanel(asgn, bridge)
+        })
+        btnWrap.appendChild(answerBtn)
+
+        if (asgn.status !== 'COMPLETED') {
+          const doneBtn = document.createElement('button')
+          doneBtn.className = 'btn btn-primary btn-sm'
+          doneBtn.textContent = 'Complete'
+          doneBtn.setAttribute('data-complete-assignment-btn', asgn.assignmentId)
+          doneBtn.addEventListener('click', async () => {
+            await bridge.executeStudyGuardianOperation!({
+              action: 'COMPLETE_ASSIGNMENT',
+              assignmentId: asgn.assignmentId,
+            })
+            await refreshStudyGuardianView(bridge)
+            await refreshVault(bridge)
+            setCompanionVisualState(
+              'SUCCESS',
+              `Completed assignment "${asgn.title}" (${asgn.subjectCode}). Reminders stopped.`
+            )
+          })
+          btnWrap.appendChild(doneBtn)
+        }
+
+        header.appendChild(title)
+        header.appendChild(btnWrap)
+        card.appendChild(header)
+
+        const details = document.createElement('div')
+        details.className = 'idea-summary'
+        details.textContent = `Due: ${asgn.dueDate || 'Unset'} · Reminders: ${asgn.paused ? 'Paused' : `Every ${asgn.reminderIntervalMinutes}m`}`
+        card.appendChild(details)
+        assignmentsContainer.appendChild(card)
+      }
+    }
+  }
+
+  const subjectsContainer = document.getElementById('semester-subjects-list')
+  if (subjectsContainer) {
+    subjectsContainer.innerHTML = ''
+    for (const s of cachedSemesterSubjects) {
+      const card = document.createElement('div')
+      card.className = 'idea-card'
+      card.setAttribute('data-subject-code', s.code)
+      const title = document.createElement('div')
+      title.className = 'idea-title'
+      title.textContent = `${s.code} — ${s.name} (${s.credits} credits)`
+      const counts = document.createElement('div')
+      counts.className = 'idea-summary'
+      counts.textContent = `Keywords: ${s.keywords.slice(0, 5).join(', ')} · Notes: ${s.notes || 'Ready'}`
+      card.appendChild(title)
+      card.appendChild(counts)
+      subjectsContainer.appendChild(card)
+    }
+  }
+}
+
 export async function runCompanionCommand(
   bridge: GravitasDesktopBridge,
   rawInput: string,
-  options?: { notepadSaveApproved?: boolean }
+  options?: { notepadSaveApproved?: boolean; targetAssignmentId?: string }
 ): Promise<void> {
   const trimmed = rawInput.trim()
   if (!trimmed) {
@@ -474,6 +734,7 @@ export async function runCompanionCommand(
       commandId: cmdId,
       input: trimmed,
       saveApproved: options?.notepadSaveApproved,
+      targetAssignmentId: options?.targetAssignmentId,
     })
 
     if (activeCommandId !== cmdId && currentState === 'CANCELLED') {
@@ -483,6 +744,32 @@ export async function runCompanionCommand(
 
     if (res.status === 'CANCELLED') {
       setCompanionVisualState('CANCELLED', res.message)
+      return
+    }
+
+    if (res.status === 'CLARIFICATION_REQUIRED' && res.clarificationCandidates) {
+      setCompanionVisualState('IDLE', res.message)
+      const clarBar = document.getElementById('assignment-clarification-bar')
+      const clarText = document.getElementById('assignment-clarification-text')
+      const clarOpts = document.getElementById('assignment-clarification-options')
+      if (clarText) clarText.textContent = res.message
+      if (clarOpts) {
+        clarOpts.innerHTML = ''
+        for (const cand of res.clarificationCandidates) {
+          const btn = document.createElement('button')
+          btn.className = 'btn btn-primary btn-sm'
+          btn.setAttribute('data-clarify-assignment-id', cand.assignmentId)
+          btn.textContent = `${cand.subjectCode}: ${cand.title}`
+          btn.addEventListener('click', () => {
+            clarBar?.classList.remove('active')
+            void runCompanionCommand(bridge, trimmed, {
+              targetAssignmentId: cand.assignmentId,
+            })
+          })
+          clarOpts.appendChild(btn)
+        }
+      }
+      clarBar?.classList.add('active')
       return
     }
 
@@ -514,6 +801,9 @@ export async function runCompanionCommand(
     }
 
     setCompanionVisualState('SUCCESS', res.message)
+    if (res.assignments || res.updatedAssignment) {
+      await refreshStudyGuardianView(bridge)
+    }
     if (res.ideas) {
       renderIdeasList(res.ideas, bridge)
     } else {
@@ -530,6 +820,7 @@ export async function stopActiveAction(bridge: GravitasDesktopBridge): Promise<v
   activeCommandId = null
   pendingNotepadCommandText = null
   document.getElementById('notepad-approval-bar')?.classList.remove('active')
+  document.getElementById('assignment-clarification-bar')?.classList.remove('active')
 
   if (activePttSessionId && bridge.cancelPushToTalk) {
     activePttSessionId = null
@@ -689,7 +980,183 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
       document.querySelectorAll('.tab-panel').forEach((p) => p.classList.toggle('active', p.id === targetId))
       if (targetId === 'panel-capabilities') {
         void refreshCapabilitiesView(b)
+      } else if (targetId === 'panel-study-guardian') {
+        void refreshStudyGuardianView(b)
       }
+    })
+  })
+
+  // V1-G-01 Study Guardian & iCloud Drive Inbox controls
+  document.getElementById('inbox-pick-folder-btn')?.addEventListener('click', async () => {
+    if (!b.selectInboxFolder || !b.executeStudyGuardianOperation) return
+    const pickRes = await b.selectInboxFolder()
+    if (!pickRes.selected || !pickRes.folderPath) return
+    const folderInput = document.getElementById('inbox-folder-input') as HTMLInputElement | null
+    if (folderInput) folderInput.value = pickRes.folderPath
+    const res = await b.executeStudyGuardianOperation({
+      action: 'SET_INBOX_FOLDER',
+      folderPath: pickRes.folderPath,
+    })
+    await refreshStudyGuardianView(b)
+    setCompanionVisualState(
+      res.success ? 'SUCCESS' : 'ERROR',
+      res.errorMessage ?? `Configured iCloud Inbox folder: ${pickRes.folderPath}`
+    )
+  })
+
+  document.getElementById('inbox-set-folder-btn')?.addEventListener('click', async () => {
+    const folderInput = document.getElementById('inbox-folder-input') as HTMLInputElement | null
+    const pathVal = folderInput?.value.trim() ?? ''
+    if (!pathVal || !b.executeStudyGuardianOperation) return
+    try {
+      const res = await b.executeStudyGuardianOperation({
+        action: 'SET_INBOX_FOLDER',
+        folderPath: pathVal,
+      })
+      await refreshStudyGuardianView(b)
+      setCompanionVisualState(
+        res.success ? 'SUCCESS' : 'ERROR',
+        res.errorMessage ?? `Configured iCloud Inbox folder: ${pathVal}`
+      )
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Inbox folder setup failed: ${(err as Error).message}`)
+    }
+  })
+
+  document.getElementById('inbox-import-now-btn')?.addEventListener('click', async () => {
+    if (!b.executeStudyGuardianOperation) return
+    try {
+      const res = await b.executeStudyGuardianOperation({ action: 'SCAN_INBOX' })
+      await refreshStudyGuardianView(b)
+      const count = res.inboxScan?.createdDrafts.length ?? 0
+      setCompanionVisualState(
+        res.success ? 'SUCCESS' : 'ERROR',
+        res.errorMessage ?? `Scanned iCloud Inbox (${count} new assignment draft(s)).`
+      )
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Inbox import failed: ${(err as Error).message}`)
+    }
+  })
+
+  document.getElementById('confirm-draft-close-btn')?.addEventListener('click', () => {
+    document.getElementById('confirm-draft-panel')?.classList.remove('active')
+  })
+
+  document.getElementById('confirm-assignment-submit-btn')?.addEventListener('click', async () => {
+    if (!b.executeStudyGuardianOperation) return
+    const draftId = (document.getElementById('confirm-draft-id') as HTMLInputElement | null)?.value
+    const title = (document.getElementById('confirm-title-input') as HTMLInputElement | null)?.value
+    const subjectCode = (document.getElementById('confirm-subject-select') as HTMLSelectElement | null)?.value
+    const dueDate = (document.getElementById('confirm-duedate-input') as HTMLInputElement | null)?.value
+    const instructions = (document.getElementById('confirm-instructions-textarea') as HTMLTextAreaElement | null)?.value
+    const intervalRaw = (document.getElementById('confirm-interval-input') as HTMLInputElement | null)?.value
+    const quietStart = (document.getElementById('confirm-quiet-start-input') as HTMLInputElement | null)?.value
+    const quietEnd = (document.getElementById('confirm-quiet-end-input') as HTMLInputElement | null)?.value
+
+    if (!draftId || !subjectCode || !dueDate?.trim()) {
+      setCompanionVisualState('ERROR', 'Please confirm both Semester Subject and Due Date (YYYY-MM-DD).')
+      return
+    }
+    try {
+      const res = await b.executeStudyGuardianOperation({
+        action: 'CONFIRM_ASSIGNMENT',
+        draftId,
+        title: title ? title.trim() : undefined,
+        confirmedSubjectCode: subjectCode,
+        confirmedDueDate: dueDate.trim(),
+        teacherInstructions: instructions,
+        reminderIntervalMinutes: intervalRaw ? Number(intervalRaw) : 180,
+        quietHoursStart: quietStart ? quietStart.trim() : '22:00',
+        quietHoursEnd: quietEnd ? quietEnd.trim() : '07:00',
+      })
+      document.getElementById('confirm-draft-panel')?.classList.remove('active')
+      await refreshStudyGuardianView(b)
+      await refreshVault(b)
+      setCompanionVisualState(
+        res.success ? 'SUCCESS' : 'ERROR',
+        res.errorMessage ?? `Confirmed assignment "${res.assignment?.title ?? title}" under ${subjectCode}.`
+      )
+    } catch (err) {
+      setCompanionVisualState('ERROR', `Confirm draft failed: ${(err as Error).message}`)
+    }
+  })
+
+  document.getElementById('study-answer-close-btn')?.addEventListener('click', () => {
+    document.getElementById('study-answer-panel')?.classList.remove('active')
+  })
+
+  document.getElementById('answer-prepare-btn')?.addEventListener('click', async () => {
+    const assignmentId = (document.getElementById('study-answer-assignment-id') as HTMLInputElement | null)?.value
+    if (!assignmentId || !b.executeStudyGuardianOperation) return
+    const res = await b.executeStudyGuardianOperation({
+      action: 'PREPARE_ANSWER_DRAFT',
+      assignmentId,
+    })
+    const promptArea = document.getElementById('answer-external-prompt-textarea') as HTMLTextAreaElement | null
+    if (promptArea && res.answerDraftResult?.copyForExternalAiPrompt) {
+      promptArea.value = res.answerDraftResult.copyForExternalAiPrompt
+    }
+    const asgn = cachedStudyAssignments.find((a) => a.assignmentId === assignmentId)
+    if (asgn) {
+      await openStudyAnswerPanel(asgn, b)
+    }
+    await refreshStudyGuardianView(b)
+    await refreshVault(b)
+    setCompanionVisualState('SUCCESS', res.answerDraftResult?.message ?? 'Prepared study answer draft.')
+  })
+
+  document.getElementById('answer-copy-prompt-btn')?.addEventListener('click', async () => {
+    const assignmentId = (document.getElementById('study-answer-assignment-id') as HTMLInputElement | null)?.value
+    if (!assignmentId || !b.executeStudyGuardianOperation) return
+    const res = await b.executeStudyGuardianOperation({
+      action: 'PREPARE_ANSWER_DRAFT',
+      assignmentId,
+    })
+    const promptArea = document.getElementById('answer-external-prompt-textarea') as HTMLTextAreaElement | null
+    if (promptArea && res.answerDraftResult?.copyForExternalAiPrompt) {
+      promptArea.value = res.answerDraftResult.copyForExternalAiPrompt
+    }
+    setCompanionVisualState('SUCCESS', 'Prepared prompt for ChatGPT/Claude. Paste your answer below when ready.')
+  })
+
+  document.getElementById('answer-save-btn')?.addEventListener('click', async () => {
+    const assignmentId = (document.getElementById('study-answer-assignment-id') as HTMLInputElement | null)?.value
+    const pasteArea = document.getElementById('answer-paste-textarea') as HTMLTextAreaElement | null
+    const text = pasteArea?.value.trim() ?? ''
+    if (!assignmentId || !text || !b.executeStudyGuardianOperation) return
+    const res = await b.executeStudyGuardianOperation({
+      action: 'SAVE_STUDY_ANSWER',
+      assignmentId,
+      answerDraftText: text,
+    })
+    const asgn = cachedStudyAssignments.find((a) => a.assignmentId === assignmentId)
+    if (asgn) {
+      await openStudyAnswerPanel(asgn, b)
+    }
+    await refreshStudyGuardianView(b)
+    await refreshVault(b)
+    setCompanionVisualState(
+      res.success ? 'SUCCESS' : 'ERROR',
+      res.errorMessage ?? `Saved study answer under ${res.studyAnswer?.subjectCode ?? 'subject'} (assignment status unchanged).`
+    )
+  })
+
+  document.getElementById('guardian-eval-reminders-btn')?.addEventListener('click', async () => {
+    if (!b.executeStudyGuardianOperation) return
+    const res = await b.executeStudyGuardianOperation({ action: 'EVALUATE_REMINDERS' })
+    await refreshStudyGuardianView(b)
+    const count = res.reminderEvaluation?.triggeredReminders.length ?? 0
+    setCompanionVisualState('SUCCESS', `Evaluated Study Guardian reminders (${count} triggered).`)
+  })
+
+  document.querySelectorAll<HTMLButtonElement>('[data-guardian-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const f = (btn.getAttribute('data-guardian-filter') || 'ALL') as 'ALL' | 'UNFINISHED' | 'DUE_WEEK'
+      activeGuardianFilter = f
+      document.querySelectorAll('[data-guardian-filter]').forEach((el) =>
+        el.classList.toggle('active', el === btn)
+      )
+      void refreshStudyGuardianView(b)
     })
   })
 
@@ -826,9 +1293,13 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
     if (projectionType === 'IDEAS_VAULT' || projectionType === 'OVERVIEW') {
       void refreshVault(b)
     }
+    if (projectionType === 'STUDY_GUARDIAN_SESSION_ACTIVE' || projectionType === 'OVERVIEW') {
+      void refreshStudyGuardianView(b)
+    }
   })
 
   void refreshVault(b)
+  void refreshStudyGuardianView(b)
   void refreshCapabilitiesView(b)
   void cachedIdeas
 }

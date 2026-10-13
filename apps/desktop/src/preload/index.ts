@@ -218,6 +218,14 @@ const bridge: GravitasDesktopBridge = {
     return ipcRenderer.invoke('gravitas:assistant-feedback', { capabilityId, rating, comment })
   },
 
+  executeStudyGuardianOperation: async (payload) => {
+    return ipcRenderer.invoke('gravitas:study-guardian-op', payload)
+  },
+
+  selectInboxFolder: async () => {
+    return ipcRenderer.invoke('gravitas:select-inbox-folder')
+  },
+
   toggleCompanionWindow: async () => {
     return ipcRenderer.invoke('gravitas:toggle-companion')
   },

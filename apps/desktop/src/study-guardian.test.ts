@@ -3,14 +3,18 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdtemp, rm, writeFile, utimes } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile, readFile, utimes } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   IdeasVaultStore,
   ICloudAssignmentInbox,
   SEVEN_SEMESTER_SUBJECTS,
+  KernelHost,
+  DesktopSupervisor,
+  type ProcessBridge,
 } from './index.js'
 
 describe('GRAVITAS Wave V1-G-01 — 7-Subject Seeding, iCloud Drive Inbox & Assignment Detection (Slice 1)', () => {
@@ -557,6 +561,69 @@ describe('GRAVITAS Wave V1-G-01 — Study Guardian, Study Answers, Companion Com
     expect(draftRes.answerDraftResult?.assignmentStatusUnchanged).toBe('IN_PROGRESS')
 
     await host.shutdown()
+  })
+
+  it('Slice 3: Verifies Companion Study Guardian UI HTML contract and active Windows session briefing notification', async () => {
+    const testDir = dirname(fileURLToPath(import.meta.url))
+    const htmlPath = join(testDir, 'renderer', 'companion.html')
+    const html = await readFile(htmlPath, 'utf8')
+
+    // Verify all V1-G-01 UI controls exist in companion.html
+    expect(html).toContain('id="tab-btn-study-guardian"')
+    expect(html).toContain('id="panel-study-guardian"')
+    expect(html).toContain('id="inbox-pick-folder-btn"')
+    expect(html).toContain('id="inbox-import-now-btn"')
+    expect(html).toContain('id="confirm-draft-panel"')
+    expect(html).toContain('id="study-answer-panel"')
+    expect(html).toContain('id="answer-prepare-btn"')
+    expect(html).toContain('id="answer-copy-prompt-btn"')
+    expect(html).toContain('id="assignment-clarification-bar"')
+    expect(html).toContain('id="semester-subjects-list"')
+
+    let activeSessionNotified = false
+    const mainListeners: {
+      message?: (msg: unknown) => void
+      exit?: (code: number) => void
+      error?: (err: Error) => void
+    } = {}
+    const host = new KernelHost({
+      dataRoot: tempDir,
+      pid: 7400,
+      onMessage: (msg) => {
+        mainListeners.message?.(msg)
+      },
+    })
+    const bridge: ProcessBridge = {
+      pid: 7400,
+      postMessage: async (msg) => {
+        await host.handleMessage(msg)
+      },
+      on: (event: string, listener: any) => {
+        if (event === 'message') mainListeners.message = listener
+        if (event === 'exit') mainListeners.exit = listener
+        if (event === 'error') mainListeners.error = listener
+      },
+      kill: () => {
+        mainListeners.exit?.(0)
+      },
+    }
+    const supervisor = new DesktopSupervisor({
+      dataRoot: tempDir,
+      forkProcess: () => bridge,
+      onProjectionUpdate: (type) => {
+        if (type === 'STUDY_GUARDIAN_SESSION_ACTIVE') {
+          activeSessionNotified = true
+        }
+      },
+    })
+    await supervisor.start()
+    await host.start()
+
+    const briefing = await supervisor.notifyStudyGuardianActiveSession()
+    expect(activeSessionNotified).toBe(true)
+    expect(briefing.sessionBriefing?.unfinishedAssignments).toHaveLength(0)
+
+    await supervisor.shutdown()
   })
 })
 

@@ -11,12 +11,12 @@
  * - CSP: default-src 'self', no unsafe-eval, no remote scripts
  */
 
-import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativeImage, globalShortcut } from 'electron'
+import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativeImage, globalShortcut, dialog, powerMonitor } from 'electron'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { DesktopSupervisor } from './supervisor.js'
 import { resolveGravitasDataRoot } from '@gravitas/core'
-import type { KernelLifecycleStatus, SafeDesktopError, OperatorIntent, DesktopLifecycleState } from '../types.js'
+import type { KernelLifecycleStatus, SafeDesktopError, OperatorIntent, DesktopLifecycleState, StudyGuardianRequestPayload } from '../types.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PRELOAD_PATH = join(__dirname, '../preload/index.cjs')
@@ -579,6 +579,44 @@ export function initMainIpc(
     return sup.submitCapabilityFeedback(payload?.capabilityId, payload?.rating, payload?.comment)
   })
 
+  handle('gravitas:study-guardian-op', async (_event, payload: StudyGuardianRequestPayload) => {
+    return sup.executeStudyGuardianOperation(payload)
+  })
+
+  handle('gravitas:select-inbox-folder', async () => {
+    const testOverrideDir = process.env['GRAVITAS_TEST_INBOX_DIR']
+    if (testOverrideDir && testOverrideDir.trim()) {
+      const folderPath = testOverrideDir.trim()
+      await sup.executeStudyGuardianOperation({
+        action: 'SET_INBOX_FOLDER',
+        folderPath,
+        startWatcher: true,
+      })
+      return { selected: true, folderPath }
+    }
+    const parentWin = companionWinGetter() ?? winGetter()
+    const res = parentWin
+      ? await dialog.showOpenDialog(parentWin, {
+          title: 'Select Windows iCloud Drive Inbox Folder (iCloud Drive/GRAVITAS/Inbox)',
+          properties: ['openDirectory', 'createDirectory'],
+        })
+      : await dialog.showOpenDialog({
+          title: 'Select Windows iCloud Drive Inbox Folder (iCloud Drive/GRAVITAS/Inbox)',
+          properties: ['openDirectory', 'createDirectory'],
+        })
+
+    if (res.canceled || !res.filePaths || res.filePaths.length === 0 || !res.filePaths[0]) {
+      return { selected: false, folderPath: null }
+    }
+    const chosen = res.filePaths[0]
+    await sup.executeStudyGuardianOperation({
+      action: 'SET_INBOX_FOLDER',
+      folderPath: chosen,
+      startWatcher: true,
+    })
+    return { selected: true, folderPath: chosen }
+  })
+
   handle('gravitas:toggle-companion', async () => {
     const res = toggleCompanionWindow()
     return { visible: res.visible }
@@ -656,6 +694,15 @@ export async function bootstrapDesktopApp(): Promise<void> {
 
   await supervisor.start()
   updateTrayMenu(supervisor.getStatus())
+
+  try {
+    powerMonitor?.on?.('unlock-screen', () => {
+      companionWindow?.webContents.send('gravitas:projection-update', 'STUDY_GUARDIAN_SESSION_ACTIVE')
+    })
+    powerMonitor?.on?.('resume', () => {
+      companionWindow?.webContents.send('gravitas:projection-update', 'STUDY_GUARDIAN_SESSION_ACTIVE')
+    })
+  } catch {}
 
   app.on('before-quit', async (e) => {
     if (!isQuittingApp) {
