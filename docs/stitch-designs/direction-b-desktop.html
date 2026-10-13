@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GRAVITAS // ARCHITECTURAL KERNEL</title>
+<!-- Typography: EB Garamond & Space Grotesk -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#472a00",
+            "secondary-fixed": "#d1e4ff",
+            "surface": "#111417",
+            "on-surface": "#e1e2e7",
+            "on-secondary-container": "#aad0ff",
+            "secondary-fixed-dim": "#9dcaff",
+            "error-container": "#93000a",
+            "surface-container-high": "#272a2e",
+            "on-tertiary-fixed": "#2a1700",
+            "on-secondary-fixed": "#001d35",
+            "outline-variant": "#3e484f",
+            "surface-bright": "#37393d",
+            "surface-variant": "#323538",
+            "on-error": "#690005",
+            "primary-container": "#38bdf8",
+            "primary-fixed-dim": "#7bd0ff",
+            "on-secondary": "#003257",
+            "inverse-primary": "#00668a",
+            "error": "#ffb4ab",
+            "primary-fixed": "#c4e7ff",
+            "on-primary-fixed-variant": "#004c69",
+            "outline": "#87929a",
+            "tertiary-container": "#f1a02b",
+            "surface-container-highest": "#323538",
+            "primary": "#8ed5ff",
+            "surface-container-low": "#191c1f",
+            "on-primary": "#00354a",
+            "on-error-container": "#ffdad6",
+            "secondary-container": "#025a96",
+            "on-tertiary-fixed-variant": "#653e00",
+            "surface-tint": "#7bd0ff",
+            "on-background": "#e1e2e7",
+            "tertiary-fixed": "#ffddb8",
+            "inverse-surface": "#e1e2e7",
+            "tertiary-fixed-dim": "#ffb960",
+            "secondary": "#9dcaff",
+            "on-secondary-fixed-variant": "#00497c",
+            "on-primary-fixed": "#001e2c",
+            "on-primary-container": "#004965",
+            "surface-container": "#1d2023",
+            "on-surface-variant": "#bdc8d1",
+            "surface-container-lowest": "#0b0e11",
+            "tertiary": "#ffc176",
+            "background": "#111417",
+            "inverse-on-surface": "#2e3134",
+            "surface-dim": "#111417",
+            "on-tertiary-container": "#613b00"
+          },
+          "borderRadius": {
+            "DEFAULT": "0px",
+            "none": "0px",
+            "sm": "0px",
+            "md": "0px",
+            "lg": "0px",
+            "xl": "0px",
+            "full": "0px"
+          },
+          "spacing": {
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin": "1rem",
+            "space-md": "1rem",
+            "margin-desktop": "2.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "3rem",
+            "gutter-desktop": "1.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["EB Garamond"],
+            "body-lg": ["Space Grotesk"],
+            "label-coordinate": ["Space Grotesk"],
+            "body-md": ["Space Grotesk"],
+            "headline-xl": ["EB Garamond"],
+            "headline-sm": ["EB Garamond"],
+            "headline-lg": ["EB Garamond"],
+            "headline-md": ["EB Garamond"],
+            "label-mono": ["Space Grotesk"],
+            "headline-xl-mobile": ["EB Garamond"],
+            "body-sm": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["28px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-coordinate": ["10px", { "lineHeight": "12px", "letterSpacing": "0.12em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "headline-xl": ["56px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+            "headline-sm": ["22px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "headline-lg": ["40px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "headline-md": ["28px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    /* Absolute rejection of soft pill contours and standard UI padding */
+    * {
+      border-radius: 0px !important;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection {
+      background-color: #38bdf8;
+      color: #0b0e11;
+    }
+    /* Drafting crosshair intersection pseudo elements */
+    .crosshair-anchor {
+      position: relative;
+    }
+    .crosshair-anchor::after {
+      content: "+";
+      position: absolute;
+      right: -5px;
+      top: -7px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 11px;
+      color: #87929a;
+      pointer-events: none;
+    }
+    /* Custom vertical scrollbar for monospaced logs */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0e11;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3e484f;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface antialiased min-h-screen flex flex-col font-body-md text-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TOP LEVEL DRAFTING BOUNDARY WRAPPER (12-COL FIXED DESKTOP MONOLITH) -->
+<div class="w-full border-x border-outline-variant max-w-[1720px] mx-auto min-h-screen flex flex-col bg-surface shadow-none">
+<!-- 1. STRUCTURAL MASTHEAD (SHARED COMPONENT: TopNavBar) -->
+<header class="w-full px-margin-desktop py-space-md border-b border-outline-variant flex items-center justify-between bg-surface docked full-width top-0 rounded-none z-50">
+<!-- Brand & Status -->
+<div class="flex items-center gap-space-lg">
+<a class="flex flex-col group" href="#workspace">
+<span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface group-hover:text-primary transition-colors duration-150">
+            GRAVITAS // ARCHITECTURAL KERNEL
+          </span>
+<span class="font-label-coordinate text-label-coordinate text-outline tracking-widest mt-0.5">
+            SEC.00 // LAT: 40.7128° N, LON: 74.0060° W // LOCAL REPLICA
+          </span>
+</a>
+<!-- Vertical drafting hairline divider -->
+<div class="h-8 w-px bg-outline-variant hidden xl:block"></div>
+<!-- Telemetry live status -->
+<div class="hidden xl:flex items-center gap-space-sm font-label-mono text-label-mono text-on-surface-variant bg-surface-container-low px-3 py-1 border border-outline-variant">
+<span class="w-1.5 h-1.5 bg-primary-container inline-block animate-pulse"></span>
+<span>SYS.01 // ACTIVE</span>
+<span class="text-outline">::</span>
+<span class="text-primary font-bold">PORT 8420 [0.42ms WAL]</span>
+</div>
+</div>
+<!-- Center navigation links from JSON -->
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-primary border-b-2 border-primary font-label-mono text-label-mono uppercase tracking-widest pb-1 cursor-pointer" href="#workstream">
+          ARCHIVE [01]
+        </a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase tracking-widest hover:text-on-surface pb-1 transition-colors duration-150 cursor-pointer" href="#schema">
+          MONOGRAPHS [02]
+        </a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase tracking-widest hover:text-on-surface pb-1 transition-colors duration-150 cursor-pointer" href="#companion">
+          SCHEMATICS [03]
+        </a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase tracking-widest hover:text-on-surface pb-1 transition-colors duration-150 cursor-pointer" href="#matrix">
+          DAEMON SPECS [04]
+        </a>
+</nav>
+<!-- Trailing Primary Action & Tooling Icons -->
+<div class="flex items-center gap-space-md">
+<div class="hidden md:flex items-center gap-2 text-outline-variant border-r border-outline-variant pr-space-md">
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant hover:border-primary-container text-on-surface-variant hover:text-primary transition-colors duration-150" title="Terminal Interface">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant hover:border-primary-container text-on-surface-variant hover:text-primary transition-colors duration-150" title="Kernel Tuning">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+</button>
+</div>
+<button class="bg-[#F0EEE8] text-[#0D1013] px-5 py-2 font-label-mono text-label-mono uppercase tracking-wider font-semibold border-0 hover:bg-primary-container hover:text-on-primary-container transition-colors duration-150 flex items-center gap-2">
+<span>ENTER WORKSPACE -&gt;</span>
+</button>
+</div>
+</header>
+<!-- 2. ASYMMETRICAL HERO WITH BLUEPRINT PROJECTIONS -->
+<section class="w-full border-b border-outline-variant bg-surface-container-lowest grid grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
+<!-- Primary Editorial Lead (Col 1-7) -->
+<div class="col-span-12 lg:col-span-7 p-margin-desktop flex flex-col justify-between">
+<div>
+<!-- Coordinate Stamp -->
+<div class="flex items-center justify-between border-b border-outline-variant pb-space-sm mb-space-xl">
+<span class="font-label-coordinate text-label-coordinate text-outline">
+              DOC.REF // STEM-CORE-2025 // REVISION 4.2.1
+            </span>
+<span class="font-label-mono text-label-mono text-primary-container">
+              + [37.7749° N, 122.4194° W]
+            </span>
+</div>
+<!-- Monumental Serif Heading (No kickers/pill badges) -->
+<h1 class="font-headline-xl text-headline-xl text-on-surface leading-[1.08] tracking-tight mb-space-lg max-w-2xl">
+            A private desktop command center for rigorous study.
+          </h1>
+<!-- Editorial Subnote -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-space-xl leading-relaxed">
+            Engineered for STEM researchers and university students. Unifying verbatim classroom capture, local SQLite schema indexing, and sub-100ms push-to-talk intelligence under absolute personal sovereignty.
+          </p>
+<!-- Action Cluster -->
+<div class="flex flex-wrap items-center gap-space-md mb-space-xl">
+<button class="bg-[#F0EEE8] text-[#0D1013] px-6 py-3 font-label-mono text-label-mono uppercase tracking-widest font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors duration-150">
+              [ DEPLOY LOCAL WORKSTATION ]
+            </button>
+<button class="bg-surface-container border border-outline-variant text-on-surface px-6 py-3 font-label-mono text-label-mono uppercase tracking-widest hover:border-primary-container hover:text-primary transition-colors duration-150">
+              [ INSPECT DRAFTING SPEC ]
+            </button>
+</div>
+</div>
+<!-- System Architecture Ledger Ticker -->
+<div class="border-t border-outline-variant pt-space-md grid grid-cols-3 gap-4">
+<div>
+<div class="font-label-coordinate text-label-coordinate text-outline">STORAGE KERNEL</div>
+<div class="font-label-mono text-label-mono text-on-surface mt-0.5">SQLite v3.45.1 WAL</div>
+</div>
+<div>
+<div class="font-label-coordinate text-label-coordinate text-outline">INGEST LATENCY</div>
+<div class="font-label-mono text-label-mono text-primary-container mt-0.5">&lt; 0.05ms Direct File IPC</div>
+</div>
+<div>
+<div class="font-label-coordinate text-label-coordinate text-outline">NETWORK EGRESS</div>
+<div class="font-label-mono text-label-mono text-on-surface mt-0.5">0.00 KB/s [AIRGAPPED]</div>
+</div>
+</div>
+</div>
+<!-- Right Blueprint Projection (Col 8-12): Courses Matrix & Schema -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-low flex flex-col justify-between">
+<!-- Header of Blueprint Slab -->
+<div class="px-space-lg py-space-sm border-b border-outline-variant bg-surface flex items-center justify-between">
+<span class="font-label-mono text-label-mono text-on-surface uppercase tracking-wider">
+            SEMESTER INDEX // ACTIVE SYLLABUS MATRIX
+          </span>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+            7 ACTIVE MODULES
+          </span>
+</div>
+<!-- 7 Semester Courses Grid -->
+<div class="divide-y divide-outline-variant text-body-sm font-body-sm overflow-hidden">
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-primary-container"></span>
+<span class="font-label-mono text-label-mono text-on-surface">CS301</span>
+<span class="text-on-surface-variant font-medium">Algorithms &amp; Complexity</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>4.0 CRED</span>
+<span class="text-on-surface font-mono">e8f4…a1</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-primary-container"></span>
+<span class="font-label-mono text-label-mono text-on-surface">CS340</span>
+<span class="text-on-surface-variant font-medium">Computer Architecture</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>4.0 CRED</span>
+<span class="text-on-surface font-mono">7b21…9c</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-primary-container"></span>
+<span class="font-label-mono text-label-mono text-on-surface">CS412</span>
+<span class="text-on-surface-variant font-medium">Database Systems</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>3.5 CRED</span>
+<span class="text-on-surface font-mono">3c09…df</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-outline"></span>
+<span class="font-label-mono text-label-mono text-on-surface">MATH310</span>
+<span class="text-on-surface-variant font-medium">Abstract Algebra</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>3.0 CRED</span>
+<span class="text-on-surface font-mono">119e…bb</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-outline"></span>
+<span class="font-label-mono text-label-mono text-on-surface">PHYS250</span>
+<span class="text-on-surface-variant font-medium">Quantum Mechanics</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>4.0 CRED</span>
+<span class="text-on-surface font-mono">fa82…12</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-outline"></span>
+<span class="font-label-mono text-label-mono text-on-surface">ECE380</span>
+<span class="text-on-surface-variant font-medium">Control Systems</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>3.0 CRED</span>
+<span class="text-on-surface font-mono">4a01…d5</span>
+</div>
+</div>
+<div class="px-space-lg py-2.5 flex items-center justify-between hover:bg-surface-container transition-colors duration-100 group">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 bg-primary-container"></span>
+<span class="font-label-mono text-label-mono text-on-surface">CS498</span>
+<span class="text-on-surface-variant font-medium">Distributed Systems</span>
+</div>
+<div class="flex items-center gap-3 font-label-coordinate text-label-coordinate text-outline">
+<span>4.0 CRED</span>
+<span class="text-on-surface font-mono">65ef…08</span>
+</div>
+</div>
+</div>
+<!-- Blueprint Code Pane: SQLite Schema Blueprint -->
+<div class="border-t border-outline-variant bg-surface-container-lowest p-space-md">
+<div class="flex items-center justify-between mb-2 pb-1 border-b border-outline-variant">
+<span class="font-label-mono text-label-mono text-primary uppercase">
+              SCHEMA // sqlite_master.sql
+            </span>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+              FOREIGN_KEYS = ON
+            </span>
+</div>
+<pre class="font-label-mono text-label-mono text-on-surface-variant leading-5 overflow-x-auto text-[11px]"><code><span class="text-primary font-bold">CREATE TABLE</span> <span class="text-on-surface">verbatim_directives</span> (
+  id <span class="text-secondary">INTEGER PRIMARY KEY</span>,
+  course_id <span class="text-secondary">TEXT</span> REFERENCES courses(id),
+  lecture_timestamp <span class="text-secondary">INTEGER NOT NULL</span>,
+  raw_teacher_audio_hash <span class="text-secondary">BLOB</span>,
+  verbatim_instruction <span class="text-primary-container">TEXT NOT NULL</span>,
+  immutable_audit_lock <span class="text-secondary">BOOLEAN DEFAULT 1</span>
+);</code></pre>
+</div>
+</div>
+</section>
+<!-- 3. ASYMMETRICAL WORK STREAM (1.65fr vs 1fr Grid Architecture) -->
+<section class="w-full border-b border-outline-variant bg-surface" id="workstream">
+<!-- Section Header Bar -->
+<div class="w-full px-margin-desktop py-space-sm border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-mono text-label-mono text-primary font-bold">SEC.02</span>
+<span class="text-outline">/</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">
+            Asymmetrical Dual-Stream Ingest &amp; Synthesizer
+          </h2>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+          LAYOUT RATIO: 1.65fr (EDITORIAL STREAM) : 1.00fr (REFERENCE RAIL)
+        </span>
+</div>
+<!-- Grid Container: 1.65fr vs 1.00fr -->
+<div class="grid grid-cols-1 lg:grid-cols-[1.65fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-outline-variant">
+<!-- Left Stream (1.65fr): Dual-Column Instructor Directive vs Student Scratchpad -->
+<div class="p-space-lg flex flex-col gap-space-lg bg-surface">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-label-mono text-label-mono text-on-surface uppercase tracking-wider">
+              ACTIVE CS301 RECITAION // VERBATIM AUDIT VS STUDENT WORKING DRAFT
+            </span>
+<span class="font-label-coordinate text-label-coordinate text-primary-container">
+              ZERO HALLUCINATION CITATION ENGINE
+            </span>
+</div>
+<!-- Dual Column Sub-Division -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Pane A: Professor Verbatim Directive (Immutable) -->
+<div class="border border-outline-variant bg-surface-container-lowest p-space-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-xs border-b border-outline-variant mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-error">lock</span>
+<span class="font-label-mono text-label-mono text-error uppercase">PROFESSOR VERBATIM DIRECTIVE</span>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">10:42:15 AM EST</span>
+</div>
+<div class="font-label-coordinate text-label-coordinate text-outline mb-2">
+                  SOURCE: CS301_LEC_09_AUDIO_STREAM // SHA256: 9b2d...c3
+                </div>
+<blockquote class="font-headline-sm text-headline-sm text-on-surface italic leading-snug my-space-md pl-3 border-l-2 border-primary-container">
+                  "PSet 4: Implement B-Tree node splitting and concurrent latch crabbing. Submit valgrind trace by Friday 23:59 EST."
+                </blockquote>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                  Lecturer notes emphasize zero memory leaks and thread-safety under heavy concurrent ingestion. Latch crabbing protocol must release parent latch immediately upon acquiring child read-lock.
+                </p>
+</div>
+<div class="mt-space-lg pt-space-xs border-t border-outline-variant flex items-center justify-between">
+<span class="font-label-coordinate text-label-coordinate text-outline">STATUS: IMMUTABLE AUDIT RECORD</span>
+<span class="font-label-mono text-label-mono text-primary-container">100% BIT-PERFECT</span>
+</div>
+</div>
+<!-- Pane B: Student Working Scratchpad & Proof -->
+<div class="border border-outline-variant bg-surface-container p-space-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-xs border-b border-outline-variant mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary-container">edit_note</span>
+<span class="font-label-mono text-label-mono text-on-surface uppercase">STUDENT WORKING SCRATCHPAD</span>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">DIRTY WAL // UNSAVED</span>
+</div>
+<div class="font-label-coordinate text-label-coordinate text-outline mb-2">
+                  WORKSPACE: ~/stem/cs301/pset4/btree_latch.cpp
+                </div>
+<!-- Syntax Highlighted C++ Logic -->
+<div class="bg-surface-container-lowest p-space-sm border border-outline-variant font-label-mono text-[11px] leading-relaxed text-on-surface my-2 overflow-x-auto">
+<span class="text-outline">// Latch Crabbing Node Splitting</span><br/>
+<span class="text-primary font-bold">void</span> <span class="text-on-surface">BTree::Insert</span>(<span class="text-secondary">const</span> Key&amp; k) {<br/>
+                    <span class="text-secondary">std::unique_lock</span>&lt;<span class="text-primary-container">Latch</span>&gt; p_lock(root-&gt;latch);<br/>
+                    <span class="text-primary font-bold">if</span> (root-&gt;is_full()) {<br/>
+                      Node* s = split_node(root);<br/>
+                      <span class="text-outline">// Citation: Slides 08, Page 14</span><br/>
+                      std::atomic_thread_fence(std::memory_order_seq_cst);<br/>
+                    }<br/>
+                  }
+                </div>
+<div class="bg-surface-container-low p-2 border border-outline-variant mt-2 text-body-sm font-body-sm text-on-surface-variant">
+<strong class="text-on-surface">Citation Reference:</strong> Slides 08: Page 12-19 (Concurrent Index Structures). Verified matching memory fence constraint without algorithmic drift.
+                </div>
+</div>
+<div class="mt-space-lg pt-space-xs border-t border-outline-variant flex items-center justify-between">
+<span class="font-label-coordinate text-label-coordinate text-outline">VALGRIND HARNESS: READY</span>
+<span class="font-label-mono text-label-mono text-primary">0 HALLUCINATIONS DETECTED</span>
+</div>
+</div>
+</div>
+<!-- Bottom Metric Plate -->
+<div class="p-space-md border border-outline-variant bg-surface-container-low flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-6">
+<div>
+<span class="font-label-coordinate text-label-coordinate text-outline">INGEST BUFFER:</span>
+<span class="font-label-mono text-label-mono text-on-surface ml-2">4,812 TOKENS / SEC</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div>
+<span class="font-label-coordinate text-label-coordinate text-outline">EMBEDDINGS:</span>
+<span class="font-label-mono text-label-mono text-on-surface ml-2">FLOAT32 (768 DIM) LOCAL</span>
+</div>
+</div>
+<button class="bg-[#F0EEE8] text-[#0D1013] px-4 py-1.5 font-label-mono text-label-mono uppercase tracking-wider font-semibold hover:bg-primary-container hover:text-on-primary-container transition-colors duration-150">
+              SYNCHRONIZE NOTEBOOK
+            </button>
+</div>
+</div>
+<!-- Right Rail (1fr): Architectural Reference Rail with Edge-to-Edge Partitions -->
+<div class="flex flex-col divide-y divide-outline-variant bg-surface-container-lowest">
+<!-- Rail Sub-header -->
+<div class="px-space-md py-space-sm bg-surface flex items-center justify-between">
+<span class="font-label-mono text-label-mono text-on-surface uppercase tracking-wider">
+              TELEMETRY &amp; DIRECTORY WATCHER
+            </span>
+<span class="w-2 h-2 bg-primary-container"></span>
+</div>
+<!-- Partition 1: Local Directory Watcher -->
+<div class="p-space-md">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-coordinate text-label-coordinate text-outline">FILESYSTEM OBSERVER</span>
+<span class="font-label-mono text-label-mono text-primary">POLLING: 250ms</span>
+</div>
+<div class="bg-surface-container p-2.5 border border-outline-variant font-label-mono text-label-mono text-on-surface">
+              ~/stem/semester-4/
+            </div>
+<div class="mt-2 text-body-sm font-body-sm text-on-surface-variant">
+              Continuous inode polling active. Local changes instantly staged to SQLite ledger without transmitting delta packets to external clouds.
+            </div>
+</div>
+<!-- Partition 2: SQLite Query Latency Gauges -->
+<div class="p-space-md">
+<div class="font-label-coordinate text-label-coordinate text-outline mb-3">INTERNAL IPC LATENCY BENCHMARK</div>
+<div class="space-y-3 font-label-mono text-label-mono">
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface">In-Memory WAL Search</span>
+<span class="text-primary-container font-bold">&lt; 0.38ms</span>
+</div>
+<div class="w-full bg-surface-container h-1 border border-outline-variant">
+<div class="bg-primary-container h-full w-[12%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface">Direct File IPC (mmap)</span>
+<span class="text-primary-container font-bold">&lt; 0.05ms</span>
+</div>
+<div class="w-full bg-surface-container h-1 border border-outline-variant">
+<div class="bg-primary-container h-full w-[4%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1 text-on-surface-variant">
+<span>Standard Cloud SaaS Latency</span>
+<span class="text-outline">480.00ms</span>
+</div>
+<div class="w-full bg-surface-container h-1 border border-outline-variant">
+<div class="bg-outline h-full w-[96%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Partition 3: Quiet-Hours Study Guardian Schedule -->
+<div class="p-space-md bg-surface-container-low flex flex-col justify-between flex-grow">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-coordinate text-label-coordinate text-primary-container">FOCUS KERNEL LOCK</span>
+<span class="font-label-mono text-label-mono text-on-surface">18:00 - 04:00</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mb-2">
+                STATUS: FOCUS LOCK ENGAGED
+              </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Network sockets restricted to localhost loopback (127.0.0.1). Zero outbound telemetry beacons. All cloud notification hooks severed at OS firewall layer.
+              </p>
+</div>
+<div class="mt-space-lg pt-space-xs border-t border-outline-variant flex items-center justify-between">
+<span class="font-label-coordinate text-label-coordinate text-outline">EGRESS RULE: REJECT ALL</span>
+<span class="font-label-mono text-label-mono text-on-surface">AIRGAP SECURED</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. FLOATING COMPANION BLUEPRINT (CTRL + SHIFT + SPACE) -->
+<section class="w-full border-b border-outline-variant bg-surface-container-lowest" id="companion">
+<!-- Section Header -->
+<div class="w-full px-margin-desktop py-space-sm border-b border-outline-variant bg-surface flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-mono text-label-mono text-primary font-bold">SEC.03</span>
+<span class="text-outline">/</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">
+            Sub-100ms Floating Companion Architecture
+          </h2>
+</div>
+<div class="flex items-center gap-2">
+<kbd class="px-2 py-0.5 border border-outline-variant bg-surface-container font-label-mono text-label-mono text-primary">Ctrl</kbd>
+<span class="text-outline">+</span>
+<kbd class="px-2 py-0.5 border border-outline-variant bg-surface-container font-label-mono text-label-mono text-primary">Shift</kbd>
+<span class="text-outline">+</span>
+<kbd class="px-2 py-0.5 border border-outline-variant bg-surface-container font-label-mono text-label-mono text-primary">Space</kbd>
+</div>
+</div>
+<!-- Schematic Dissection Layout -->
+<div class="grid grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-outline-variant">
+<!-- Left: Audio Ingest Waveform & Engine (5 cols) -->
+<div class="col-span-12 lg:col-span-5 p-margin-desktop flex flex-col justify-between">
+<div>
+<span class="font-label-coordinate text-label-coordinate text-outline block mb-2">
+              REAL-TIME ACOUSTIC SUBSYSTEM
+            </span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-space-md">
+              Push-To-Talk Voice Transduction
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-lg leading-relaxed">
+              Captures professor and student remarks through a dedicated float32 16kHz PCM stream. Whisper-large local tensor execution yields instantaneous phonetic mapping directly to disk.
+            </p>
+<!-- Audio Waveform Graphic Plate -->
+<div class="border border-outline-variant bg-surface-container p-space-md mb-space-md">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant text-label-coordinate font-label-coordinate text-outline">
+<span>PCM_FLOAT32 // 16000 HZ</span>
+<span class="text-primary-container">CAPTURE ACTIVE</span>
+</div>
+<!-- Monochromatic Simulated Waveform Bars -->
+<div class="h-16 flex items-end gap-1 my-space-md">
+<div class="w-1 bg-outline-variant h-[20%]"></div>
+<div class="w-1 bg-outline-variant h-[40%]"></div>
+<div class="w-1 bg-primary-container h-[75%]"></div>
+<div class="w-1 bg-primary-container h-[95%]"></div>
+<div class="w-1 bg-primary-container h-[60%]"></div>
+<div class="w-1 bg-primary h-[85%]"></div>
+<div class="w-1 bg-primary h-[100%]"></div>
+<div class="w-1 bg-primary h-[40%]"></div>
+<div class="w-1 bg-outline-variant h-[30%]"></div>
+<div class="w-1 bg-outline-variant h-[15%]"></div>
+<div class="w-1 bg-primary-container h-[65%]"></div>
+<div class="w-1 bg-primary-container h-[90%]"></div>
+<div class="w-1 bg-primary h-[70%]"></div>
+<div class="w-1 bg-outline-variant h-[25%]"></div>
+<div class="w-1 bg-outline-variant h-[10%]"></div>
+<div class="w-1 bg-primary-container h-[55%]"></div>
+<div class="w-1 bg-primary h-[80%]"></div>
+<div class="w-1 bg-primary h-[60%]"></div>
+<div class="w-1 bg-outline-variant h-[35%]"></div>
+<div class="w-1 bg-outline-variant h-[15%]"></div>
+</div>
+<div class="flex items-center justify-between text-label-mono font-label-mono text-outline">
+<span>PEAK: -1.2 dBFS</span>
+<span>LATENCY: 42ms</span>
+<span>MODEL: LOCAL TENSOR</span>
+</div>
+</div>
+</div>
+<div class="font-label-coordinate text-label-coordinate text-outline pt-space-md border-t border-outline-variant">
+            BUFFER RETENTION: ZERO PERSISTENCE AFTER EMBEDDING
+          </div>
+</div>
+<!-- Right: Strict Human Approval Boundary & Obsidian Export Pipe (7 cols) -->
+<div class="col-span-12 lg:col-span-7 p-margin-desktop flex flex-col justify-between bg-surface">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-coordinate text-label-coordinate text-error">
+                SECURITY INVARIANT // HUMAN-APPROVAL BOUNDARY
+              </span>
+<span class="font-label-mono text-label-mono text-outline">
+                STAGED GIT PATCH
+              </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">
+              Filesystem Mutation Barrier
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md leading-relaxed">
+              No AI daemon writes to your disk uninvited. Every suggested revision produces an atomic unified diff requiring explicit manual cryptographic signature.
+            </p>
+<!-- Pending Diff Block (Git style) -->
+<div class="border border-outline-variant bg-surface-container-lowest p-space-md mb-space-md font-label-mono text-label-mono text-[11px] leading-5">
+<div class="text-outline pb-1 border-b border-outline-variant mb-2">
+                --- a/courses/cs412/relational_algebra.md<br/>
+                +++ b/courses/cs412/relational_algebra.md
+              </div>
+<div class="text-error bg-error-container/20 px-2 py-0.5">
+                - Direct Cartesian product is O(N*M) with zero filter pushdown optimization.
+              </div>
+<div class="text-primary bg-secondary-container/20 px-2 py-0.5 mt-1">
+                + Optimized Theta-Join evaluates predicate prior to cross-product allocation:
+              </div>
+<div class="text-on-surface-variant pl-4 mt-1 font-mono">
+                $$ \sigma_{\text{price} &gt; 100}(R \bowtie_{\theta} S) \equiv \sigma_{\theta}(R) \bowtie S $$
+              </div>
+</div>
+<!-- Crisp Rectangular Approval Actions -->
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex items-center gap-3">
+<button class="bg-[#F0EEE8] text-[#0D1013] px-5 py-2 font-label-mono text-label-mono uppercase tracking-widest font-bold hover:bg-primary-container transition-colors duration-150">
+                  [ WRITE TO LOCAL DISK ]
+                </button>
+<button class="bg-surface-container border border-outline-variant text-on-surface px-5 py-2 font-label-mono text-label-mono uppercase tracking-widest hover:border-error hover:text-error transition-colors duration-150">
+                  [ REJECT ]
+                </button>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+                SAFE HARBOR VERIFIED
+              </span>
+</div>
+</div>
+<!-- Obsidian Pipe Card -->
+<div class="mt-space-lg pt-space-md border-t border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]">sync_alt</span>
+<span class="font-label-mono text-label-mono text-on-surface">
+                EXPORT PIPELINE: YAML FRONTMATTER + LATEX SYMBOLIC PARSER
+              </span>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+              OBSIDIAN 1.7+ NATIVE
+            </span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. LOCAL SOVEREIGNTY MANIFEST (Architectural Comparison Matrix) -->
+<section class="w-full border-b border-outline-variant bg-surface" id="matrix">
+<!-- Section Header -->
+<div class="w-full px-margin-desktop py-space-sm border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-mono text-label-mono text-primary font-bold">SEC.04</span>
+<span class="text-outline">/</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">
+            Sovereignty Architecture vs Cloud SaaS
+          </h2>
+</div>
+<span class="font-label-coordinate text-label-coordinate text-outline">
+          AUDIT METHOD: WIRESHARK PACKET TRACE &amp; SYSCALL PROFILING
+        </span>
+</div>
+<!-- Edge-to-Edge Data Table -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse font-body-sm text-body-sm">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container font-label-coordinate text-label-coordinate text-outline">
+<th class="py-space-md px-margin-desktop uppercase tracking-widest w-1/4">SYSTEM PARAMETER</th>
+<th class="py-space-md px-margin-desktop uppercase tracking-widest w-3/8 text-primary font-bold">GRAVITAS (LOCAL WORKSTATION)</th>
+<th class="py-space-md px-margin-desktop uppercase tracking-widest w-3/8 text-outline">COMMERCIAL CLOUD SAAS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant font-label-mono text-label-mono">
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">Database Storage</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">Embedded SQLite v3.45.1 (Direct File Access)</td>
+<td class="py-space-md px-margin-desktop text-on-surface-variant">Remote Cloud MongoDB / DynamoDB Clustered</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">Model Inference Runtime</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">Local MLX / Ollama Unix Socket (Zero External Calls)</td>
+<td class="py-space-md px-margin-desktop text-on-surface-variant">Rate-limited Cloud API with Queues &amp; Logging</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">Telemetry &amp; Network Egress</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">0 Egress Packets (Verified via Wireshark)</td>
+<td class="py-space-md px-margin-desktop text-error font-medium">Continuous 3rd-Party Tracking &amp; Behavioral Telemetry</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">File Portability</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">Plaintext Markdown + Open Schemas</td>
+<td class="py-space-md px-margin-desktop text-on-surface-variant">Proprietary Binary JSON / Vendor Lock-in</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">Hotkey Latency Floor</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">&lt; 0.4ms Local IPC Native Threading</td>
+<td class="py-space-md px-margin-desktop text-on-surface-variant">180ms – 1,200ms Cloud Round-Trip Time</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors duration-100">
+<td class="py-space-md px-margin-desktop text-on-surface font-semibold">License &amp; Continuity</td>
+<td class="py-space-md px-margin-desktop text-primary font-bold">Perpetual MIT Local Core // Unkillable</td>
+<td class="py-space-md px-margin-desktop text-on-surface-variant">Recurring Cloud Subscription (Revocable Access)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Bottom Manifest Footnote -->
+<div class="p-margin-desktop bg-surface-container-low border-t border-outline-variant flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+<div>
+<span class="font-label-coordinate text-label-coordinate text-outline block mb-1">
+            VERIFICATION STANDARD
+          </span>
+<p class="font-body-md text-body-md text-on-surface">
+            Binary hashes and SQLite journals are maintained in your local home directory. No telemetry token is ever provisioned or validated over the internet.
+          </p>
+</div>
+<button class="bg-[#F0EEE8] text-[#0D1013] px-6 py-2.5 font-label-mono text-label-mono uppercase tracking-widest font-bold hover:bg-primary-container transition-colors duration-150 shrink-0">
+          READ COMPLIANCE FOLIO
+        </button>
+</div>
+</section>
+<!-- 6. ARCHITECTURAL COLOPHON / FOOTER (SHARED COMPONENT: Footer) -->
+<footer class="w-full px-margin-desktop py-space-xl border-t border-outline-variant grid grid-cols-12 gap-gutter-desktop bg-surface-container-lowest docked full-width bottom-0 rounded-none">
+<!-- Col 1-5: Brand & Copyright -->
+<div class="col-span-12 lg:col-span-5 flex flex-col justify-between">
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface uppercase mb-space-sm">
+            GRAVITAS // ARCHITECTURAL KERNEL
+          </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-sm mb-space-md">
+            Monumental technical folio designed for STEM scholars requiring uncompromising local sovereignty, sub-100ms response vectors, and immutable lecture audit trails.
+          </p>
+</div>
+<div class="font-label-mono text-label-mono text-outline">
+          © 2025 GRAVITAS STRUCTURAL SYSTEMS // MONUMENTAL TECHNICAL FOLIO. ALL RIGHTS RESERVED. LOCAL REPLICA LICENSE V4.2.
+        </div>
+</div>
+<!-- Col 6-8: Links Column 1 -->
+<div class="col-span-6 lg:col-span-3 flex flex-col gap-2">
+<span class="font-label-coordinate text-label-coordinate text-outline uppercase mb-2">SYSTEM TELEMETRY</span>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#matrix">
+          DAEMON SPECS: Z-TELEMETRY 0.0.0
+        </a>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#build">
+          BUILD: 24.11-RELEASE-LTS
+        </a>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#coord">
+          COORDINATE: 40.7128° N, 74.0060° W
+        </a>
+</div>
+<!-- Col 9-12: Links Column 2 -->
+<div class="col-span-6 lg:col-span-4 flex flex-col gap-2">
+<span class="font-label-coordinate text-label-coordinate text-outline uppercase mb-2">SPECIFICATIONS</span>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#fonts">
+          FONTS: EB GARAMOND / SPACE GROTESK
+        </a>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#hardware">
+          HARDWARE: ARCH-64 IMMUTABLE
+        </a>
+<a class="font-label-mono text-label-mono text-on-surface-variant uppercase hover:text-primary transition-colors duration-150" href="#legal">
+          LEGAL FOLIO
+        </a>
+<div class="mt-space-md pt-space-xs border-t border-outline-variant font-label-coordinate text-label-coordinate text-outline">
+          SHA-256: 8f0b2c140a7e6bdf281989ea11e9f2a4921b7c010a3004d
+        </div>
+</div>
+</footer>
+</div>
+</body></html>

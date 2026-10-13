@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>GRAVITAS // OS — Computational Workstation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-surface": "#e2e2e8",
+            "tertiary-container": "#5594da",
+            "surface-bright": "#37393e",
+            "primary-container": "#5795d4",
+            "error": "#ffb4ab",
+            "on-surface-variant": "#c1c7d1",
+            "on-primary-container": "#002b4d",
+            "secondary-fixed": "#dce3f0",
+            "secondary-container": "#404752",
+            "on-surface": "#e2e2e8",
+            "on-tertiary-fixed": "#001c37",
+            "on-tertiary": "#003259",
+            "error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#00497f",
+            "on-secondary": "#2a313b",
+            "on-tertiary-container": "#002b4e",
+            "on-error-container": "#ffdad6",
+            "secondary-fixed-dim": "#c0c7d4",
+            "surface-dim": "#111317",
+            "on-primary-fixed": "#001d35",
+            "on-secondary-fixed-variant": "#404752",
+            "surface-container-lowest": "#0c0e12",
+            "on-primary": "#003257",
+            "on-error": "#690005",
+            "inverse-primary": "#15619e",
+            "outline": "#8b919b",
+            "primary-fixed-dim": "#9dcaff",
+            "on-background": "#e2e2e8",
+            "primary-fixed": "#d1e4ff",
+            "surface-container-low": "#1a1c20",
+            "primary": "#9dcaff",
+            "outline-variant": "#414750",
+            "on-primary-fixed-variant": "#00497c",
+            "tertiary": "#a0c9ff",
+            "tertiary-fixed-dim": "#a0c9ff",
+            "surface": "#111317",
+            "background": "#111317",
+            "secondary": "#c0c7d4",
+            "tertiary-fixed": "#d2e4ff",
+            "surface-tint": "#9dcaff",
+            "surface-container-high": "#282a2e",
+            "surface-container-highest": "#333539",
+            "inverse-on-surface": "#2f3035",
+            "surface-container": "#1e2024",
+            "on-secondary-fixed": "#151c25",
+            "surface-variant": "#333539",
+            "on-secondary-container": "#afb5c2"
+          },
+          "borderRadius": {
+            "DEFAULT": "0px",
+            "none": "0px",
+            "sm": "0px",
+            "md": "0px",
+            "lg": "0px",
+            "xl": "0px",
+            "full": "0px"
+          },
+          "spacing": {
+            "space-xl": "2rem",
+            "space-md": "0.75rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.25rem",
+            "margin-mobile": "1rem",
+            "margin": "1.5rem"
+          },
+          "fontFamily": {
+            "label-lg": ["JetBrains Mono", "monospace"],
+            "headline-lg": ["Newsreader", "serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "headline-lg-mobile": ["Newsreader", "serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "headline-sm": ["Geist", "sans-serif"],
+            "body-lg": ["Geist", "sans-serif"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "headline-display-mobile": ["Newsreader", "serif"],
+            "headline-display": ["Newsreader", "serif"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "headline-md": ["Newsreader", "serif"]
+          },
+          "fontSize": {
+            "label-lg": ["0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.015em", "fontWeight": "400" }],
+            "body-sm": ["0.75rem", { "lineHeight": "1.125rem", "fontWeight": "400" }],
+            "headline-lg-mobile": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "body-md": ["0.875rem", { "lineHeight": "1.375rem", "fontWeight": "400" }],
+            "headline-sm": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "body-lg": ["1rem", { "lineHeight": "1.625rem", "fontWeight": "400" }],
+            "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "400" }],
+            "headline-display-mobile": ["1.875rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.015em", "fontWeight": "400" }],
+            "headline-display": ["2.5rem", { "lineHeight": "3rem", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+            "label-md": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-md": ["1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.01em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    * {
+      border-radius: 0px !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #0c0e12;
+      color: #e2e2e8;
+      font-family: 'Geist', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 16px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .waveform-bar {
+      animation: pulseWave 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes pulseWave {
+      0% { height: 4px; }
+      50% { height: 18px; }
+      100% { height: 8px; }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col justify-between">
+<!-- TOP APP BAR (Shared Components JSON Anchor) -->
+<header class="flex justify-between items-center w-full px-margin-mobile py-space-sm border-b border-outline-variant bg-surface sticky top-0 z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">terminal</span>
+<span class="font-label-lg text-label-lg uppercase tracking-wider text-on-surface font-bold">GRAVITAS // OS</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="hidden xs:flex items-center gap-1.5 px-2 py-0.5 border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">
+<span class="inline-block w-1.5 h-1.5 bg-primary"></span>
+<span>DAEMON: 127.0.0.1:8420</span>
+</div>
+<button class="px-2.5 py-1 border border-outline-variant bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors flex items-center gap-1 active:bg-surface-container-highest">
+<span>[ MENU ]</span>
+</button>
+</div>
+</header>
+<!-- TELEMETRY SUB-BANNER -->
+<div class="w-full bg-surface-container border-b border-outline-variant px-margin-mobile py-1 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-2">
+<span class="inline-block w-1.5 h-1.5 bg-primary animate-ping"></span>
+<span class="text-primary font-mono font-medium">[ LOCAL-FIRST PROTOCOL ]</span>
+</div>
+<div class="text-on-surface-variant font-mono">
+      SYSTEM_LATENCY: &lt;100MS
+    </div>
+</div>
+<main class="flex-1 w-full flex flex-col">
+<!-- SECTION 1: MOBILE HERO -->
+<section class="px-margin-mobile pt-space-xl pb-space-lg flex flex-col gap-space-md bg-surface-container-lowest">
+<div class="inline-flex items-center gap-2 border border-outline-variant bg-surface-container-low px-2 py-1 self-start">
+<span class="w-1.5 h-1.5 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-primary tracking-wider uppercase">SOVEREIGN WORKSPACE v3.45.1</span>
+</div>
+<h1 class="font-headline-display-mobile text-headline-display-mobile text-on-surface font-light leading-tight">
+        Your personal operating system for getting things done.
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        A local-first multi-agent workspace built for university STEM students and researchers. Unifies offline capture, local SQLite indexing, and push-to-talk intelligence under absolute personal sovereignty.
+      </p>
+<!-- METRICS HAIRLINE STACK -->
+<div class="mt-space-sm border border-outline-variant bg-surface-container-low divide-y divide-outline-variant">
+<div class="p-space-sm flex flex-col gap-0.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold tracking-wider">DATA LAYER</span>
+<span class="text-on-surface">100% LOCAL SQLITE ENGINE</span>
+</div>
+<p class="font-label-sm text-label-sm text-outline">Zero external latency // In-memory WAL</p>
+</div>
+<div class="p-space-sm flex flex-col gap-0.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold tracking-wider">AIR-GAP SECURITY</span>
+<span class="text-on-surface">ZERO CLOUD EGRESS</span>
+</div>
+<p class="font-label-sm text-label-sm text-outline">Air-gapped verification // Offline MLX</p>
+</div>
+<div class="p-space-sm flex flex-col gap-0.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold tracking-wider">SYSTEM LATENCY</span>
+<span class="text-on-surface">&lt;100MS GLOBAL HOTKEY</span>
+</div>
+<p class="font-label-sm text-label-sm text-outline">Instant OS-level summoning via IPC</p>
+</div>
+</div>
+<!-- CTA BUTTONS -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<button class="w-full py-3 px-4 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider font-semibold border border-primary hover:bg-primary-fixed transition-colors active:opacity-90 flex items-center justify-center gap-2">
+<span>DEPLOY LOCAL WORKSTATION</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="w-full py-2.5 px-4 bg-surface-container border border-outline-variant text-on-surface hover:border-outline font-label-md text-label-md tracking-wider transition-colors active:bg-surface-container-high">
+          [ INSPECT BENCHMARKS ]
+        </button>
+</div>
+</section>
+<!-- SECTION 2: STUDY GUARDIAN -->
+<section class="border-t border-outline-variant bg-surface px-margin-mobile py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary tracking-widest font-semibold uppercase">01 // STUDY GUARDIAN: VERBATIM CAPTURE</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-normal">
+          High-fidelity classroom triage.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Raw mobile voice inputs and classroom messages sync directly over local Wi-Fi or USB. Multi-agent triaging isolates teacher directives with zero loss of phrasing.
+        </p>
+</div>
+<!-- FILTER TAB STRIP -->
+<div class="flex overflow-x-auto gap-1 border-b border-outline-variant pb-2 no-scrollbar">
+<button class="whitespace-nowrap px-2.5 py-1 bg-surface-container-highest border border-primary text-primary font-label-sm text-label-sm">
+          [ CS301 Algorithms &amp; Complexity ]
+        </button>
+<button class="whitespace-nowrap px-2.5 py-1 bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm">
+          [ CS340 Arch ]
+        </button>
+<button class="whitespace-nowrap px-2.5 py-1 bg-surface-container border border-outline-variant text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm">
+          [ CS412 DB ]
+        </button>
+</div>
+<!-- CAPTURE TERMINAL CARD -->
+<div class="border border-outline-variant bg-surface-container-lowest flex flex-col">
+<!-- Card Header -->
+<div class="px-3 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">AUDIO CLIP SYNC // INGEST_ID: 9402</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">16kHz PCM</span>
+</div>
+<div class="p-3 flex flex-col gap-3">
+<!-- STT Engine Status -->
+<div class="flex items-center justify-between font-label-sm text-label-sm border border-outline-variant px-2 py-1 bg-surface-container-low">
+<span class="text-on-surface-variant">Local Whisper STT (Medium.en)</span>
+<span class="text-primary font-mono">0.08s LATENCY</span>
+</div>
+<!-- Captured Quote Box -->
+<div class="border-l-2 border-primary bg-surface-container-low p-2.5">
+<p class="font-mono text-body-sm text-on-surface leading-relaxed">
+              “PSet 4: Implement B-Tree node splitting and concurrent latch crabbing. Submit valgrind trace by Friday 23:59 EST.”
+            </p>
+</div>
+<!-- Hash Verification -->
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm border-t border-outline-variant pt-2">
+<span class="font-mono text-outline">SQLITE BLOB HASH</span>
+<span class="font-mono text-primary">SHA256:d8a2...3f1c</span>
+</div>
+<!-- Multi-Agent Triage Metadata -->
+<div class="border border-outline-variant bg-surface divide-y divide-outline-variant">
+<div class="px-2.5 py-1.5 flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">TARGET DEADLINE</span>
+<span class="text-error font-medium">Friday 23:59 EST [48h REMAINING]</span>
+</div>
+<div class="px-2.5 py-1.5 flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">LOCAL PDF CITATION</span>
+<span class="text-on-surface underline">Slides 08: Page 12-19</span>
+</div>
+<div class="px-2.5 py-1.5 flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">DEPENDENCY GRAPH</span>
+<span class="text-primary">latch_crab.cc → btree_split()</span>
+</div>
+</div>
+<!-- Action -->
+<button class="w-full mt-1 py-2 px-3 bg-surface-container border border-outline-variant hover:border-primary text-on-surface font-label-md text-label-md text-center transition-colors">
+            [ OPEN VERIFIED NOTEBOOK ]
+          </button>
+</div>
+</div>
+</section>
+<!-- SECTION 3: FLOATING COMPANION -->
+<section class="border-t border-outline-variant bg-surface-container-lowest px-margin-mobile py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary tracking-widest font-semibold uppercase">02 // FLOATING COMPANION: SYSTEM REASONING</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-normal">
+          Inference that never leaves RAM.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Push-to-talk speech transcription and LLM inference operate 100% on silicon hardware without leaving RAM.
+        </p>
+</div>
+<!-- HUD REASONING WINDOW -->
+<div class="border border-outline-variant bg-surface flex flex-col">
+<!-- HUD Header Bar -->
+<div class="px-3 py-2 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface font-bold">
+<span class="material-symbols-outlined text-primary text-[14px]">graphic_eq</span>
+<span>GRAVITAS HUD // M3 SILICON</span>
+</div>
+<span class="text-primary font-label-sm text-label-sm uppercase font-mono">PUSH-TO-TALK ACTIVE</span>
+</div>
+<!-- Waveform Visualizer -->
+<div class="px-3 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-1 h-6">
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.1s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.3s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.15s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.4s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.25s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.5s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.2s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.35s"></div>
+<div class="w-1 bg-primary waveform-bar" style="animation-delay: 0.1s"></div>
+</div>
+<span class="font-label-sm text-label-sm text-outline font-mono">SAMPLING: 44.1kHz FLOAT32</span>
+</div>
+<div class="p-3 flex flex-col gap-3">
+<!-- User Prompt Monospace -->
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-outline">STREAMING QUERY</span>
+<div class="p-2 border border-outline-variant bg-surface-container text-on-surface font-mono text-body-sm">
+              &gt; Debug Cache Invalidation in C++ concurrency loop...
+            </div>
+</div>
+<!-- Direct Execution Output -->
+<div class="border border-outline-variant bg-surface-container-low p-2.5 flex flex-col gap-2">
+<div class="flex items-center justify-between border-b border-outline-variant pb-1">
+<span class="font-label-sm text-label-sm text-primary font-semibold">SYNTHESIS: MEMORY BARRIER ANALYSIS</span>
+<span class="font-label-sm text-label-sm text-primary">0.14s TOTAL</span>
+</div>
+<pre class="font-mono text-body-sm text-on-surface overflow-x-auto py-1 leading-snug"><code>// Insert acquire/release barrier
+std::atomic_thread_fence(
+    std::memory_order_release
+);
+b_node-&gt;latch.store(UNLOCKED, 
+    std::memory_order_release);</code></pre>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Resolution: Race condition mitigated. Local AST index refreshed without thread stalls.
+            </p>
+</div>
+<!-- Trigger Actions -->
+<div class="grid grid-cols-1 gap-2 pt-1">
+<button class="w-full py-2 px-3 bg-surface-container border border-outline-variant hover:border-outline text-on-surface font-label-md text-label-md text-left flex items-center justify-between transition-colors">
+<span>[ EXPORT AS LOCAL MARKDOWN ]</span>
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+</button>
+<button class="w-full py-2 px-3 bg-primary-container text-on-primary-container border border-primary font-label-md text-label-md text-left flex items-center justify-between transition-colors font-medium">
+<span>[ PIPE TO ACTIVE NOTEBOOK ]</span>
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: LOCAL SOVEREIGNTY ARCHITECTURE & MANIFESTO -->
+<section class="border-t border-outline-variant bg-surface px-margin-mobile py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-primary tracking-widest font-semibold uppercase">03 // THE SOVEREIGNTY PROTOCOL</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-normal">
+          Zero Egress. Zero Cloud Telemetry.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          You own the database, you own the models, and no byte ever egresses your hardware.
+        </p>
+</div>
+<!-- COMPARISON HAIRLINE TABLE -->
+<div class="border border-outline-variant bg-surface-container-low divide-y divide-outline-variant">
+<!-- Row 1 -->
+<div class="p-3 flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-outline">DATABASE ENGINE</span>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-primary font-mono font-medium">Embedded SQLite v3.45.1</span>
+<span class="text-outline line-through font-mono">Remote Cloud SaaS</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-3 flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-outline">MODEL INFERENCE</span>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-primary font-mono font-medium">Local Ollama / MLX Socket</span>
+<span class="text-outline line-through font-mono">Rate-Limited API</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="p-3 flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-outline">NETWORK PRIVACY</span>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-primary font-mono font-medium">0 Egress (Wireshark Verified)</span>
+<span class="text-outline line-through font-mono">3rd-Party Training</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="p-3 flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-outline">LATENCY FLOOR</span>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-primary font-mono font-medium">&lt;0.5ms Memory Access</span>
+<span class="text-outline line-through font-mono">180ms - 1200ms RTT</span>
+</div>
+</div>
+</div>
+<!-- TERMINAL DEPLOYMENT BOX -->
+<div class="border border-outline-variant bg-surface-container-lowest p-3 flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="text-outline">INSTALL DAEMON ON LOCAL HOST</span>
+<span class="text-primary">UNIX / DARWIN</span>
+</div>
+<div class="flex items-center justify-between bg-surface border border-outline-variant p-2.5">
+<code class="font-mono text-body-sm text-on-surface select-all">$ curl -sSL https://gravitas.run | sh</code>
+<button class="px-2 py-1 bg-surface-container border border-outline-variant hover:border-primary text-primary font-label-sm text-label-sm uppercase ml-2 active:bg-surface-container-high transition-colors" onclick="navigator.clipboard.writeText('curl -sSL https://gravitas.run | sh'); this.innerText='COPIED'; setTimeout(() =&gt; this.innerText='COPY', 1500)">
+            COPY
+          </button>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER (Shared Components JSON Anchor) -->
+<footer class="flex flex-col gap-space-md w-full px-margin-mobile py-space-lg border-t border-outline-variant bg-surface-container-lowest">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-outline-variant pb-space-sm">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">GRAVITAS // OS</span>
+<div class="flex gap-3">
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-colors" href="#specs">SPECS</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-colors" href="#manifesto">MANIFESTO</a>
+<a class="text-primary font-label-sm text-label-sm underline" href="#terminal">TERMINAL</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-colors" href="#docs">DOCS</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-on-surface transition-colors" href="#security">SECURITY</a>
+</div>
+</div>
+<div class="flex flex-col gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex flex-wrap gap-2 text-outline">
+<span class="border border-outline-variant px-1.5 py-0.5">SQLite v3.45.1</span>
+<span class="border border-outline-variant px-1.5 py-0.5">Zero Cloud Egress</span>
+<span class="border border-outline-variant px-1.5 py-0.5">Ollama/MLX Bridge</span>
+<span class="border border-outline-variant px-1.5 py-0.5">SHA-256 Valid</span>
+</div>
+<p class="leading-relaxed text-outline pt-1">
+        © 2025 GRAVITAS COMPUTATIONAL SYSTEMS. LOCAL-FIRST PROTOCOL. ZERO CLOUD TELEMETRY.
+      </p>
+</div>
+</footer>
+</body></html>

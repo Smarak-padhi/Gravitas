@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GRAVITAS OS // C Workstation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline-variant": "#414750",
+            "inverse-primary": "#15619e",
+            "secondary": "#c0c7d4",
+            "error-container": "#93000a",
+            "secondary-fixed": "#dce3f0",
+            "surface-container-high": "#282a2e",
+            "surface-bright": "#37393e",
+            "on-tertiary-container": "#002b4e",
+            "outline": "#8b919b",
+            "tertiary-fixed-dim": "#a0c9ff",
+            "primary-container": "#5795d4",
+            "on-secondary-fixed": "#151c25",
+            "inverse-surface": "#e2e2e8",
+            "inverse-on-surface": "#2f3035",
+            "on-tertiary": "#003259",
+            "on-error-container": "#ffdad6",
+            "surface-container-low": "#1a1c20",
+            "on-surface-variant": "#c1c7d1",
+            "on-secondary-fixed-variant": "#404752",
+            "on-secondary-container": "#afb5c2",
+            "secondary-fixed-dim": "#c0c7d4",
+            "tertiary-fixed": "#d2e4ff",
+            "surface": "#111317",
+            "primary": "#9dcaff",
+            "tertiary-container": "#5594da",
+            "on-primary-fixed": "#001d35",
+            "on-tertiary-fixed-variant": "#00497f",
+            "on-secondary": "#2a313b",
+            "surface-dim": "#111317",
+            "surface-container-lowest": "#0c0e12",
+            "on-primary-fixed-variant": "#00497c",
+            "background": "#111317",
+            "on-primary": "#003257",
+            "secondary-container": "#404752",
+            "on-tertiary-fixed": "#001c37",
+            "surface-tint": "#9dcaff",
+            "primary-fixed-dim": "#9dcaff",
+            "on-surface": "#e2e2e8",
+            "primary-fixed": "#d1e4ff",
+            "on-primary-container": "#002b4d",
+            "on-background": "#e2e2e8",
+            "surface-container-highest": "#333539",
+            "tertiary": "#a0c9ff",
+            "surface-container": "#1e2024",
+            "on-error": "#690005",
+            "error": "#ffb4ab",
+            "surface-variant": "#333539"
+          },
+          "borderRadius": {
+            "DEFAULT": "0px",
+            "none": "0px",
+            "sm": "0px",
+            "md": "0px",
+            "lg": "0px",
+            "xl": "0px",
+            "full": "0px"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "gutter-mobile": "0.75rem",
+            "gutter": "1rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.25rem",
+            "margin-mobile": "1rem"
+          },
+          "fontFamily": {
+            "body-lg": ["Geist", "sans-serif"],
+            "headline-display-mobile": ["Newsreader", "serif"],
+            "headline-md": ["Newsreader", "serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "label-lg": ["JetBrains Mono", "monospace"],
+            "headline-lg-mobile": ["Newsreader", "serif"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "headline-sm": ["Geist", "sans-serif"],
+            "headline-lg": ["Newsreader", "serif"],
+            "headline-display": ["Newsreader", "serif"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "body-md": ["Geist", "sans-serif"]
+          },
+          "fontSize": {
+            "body-lg": ["1rem", { "lineHeight": "1.625rem", "fontWeight": "400" }],
+            "headline-display-mobile": ["1.875rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.015em", "fontWeight": "400" }],
+            "headline-md": ["1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-sm": ["0.75rem", { "lineHeight": "1.125rem", "fontWeight": "400" }],
+            "label-lg": ["0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-lg-mobile": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "label-md": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-sm": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-lg": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.015em", "fontWeight": "400" }],
+            "headline-display": ["2.5rem", { "lineHeight": "3rem", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+            "label-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.06em", "fontWeight": "400" }],
+            "body-md": ["0.875rem", { "lineHeight": "1.375rem", "fontWeight": "400" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    * {
+      border-radius: 0px !important;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      background-color: #0c0e12;
+      color: #e2e2e8;
+      overflow-x: hidden;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      font-size: 1.125rem;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .hairline-border {
+      border-color: #272e38;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface antialiased flex justify-center selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Screen Frame Constraint (390px max-width viewport) -->
+<div class="w-full max-w-[390px] min-h-screen bg-background border-x hairline-border flex flex-col relative pb-24 shadow-2xl">
+<!-- 1. COMPACT OS TOP BAR (Shared Component: TopAppBar) -->
+<header class="bg-surface-container-lowest text-primary docked full-width top-0 rounded-none border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile py-2 z-40 sticky">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-base">terminal</span>
+<span class="font-label-md text-label-md tracking-wider uppercase text-on-surface font-semibold">GRAVITAS OS // C</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="px-1.5 py-0.5 bg-surface-container border hairline-border font-label-sm text-label-sm text-outline">127.0.0.1:8420</span>
+<button class="bg-surface-container border hairline-border p-1 text-outline hover:text-on-surface" title="Tune Settings">
+<span class="material-symbols-outlined text-base">tune</span>
+</button>
+</div>
+</header>
+<!-- Sub-status Operational Strip -->
+<div class="w-full bg-surface-container-low border-b hairline-border px-margin-mobile py-1 flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 bg-primary inline-block"></span>
+<span class="text-on-surface-variant">DAEMON ACTIVE</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-2 py-0.5 font-label-sm text-label-sm font-semibold tracking-wider hover:bg-primary">
+        DEPLOY WORKSTATION
+      </button>
+</div>
+<main class="flex-1 flex flex-col">
+<!-- 2. LIVING HERO SECTION -->
+<section class="p-margin-mobile border-b hairline-border bg-surface-container-lowest">
+<div class="mb- space-sm">
+<div class="inline-flex items-center gap-1.5 border hairline-border px-2 py-0.5 mb-3 bg-surface-container-low text-label-sm font-label-sm text-outline">
+<span class="text-primary font-semibold">VER 3.45.1</span>
+<span>//</span>
+<span>AIR-GAPPED RIGOR</span>
+</div>
+<h1 class="font-headline-display-mobile text-headline-display-mobile text-on-surface font-normal leading-tight tracking-tight">
+            The local-first operating system for academic rigor.
+          </h1>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-3 leading-relaxed">
+          Engineered for university STEM students and researchers. Unifying offline verbatim capture, zero-latency SQLite schema indexing, and sub-100ms push-to-talk intelligence under absolute personal sovereignty.
+        </p>
+<!-- Metric Specs Strip -->
+<div class="grid grid-cols-2 gap-px bg-outline-variant border hairline-border mt-5 text-label-sm font-label-sm">
+<div class="bg-surface-container-low p-2">
+<span class="text-outline block text-[9px] uppercase tracking-wider">ENGINE</span>
+<span class="text-on-surface font-medium">SQLite v3.45.1 WAL</span>
+</div>
+<div class="bg-surface-container-low p-2">
+<span class="text-outline block text-[9px] uppercase tracking-wider">INDEX LATENCY</span>
+<span class="text-primary font-medium">&lt; 0.42ms Search</span>
+</div>
+<div class="bg-surface-container-low p-2">
+<span class="text-outline block text-[9px] uppercase tracking-wider">SPEECH RECEPTOR</span>
+<span class="text-on-surface font-medium">Push-to-Talk HUD</span>
+</div>
+<div class="bg-surface-container-low p-2">
+<span class="text-outline block text-[9px] uppercase tracking-wider">CLOUD TRAFFIC</span>
+<span class="text-primary font-medium">0.00 KB/s Egress</span>
+</div>
+</div>
+<!-- Interactive Mobile Workspace Card -->
+<div class="mt-6 border hairline-border bg-surface-container">
+<div class="bg-surface-container-low px-3 py-2 border-b hairline-border flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface truncate text-[10px]">~/stem-workspace/semester-spring-2025.db</span>
+<span class="text-primary text-[9px] border hairline-border px-1">READ-WRITE WAL</span>
+</div>
+<!-- Instant Search Bar -->
+<div class="p-2 border-b hairline-border bg-surface-container-lowest flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none p-0 text-on-surface font-label-md text-label-md focus:ring-0 w-full cursor-default" readonly="" type="text" value="B-Tree"/>
+<span class="font-label-sm text-label-sm text-primary bg-surface-container px-1.5 py-0.5 border hairline-border">0.18ms</span>
+</div>
+<!-- Course Switcher Tabs -->
+<div class="flex border-b hairline-border bg-surface-container-low overflow-x-auto text-label-sm font-label-sm no-scrollbar">
+<button class="px-3 py-1.5 bg-surface-container text-primary border-r hairline-border border-b-2 border-primary font-medium whitespace-nowrap">
+              CS301 Algorithms
+            </button>
+<button class="px-3 py-1.5 text-outline border-r hairline-border hover:text-on-surface whitespace-nowrap">
+              CS340 Comp Arch
+            </button>
+<button class="px-3 py-1.5 text-outline hover:text-on-surface whitespace-nowrap">
+              CS412 DB Systems
+            </button>
+</div>
+<!-- Active Course View Body -->
+<div class="p-3 space-y-3 bg-surface-container">
+<div>
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline mb-1">
+<span>SECTION § 4.2</span>
+<span class="text-[9px]">LATCH CRABBING &amp; INVARIANTS</span>
+</div>
+<div class="bg-surface-container-low p-2.5 border hairline-border">
+<div class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary mb-1">
+<span class="material-symbols-outlined text-xs">record_voice_over</span>
+<span class="font-semibold uppercase tracking-wider text-[10px]">Professor Verbatim Directive (Immutable)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface italic">
+                  "PSet 4: Implement B-Tree node splitting and concurrent latch crabbing. Submit valgrind trace by Friday 23:59 EST."
+                </p>
+<div class="mt-2 pt-2 border-t hairline-border flex items-center justify-between text-[10px] font-label-sm text-outline">
+<span>10:42:15 AM EST</span>
+<span class="text-primary font-medium">100% BIT-PERFECT AUDIT</span>
+</div>
+</div>
+</div>
+<!-- Student Scratchpad -->
+<div class="bg-surface-container-lowest p-2.5 border hairline-border">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline mb-2">
+<span>working_btree.cc</span>
+<span class="text-on-surface-variant text-[10px]">C++20</span>
+</div>
+<pre class="font-label-sm text-label-sm text-on-surface overflow-x-auto leading-relaxed"><code><span class="text-outline">1</span>  <span class="text-primary">template</span> &lt;<span class="text-primary">typename</span> Key, <span class="text-primary">typename</span> Val&gt;
+<span class="text-outline">2</span>  <span class="text-primary">auto</span> BTree::insert(Key k, Val v) -&gt; <span class="text-primary">bool</span> {
+<span class="text-outline">3</span>    WriteLockGuard lock(root-&gt;mutex);
+<span class="text-outline">4</span>    <span class="text-outline">// Concurrent latch crabbing traversal</span>
+<span class="text-outline">5</span>    <span class="text-primary">return</span> crab_descent(root, k, v);
+<span class="text-outline">6</span>  }</code></pre>
+<button class="mt-3 w-full bg-surface-container border hairline-border hover:border-primary text-on-surface py-1.5 font-label-sm text-label-sm font-medium tracking-wider flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-primary">data_object</span>
+                COMMIT TO SQLITE WAL
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. DEMO 1: PHONE-TO-DESKTOP STUDY GUARDIAN -->
+<section class="p-margin-mobile border-b hairline-border bg-surface-container-low">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-1.5 h-1.5 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">PROTOCOL 01 // GUARDIAN INGESTION</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2 font-normal">
+          Bit-perfect classroom triage. From audio to structured SQLite schema.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+          Lecture acoustic buffers are converted on-device without cloud transcription API leaks. Entities map deterministically into local relational tables.
+        </p>
+<!-- Ingestion Tabs -->
+<div class="border hairline-border bg-surface-container">
+<div class="flex border-b hairline-border text-label-sm font-label-sm bg-surface-container-lowest">
+<button class="flex-1 py-1.5 px-2 text-center text-primary bg-surface-container border-b-2 border-primary font-medium" id="tab-sample-a" onclick="switchSample('a')">
+              IPHONE AUDIO 16kHz
+            </button>
+<button class="flex-1 py-1.5 px-2 text-center text-outline hover:text-on-surface border-l hairline-border" id="tab-sample-b" onclick="switchSample('b')">
+              CS412 MIDTERM PDF
+            </button>
+</div>
+<div class="p-3">
+<div class="space-y-3" id="sample-content-a">
+<div class="bg-surface-container-lowest p-2 border hairline-border flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">BUFFER: pcm_s16le 16000Hz mono</span>
+<span class="text-primary">AUDIO DOCK ACTIVE</span>
+</div>
+<div class="bg-surface-container-low p-2.5 border hairline-border">
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase text-[10px]">PARSED TEACHER DIRECTIVE:</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">
+                  "Deliverable due Friday 23:59 EST: Submit executable C++ binary with valgrind log proving 0 byte leak on node splits."
+                </p>
+</div>
+<!-- Metadata Breakdown Grid -->
+<div class="grid grid-cols-2 gap-2 text-label-sm font-label-sm">
+<div class="p-2 bg-surface-container-lowest border hairline-border">
+<span class="text-outline block text-[9px] uppercase">DEADLINE DETECTED</span>
+<span class="text-error font-medium">Friday 23:59 EST</span>
+</div>
+<div class="p-2 bg-surface-container-lowest border hairline-border">
+<span class="text-outline block text-[9px] uppercase">DELIVERABLE</span>
+<span class="text-on-surface font-medium">valgrind_trace.log</span>
+</div>
+</div>
+<div class="p-2 bg-surface-container-lowest border hairline-border flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline text-[10px]">SHA-256 INTEGRITY:</span>
+<span class="text-primary font-mono text-[10px]">e3b0c44298fc1c149afbf4c8</span>
+</div>
+</div>
+<div class="space-y-3 hidden" id="sample-content-b">
+<div class="bg-surface-container-lowest p-2 border hairline-border flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">PARSER: PyMuPDF / pdftotext v4.04</span>
+<span class="text-primary">348 KB TEXT EXTRACTED</span>
+</div>
+<div class="bg-surface-container-low p-2.5 border hairline-border">
+<span class="font-label-sm text-label-sm text-outline block mb-1 uppercase text-[10px]">EXAM SYLLABUS DIRECTIVE:</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">
+                  "Midterm 02: Relational calculus, B+ Trees, and ARIES recovery protocols. Open book, closed network interface."
+                </p>
+</div>
+<div class="p-2 bg-surface-container-lowest border hairline-border flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline text-[10px]">SHA-256 INTEGRITY:</span>
+<span class="text-primary font-mono text-[10px]">9f83c6b4e028b10ca634a413</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. DEMO 2: FLOATING COMPANION PTT & DIFF GATE -->
+<section class="p-margin-mobile border-b hairline-border bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-1.5 h-1.5 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">PROTOCOL 02 // COMPANION PTT &amp; DIFF GATE</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2 font-normal">
+          Inference that never leaves RAM. Summoned anywhere via hotkey.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+          Local Apple Silicon MLX neural transduction pipelines yield sub-80ms voice round-trip. Mutations stay frozen behind a Git-style approval gate.
+        </p>
+<!-- Push to Talk Module Card -->
+<div class="border hairline-border bg-surface-container p-3 mb-4">
+<div class="flex items-center justify-between mb-3 text-label-sm font-label-sm">
+<span class="text-outline uppercase text-[10px]">TRANSDUCTION HUD</span>
+<span class="text-primary border hairline-border px-1 text-[9px]">0.08s LATENCY MLX</span>
+</div>
+<!-- Waveform Visualizer -->
+<div class="h-10 bg-surface-container-lowest border hairline-border px-2 flex items-center justify-center gap-1 mb-3">
+<div class="w-1 h-3 bg-primary animate-pulse"></div>
+<div class="w-1 h-6 bg-primary"></div>
+<div class="w-1 h-4 bg-primary animate-pulse"></div>
+<div class="w-1 h-8 bg-primary"></div>
+<div class="w-1 h-5 bg-primary"></div>
+<div class="w-1 h-7 bg-primary animate-pulse"></div>
+<div class="w-1 h-3 bg-primary"></div>
+<div class="w-1 h-6 bg-primary"></div>
+<div class="w-1 h-2 bg-primary"></div>
+<div class="w-1 h-5 bg-primary animate-pulse"></div>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container py-2.5 font-label-md text-label-md font-semibold tracking-wider flex items-center justify-center gap-2 hover:bg-primary active:bg-inverse-primary active:text-on-surface">
+<span class="material-symbols-outlined text-base">mic</span>
+            HOLD TO TALK (CTRL+SHIFT+SPACE)
+          </button>
+</div>
+<!-- Pre-Commit Human Approval Diff Gate -->
+<div class="border hairline-border bg-surface-container">
+<div class="bg-surface-container-low px-3 py-1.5 border-b hairline-border flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface font-medium text-[10px]">DIFF GATE // PRE-COMMIT APPROVAL</span>
+<span class="text-outline text-[9px]">ZERO SILENT EDITS</span>
+</div>
+<div class="p-2 font-label-sm text-label-sm bg-surface-container-lowest overflow-x-auto space-y-1">
+<div class="text-outline text-[10px] pb-1 border-b hairline-border">@@ btree_invariants.tex:42,7 @@</div>
+<div class="text-error bg-error-container/20 px-1 font-mono text-[10px]">- \text{Latch acquisition: } L_{child} \rightarrow L_{parent} \text{ (Unsafe order)}</div>
+<div class="text-primary bg-primary-container/20 px-1 font-mono text-[10px]">+ \text{Latch crabbing: } L_{parent} \rightarrow L_{child} \text{ with invariant verification}</div>
+</div>
+<div class="p-2 bg-surface-container border-t hairline-border grid grid-cols-2 gap-2">
+<button class="bg-primary-container text-on-primary-container py-1.5 font-label-sm text-label-sm font-semibold tracking-wider hover:bg-primary">
+              APPROVE &amp; COMMIT
+            </button>
+<button class="bg-surface-container-low border hairline-border text-outline hover:text-on-surface py-1.5 font-label-sm text-label-sm tracking-wider">
+              DISCARD
+            </button>
+</div>
+</div>
+</section>
+<!-- 5. DEMO 3: KNOWLEDGE HUB 4-COLLECTION MATRIX -->
+<section class="p-margin-mobile border-b hairline-border bg-surface-container-low">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-1.5 h-1.5 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">PROTOCOL 03 // 4-COLLECTION MATRIX</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2 font-normal">
+          Four distinct cognitive vectors. Indexed in pure SQLite.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+          Structured records across four core epistemic axes, each governed by explicit schema constraints and instant indexed retrieval.
+        </p>
+<!-- 4 Rectangular Selectors -->
+<div class="grid grid-cols-2 gap-1.5 mb-3 font-label-sm text-label-sm">
+<button class="p-2 bg-surface-container text-primary border-l-2 border-primary text-left border hairline-border font-medium" id="matrix-btn-1" onclick="switchMatrix(1)">
+            01 Ideas &amp; Sparks
+          </button>
+<button class="p-2 bg-surface-container-lowest text-outline text-left border hairline-border hover:text-on-surface" id="matrix-btn-2" onclick="switchMatrix(2)">
+            02 Study Notes
+          </button>
+<button class="p-2 bg-surface-container-lowest text-outline text-left border hairline-border hover:text-on-surface" id="matrix-btn-3" onclick="switchMatrix(3)">
+            03 Projects
+          </button>
+<button class="p-2 bg-surface-container-lowest text-outline text-left border hairline-border hover:text-on-surface" id="matrix-btn-4" onclick="switchMatrix(4)">
+            04 Plan Tasks
+          </button>
+</div>
+<!-- Schema Display & Item List -->
+<div class="border hairline-border bg-surface-container">
+<div class="bg-surface-container-lowest p-2.5 border-b hairline-border">
+<span class="text-outline text-[9px] block uppercase font-label-sm">SQL DDL SPECIFICATION</span>
+<code class="font-label-sm text-label-sm text-primary block mt-1 overflow-x-auto text-[10px]" id="matrix-schema">CREATE TABLE ideas_sparks (id UUID PRIMARY KEY, spark_text TEXT, hypothesis TEXT, created_at INTEGER);</code>
+</div>
+<div class="p-3 space-y-2">
+<div class="bg-surface-container-low p-2 border hairline-border" id="matrix-record">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline mb-1 text-[10px]">
+<span>UUID: 7a8f10e4-b81d</span>
+<span class="text-primary">INDEX MATCH #1</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium" id="matrix-content">
+                "Hypothesis: Lock-free B-tree split via RCU pointers eliminates top-level latch bottle-necks during heavy append batches."
+              </p>
+<div class="mt-2 pt-1.5 border-t hairline-border flex items-center justify-between text-[9px] font-label-sm text-outline">
+<span>HASH: a40f92b</span>
+<span>2025-03-24 14:10:02 UTC</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. LOCAL SOVEREIGNTY & ZERO-EGRESS TELEMETRY -->
+<section class="p-margin-mobile border-b hairline-border bg-surface-container-lowest">
+<div class="flex items-center gap-2 mb-1">
+<span class="w-1.5 h-1.5 bg-primary"></span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">PROTOCOL 04 // SOVEREIGN AIRGAP</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2 font-normal">
+          Zero cloud telemetry. Proven by your own network analyzer.
+        </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+          All binaries bind strictly to loopback interface 127.0.0.1. Verify via Little Snitch, Wireshark, or eBPF socket monitoring.
+        </p>
+<!-- Live Telemetry Inspector Card -->
+<div class="border hairline-border bg-surface-container p-3 mb-4 space-y-2">
+<div class="flex items-center justify-between border-b hairline-border pb-2">
+<span class="font-label-sm text-label-sm text-outline uppercase text-[10px]">SOCKET DAEMON INSPECTION</span>
+<span class="text-primary font-label-sm text-label-sm font-semibold tracking-wider">AIR-GAP VERIFIED</span>
+</div>
+<div class="space-y-1.5 text-label-sm font-label-sm pt-1">
+<div class="flex items-center justify-between">
+<span class="text-outline">Inbound Sockets:</span>
+<span class="text-on-surface font-mono">127.0.0.1:8420 [LOOPBACK]</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-outline">Outbound Egress:</span>
+<span class="text-primary font-mono font-medium">0.00 KB/s [BLOCKED]</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-outline">Telemetry Beacons:</span>
+<span class="text-on-surface font-mono">0 Sentry / Mixpanel</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-outline">Air-Gap Status:</span>
+<span class="text-primary font-mono font-semibold">[HARDWARE ISOLATED]</span>
+</div>
+</div>
+</div>
+<!-- Terminal Installer Card -->
+<div class="border hairline-border bg-surface-container-lowest p-3">
+<div class="flex items-center justify-between mb-2">
+<span class="text-outline font-label-sm text-label-sm text-[10px] uppercase">LOCAL INSTALLER (MACOS / LINUX)</span>
+<span class="text-outline font-label-sm text-label-sm text-[9px]">POSIX SH</span>
+</div>
+<div class="bg-surface-container p-2 border hairline-border flex items-center justify-between gap-2">
+<code class="font-label-sm text-label-sm text-primary truncate text-[11px]">curl -sSL https://gravitas.run | sh</code>
+<button class="bg-surface-container-high hover:bg-surface-bright px-2 py-1 font-label-sm text-label-sm text-on-surface shrink-0 border hairline-border" id="copy-btn" onclick="copyCommand()">
+              COPY
+            </button>
+</div>
+</div>
+</section>
+<!-- 7. TECHNICAL COLOPHON (Shared Component: Footer) -->
+<footer class="bg-surface-container-lowest text-primary w-full rounded-none border-t border-outline-variant flat no shadows p-margin-mobile text-label-sm font-label-sm">
+<div class="flex flex-col gap-3">
+<div class="text-outline font-label-md text-label-md">
+            SOVEREIGN ZERO-EGRESS AIRGAP ACTIVE // ARCHITECTURE C
+          </div>
+<div class="flex flex-wrap gap-x-4 gap-y-1 text-label-sm font-label-sm">
+<a class="text-outline hover:text-on-surface hover:underline cursor-pointer duration-75" href="#syslog">SYS.LOG</a>
+<a class="text-outline hover:text-on-surface hover:underline cursor-pointer duration-75" href="#diffgate">DIFF.GATE</a>
+<a class="text-outline hover:text-on-surface hover:underline cursor-pointer duration-75" href="#integrity">INTEGRITY</a>
+</div>
+<div class="pt-2 border-t hairline-border text-[9px] text-outline flex justify-between items-center font-mono">
+<span>SQLITE WAL ARCHITECTURE</span>
+<span>MIT LICENSE 2025</span>
+</div>
+</div>
+</footer>
+</main>
+<!-- FIXED CRISP BOTTOM NAVIGATION BAR (Shared Component: BottomNavBar) -->
+<!-- Active Tab: WORKSPACE -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center border-t border-outline-variant bg-surface-container-lowest max-w-[390px] mx-auto right-0">
+<!-- Item 1: WORKSPACE (Active) -->
+<a class="flex flex-col items-center justify-center bg-surface-container text-primary border-t-2 border-primary py-1.5 px-2 rounded-none flex-1 text-center" href="#workspace">
+<span class="material-symbols-outlined text-base">grid_view</span>
+<span class="font-label-sm text-label-sm uppercase mt-0.5 text-[9px]">WORKSPACE</span>
+</a>
+<!-- Item 2: GUARDIAN (Inactive) -->
+<a class="flex flex-col items-center justify-center text-outline py-1.5 px-2 rounded-none flex-1 text-center hover:bg-surface-container-low hover:text-on-surface" href="#guardian">
+<span class="material-symbols-outlined text-base">shield</span>
+<span class="font-label-sm text-label-sm uppercase mt-0.5 text-[9px]">GUARDIAN</span>
+</a>
+<!-- Item 3: KNOWLEDGE (Inactive) -->
+<a class="flex flex-col items-center justify-center text-outline py-1.5 px-2 rounded-none flex-1 text-center hover:bg-surface-container-low hover:text-on-surface" href="#knowledge">
+<span class="material-symbols-outlined text-base">menu_book</span>
+<span class="font-label-sm text-label-sm uppercase mt-0.5 text-[9px]">KNOWLEDGE</span>
+</a>
+<!-- Item 4: TELEMETRY (Inactive) -->
+<a class="flex flex-col items-center justify-center text-outline py-1.5 px-2 rounded-none flex-1 text-center hover:bg-surface-container-low hover:text-on-surface" href="#telemetry">
+<span class="material-symbols-outlined text-base">monitoring</span>
+<span class="font-label-sm text-label-sm uppercase mt-0.5 text-[9px]">TELEMETRY</span>
+</a>
+</nav>
+</div>
+<script>
+    // Tab switching for Sample Ingestion
+    function switchSample(sample) {
+      const btnA = document.getElementById('tab-sample-a');
+      const btnB = document.getElementById('tab-sample-b');
+      const contentA = document.getElementById('sample-content-a');
+      const contentB = document.getElementById('sample-content-b');
+
+      if (sample === 'a') {
+        btnA.className = "flex-1 py-1.5 px-2 text-center text-primary bg-surface-container border-b-2 border-primary font-medium";
+        btnB.className = "flex-1 py-1.5 px-2 text-center text-outline hover:text-on-surface border-l hairline-border";
+        contentA.classList.remove('hidden');
+        contentB.classList.add('hidden');
+      } else {
+        btnB.className = "flex-1 py-1.5 px-2 text-center text-primary bg-surface-container border-b-2 border-primary font-medium border-l hairline-border";
+        btnA.className = "flex-1 py-1.5 px-2 text-center text-outline hover:text-on-surface";
+        contentB.classList.remove('hidden');
+        contentA.classList.add('hidden');
+      }
+    }
+
+    // 4-Collection Matrix Interactive Switcher
+    const matrixData = {
+      1: {
+        schema: "CREATE TABLE ideas_sparks (id UUID PRIMARY KEY, spark_text TEXT, hypothesis TEXT, created_at INTEGER);",
+        uuid: "7a8f10e4-b81d",
+        content: "Hypothesis: Lock-free B-tree split via RCU pointers eliminates top-level latch bottle-necks during heavy append batches.",
+        hash: "a40f92b"
+      },
+      2: {
+        schema: "CREATE TABLE study_notes (id UUID PRIMARY KEY, course_code TEXT, markdown_body TEXT, audio_ref BLOB);",
+        uuid: "2c9d41b0-ef88",
+        content: "Theorem: In two-phase locking (2PL), serializability is guaranteed iff no transaction acquires new locks after releasing its first lock.",
+        hash: "e51b33a"
+      },
+      3: {
+        schema: "CREATE TABLE projects (id UUID PRIMARY KEY, repo_name TEXT, build_target TEXT, valgrind_passed INTEGER);",
+        uuid: "88a100f2-44ca",
+        content: "Project: btree_concurrent_engine // Passing 128 stress tests with 16 worker threads; 0 memory leaks confirmed.",
+        hash: "c0189de"
+      },
+      4: {
+        schema: "CREATE TABLE plan_tasks (id UUID PRIMARY KEY, task_desc TEXT, hard_deadline INTEGER, priority_weight REAL);",
+        uuid: "5512ae30-1049",
+        content: "Deliverable PSet 4 due Friday 23:59 EST. Requirement: Submit benchmark comparison vs BerkeleyDB B-tree.",
+        hash: "f442c01"
+      }
+    };
+
+    function switchMatrix(index) {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`matrix-btn-${i}`);
+        if (i === index) {
+          btn.className = "p-2 bg-surface-container text-primary border-l-2 border-primary text-left border hairline-border font-medium";
+        } else {
+          btn.className = "p-2 bg-surface-container-lowest text-outline text-left border hairline-border hover:text-on-surface";
+        }
+      }
+
+      const item = matrixData[index];
+      document.getElementById('matrix-schema').innerText = item.schema;
+      document.getElementById('matrix-content').innerText = item.content;
+    }
+
+    // Terminal command copy handler
+    function copyCommand() {
+      const copyBtn = document.getElementById('copy-btn');
+      navigator.clipboard.writeText('curl -sSL https://gravitas.run | sh');
+      copyBtn.innerText = 'COPIED';
+      setTimeout(() => {
+        copyBtn.innerText = 'COPY';
+      }, 1500);
+    }
+  </script>
+</body></html>
