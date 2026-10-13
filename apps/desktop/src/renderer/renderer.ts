@@ -26,6 +26,7 @@ import type {
   RecordHumanDecisionIntent,
   DoctorReport,
 } from '../types.js'
+import type { PhoneSyncPlatform, PersonaArchetype } from '@gravitas/core'
 import { initWorldView } from './world/worldView.js'
 import type { WorldViewController } from './world/worldView.js'
 import type { WorldDataSource } from './world/worldModel.js'
@@ -576,155 +577,383 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
   if (!dialog) return
 
-  let currentStep = 1
-  const TOTAL_STEPS = 8
+  let currentScreen = 1
+  const TOTAL_SCREENS = 3
+  let selectedPlatform: PhoneSyncPlatform = 'IPHONE'
+  let selectedAction: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE' = 'SAVE_IDEA'
 
-  function setStep(step: number): void {
-    if (step < 1 || step > TOTAL_STEPS) return
-    currentStep = step
+  const PHONE_INSTRUCTIONS: Record<string, string> = {
+    IPHONE: `
+      <strong>iPhone iCloud Drive Setup:</strong><br>
+      1. On your iPhone, open Files, Safari, or your course app.<br>
+      2. Tap <strong>Share ➔ Save to Files</strong>, and choose <code>iCloud Drive/GRAVITAS/Inbox</code>.<br>
+      3. Select your local Windows iCloud Drive folder below.<br>
+      4. GRAVITAS watches the folder and imports assignments and notes into your subjects automatically.
+    `,
+    ANDROID: `
+      <strong>Android Folder Sync Setup:</strong><br>
+      1. Install <strong>Syncthing</strong>, <strong>LocalSend</strong>, or use USB sync on Android.<br>
+      2. Pair a mobile folder to a local folder on this Windows machine.<br>
+      3. Choose that synchronized Windows folder below.<br>
+      <em style="color: var(--text-muted);">Note: Uses standard local folder synchronization. No proprietary Android app required or claimed.</em>
+    `,
+    BOTH: `
+      <strong>Dual Device Setup (iPhone & Android):</strong><br>
+      Point the Windows Inbox to a central folder synchronized with iCloud Drive and your Android sync client.
+    `,
+    NONE: `
+      <strong>Local-Only Mode:</strong><br>
+      No phone synchronization configured. Notes, assignments, and tasks will be captured directly via Windows desktop companion or file drag-and-drop.
+    `,
+  }
 
-    for (let i = 1; i <= TOTAL_STEPS; i++) {
-      const stepEl = document.getElementById(`onboarding-step-${i}`)
-      if (stepEl) {
-        stepEl.style.display = i === currentStep ? 'block' : 'none'
+  function updateDots(screen: number): void {
+    const dots = document.querySelectorAll('.ob-dot')
+    dots.forEach((d) => {
+      const step = Number((d as HTMLElement).dataset.step || '1')
+      if (step === screen) {
+        ;(d as HTMLElement).style.background = '#38bdf8'
+      } else if (step < screen) {
+        ;(d as HTMLElement).style.background = 'var(--success)'
+      } else {
+        ;(d as HTMLElement).style.background = 'var(--border)'
+      }
+    })
+  }
+
+  function setScreen(screen: number): void {
+    if (screen < 1 || screen > TOTAL_SCREENS) return
+    currentScreen = screen
+
+    for (let i = 1; i <= TOTAL_SCREENS; i++) {
+      const el = document.getElementById(`onboarding-screen-${i}`)
+      if (el) {
+        el.style.display = i === currentScreen ? 'block' : 'none'
       }
     }
 
     const indicator = document.getElementById('onboarding-step-indicator')
-    if (indicator) indicator.textContent = `Step ${currentStep} of ${TOTAL_STEPS}`
+    if (indicator) indicator.textContent = `Screen ${currentScreen} of ${TOTAL_SCREENS}`
+
+    updateDots(currentScreen)
 
     const btnPrev = document.getElementById('onboarding-btn-prev')
     const btnNext = document.getElementById('onboarding-btn-next')
     const btnFinish = document.getElementById('onboarding-btn-finish')
 
-    if (btnPrev) btnPrev.style.display = currentStep > 1 ? 'inline-block' : 'none'
-    if (btnNext) btnNext.style.display = currentStep < TOTAL_STEPS ? 'inline-block' : 'none'
-    if (btnFinish) btnFinish.style.display = currentStep === TOTAL_STEPS ? 'inline-block' : 'none'
+    if (btnPrev) btnPrev.style.display = currentScreen > 1 ? 'inline-block' : 'none'
+    if (btnNext) btnNext.style.display = currentScreen < TOTAL_SCREENS ? 'inline-block' : 'none'
+    if (btnFinish) btnFinish.style.display = currentScreen === TOTAL_SCREENS ? 'inline-block' : 'none'
 
-    if (currentStep === 3) {
-      void bridge.getOnboarding().then((ob) => {
-        const rootDisplay = document.getElementById('onboarding-data-root-display')
-        if (rootDisplay) rootDisplay.textContent = ob.dataRoot
+    if (currentScreen === 3) {
+      updatePhoneInstructions(selectedPlatform)
+      if (bridge.executeStudyGuardianOperation) {
+        void bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' }).then((res) => {
+          const input = document.getElementById('ob-inbox-folder-input') as HTMLInputElement | null
+          if (input && res.inboxConfig?.inboxFolderPath) {
+            input.value = res.inboxConfig.inboxFolderPath
+          }
+        })
+      }
+    }
+  }
+
+  function updatePhoneInstructions(platform: string): void {
+    const container = document.getElementById('ob-phone-instructions')
+    if (container) {
+      container.innerHTML = PHONE_INSTRUCTIONS[platform] || PHONE_INSTRUCTIONS['IPHONE']!
+    }
+  }
+
+  // Theme Toggle
+  const themeToggle = document.getElementById('ob-btn-theme-toggle')
+  themeToggle?.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-theme')
+    if (themeToggle) {
+      themeToggle.textContent = isLight ? 'Theme: Light' : 'Theme: Dark'
+    }
+  })
+
+  // Screen 1: Welcome buttons
+  document.getElementById('ob-btn-get-started')?.addEventListener('click', () => {
+    setScreen(2)
+  })
+
+  document.getElementById('ob-btn-explore-demo')?.addEventListener('click', async () => {
+    if (bridge.executeStudyGuardianOperation) {
+      await bridge.executeStudyGuardianOperation({
+        action: 'APPLY_PERSONA_SETUP',
+        persona: 'EVERYTHING',
+      })
+      await bridge.executeStudyGuardianOperation({
+        action: 'EXECUTE_FIRST_SUCCESS',
+        successAction: 'EXPLORE_SAMPLE',
+      })
+    }
+    setScreen(5)
+    const card = document.getElementById('ob-persistence-card')
+    const detail = document.getElementById('ob-persistence-detail')
+    if (card && detail) {
+      card.style.display = 'block'
+      detail.textContent = 'Explore Demo Mode: Sample Knowledge Hub workspace populated with projects, notes, and tasks.'
+    }
+  })
+
+  // Screen 2: Persona Selection Cards
+  const personaCards = document.querySelectorAll('.ob-persona-card')
+  personaCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      personaCards.forEach((c) => ((c as HTMLElement).style.borderColor = 'var(--border)'))
+      ;(card as HTMLElement).style.borderColor = 'var(--border-focus)'
+      const radio = card.querySelector('input[type="radio"]') as HTMLInputElement | null
+      if (radio) radio.checked = true
+
+      const studentOpts = document.getElementById('ob-student-options')
+      if (studentOpts) {
+        studentOpts.style.display = radio?.value === 'STUDENT' ? 'block' : 'none'
+      }
+    })
+  })
+
+  // Screen 3: Phone Platform Tabs
+  const phoneTabs = document.querySelectorAll('.ob-phone-tab')
+  phoneTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      phoneTabs.forEach((t) => t.classList.remove('active'))
+      tab.classList.add('active')
+      selectedPlatform = ((tab as HTMLElement).dataset.platform as PhoneSyncPlatform) || 'IPHONE'
+      updatePhoneInstructions(selectedPlatform)
+    })
+  })
+
+  // Screen 3: Browse Folder
+  document.getElementById('ob-btn-browse-inbox')?.addEventListener('click', async () => {
+    if (bridge.selectInboxFolder) {
+      const res = await bridge.selectInboxFolder()
+      if (res.selected && res.folderPath) {
+        const input = document.getElementById('ob-inbox-folder-input') as HTMLInputElement | null
+        if (input) input.value = res.folderPath
+      }
+    }
+  })
+
+  // Screen 3: Test Inbox Connection
+  document.getElementById('ob-btn-test-inbox')?.addEventListener('click', async () => {
+    const input = document.getElementById('ob-inbox-folder-input') as HTMLInputElement | null
+    const folder = input?.value.trim() || undefined
+    const badge = document.getElementById('ob-inbox-status-badge')
+    const messageEl = document.getElementById('ob-inbox-test-message')
+
+    if (badge) {
+      badge.style.display = 'inline-block'
+      badge.className = 'badge badge-waiting'
+      badge.textContent = 'TESTING...'
+    }
+    if (messageEl) messageEl.textContent = 'Verifying inbox accessibility and sync status...'
+
+    try {
+      if (bridge.executeStudyGuardianOperation) {
+        const res = await bridge.executeStudyGuardianOperation({
+          action: 'TEST_INBOX_SETUP',
+          folderPath: folder,
+          checkType: 'full_scan',
+        })
+
+        const v = res.inboxVerificationResult
+        if (badge && v) {
+          if (v.state === 'CROSS_DEVICE_SYNC_VERIFIED') {
+            badge.className = 'badge badge-ready'
+            badge.textContent = 'CROSS-DEVICE SYNC VERIFIED'
+          } else if (v.state === 'LOCAL_IMPORT_VERIFIED') {
+            badge.className = 'badge badge-ready'
+            badge.textContent = 'LOCAL IMPORT VERIFIED'
+          } else if (v.state === 'AWAITING_FIRST_FILE') {
+            badge.className = 'badge badge-waiting'
+            badge.textContent = 'AWAITING FIRST FILE'
+          } else if (v.state === 'FOLDER_ACCESSIBLE') {
+            badge.className = 'badge badge-ready'
+            badge.textContent = 'FOLDER ACCESSIBLE'
+          } else {
+            badge.className = 'badge badge-offline'
+            badge.textContent = 'UNCONFIGURED / INVALID'
+          }
+        }
+        if (messageEl && v) {
+          messageEl.textContent = v.message
+        }
+      }
+    } catch (err) {
+      if (badge) {
+        badge.className = 'badge badge-offline'
+        badge.textContent = 'ERROR'
+      }
+      if (messageEl) messageEl.textContent = `Verification error: ${(err as Error).message}`
+    }
+  })
+
+  // Screen 5: Action Tabs
+  const actionTabs = document.querySelectorAll('.ob-first-action-tab')
+  actionTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      actionTabs.forEach((t) => t.classList.remove('active'))
+      tab.classList.add('active')
+      selectedAction = ((tab as HTMLElement).dataset.action as any) || 'SAVE_IDEA'
+
+      const extraRow = document.getElementById('ob-input-row-extra')
+      const titleInput = document.getElementById('ob-action-title') as HTMLInputElement | null
+      const textInput = document.getElementById('ob-action-text') as HTMLInputElement | null
+
+      if (extraRow) {
+        extraRow.style.display = selectedAction === 'CREATE_TASK' ? 'block' : 'none'
+      }
+
+      if (selectedAction === 'SAVE_IDEA') {
+        if (titleInput) titleInput.value = 'My first idea in GRAVITAS'
+        if (textInput) textInput.value = 'Quick thought captured into Knowledge Hub.'
+      } else if (selectedAction === 'CREATE_TASK') {
+        if (titleInput) titleInput.value = 'Complete Chapter 2 revision problem set'
+        if (textInput) textInput.value = 'Focus on asymptotic recurrence trees.'
+      } else if (selectedAction === 'IMPORT_ASSIGNMENT') {
+        if (titleInput) titleInput.value = 'Assignment 1 Solution Draft'
+        if (textInput) textInput.value = 'Solve algorithmic problems and review with assistant.'
+      } else if (selectedAction === 'EXPLORE_SAMPLE') {
+        if (titleInput) titleInput.value = 'Explore sample workspace'
+        if (textInput) textInput.value = 'Review seeded projects, notes, and tasks.'
+      }
+    })
+  })
+
+  // Screen 5: Execute Action
+  document.getElementById('ob-btn-do-action')?.addEventListener('click', async () => {
+    const titleInput = document.getElementById('ob-action-title') as HTMLInputElement | null
+    const textInput = document.getElementById('ob-action-text') as HTMLInputElement | null
+    const extraInput = document.getElementById('ob-action-extra') as HTMLInputElement | null
+
+    const title = titleInput?.value.trim() || undefined
+    const text = textInput?.value.trim() || undefined
+    const dueDate = extraInput?.value || undefined
+
+    const card = document.getElementById('ob-persistence-card')
+    const detail = document.getElementById('ob-persistence-detail')
+
+    try {
+      if (bridge.executeStudyGuardianOperation) {
+        const res = await bridge.executeStudyGuardianOperation({
+          action: 'EXECUTE_FIRST_SUCCESS',
+          successAction: selectedAction,
+          title,
+          text,
+          dueDate,
+        })
+
+        if (res.firstSuccessResult && card && detail) {
+          card.style.display = 'block'
+          card.style.background = '#064e3b'
+          detail.textContent = `Created ${res.firstSuccessResult.collection} "${res.firstSuccessResult.itemTitle}" (ID: ${res.firstSuccessResult.createdItemId}). Persisted to local SQLite: true.`
+          announce(`Action complete: ${res.firstSuccessResult.message}`)
+        }
+      }
+    } catch (err) {
+      if (card && detail) {
+        card.style.display = 'block'
+        card.style.background = '#7f1d1d'
+        detail.textContent = `Action failed: ${(err as Error).message}`
+      }
+    }
+  })
+
+  // Stepper Back/Next Navigation
+  document.getElementById('onboarding-btn-prev')?.addEventListener('click', () => {
+    setScreen(currentScreen - 1)
+  })
+
+  document.getElementById('onboarding-btn-next')?.addEventListener('click', async () => {
+    // If moving from Screen 2, apply persona setup
+    if (currentScreen === 2) {
+      const selectedPersonaEl = document.querySelector('input[name="ob-persona"]:checked') as HTMLInputElement | null
+      const persona = (selectedPersonaEl?.value as PersonaArchetype) || 'STUDENT'
+      const customSubjInput = (document.getElementById('ob-custom-subjects-input') as HTMLInputElement | null)?.value || ''
+      const customSubjects = customSubjInput
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+      const useSevenSubjectTemplate = (document.getElementById('ob-use-7-subject-template') as HTMLInputElement | null)?.checked
+
+      const statusEl = document.getElementById('ob-persona-status')
+      if (statusEl) statusEl.textContent = 'Applying workspace setup...'
+
+      try {
+        if (bridge.executeStudyGuardianOperation) {
+          const res = await bridge.executeStudyGuardianOperation({
+            action: 'APPLY_PERSONA_SETUP',
+            persona,
+            customSubjects: customSubjects.length > 0 ? customSubjects : undefined,
+            useSevenSubjectTemplate,
+          })
+          if (statusEl && res.personaSetupResult) {
+            statusEl.textContent = res.personaSetupResult.message
+          }
+        }
+      } catch (err) {
+        if (statusEl) statusEl.textContent = `Setup error: ${(err as Error).message}`
+      }
+    }
+
+    // If moving from Screen 4, save assistant preferences
+    if (currentScreen === 4) {
+      const shortcut = (document.getElementById('ob-shortcut-input') as HTMLInputElement | null)?.value || 'Alt+Space'
+      const freq = Number((document.getElementById('ob-reminder-frequency-select') as HTMLSelectElement | null)?.value || '60')
+      const qStart = (document.getElementById('ob-quiet-start') as HTMLInputElement | null)?.value || '22:00'
+      const qEnd = (document.getElementById('ob-quiet-end') as HTMLInputElement | null)?.value || '08:00'
+      const notifs = (document.getElementById('ob-notifications-enabled') as HTMLInputElement | null)?.checked ?? true
+      const startWin = (document.getElementById('ob-start-with-windows') as HTMLInputElement | null)?.checked ?? false
+
+      await bridge.saveOnboarding({
+        completed: false,
+        step: 'FIRST_SUCCESS',
+        preferences: {
+          companionShortcut: shortcut,
+          assistantShortcut: shortcut,
+          reminderFrequencyMinutes: freq,
+          reminderIntervalMinutes: freq,
+          quietHoursStart: qStart,
+          quietHoursEnd: qEnd,
+          notificationsEnabled: notifs,
+          startWithWindows: startWin,
+          phonePlatform: selectedPlatform,
+          defaultDenyCloudEgress: true,
+        },
       })
     }
 
-    if (currentStep === 8) {
-      updateReviewSummary()
-    }
-  }
-
-  function updateReviewSummary(): void {
-    const summaryEl = document.getElementById('onboarding-review-summary')
-    if (!summaryEl) return
-
-    const isAssisted = (document.getElementById('onboarding-mode-assisted') as HTMLInputElement)?.checked
-    const mode = isAssisted ? 'ASSISTED' : 'DETERMINISTIC_ONLY'
-
-    const harnesses: string[] = ['harness:antigravity:host']
-    if ((document.getElementById('harness-powershell') as HTMLInputElement)?.checked) harnesses.push('harness:powershell')
-    if ((document.getElementById('harness-claude') as HTMLInputElement)?.checked) harnesses.push('harness:claude-code')
-    if ((document.getElementById('harness-codex') as HTMLInputElement)?.checked) harnesses.push('harness:codex')
-
-    const nimStatus = document.getElementById('onboarding-nim-status')?.textContent || 'Unconfigured'
-
-    summaryEl.innerHTML = `
-      <div><strong>Operating Mode:</strong> ${mode}</div>
-      <div><strong>Active Harnesses:</strong> ${harnesses.join(', ')}</div>
-      <div><strong>AI Provider (NVIDIA NIM):</strong> ${nimStatus}</div>
-      <div><strong>Autonomous Spend Ceiling:</strong> $0.00 (Zero out-of-pocket guarantee)</div>
-      <div><strong>Storage Guarantees:</strong> Single-writer SQLite transaction journal</div>
-    `
-  }
-
-  // Stepper navigation
-  document.getElementById('onboarding-btn-prev')?.addEventListener('click', () => {
-    setStep(currentStep - 1)
-  })
-
-  document.getElementById('onboarding-btn-next')?.addEventListener('click', () => {
-    setStep(currentStep + 1)
+    setScreen(currentScreen + 1)
   })
 
   document.getElementById('onboarding-btn-close')?.addEventListener('click', () => {
     dialog.close()
   })
 
-  // Step 2 Doctor preview
-  document.getElementById('onboarding-btn-run-doctor')?.addEventListener('click', async () => {
-    const preview = document.getElementById('onboarding-doctor-preview')
-    if (preview) preview.textContent = 'Running diagnostics...'
-    try {
-      const rep = await bridge.runDoctor()
-      if (preview) renderDoctorReport(preview, rep)
-    } catch (err) {
-      if (preview) preview.textContent = `Diagnostic error: ${(err as Error).message}`
-    }
-  })
-
-  // Step 6 NIM Key configuration
-  document.getElementById('onboarding-btn-test-key')?.addEventListener('click', async () => {
-    const keyInput = document.getElementById('onboarding-nim-key-input') as HTMLInputElement | null
-    const key = keyInput?.value.trim() || ''
-    const statusEl = document.getElementById('onboarding-nim-status')
-    if (!key) {
-      if (statusEl) statusEl.textContent = 'Please enter key or click skip'
-      return
-    }
-    if (statusEl) statusEl.textContent = 'Storing key...'
-    try {
-      const res = await bridge.configureProvider({ providerId: 'nvidia-nim', apiKey: key })
-      if (statusEl) {
-        statusEl.textContent = res.success ? `Configured (${res.maskedHandle})` : 'Configuration failed'
-        statusEl.style.color = res.success ? 'var(--badge-ready)' : 'var(--badge-offline)'
-      }
-      if (keyInput) keyInput.value = ''
-    } catch (err) {
-      if (statusEl) statusEl.textContent = `Error: ${(err as Error).message}`
-    }
-  })
-
-  document.getElementById('onboarding-btn-clear-key')?.addEventListener('click', async () => {
-    const statusEl = document.getElementById('onboarding-nim-status')
-    const keyInput = document.getElementById('onboarding-nim-key-input') as HTMLInputElement | null
-    if (keyInput) keyInput.value = ''
-    try {
-      await bridge.configureProvider({ providerId: 'nvidia-nim', apiKey: '' })
-      if (statusEl) {
-        statusEl.textContent = 'Skipped / Unconfigured'
-        statusEl.style.color = 'var(--text-muted)'
-      }
-    } catch (err) {
-      if (statusEl) statusEl.textContent = `Error: ${(err as Error).message}`
-    }
-  })
-
-  // Step 8 Finish Setup
+  // Finish Setup Button (Screen 5)
   document.getElementById('onboarding-btn-finish')?.addEventListener('click', async () => {
-    const isAssisted = (document.getElementById('onboarding-mode-assisted') as HTMLInputElement)?.checked
-    const mode = isAssisted ? 'ASSISTED' : 'DETERMINISTIC_ONLY'
-
-    const harnesses: string[] = ['harness:antigravity:host']
-    if ((document.getElementById('harness-powershell') as HTMLInputElement)?.checked) harnesses.push('harness:powershell')
-    if ((document.getElementById('harness-claude') as HTMLInputElement)?.checked) harnesses.push('harness:claude-code')
-    if ((document.getElementById('harness-codex') as HTMLInputElement)?.checked) harnesses.push('harness:codex')
-
     try {
       await bridge.saveOnboarding({
         completed: true,
-        operatingMode: mode,
-        selectedHarnesses: harnesses,
+        step: 'COMPLETED',
       })
-      announce('Onboarding configuration saved successfully.')
+      announce('Setup complete! Welcome to GRAVITAS.')
       dialog.close()
       await refreshAll(bridge)
     } catch (err) {
-      alert(`Failed to save setup: ${(err as Error).message}`)
+      alert(`Failed to complete onboarding: ${(err as Error).message}`)
     }
   })
 
-  // System Surface Buttons
-  document.getElementById('btn-run-setup-wizard')?.addEventListener('click', () => {
-    setStep(1)
+  // System Surface "Run setup again" Button
+  document.getElementById('btn-run-setup-wizard')?.addEventListener('click', async () => {
+    if (bridge.executeStudyGuardianOperation) {
+      await bridge.executeStudyGuardianOperation({ action: 'RESET_ONBOARDING' })
+    }
+    setScreen(1)
     dialog.showModal()
   })
 
@@ -742,11 +971,17 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     }
   })
 
-  // Auto-prompt on initial launch if not completed and not running under automated test override
+  // Auto-prompt on initial launch if not completed
   void bridge.getOnboarding().then((ob) => {
     if (!ob.completed && !ob.isTest) {
-      setStep(1)
-      dialog.show()
+      let startStep = 1
+      if (ob.step === 'PERSONALIZE') startStep = 2
+      else if (ob.step === 'PHONE_SETUP') startStep = 3
+      else if (ob.step === 'ASSISTANT_PREFS') startStep = 4
+      else if (ob.step === 'FIRST_SUCCESS') startStep = 5
+
+      setScreen(startStep)
+      dialog.showModal()
     }
   })
 }

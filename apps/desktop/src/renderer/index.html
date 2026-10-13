@@ -23,6 +23,24 @@
       --badge-waiting: #fbbf24;
     }
 
+    body.light-theme, [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #f1f5f9;
+      --border: #cbd5e1;
+      --border-focus: #0284c7;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --badge-ready: #10b981;
+      --badge-offline: #ef4444;
+      --badge-waiting: #f59e0b;
+    }
+
     * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -570,160 +588,147 @@
     </div>
   </dialog>
 
-  <!-- First-Run Setup Wizard (Wave V1-C) -->
-  <dialog id="onboarding-dialog" aria-labelledby="onboarding-heading" style="max-width: 640px; width: 90%;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px;">
-      <h3 id="onboarding-heading" style="margin: 0; font-size: 16px;">GRAVITAS — Setup Wizard</h3>
-      <span id="onboarding-step-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Step 1 of 8</span>
-    </div>
-
-    <!-- Step A: Welcome -->
-    <div id="onboarding-step-1" class="onboarding-step" data-step="1">
-      <h4 style="margin-top: 0; color: #38bdf8;">Welcome & Local-First Architecture</h4>
-      <p style="font-size: 13px; line-height: 1.6; color: var(--text-main);">
-        GRAVITAS operates on a strict <strong>local-first, fail-closed</strong> foundation. All orchestration, state machines, and verification gates execute entirely within your local Windows environment.
-      </p>
-      <div class="invariant-banner" style="margin-top: 12px;">
-        INVARIANT: DETERMINISTIC VERIFICATION PRECEDES ALL DISPATCH.<br>
-        ZERO OUT-OF-POCKET EXPENSE REQUIRED. NO EXTERNAL ACCOUNTS MANDATED.
+  <!-- Premium First-Run Setup Wizard (Wave V1-G-02) -->
+  <dialog id="onboarding-dialog" aria-labelledby="onboarding-heading" style="max-width: 680px; width: 92%; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-main); padding: 20px;">
+    <!-- Wizard Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 18px; font-weight: 700; color: #38bdf8;">GRAVITAS</span>
+        <span id="onboarding-heading" style="font-size: 14px; font-weight: 600; color: var(--text-muted);">First-Run Setup</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <button id="ob-btn-theme-toggle" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" aria-label="Toggle light or dark theme">Theme: Dark</button>
+        <span id="onboarding-step-indicator" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Screen 1 of 5</span>
       </div>
     </div>
 
-    <!-- Step B: Environment Diagnostics -->
-    <div id="onboarding-step-2" class="onboarding-step" data-step="2" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Environment Diagnostics</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        The diagnostic engine verifies runtime environment readiness, single-writer SQLite integrity, and tool availability.
-      </p>
-      <div id="onboarding-doctor-preview" style="background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;">
-        Click "Run Diagnostics" to inspect local environment.
-      </div>
-      <div style="margin-top: 10px;">
-        <button id="onboarding-btn-run-doctor" class="btn btn-secondary">Run Diagnostics</button>
-      </div>
+    <!-- Step Progress Dots / Bar -->
+    <div style="display: flex; gap: 6px; margin-bottom: 20px;" id="onboarding-dots-bar" aria-label="Setup progress">
+      <div class="ob-dot" data-step="1" style="flex: 1; height: 4px; background: #38bdf8; border-radius: 2px;"></div>
+      <div class="ob-dot" data-step="2" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
+      <div class="ob-dot" data-step="3" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
     </div>
 
-    <!-- Step C: Data Location -->
-    <div id="onboarding-step-3" class="onboarding-step" data-step="3" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Data Root & Storage Readiness</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        Canonical state is preserved in an isolated directory with single-writer SQLite transaction guarantees.
-      </p>
-      <div class="dialog-field">
-        <span class="dialog-label">Active Data Root Directory</span>
-        <div id="onboarding-data-root-display" style="font-family: monospace; font-size: 12px; background: #000; padding: 8px; border: 1px solid var(--border); word-break: break-all;">
-          Loading...
+    <!-- SCREEN 1: Welcome -->
+    <div id="onboarding-screen-1" class="onboarding-screen" data-screen="1">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #38bdf8;">Welcome to GRAVITAS</h2>
+        <p style="font-size: 14px; line-height: 1.5; color: var(--text-main); max-width: 540px; margin: 0 auto;">
+          Your local-first intelligence operating system. Capture ideas, organize semester subjects, track assignments, and orchestrate daily workflows with zero forced cloud accounts.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #38bdf8;">100% Local-First</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+            All notes, SQLite databases, and task state live locally on your machine. No accounts, subscriptions, or forced telemetry.
+          </p>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #38bdf8;">Universal Companion</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+            Summon the assistant with <kbd style="background: #000; color: #fff; padding: 2px 5px; border-radius: 3px; font-family: monospace;">Alt+Space</kbd> from any app to capture thoughts or schedule tasks.
+          </p>
         </div>
       </div>
-      <div class="dialog-field">
-        <span class="dialog-label">Storage Integrity</span>
-        <div id="onboarding-storage-status" style="font-size: 12px; color: var(--success);">
-          Database schema version: 1 | Single-writer lock verified
+
+      <div class="invariant-banner" style="margin-bottom: 20px; font-size: 11px;">
+        PRIVACY GUARANTEE: Zero audio or file data is ever transmitted to cloud providers without explicit manual configuration.
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: center; align-items: center;">
+        <button id="ob-btn-get-started" class="btn" style="padding: 10px 24px; font-size: 14px;">Get Started</button>
+        <button id="ob-btn-explore-demo" class="btn btn-secondary" style="padding: 10px 20px; font-size: 13px;">Explore Demo</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Personalize -->
+    <div id="onboarding-screen-2" class="onboarding-screen" data-screen="2" style="display: none;">
+      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Personalize Your Workspace</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Choose the starter template that matches your focus. You can always customize collections later.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border-focus); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
+          <input type="radio" name="ob-persona" value="STUDENT" checked style="margin-right: 6px;" />
+          <strong style="font-size: 13px;">STUDENT</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Semester subjects, lecture notes, assignments, solution drafts, and revision tasks.</div>
+        </label>
+        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
+          <input type="radio" name="ob-persona" value="WORK" style="margin-right: 6px;" />
+          <strong style="font-size: 13px;">WORK</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Roadmaps, sprint tasks, meeting agendas, architecture decisions, and documents.</div>
+        </label>
+        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
+          <input type="radio" name="ob-persona" value="PERSONAL" style="margin-right: 6px;" />
+          <strong style="font-size: 13px;">PERSONAL</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Daily ideas, habit trackers, reading notes, and personal reminders.</div>
+        </label>
+        <label class="ob-persona-card" style="display: block; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-card); cursor: pointer;">
+          <input type="radio" name="ob-persona" value="EVERYTHING" style="margin-right: 6px;" />
+          <strong style="font-size: 13px;">EVERYTHING</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Unified Knowledge Hub connecting all study, work, and personal collections.</div>
+        </label>
+      </div>
+
+      <!-- Student custom subjects options -->
+      <div id="ob-student-options" style="background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+        <label class="dialog-label" for="ob-custom-subjects-input">Your Subjects (comma-separated)</label>
+        <input type="text" id="ob-custom-subjects-input" placeholder="e.g. Mathematics, Computer Science, Physics" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px; margin-top: 4px; margin-bottom: 8px;" />
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer;">
+          <input type="checkbox" id="ob-use-7-subject-template" />
+          <span>Optional: Use Semester 3 seven-subject template (CSE 2195, CSE 2221, CSE 2631, MTH 2002, MTH 2787, CHM 2041, GET 1433)</span>
+        </label>
+      </div>
+
+      <div id="ob-persona-status" style="font-size: 12px; font-family: monospace; color: var(--badge-ready); margin-bottom: 8px; min-height: 18px;"></div>
+    </div>
+
+    <!-- SCREEN 3: Universal Phone and Inbox Setup -->
+    <div id="onboarding-screen-3" class="onboarding-screen" data-screen="3" style="display: none;">
+      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Phone & Inbox Setup</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+        Import notes and assignments seamlessly from your phone into GRAVITAS using local folders.
+      </p>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+        <button class="btn btn-secondary ob-phone-tab active" data-platform="IPHONE">iPhone</button>
+        <button class="btn btn-secondary ob-phone-tab" data-platform="ANDROID">Android</button>
+        <button class="btn btn-secondary ob-phone-tab" data-platform="BOTH">Both</button>
+        <button class="btn btn-secondary ob-phone-tab" data-platform="NONE">No Phone (Local Only)</button>
+      </div>
+
+      <div id="ob-phone-instructions" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.6; margin-bottom: 14px;">
+        <!-- Dynamic instructions rendered by JS -->
+      </div>
+
+      <div class="dialog-field" style="margin-bottom: 12px;">
+        <label class="dialog-label" for="ob-inbox-folder-input">Windows Inbox Folder</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="ob-inbox-folder-input" readonly placeholder="Click Browse to select Windows Inbox directory..." style="flex: 1; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-family: monospace; font-size: 11px;" />
+          <button id="ob-btn-browse-inbox" class="btn btn-secondary" style="font-size: 12px;">Browse Folder</button>
         </div>
       </div>
-    </div>
 
-    <!-- Step D: Operating Mode -->
-    <div id="onboarding-step-4" class="onboarding-step" data-step="4" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Operating Mode</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        Choose the initial execution mode for GRAVITAS:
-      </p>
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
-          <input type="radio" name="onboarding-mode" id="onboarding-mode-deterministic" value="DETERMINISTIC_ONLY" checked style="margin-top: 3px;" />
-          <div>
-            <div style="font-weight: 600; font-size: 13px;">DETERMINISTIC_ONLY (Recommended Default)</div>
-            <div style="font-size: 12px; color: var(--text-muted);">Zero external LLMs or APIs. Uses purely deterministic code, unit tests, and verified tools. Fully functional without an internet connection.</div>
-          </div>
-        </label>
-        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
-          <input type="radio" name="onboarding-mode" id="onboarding-mode-assisted" value="ASSISTED" style="margin-top: 3px;" />
-          <div>
-            <div style="font-weight: 600; font-size: 13px;">ASSISTED</div>
-            <div style="font-size: 12px; color: var(--text-muted);">Enables optional model intelligence using zero-spend NVIDIA NIM or local models under K3/K5 governance.</div>
-          </div>
-        </label>
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+        <button id="ob-btn-test-inbox" class="btn btn-secondary" style="font-size: 12px;">Test Inbox Connection</button>
+        <span id="ob-inbox-status-badge" class="badge" style="display: none;">-</span>
       </div>
+
+      <div id="ob-inbox-test-message" style="font-size: 12px; color: var(--text-muted); min-height: 20px;"></div>
     </div>
 
-    <!-- Step E: Harness Discovery -->
-    <div id="onboarding-step-5" class="onboarding-step" data-step="5" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Harness Discovery & Selection</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        Select available execution harnesses in your environment:
-      </p>
-      <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
-        <label style="display: flex; gap: 8px; align-items: center;">
-          <input type="checkbox" id="harness-agy" value="harness:antigravity:host" checked disabled />
-          <span><strong>Antigravity Host</strong> (Built-in primary host runtime)</span>
-        </label>
-        <label style="display: flex; gap: 8px; align-items: center;">
-          <input type="checkbox" id="harness-powershell" value="harness:powershell" checked />
-          <span><strong>PowerShell</strong> (Native Windows shell execution)</span>
-        </label>
-        <label style="display: flex; gap: 8px; align-items: center;">
-          <input type="checkbox" id="harness-claude" value="harness:claude-code" />
-          <span><strong>Claude Code</strong> (Optional CLI harness)</span>
-        </label>
-        <label style="display: flex; gap: 8px; align-items: center;">
-          <input type="checkbox" id="harness-codex" value="harness:codex" />
-          <span><strong>Codex</strong> (Optional CLI harness)</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Step F: Optional NVIDIA NIM Setup -->
-    <div id="onboarding-step-6" class="onboarding-step" data-step="6" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Optional AI Provider: NVIDIA NIM</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        Configure a zero-spend NVIDIA NIM API key for assisted tasks. Keys are kept <strong>strictly in volatile memory</strong> and never saved to plaintext configuration or disk.
-      </p>
-      <div class="dialog-field">
-        <span class="dialog-label">API Key (nvapi-...)</span>
-        <input type="password" id="onboarding-nim-key-input" placeholder="nvapi-..." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 8px; font-family: monospace; font-size: 12px;" />
-      </div>
-      <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
-        <button id="onboarding-btn-test-key" class="btn btn-secondary">Store Key in Volatile Memory</button>
-        <button id="onboarding-btn-clear-key" class="btn btn-secondary">Clear / Skip</button>
-        <span id="onboarding-nim-status" style="font-size: 12px; font-family: monospace; color: var(--text-muted);">Unconfigured</span>
-      </div>
-    </div>
-
-    <!-- Step G: Security & Spend Policy -->
-    <div id="onboarding-step-7" class="onboarding-step" data-step="7" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Security & Spend Policy</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        GRAVITAS enforces zero-dollar out-of-pocket spend and fail-closed security invariants:
-      </p>
-      <table style="margin-top: 10px;">
-        <tr><th>Policy Invariant</th><th>Enforcement Status</th></tr>
-        <tr><td>Autonomous Financial Spend</td><td style="color: var(--success);">BLOCKED ($0.00 Limit)</td></tr>
-        <tr><td>Paid Provider Fallback</td><td style="color: var(--success);">DISABLED</td></tr>
-        <tr><td>Architectural Decisions & Deployments</td><td style="color: var(--badge-ready);">HUMAN APPROVAL REQUIRED</td></tr>
-        <tr><td>Secret Storage</td><td style="color: var(--badge-ready);">VOLATILE IN-MEMORY ONLY</td></tr>
-      </table>
-    </div>
-
-    <!-- Step H: Review & Finish -->
-    <div id="onboarding-step-8" class="onboarding-step" data-step="8" style="display: none;">
-      <h4 style="margin-top: 0; color: #38bdf8;">Review & Complete Setup</h4>
-      <p style="font-size: 13px; color: var(--text-muted);">
-        Review your configuration before completing initial onboarding:
-      </p>
-      <div id="onboarding-review-summary" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-size: 12px; font-family: monospace; line-height: 1.6;">
-        Loading summary...
-      </div>
-    </div>
-
-    <div class="dialog-actions" style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 12px; justify-content: space-between;">
+    <!-- Wizard Navigation Footer -->
+    <div class="dialog-actions" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px; display: flex; justify-content: space-between; align-items: center;">
       <div>
-        <button id="onboarding-btn-close" class="btn btn-secondary">Close</button>
+        <button id="onboarding-btn-close" class="btn btn-secondary" style="font-size: 12px;">Close</button>
       </div>
       <div style="display: flex; gap: 8px;">
-        <button id="onboarding-btn-prev" class="btn btn-secondary" style="display: none;">Back</button>
-        <button id="onboarding-btn-next" class="btn">Next</button>
-        <button id="onboarding-btn-finish" class="btn" style="display: none;">Finish Setup</button>
+        <button id="onboarding-btn-prev" class="btn btn-secondary" style="display: none; font-size: 12px;">Back</button>
+        <button id="onboarding-btn-next" class="btn" style="font-size: 12px;">Continue</button>
+        <button id="onboarding-btn-finish" class="btn" style="display: none; font-size: 12px; background: var(--success);">Finish & Open Dashboard</button>
       </div>
     </div>
   </dialog>
