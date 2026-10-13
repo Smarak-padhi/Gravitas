@@ -239,3 +239,324 @@ describe('GRAVITAS Wave V1-G-01 — 7-Subject Seeding, iCloud Drive Inbox & Assi
     vault.close()
   })
 })
+
+describe('GRAVITAS Wave V1-G-01 — Study Guardian, Study Answers, Companion Commands & End-to-End A–J Flow (Slice 2)', () => {
+  let tempDir: string
+  let inboxDir: string
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'gravitas-v1g01-s2-'))
+    inboxDir = join(tempDir, 'iCloudDrive', 'GRAVITAS', 'Inbox')
+  })
+
+  afterEach(async () => {
+    try {
+      await rm(tempDir, { recursive: true, force: true })
+    } catch {}
+  })
+
+  it('4. Executes the full Required Working Demonstration (A–J) through KernelHost and DesktopSupervisor', async () => {
+    const { KernelHost, DesktopSupervisor } = await import('./index.js')
+    const kernelListeners: Array<(msg: unknown) => void> = []
+    let host: InstanceType<typeof KernelHost>
+
+    const bridge = {
+      pid: 4242,
+      postMessage(msg: unknown) {
+        void host.handleMessage(msg)
+      },
+      on(event: string, listener: (arg: any) => void) {
+        if (event === 'message') {
+          kernelListeners.push(listener)
+        }
+      },
+    }
+
+    host = new KernelHost({
+      dataRoot: tempDir,
+      pid: 4242,
+      onMessage: (msg) => {
+        for (const l of kernelListeners) l(msg)
+      },
+    })
+
+    const supervisor = new DesktopSupervisor({
+      dataRoot: tempDir,
+      forkProcess: () => bridge as any,
+    })
+
+    await supervisor.start()
+    await host.start()
+
+    // A. Verify all 7 subjects exist and do not duplicate after restart
+    const subjRes1 = await supervisor.executeStudyGuardianOperation({
+      action: 'LIST_SEMESTER_SUBJECTS',
+    })
+    expect(subjRes1.success).toBe(true)
+    expect(subjRes1.semesterSubjects).toHaveLength(7)
+
+    // B. Configure a local test Inbox folder representing iCloud Drive/GRAVITAS/Inbox
+    const cfgRes = await supervisor.executeStudyGuardianOperation({
+      action: 'SET_INBOX_FOLDER',
+      folderPath: inboxDir,
+      startWatcher: false,
+    })
+    expect(cfgRes.success).toBe(true)
+    expect(cfgRes.inboxConfig?.inboxFolderPath).toBe(inboxDir)
+
+    // C. Drop a realistic CSE 2631 Algorithms assignment file into the Inbox folder
+    const dueIn4Days = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
+    const dueIso = `${dueIn4Days.getFullYear()}-${String(dueIn4Days.getMonth() + 1).padStart(2, '0')}-${String(dueIn4Days.getDate()).padStart(2, '0')}`
+    const algoFile = join(inboxDir, 'CSE2631_HW3_Dynamic_Programming.txt')
+    const originalInstructions = [
+      'Title: Homework 3 — Dynamic Programming & Shortest Paths',
+      'Subject: CSE 2631 — Algorithms Analysis and Design 1',
+      `Due: ${dueIso}`,
+      'Teacher Instructions:',
+      '1. Formulate the optimal substructure recurrence for 0/1 Knapsack.',
+      '2. Trace Dijkstra algorithm on the weighted directed graph in Figure 2.',
+      '3. Prove why negative-weight cycles break greedy relaxation.',
+    ].join('\n')
+    await writeFile(algoFile, originalInstructions, 'utf8')
+
+    // D. Import and extract a draft assignment with CSE 2631 suggested
+    const scanRes1 = await supervisor.executeStudyGuardianOperation({
+      action: 'SCAN_INBOX',
+    })
+    expect(scanRes1.success).toBe(true)
+    expect(scanRes1.inboxScan?.importedRecords).toHaveLength(1)
+    expect(scanRes1.inboxScan?.createdDrafts).toHaveLength(1)
+
+    const draft = scanRes1.inboxScan!.createdDrafts[0]!
+    expect(draft.suggestedSubjectCode).toBe('CSE 2631')
+    expect(draft.extractedDueDate).toBe(dueIso)
+    expect(draft.subtasks).toHaveLength(3)
+
+    // E. Confirm subject and due date
+    const confirmRes = await supervisor.executeStudyGuardianOperation({
+      action: 'CONFIRM_ASSIGNMENT',
+      draftId: draft.draftId,
+      confirmedSubjectCode: 'CSE 2631',
+      confirmedDueDate: dueIso,
+      reminderIntervalMinutes: 60,
+      quietHoursStart: '23:00',
+      quietHoursEnd: '06:00',
+    })
+    expect(confirmRes.success).toBe(true)
+    const assignment = confirmRes.assignment!
+    expect(assignment.subjectCode).toBe('CSE 2631')
+    expect(assignment.dueDate).toBe(dueIso)
+    expect(assignment.status).toBe('TODO')
+    expect(assignment.progressPercent).toBe(0)
+
+    // F. Prepare or paste an answer draft under CSE 2631 -> Answers
+    const prepRes = await supervisor.executeStudyGuardianOperation({
+      action: 'PREPARE_ANSWER_DRAFT',
+      assignmentId: assignment.assignmentId,
+    })
+    expect(prepRes.success).toBe(true)
+    expect(prepRes.answerDraftResult?.mode).toBe('MANUAL_COPY_FOR_EXTERNAL_AI')
+    expect(prepRes.answerDraftResult?.copyForExternalAiPrompt).toContain(
+      'Formulate the optimal substructure recurrence for 0/1 Knapsack.'
+    )
+    // Preparing answer draft NEVER marks assignment completed
+    expect(prepRes.answerDraftResult?.assignmentStatusUnchanged).toBe('TODO')
+
+    const pastedAnswerRes = await supervisor.executeStudyGuardianOperation({
+      action: 'SAVE_STUDY_ANSWER',
+      assignmentId: assignment.assignmentId,
+      title: 'My Draft Solution for HW3',
+      answerDraftText:
+        'Part 1: Let DP[i][w] = max(DP[i-1][w], v_i + DP[i-1][w - w_i]).\nPart 2: Dijkstra priority queue trace...\nPart 3: Negative cycle proof...',
+    })
+    expect(pastedAnswerRes.success).toBe(true)
+    expect(pastedAnswerRes.studyAnswer?.subjectCode).toBe('CSE 2631')
+    // Original teacher material is kept strictly separate from AI/pasted answer text
+    expect(pastedAnswerRes.studyAnswer?.teacherInstructionsVerbatim).toContain(
+      'Formulate the optimal substructure recurrence'
+    )
+    expect(pastedAnswerRes.studyAnswer?.answerDraftText).toContain('Let DP[i][w] = max')
+
+    // Verify CSE 2631 -> Answers workspace bucket contains the saved answer
+    const wsRes = await supervisor.executeStudyGuardianOperation({
+      action: 'GET_SUBJECT_WORKSPACE',
+      subjectCodeOrQuery: 'CSE 2631',
+    })
+    expect(wsRes.subjectWorkspace?.answers).toHaveLength(1)
+    expect(wsRes.subjectWorkspace?.assignments).toHaveLength(1)
+
+    // Verify assignment status is STILL TODO (never marked completed just because an answer was saved)
+    const listBeforeProgress = await supervisor.executeStudyGuardianOperation({
+      action: 'LIST_ASSIGNMENTS',
+      subjectCode: 'CSE 2631',
+    })
+    expect(listBeforeProgress.assignments?.[0]?.status).toBe('TODO')
+
+    // G. Trigger a deterministic reminder check and verify no duplicate spam on immediate re-check
+    const daytimeDate = new Date('2026-10-15T14:00:00.000')
+    const remEval1 = await supervisor.executeStudyGuardianOperation({
+      action: 'EVALUATE_REMINDERS',
+      referenceTimeIso: daytimeDate.toISOString(),
+    })
+    expect(remEval1.reminderEvaluation?.triggeredReminders).toHaveLength(1)
+    expect(remEval1.reminderEvaluation?.deduplicatedSkippedCount).toBe(0)
+
+    const remEval2 = await supervisor.executeStudyGuardianOperation({
+      action: 'EVALUATE_REMINDERS',
+      referenceTimeIso: new Date(daytimeDate.getTime() + 10_000).toISOString(),
+    })
+    expect(remEval2.reminderEvaluation?.triggeredReminders).toHaveLength(0)
+    expect(remEval2.reminderEvaluation?.deduplicatedSkippedCount).toBe(1)
+
+    // Verify quiet hours suppression (23:30 local time is inside 23:00-06:00)
+    const quietTime = new Date(2026, 9, 15, 23, 30, 0)
+    const remQuiet = await supervisor.executeStudyGuardianOperation({
+      action: 'EVALUATE_REMINDERS',
+      referenceTimeIso: quietTime.toISOString(),
+    })
+    expect(remQuiet.reminderEvaluation?.quietHoursActive).toBe(true)
+    expect(remQuiet.reminderEvaluation?.triggeredReminders).toHaveLength(0)
+
+    // Verify startup / active-Windows-session unfinished task briefing
+    const briefingRes = await supervisor.executeStudyGuardianOperation({
+      action: 'GET_SESSION_BRIEFING',
+      trigger: 'WINDOWS_SESSION_ACTIVE',
+    })
+    expect(briefingRes.sessionBriefing?.unfinishedAssignments).toHaveLength(1)
+    expect(briefingRes.sessionBriefing?.summaryMessage).toContain('CSE 2631')
+
+    // H. Update progress to 50% (via Companion command)
+    const cmdShowAll = await supervisor.executeAssistantCommand({
+      input: 'Show my assignments.',
+    })
+    expect(cmdShowAll.status).toBe('SUCCESS')
+    expect(cmdShowAll.assignments).toHaveLength(1)
+
+    const cmdDueWeek = await supervisor.executeAssistantCommand({
+      input: "What's due this week?",
+    })
+    expect(cmdDueWeek.status).toBe('SUCCESS')
+    expect(cmdDueWeek.assignments).toHaveLength(1)
+
+    const cmdShowAlgo = await supervisor.executeAssistantCommand({
+      input: 'Show Algorithms assignments.',
+    })
+    expect(cmdShowAlgo.status).toBe('SUCCESS')
+    expect(cmdShowAlgo.assignments).toHaveLength(1)
+
+    const cmdProgress50 = await supervisor.executeAssistantCommand({
+      input: "I'm 50% done with Algorithms.",
+    })
+    expect(cmdProgress50.status).toBe('SUCCESS')
+    expect(cmdProgress50.updatedAssignment?.progressPercent).toBe(50)
+    expect(cmdProgress50.updatedAssignment?.status).toBe('IN_PROGRESS')
+
+    const cmdSnooze = await supervisor.executeAssistantCommand({
+      input: 'Remind me tomorrow evening.',
+    })
+    expect(cmdSnooze.status).toBe('SUCCESS')
+    expect(cmdSnooze.updatedAssignment?.snoozedUntil).toBeTruthy()
+
+    // I. Mark complete and verify reminders stop
+    const cmdComplete = await supervisor.executeAssistantCommand({
+      input: 'Mark this assignment complete.',
+    })
+    expect(cmdComplete.status).toBe('SUCCESS')
+    expect(cmdComplete.updatedAssignment?.status).toBe('COMPLETED')
+    expect(cmdComplete.updatedAssignment?.progressPercent).toBe(100)
+
+    const remAfterComplete = await supervisor.executeStudyGuardianOperation({
+      action: 'EVALUATE_REMINDERS',
+      referenceTimeIso: new Date('2026-10-18T14:00:00.000').toISOString(),
+    })
+    expect(remAfterComplete.reminderEvaluation?.triggeredReminders).toHaveLength(0)
+    expect(remAfterComplete.reminderEvaluation?.completedSkippedCount).toBe(1)
+
+    // J. Re-scan the same Inbox file and verify no duplicate assignment is created
+    const scanRes2 = await supervisor.executeStudyGuardianOperation({
+      action: 'SCAN_INBOX',
+    })
+    expect(scanRes2.inboxScan?.importedRecords).toHaveLength(0)
+    expect(scanRes2.inboxScan?.duplicateSkippedRecords).toHaveLength(1)
+    expect(scanRes2.inboxScan?.createdDrafts).toHaveLength(0)
+
+    const finalAssignments = await supervisor.executeStudyGuardianOperation({
+      action: 'LIST_ASSIGNMENTS',
+    })
+    expect(finalAssignments.assignments).toHaveLength(1)
+
+    await supervisor.shutdown()
+  })
+
+  it('5. Asks for clarification when multiple unfinished assignments match a Companion command, supports authorized local model answer drafting, and registers all 5 Study Guardian capabilities', async () => {
+    const { KernelHost } = await import('./index.js')
+    const host = new KernelHost({
+      dataRoot: tempDir,
+      localAnswerGenerator: async ({ assignment }) => ({
+        answerText: `Local Model Draft for ${assignment.title}: Verified step-by-step derivation.`,
+        modelId: 'local/llama-3.1-8b-study-instruct',
+      }),
+    })
+    await host.start()
+
+    // Verify all 5 V1-G-01 Study Guardian capabilities are registered in supervised self-improvement registry
+    const capRes = host.handleCapabilityRegistryOperation({ action: 'LIST' })
+    const capIds = capRes.capabilities.map((c) => c.capabilityId)
+    expect(capIds).toContain('cap:study:subject-classification')
+    expect(capIds).toContain('cap:study:inbox-import')
+    expect(capIds).toContain('cap:study:assignment-extraction')
+    expect(capIds).toContain('cap:study:reminder-scheduling')
+    expect(capIds).toContain('cap:study:answer-drafting')
+
+    // Create two unfinished assignments under CSE 2195 (Data Science)
+    const a1 = await host.handleStudyGuardianOperation({
+      action: 'CONFIRM_ASSIGNMENT',
+      title: 'Physics & Data Lab 1: Kinematics Dataset',
+      confirmedSubjectCode: 'CSE 2195',
+      confirmedDueDate: '2026-10-22',
+      teacherInstructions: 'Analyze physics kinematics CSV in pandas.',
+    })
+    const a2 = await host.handleStudyGuardianOperation({
+      action: 'CONFIRM_ASSIGNMENT',
+      title: 'Physics & Data Lab 2: Optics Regression',
+      confirmedSubjectCode: 'CSE 2195',
+      confirmedDueDate: '2026-10-24',
+      teacherInstructions: 'Fit linear regression to physics optics measurements.',
+    })
+    expect(a1.assignment).toBeDefined()
+    expect(a2.assignment).toBeDefined()
+
+    // Command: "I'm 50% done with Physics." -> matches both unfinished Physics labs -> MUST ask for clarification!
+    const ambiguousCmd = await host.executeAssistantCommand({
+      input: "I'm 50% done with Physics.",
+    })
+    expect(ambiguousCmd.status).toBe('CLARIFICATION_REQUIRED')
+    expect(ambiguousCmd.terminalState).toBe('WAITING_CONFIRMATION')
+    expect(ambiguousCmd.clarificationCandidates).toHaveLength(2)
+
+    // Re-submit with clarified targetAssignmentId
+    const clarifiedCmd = await host.executeAssistantCommand({
+      input: "I'm 50% done with Physics.",
+      targetAssignmentId: a1.assignment!.assignmentId,
+    })
+    expect(clarifiedCmd.status).toBe('SUCCESS')
+    expect(clarifiedCmd.updatedAssignment?.assignmentId).toBe(a1.assignment!.assignmentId)
+    expect(clarifiedCmd.updatedAssignment?.progressPercent).toBe(50)
+
+    // Test "Prepare answer draft" with authorized local model
+    const draftRes = await host.handleStudyGuardianOperation({
+      action: 'PREPARE_ANSWER_DRAFT',
+      assignmentId: a1.assignment!.assignmentId,
+    })
+    expect(draftRes.answerDraftResult?.mode).toBe('GENERATED_BY_LOCAL_MODEL')
+    expect(draftRes.answerDraftResult?.savedAnswer?.provenance).toBe('AUTHORIZED_LOCAL_MODEL')
+    expect(draftRes.answerDraftResult?.savedAnswer?.modelId).toBe(
+      'local/llama-3.1-8b-study-instruct'
+    )
+    // Assignment status remains IN_PROGRESS (never auto-completed)
+    expect(draftRes.answerDraftResult?.assignmentStatusUnchanged).toBe('IN_PROGRESS')
+
+    await host.shutdown()
+  })
+})
+

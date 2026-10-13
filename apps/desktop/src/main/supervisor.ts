@@ -56,6 +56,8 @@ import {
   type PttTranscriptionResult,
   type VoicePttOperationResult,
   type CapabilityRegistryResult,
+  type StudyGuardianRequestPayload,
+  type StudyGuardianOperationResult,
 } from '../types.js'
 
 import {
@@ -453,6 +455,7 @@ export class DesktopSupervisor {
       case 'EXECUTE_ASSISTANT_COMMAND_RESPONSE':
       case 'CANCEL_ASSISTANT_COMMAND_RESPONSE':
       case 'IDEAS_VAULT_RESPONSE':
+      case 'STUDY_GUARDIAN_RESPONSE':
       case 'VOICE_PTT_RESPONSE':
       case 'CAPABILITY_REGISTRY_RESPONSE': {
         const p = this.pendingRequests.get(msg.requestId)
@@ -1115,6 +1118,27 @@ export class DesktopSupervisor {
         commandId: payload.commandId,
         input: payload.input,
         saveApproved: payload.saveApproved,
+        targetAssignmentId: payload.targetAssignmentId,
+        timestamp: new Date().toISOString(),
+      },
+      requestId,
+      20000
+    )
+  }
+
+  public async executeStudyGuardianOperation(
+    payload: StudyGuardianRequestPayload
+  ): Promise<StudyGuardianOperationResult> {
+    if (!payload || typeof payload.action !== 'string') {
+      throw new Error('Invalid Study Guardian operation payload')
+    }
+    const requestId = `req_sg_${randomUUID().slice(0, 8)}`
+    return this.sendToKernel<StudyGuardianOperationResult>(
+      {
+        type: 'STUDY_GUARDIAN_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload,
         timestamp: new Date().toISOString(),
       },
       requestId,

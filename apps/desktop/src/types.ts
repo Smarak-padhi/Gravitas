@@ -600,6 +600,29 @@ import type {
   ImprovementProposal,
   CapabilityFeedbackItem,
 } from './assistant/capabilityRegistry.js'
+import type {
+  SemesterSubjectCode,
+  SubjectSectionBucket,
+  SemesterSubjectRecord,
+  SubjectSectionEntryRecord,
+  SubjectWorkspaceProjection,
+  InboxSourceKind,
+  InboxImportStatus,
+  ExtractionReviewStatus,
+  InboxConfigRecord,
+  InboxImportRecord,
+  AssignmentDraftRecord,
+  InboxScanResult,
+} from './assistant/icloudInbox.js'
+import type {
+  StudyAssignmentStatus,
+  StudyAssignmentRecord,
+  AssignmentReminderRecord,
+  StudyAnswerRecord,
+  PrepareAnswerDraftResult,
+  ReminderEvaluationResult,
+  SessionBriefingResult,
+} from './assistant/studyGuardian.js'
 
 export type {
   IdeaRecord,
@@ -621,6 +644,25 @@ export type {
   AssistantCapabilityRecord,
   ImprovementProposal,
   CapabilityFeedbackItem,
+  SemesterSubjectCode,
+  SubjectSectionBucket,
+  SemesterSubjectRecord,
+  SubjectSectionEntryRecord,
+  SubjectWorkspaceProjection,
+  InboxSourceKind,
+  InboxImportStatus,
+  ExtractionReviewStatus,
+  InboxConfigRecord,
+  InboxImportRecord,
+  AssignmentDraftRecord,
+  InboxScanResult,
+  StudyAssignmentStatus,
+  StudyAssignmentRecord,
+  AssignmentReminderRecord,
+  StudyAnswerRecord,
+  PrepareAnswerDraftResult,
+  ReminderEvaluationResult,
+  SessionBriefingResult,
 }
 
 export interface DispatchModelResponse extends BaseProtocolMessage, DesktopModelDispatchResult {
@@ -647,6 +689,7 @@ export interface AssistantCommandPayload {
   readonly commandId?: string | undefined
   readonly input: string
   readonly saveApproved?: boolean | undefined
+  readonly targetAssignmentId?: string | undefined
 }
 
 export interface AssistantCommandResult {
@@ -655,7 +698,7 @@ export interface AssistantCommandResult {
   readonly runId: string
   readonly taskId: string
   readonly intentKind: AssistantIntentKind
-  readonly status: 'SUCCESS' | 'ERROR' | 'CANCELLED' | 'CONFIRMATION_REQUIRED'
+  readonly status: 'SUCCESS' | 'ERROR' | 'CANCELLED' | 'CONFIRMATION_REQUIRED' | 'CLARIFICATION_REQUIRED'
   readonly terminalState: 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | 'WAITING_CONFIRMATION'
   readonly message: string
   readonly savedIdea?: IdeaRecord | undefined
@@ -667,6 +710,9 @@ export interface AssistantCommandResult {
   readonly improvementProposal?: ImprovementProposal | undefined
   readonly pendingDeleteIdea?: IdeaRecord | undefined
   readonly pendingApprovalCommand?: string | undefined
+  readonly assignments?: readonly StudyAssignmentRecord[] | undefined
+  readonly updatedAssignment?: StudyAssignmentRecord | undefined
+  readonly clarificationCandidates?: readonly StudyAssignmentRecord[] | undefined
 }
 
 export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
@@ -675,6 +721,7 @@ export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
   readonly commandId?: string | undefined
   readonly input: string
   readonly saveApproved?: boolean | undefined
+  readonly targetAssignmentId?: string | undefined
 }
 
 export interface ExecuteAssistantCommandResponse extends BaseProtocolMessage {
@@ -743,6 +790,128 @@ export interface IdeasVaultOperationResponse extends BaseProtocolMessage {
   readonly type: 'IDEAS_VAULT_RESPONSE'
   readonly requestId: string
   readonly result: IdeasVaultOperationResult
+}
+
+export type StudyGuardianRequestPayload =
+  | { readonly action: 'LIST_SEMESTER_SUBJECTS' }
+  | { readonly action: 'GET_SUBJECT_WORKSPACE'; readonly subjectCodeOrQuery: string }
+  | {
+      readonly action: 'UPDATE_SEMESTER_SUBJECT'
+      readonly code: string
+      readonly name?: string | undefined
+      readonly credits?: number | undefined
+      readonly keywords?: readonly string[] | undefined
+      readonly notes?: string | undefined
+    }
+  | {
+      readonly action: 'ADD_SUBJECT_ENTRY'
+      readonly subjectCode: string
+      readonly bucket: SubjectSectionBucket
+      readonly title: string
+      readonly originalContent: string
+      readonly generatedOrEditedContent?: string | null | undefined
+      readonly linkedAssignmentId?: string | null | undefined
+      readonly attachmentPath?: string | null | undefined
+    }
+  | { readonly action: 'GET_INBOX_CONFIG' }
+  | {
+      readonly action: 'SET_INBOX_FOLDER'
+      readonly folderPath: string
+      readonly startWatcher?: boolean | undefined
+      readonly maxFileSizeBytes?: number | undefined
+    }
+  | { readonly action: 'SCAN_INBOX'; readonly customFolderPath?: string | undefined }
+  | { readonly action: 'LIST_INBOX_IMPORTS' }
+  | { readonly action: 'LIST_ASSIGNMENT_DRAFTS' }
+  | {
+      readonly action: 'CONFIRM_ASSIGNMENT'
+      readonly draftId?: string | undefined
+      readonly title?: string | undefined
+      readonly confirmedSubjectCode: string
+      readonly confirmedDueDate: string
+      readonly teacherInstructions?: string | undefined
+      readonly subtasks?: readonly string[] | undefined
+      readonly reminderIntervalMinutes?: number | undefined
+      readonly quietHoursStart?: string | undefined
+      readonly quietHoursEnd?: string | undefined
+    }
+  | {
+      readonly action: 'LIST_ASSIGNMENTS'
+      readonly subjectCode?: string | undefined
+      readonly status?: StudyAssignmentStatus | undefined
+      readonly unfinishedOnly?: boolean | undefined
+    }
+  | { readonly action: 'LIST_DUE_THIS_WEEK' }
+  | {
+      readonly action: 'UPDATE_PROGRESS'
+      readonly assignmentId: string
+      readonly progressPercent: number
+    }
+  | { readonly action: 'COMPLETE_ASSIGNMENT'; readonly assignmentId: string }
+  | {
+      readonly action: 'CONFIGURE_REMINDER'
+      readonly assignmentId: string
+      readonly reminderIntervalMinutes?: number | undefined
+      readonly snoozedUntil?: string | null | undefined
+      readonly paused?: boolean | undefined
+      readonly quietHoursStart?: string | undefined
+      readonly quietHoursEnd?: string | undefined
+    }
+  | {
+      readonly action: 'EVALUATE_REMINDERS'
+      readonly referenceTimeIso?: string | undefined
+      readonly ignoreQuietHours?: boolean | undefined
+    }
+  | { readonly action: 'LIST_REMINDER_HISTORY'; readonly assignmentId?: string | undefined }
+  | {
+      readonly action: 'GET_SESSION_BRIEFING'
+      readonly trigger?: 'APP_STARTUP' | 'WINDOWS_SESSION_ACTIVE' | undefined
+    }
+  | { readonly action: 'PREPARE_ANSWER_DRAFT'; readonly assignmentId: string }
+  | {
+      readonly action: 'SAVE_STUDY_ANSWER'
+      readonly assignmentId: string
+      readonly answerDraftText: string
+      readonly title?: string | undefined
+    }
+  | {
+      readonly action: 'LIST_STUDY_ANSWERS'
+      readonly assignmentId?: string | undefined
+      readonly subjectCode?: string | undefined
+    }
+
+export interface StudyGuardianOperationRequest extends BaseProtocolMessage {
+  readonly type: 'STUDY_GUARDIAN_REQUEST'
+  readonly requestId: string
+  readonly payload: StudyGuardianRequestPayload
+}
+
+export interface StudyGuardianOperationResult {
+  readonly success: boolean
+  readonly action: StudyGuardianRequestPayload['action']
+  readonly semesterSubjects?: readonly SemesterSubjectRecord[] | undefined
+  readonly subjectRecord?: SemesterSubjectRecord | undefined
+  readonly subjectWorkspace?: SubjectWorkspaceProjection | undefined
+  readonly subjectEntry?: SubjectSectionEntryRecord | undefined
+  readonly inboxConfig?: InboxConfigRecord | undefined
+  readonly inboxScan?: InboxScanResult | undefined
+  readonly inboxImports?: readonly InboxImportRecord[] | undefined
+  readonly assignmentDrafts?: readonly AssignmentDraftRecord[] | undefined
+  readonly assignment?: StudyAssignmentRecord | undefined
+  readonly assignments?: readonly StudyAssignmentRecord[] | undefined
+  readonly reminderEvaluation?: ReminderEvaluationResult | undefined
+  readonly reminderHistory?: readonly AssignmentReminderRecord[] | undefined
+  readonly sessionBriefing?: SessionBriefingResult | undefined
+  readonly answerDraftResult?: PrepareAnswerDraftResult | undefined
+  readonly studyAnswer?: StudyAnswerRecord | undefined
+  readonly studyAnswers?: readonly StudyAnswerRecord[] | undefined
+  readonly errorMessage?: string | undefined
+}
+
+export interface StudyGuardianOperationResponse extends BaseProtocolMessage {
+  readonly type: 'STUDY_GUARDIAN_RESPONSE'
+  readonly requestId: string
+  readonly result: StudyGuardianOperationResult
 }
 
 export type VoicePttRequestPayload =
@@ -815,6 +984,7 @@ export type D1MainToKernelMessage =
   | ExecuteAssistantCommandRequest
   | CancelAssistantCommandRequest
   | IdeasVaultOperationRequest
+  | StudyGuardianOperationRequest
   | VoicePttRequest
   | CapabilityRegistryRequest
 
@@ -839,6 +1009,7 @@ export type D1KernelToMainMessage =
   | ExecuteAssistantCommandResponse
   | CancelAssistantCommandResponse
   | IdeasVaultOperationResponse
+  | StudyGuardianOperationResponse
   | VoicePttResponse
   | CapabilityRegistryResponse
 

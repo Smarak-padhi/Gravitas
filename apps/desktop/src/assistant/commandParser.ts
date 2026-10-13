@@ -18,6 +18,12 @@ export type AssistantIntentKind =
   | 'LIST_COLLECTION'
   | 'LINK_ITEMS'
   | 'EXPORT_MARKDOWN'
+  | 'SHOW_ASSIGNMENTS'
+  | 'DUE_THIS_WEEK'
+  | 'SHOW_SUBJECT_ASSIGNMENTS'
+  | 'UPDATE_ASSIGNMENT_PROGRESS'
+  | 'SNOOZE_ASSIGNMENT_REMINDER'
+  | 'COMPLETE_ASSIGNMENT'
   | 'LIST_IDEAS'
   | 'SEARCH_IDEAS'
   | 'LAUNCH_APP'
@@ -90,6 +96,42 @@ export interface ParsedExportMarkdownIntent {
   readonly rawInput: string
 }
 
+export interface ParsedShowAssignmentsIntent {
+  readonly kind: 'SHOW_ASSIGNMENTS'
+  readonly rawInput: string
+}
+
+export interface ParsedDueThisWeekIntent {
+  readonly kind: 'DUE_THIS_WEEK'
+  readonly rawInput: string
+}
+
+export interface ParsedShowSubjectAssignmentsIntent {
+  readonly kind: 'SHOW_SUBJECT_ASSIGNMENTS'
+  readonly rawInput: string
+  readonly subjectQuery: string
+}
+
+export interface ParsedUpdateAssignmentProgressIntent {
+  readonly kind: 'UPDATE_ASSIGNMENT_PROGRESS'
+  readonly rawInput: string
+  readonly progressPercent: number
+  readonly targetQuery: string
+}
+
+export interface ParsedSnoozeAssignmentReminderIntent {
+  readonly kind: 'SNOOZE_ASSIGNMENT_REMINDER'
+  readonly rawInput: string
+  readonly whenExpression: string
+  readonly targetQuery?: string | undefined
+}
+
+export interface ParsedCompleteAssignmentIntent {
+  readonly kind: 'COMPLETE_ASSIGNMENT'
+  readonly rawInput: string
+  readonly targetQuery?: string | undefined
+}
+
 export interface ParsedListIdeasIntent {
   readonly kind: 'LIST_IDEAS'
   readonly rawInput: string
@@ -154,6 +196,12 @@ export type ParsedAssistantIntent =
   | ParsedListCollectionIntent
   | ParsedLinkItemsIntent
   | ParsedExportMarkdownIntent
+  | ParsedShowAssignmentsIntent
+  | ParsedDueThisWeekIntent
+  | ParsedShowSubjectAssignmentsIntent
+  | ParsedUpdateAssignmentProgressIntent
+  | ParsedSnoozeAssignmentReminderIntent
+  | ParsedCompleteAssignmentIntent
   | ParsedListIdeasIntent
   | ParsedSearchIdeasIntent
   | ParsedLaunchAppIntent
@@ -308,6 +356,103 @@ export function parseAssistantCommand(rawInput: string): ParsedAssistantIntent {
     return {
       kind: 'LIST_UNFINISHED_TASKS',
       rawInput: trimmed,
+    }
+  }
+
+  // 5b. Study Guardian V1-G-01 Companion Commands:
+  // (a) "Show my assignments." / "List my assignments." / "Show all assignments."
+  if (
+    /^(?:show|list|view|display|get|what\s+are)\s+(?:all\s+)?(?:my\s+|the\s+)?assignments[.!?]*$/i.test(
+      trimmed
+    ) ||
+    /^assignments[.!?]*$/i.test(trimmed)
+  ) {
+    return {
+      kind: 'SHOW_ASSIGNMENTS',
+      rawInput: trimmed,
+    }
+  }
+
+  // (b) "What's due this week?" / "What is due this week?" / "Show assignments due this week."
+  if (
+    /^(?:what(?:'s|\s+is)|show|list|view)\s+(?:all\s+)?(?:assignments?\s+|tasks?\s+)?due\s+this\s+week[.!?]*$/i.test(
+      trimmed
+    ) ||
+    /^due\s+this\s+week[.!?]*$/i.test(trimmed)
+  ) {
+    return {
+      kind: 'DUE_THIS_WEEK',
+      rawInput: trimmed,
+    }
+  }
+
+  // (c) "Show Algorithms assignments." / "Show CSE 2631 assignments." / "Show my Physics assignments."
+  const subjAsgnMatch = trimmed.match(
+    /^(?:show|list|view|display|get)\s+(?:all\s+)?(?:my\s+|the\s+)?([a-z0-9\s_-]+?)\s+assignments?[.!?]*$/i
+  )
+  if (subjAsgnMatch && subjAsgnMatch[1]) {
+    const subjCandidate = subjAsgnMatch[1].trim()
+    if (!/^(?:all|my|the|saved|open|pending|unfinished)$/i.test(subjCandidate)) {
+      return {
+        kind: 'SHOW_SUBJECT_ASSIGNMENTS',
+        rawInput: trimmed,
+        subjectQuery: subjCandidate,
+      }
+    }
+  }
+
+  // (d) "I'm 50% done with Physics." / "I am 50% done with Algorithms." / "Update Physics progress to 50%."
+  const progressMatch =
+    trimmed.match(
+      /^(?:i(?:'m|\s+am)\s+)?(\d{1,3})\s*%\s*(?:done|finished|complete|completed)\s+(?:with|on|for)\s+(.+?)[.!?]*$/i
+    ) ||
+    trimmed.match(
+      /^(?:set|update)\s+(.+?)\s+progress\s+to\s+(\d{1,3})\s*%[.!?]*$/i
+    )
+  if (progressMatch && progressMatch[1] && progressMatch[2]) {
+    const isFirstPercent = /^\d+$/.test(progressMatch[1].trim())
+    const pct = Number(isFirstPercent ? progressMatch[1] : progressMatch[2])
+    const targetQuery = (isFirstPercent ? progressMatch[2] : progressMatch[1]).trim()
+    return {
+      kind: 'UPDATE_ASSIGNMENT_PROGRESS',
+      rawInput: trimmed,
+      progressPercent: Math.max(0, Math.min(pct, 100)),
+      targetQuery,
+    }
+  }
+
+  // (e) "Remind me tomorrow evening." / "Remind me tomorrow morning." / "Remind me about Physics tomorrow evening."
+  const snoozeMatch = trimmed.match(
+    /^(?:remind\s+me|snooze(?:\s+reminder)?)\s+(?:about\s+(.+?)\s+)?(tomorrow(?:\s+evening|\s+morning|\s+afternoon|\s+night)?|tonight|this\s+evening|later\s+today|in\s+\d+\s+(?:hours?|minutes?|days?))[.!?]*$/i
+  )
+  if (snoozeMatch && snoozeMatch[2]) {
+    return {
+      kind: 'SNOOZE_ASSIGNMENT_REMINDER',
+      rawInput: trimmed,
+      whenExpression: snoozeMatch[2].trim().toLowerCase(),
+      targetQuery: snoozeMatch[1]?.trim(),
+    }
+  }
+
+  // (f) "Mark this assignment complete." / "Mark the Algorithms assignment complete." / "Complete assignment: CSE 2631"
+  const completeAsgnMatch =
+    trimmed.match(
+      /^(?:mark|set|complete|finish)\s+(?:this|my|the)?\s*assignment\s*(?:as\s+)?(?:complete|completed|done|finished)[.!?]*$/i
+    ) ||
+    trimmed.match(
+      /^(?:mark|set|complete|finish)\s+(?:my\s+|the\s+)?(.+?)\s+assignment\s*(?:as\s+)?(?:complete|completed|done|finished)[.!?]*$/i
+    ) ||
+    trimmed.match(
+      /^(?:complete|finish)\s+assignment\s*[:\-]\s*(.+?)[.!?]*$/i
+    )
+  if (completeAsgnMatch) {
+    const rawTarget = completeAsgnMatch[1]?.trim()
+    const targetQuery =
+      rawTarget && !/^(?:this|my|the)$/i.test(rawTarget) ? rawTarget : undefined
+    return {
+      kind: 'COMPLETE_ASSIGNMENT',
+      rawInput: trimmed,
+      targetQuery,
     }
   }
 

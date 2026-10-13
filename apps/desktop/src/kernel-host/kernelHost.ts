@@ -75,11 +75,13 @@ import {
   type ExecuteAssistantCommandRequest,
   type CancelAssistantCommandRequest,
   type IdeasVaultOperationRequest,
+  type StudyGuardianOperationRequest,
   type VoicePttRequest,
   type CapabilityRegistryRequest,
   type AssistantCommandResult,
   type CancelAssistantCommandResult,
   type IdeasVaultOperationResult,
+  type StudyGuardianOperationResult,
   type VoicePttOperationResult,
   type CapabilityRegistryResult,
 } from '../types.js'
@@ -89,8 +91,12 @@ import {
   parseAssistantCommand,
   AllowlistedAppLauncher,
   OfflineVoiceController,
+  ICloudAssignmentInbox,
+  StudyGuardianService,
+  resolveSemesterSubjectQuery,
   type CustomAppSpawnFn,
   type LocalOfflineTranscriberFn,
+  type AuthorizedLocalAnswerGenerator,
 } from '../assistant/index.js'
 
 export interface KernelHostOptions {
@@ -107,6 +113,7 @@ export interface KernelHostOptions {
   readonly customAppSpawn?: CustomAppSpawnFn | undefined
   readonly customLocalTranscriber?: LocalOfflineTranscriberFn | undefined
   readonly enabledAssistantCapabilities?: readonly string[] | undefined
+  readonly localAnswerGenerator?: AuthorizedLocalAnswerGenerator | undefined
 }
 
 const DEFAULT_PATTERNS: readonly RegExp[] = [
@@ -179,6 +186,9 @@ export class KernelHost {
   private readonly kernelCommandTimeoutMs: number
   private ideasVault?: IdeasVaultStore | undefined
   private capabilityRegistry?: AssistantCapabilityRegistry | undefined
+  private icloudInbox?: ICloudAssignmentInbox | undefined
+  private studyGuardian?: StudyGuardianService | undefined
+  private readonly localAnswerGenerator?: AuthorizedLocalAnswerGenerator | undefined
   private readonly appLauncher: AllowlistedAppLauncher
   private readonly voiceController: OfflineVoiceController
 
@@ -220,6 +230,7 @@ export class KernelHost {
       dataRoot: this.dataRoot,
       customLocalTranscriber: opts.customLocalTranscriber,
     })
+    this.localAnswerGenerator = opts.localAnswerGenerator
 
     // Seed default execution harness data for K1/K2/K3 projections
     this.seedExecutionRegistry()
@@ -1695,6 +1706,19 @@ export class KernelHost {
         break
       }
 
+      case 'STUDY_GUARDIAN_REQUEST': {
+        const req = m as StudyGuardianOperationRequest
+        const result = await this.handleStudyGuardianOperation(req.payload)
+        this.sendMessage({
+          type: 'STUDY_GUARDIAN_RESPONSE',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          requestId: req.requestId,
+          result,
+          timestamp: new Date().toISOString(),
+        })
+        break
+      }
+
       case 'VOICE_PTT_REQUEST': {
         const req = m as VoicePttRequest
         const result = await this.handleVoicePttOperation(req.payload)
@@ -1745,7 +1769,7 @@ export class KernelHost {
     }
   }
 
-  // ─── V1-F-01 Floating Companion & Ideas Vault Subsystems ──────────────────
+  // ─── V1-F-01 / V1-G-01 Floating Companion, Ideas Vault & Study Guardian ──
 
   public getIdeasVault(): IdeasVaultStore {
     if (!this.ideasVault) {
@@ -1762,6 +1786,30 @@ export class KernelHost {
     return this.capabilityRegistry
   }
 
+  public getICloudInbox(): ICloudAssignmentInbox {
+    if (!this.icloudInbox) {
+      const vault = this.getIdeasVault()
+      this.icloudInbox = new ICloudAssignmentInbox({
+        vault,
+        dataRoot: this.dataRoot,
+      })
+    }
+    return this.icloudInbox
+  }
+
+  public getStudyGuardian(): StudyGuardianService {
+    if (!this.studyGuardian) {
+      const vault = this.getIdeasVault()
+      const inbox = this.getICloudInbox()
+      this.studyGuardian = new StudyGuardianService({
+        vault,
+        inbox,
+        localAnswerGenerator: this.localAnswerGenerator,
+      })
+    }
+    return this.studyGuardian
+  }
+
   public getVoiceController(): OfflineVoiceController {
     return this.voiceController
   }
@@ -1770,6 +1818,7 @@ export class KernelHost {
     readonly commandId?: string | undefined
     readonly input: string
     readonly saveApproved?: boolean | undefined
+    readonly targetAssignmentId?: string | undefined
   }): Promise<AssistantCommandResult> {
     const commandId = req.commandId && req.commandId.trim() ? req.commandId.trim() : `cmd_asst_${randomUUID().slice(0, 8)}`
     const intent = parseAssistantCommand(req.input)
@@ -2305,6 +2354,314 @@ export class KernelHost {
           }
         }
 
+        case 'SHOW_ASSIGNMENTS': {
+          const guardian = this.getStudyGuardian()
+          const assignments = guardian.listAssignments()
+          const unfinished = assignments.filter((a) => a.status !== 'COMPLETED')
+          await completeKernelTask(`Listed ${assignments.length} assignments`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              assignments.length > 0
+                ? `Showing ${assignments.length} assignment(s) (${unfinished.length} unfinished): ${assignments
+                    .map((a) => `${a.subjectCode} - ${a.title} [${a.progressPercent}%, ${a.status}]`)
+                    .join('; ')}.`
+                : 'You have no tracked assignments in Study Guardian yet.',
+            assignments,
+          }
+        }
+
+        case 'DUE_THIS_WEEK': {
+          const guardian = this.getStudyGuardian()
+          const dueAssignments = guardian.listDueThisWeek()
+          await completeKernelTask(`Listed ${dueAssignments.length} assignments due this week`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              dueAssignments.length > 0
+                ? `Due within the next 7 days (${dueAssignments.length}): ${dueAssignments
+                    .map((a) => `${a.subjectCode} - ${a.title} (due ${a.dueDate}, ${a.progressPercent}%)`)
+                    .join('; ')}.`
+                : 'No assignments have confirmed due dates within the next 7 days.',
+            assignments: dueAssignments,
+          }
+        }
+
+        case 'SHOW_SUBJECT_ASSIGNMENTS': {
+          const inbox = this.getICloudInbox()
+          const guardian = this.getStudyGuardian()
+          const resolvedSubject = inbox.getSemesterSubject(intent.subjectQuery)
+          const matches = guardian.listAssignments({
+            subjectCode: resolvedSubject ? resolvedSubject.code : intent.subjectQuery,
+          })
+          await completeKernelTask(
+            `Listed ${matches.length} assignments for "${resolvedSubject?.code ?? intent.subjectQuery}"`
+          )
+          const subjectLabel = resolvedSubject
+            ? `${resolvedSubject.code} — ${resolvedSubject.name}`
+            : intent.subjectQuery
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              matches.length > 0
+                ? `Showing ${matches.length} assignment(s) for ${subjectLabel}: ${matches
+                    .map((a) => `${a.title} [${a.progressPercent}%, ${a.status}]`)
+                    .join('; ')}.`
+                : `No assignments found for ${subjectLabel}.`,
+            assignments: matches,
+          }
+        }
+
+        case 'UPDATE_ASSIGNMENT_PROGRESS': {
+          const guardian = this.getStudyGuardian()
+          let targetId = req.targetAssignmentId
+          if (!targetId) {
+            const candidates = guardian.findMatchingAssignments(intent.targetQuery, true)
+            if (candidates.length === 0) {
+              const proposal = this.getCapabilityRegistry().recordFailedAttempt({
+                capabilityId: 'cap:study:subject-classification',
+                triggerCommand: req.input,
+                failureReason: `No active assignment matched "${intent.targetQuery}"`,
+                suggestedImprovement: `Add subject/assignment alias mapping for "${intent.targetQuery}" after human review.`,
+              })
+              await this.kernel.execute({
+                commandId: `cmd_fail_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'FAILED',
+                  reason: `No active assignment matched "${intent.targetQuery}"`,
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'ERROR',
+                terminalState: 'FAILED',
+                message: `No unfinished assignment matched "${intent.targetQuery}".`,
+                improvementProposal: proposal,
+              }
+            }
+            if (candidates.length > 1) {
+              await this.kernel.execute({
+                commandId: `cmd_wait_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'WAITING_APPROVAL',
+                  reason: `Multiple assignments matched "${intent.targetQuery}"; clarification required`,
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'CLARIFICATION_REQUIRED',
+                terminalState: 'WAITING_CONFIRMATION',
+                message: `Multiple unfinished assignments matched "${intent.targetQuery}" (${candidates
+                  .map((c) => `${c.subjectCode}: ${c.title}`)
+                  .join(', ')}). Please clarify which assignment to update to ${intent.progressPercent}%.`,
+                clarificationCandidates: candidates,
+                pendingApprovalCommand: req.input,
+              }
+            }
+            targetId = candidates[0]!.assignmentId
+          }
+
+          const updated = guardian.updateAssignmentProgress(targetId, intent.progressPercent)
+          const assignments = guardian.listAssignments()
+          await completeKernelTask(`Updated assignment ${updated.assignmentId} progress to ${updated.progressPercent}%`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Updated "${updated.title}" (${updated.subjectCode}) to ${updated.progressPercent}% (${updated.status}).`,
+            updatedAssignment: updated,
+            assignments,
+          }
+        }
+
+        case 'SNOOZE_ASSIGNMENT_REMINDER': {
+          const guardian = this.getStudyGuardian()
+          let targetId = req.targetAssignmentId
+          if (!targetId) {
+            const candidates = intent.targetQuery
+              ? guardian.findMatchingAssignments(intent.targetQuery, true)
+              : guardian.listAssignments({ unfinishedOnly: true })
+            if (candidates.length === 0) {
+              await this.kernel.execute({
+                commandId: `cmd_fail_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'FAILED',
+                  reason: 'No unfinished assignment found to snooze reminder',
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'ERROR',
+                terminalState: 'FAILED',
+                message: 'No unfinished assignment found to schedule a reminder.',
+              }
+            }
+            if (candidates.length > 1) {
+              await this.kernel.execute({
+                commandId: `cmd_wait_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'WAITING_APPROVAL',
+                  reason: 'Multiple unfinished assignments matched reminder command; clarification required',
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'CLARIFICATION_REQUIRED',
+                terminalState: 'WAITING_CONFIRMATION',
+                message: `Multiple unfinished assignments found (${candidates
+                  .map((c) => `${c.subjectCode}: ${c.title}`)
+                  .join(', ')}). Please clarify which assignment to remind you about (${intent.whenExpression}).`,
+                clarificationCandidates: candidates,
+                pendingApprovalCommand: req.input,
+              }
+            }
+            targetId = candidates[0]!.assignmentId
+          }
+
+          const updated = guardian.snoozeAssignmentByExpression(targetId, intent.whenExpression)
+          const assignments = guardian.listAssignments()
+          await completeKernelTask(`Snoozed reminder for ${updated.assignmentId} until ${updated.snoozedUntil}`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Scheduled reminder for "${updated.title}" (${updated.subjectCode}) at ${updated.snoozedUntil}.`,
+            updatedAssignment: updated,
+            assignments,
+          }
+        }
+
+        case 'COMPLETE_ASSIGNMENT': {
+          const guardian = this.getStudyGuardian()
+          let targetId = req.targetAssignmentId
+          if (!targetId) {
+            const candidates = intent.targetQuery
+              ? guardian.findMatchingAssignments(intent.targetQuery, true)
+              : guardian.listAssignments({ unfinishedOnly: true })
+            if (candidates.length === 0) {
+              await this.kernel.execute({
+                commandId: `cmd_fail_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'FAILED',
+                  reason: 'No unfinished assignment matched completion request',
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'ERROR',
+                terminalState: 'FAILED',
+                message: 'No matching unfinished assignment found to mark complete.',
+              }
+            }
+            if (candidates.length > 1) {
+              await this.kernel.execute({
+                commandId: `cmd_wait_${commandId}`,
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: {
+                  taskId,
+                  toState: 'WAITING_APPROVAL',
+                  reason: 'Multiple unfinished assignments matched completion command; clarification required',
+                },
+              })
+              return {
+                commandId,
+                workSessionId,
+                runId,
+                taskId,
+                intentKind: intent.kind,
+                status: 'CLARIFICATION_REQUIRED',
+                terminalState: 'WAITING_CONFIRMATION',
+                message: `Multiple unfinished assignments matched (${candidates
+                  .map((c) => `${c.subjectCode}: ${c.title}`)
+                  .join(', ')}). Please clarify which assignment to mark complete.`,
+                clarificationCandidates: candidates,
+                pendingApprovalCommand: req.input,
+              }
+            }
+            targetId = candidates[0]!.assignmentId
+          }
+
+          const updated = guardian.markAssignmentCompleted(targetId)
+          const assignments = guardian.listAssignments()
+          await completeKernelTask(`Marked assignment ${updated.assignmentId} completed`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Marked assignment "${updated.title}" (${updated.subjectCode}) as COMPLETED (100%). Follow-up reminders stopped.`,
+            updatedAssignment: updated,
+            assignments,
+          }
+        }
+
         case 'BLOCKED_APP': {
           const proposal = this.getCapabilityRegistry().recordFailedAttempt({
             capabilityId: 'cap:desktop:launch-app',
@@ -2573,6 +2930,265 @@ export class KernelHost {
     }
   }
 
+  public async handleStudyGuardianOperation(
+    payload: StudyGuardianOperationRequest['payload']
+  ): Promise<StudyGuardianOperationResult> {
+    try {
+      const inbox = this.getICloudInbox()
+      const guardian = this.getStudyGuardian()
+
+      switch (payload.action) {
+        case 'LIST_SEMESTER_SUBJECTS': {
+          return {
+            success: true,
+            action: 'LIST_SEMESTER_SUBJECTS',
+            semesterSubjects: inbox.listSemesterSubjects(),
+          }
+        }
+        case 'GET_SUBJECT_WORKSPACE': {
+          return {
+            success: true,
+            action: 'GET_SUBJECT_WORKSPACE',
+            subjectWorkspace: inbox.getSubjectWorkspace(payload.subjectCodeOrQuery),
+          }
+        }
+        case 'UPDATE_SEMESTER_SUBJECT': {
+          const subjectRecord = inbox.updateSemesterSubject({
+            code: payload.code,
+            name: payload.name,
+            credits: payload.credits,
+            keywords: payload.keywords,
+            notes: payload.notes,
+          })
+          return {
+            success: true,
+            action: 'UPDATE_SEMESTER_SUBJECT',
+            subjectRecord,
+            semesterSubjects: inbox.listSemesterSubjects(),
+          }
+        }
+        case 'ADD_SUBJECT_ENTRY': {
+          const subjectEntry = inbox.addSubjectSectionEntry({
+            subjectCode: payload.subjectCode,
+            bucket: payload.bucket,
+            title: payload.title,
+            originalContent: payload.originalContent,
+            generatedOrEditedContent: payload.generatedOrEditedContent,
+            linkedAssignmentId: payload.linkedAssignmentId,
+            attachmentPath: payload.attachmentPath,
+          })
+          return {
+            success: true,
+            action: 'ADD_SUBJECT_ENTRY',
+            subjectEntry,
+            subjectWorkspace: inbox.getSubjectWorkspace(payload.subjectCode),
+          }
+        }
+        case 'GET_INBOX_CONFIG': {
+          return {
+            success: true,
+            action: 'GET_INBOX_CONFIG',
+            inboxConfig: inbox.getInboxConfig(),
+          }
+        }
+        case 'SET_INBOX_FOLDER': {
+          const inboxConfig = inbox.setInboxFolder(payload.folderPath, {
+            startWatcher: payload.startWatcher,
+            maxFileSizeBytes: payload.maxFileSizeBytes,
+          })
+          return {
+            success: true,
+            action: 'SET_INBOX_FOLDER',
+            inboxConfig,
+          }
+        }
+        case 'SCAN_INBOX': {
+          const inboxScan = await inbox.scanAndReconcileInbox(payload.customFolderPath)
+          for (const errItem of inboxScan.errorRecords) {
+            this.getCapabilityRegistry().recordFailedAttempt({
+              capabilityId: 'cap:study:inbox-import',
+              triggerCommand: `import:${errItem.sourceFileName}`,
+              failureReason: errItem.errorMessage ?? errItem.status,
+              suggestedImprovement: `Review inbox file failure (${errItem.status}) for "${errItem.sourceFileName}".`,
+            })
+          }
+          for (const draft of inboxScan.createdDrafts) {
+            if (draft.extractionStatus === 'NEEDS_MANUAL_REVIEW') {
+              this.getCapabilityRegistry().recordFailedAttempt({
+                capabilityId: 'cap:study:assignment-extraction',
+                triggerCommand: `extract:${draft.title}`,
+                failureReason: draft.extractionNote,
+                suggestedImprovement: `Enhance local extraction heuristics or syllabus keywords for "${draft.title}" after human review.`,
+              })
+            }
+          }
+          return {
+            success: true,
+            action: 'SCAN_INBOX',
+            inboxScan,
+            inboxConfig: inbox.getInboxConfig(),
+            inboxImports: inbox.listInboxImports(),
+            assignmentDrafts: inbox.listAssignmentDrafts(),
+          }
+        }
+        case 'LIST_INBOX_IMPORTS': {
+          return {
+            success: true,
+            action: 'LIST_INBOX_IMPORTS',
+            inboxImports: inbox.listInboxImports(),
+            assignmentDrafts: inbox.listAssignmentDrafts(),
+          }
+        }
+        case 'LIST_ASSIGNMENT_DRAFTS': {
+          return {
+            success: true,
+            action: 'LIST_ASSIGNMENT_DRAFTS',
+            assignmentDrafts: inbox.listAssignmentDrafts(),
+          }
+        }
+        case 'CONFIRM_ASSIGNMENT': {
+          const assignment = guardian.createOrConfirmAssignment({
+            draftId: payload.draftId,
+            title: payload.title,
+            confirmedSubjectCode: payload.confirmedSubjectCode,
+            confirmedDueDate: payload.confirmedDueDate,
+            teacherInstructions: payload.teacherInstructions,
+            subtasks: payload.subtasks,
+            reminderIntervalMinutes: payload.reminderIntervalMinutes,
+            quietHoursStart: payload.quietHoursStart,
+            quietHoursEnd: payload.quietHoursEnd,
+          })
+          return {
+            success: true,
+            action: 'CONFIRM_ASSIGNMENT',
+            assignment,
+            assignments: guardian.listAssignments(),
+            assignmentDrafts: inbox.listAssignmentDrafts(),
+          }
+        }
+        case 'LIST_ASSIGNMENTS': {
+          return {
+            success: true,
+            action: 'LIST_ASSIGNMENTS',
+            assignments: guardian.listAssignments({
+              subjectCode: payload.subjectCode,
+              status: payload.status,
+              unfinishedOnly: payload.unfinishedOnly,
+            }),
+          }
+        }
+        case 'LIST_DUE_THIS_WEEK': {
+          return {
+            success: true,
+            action: 'LIST_DUE_THIS_WEEK',
+            assignments: guardian.listDueThisWeek(),
+          }
+        }
+        case 'UPDATE_PROGRESS': {
+          const assignment = guardian.updateAssignmentProgress(
+            payload.assignmentId,
+            payload.progressPercent
+          )
+          return {
+            success: true,
+            action: 'UPDATE_PROGRESS',
+            assignment,
+            assignments: guardian.listAssignments(),
+          }
+        }
+        case 'COMPLETE_ASSIGNMENT': {
+          const assignment = guardian.markAssignmentCompleted(payload.assignmentId)
+          return {
+            success: true,
+            action: 'COMPLETE_ASSIGNMENT',
+            assignment,
+            assignments: guardian.listAssignments(),
+          }
+        }
+        case 'CONFIGURE_REMINDER': {
+          const assignment = guardian.configureReminderSettings({
+            assignmentId: payload.assignmentId,
+            reminderIntervalMinutes: payload.reminderIntervalMinutes,
+            snoozedUntil: payload.snoozedUntil,
+            paused: payload.paused,
+            quietHoursStart: payload.quietHoursStart,
+            quietHoursEnd: payload.quietHoursEnd,
+          })
+          return {
+            success: true,
+            action: 'CONFIGURE_REMINDER',
+            assignment,
+            assignments: guardian.listAssignments(),
+          }
+        }
+        case 'EVALUATE_REMINDERS': {
+          const reminderEvaluation = guardian.evaluateReminders(
+            payload.referenceTimeIso ? new Date(payload.referenceTimeIso) : new Date(),
+            { ignoreQuietHours: payload.ignoreQuietHours }
+          )
+          return {
+            success: true,
+            action: 'EVALUATE_REMINDERS',
+            reminderEvaluation,
+          }
+        }
+        case 'LIST_REMINDER_HISTORY': {
+          return {
+            success: true,
+            action: 'LIST_REMINDER_HISTORY',
+            reminderHistory: guardian.listReminderHistory(payload.assignmentId),
+          }
+        }
+        case 'GET_SESSION_BRIEFING': {
+          const sessionBriefing = guardian.getSessionBriefing(payload.trigger ?? 'APP_STARTUP')
+          return {
+            success: true,
+            action: 'GET_SESSION_BRIEFING',
+            sessionBriefing,
+          }
+        }
+        case 'PREPARE_ANSWER_DRAFT': {
+          const answerDraftResult = await guardian.prepareAnswerDraft(payload.assignmentId)
+          return {
+            success: true,
+            action: 'PREPARE_ANSWER_DRAFT',
+            answerDraftResult,
+            studyAnswers: guardian.listStudyAnswers({ assignmentId: payload.assignmentId }),
+          }
+        }
+        case 'SAVE_STUDY_ANSWER': {
+          const studyAnswer = guardian.saveStudyAnswer({
+            assignmentId: payload.assignmentId,
+            answerDraftText: payload.answerDraftText,
+            title: payload.title,
+          })
+          return {
+            success: true,
+            action: 'SAVE_STUDY_ANSWER',
+            studyAnswer,
+            studyAnswers: guardian.listStudyAnswers({ assignmentId: payload.assignmentId }),
+          }
+        }
+        case 'LIST_STUDY_ANSWERS': {
+          return {
+            success: true,
+            action: 'LIST_STUDY_ANSWERS',
+            studyAnswers: guardian.listStudyAnswers({
+              assignmentId: payload.assignmentId,
+              subjectCode: payload.subjectCode,
+            }),
+          }
+        }
+      }
+    } catch (err) {
+      return {
+        success: false,
+        action: payload.action,
+        errorMessage: sanitizeText((err as Error).message),
+      }
+    }
+  }
+
   public async handleVoicePttOperation(
     payload: VoicePttRequest['payload']
   ): Promise<VoicePttOperationResult> {
@@ -2637,6 +3253,11 @@ export class KernelHost {
   public async shutdown(): Promise<void> {
     this.status = 'STOPPING'
     this.voiceController.cancelPushToTalk()
+    if (this.icloudInbox) {
+      this.icloudInbox.stopWatcher()
+      this.icloudInbox = undefined
+    }
+    this.studyGuardian = undefined
     for (const controller of this.activeDispatches.values()) {
       controller.abort()
     }

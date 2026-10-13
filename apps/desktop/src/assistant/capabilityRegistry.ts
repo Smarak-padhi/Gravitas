@@ -167,6 +167,61 @@ export const DEFAULT_ASSISTANT_CAPABILITIES: ReadonlyArray<{
       verifiedAssertionsCount: 8,
     },
   },
+  {
+    capabilityId: 'cap:study:subject-classification',
+    capabilityName: '7-Subject Syllabus Keyword Classification & Confirmation',
+    supportedActions: ['SEED_SEVEN_SUBJECTS', 'CLASSIFY_SUBJECT', 'CONFIRM_AMBIGUOUS_SUBJECT', 'UPDATE_SUBJECT'],
+    requiredPermissions: ['fs:sqlite:ideas-vault'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/study-guardian.test.ts',
+      verifiedAssertionsCount: 10,
+    },
+  },
+  {
+    capabilityId: 'cap:study:inbox-import',
+    capabilityName: 'iCloud Drive Inbox Watcher & Safe Attachment Importer',
+    supportedActions: ['SELECT_INBOX_FOLDER', 'SCAN_AND_RECONCILE_INBOX', 'DEDUPLICATE_SHA256', 'PRESERVE_ATTACHMENT'],
+    requiredPermissions: ['fs:read:user-selected-icloud-inbox', 'fs:write:inbox-attachments'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/study-guardian.test.ts',
+      verifiedAssertionsCount: 12,
+    },
+  },
+  {
+    capabilityId: 'cap:study:assignment-extraction',
+    capabilityName: 'Deterministic Assignment Draft Extraction',
+    supportedActions: ['EXTRACT_ASSIGNMENT_DRAFT', 'EXTRACT_EXPLICIT_DEADLINE', 'FLAG_RELATIVE_DEADLINE', 'EXTRACT_LOCAL_PDF_TEXT'],
+    requiredPermissions: ['fs:sqlite:ideas-vault', 'fs:read:inbox-attachments'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/study-guardian.test.ts',
+      verifiedAssertionsCount: 10,
+    },
+  },
+  {
+    capabilityId: 'cap:study:reminder-scheduling',
+    capabilityName: 'Study Guardian Progress & Deduplicated Reminder Scheduler',
+    supportedActions: ['CREATE_PERSISTENT_ASSIGNMENT', 'UPDATE_PROGRESS', 'EVALUATE_REMINDERS_DEDUP', 'SNOOZE_OR_PAUSE_REMINDER'],
+    requiredPermissions: ['fs:sqlite:ideas-vault', 'ui:companion-reminder-notification'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/study-guardian.test.ts',
+      verifiedAssertionsCount: 12,
+    },
+  },
+  {
+    capabilityId: 'cap:study:answer-drafting',
+    capabilityName: 'Study Answer Preparation & Paste-Back Workflow',
+    supportedActions: ['PREPARE_ANSWER_DRAFT', 'BUILD_EXTERNAL_AI_PROMPT', 'SAVE_PASTED_ANSWER'],
+    requiredPermissions: ['fs:sqlite:ideas-vault'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/study-guardian.test.ts',
+      verifiedAssertionsCount: 8,
+    },
+  },
 ]
 
 export class AssistantCapabilityRegistry {
