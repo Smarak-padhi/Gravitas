@@ -488,7 +488,10 @@ describe('Wave V1-E-01 — NVIDIA Model Router Recovery & Production Dispatch', 
     expect(execItem).toBeDefined()
     expect(execItem!.provider).toBe('nvidia-nim')
     expect(execItem!.status).toBe('COMPLETED')
-    expect(execItem!.costEligibility).toBe('OPERATOR_INCLUDED_ACCOUNT')
+    expect(execItem!.qualificationStatus).toBe('NOT_QUALIFIED')
+    expect(execItem!.readinessStatus).toBe('NOT_READY')
+    expect(execItem!.costEligibility).toBe('UNKNOWN_COST')
+    expect(execItem!.dispatchAuthorization).toBe('AUTHORIZED')
     expect(execItem!.boundedOutput).toContain(expectedOutput)
 
     // Verify Task Detail projection resolves bounded output

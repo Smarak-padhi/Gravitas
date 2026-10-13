@@ -30,6 +30,7 @@ import {
   NvidiaNimAdapter,
   getNvidiaProviderDescriptor,
   NVIDIA_PROVIDER_ID,
+  verifyK3DispatchGrant,
   type K3DispatchCapabilityGrant,
   type ProviderChatMessage,
   type ProviderInferenceRequest,
@@ -82,6 +83,8 @@ export interface KernelHostOptions {
   readonly kernelInstanceId?: string
   readonly customFetch?: typeof fetch | undefined
   readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
+  readonly shutdownDrainTimeoutMs?: number | undefined
+  readonly kernelCommandTimeoutMs?: number | undefined
 }
 
 const DEFAULT_PATTERNS: readonly RegExp[] = [
@@ -150,6 +153,8 @@ export class KernelHost {
   private readonly modelRouter: ModelRouter
   private readonly customFetch?: typeof fetch | undefined
   private readonly nvidiaAdapter?: NvidiaNimAdapter | undefined
+  private readonly shutdownDrainTimeoutMs: number
+  private readonly kernelCommandTimeoutMs: number
 
   // Canonical auxiliary stores managed under single writer
   private readonly verificationPlans = new Map<string, StoredVerificationPlan>()
@@ -157,6 +162,7 @@ export class KernelHost {
   private readonly executionRegistry = new Map<string, ExecutionItem>()
   private recentErrors: string[] = []
   private readonly activeDispatches = new Map<string, AbortController>()
+  private readonly inFlightDispatchTasks = new Map<string, string>()
 
   constructor(opts: KernelHostOptions = {}) {
     this.startedAt = new Date().toISOString()
@@ -171,6 +177,8 @@ export class KernelHost {
 
     this.customFetch = opts.customFetch
     this.nvidiaAdapter = opts.nvidiaAdapter
+    this.shutdownDrainTimeoutMs = opts.shutdownDrainTimeoutMs ?? 200
+    this.kernelCommandTimeoutMs = opts.kernelCommandTimeoutMs ?? 5000
     this.modelRegistry = ModelRegistry.getInstance()
     this.modelRouter = new ModelRouter({ registry: this.modelRegistry })
 
@@ -872,11 +880,51 @@ export class KernelHost {
     const controller = new AbortController()
     const dispatchKey = randomUUID()
     this.activeDispatches.set(dispatchKey, controller)
+
+    const awaitBounded = async <T>(
+      operation: Promise<T>,
+      timeoutMs: number,
+      abortMessage: string,
+      timeoutMessage: string
+    ): Promise<T> => {
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined
+      let abortGraceHandle: ReturnType<typeof setTimeout> | undefined
+      let onAbortListener: (() => void) | undefined
+      const guardPromise = new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs)
+        onAbortListener = () => {
+          abortGraceHandle = setTimeout(() => reject(new Error(abortMessage)), 25)
+        }
+        if (controller.signal.aborted) {
+          onAbortListener()
+        } else {
+          controller.signal.addEventListener('abort', onAbortListener, { once: true })
+        }
+      })
+      void guardPromise.catch(() => {})
+      try {
+        return await Promise.race([operation, guardPromise])
+      } finally {
+        if (timeoutHandle !== undefined) clearTimeout(timeoutHandle)
+        if (abortGraceHandle !== undefined) clearTimeout(abortGraceHandle)
+        if (onAbortListener !== undefined) {
+          controller.signal.removeEventListener('abort', onAbortListener)
+        }
+      }
+    }
+
     const command = async (input: Parameters<WorkSessionKernel['execute']>[0]) => {
-      const result = await this.kernel.execute(input)
+      const cmdTimeoutMs = Math.min(req?.timeoutMs ?? this.kernelCommandTimeoutMs, this.kernelCommandTimeoutMs)
+      const result = await awaitBounded(
+        this.kernel.execute(input),
+        cmdTimeoutMs,
+        'Dispatch cancelled',
+        'Kernel command timed out'
+      )
       if (!result.success) throw new Error('Kernel command failed')
       return result
     }
+
     try {
       validateDispatchPayload(req)
       if (this.status !== 'READY') throw new Error('Kernel is not ready')
@@ -919,10 +967,49 @@ export class KernelHost {
         }
       }
 
+      // 3. Deterministic ModelRouter Resolution (without premature qualification)
+      this.modelRegistry.registerProvider(getNvidiaProviderDescriptor())
+      const routeReq: TaskModelRequirements = {
+        taskDomain: 'code_generation',
+        taskComplexityClass: 'MEDIUM',
+        preferredTier: targetModelId.includes('70b') ? 'FRONTIER' : 'FAST',
+        requestedModelId: targetModelId,
+      }
+      let decision = this.modelRouter.resolveModel(routeReq)
+      if (
+        (!decision.selectedModel || !decision.selectedProvider) &&
+        this.customFetch &&
+        decision.qualificationDecision === 'NO_QUALIFIED_MODEL'
+      ) {
+        // Clearly distinguished offline-test route for metadata-validated models; never promotes qualificationState
+        decision = this.modelRouter.resolveOfflineTestModel(routeReq)
+      }
+      if (!decision.selectedModel || !decision.selectedProvider) {
+        const errorTaxonomy =
+          decision.qualificationDecision === 'AUTH_REQUIRED'
+            ? 'AUTH_REQUIRED'
+            : decision.costDecision === 'PAID_BLOCKED' || decision.costDecision === 'COST_UNKNOWN_BLOCKED'
+              ? 'COST_BLOCKED'
+              : 'DISPATCH_REJECTED'
+        return {
+          success: false,
+          workSessionId: req.workSessionId ?? '',
+          runId: '',
+          taskId: '',
+          executionId: '',
+          provider: modelDesc.providerId,
+          requestedModel: sanitizeText(targetModelId),
+          actualModel: sanitizeText(targetModelId),
+          terminationStatus: 'ERROR',
+          errorTaxonomy,
+          errorMessage: sanitizeText(`Model router rejected selection: ${decision.reason}`),
+        }
+      }
+
       // Mock inference does not qualify production models. Live transport is disabled.
       if (!this.customFetch) throw new Error('Live NVIDIA egress is disabled; offline transport required')
-      const selectedModel = targetModelId
-      const selectedProvider = modelDesc.providerId
+      const selectedModel = decision.selectedModel
+      const selectedProvider = decision.selectedProvider
 
       // 4. Ensure WorkSession, Run, and Task exist in canonical kernel
       workSessionId = req.workSessionId ?? ''
@@ -959,6 +1046,9 @@ export class KernelHost {
       })
 
       taskId = `task_${randomUUID().slice(0, 8)}`
+      this.activeDispatches.set(taskId, controller)
+      this.inFlightDispatchTasks.set(taskId, workSessionId)
+
       await command({
         commandId: `cmd_create_task_${randomUUID().slice(0, 8)}`,
         commandType: 'CREATE_TASK',
@@ -984,8 +1074,13 @@ export class KernelHost {
       })
 
       // 5. Construct K3 Dispatch CapabilityGrant
-      const grant = authorizeOfflineNvidiaDispatch({ subjectId: this.kernelInstanceId,
-        workSessionId, runId, taskId, model: selectedModel })
+      const grant = authorizeOfflineNvidiaDispatch({
+        subjectId: this.kernelInstanceId,
+        workSessionId,
+        runId,
+        taskId,
+        model: selectedModel,
+      })
 
       // 6. Execute through production NvidiaNimAdapter
       const adapter = this.nvidiaAdapter ?? new NvidiaNimAdapter({
@@ -1006,17 +1101,22 @@ export class KernelHost {
         capabilityGrant: grant,
       }
 
-      this.activeDispatches.set(taskId, controller)
       if (controller.signal.aborted) throw new Error('Dispatch cancelled')
-      const adapterRes = await adapter.execute(inferenceReq, {
-        timeoutMs: req.timeoutMs ?? 30000,
-        signal: controller.signal,
-      })
+      const effectiveTimeoutMs = req.timeoutMs ?? 30000
+      const adapterRes = await awaitBounded(
+        adapter.execute(inferenceReq, {
+          timeoutMs: effectiveTimeoutMs,
+          signal: controller.signal,
+        }),
+        effectiveTimeoutMs + 50,
+        'Dispatch cancelled',
+        `Request timed out after ${effectiveTimeoutMs}ms`
+      )
 
       const executionId = `exec_nim_${randomUUID().slice(0, 8)}`
       const isSuccess = adapterRes.terminationStatus === 'COMPLETED' && !controller.signal.aborted
 
-      // 7. Transition Task & Record Execution
+      // 7. Transition Task & Record Execution (Evidence-Based Claims)
       await command({
         commandId: `cmd_trans_task_finish_${randomUUID().slice(0, 8)}`,
         commandType: 'TRANSITION_TASK',
@@ -1030,6 +1130,44 @@ export class KernelHost {
         },
       })
 
+      const latestModelDesc = this.modelRegistry.getModel(selectedModel) ?? modelDesc
+      const isQualifiedEvidence =
+        decision.qualificationDecision === 'QUALIFIED' &&
+        latestModelDesc.qualificationState === 'QUALIFIED'
+      const qualificationStatus: ExecutionItem['qualificationStatus'] = isQualifiedEvidence
+        ? 'QUALIFIED'
+        : latestModelDesc.qualificationState === 'DISCOVERED'
+          ? 'DISCOVERED'
+          : 'NOT_QUALIFIED'
+      const readinessStatus: ExecutionItem['readinessStatus'] =
+        isQualifiedEvidence && latestModelDesc.availability === 'AVAILABLE'
+          ? 'READY'
+          : 'NOT_READY'
+      const costEligibility: ExecutionItem['costEligibility'] =
+        decision.costDecision === 'PAID_BLOCKED' ||
+        adapterRes.errorTaxonomy === 'COST_BLOCKED' ||
+        latestModelDesc.costClass === 'PAID'
+          ? 'PAID_BLOCKED'
+          : isQualifiedEvidence &&
+              decision.costDecision === 'FREE_APPROVED' &&
+              latestModelDesc.costClass === 'ZERO_DOLLAR_FREE'
+            ? latestModelDesc.source === 'LOCAL'
+              ? 'FREE_OPEN_SOURCE_LOCAL'
+              : 'OPERATOR_INCLUDED_ACCOUNT'
+            : 'UNKNOWN_COST'
+
+      const grantVerification = verifyK3DispatchGrant({
+        grant,
+        expectedProvider: selectedProvider,
+        endpointUrl: 'https://integrate.api.nvidia.com/v1/chat/completions',
+        model: selectedModel,
+        credentialRef: credHandle.credentialRef,
+      })
+      const isDispatchAuthorized =
+        grantVerification.authorized &&
+        adapterRes.errorTaxonomy !== 'CAPABILITY_GRANT_REQUIRED' &&
+        adapterRes.errorTaxonomy !== 'AUTH_REQUIRED'
+
       const execItem: ExecutionItem = {
         executionId,
         taskId,
@@ -1040,12 +1178,17 @@ export class KernelHost {
         provider: selectedProvider,
         model: adapterRes.actualModel || selectedModel,
         processId: `proc_${this.pid}`,
-        qualificationStatus: 'NOT_QUALIFIED',
-        readinessStatus: 'READY',
-        costEligibility: 'OPERATOR_INCLUDED_ACCOUNT',
-        dispatchAuthorization: 'AUTHORIZED',
-        grantedCapabilities: ['provider:nvidia-nim'],
-        status: isSuccess ? 'COMPLETED' : 'FAILED',
+        qualificationStatus,
+        readinessStatus,
+        costEligibility,
+        dispatchAuthorization: isDispatchAuthorized ? 'AUTHORIZED' : 'DENIED',
+        grantedCapabilities: isDispatchAuthorized ? [...grant.grantedCapabilities] : [],
+        status:
+          !isDispatchAuthorized || adapterRes.errorTaxonomy === 'COST_BLOCKED'
+            ? 'BLOCKED'
+            : isSuccess
+              ? 'COMPLETED'
+              : 'FAILED',
         startedAt: new Date(Date.now() - adapterRes.latencyMs).toISOString(),
         completedAt: new Date().toISOString(),
         boundedOutput: sanitizeText(
@@ -1092,19 +1235,66 @@ export class KernelHost {
         tokenUsage: adapterRes.tokenUsage,
       }
     } catch (error) {
+      const errMessage = error instanceof Error ? error.message : 'Dispatch failed'
+      const isTimedOut = !controller.signal.aborted && errMessage.startsWith('Request timed out after')
       if (taskId) {
         try {
-          await command({ commandId: randomUUID(), commandType: 'TRANSITION_TASK', workSessionId,
-            payload: { taskId, toState: controller.signal.aborted ? 'CANCELLED' : 'FAILED', reason: 'Dispatch failed safely' } })
-        } catch { this.recentErrors.push('Dispatch recovery requires kernel restart') }
+          const fallbackState =
+            this.status === 'STOPPING' || this.status === 'STOPPED'
+              ? controller.signal.aborted
+                ? 'CANCELLED'
+                : 'RECOVERY_REQUIRED'
+              : controller.signal.aborted
+                ? 'CANCELLED'
+                : 'FAILED'
+          let fallbackTimer: ReturnType<typeof setTimeout> | undefined
+          try {
+            const fallbackRes = await Promise.race([
+              this.kernel.execute({
+                commandId: randomUUID(),
+                commandType: 'TRANSITION_TASK',
+                workSessionId,
+                payload: { taskId, toState: fallbackState, reason: 'Dispatch failed safely' },
+              }),
+              new Promise<never>((_, reject) => {
+                fallbackTimer = setTimeout(() => reject(new Error('Fallback transition timed out')), 50)
+              }),
+            ])
+            if (!fallbackRes.success) {
+              this.recentErrors.push('Dispatch recovery requires kernel restart')
+            }
+          } finally {
+            if (fallbackTimer !== undefined) clearTimeout(fallbackTimer)
+          }
+        } catch {
+          this.recentErrors.push('Dispatch recovery requires kernel restart')
+        }
       }
-      return { success: false, workSessionId, runId, taskId, executionId: '', provider: 'nvidia-nim',
-        requestedModel: typeof req?.modelId === 'string' ? sanitizeText(req.modelId) : '', actualModel: '',
-        terminationStatus: controller.signal.aborted ? 'CANCELLED' : 'ERROR', errorTaxonomy: 'DISPATCH_REJECTED',
-        errorMessage: sanitizeText(error instanceof Error ? error.message : 'Dispatch failed') }
+      return {
+        success: false,
+        workSessionId,
+        runId,
+        taskId,
+        executionId: '',
+        provider: 'nvidia-nim',
+        requestedModel: typeof req?.modelId === 'string' ? sanitizeText(req.modelId) : '',
+        actualModel: '',
+        terminationStatus: controller.signal.aborted
+          ? 'CANCELLED'
+          : isTimedOut
+            ? 'TIMED_OUT'
+            : 'ERROR',
+        errorTaxonomy: controller.signal.aborted
+          ? 'CANCELLED'
+          : isTimedOut
+            ? 'TIMEOUT'
+            : 'DISPATCH_REJECTED',
+        errorMessage: sanitizeText(errMessage),
+      }
     } finally {
       this.activeDispatches.delete(taskId)
       this.activeDispatches.delete(dispatchKey)
+      this.inFlightDispatchTasks.delete(taskId)
     }
   }
 
@@ -1433,12 +1623,7 @@ export class KernelHost {
       }
 
       case 'SHUTDOWN_REQUEST': {
-        this.status = 'STOPPING'
-        for (const controller of this.activeDispatches.values()) controller.abort()
-        while (this.activeDispatches.size) await new Promise(resolve => setTimeout(resolve, 5))
-        ModelCapabilityHistory.getInstance().detachDurableWriter()
-        await this.kernel.shutdown()
-        this.status = 'STOPPED'
+        await this.shutdown()
         this.sendMessage({
           type: 'SHUTDOWN_ACK',
           protocolVersion: m.protocolVersion!,
@@ -1463,10 +1648,53 @@ export class KernelHost {
 
   public async shutdown(): Promise<void> {
     this.status = 'STOPPING'
-    for (const controller of this.activeDispatches.values()) controller.abort()
-    while (this.activeDispatches.size) await new Promise(resolve => setTimeout(resolve, 5))
+    for (const controller of this.activeDispatches.values()) {
+      controller.abort()
+    }
+    const deadline = Date.now() + this.shutdownDrainTimeoutMs
+    while (this.activeDispatches.size > 0 && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 5))
+    }
+    if (this.activeDispatches.size > 0) {
+      for (const [stuckTaskId, stuckWsId] of this.inFlightDispatchTasks.entries()) {
+        let recoverTimer: ReturnType<typeof setTimeout> | undefined
+        try {
+          await Promise.race([
+            this.kernel.execute({
+              commandId: `cmd_shutdown_recover_${randomUUID().slice(0, 8)}`,
+              commandType: 'TRANSITION_TASK',
+              workSessionId: stuckWsId,
+              payload: {
+                taskId: stuckTaskId,
+                toState: 'RECOVERY_REQUIRED',
+                reason: 'Dispatch did not settle before host shutdown deadline; recovery required',
+              },
+            }),
+            new Promise<never>((_, reject) => {
+              recoverTimer = setTimeout(() => reject(new Error('Shutdown recovery transition timed out')), 50)
+            }),
+          ])
+        } catch {
+          this.recentErrors.push('Shutdown drain deadline exceeded; kernel recovery required on restart')
+        } finally {
+          if (recoverTimer !== undefined) clearTimeout(recoverTimer)
+        }
+      }
+      this.activeDispatches.clear()
+      this.inFlightDispatchTasks.clear()
+    }
     ModelCapabilityHistory.getInstance().detachDurableWriter()
-    await this.kernel.shutdown()
+    let kernelShutdownTimer: ReturnType<typeof setTimeout> | undefined
+    try {
+      await Promise.race([
+        this.kernel.shutdown(),
+        new Promise<void>((resolve) => {
+          kernelShutdownTimer = setTimeout(resolve, this.shutdownDrainTimeoutMs)
+        }),
+      ])
+    } finally {
+      if (kernelShutdownTimer !== undefined) clearTimeout(kernelShutdownTimer)
+    }
     this.status = 'STOPPED'
   }
 }

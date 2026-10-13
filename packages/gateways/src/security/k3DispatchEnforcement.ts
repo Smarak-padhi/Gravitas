@@ -12,10 +12,26 @@
 import { randomUUID } from 'node:crypto';
 import type { K3DispatchCapabilityGrant } from '../providers/types.js';
 
+const ALLOWED_OFFLINE_NVIDIA_MODELS = new Set([
+  'meta/llama-3.1-8b-instruct',
+  'meta/llama-3.1-70b-instruct',
+  'mistralai/mixtral-8x7b-instruct-v0.1',
+]);
+const FIXED_NVIDIA_PROVIDER_CAPABILITY = 'provider:nvidia-nim';
+const FIXED_NVIDIA_TOOL_ID = 'tool:nvidia-nim:chat';
+const FIXED_NVIDIA_ORIGIN = 'https://integrate.api.nvidia.com';
+const FIXED_NVIDIA_OPERATION = 'chat_completions';
+const FIXED_NVIDIA_CREDENTIAL_REF = 'vault:cred:nvidia-nim';
+const FIXED_OFFLINE_COST_CEILING = 'ZERO_DOLLAR_FREE';
+const FIXED_OFFLINE_AUTHORITY_CEILING = 'RESTRICTED_INFERENCE';
+
 // Object identity is a process-local authority boundary; serialized/forged grants fail closed.
 const trustedGrants = new WeakSet<object>();
-export function authorizeOfflineNvidiaGrant(grant: K3DispatchCapabilityGrant): K3DispatchCapabilityGrant {
-  const frozen = Object.freeze({ ...grant,
+const TRUSTED_ISSUER_TOKEN = Symbol('gravitas.k3.offline.issuer');
+
+function freezeGrant(grant: K3DispatchCapabilityGrant): K3DispatchCapabilityGrant {
+  return Object.freeze({
+    ...grant,
     grantedCapabilities: Object.freeze([...grant.grantedCapabilities]),
     authorizedToolIds: Object.freeze([...grant.authorizedToolIds]),
     credentialReferences: Object.freeze([...(grant.credentialReferences ?? [])]),
@@ -25,25 +41,130 @@ export function authorizeOfflineNvidiaGrant(grant: K3DispatchCapabilityGrant): K
       allowedOperations: Object.freeze([...(grant.resourceScope.allowedOperations ?? [])]),
     }),
   });
-  if (grant.status !== 'ACTIVE' || ![grant.grantId, grant.subjectId, grant.workSessionId, grant.runId, grant.taskId].every(x => typeof x === 'string' && x.length > 0) ||
-      !['0', 'ZERO_DOLLAR_FREE'].includes(grant.costCeiling) || !['NORMAL', 'RESTRICTED_INFERENCE'].includes(grant.authorityCeiling)) throw new Error('Offline dispatch policy denied');
+}
+
+export function authorizeOfflineNvidiaGrant(
+  grant: K3DispatchCapabilityGrant,
+  issuerToken?: symbol
+): K3DispatchCapabilityGrant {
+  if (issuerToken !== TRUSTED_ISSUER_TOKEN) {
+    throw new Error('Offline dispatch policy denied: self-constructed grants cannot be registered as trusted');
+  }
+  const expiresAtMs = new Date(grant.expiresAt).getTime();
+  const hasValidIdentity = [
+    grant.grantId,
+    grant.subjectId,
+    grant.workSessionId,
+    grant.runId,
+    grant.taskId,
+  ].every((x) => typeof x === 'string' && x.trim().length > 0);
+  const hasFixedProviderScope =
+    grant.grantedCapabilities?.length === 1 &&
+    grant.grantedCapabilities[0] === FIXED_NVIDIA_PROVIDER_CAPABILITY &&
+    grant.authorizedToolIds?.length === 1 &&
+    grant.authorizedToolIds[0] === FIXED_NVIDIA_TOOL_ID;
+  const hasFixedEndpointScope =
+    grant.resourceScope?.allowedOrigins?.length === 1 &&
+    grant.resourceScope.allowedOrigins[0] === FIXED_NVIDIA_ORIGIN &&
+    grant.resourceScope?.allowedOperations?.length === 1 &&
+    grant.resourceScope.allowedOperations[0] === FIXED_NVIDIA_OPERATION;
+  const hasFixedModelScope =
+    grant.resourceScope?.allowedPaths?.length === 1 &&
+    ALLOWED_OFFLINE_NVIDIA_MODELS.has(grant.resourceScope.allowedPaths[0]!);
+  const hasFixedCredentialScope =
+    grant.credentialReferences?.length === 1 &&
+    grant.credentialReferences[0] === FIXED_NVIDIA_CREDENTIAL_REF;
+  const hasFixedCostAndAuthority =
+    grant.costCeiling === FIXED_OFFLINE_COST_CEILING &&
+    grant.authorityCeiling === FIXED_OFFLINE_AUTHORITY_CEILING;
+
+  if (
+    grant.status !== 'ACTIVE' ||
+    !hasValidIdentity ||
+    !hasFixedProviderScope ||
+    !hasFixedEndpointScope ||
+    !hasFixedModelScope ||
+    !hasFixedCredentialScope ||
+    !hasFixedCostAndAuthority ||
+    !Number.isFinite(expiresAtMs) ||
+    expiresAtMs <= Date.now()
+  ) {
+    throw new Error('Offline dispatch policy denied');
+  }
+
+  const frozen = freezeGrant(grant);
   trustedGrants.add(frozen);
   return frozen;
 }
 
-/** Policy-issued offline authority; caller context is supplied by trusted host construction. */
+/**
+ * Policy-issued offline-test authority; caller context is supplied by trusted host construction.
+ * Never represents human approval or live production qualification.
+ */
 export function authorizeOfflineNvidiaDispatch(context: {
-  subjectId: string; workSessionId: string; runId: string; taskId: string; model: string;
+  subjectId: string;
+  workSessionId: string;
+  runId: string;
+  taskId: string;
+  model: string;
 }): K3DispatchCapabilityGrant {
-  if (!['meta/llama-3.1-8b-instruct', 'meta/llama-3.1-70b-instruct', 'mistralai/mixtral-8x7b-instruct-v0.1'].includes(context.model)) throw new Error('Model denied by offline policy');
-  return authorizeOfflineNvidiaGrant({
-    grantId: randomUUID(), subjectId: context.subjectId, workSessionId: context.workSessionId,
-    runId: context.runId, taskId: context.taskId, grantedCapabilities: ['provider:nvidia-nim'],
-    authorizedToolIds: ['tool:nvidia-nim:chat'], resourceScope: {
-      allowedOrigins: ['https://integrate.api.nvidia.com'], allowedOperations: ['chat_completions'], allowedPaths: [context.model],
-    }, authorityCeiling: 'RESTRICTED_INFERENCE', costCeiling: 'ZERO_DOLLAR_FREE',
-    expiresAt: new Date(Date.now() + 120000).toISOString(), status: 'ACTIVE', credentialReferences: ['vault:cred:nvidia-nim'],
+  if (!ALLOWED_OFFLINE_NVIDIA_MODELS.has(context.model)) {
+    throw new Error('Model denied by offline policy');
+  }
+  return authorizeOfflineNvidiaGrant(
+    {
+      grantId: randomUUID(),
+      subjectId: context.subjectId,
+      workSessionId: context.workSessionId,
+      runId: context.runId,
+      taskId: context.taskId,
+      grantedCapabilities: [FIXED_NVIDIA_PROVIDER_CAPABILITY],
+      authorizedToolIds: [FIXED_NVIDIA_TOOL_ID],
+      resourceScope: {
+        allowedOrigins: [FIXED_NVIDIA_ORIGIN],
+        allowedOperations: [FIXED_NVIDIA_OPERATION],
+        allowedPaths: [context.model],
+      },
+      authorityCeiling: FIXED_OFFLINE_AUTHORITY_CEILING,
+      costCeiling: FIXED_OFFLINE_COST_CEILING,
+      expiresAt: new Date(Date.now() + 120000).toISOString(),
+      status: 'ACTIVE',
+      credentialReferences: [FIXED_NVIDIA_CREDENTIAL_REF],
+    },
+    TRUSTED_ISSUER_TOKEN
+  );
+}
+
+/**
+ * Narrowly controlled test-only fixture issuer for deterministic offline K3 verification tests.
+ * Refuses execution outside test environments and never represents human approval.
+ */
+export function issueOfflineNvidiaTestFixtureGrant(
+  overrides?: Partial<K3DispatchCapabilityGrant>
+): K3DispatchCapabilityGrant {
+  if (process.env['VITEST'] !== 'true' && process.env['NODE_ENV'] !== 'test') {
+    throw new Error('Offline test grant fixtures are restricted to test execution');
+  }
+  const base = authorizeOfflineNvidiaDispatch({
+    subjectId: 'test-subject-offline',
+    workSessionId: 'ws-test-offline',
+    runId: 'run-test-offline',
+    taskId: 'task-test-offline',
+    model: 'meta/llama-3.1-8b-instruct',
   });
+  const merged: K3DispatchCapabilityGrant = {
+    ...base,
+    ...overrides,
+    authorityCeiling: 'RESTRICTED_INFERENCE',
+    costCeiling: 'ZERO_DOLLAR_FREE',
+    resourceScope: {
+      ...base.resourceScope,
+      ...(overrides?.resourceScope ?? {}),
+    },
+  };
+  const frozen = freezeGrant(merged);
+  trustedGrants.add(frozen);
+  return frozen;
 }
 
 export interface K3DispatchGrantVerificationInput {
@@ -83,19 +204,19 @@ export function verifyK3DispatchGrant(
     };
   }
 
-  // 2. Grant status check
-  if (grant.status !== 'ACTIVE' && grant.status !== 'EXPIRED') {
+  // 2. Grant status check — require exactly ACTIVE status
+  if (grant.status !== 'ACTIVE') {
+    if (grant.status === 'EXPIRED') {
+      return {
+        authorized: false,
+        failureReasonCode: 'GRANT_EXPIRED',
+        message: `CapabilityGrant '${grant.grantId}' has expired.`,
+      };
+    }
     return {
       authorized: false,
       failureReasonCode: 'GRANT_REVOKED',
       message: `CapabilityGrant '${grant.grantId}' has been revoked.`,
-    };
-  }
-  if (grant.status === 'EXPIRED') {
-    return {
-      authorized: false,
-      failureReasonCode: 'GRANT_EXPIRED',
-      message: `CapabilityGrant '${grant.grantId}' has expired.`,
     };
   }
 

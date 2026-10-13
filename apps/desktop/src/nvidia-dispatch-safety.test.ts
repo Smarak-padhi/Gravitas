@@ -8,7 +8,16 @@ import { DesktopSupervisor } from './main/supervisor.js'
 import { isAuthorizedRestartCaller, initMainIpc } from './main/index.js'
 import { ipcMain } from 'electron'
 import { validateDispatchPayload } from './dispatchValidation.js'
-import { ModelCredentialBroker, ModelRegistry, NvidiaNimAdapter, authorizeOfflineNvidiaDispatch } from '@gravitas/gateways'
+import {
+  ModelCredentialBroker,
+  ModelRegistry,
+  ModelRouter,
+  NvidiaNimAdapter,
+  authorizeOfflineNvidiaDispatch,
+  authorizeOfflineNvidiaGrant,
+  issueOfflineNvidiaTestFixtureGrant,
+  verifyK3DispatchGrant,
+} from '@gravitas/gateways'
 import type { DispatchModelRequest } from './types.js'
 
 vi.mock('electron', () => ({ ipcMain: { handle: vi.fn() } }))
@@ -18,7 +27,7 @@ const request = (extra = {}): DispatchModelRequest => ({ type: 'DISPATCH_MODEL_R
 const grant = () => authorizeOfflineNvidiaDispatch({ subjectId: 'host', workSessionId: 'ws', runId: 'run', taskId: 'task', model })
 const response = () => new Response(JSON.stringify({ model, choices: [{ message: { content: 'LABELED_MOCK' }, finish_reason: 'stop' }] }))
 
-describe('V1-E-01-R1 dispatch safety', () => {
+describe('V1-E-01-R1 & R2 dispatch safety', () => {
   let root: string
   const hosts: KernelHost[] = []
   beforeEach(() => {
@@ -32,8 +41,8 @@ describe('V1-E-01-R1 dispatch safety', () => {
     vi.restoreAllMocks()
     rmSync(root, { recursive: true, force: true })
   })
-  const host = async (fetchFn?: typeof fetch) => {
-    const h = new KernelHost({ dataRoot: root, customFetch: fetchFn })
+  const host = async (fetchFn?: typeof fetch, extraOpts: Record<string, unknown> = {}) => {
+    const h = new KernelHost({ dataRoot: root, customFetch: fetchFn, ...extraOpts })
     hosts.push(h)
     await h.start()
     return h
@@ -82,18 +91,65 @@ describe('V1-E-01-R1 dispatch safety', () => {
     expect(live).not.toHaveBeenCalled()
   })
 
-  it('keeps metadata qualification unchanged and associates tasks with the requested session', async () => {
+  it('restricts authorizeOfflineNvidiaGrant against self-constructed grants and rejects EXPIRED status with future timestamp', async () => {
+    const issued = grant()
+    expect(issued.authorityCeiling).toBe('RESTRICTED_INFERENCE')
+    expect(issued.costCeiling).toBe('ZERO_DOLLAR_FREE')
+    expect(issued.grantedCapabilities).toEqual(['provider:nvidia-nim'])
+    expect(issued.resourceScope.allowedOrigins).toEqual(['https://integrate.api.nvidia.com'])
+    expect(issued.credentialReferences).toEqual(['vault:cred:nvidia-nim'])
+    expect(() => authorizeOfflineNvidiaGrant({ ...issued })).toThrow(/self-constructed grants cannot be registered/)
+
+    const futureExpiredFixture = issueOfflineNvidiaTestFixtureGrant({
+      status: 'EXPIRED',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    })
+    const verification = verifyK3DispatchGrant({
+      grant: futureExpiredFixture,
+      expectedProvider: 'nvidia-nim',
+      endpointUrl: 'https://integrate.api.nvidia.com/v1/chat/completions',
+      model,
+      credentialRef: 'vault:cred:nvidia-nim',
+    })
+    expect(verification.authorized).toBe(false)
+    expect(verification.failureReasonCode).toBe('GRANT_EXPIRED')
+  })
+
+  it('keeps metadata qualification unchanged, invokes ModelRouter, and records nonqualified/unknown cost claims', async () => {
     credential()
+    const resolveModelSpy = vi.spyOn(ModelRouter.prototype, 'resolveModel')
+    const resolveOfflineSpy = vi.spyOn(ModelRouter.prototype, 'resolveOfflineTestModel')
     const h = await host(async () => response())
     await h.getKernel().execute({ commandId: 'ws-create', commandType: 'CREATE_WORKSESSION', workSessionId: 'ws-existing', payload: { title: 'Existing', objective: 'Test', repositoryRoot: root } })
     const before = ModelRegistry.getInstance().getModel(model)!.qualificationState
     expect(before).toBe('METADATA_VALIDATED')
     const result = await h.dispatchModel(request({ workSessionId: 'ws-existing' }))
     expect(result.success).toBe(true)
+    expect(resolveModelSpy).toHaveBeenCalledTimes(1)
+    expect(resolveOfflineSpy).toHaveBeenCalledTimes(1)
+    expect(resolveOfflineSpy.mock.results[0]?.value.qualificationDecision).toBe('UNQUALIFIED')
     const snapshot = h.getKernel().getWorkSessionSnapshot('ws-existing')
     expect(snapshot.tasks[0]).toMatchObject({ id: result.taskId, runId: result.runId, workSessionId: 'ws-existing', state: 'VERIFYING' })
     expect(snapshot.runs[0].id).toBe(result.runId)
     expect(ModelRegistry.getInstance().getModel(model)!.qualificationState).toBe(before)
+
+    const execProj = h.generateExecutionProjection()
+    const execItem = execProj.executions.find(e => e.executionId === result.executionId)!
+    expect(execItem).toMatchObject({
+      qualificationStatus: 'NOT_QUALIFIED',
+      readinessStatus: 'NOT_READY',
+      costEligibility: 'UNKNOWN_COST',
+      dispatchAuthorization: 'AUTHORIZED',
+      status: 'COMPLETED',
+    })
+
+    // Router cost policy blocks PAID models before any task or transport execution
+    const existingModel = ModelRegistry.getInstance().getModel(model)!
+    ModelRegistry.getInstance().registerModel({ ...existingModel, costClass: 'PAID' })
+    const costBlocked = await h.dispatchModel(request({ workSessionId: 'ws-existing' }))
+    expect(costBlocked.success).toBe(false)
+    expect(costBlocked.errorTaxonomy).toBe('COST_BLOCKED')
+
     expect((await h.dispatchModel(request({ workSessionId: 'missing' }))).success).toBe(false)
     expect(h.getKernel().listWorkSessions()).toHaveLength(1)
   })
@@ -145,6 +201,39 @@ describe('V1-E-01-R1 dispatch safety', () => {
     const restarted = await host(async () => response())
     const ws = restarted.getKernel().listWorkSessions()[0]
     expect(restarted.getKernel().getWorkSessionSnapshot(ws.id).tasks[0].state).toBe('CANCELLED')
+  })
+
+  it('bounded shutdown drain recovers safely when adapter or kernel operations never settle', async () => {
+    credential()
+    let adapterStarted!: () => void
+    const adapterReady = new Promise<void>(resolve => { adapterStarted = resolve })
+    const unsettledAdapter = {
+      execute: () => {
+        adapterStarted()
+        return new Promise<any>(() => {})
+      },
+    } as unknown as NvidiaNimAdapter
+    const h1 = await host(async () => response(), { nvidiaAdapter: unsettledAdapter, shutdownDrainTimeoutMs: 40 })
+    const pending1 = h1.dispatchModel(request())
+    await adapterReady
+    await h1.shutdown()
+    hosts.splice(hosts.indexOf(h1), 1)
+    expect((await pending1).success).toBe(false)
+
+    // Also test a kernel operation (kernel.execute) that never settles during dispatch
+    const h2 = await host(async () => response(), { shutdownDrainTimeoutMs: 40, kernelCommandTimeoutMs: 30 })
+    const origExecute = h2.getKernel().execute.bind(h2.getKernel())
+    vi.spyOn(h2.getKernel(), 'execute').mockImplementation(async (cmd: any) => {
+      if (cmd.commandType === 'TRANSITION_TASK' && cmd.payload?.toState === 'RUNNING') {
+        return new Promise(() => {})
+      }
+      return origExecute(cmd)
+    })
+    const timedOutKernelRes = await h2.dispatchModel(request({ timeoutMs: 40 }))
+    expect(timedOutKernelRes.success).toBe(false)
+    expect(timedOutKernelRes.errorMessage).toContain('Kernel command timed out')
+    await h2.shutdown()
+    hosts.splice(hosts.indexOf(h2), 1)
   })
 
   it('thrown provider failures and failed kernel commands cannot leave RUNNING tasks', async () => {

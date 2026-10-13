@@ -52,11 +52,32 @@ export class ModelRouter {
   }
 
   /**
-   * Deterministically resolves a model and provider for the given task requirements.
+   * Deterministically resolves a production-qualified model and provider for the given task requirements.
    */
   public resolveModel(
     requirements: TaskModelRequirements,
     escalationPosition = 0
+  ): RoutingDecision {
+    return this.resolveWithMode(requirements, escalationPosition, 'PRODUCTION');
+  }
+
+  /**
+   * Deterministically resolves a model for offline test execution without promoting
+   * metadata-validated models to production QUALIFIED status.
+   * Enforces all provider auth, zero-dollar budget, and capability constraints,
+   * while returning qualificationDecision: 'UNQUALIFIED' for metadata-only models.
+   */
+  public resolveOfflineTestModel(
+    requirements: TaskModelRequirements,
+    escalationPosition = 0
+  ): RoutingDecision {
+    return this.resolveWithMode(requirements, escalationPosition, 'OFFLINE_TEST');
+  }
+
+  private resolveWithMode(
+    requirements: TaskModelRequirements,
+    escalationPosition: number,
+    mode: 'PRODUCTION' | 'OFFLINE_TEST'
   ): RoutingDecision {
     const allModels = this.registry.listModels();
     const candidateModels: string[] = [];
@@ -106,7 +127,9 @@ export class ModelRouter {
       }
 
       // 3. Qualification state
-      if (model.qualificationState !== 'QUALIFIED') {
+      const isOfflineEligible =
+        mode === 'OFFLINE_TEST' && model.qualificationState === 'METADATA_VALIDATED';
+      if (model.qualificationState !== 'QUALIFIED' && !isOfflineEligible) {
         if (model.qualificationState === 'AUTH_REQUIRED') seenAuthBlocked = true;
         if (model.qualificationState === 'COST_BLOCKED') seenCostBlocked = true;
         rejectedCandidates.push({
@@ -284,6 +307,7 @@ export class ModelRouter {
 
     const chosen = eligible[0]!;
     const historyUsed = this.history.getObservations({ modelId: chosen.id }).length > 0;
+    const isProductionQualified = chosen.qualificationState === 'QUALIFIED';
 
     return {
       selectedProvider: chosen.providerId,
@@ -292,12 +316,14 @@ export class ModelRouter {
       rejectedCandidates,
       rejectionReasons: rejectedCandidates.map((r) => `${r.modelId}: ${r.reason}`),
       costDecision: 'FREE_APPROVED',
-      qualificationDecision: 'QUALIFIED',
+      qualificationDecision: isProductionQualified ? 'QUALIFIED' : 'UNQUALIFIED',
       capabilityDecision: 'SATISFIED',
       historicalEvidenceUsed: historyUsed,
       escalationPosition,
       policyVersion: this.routingPolicy.policyVersion,
-      reason: `Deterministically selected model '${chosen.id}' via provider '${chosen.providerId}' satisfying all constraints under $0 budget.`,
+      reason: isProductionQualified
+        ? `Deterministically selected model '${chosen.id}' via provider '${chosen.providerId}' satisfying all constraints under $0 budget.`
+        : `OFFLINE_TEST_ROUTE: Selected metadata-validated model '${chosen.id}' via provider '${chosen.providerId}' for offline test execution without promoting production qualification.`,
     };
   }
 }

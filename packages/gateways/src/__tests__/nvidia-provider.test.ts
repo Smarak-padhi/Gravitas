@@ -1,31 +1,28 @@
-import { authorizeOfflineNvidiaGrant } from '../security/k3DispatchEnforcement.js';
+import { issueOfflineNvidiaTestFixtureGrant } from '../security/k3DispatchEnforcement.js';
 import { describe, expect, it } from 'vitest';
 import { NvidiaNimAdapter, NVIDIA_CHAT_ENDPOINT, NVIDIA_DEFAULT_BASE_URL, NVIDIA_PROVIDER_ID } from '../providers/nvidia.js';
 import { ModelCredentialBroker } from '../credentials/modelCredentialBroker.js';
 import type { K3DispatchCapabilityGrant, ProviderInferenceRequest } from '../providers/types.js';
 
 function createValidGrant(overrides?: Partial<K3DispatchCapabilityGrant>): K3DispatchCapabilityGrant {
-  const grant: K3DispatchCapabilityGrant = {
+  return issueOfflineNvidiaTestFixtureGrant({
     grantId: 'grant-test-k3-valid-001',
     subjectId: 'agent-worker-1',
     workSessionId: 'ws-test-1',
     runId: 'run-test-1',
     taskId: 'task-test-1',
     grantedCapabilities: ['provider:nvidia-nim'],
-    authorizedToolIds: ['nvidia-nim'],
+    authorizedToolIds: ['tool:nvidia-nim:chat'],
     resourceScope: {
       allowedOrigins: ['https://integrate.api.nvidia.com'],
       allowedOperations: ['chat_completions'],
       allowedPaths: ['meta/llama-3.1-8b-instruct', 'meta/llama-3.1-70b-instruct', 'mistralai/mixtral-8x7b-instruct-v0.1'],
     },
-    authorityCeiling: 'NORMAL',
-    costCeiling: '0',
     status: 'ACTIVE',
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
-    credentialReferences: ['cred-nvidia-nim-1'],
+    credentialReferences: ['vault:cred:nvidia-nim'],
     ...overrides,
-  };
-  return grant.status === 'ACTIVE' ? authorizeOfflineNvidiaGrant(grant) : grant;
+  });
 }
 
 describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
@@ -157,7 +154,7 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
       }) as any,
     });
 
-    // 4a. Expired grant
+    // 4a. Expired grant (past timestamp)
     const expiredGrant = createValidGrant({
       credentialReferences: [credRef],
       expiresAt: new Date(Date.now() - 1000).toISOString(),
@@ -171,6 +168,21 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
     expect(resExpired.errorTaxonomy).toBe('CAPABILITY_GRANT_REQUIRED');
     expect(resExpired.errorMessage).toContain('expired');
 
+    // 4a-2. EXPIRED status with future expiration timestamp
+    const statusExpiredFutureGrant = createValidGrant({
+      credentialReferences: [credRef],
+      status: 'EXPIRED',
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+    const resStatusExpiredFuture = await adapter.execute({
+      model: 'meta/llama-3.1-8b-instruct',
+      messages: [{ role: 'user', content: 'test' }],
+      credentialRef: credRef,
+      capabilityGrant: statusExpiredFutureGrant,
+    });
+    expect(resStatusExpiredFuture.errorTaxonomy).toBe('CAPABILITY_GRANT_REQUIRED');
+    expect(resStatusExpiredFuture.errorMessage).toContain('has expired');
+
     // 4b. Revoked grant
     const revokedGrant = createValidGrant({
       credentialReferences: [credRef],
@@ -183,7 +195,7 @@ describe('GRAVITAS V1-B — NVIDIA NIM Provider Adapter Suite', () => {
       capabilityGrant: revokedGrant,
     });
     expect(resRevoked.errorTaxonomy).toBe('CAPABILITY_GRANT_REQUIRED');
-    expect(resRevoked.errorMessage).toContain('No K3 CapabilityGrant');
+    expect(resRevoked.errorMessage).toContain('has been revoked');
 
     // 4c. Wrong provider in grant
     const wrongProviderGrant = createValidGrant({
