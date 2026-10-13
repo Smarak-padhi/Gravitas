@@ -607,6 +607,8 @@
       <div class="ob-dot" data-step="1" style="flex: 1; height: 4px; background: #38bdf8; border-radius: 2px;"></div>
       <div class="ob-dot" data-step="2" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
       <div class="ob-dot" data-step="3" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
+      <div class="ob-dot" data-step="4" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
+      <div class="ob-dot" data-step="5" style="flex: 1; height: 4px; background: var(--border); border-radius: 2px;"></div>
     </div>
 
     <!-- SCREEN 1: Welcome -->
@@ -718,6 +720,101 @@
       </div>
 
       <div id="ob-inbox-test-message" style="font-size: 12px; color: var(--text-muted); min-height: 20px;"></div>
+    </div>
+
+    <!-- SCREEN 4: Assistant Preferences -->
+    <div id="onboarding-screen-4" class="onboarding-screen" data-screen="4" style="display: none;">
+      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Assistant & Notification Preferences</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+        Configure your floating companion shortcut and notification schedule.
+      </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+        <div>
+          <label class="dialog-label" for="ob-shortcut-input">Floating Assistant Shortcut</label>
+          <input type="text" id="ob-shortcut-input" value="Alt+Space" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-family: monospace; font-size: 12px;" />
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Press anywhere on Windows to summon or dismiss.</div>
+        </div>
+        <div>
+          <label class="dialog-label" for="ob-reminder-frequency-select">Reminder Frequency</label>
+          <select id="ob-reminder-frequency-select" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;">
+            <option value="30">Every 30 minutes</option>
+            <option value="60" selected>Every 60 minutes (Default)</option>
+            <option value="120">Every 2 hours</option>
+            <option value="240">Every 4 hours</option>
+          </select>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Interval for upcoming assignment briefings.</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+        <div>
+          <label class="dialog-label" for="ob-quiet-start">Quiet Hours Start</label>
+          <input type="time" id="ob-quiet-start" value="22:00" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        </div>
+        <div>
+          <label class="dialog-label" for="ob-quiet-end">Quiet Hours End</label>
+          <input type="time" id="ob-quiet-end" value="08:00" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; margin-bottom: 8px;">
+          <input type="checkbox" id="ob-notifications-enabled" checked />
+          <span><strong>Enable desktop notifications</strong> (Ask for reminder preference before sending notifications)</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+          <input type="checkbox" id="ob-start-with-windows" />
+          <span>Optional: Start GRAVITAS companion minimized when Windows boots</span>
+        </label>
+      </div>
+
+      <div class="invariant-banner" style="font-size: 11px;">
+        OFFLINE SPEECH & EGRESS: Voice push-to-talk uses local offline Vosk models with text fallback. Real network egress is default-denied.
+      </div>
+    </div>
+
+    <!-- SCREEN 5: First Success -->
+    <div id="onboarding-screen-5" class="onboarding-screen" data-screen="5" style="display: none;">
+      <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 6px; color: #38bdf8;">Your First Action</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+        Complete one real action to verify persistence and see GRAVITAS in action.
+      </p>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+        <button class="btn btn-secondary ob-first-action-tab active" data-action="SAVE_IDEA">1. Save Idea</button>
+        <button class="btn btn-secondary ob-first-action-tab" data-action="CREATE_TASK">2. Create Task</button>
+        <button class="btn btn-secondary ob-first-action-tab" data-action="IMPORT_ASSIGNMENT">3. Import Assignment</button>
+        <button class="btn btn-secondary ob-first-action-tab" data-action="EXPLORE_SAMPLE">4. Explore Sample</button>
+      </div>
+
+      <!-- Action Inputs -->
+      <div id="ob-first-action-inputs" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
+        <div id="ob-input-row-title" style="margin-bottom: 8px;">
+          <label class="dialog-label" for="ob-action-title">Title</label>
+          <input type="text" id="ob-action-title" value="My first note in GRAVITAS" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        </div>
+        <div id="ob-input-row-text" style="margin-bottom: 8px;">
+          <label class="dialog-label" for="ob-action-text">Details / Note</label>
+          <input type="text" id="ob-action-text" value="Testing local knowledge hub persistence and floating companion." style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        </div>
+        <div id="ob-input-row-extra" style="display: none; margin-bottom: 8px;">
+          <label class="dialog-label" for="ob-action-extra">Due Date</label>
+          <input type="date" id="ob-action-extra" style="width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 7px; font-size: 12px;" />
+        </div>
+        <button id="ob-btn-do-action" class="btn" style="margin-top: 6px;">Execute Action & Save to Hub</button>
+      </div>
+
+      <!-- Persistence Confirmation Banner -->
+      <div id="ob-persistence-card" style="display: none; background: #064e3b; border: 1px solid #059669; border-radius: 6px; padding: 10px; margin-bottom: 14px; font-size: 12px;">
+        <div style="font-weight: 600; color: #34d399; margin-bottom: 4px;">Verified Local Persistence</div>
+        <div id="ob-persistence-detail" style="font-family: monospace; font-size: 11px; color: #d1fae5;"></div>
+      </div>
+
+      <!-- Companion Quick Guide -->
+      <div style="background: #1e1b4b; border: 1px solid #4338ca; border-radius: 6px; padding: 10px; font-size: 12px; color: #c7d2fe;">
+        <strong>Companion Ready:</strong> Press <kbd style="background: #000; padding: 2px 5px; border-radius: 3px; font-family: monospace;">Alt+Space</kbd> anytime to open the floating companion. Hold microphone for offline speech, or type natural commands like <em>"Save this idea..."</em> or <em>"Show my unfinished tasks"</em>.
+      </div>
     </div>
 
     <!-- Wizard Navigation Footer -->

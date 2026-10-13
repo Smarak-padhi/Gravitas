@@ -578,7 +578,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   if (!dialog) return
 
   let currentScreen = 1
-  const TOTAL_SCREENS = 3
+  const TOTAL_SCREENS = 5
   let selectedPlatform: PhoneSyncPlatform = 'IPHONE'
   let selectedAction: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE' = 'SAVE_IDEA'
 
