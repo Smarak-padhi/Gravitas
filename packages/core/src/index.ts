@@ -259,7 +259,11 @@ export {
 // Configuration and first-run onboarding
 export {
   type GravitasOperatingMode,
+  type PersonaArchetype,
+  type PhoneSyncPlatform,
+  type InboxVerificationState,
   type OnboardingStep,
+  type OnboardingPreferences,
   type OnboardingState,
   type GravitasConfig,
   getDefaultOnboardingState,

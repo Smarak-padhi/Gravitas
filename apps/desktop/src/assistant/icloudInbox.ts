@@ -804,6 +804,111 @@ export class ICloudAssignmentInbox {
     return this.getSemesterSubject(existing.code)!
   }
 
+  public createSemesterSubject(input: {
+    readonly code: string
+    readonly name?: string | undefined
+    readonly credits?: number | undefined
+    readonly keywords?: readonly string[] | undefined
+    readonly notes?: string | undefined
+  }): SemesterSubjectRecord {
+    const code = input.code.trim()
+    const existing = this.getSemesterSubject(code)
+    if (existing) {
+      return existing
+    }
+
+    const name = (input.name || code).trim()
+    const credits = input.credits !== undefined ? Number(input.credits) : 4
+    const keywords = input.keywords ?? [code.toLowerCase(), name.toLowerCase()]
+    const notes = input.notes ?? `Workspace for ${code} (${name}) with Notes, Assignments, Answers, Resources, and Revision Tasks.`
+    const now = new Date().toISOString()
+
+    this.db
+      .prepare(`
+        INSERT INTO semester_subjects (code, name, credits, keywords_json, notes, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+      `)
+      .run(code, name, credits, JSON.stringify(keywords), notes, now, now)
+
+    return this.getSemesterSubject(code)!
+  }
+
+  public seedDefaultSubjects(): readonly SemesterSubjectRecord[] {
+    const now = new Date().toISOString()
+    const insertSubj = this.db.prepare(`
+      INSERT OR IGNORE INTO semester_subjects (code, name, credits, keywords_json, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?);
+    `)
+    for (const s of SEVEN_SEMESTER_SUBJECTS) {
+      insertSubj.run(
+        s.code,
+        s.name,
+        s.credits,
+        JSON.stringify(s.keywords),
+        `Default ${s.code} (${s.name}) workspace with Notes, Assignments, Answers, Resources, and Revision Tasks.`,
+        now,
+        now
+      )
+    }
+    return this.listSemesterSubjects()
+  }
+
+  public deleteSemesterSubject(code: string, force = false): boolean {
+    const existing = this.getSemesterSubject(code)
+    if (!existing) return false
+
+    // Check if subject has user entries or assignments unless force=true
+    if (!force) {
+      const entryCountRow = this.db
+        .prepare('SELECT COUNT(*) as count FROM subject_section_entries WHERE UPPER(subject_code) = UPPER(?);')
+        .get(existing.code) as { count: number } | undefined
+      if (entryCountRow && entryCountRow.count > 0) {
+        throw new Error(`Cannot delete subject ${existing.code}: contains ${entryCountRow.count} section entries.`)
+      }
+
+      try {
+        const asgnCountRow = this.db
+          .prepare('SELECT COUNT(*) as count FROM study_assignments WHERE UPPER(subject_code) = UPPER(?);')
+          .get(existing.code) as { count: number } | undefined
+        if (asgnCountRow && asgnCountRow.count > 0) {
+          throw new Error(`Cannot delete subject ${existing.code}: contains ${asgnCountRow.count} assignments.`)
+        }
+      } catch (err) {
+        if ((err as Error).message.includes('Cannot delete subject')) throw err
+      }
+    }
+
+    this.db.prepare('DELETE FROM semester_subjects WHERE UPPER(code) = UPPER(?);').run(existing.code)
+    return true
+  }
+
+  public clearUnusedDefaultSubjects(): number {
+    let cleared = 0
+    for (const s of SEVEN_SEMESTER_SUBJECTS) {
+      let hasEntries = false
+      try {
+        const entryCountRow = this.db
+          .prepare('SELECT COUNT(*) as count FROM subject_section_entries WHERE UPPER(subject_code) = UPPER(?);')
+          .get(s.code) as { count: number } | undefined
+        hasEntries = (entryCountRow?.count ?? 0) > 0
+      } catch {}
+
+      let hasAssignments = false
+      try {
+        const asgnCountRow = this.db
+          .prepare('SELECT COUNT(*) as count FROM study_assignments WHERE UPPER(subject_code) = UPPER(?);')
+          .get(s.code) as { count: number } | undefined
+        hasAssignments = (asgnCountRow?.count ?? 0) > 0
+      } catch {}
+
+      if (!hasEntries && !hasAssignments) {
+        this.db.prepare('DELETE FROM semester_subjects WHERE code = ?;').run(s.code)
+        cleared++
+      }
+    }
+    return cleared
+  }
+
   public addSubjectSectionEntry(input: {
     readonly subjectCode: string
     readonly bucket: SubjectSectionBucket

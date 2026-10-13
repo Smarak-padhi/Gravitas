@@ -18,8 +18,20 @@
  * - HUMAN_APPROVAL != AUTO_MERGE / AUTO_DEPLOY / AUTO_RELEASE
  */
 
-import type { DoctorReport } from '@gravitas/core'
-export type { DoctorReport }
+import type {
+  DoctorReport,
+  PersonaArchetype,
+  PhoneSyncPlatform,
+  InboxVerificationState,
+  OnboardingPreferences,
+} from '@gravitas/core'
+export type {
+  DoctorReport,
+  PersonaArchetype,
+  PhoneSyncPlatform,
+  InboxVerificationState,
+  OnboardingPreferences,
+}
 
 export const D0_PROTOCOL_VERSION = 'd0.1'
 export const D1_PROTOCOL_VERSION = 'd1.0'
@@ -665,6 +677,30 @@ export type {
   SessionBriefingResult,
 }
 
+import type { PersonaSetupResult } from './assistant/onboardingService.js'
+export type { PersonaSetupResult }
+
+export interface InboxVerificationResult {
+  readonly state: InboxVerificationState
+  readonly folderPath: string | null
+  readonly isAccessible: boolean
+  readonly fileCount: number
+  readonly importedCount: number
+  readonly hasCrossDeviceEvidence: boolean
+  readonly evidenceSummary?: string | undefined
+  readonly message: string
+}
+
+export interface FirstSuccessResult {
+  readonly success: boolean
+  readonly action: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE'
+  readonly createdItemId: string
+  readonly itemTitle: string
+  readonly collection: string
+  readonly persisted: boolean
+  readonly message: string
+}
+
 export interface DispatchModelResponse extends BaseProtocolMessage, DesktopModelDispatchResult {
   readonly type: 'DISPATCH_MODEL_RESPONSE'
   readonly requestId: string
@@ -879,6 +915,34 @@ export type StudyGuardianRequestPayload =
       readonly assignmentId?: string | undefined
       readonly subjectCode?: string | undefined
     }
+  | {
+      readonly action: 'CREATE_SEMESTER_SUBJECT'
+      readonly code: string
+      readonly name?: string | undefined
+      readonly credits?: number | undefined
+      readonly keywords?: readonly string[] | undefined
+      readonly notes?: string | undefined
+    }
+  | {
+      readonly action: 'APPLY_PERSONA_SETUP'
+      readonly persona: PersonaArchetype
+      readonly customSubjects?: readonly string[] | undefined
+      readonly useSevenSubjectTemplate?: boolean | undefined
+    }
+  | {
+      readonly action: 'TEST_INBOX_SETUP'
+      readonly folderPath?: string | undefined
+      readonly checkType?: 'folder_only' | 'full_scan' | undefined
+    }
+  | {
+      readonly action: 'EXECUTE_FIRST_SUCCESS'
+      readonly successAction: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE'
+      readonly title?: string | undefined
+      readonly text?: string | undefined
+      readonly subjectCode?: string | undefined
+      readonly dueDate?: string | undefined
+    }
+  | { readonly action: 'RESET_ONBOARDING' }
 
 export interface StudyGuardianOperationRequest extends BaseProtocolMessage {
   readonly type: 'STUDY_GUARDIAN_REQUEST'
@@ -905,6 +969,9 @@ export interface StudyGuardianOperationResult {
   readonly answerDraftResult?: PrepareAnswerDraftResult | undefined
   readonly studyAnswer?: StudyAnswerRecord | undefined
   readonly studyAnswers?: readonly StudyAnswerRecord[] | undefined
+  readonly personaSetupResult?: PersonaSetupResult | undefined
+  readonly inboxVerificationResult?: InboxVerificationResult | undefined
+  readonly firstSuccessResult?: FirstSuccessResult | undefined
   readonly errorMessage?: string | undefined
 }
 
@@ -1043,6 +1110,7 @@ export interface OnboardingStateProjection {
   readonly providerConfigured: boolean
   readonly dataRoot: string
   readonly isTest?: boolean | undefined
+  readonly preferences?: OnboardingPreferences | undefined
 }
 
 export interface SaveOnboardingPayload {
@@ -1050,6 +1118,7 @@ export interface SaveOnboardingPayload {
   readonly step?: string | undefined
   readonly operatingMode?: 'DETERMINISTIC_ONLY' | 'ASSISTED' | undefined
   readonly selectedHarnesses?: readonly string[] | undefined
+  readonly preferences?: OnboardingPreferences | undefined
 }
 
 export interface ConfigureProviderPayload {

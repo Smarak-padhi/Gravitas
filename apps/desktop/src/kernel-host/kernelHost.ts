@@ -94,6 +94,7 @@ import {
   ICloudAssignmentInbox,
   StudyGuardianService,
   resolveSemesterSubjectQuery,
+  OnboardingService,
   type CustomAppSpawnFn,
   type LocalOfflineTranscriberFn,
   type AuthorizedLocalAnswerGenerator,
@@ -188,6 +189,7 @@ export class KernelHost {
   private capabilityRegistry?: AssistantCapabilityRegistry | undefined
   private icloudInbox?: ICloudAssignmentInbox | undefined
   private studyGuardian?: StudyGuardianService | undefined
+  private onboardingService?: OnboardingService | undefined
   private readonly localAnswerGenerator?: AuthorizedLocalAnswerGenerator | undefined
   private readonly appLauncher: AllowlistedAppLauncher
   private readonly voiceController: OfflineVoiceController
@@ -305,6 +307,10 @@ export class KernelHost {
 
   public getStatus(): KernelLifecycleStatus {
     return this.status
+  }
+
+  public async stop(): Promise<void> {
+    await this.shutdown()
   }
 
   public getKernel(): WorkSessionKernel {
@@ -1810,6 +1816,17 @@ export class KernelHost {
     return this.studyGuardian
   }
 
+  public getOnboardingService(): OnboardingService {
+    if (!this.onboardingService) {
+      this.onboardingService = new OnboardingService(
+        this.getICloudInbox(),
+        this.getIdeasVault(),
+        this.dataRoot
+      )
+    }
+    return this.onboardingService
+  }
+
   public getVoiceController(): OfflineVoiceController {
     return this.voiceController
   }
@@ -3177,6 +3194,72 @@ export class KernelHost {
               assignmentId: payload.assignmentId,
               subjectCode: payload.subjectCode,
             }),
+          }
+        }
+        case 'CREATE_SEMESTER_SUBJECT': {
+          const subjectRecord = inbox.createSemesterSubject({
+            code: payload.code,
+            name: payload.name,
+            credits: payload.credits,
+            keywords: payload.keywords,
+            notes: payload.notes,
+          })
+          return {
+            success: true,
+            action: 'CREATE_SEMESTER_SUBJECT',
+            subjectRecord,
+            semesterSubjects: inbox.listSemesterSubjects(),
+          }
+        }
+        case 'APPLY_PERSONA_SETUP': {
+          const onboarding = this.getOnboardingService()
+          const result = onboarding.applyPersonaSetup({
+            persona: payload.persona,
+            customSubjects: payload.customSubjects,
+            useSevenSubjectTemplate: payload.useSevenSubjectTemplate,
+          })
+          return {
+            success: result.success,
+            action: 'APPLY_PERSONA_SETUP',
+            personaSetupResult: result,
+            semesterSubjects: inbox.listSemesterSubjects(),
+          }
+        }
+        case 'TEST_INBOX_SETUP': {
+          const onboarding = this.getOnboardingService()
+          const verification = await onboarding.verifyInbox({
+            folderPath: payload.folderPath,
+            checkType: payload.checkType,
+          })
+          return {
+            success: verification.isAccessible,
+            action: 'TEST_INBOX_SETUP',
+            inboxVerificationResult: verification,
+            inboxConfig: inbox.getInboxConfig(),
+          }
+        }
+        case 'EXECUTE_FIRST_SUCCESS': {
+          const onboarding = this.getOnboardingService()
+          const firstSuccess = onboarding.executeFirstSuccessAction({
+            successAction: payload.successAction,
+            title: payload.title,
+            text: payload.text,
+            subjectCode: payload.subjectCode,
+            dueDate: payload.dueDate,
+          })
+          return {
+            success: firstSuccess.success,
+            action: 'EXECUTE_FIRST_SUCCESS',
+            firstSuccessResult: firstSuccess,
+            assignments: guardian.listAssignments(),
+          }
+        }
+        case 'RESET_ONBOARDING': {
+          const onboarding = this.getOnboardingService()
+          onboarding.resetOnboarding()
+          return {
+            success: true,
+            action: 'RESET_ONBOARDING',
           }
         }
       }

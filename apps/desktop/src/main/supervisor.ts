@@ -888,6 +888,7 @@ export class DesktopSupervisor {
       providerConfigured: this.isExecutionCredentialReady('nvidia-nim'),
       dataRoot: this.dataRoot,
       isTest,
+      preferences: cfg.onboarding.preferences,
     }
   }
 
@@ -903,6 +904,10 @@ export class DesktopSupervisor {
           step,
           operatingMode: payload.operatingMode ?? current.onboarding.operatingMode,
           selectedHarnesses: payload.selectedHarnesses ?? current.onboarding.selectedHarnesses,
+          preferences:
+            payload.preferences !== undefined
+              ? { ...(current.onboarding.preferences || {}), ...payload.preferences }
+              : current.onboarding.preferences,
         },
       })
       return true

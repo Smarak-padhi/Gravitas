@@ -17,6 +17,17 @@ import { randomUUID } from 'node:crypto'
 
 export type GravitasOperatingMode = 'DETERMINISTIC_ONLY' | 'ASSISTED'
 
+export type PersonaArchetype = 'STUDENT' | 'WORK' | 'PERSONAL' | 'EVERYTHING'
+
+export type PhoneSyncPlatform = 'IPHONE' | 'ANDROID' | 'BOTH' | 'NONE'
+
+export type InboxVerificationState =
+  | 'UNCONFIGURED'
+  | 'FOLDER_ACCESSIBLE'
+  | 'AWAITING_FIRST_FILE'
+  | 'LOCAL_IMPORT_VERIFIED'
+  | 'CROSS_DEVICE_SYNC_VERIFIED'
+
 export type OnboardingStep =
   | 'WELCOME'
   | 'DIAGNOSTICS'
@@ -25,7 +36,33 @@ export type OnboardingStep =
   | 'HARNESSES'
   | 'PROVIDERS'
   | 'POLICY'
+  | 'PERSONALIZE'
+  | 'PHONE_INBOX'
+  | 'ASSISTANT_PREFS'
+  | 'FIRST_SUCCESS'
   | 'COMPLETED'
+
+export interface OnboardingPreferences {
+  readonly persona?: PersonaArchetype | undefined
+  readonly customSubjects?: readonly string[] | undefined
+  readonly useSevenSubjectTemplate?: boolean | undefined
+  readonly phonePlatform?: PhoneSyncPlatform | undefined
+  readonly inboxFolderPath?: string | null | undefined
+  readonly inboxVerificationState?: InboxVerificationState | undefined
+  readonly companionShortcut?: string | undefined
+  readonly assistantShortcut?: string | undefined
+  readonly startWithWindows?: boolean | undefined
+  readonly reminderFrequencyMinutes?: number | undefined
+  readonly reminderIntervalMinutes?: number | undefined
+  readonly quietHoursStart?: string | undefined
+  readonly quietHoursEnd?: string | undefined
+  readonly notificationsEnabled?: boolean | undefined
+  readonly voiceEnabled?: boolean | undefined
+  readonly defaultDenyCloudEgress?: boolean | undefined
+  readonly firstSuccessAction?: 'FIRST_IDEA' | 'FIRST_TASK' | 'FIRST_ASSIGNMENT' | 'EXPLORE_DEMO' | undefined
+  readonly firstSuccessItemId?: string | undefined
+  readonly theme?: 'dark' | 'light' | 'system' | undefined
+}
 
 export interface OnboardingState {
   readonly completed: boolean
@@ -35,6 +72,7 @@ export interface OnboardingState {
   readonly selectedHarnesses: readonly string[]
   readonly providerConfigured: boolean
   readonly dismissedNoticeIds?: readonly string[] | undefined
+  readonly preferences?: OnboardingPreferences | undefined
 }
 
 export interface GravitasConfig {
@@ -91,6 +129,7 @@ export function loadGravitasConfig(configFilePath: string): { config: GravitasCo
       selectedHarnesses: Array.isArray(onboarding.selectedHarnesses) ? onboarding.selectedHarnesses : ['harness:powershell:desktop'],
       providerConfigured: Boolean(onboarding.providerConfigured),
       dismissedNoticeIds: Array.isArray(onboarding.dismissedNoticeIds) ? onboarding.dismissedNoticeIds : [],
+      preferences: onboarding.preferences && typeof onboarding.preferences === 'object' ? onboarding.preferences : undefined,
     }
 
     const config: GravitasConfig = {
