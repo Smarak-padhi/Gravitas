@@ -573,6 +573,12 @@ export interface DispatchModelRequest extends BaseProtocolMessage {
 
 import type {
   IdeaRecord,
+  KnowledgeCollection,
+  KnowledgeTaskStatus,
+  KnowledgeLinkRecord,
+  StudySubjectSummary,
+  KnowledgeFilterInput,
+  MarkdownExportResult,
   SaveIdeaInput,
   UpdateIdeaInput,
   DeleteIdeaResult,
@@ -582,6 +588,7 @@ import type {
 } from './assistant/commandParser.js'
 import type {
   AppLaunchResult,
+  NotepadAutomationResult,
 } from './assistant/appLauncher.js'
 import type {
   VoiceSttStatusProjection,
@@ -596,11 +603,18 @@ import type {
 
 export type {
   IdeaRecord,
+  KnowledgeCollection,
+  KnowledgeTaskStatus,
+  KnowledgeLinkRecord,
+  StudySubjectSummary,
+  KnowledgeFilterInput,
+  MarkdownExportResult,
   SaveIdeaInput,
   UpdateIdeaInput,
   DeleteIdeaResult,
   AssistantIntentKind,
   AppLaunchResult,
+  NotepadAutomationResult,
   VoiceSttStatusProjection,
   PttSessionStartResult,
   PttTranscriptionResult,
@@ -619,7 +633,7 @@ export interface D1ProjectionUpdatedNotification extends BaseProtocolMessage {
   readonly projectionType: string
 }
 
-// ─── V1-F-01 Floating Companion & Ideas Vault IPC Contracts ──────────────────
+// ─── V1-F-01 / V1-F-02 Floating Companion & Knowledge Hub IPC Contracts ──────
 
 export type CompanionVisualState =
   | 'IDLE'
@@ -632,6 +646,7 @@ export type CompanionVisualState =
 export interface AssistantCommandPayload {
   readonly commandId?: string | undefined
   readonly input: string
+  readonly saveApproved?: boolean | undefined
 }
 
 export interface AssistantCommandResult {
@@ -646,8 +661,12 @@ export interface AssistantCommandResult {
   readonly savedIdea?: IdeaRecord | undefined
   readonly ideas?: readonly IdeaRecord[] | undefined
   readonly launchedApp?: AppLaunchResult | undefined
+  readonly notepadAutomation?: NotepadAutomationResult | undefined
+  readonly linkedRecord?: KnowledgeLinkRecord | undefined
+  readonly markdownExport?: MarkdownExportResult | undefined
   readonly improvementProposal?: ImprovementProposal | undefined
   readonly pendingDeleteIdea?: IdeaRecord | undefined
+  readonly pendingApprovalCommand?: string | undefined
 }
 
 export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
@@ -655,6 +674,7 @@ export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
   readonly requestId: string
   readonly commandId?: string | undefined
   readonly input: string
+  readonly saveApproved?: boolean | undefined
 }
 
 export interface ExecuteAssistantCommandResponse extends BaseProtocolMessage {
@@ -684,11 +704,22 @@ export interface CancelAssistantCommandResponse extends BaseProtocolMessage {
 
 export type IdeasVaultRequestPayload =
   | { readonly action: 'SAVE'; readonly input: SaveIdeaInput }
-  | { readonly action: 'LIST' }
+  | { readonly action: 'LIST'; readonly filter?: KnowledgeFilterInput | undefined }
   | { readonly action: 'SEARCH'; readonly query: string }
   | { readonly action: 'GET'; readonly id: string }
   | { readonly action: 'UPDATE'; readonly input: UpdateIdeaInput }
   | { readonly action: 'DELETE'; readonly id: string; readonly confirmed: boolean }
+  | { readonly action: 'COMPLETE_TASK'; readonly id: string; readonly completed: boolean }
+  | {
+      readonly action: 'LINK_ITEMS'
+      readonly sourceId: string
+      readonly targetId: string
+      readonly relationship?: string | undefined
+    }
+  | { readonly action: 'UNLINK_ITEMS'; readonly sourceId: string; readonly targetId: string }
+  | { readonly action: 'LIST_SUBJECTS' }
+  | { readonly action: 'EXPORT_MARKDOWN'; readonly targetDirectory?: string | undefined }
+  | { readonly action: 'IMPORT_MARKDOWN'; readonly markdownContent: string }
 
 export interface IdeasVaultOperationRequest extends BaseProtocolMessage {
   readonly type: 'IDEAS_VAULT_REQUEST'
@@ -701,6 +732,9 @@ export interface IdeasVaultOperationResult {
   readonly action: IdeasVaultRequestPayload['action']
   readonly idea?: IdeaRecord | null | undefined
   readonly ideas?: readonly IdeaRecord[] | undefined
+  readonly subjects?: readonly StudySubjectSummary[] | undefined
+  readonly linkRecord?: KnowledgeLinkRecord | undefined
+  readonly markdownExport?: MarkdownExportResult | undefined
   readonly deleteResult?: DeleteIdeaResult | undefined
   readonly errorMessage?: string | undefined
 }

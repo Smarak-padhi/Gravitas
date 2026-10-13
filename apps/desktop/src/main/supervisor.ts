@@ -43,6 +43,10 @@ import {
   type AssistantCommandResult,
   type CancelAssistantCommandResult,
   type IdeaRecord,
+  type KnowledgeFilterInput,
+  type KnowledgeLinkRecord,
+  type StudySubjectSummary,
+  type MarkdownExportResult,
   type SaveIdeaInput,
   type UpdateIdeaInput,
   type DeleteIdeaResult,
@@ -1110,6 +1114,7 @@ export class DesktopSupervisor {
         requestId,
         commandId: payload.commandId,
         input: payload.input,
+        saveApproved: payload.saveApproved,
         timestamp: new Date().toISOString(),
       },
       requestId,
@@ -1150,14 +1155,14 @@ export class DesktopSupervisor {
     return res.idea
   }
 
-  public async listIdeas(): Promise<readonly IdeaRecord[]> {
+  public async listIdeas(filter?: KnowledgeFilterInput): Promise<readonly IdeaRecord[]> {
     const requestId = `req_vault_list_${randomUUID().slice(0, 8)}`
     const res = await this.sendToKernel<IdeasVaultOperationResult>(
       {
         type: 'IDEAS_VAULT_REQUEST',
         protocolVersion: D1_PROTOCOL_VERSION,
         requestId,
-        payload: { action: 'LIST' },
+        payload: { action: 'LIST', filter },
         timestamp: new Date().toISOString(),
       },
       requestId
@@ -1241,6 +1246,115 @@ export class DesktopSupervisor {
       throw new Error(res.errorMessage || 'Failed to delete idea')
     }
     return res.deleteResult
+  }
+
+  public async completeTask(id: string, completed: boolean): Promise<IdeaRecord> {
+    const requestId = `req_vault_done_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'COMPLETE_TASK', id, completed },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.idea) {
+      throw new Error(res.errorMessage || 'Failed to update task completion')
+    }
+    return res.idea
+  }
+
+  public async linkKnowledgeItems(
+    sourceId: string,
+    targetId: string,
+    relationship?: string
+  ): Promise<KnowledgeLinkRecord> {
+    const requestId = `req_vault_link_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'LINK_ITEMS', sourceId, targetId, relationship },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.linkRecord) {
+      throw new Error(res.errorMessage || 'Failed to link Knowledge Hub items')
+    }
+    return res.linkRecord
+  }
+
+  public async unlinkKnowledgeItems(sourceId: string, targetId: string): Promise<boolean> {
+    const requestId = `req_vault_unlink_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'UNLINK_ITEMS', sourceId, targetId },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    return res.success
+  }
+
+  public async listStudySubjects(): Promise<readonly StudySubjectSummary[]> {
+    const requestId = `req_vault_subj_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'LIST_SUBJECTS' },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success) {
+      throw new Error(res.errorMessage || 'Failed to list subjects')
+    }
+    return res.subjects ?? []
+  }
+
+  public async exportKnowledgeMarkdown(targetDirectory?: string): Promise<MarkdownExportResult> {
+    const requestId = `req_vault_exp_md_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'EXPORT_MARKDOWN', targetDirectory },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.markdownExport) {
+      throw new Error(res.errorMessage || 'Failed to export Markdown')
+    }
+    return res.markdownExport
+  }
+
+  public async importKnowledgeMarkdown(markdownContent: string): Promise<IdeaRecord> {
+    const requestId = `req_vault_imp_md_${randomUUID().slice(0, 8)}`
+    const res = await this.sendToKernel<IdeasVaultOperationResult>(
+      {
+        type: 'IDEAS_VAULT_REQUEST',
+        protocolVersion: D1_PROTOCOL_VERSION,
+        requestId,
+        payload: { action: 'IMPORT_MARKDOWN', markdownContent },
+        timestamp: new Date().toISOString(),
+      },
+      requestId
+    )
+    if (!res.success || !res.idea) {
+      throw new Error(res.errorMessage || 'Failed to import Markdown')
+    }
+    return res.idea
   }
 
   public async getVoiceSttStatus(): Promise<VoiceSttStatusProjection> {

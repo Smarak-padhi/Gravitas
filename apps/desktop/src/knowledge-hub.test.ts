@@ -233,3 +233,249 @@ describe('GRAVITAS Wave V1-F-02 — Local Knowledge Hub Persistence & Markdown I
     hub.close()
   })
 })
+
+import {
+  DesktopSupervisor,
+  KernelHost,
+  parseAssistantCommand,
+  synthesizeOfflineWavSample,
+  type ProcessBridge,
+  type AllowlistedAppSpec,
+} from './index.js'
+
+describe('GRAVITAS Wave V1-F-02 — Voice/Text Intents, Offline STT & Bounded Windows Automation (Slice 2)', () => {
+  let tempDir: string
+  let host: KernelHost
+  let supervisor: DesktopSupervisor
+  let spawnedApps: Array<{ spec: AllowlistedAppSpec; executablePath: string; args: readonly string[] }>
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'gravitas-khub-slice2-'))
+    spawnedApps = []
+
+    const mainListeners: {
+      message?: (msg: unknown) => void
+      exit?: (code: number) => void
+      error?: (err: Error) => void
+    } = {}
+
+    host = new KernelHost({
+      dataRoot: tempDir,
+      pid: 7201,
+      customAppSpawn: async (spec, executablePath, args = []) => {
+        spawnedApps.push({ spec, executablePath, args })
+        return { pid: 9500 + spawnedApps.length }
+      },
+      onMessage: (msg) => {
+        mainListeners.message?.(msg)
+      },
+    })
+
+    const bridge: ProcessBridge = {
+      pid: 7201,
+      postMessage: async (msg: unknown) => {
+        await host.handleMessage(msg)
+      },
+      on: (event: string, listener: any) => {
+        if (event === 'message') mainListeners.message = listener
+        if (event === 'exit') mainListeners.exit = listener
+        if (event === 'error') mainListeners.error = listener
+      },
+      kill: () => {
+        mainListeners.exit?.(0)
+      },
+    }
+
+    supervisor = new DesktopSupervisor({
+      dataRoot: tempDir,
+      forkProcess: () => bridge,
+    })
+
+    await supervisor.start()
+    await host.start()
+  })
+
+  afterEach(async () => {
+    await supervisor.shutdown()
+    await host.shutdown()
+    try {
+      await rm(tempDir, { recursive: true, force: true })
+    } catch {}
+  })
+
+  it('Executes required Knowledge Hub voice/text commands end-to-end through Supervisor and KernelHost', async () => {
+    // 1. "Save this idea..."
+    const ideaRes = await supervisor.executeAssistantCommand({
+      input: 'Save this idea: build an AI study planner.',
+    })
+    expect(ideaRes.status).toBe('SUCCESS')
+    expect(ideaRes.intentKind).toBe('SAVE_IDEA')
+    expect(ideaRes.savedIdea?.collection).toBe('IDEA')
+    expect(ideaRes.savedIdea?.originalText).toBe('build an AI study planner.')
+
+    // 2. "Add these notes to Physics."
+    const noteRes1 = await supervisor.executeAssistantCommand({
+      input: 'Add these notes to Physics.',
+    })
+    expect(noteRes1.status).toBe('SUCCESS')
+    expect(noteRes1.intentKind).toBe('ADD_STUDY_NOTE')
+    expect(noteRes1.savedIdea?.collection).toBe('STUDY_NOTE')
+    expect(noteRes1.savedIdea?.subject).toBe('Physics')
+
+    const noteRes2 = await supervisor.executeAssistantCommand({
+      input: 'Add these notes to Physics on Chapter 3: Conservation of energy and work-energy theorem.',
+    })
+    expect(noteRes2.status).toBe('SUCCESS')
+    expect(noteRes2.savedIdea?.subject).toBe('Physics')
+    expect(noteRes2.savedIdea?.topic).toBe('Chapter 3')
+    expect(noteRes2.savedIdea?.originalText).toBe('Conservation of energy and work-energy theorem.')
+
+    // 3. "Create a project called Study Planner."
+    const projRes = await supervisor.executeAssistantCommand({
+      input: 'Create a project called Study Planner.',
+    })
+    expect(projRes.status).toBe('SUCCESS')
+    expect(projRes.intentKind).toBe('CREATE_PROJECT')
+    expect(projRes.savedIdea?.collection).toBe('PROJECT')
+    expect(projRes.savedIdea?.title).toBe('Study Planner')
+    // Automatically linked to matching idea "build an AI study planner."
+    expect(projRes.savedIdea?.linkedItemIds).toContain(ideaRes.savedIdea?.id)
+
+    // 4. "Remind me to revise chapter 3 tomorrow."
+    const taskRes = await supervisor.executeAssistantCommand({
+      input: 'Remind me to revise chapter 3 tomorrow.',
+    })
+    expect(taskRes.status).toBe('SUCCESS')
+    expect(taskRes.intentKind).toBe('CREATE_TASK')
+    expect(taskRes.savedIdea?.collection).toBe('PLAN_TASK')
+    expect(taskRes.savedIdea?.title).toBe('Revise chapter 3')
+    expect(taskRes.savedIdea?.topic).toBe('Chapter 3')
+    expect(taskRes.savedIdea?.completed).toBe(false)
+    expect(taskRes.savedIdea?.dueDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(taskRes.savedIdea?.originalText).toBe('Remind me to revise chapter 3 tomorrow.')
+
+    // 5. "Show my unfinished tasks."
+    const unfinishedRes = await supervisor.executeAssistantCommand({
+      input: 'Show my unfinished tasks.',
+    })
+    expect(unfinishedRes.status).toBe('SUCCESS')
+    expect(unfinishedRes.intentKind).toBe('LIST_UNFINISHED_TASKS')
+    expect(unfinishedRes.ideas).toHaveLength(1)
+    expect(unfinishedRes.ideas?.[0]?.title).toBe('Revise chapter 3')
+    expect(unfinishedRes.message).toContain('Revise chapter 3')
+
+    // 6. Link Physics note to Study Planner project via natural language
+    const linkRes = await supervisor.executeAssistantCommand({
+      input: 'Link Study Planner to Conservation of energy',
+    })
+    expect(linkRes.status).toBe('SUCCESS')
+    expect(linkRes.intentKind).toBe('LINK_ITEMS')
+    expect(linkRes.linkedRecord).toBeDefined()
+
+    // 7. Filter by subject ("Show my Physics notes.")
+    const physicsNotesRes = await supervisor.executeAssistantCommand({
+      input: 'Show my Physics notes.',
+    })
+    expect(physicsNotesRes.status).toBe('SUCCESS')
+    expect(physicsNotesRes.intentKind).toBe('LIST_COLLECTION')
+    expect(physicsNotesRes.ideas).toHaveLength(2)
+
+    // 8. Complete task and verify unfinished tasks becomes empty
+    const completeRes = await supervisor.executeAssistantCommand({
+      input: 'Complete task: revise chapter 3',
+    })
+    expect(completeRes.status).toBe('SUCCESS')
+    expect(completeRes.savedIdea?.completed).toBe(true)
+
+    const unfinishedAfter = await supervisor.executeAssistantCommand({
+      input: 'Show my unfinished tasks.',
+    })
+    expect(unfinishedAfter.ideas).toHaveLength(0)
+
+    // 9. Export Knowledge Hub to Markdown
+    const exportRes = await supervisor.executeAssistantCommand({
+      input: 'Export my knowledge hub to Markdown.',
+    })
+    expect(exportRes.status).toBe('SUCCESS')
+    expect(exportRes.intentKind).toBe('EXPORT_MARKDOWN')
+    expect(exportRes.markdownExport?.exportedCount).toBe(5)
+  })
+
+  it('Enforces explicit operator approval for bounded Windows Notepad file-save automation', async () => {
+    const cmd = 'Open Notepad, type Hello from GRAVITAS, and save it to a user-approved location.'
+    const parsed = parseAssistantCommand(cmd)
+    expect(parsed.kind).toBe('AUTOMATE_NOTEPAD')
+
+    // Without saveApproved=true, returns CONFIRMATION_REQUIRED and does not launch or write file
+    const unapprovedRes = await supervisor.executeAssistantCommand({
+      input: cmd,
+    })
+    expect(unapprovedRes.status).toBe('CONFIRMATION_REQUIRED')
+    expect(unapprovedRes.terminalState).toBe('WAITING_CONFIRMATION')
+    expect(spawnedApps).toHaveLength(0)
+
+    // With explicit operator approval (saveApproved: true), writes file to approved directory and launches Notepad with shell: false
+    const approvedRes = await supervisor.executeAssistantCommand({
+      input: cmd,
+      saveApproved: true,
+    })
+    expect(approvedRes.status).toBe('SUCCESS')
+    expect(approvedRes.terminalState).toBe('SUCCEEDED')
+    expect(approvedRes.notepadAutomation?.launched).toBe(true)
+    expect(approvedRes.notepadAutomation?.shellUsed).toBe(false)
+    expect(approvedRes.notepadAutomation?.savedFilePath).toBeDefined()
+    expect(spawnedApps).toHaveLength(1)
+    expect(spawnedApps[0]?.spec.appId).toBe('notepad')
+
+    const savedContent = await readFile(approvedRes.notepadAutomation!.savedFilePath!, 'utf8')
+    expect(savedContent.trim()).toBe('Hello from GRAVITAS')
+  })
+
+  it('Performs real offline Windows System.Speech WAV transcription through Push-to-Talk and executes transcribed command', async () => {
+    const wavPath = join(tempDir, 'spoken_sample.wav')
+    const wavBuf = synthesizeOfflineWavSample('Show my unfinished tasks', wavPath)
+    expect(wavBuf).not.toBeNull()
+
+    await supervisor.executeAssistantCommand({
+      input: 'Remind me to revise chapter 3 tomorrow.',
+    })
+
+    const startRes = await supervisor.startPushToTalk(true)
+    expect(startRes.started).toBe(true)
+
+    const stopRes = await supervisor.stopPushToTalk(
+      startRes.pttSessionId,
+      wavBuf!.toString('base64')
+    )
+    expect(stopRes.transcribed).toBe(true)
+    expect(stopRes.status).toBe('TRANSCRIBED')
+    expect(stopRes.cloudAudioSent).toBe(false)
+    expect(stopRes.silentDownloadPerformed).toBe(false)
+    expect(stopRes.transcript?.toLowerCase()).toContain('unfinished tasks')
+
+    const cmdRes = await supervisor.executeAssistantCommand({
+      input: stopRes.transcript!,
+    })
+    expect(cmdRes.status).toBe('SUCCESS')
+    expect(cmdRes.intentKind).toBe('LIST_UNFINISHED_TASKS')
+    expect(cmdRes.ideas).toHaveLength(1)
+  })
+
+  it('Registers Knowledge Hub, Markdown Portability, and Bounded Windows Automation in the Supervised Capability Registry without auto-modification', async () => {
+    const reg = await supervisor.getAssistantCapabilities()
+    const capIds = reg.capabilities.map((c) => c.capabilityId)
+
+    expect(capIds).toEqual(
+      expect.arrayContaining([
+        'cap:assistant:ideas-vault',
+        'cap:assistant:knowledge-hub',
+        'cap:assistant:markdown-portability',
+        'cap:assistant:nl-command',
+        'cap:desktop:launch-app',
+        'cap:desktop:bounded-automation',
+        'cap:assistant:voice-ptt',
+      ])
+    )
+  })
+})
+

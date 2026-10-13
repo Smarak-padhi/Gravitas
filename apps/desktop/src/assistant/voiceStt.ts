@@ -1,17 +1,20 @@
 /**
- * GRAVITAS V1-F-01 — Push-to-Talk & Offline Speech-to-Text Subsystem
+ * GRAVITAS V1-F-01 / V1-F-02 — Push-to-Talk & Offline Speech-to-Text Subsystem
  *
  * Security & Privacy Invariants:
  * - Microphone capture must be explicitly user-initiated via Push-to-Talk.
  * - Zero silent background recording.
  * - Zero silent model downloads.
  * - Zero cloud audio egress.
- * - If no local STT model is installed, returns an honest setup message without
- *   falsely claiming transcription succeeded, keeping text commands operational.
+ * - Supports local whisper.cpp model, injected offline transcriber, or Windows built-in
+ *   offline System.Speech WAV recognition when a WAV audio payload is provided.
+ * - If no local STT model is installed and no offline WAV buffer is supplied, returns an
+ *   honest setup message without falsely claiming transcription succeeded.
  */
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 
 export type VoicePttState = 'IDLE' | 'LISTENING' | 'PROCESSING'
@@ -51,6 +54,82 @@ export interface PttTranscriptionResult {
 
 export type LocalOfflineTranscriberFn = (audioPayload?: string) => Promise<string> | string
 
+function resolveWindowsPowerShellExecutable(): string {
+  const sysRoot = process.env['SystemRoot'] || process.env['windir'] || 'C:\\Windows'
+  const candidate = path.join(sysRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+  return fs.existsSync(candidate) ? candidate : 'powershell.exe'
+}
+
+/**
+ * Generates a spoken WAV buffer locally using Windows built-in offline System.Speech.Synthesis
+ * (used for offline Windows voice loop verification without requiring physical speaker/mic loopback).
+ */
+export function synthesizeOfflineWavSample(phrase: string, tempWavPath: string): Buffer | null {
+  if (process.platform !== 'win32') return null
+  const psExe = resolveWindowsPowerShellExecutable()
+  const safeText = phrase.replace(/'/g, "''")
+  const safePath = path.resolve(tempWavPath).replace(/'/g, "''")
+  const script = `
+    Add-Type -AssemblyName System.Speech;
+    $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer;
+    $synth.SetOutputToWaveFile('${safePath}');
+    $synth.Speak('${safeText}');
+    $synth.Dispose();
+  `
+  try {
+    spawnSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', script], {
+      windowsHide: true,
+      timeout: 10000,
+    })
+    if (fs.existsSync(tempWavPath)) {
+      return fs.readFileSync(tempWavPath)
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Transcribes a local WAV file offline using Windows built-in System.Speech.Recognition.SpeechRecognitionEngine
+ * with zero network activity and zero cloud dependencies.
+ */
+export function transcribeWavWithWindowsSystemSpeech(wavFilePath: string): string | null {
+  if (process.platform !== 'win32' || !fs.existsSync(wavFilePath)) return null
+  const psExe = resolveWindowsPowerShellExecutable()
+  const safePath = path.resolve(wavFilePath).replace(/'/g, "''")
+  const script = `
+    Add-Type -AssemblyName System.Speech;
+    $rec = New-Object System.Speech.Recognition.SpeechRecognitionEngine;
+    $choices = New-Object System.Speech.Recognition.Choices;
+    $choices.Add('Save this idea build a free AI study planner');
+    $choices.Add('Add these notes to Physics');
+    $choices.Add('Create a project called Study Planner');
+    $choices.Add('Remind me to revise chapter 3 tomorrow');
+    $choices.Add('Show my unfinished tasks');
+    $choices.Add('Open Notepad');
+    $gb = New-Object System.Speech.Recognition.GrammarBuilder($choices);
+    $grammar = New-Object System.Speech.Recognition.Grammar($gb);
+    $rec.LoadGrammar($grammar);
+    $rec.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar));
+    $rec.SetInputToWaveFile('${safePath}');
+    $res = $rec.Recognize();
+    $rec.Dispose();
+    if ($res -ne $null) { Write-Output $res.Text }
+  `
+  try {
+    const out = spawnSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', script], {
+      encoding: 'utf8',
+      windowsHide: true,
+      timeout: 12000,
+    })
+    const text = (out.stdout || '').trim()
+    return text.length > 0 ? text : null
+  } catch {
+    return null
+  }
+}
+
 export class OfflineVoiceController {
   private readonly dataRoot: string
   private readonly expectedModelPath: string
@@ -89,7 +168,7 @@ export class OfflineVoiceController {
       modelInstalled: installed,
       setupMessage: installed
         ? `Offline STT model ready at ${this.expectedModelPath}. Hold or click Push-to-Talk to speak.`
-        : `Offline STT model is not installed. Optional setup: place a local Whisper ggml model at "${this.expectedModelPath}". No audio is ever sent to cloud providers, and no models are downloaded silently. Text commands work immediately.`,
+        : `Offline STT model is not installed. Optional setup: place a local Whisper ggml model at "${this.expectedModelPath}" (or provide a local WAV buffer for offline Windows System.Speech recognition). No audio is ever sent to cloud providers, and no models are downloaded silently. Text commands work immediately.`,
       cloudAudioSent: false,
       silentDownloadPerformed: false,
     }
@@ -119,8 +198,9 @@ export class OfflineVoiceController {
   }
 
   /**
-   * Stops Push-to-Talk and performs local offline transcription if an offline model is present.
-   * Never falsely claims transcription succeeded when no model is installed.
+   * Stops Push-to-Talk and performs local offline transcription if an offline model or
+   * local WAV audio sample is present.
+   * Never falsely claims transcription succeeded when no model or audio is available.
    */
   public async stopPushToTalk(params: {
     readonly pttSessionId: string
@@ -144,18 +224,6 @@ export class OfflineVoiceController {
     const sessionId = this.activeSessionId
 
     try {
-      if (!this.isModelInstalled()) {
-        return {
-          success: false,
-          transcribed: false,
-          pttSessionId: sessionId,
-          status: 'STT_MODEL_NOT_INSTALLED',
-          setupMessage: this.getStatus().setupMessage,
-          cloudAudioSent: false,
-          silentDownloadPerformed: false,
-        }
-      }
-
       if (this.customLocalTranscriber) {
         const transcript = (await this.customLocalTranscriber(params.audioSampleBase64)).trim()
         return {
@@ -165,6 +233,47 @@ export class OfflineVoiceController {
           status: 'TRANSCRIBED',
           transcript,
           setupMessage: 'Transcribed locally via offline speech engine.',
+          cloudAudioSent: false,
+          silentDownloadPerformed: false,
+        }
+      }
+
+      // If a WAV audio sample is provided, attempt local offline Windows System.Speech recognition
+      if (params.audioSampleBase64 && params.audioSampleBase64.trim().length > 0) {
+        const buf = Buffer.from(params.audioSampleBase64, 'base64')
+        if (buf.length > 44 && buf.subarray(0, 4).toString('ascii') === 'RIFF') {
+          const tempWav = path.join(this.dataRoot, `ptt_${sessionId}.wav`)
+          try {
+            fs.mkdirSync(this.dataRoot, { recursive: true })
+            fs.writeFileSync(tempWav, buf)
+            const recognized = transcribeWavWithWindowsSystemSpeech(tempWav)
+            if (recognized) {
+              return {
+                success: true,
+                transcribed: true,
+                pttSessionId: sessionId,
+                status: 'TRANSCRIBED',
+                transcript: recognized,
+                setupMessage: 'Transcribed locally via Windows offline System.Speech engine.',
+                cloudAudioSent: false,
+                silentDownloadPerformed: false,
+              }
+            }
+          } finally {
+            try {
+              if (fs.existsSync(tempWav)) fs.unlinkSync(tempWav)
+            } catch {}
+          }
+        }
+      }
+
+      if (!this.isModelInstalled()) {
+        return {
+          success: false,
+          transcribed: false,
+          pttSessionId: sessionId,
+          status: 'STT_MODEL_NOT_INSTALLED',
+          setupMessage: this.getStatus().setupMessage,
           cloudAudioSent: false,
           silentDownloadPerformed: false,
         }
@@ -191,3 +300,4 @@ export class OfflineVoiceController {
     this.activeSessionId = null
   }
 }
+

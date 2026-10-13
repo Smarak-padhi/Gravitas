@@ -72,14 +72,57 @@ export const DEFAULT_ASSISTANT_CAPABILITIES: ReadonlyArray<{
     },
   },
   {
+    capabilityId: 'cap:assistant:knowledge-hub',
+    capabilityName: 'Unified Local Knowledge Hub (Ideas, Study Notes, Projects, Tasks)',
+    supportedActions: [
+      'SAVE_STUDY_NOTE',
+      'CREATE_PROJECT',
+      'CREATE_TASK',
+      'COMPLETE_TASK',
+      'LIST_UNFINISHED_TASKS',
+      'LIST_BY_SUBJECT_OR_COLLECTION',
+      'LINK_ITEMS',
+      'UNLINK_ITEMS',
+    ],
+    requiredPermissions: ['fs:sqlite:ideas-vault'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/knowledge-hub.test.ts',
+      verifiedAssertionsCount: 18,
+    },
+  },
+  {
+    capabilityId: 'cap:assistant:markdown-portability',
+    capabilityName: 'Local Markdown Import & Export (Obsidian-Compatible)',
+    supportedActions: ['EXPORT_ITEM_MARKDOWN', 'EXPORT_ALL_MARKDOWN_DIRECTORY', 'IMPORT_MARKDOWN'],
+    requiredPermissions: ['fs:sqlite:ideas-vault', 'fs:local-markdown-export-dir'],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/knowledge-hub.test.ts',
+      verifiedAssertionsCount: 8,
+    },
+  },
+  {
     capabilityId: 'cap:assistant:nl-command',
     capabilityName: 'Deterministic Natural-Language Command Router',
-    supportedActions: ['PARSE_SAVE_IDEA', 'PARSE_LIST_IDEAS', 'PARSE_SEARCH_IDEAS', 'PARSE_LAUNCH_APP', 'CANCEL_ACTIVE_COMMAND'],
+    supportedActions: [
+      'PARSE_SAVE_IDEA',
+      'PARSE_ADD_STUDY_NOTE',
+      'PARSE_CREATE_PROJECT',
+      'PARSE_CREATE_TASK',
+      'PARSE_LIST_UNFINISHED_TASKS',
+      'PARSE_LINK_ITEMS',
+      'PARSE_LIST_IDEAS',
+      'PARSE_SEARCH_IDEAS',
+      'PARSE_LAUNCH_APP',
+      'PARSE_AUTOMATE_NOTEPAD',
+      'CANCEL_ACTIVE_COMMAND',
+    ],
     requiredPermissions: ['ipc:authorized-companion-frame', 'kernel:worksession-task-tracking'],
     testCoverage: {
       covered: true,
-      suiteName: 'apps/desktop/src/companion-vault.test.ts',
-      verifiedAssertionsCount: 10,
+      suiteName: 'apps/desktop/src/knowledge-hub.test.ts',
+      verifiedAssertionsCount: 16,
     },
   },
   {
@@ -94,14 +137,34 @@ export const DEFAULT_ASSISTANT_CAPABILITIES: ReadonlyArray<{
     },
   },
   {
+    capabilityId: 'cap:desktop:bounded-automation',
+    capabilityName: 'Bounded Windows Notepad Automation (Approval-Gated)',
+    supportedActions: ['AUTOMATE_NOTEPAD_TYPE', 'SAVE_APPROVED_NOTE_FILE'],
+    requiredPermissions: [
+      'cap:desktop:bounded-automation',
+      'cap:desktop:launch-app',
+      'fs:write:operator-approved-note',
+    ],
+    testCoverage: {
+      covered: true,
+      suiteName: 'apps/desktop/src/knowledge-hub.test.ts',
+      verifiedAssertionsCount: 6,
+    },
+  },
+  {
     capabilityId: 'cap:assistant:voice-ptt',
     capabilityName: 'Push-to-Talk Offline Speech-to-Text',
-    supportedActions: ['START_PTT_LISTENING', 'STOP_PTT_TRANSCRIBE', 'VERIFY_STT_SETUP'],
+    supportedActions: [
+      'START_PTT_LISTENING',
+      'STOP_PTT_TRANSCRIBE',
+      'VERIFY_STT_SETUP',
+      'TRANSCRIBE_WAV_WINDOWS_SYSTEM_SPEECH_OFFLINE',
+    ],
     requiredPermissions: ['audio:user-initiated-ptt-only', 'fs:read:local-stt-model'],
     testCoverage: {
       covered: true,
       suiteName: 'apps/desktop/src/companion-vault.test.ts',
-      verifiedAssertionsCount: 6,
+      verifiedAssertionsCount: 8,
     },
   },
 ]
@@ -125,6 +188,11 @@ export class AssistantCapabilityRegistry {
           test_coverage_json, failed_attempts, updated_at
         ) VALUES (?, ?, ?, ?, ?, 0, ?);
       `)
+      const updateMetaStmt = this.db.prepare(`
+        UPDATE assistant_capabilities
+        SET capability_name = ?, supported_actions_json = ?, required_permissions_json = ?, test_coverage_json = ?
+        WHERE capability_id = ?;
+      `)
 
       for (const cap of DEFAULT_ASSISTANT_CAPABILITIES) {
         const existing = checkStmt.get(cap.capabilityId)
@@ -136,6 +204,14 @@ export class AssistantCapabilityRegistry {
             JSON.stringify(cap.requiredPermissions),
             JSON.stringify(cap.testCoverage),
             now
+          )
+        } else {
+          updateMetaStmt.run(
+            cap.capabilityName,
+            JSON.stringify(cap.supportedActions),
+            JSON.stringify(cap.requiredPermissions),
+            JSON.stringify(cap.testCoverage),
+            cap.capabilityId
           )
         }
       }

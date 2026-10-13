@@ -1,12 +1,14 @@
 /**
- * GRAVITAS V1-F-01 — Scoped Allowlisted Application Launcher
+ * GRAVITAS V1-F-01 / V1-F-02 — Scoped Allowlisted Application Launcher & Bounded Windows Automation
  *
  * Launches only explicitly allowlisted Windows desktop applications using
- * resolved absolute binary paths with shell: false and zero user arguments.
+ * resolved absolute binary paths with shell: false and zero user arguments,
+ * plus bounded Notepad automation with explicit user approval for file writes.
  *
  * Security Invariants:
  * - Never executes arbitrary generated shell commands.
- * - Enforces capability 'cap:desktop:launch-app'.
+ * - Enforces capability 'cap:desktop:launch-app' and 'cap:desktop:bounded-automation'.
+ * - Requires explicit user approval (approved === true) before saving any file to disk.
  * - Rejects unknown applications or argument injection fail-closed.
  */
 
@@ -33,7 +35,22 @@ export interface AppLaunchResult {
   readonly message: string
 }
 
-export type CustomAppSpawnFn = (spec: AllowlistedAppSpec, executablePath: string) => Promise<{ pid?: number }>
+export interface NotepadAutomationResult {
+  readonly status: 'SUCCEEDED' | 'CONFIRMATION_REQUIRED'
+  readonly launched: boolean
+  readonly typedText: string
+  readonly savedFilePath?: string | undefined
+  readonly pid?: number | undefined
+  readonly capabilityGranted: 'cap:desktop:bounded-automation'
+  readonly shellUsed: false
+  readonly message: string
+}
+
+export type CustomAppSpawnFn = (
+  spec: AllowlistedAppSpec,
+  executablePath: string,
+  args?: readonly string[]
+) => Promise<{ pid?: number }>
 
 const ALLOWLISTED_APPS: Readonly<Record<AllowlistedAppId, AllowlistedAppSpec>> = {
   notepad: {
@@ -78,7 +95,9 @@ export class AllowlistedAppLauncher {
     readonly enabledCapabilities?: readonly string[] | undefined
   }) {
     this.customSpawn = opts?.customSpawn
-    this.enabledCapabilities = new Set(opts?.enabledCapabilities ?? ['cap:desktop:launch-app'])
+    this.enabledCapabilities = new Set(
+      opts?.enabledCapabilities ?? ['cap:desktop:launch-app', 'cap:desktop:bounded-automation']
+    )
   }
 
   public getAllowlistedApps(): readonly AllowlistedAppSpec[] {
@@ -102,7 +121,7 @@ export class AllowlistedAppLauncher {
     const executablePath = resolveAllowlistedExecutablePath(spec.executableName)
 
     if (this.customSpawn) {
-      const spawned = await this.customSpawn(spec, executablePath)
+      const spawned = await this.customSpawn(spec, executablePath, [])
       return {
         launched: true,
         appId: spec.appId,
@@ -151,4 +170,107 @@ export class AllowlistedAppLauncher {
       message: `Launched ${spec.displayName}${pid ? ` (PID ${pid})` : ''}.`,
     }
   }
+
+  /**
+   * Bounded Windows Notepad Automation:
+   * - Requires capability 'cap:desktop:bounded-automation'
+   * - If file saving is requested, requires explicit user approval (saveApproved === true)
+   *   and writes only within the user-approved safe directory before opening in Notepad with shell: false.
+   */
+  public async executeNotepadAutomation(params: {
+    readonly textToType: string
+    readonly requiresSaveApproval: boolean
+    readonly saveApproved?: boolean | undefined
+    readonly approvedDirectory: string
+    readonly fileName?: string | undefined
+    readonly signal?: AbortSignal | undefined
+  }): Promise<NotepadAutomationResult> {
+    if (params.signal?.aborted) {
+      throw new Error('Notepad automation cancelled before execution')
+    }
+
+    if (!this.enabledCapabilities.has('cap:desktop:bounded-automation')) {
+      throw new Error('Missing required capability "cap:desktop:bounded-automation" for Notepad automation')
+    }
+
+    const cleanText = (params.textToType || '').trim()
+    if (!cleanText) {
+      throw new Error('Notepad automation textToType must be non-empty')
+    }
+    if (cleanText.length > 32768) {
+      throw new Error('Notepad automation textToType exceeds maximum length')
+    }
+
+    if (params.requiresSaveApproval && params.saveApproved !== true) {
+      return {
+        status: 'CONFIRMATION_REQUIRED',
+        launched: false,
+        typedText: cleanText,
+        capabilityGranted: 'cap:desktop:bounded-automation',
+        shellUsed: false,
+        message: `Approval required before saving "${cleanText}" to disk and opening in Notepad.`,
+      }
+    }
+
+    const safeDir = path.resolve(params.approvedDirectory)
+    fs.mkdirSync(safeDir, { recursive: true })
+    const rawFileName = (params.fileName || 'gravitas-note.txt').replace(/[^a-zA-Z0-9._-]/g, '-')
+    const safeFileName = rawFileName.endsWith('.txt') || rawFileName.endsWith('.md') ? rawFileName : `${rawFileName}.txt`
+    const targetFilePath = path.join(safeDir, safeFileName)
+
+    // Verify path stays strictly inside approvedDirectory
+    if (!targetFilePath.startsWith(safeDir)) {
+      throw new Error('Refused file save outside approved directory boundary')
+    }
+
+    fs.writeFileSync(targetFilePath, `${cleanText}\r\n`, 'utf8')
+
+    const spec = ALLOWLISTED_APPS.notepad
+    const executablePath = resolveAllowlistedExecutablePath(spec.executableName)
+
+    if (this.customSpawn) {
+      const spawned = await this.customSpawn(spec, executablePath, [targetFilePath])
+      return {
+        status: 'SUCCEEDED',
+        launched: true,
+        typedText: cleanText,
+        savedFilePath: targetFilePath,
+        pid: spawned.pid,
+        capabilityGranted: 'cap:desktop:bounded-automation',
+        shellUsed: false,
+        message: `Opened Notepad with "${cleanText}" and saved to approved location "${targetFilePath}".`,
+      }
+    }
+
+    const pid = await new Promise<number | undefined>((resolve, reject) => {
+      try {
+        const child = spawn(executablePath, [targetFilePath], {
+          detached: true,
+          stdio: 'ignore',
+          shell: false,
+          windowsHide: false,
+        })
+        child.once('error', (err) => reject(err))
+        child.once('spawn', () => {
+          const childPid = child.pid
+          child.unref()
+          resolve(childPid)
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    return {
+      status: 'SUCCEEDED',
+      launched: true,
+      typedText: cleanText,
+      savedFilePath: targetFilePath,
+      pid,
+      capabilityGranted: 'cap:desktop:bounded-automation',
+      shellUsed: false,
+      message: `Opened Notepad with "${cleanText}" and saved to approved location "${targetFilePath}".`,
+    }
+  }
 }
+

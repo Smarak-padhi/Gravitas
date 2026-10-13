@@ -1769,6 +1769,7 @@ export class KernelHost {
   public async executeAssistantCommand(req: {
     readonly commandId?: string | undefined
     readonly input: string
+    readonly saveApproved?: boolean | undefined
   }): Promise<AssistantCommandResult> {
     const commandId = req.commandId && req.commandId.trim() ? req.commandId.trim() : `cmd_asst_${randomUUID().slice(0, 8)}`
     const intent = parseAssistantCommand(req.input)
@@ -1835,28 +1836,36 @@ export class KernelHost {
         throw new Error('CANCELLED_BY_OPERATOR')
       }
 
+      const completeKernelTask = async (reason: string) => {
+        await this.kernel.execute({
+          commandId: `cmd_done_${commandId}`,
+          commandType: 'TRANSITION_TASK',
+          workSessionId,
+          payload: {
+            taskId,
+            toState: 'SUCCEEDED',
+            reason: sanitizeText(reason),
+          },
+        })
+      }
+
+      const emitVaultUpdate = () => {
+        this.sendMessage({
+          type: 'PROJECTION_UPDATED',
+          protocolVersion: D1_PROTOCOL_VERSION,
+          projectionType: 'IDEAS_VAULT',
+          timestamp: new Date().toISOString(),
+        })
+      }
+
       switch (intent.kind) {
         case 'SAVE_IDEA': {
           const savedIdea = this.getIdeasVault().saveIdea({
             originalText: intent.ideaText,
           })
           const ideas = this.getIdeasVault().listIdeas()
-          await this.kernel.execute({
-            commandId: `cmd_done_${commandId}`,
-            commandType: 'TRANSITION_TASK',
-            workSessionId,
-            payload: {
-              taskId,
-              toState: 'SUCCEEDED',
-              reason: `Saved idea ${savedIdea.id}`,
-            },
-          })
-          this.sendMessage({
-            type: 'PROJECTION_UPDATED',
-            protocolVersion: D1_PROTOCOL_VERSION,
-            projectionType: 'IDEAS_VAULT',
-            timestamp: new Date().toISOString(),
-          })
+          await completeKernelTask(`Saved idea ${savedIdea.id}`)
+          emitVaultUpdate()
           return {
             commandId,
             workSessionId,
@@ -1871,18 +1880,246 @@ export class KernelHost {
           }
         }
 
+        case 'ADD_STUDY_NOTE': {
+          const vault = this.getIdeasVault()
+          const savedNote = vault.saveStudyNote({
+            title: intent.topic
+              ? `${intent.subject}: ${intent.topic}`
+              : `${intent.subject} Notes`,
+            originalText: intent.noteText,
+            subject: intent.subject,
+            topic: intent.topic,
+          })
+          const ideas = vault.listIdeas()
+          await completeKernelTask(`Saved study note ${savedNote.id} under ${intent.subject}`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Added study note "${savedNote.title}" to ${savedNote.subject} in Knowledge Hub.`,
+            savedIdea: savedNote,
+            ideas,
+          }
+        }
+
+        case 'CREATE_PROJECT': {
+          const vault = this.getIdeasVault()
+          const relatedIdeas = vault
+            .searchIdeas(intent.projectTitle)
+            .filter((i) => i.collection === 'IDEA')
+            .map((i) => i.id)
+          const savedProject = vault.createProject({
+            title: intent.projectTitle,
+            originalText: intent.rawInput,
+            summary: intent.description,
+            linkedItemIds: relatedIdeas,
+          })
+          const ideas = vault.listIdeas()
+          await completeKernelTask(`Created project ${savedProject.id}`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Created project "${savedProject.title}" in Knowledge Hub.`,
+            savedIdea: savedProject,
+            ideas,
+          }
+        }
+
+        case 'CREATE_TASK': {
+          const vault = this.getIdeasVault()
+          const projects = vault.listItems({ collection: 'PROJECT' })
+          const defaultProject = projects[0]?.id ?? null
+          const savedTask = vault.createTask({
+            title: intent.taskTitle,
+            originalText: intent.originalText,
+            dueDate: intent.dueDateExpression,
+            subject: intent.subject,
+            topic: intent.topic,
+            projectId: defaultProject,
+          })
+          const ideas = vault.listIdeas()
+          await completeKernelTask(`Created task ${savedTask.id}`)
+          emitVaultUpdate()
+          const dueSuffix = savedTask.dueDate ? ` (due ${savedTask.dueDate})` : ''
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Added task "${savedTask.title}"${dueSuffix} to Knowledge Hub.`,
+            savedIdea: savedTask,
+            ideas,
+          }
+        }
+
+        case 'COMPLETE_TASK': {
+          const vault = this.getIdeasVault()
+          const target = vault.findItemByTitleOrId(intent.targetQueryOrId)
+          if (!target) {
+            await this.kernel.execute({
+              commandId: `cmd_fail_${commandId}`,
+              commandType: 'TRANSITION_TASK',
+              workSessionId,
+              payload: {
+                taskId,
+                toState: 'FAILED',
+                reason: `Task not found: ${intent.targetQueryOrId}`,
+              },
+            })
+            return {
+              commandId,
+              workSessionId,
+              runId,
+              taskId,
+              intentKind: intent.kind,
+              status: 'ERROR',
+              terminalState: 'FAILED',
+              message: `No task found matching "${intent.targetQueryOrId}".`,
+            }
+          }
+          const updated = vault.setTaskCompletion(target.id, true)
+          const ideas = vault.listIdeas()
+          await completeKernelTask(`Completed task ${updated.id}`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Marked task "${updated.title}" as DONE.`,
+            savedIdea: updated,
+            ideas,
+          }
+        }
+
+        case 'LIST_UNFINISHED_TASKS': {
+          const tasks = this.getIdeasVault().listUnfinishedTasks()
+          await completeKernelTask(`Listed ${tasks.length} unfinished tasks`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              tasks.length > 0
+                ? `Showing ${tasks.length} unfinished task(s): ${tasks.map((t) => `${t.title}${t.dueDate ? ` (due ${t.dueDate})` : ''}`).join(', ')}.`
+                : 'You have no unfinished tasks in Knowledge Hub.',
+            ideas: tasks,
+          }
+        }
+
+        case 'LIST_COLLECTION': {
+          const items = this.getIdeasVault().listItems({
+            collection: intent.collection,
+            subject: intent.subject,
+          })
+          await completeKernelTask(`Listed ${items.length} Knowledge Hub items`)
+          const label = intent.subject
+            ? `${intent.subject} notes`
+            : intent.collection === 'PROJECT'
+              ? 'projects'
+              : intent.collection === 'PLAN_TASK'
+                ? 'tasks'
+                : 'study notes'
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              items.length > 0
+                ? `Showing ${items.length} ${label} from Knowledge Hub.`
+                : `No ${label} found in Knowledge Hub.`,
+            ideas: items,
+          }
+        }
+
+        case 'LINK_ITEMS': {
+          const vault = this.getIdeasVault()
+          const src = vault.findItemByTitleOrId(intent.sourceQuery)
+          const tgt = vault.findItemByTitleOrId(intent.targetQuery)
+          if (!src || !tgt) {
+            await this.kernel.execute({
+              commandId: `cmd_fail_${commandId}`,
+              commandType: 'TRANSITION_TASK',
+              workSessionId,
+              payload: {
+                taskId,
+                toState: 'FAILED',
+                reason: 'Could not resolve items to link',
+              },
+            })
+            return {
+              commandId,
+              workSessionId,
+              runId,
+              taskId,
+              intentKind: intent.kind,
+              status: 'ERROR',
+              terminalState: 'FAILED',
+              message: `Could not find both "${intent.sourceQuery}" and "${intent.targetQuery}" to link.`,
+            }
+          }
+          const linkedRecord = vault.linkItems(src.id, tgt.id, 'related')
+          const ideas = vault.listIdeas()
+          await completeKernelTask(`Linked ${src.id} <-> ${tgt.id}`)
+          emitVaultUpdate()
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Linked "${src.title}" (${src.collection}) with "${tgt.title}" (${tgt.collection}).`,
+            linkedRecord,
+            ideas,
+          }
+        }
+
+        case 'EXPORT_MARKDOWN': {
+          const markdownExport = this.getIdeasVault().exportAllToMarkdownDirectory()
+          await completeKernelTask(`Exported ${markdownExport.exportedCount} items to Markdown`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Exported ${markdownExport.exportedCount} Knowledge Hub item(s) to Markdown at "${markdownExport.exportDirectory}".`,
+            markdownExport,
+          }
+        }
+
         case 'LIST_IDEAS': {
           const ideas = this.getIdeasVault().listIdeas()
-          await this.kernel.execute({
-            commandId: `cmd_done_${commandId}`,
-            commandType: 'TRANSITION_TASK',
-            workSessionId,
-            payload: {
-              taskId,
-              toState: 'SUCCEEDED',
-              reason: `Listed ${ideas.length} ideas`,
-            },
-          })
+          await completeKernelTask(`Listed ${ideas.length} ideas`)
           return {
             commandId,
             workSessionId,
@@ -1893,24 +2130,15 @@ export class KernelHost {
             terminalState: 'SUCCEEDED',
             message:
               ideas.length > 0
-                ? `Showing ${ideas.length} saved idea(s) from Local Ideas Vault.`
-                : 'Your Local Ideas Vault is currently empty.',
+                ? `Showing ${ideas.length} saved item(s) from Local Knowledge Hub.`
+                : 'Your Local Knowledge Hub is currently empty.',
             ideas,
           }
         }
 
         case 'SEARCH_IDEAS': {
           const ideas = this.getIdeasVault().searchIdeas(intent.query)
-          await this.kernel.execute({
-            commandId: `cmd_done_${commandId}`,
-            commandType: 'TRANSITION_TASK',
-            workSessionId,
-            payload: {
-              taskId,
-              toState: 'SUCCEEDED',
-              reason: `Searched ideas for "${intent.query}" (${ideas.length} matches)`,
-            },
-          })
+          await completeKernelTask(`Searched ideas for "${intent.query}" (${ideas.length} matches)`)
           return {
             commandId,
             workSessionId,
@@ -1921,8 +2149,8 @@ export class KernelHost {
             terminalState: 'SUCCEEDED',
             message:
               ideas.length > 0
-                ? `Found ${ideas.length} matching idea(s) for "${intent.query}": "${ideas[0]!.originalText}"`
-                : `No saved ideas matched "${intent.query}".`,
+                ? `Found ${ideas.length} matching item(s) for "${intent.query}": "${ideas[0]!.originalText}"`
+                : `No saved items matched "${intent.query}".`,
             ideas,
           }
         }
@@ -1932,16 +2160,7 @@ export class KernelHost {
           if (controller.signal.aborted) {
             throw new Error('CANCELLED_BY_OPERATOR')
           }
-          await this.kernel.execute({
-            commandId: `cmd_done_${commandId}`,
-            commandType: 'TRANSITION_TASK',
-            workSessionId,
-            payload: {
-              taskId,
-              toState: 'SUCCEEDED',
-              reason: `Launched allowlisted app ${launchedApp.displayName}`,
-            },
-          })
+          await completeKernelTask(`Launched allowlisted app ${launchedApp.displayName}`)
           return {
             commandId,
             workSessionId,
@@ -1952,6 +2171,56 @@ export class KernelHost {
             terminalState: 'SUCCEEDED',
             message: launchedApp.message,
             launchedApp,
+          }
+        }
+
+        case 'AUTOMATE_NOTEPAD': {
+          const approvedDir = join(this.dataRoot, 'approved-notes')
+          const notepadRes = await this.appLauncher.executeNotepadAutomation({
+            textToType: intent.textToType,
+            requiresSaveApproval: intent.requiresSaveApproval,
+            saveApproved: req.saveApproved,
+            approvedDirectory: approvedDir,
+            fileName: 'gravitas-hello.txt',
+            signal: controller.signal,
+          })
+
+          if (notepadRes.status === 'CONFIRMATION_REQUIRED') {
+            await this.kernel.execute({
+              commandId: `cmd_wait_${commandId}`,
+              commandType: 'TRANSITION_TASK',
+              workSessionId,
+              payload: {
+                taskId,
+                toState: 'WAITING_APPROVAL',
+                reason: 'Awaiting explicit operator approval to save Notepad file to disk',
+              },
+            })
+            return {
+              commandId,
+              workSessionId,
+              runId,
+              taskId,
+              intentKind: intent.kind,
+              status: 'CONFIRMATION_REQUIRED',
+              terminalState: 'WAITING_CONFIRMATION',
+              message: notepadRes.message,
+              notepadAutomation: notepadRes,
+              pendingApprovalCommand: req.input,
+            }
+          }
+
+          await completeKernelTask(`Automated Notepad and saved to ${notepadRes.savedFilePath}`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: notepadRes.message,
+            notepadAutomation: notepadRes,
           }
         }
 
@@ -2000,7 +2269,7 @@ export class KernelHost {
             intentKind: intent.kind,
             status: 'CONFIRMATION_REQUIRED',
             terminalState: 'WAITING_CONFIRMATION',
-            message: `Confirmation required to delete idea "${target.title}". Use the Confirm Delete button to proceed.`,
+            message: `Confirmation required to delete "${target.title}". Use the Confirm Delete button to proceed.`,
             pendingDeleteIdea: target,
           }
         }
@@ -2022,16 +2291,7 @@ export class KernelHost {
             }
           })
 
-          await this.kernel.execute({
-            commandId: `cmd_done_${commandId}`,
-            commandType: 'TRANSITION_TASK',
-            workSessionId,
-            payload: {
-              taskId,
-              toState: 'SUCCEEDED',
-              reason: 'Completed long assistant task',
-            },
-          })
+          await completeKernelTask('Completed long assistant task')
 
           return {
             commandId,
@@ -2214,7 +2474,7 @@ export class KernelHost {
           return {
             success: true,
             action: 'LIST',
-            ideas: vault.listIdeas(),
+            ideas: payload.filter ? vault.listItems(payload.filter) : vault.listIdeas(),
           }
         }
         case 'SEARCH': {
@@ -2246,6 +2506,60 @@ export class KernelHost {
             success: deleteResult.deleted,
             action: 'DELETE',
             deleteResult,
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'COMPLETE_TASK': {
+          const idea = vault.setTaskCompletion(payload.id, payload.completed)
+          return {
+            success: true,
+            action: 'COMPLETE_TASK',
+            idea,
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'LINK_ITEMS': {
+          const linkRecord = vault.linkItems(
+            payload.sourceId,
+            payload.targetId,
+            payload.relationship
+          )
+          return {
+            success: true,
+            action: 'LINK_ITEMS',
+            linkRecord,
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'UNLINK_ITEMS': {
+          const ok = vault.unlinkItems(payload.sourceId, payload.targetId)
+          return {
+            success: ok,
+            action: 'UNLINK_ITEMS',
+            ideas: vault.listIdeas(),
+          }
+        }
+        case 'LIST_SUBJECTS': {
+          return {
+            success: true,
+            action: 'LIST_SUBJECTS',
+            subjects: vault.listSubjects(),
+          }
+        }
+        case 'EXPORT_MARKDOWN': {
+          const markdownExport = vault.exportAllToMarkdownDirectory(payload.targetDirectory)
+          return {
+            success: true,
+            action: 'EXPORT_MARKDOWN',
+            markdownExport,
+          }
+        }
+        case 'IMPORT_MARKDOWN': {
+          const idea = vault.importFromMarkdown(payload.markdownContent)
+          return {
+            success: true,
+            action: 'IMPORT_MARKDOWN',
+            idea,
             ideas: vault.listIdeas(),
           }
         }
