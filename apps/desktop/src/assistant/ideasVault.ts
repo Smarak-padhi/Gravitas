@@ -58,9 +58,13 @@ export interface KnowledgeLinkRecord {
 
 export interface StudySubjectSummary {
   readonly subject: string
+  readonly code?: string | undefined
+  readonly name?: string | undefined
+  readonly credits?: number | undefined
   readonly topics: readonly string[]
   readonly noteCount: number
   readonly taskCount: number
+  readonly assignmentCount?: number | undefined
 }
 
 export interface SaveIdeaInput {
@@ -696,15 +700,110 @@ export class IdeasVaultStore {
   public listSubjects(): readonly StudySubjectSummary[] {
     this.assertOpen()
     const items = this.listIdeas()
-    const map = new Map<string, { display: string; topics: Set<string>; noteCount: number; taskCount: number }>()
+    const map = new Map<
+      string,
+      {
+        display: string
+        code?: string
+        name?: string
+        credits?: number
+        topics: Set<string>
+        noteCount: number
+        taskCount: number
+        assignmentCount: number
+      }
+    >()
 
+    // 1. Check if semester_subjects table exists in the database
+    try {
+      const hasSemesterTable = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='semester_subjects';")
+        .get() as { name: string } | undefined
+      if (hasSemesterTable) {
+        const rows = this.db
+          .prepare('SELECT * FROM semester_subjects ORDER BY code ASC;')
+          .all() as Array<{ code: string; name: string; credits?: number }>
+        for (const r of rows) {
+          const key = r.code.toLowerCase()
+          map.set(key, {
+            display: r.name && r.name !== r.code ? `${r.code} — ${r.name}` : r.code,
+            code: r.code,
+            name: r.name,
+            credits: r.credits ?? 4,
+            topics: new Set<string>(),
+            noteCount: 0,
+            taskCount: 0,
+            assignmentCount: 0,
+          })
+        }
+      }
+    } catch {}
+
+    // 2. Count study assignments per subject if study_assignments table exists
+    try {
+      const hasAssignmentsTable = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='study_assignments';")
+        .get() as { name: string } | undefined
+      if (hasAssignmentsTable) {
+        const asgnRows = this.db
+          .prepare('SELECT subject_code, COUNT(*) as count FROM study_assignments GROUP BY subject_code;')
+          .all() as Array<{ subject_code: string; count: number }>
+        for (const ar of asgnRows) {
+          const key = ar.subject_code.toLowerCase()
+          const entry = map.get(key)
+          if (entry) {
+            entry.assignmentCount = Number(ar.count)
+          }
+        }
+      }
+    } catch {}
+
+    // 3. Count section entries in subject_section_entries table if present
+    try {
+      const hasEntriesTable = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='subject_section_entries';")
+        .get() as { name: string } | undefined
+      if (hasEntriesTable) {
+        const entries = this.db
+          .prepare('SELECT subject_code, bucket, COUNT(*) as count FROM subject_section_entries GROUP BY subject_code, bucket;')
+          .all() as Array<{ subject_code: string; bucket: string; count: number }>
+        for (const ent of entries) {
+          const key = ent.subject_code.toLowerCase()
+          const entry = map.get(key)
+          if (entry) {
+            if (ent.bucket === 'NOTES') entry.noteCount += Number(ent.count)
+            else if (ent.bucket === 'REVISION_TASKS') entry.taskCount += Number(ent.count)
+            else if (ent.bucket === 'ASSIGNMENTS') entry.assignmentCount += Number(ent.count)
+          }
+        }
+      }
+    } catch {}
+
+    // 4. Incorporate all items in ideas_vault
     for (const item of items) {
       if (!item.subject) continue
-      const key = item.subject.toLowerCase()
-      let entry = map.get(key)
+      const rawKey = item.subject.toLowerCase()
+      let entry = map.get(rawKey)
       if (!entry) {
-        entry = { display: item.subject, topics: new Set<string>(), noteCount: 0, taskCount: 0 }
-        map.set(key, entry)
+        for (const [, v] of map.entries()) {
+          if ((v.code && v.code.toLowerCase() === rawKey) || (v.name && v.name.toLowerCase() === rawKey)) {
+            entry = v
+            break
+          }
+        }
+      }
+      if (!entry) {
+        entry = {
+          display: item.subject,
+          code: item.subject,
+          name: item.subject,
+          credits: 4,
+          topics: new Set<string>(),
+          noteCount: 0,
+          taskCount: 0,
+          assignmentCount: 0,
+        }
+        map.set(rawKey, entry)
       }
       if (item.topic) {
         entry.topics.add(item.topic)
@@ -718,9 +817,13 @@ export class IdeasVaultStore {
 
     return Array.from(map.values()).map((e) => ({
       subject: e.display,
+      code: e.code,
+      name: e.name,
+      credits: e.credits,
       topics: Array.from(e.topics),
       noteCount: e.noteCount,
       taskCount: e.taskCount,
+      assignmentCount: e.assignmentCount,
     }))
   }
 

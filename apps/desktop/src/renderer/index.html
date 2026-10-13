@@ -708,6 +708,60 @@
       gap: 14px;
     }
 
+    .subject-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .subject-card:hover {
+      border-color: var(--border-hover);
+    }
+    .subject-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .subject-card-code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-sage);
+      background: var(--accent-sage-subtle);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .subject-card-credits {
+      font-size: 11.5px;
+      color: var(--text-tertiary);
+      font-family: var(--font-stack);
+    }
+    .subject-card-title {
+      font-size: 15px;
+      font-weight: 550;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.35;
+    }
+    .subject-card-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .subject-stat-pill {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
     /* ─── Generic Cards (for full sub-views) ─────────────────────────────────── */
     .card {
       background: var(--bg-surface);
@@ -1326,12 +1380,12 @@
         <div class="workspace-hero">
           <div>
             <h1 id="workspace-greeting" class="workspace-greeting-title">Good afternoon</h1>
-            <p class="workspace-greeting-subtitle">Here is your daily overview — 7 semester subjects active, local vault synchronized.</p>
+            <p id="workspace-greeting-subtitle" class="workspace-greeting-subtitle">Loading daily overview...</p>
           </div>
           <div>
-            <span class="status-pill">
-              <span class="status-dot"></span>
-              Local Engine Ready
+            <span id="workspace-status-pill" class="status-pill">
+              <span id="workspace-status-dot" class="status-dot"></span>
+              <span id="workspace-status-text">Local Engine Ready</span>
             </span>
           </div>
         </div>
@@ -1408,15 +1462,15 @@
             <div class="rail-card">
               <div class="rail-card-header">
                 <h3 class="rail-card-title">Phone Inbox</h3>
-                <span id="workspace-inbox-status-pill" class="badge badge-ready">Connected</span>
+                <span id="workspace-inbox-status-pill" class="badge badge-waiting">Not Configured</span>
               </div>
               <p class="rail-card-desc" id="workspace-inbox-desc">
-                Watching folder for assignment PDFs and lecture notes from your mobile devices.
+                Select an iCloud Drive or local folder to automatically ingest homework assignments and notes from your phone.
               </p>
               <div class="rail-code-path" id="workspace-inbox-path">
-                iCloud Drive/GRAVITAS/Inbox
+                No folder selected
               </div>
-              <button id="workspace-btn-check-inbox" class="rail-btn-action">Check for incoming files</button>
+              <button id="workspace-btn-check-inbox" class="rail-btn-action">Configure Inbox Folder</button>
             </div>
 
             <!-- Desktop Companion -->

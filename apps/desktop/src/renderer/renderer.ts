@@ -25,6 +25,7 @@ import type {
   ApprovalQueueItem,
   RecordHumanDecisionIntent,
   DoctorReport,
+  IdeaRecord,
 } from '../types.js'
 import type { PhoneSyncPlatform, PersonaArchetype } from '@gravitas/core'
 import { initWorldView } from './world/worldView.js'
@@ -526,73 +527,199 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
     else greetingEl.textContent = 'Good evening'
   }
 
-  // 2. Load Tasks
+  // 1b. Engine Status Pill
+  try {
+    const health = await bridge.getHealth()
+    const statusDot = document.getElementById('workspace-status-dot')
+    const statusText = document.getElementById('workspace-status-text')
+    if (statusText) {
+      if (health.status === 'READY') {
+        statusText.textContent = 'Local Engine Ready'
+        if (statusDot) statusDot.style.background = 'var(--badge-ready)'
+      } else if (health.status === 'OFFLINE') {
+        statusText.textContent = 'Local Engine Offline'
+        if (statusDot) statusDot.style.background = 'var(--badge-offline)'
+      } else {
+        statusText.textContent = `Local Engine ${health.status}`
+        if (statusDot) statusDot.style.background = 'var(--badge-waiting)'
+      }
+    }
+  } catch {}
+
+  let totalSubjectCount = 0
+  let pendingTaskCount = 0
+
+  // 2. Load Tasks with Priority Grouping (Overdue, Due Today, Upcoming, Completed)
   try {
     const tasks = (await bridge.listIdeas?.({ collection: 'PLAN_TASK' })) || []
+    pendingTaskCount = tasks.filter((t) => !t.completed).length
     const countEl = document.getElementById('workspace-tasks-count')
     if (countEl) countEl.textContent = String(tasks.length)
 
     const listEl = document.getElementById('workspace-tasks-list')
     const fullTasksEl = document.getElementById('tasks-full-list')
 
-    const renderTaskNodes = (target: HTMLElement, maxItems?: number) => {
+    const now = new Date()
+    const todayStr = now.toISOString().slice(0, 10)
+
+    const isOverdue = (t: IdeaRecord) => !t.completed && Boolean(t.dueDate) && t.dueDate!.slice(0, 10) < todayStr
+    const isDueToday = (t: IdeaRecord) => !t.completed && Boolean(t.dueDate) && t.dueDate!.slice(0, 10) === todayStr
+    const isUpcoming = (t: IdeaRecord) => !t.completed && (!t.dueDate || t.dueDate.slice(0, 10) > todayStr)
+    const isDone = (t: IdeaRecord) => Boolean(t.completed)
+
+    const renderTaskItem = (t: IdeaRecord): HTMLElement => {
+      const item = document.createElement('div')
+      item.className = `task-item ${t.completed ? 'completed' : ''}`
+
+      const chk = document.createElement('input')
+      chk.type = 'checkbox'
+      chk.className = 'task-checkbox'
+      chk.checked = Boolean(t.completed)
+      chk.title = t.completed ? 'Mark task incomplete' : 'Mark task complete'
+      chk.addEventListener('change', async () => {
+        if (bridge.completeTask) {
+          await bridge.completeTask(t.id, chk.checked)
+          await refreshWorkspace(bridge)
+        }
+      })
+
+      const content = document.createElement('div')
+      content.className = 'task-content'
+
+      const text = document.createElement('span')
+      text.className = 'task-text'
+      text.textContent = t.title
+
+      content.appendChild(text)
+
+      const metaRow = document.createElement('div')
+      metaRow.style.display = 'flex'
+      metaRow.style.alignItems = 'center'
+      metaRow.style.gap = '6px'
+
+      if (t.subject) {
+        const subjTag = document.createElement('span')
+        subjTag.className = 'task-tag'
+        subjTag.style.background = 'var(--accent-sage-subtle)'
+        subjTag.style.color = 'var(--accent-sage)'
+        subjTag.textContent = t.subject
+        metaRow.appendChild(subjTag)
+      }
+
+      if (t.dueDate) {
+        const dueTag = document.createElement('span')
+        dueTag.className = 'task-tag'
+        const dStr = t.dueDate.slice(0, 10)
+        if (dStr < todayStr && !t.completed) {
+          dueTag.style.background = 'rgba(201, 107, 97, 0.15)'
+          dueTag.style.color = 'var(--badge-offline)'
+          dueTag.textContent = `Overdue · ${dStr}`
+        } else if (dStr === todayStr && !t.completed) {
+          dueTag.style.background = 'rgba(199, 157, 94, 0.15)'
+          dueTag.style.color = 'var(--badge-waiting)'
+          dueTag.textContent = 'Due Today'
+        } else {
+          dueTag.textContent = `Due ${dStr}`
+        }
+        metaRow.appendChild(dueTag)
+      } else if (t.tags && t.tags.length > 0) {
+        const tag = document.createElement('span')
+        tag.className = 'task-tag'
+        tag.textContent = t.tags[0]!
+        metaRow.appendChild(tag)
+      }
+
+      content.appendChild(metaRow)
+      item.appendChild(chk)
+      item.appendChild(content)
+      return item
+    }
+
+    const renderTaskNodes = (target: HTMLElement, isCompact = false) => {
       if (tasks.length === 0) {
-        target.innerHTML = '<div class="empty-state">No pending tasks. You are all caught up!</div>'
+        target.innerHTML = `
+          <div class="empty-state-editorial">
+            <div style="font-weight: 550; color: var(--text-primary); margin-bottom: 4px;">All clear — no pending study tasks</div>
+            <p style="margin: 0 0 12px 0; color: var(--text-secondary); font-size: 13px;">Add an assignment deadline, revision milestone, or import study notes from your phone.</p>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+              <button id="workspace-empty-btn-task" class="btn btn-secondary" style="font-size: 12px; padding: 5px 12px;">+ Add Task</button>
+            </div>
+          </div>
+        `
+        target.querySelector('#workspace-empty-btn-task')?.addEventListener('click', () => {
+          document.getElementById('workspace-btn-add-task-modal')?.click()
+        })
         return
       }
+
       target.innerHTML = ''
-      const sorted = [...tasks].sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0))
-      const slice = maxItems ? sorted.slice(0, maxItems) : sorted
-      for (const t of slice) {
-        const item = document.createElement('div')
-        item.className = `task-item ${t.completed ? 'completed' : ''}`
 
-        const chk = document.createElement('input')
-        chk.type = 'checkbox'
-        chk.className = 'task-checkbox'
-        chk.checked = Boolean(t.completed)
-        chk.title = 'Mark task complete'
-        chk.addEventListener('change', async () => {
-          if (bridge.completeTask) {
-            await bridge.completeTask(t.id, chk.checked)
-            await refreshWorkspace(bridge)
-          }
+      if (isCompact) {
+        // Workspace Home Stream: prioritized slice
+        const sorted = [...tasks].sort((a, b) => {
+          if (a.completed !== b.completed) return (a.completed ? 1 : 0) - (b.completed ? 1 : 0)
+          const dueA = a.dueDate ? a.dueDate.slice(0, 10) : '9999-99-99'
+          const dueB = b.dueDate ? b.dueDate.slice(0, 10) : '9999-99-99'
+          return dueA.localeCompare(dueB)
         })
-
-        const content = document.createElement('div')
-        content.className = 'task-content'
-
-        const text = document.createElement('span')
-        text.className = 'task-text'
-        text.textContent = t.title
-
-        content.appendChild(text)
-
-        if (t.tags && t.tags.length > 0) {
-          const tag = document.createElement('span')
-          tag.className = 'task-tag'
-          tag.textContent = t.tags[0]!
-          content.appendChild(tag)
-        } else if (t.category) {
-          const tag = document.createElement('span')
-          tag.className = 'task-tag'
-          tag.textContent = t.category
-          content.appendChild(tag)
+        const slice = sorted.slice(0, 6)
+        for (const t of slice) {
+          target.appendChild(renderTaskItem(t))
         }
+      } else {
+        // Full Tasks Page: Grouped by Overdue, Due Today, Upcoming, Completed
+        const groups = [
+          { title: 'Overdue', items: tasks.filter(isOverdue), color: 'var(--badge-offline)' },
+          { title: 'Due Today', items: tasks.filter(isDueToday), color: 'var(--badge-waiting)' },
+          { title: 'Upcoming & Open', items: tasks.filter(isUpcoming), color: 'var(--text-primary)' },
+          { title: 'Completed', items: tasks.filter(isDone), color: 'var(--text-tertiary)' },
+        ]
 
-        item.appendChild(chk)
-        item.appendChild(content)
-        target.appendChild(item)
+        for (const g of groups) {
+          if (g.items.length === 0 && g.title !== 'Upcoming & Open') continue
+          const groupSec = document.createElement('div')
+          groupSec.style.marginBottom = '20px'
+
+          const header = document.createElement('div')
+          header.style.display = 'flex'
+          header.style.justifyContent = 'space-between'
+          header.style.alignItems = 'center'
+          header.style.marginBottom = '8px'
+          header.style.borderBottom = '1px solid var(--border-subtle)'
+          header.style.paddingBottom = '4px'
+
+          const hTitle = document.createElement('span')
+          hTitle.style.fontSize = '13.5px'
+          hTitle.style.fontWeight = '600'
+          hTitle.style.color = g.color
+          hTitle.textContent = `${g.title} (${g.items.length})`
+
+          header.appendChild(hTitle)
+          groupSec.appendChild(header)
+
+          if (g.items.length === 0) {
+            const empty = document.createElement('div')
+            empty.className = 'empty-state-editorial'
+            empty.style.padding = '12px'
+            empty.textContent = 'None'
+            groupSec.appendChild(empty)
+          } else {
+            for (const t of g.items) {
+              groupSec.appendChild(renderTaskItem(t))
+            }
+          }
+          target.appendChild(groupSec)
+        }
       }
     }
 
-    if (listEl) renderTaskNodes(listEl, 6)
-    if (fullTasksEl) renderTaskNodes(fullTasksEl)
+    if (listEl) renderTaskNodes(listEl, true)
+    if (fullTasksEl) renderTaskNodes(fullTasksEl, false)
   } catch {
     // Graceful fallback
   }
 
-  // 3. Load Recent Notes & Ideas
+  // 3. Load Recent Notes & Ideas with Timestamp & Subject Badging
   try {
     const allIdeas = (await bridge.listIdeas?.()) || []
     const notesOnly = allIdeas.filter((i) => i.collection !== 'PLAN_TASK')
@@ -604,7 +731,7 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
 
     const renderNoteNodes = (target: HTMLElement, maxItems?: number) => {
       if (notesOnly.length === 0) {
-        target.innerHTML = '<div class="empty-state">No recent notes. Use the prompt bar above to capture thoughts.</div>'
+        target.innerHTML = '<div class="empty-state-editorial">No recent notes. Use the quick capture bar above to write one.</div>'
         return
       }
       target.innerHTML = ''
@@ -622,7 +749,13 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
 
         const date = document.createElement('div')
         date.className = 'note-date'
-        date.textContent = new Date(n.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+        const dObj = new Date(n.updatedAt)
+        date.textContent = dObj.toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
 
         header.appendChild(title)
         header.appendChild(date)
@@ -632,6 +765,31 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
         preview.className = 'note-preview'
         preview.textContent = n.originalText || n.summary || 'No text preview.'
         item.appendChild(preview)
+
+        if (n.subject || (n.tags && n.tags.length > 0)) {
+          const footer = document.createElement('div')
+          footer.style.display = 'flex'
+          footer.style.gap = '6px'
+          footer.style.marginTop = '6px'
+
+          if (n.subject) {
+            const subjTag = document.createElement('span')
+            subjTag.className = 'task-tag'
+            subjTag.style.background = 'var(--accent-sage-subtle)'
+            subjTag.style.color = 'var(--accent-sage)'
+            subjTag.textContent = n.subject
+            footer.appendChild(subjTag)
+          }
+          if (n.tags) {
+            for (const tg of n.tags.slice(0, 2)) {
+              const tEl = document.createElement('span')
+              tEl.className = 'task-tag'
+              tEl.textContent = tg
+              footer.appendChild(tEl)
+            }
+          }
+          item.appendChild(footer)
+        }
 
         target.appendChild(item)
       }
@@ -646,65 +804,155 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
   // 4. Load Subjects & Collections
   try {
     const subjects = (await bridge.listStudySubjects?.()) || []
+    totalSubjectCount = subjects.length
     const countEl = document.getElementById('workspace-subjects-count')
     if (countEl) countEl.textContent = String(subjects.length)
 
     const listEl = document.getElementById('workspace-subjects-list')
     const fullSubjectsEl = document.getElementById('subjects-full-list')
 
-    const renderSubjectNodes = (target: HTMLElement, maxItems?: number) => {
+    if (listEl) {
       if (subjects.length === 0) {
-        target.innerHTML = '<div class="empty-state">No study subjects enrolled yet. Configure in First-Run Setup.</div>'
-        return
-      }
-      target.innerHTML = ''
-      const slice = maxItems ? subjects.slice(0, maxItems) : subjects
-      for (const s of slice) {
-        const pill = document.createElement('div')
-        pill.className = 'subject-pill'
+        listEl.innerHTML = '<div class="empty-state-editorial">No study subjects enrolled yet.</div>'
+      } else {
+        listEl.innerHTML = ''
+        const slice = subjects.slice(0, 5)
+        for (const s of slice) {
+          const pill = document.createElement('div')
+          pill.className = 'subject-pill'
 
-        const info = document.createElement('div')
-        info.className = 'subject-info'
+          const info = document.createElement('div')
+          info.className = 'subject-info'
 
-        const title = document.createElement('div')
-        title.className = 'subject-code'
-        title.textContent = s.subject
+          const codeRow = document.createElement('div')
+          codeRow.style.display = 'flex'
+          codeRow.style.alignItems = 'center'
+          codeRow.style.gap = '6px'
 
-        const meta = document.createElement('div')
-        meta.className = 'subject-name'
-        meta.textContent = `${s.noteCount || 0} notes · ${s.taskCount || 0} tasks`
+          const codeEl = document.createElement('span')
+          codeEl.className = 'subject-code'
+          codeEl.textContent = s.code || s.subject
 
-        info.appendChild(title)
-        info.appendChild(meta)
-        pill.appendChild(info)
+          codeRow.appendChild(codeEl)
 
-        target.appendChild(pill)
+          if (s.credits !== undefined) {
+            const cr = document.createElement('span')
+            cr.className = 'subject-credits'
+            cr.textContent = `${s.credits} cr`
+            codeRow.appendChild(cr)
+          }
+
+          const meta = document.createElement('div')
+          meta.className = 'subject-name'
+          meta.textContent = s.name && s.name !== s.code ? s.name : `${s.noteCount || 0} notes · ${s.taskCount || 0} tasks`
+
+          info.appendChild(codeRow)
+          info.appendChild(meta)
+          pill.appendChild(info)
+          listEl.appendChild(pill)
+        }
       }
     }
 
-    if (listEl) renderSubjectNodes(listEl, 5)
-    if (fullSubjectsEl) renderSubjectNodes(fullSubjectsEl)
+    if (fullSubjectsEl) {
+      if (subjects.length === 0) {
+        fullSubjectsEl.innerHTML = '<div class="empty-state-editorial">No semester subjects enrolled.</div>'
+      } else {
+        fullSubjectsEl.innerHTML = ''
+        for (const s of subjects) {
+          const card = document.createElement('div')
+          card.className = 'subject-card'
+
+          const cardHeader = document.createElement('div')
+          cardHeader.className = 'subject-card-header'
+
+          const codeBadge = document.createElement('span')
+          codeBadge.className = 'subject-card-code'
+          codeBadge.textContent = s.code || s.subject
+
+          const creditsBadge = document.createElement('span')
+          creditsBadge.className = 'subject-card-credits'
+          creditsBadge.textContent = `${s.credits ?? 4} Credits`
+
+          cardHeader.appendChild(codeBadge)
+          cardHeader.appendChild(creditsBadge)
+          card.appendChild(cardHeader)
+
+          const title = document.createElement('h3')
+          title.className = 'subject-card-title'
+          title.textContent = s.name || s.subject
+          card.appendChild(title)
+
+          const stats = document.createElement('div')
+          stats.className = 'subject-card-stats'
+
+          const notesPill = document.createElement('span')
+          notesPill.className = 'subject-stat-pill'
+          notesPill.innerHTML = `<strong>${s.noteCount || 0}</strong> notes`
+
+          const asgnPill = document.createElement('span')
+          asgnPill.className = 'subject-stat-pill'
+          asgnPill.innerHTML = `<strong>${s.assignmentCount || 0}</strong> assignments`
+
+          const taskPill = document.createElement('span')
+          taskPill.className = 'subject-stat-pill'
+          taskPill.innerHTML = `<strong>${s.taskCount || 0}</strong> revisions`
+
+          stats.appendChild(notesPill)
+          stats.appendChild(asgnPill)
+          stats.appendChild(taskPill)
+          card.appendChild(stats)
+
+          fullSubjectsEl.appendChild(card)
+        }
+      }
+    }
   } catch {
     // Graceful fallback
   }
 
-  // 5. Load Inbox Configuration
+  // 4b. Update Greeting Subtitle dynamically
+  const subtitleEl = document.getElementById('workspace-greeting-subtitle')
+  if (subtitleEl) {
+    const subjWord = totalSubjectCount === 1 ? 'subject' : 'subjects'
+    const taskWord = pendingTaskCount === 1 ? 'task' : 'tasks'
+    if (pendingTaskCount > 0) {
+      subtitleEl.textContent = `Here is your daily overview — ${totalSubjectCount} semester ${subjWord} active, ${pendingTaskCount} pending ${taskWord}.`
+    } else {
+      subtitleEl.textContent = `Here is your daily overview — ${totalSubjectCount} semester ${subjWord} active, all tasks caught up.`
+    }
+  }
+
+  // 5. Load Phone Inbox Configuration with Verified Truthfulness
   try {
     if (bridge.executeStudyGuardianOperation) {
       const res = await bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' })
       const pathEl = document.getElementById('workspace-inbox-path')
       const pillEl = document.getElementById('workspace-inbox-status-pill')
       const descEl = document.getElementById('workspace-inbox-desc')
+      const btnEl = document.getElementById('workspace-btn-check-inbox')
 
-      if (res.inboxConfig?.inboxFolderPath) {
-        if (pathEl) pathEl.textContent = res.inboxConfig.inboxFolderPath
+      const folderPath = res.inboxConfig?.inboxFolderPath
+      if (folderPath) {
+        if (pathEl) pathEl.textContent = folderPath
         if (pillEl) {
-          pillEl.textContent = res.inboxConfig.watcherActive ? 'Connected' : 'Paused'
+          pillEl.textContent = res.inboxConfig.watcherActive ? 'Watching' : 'Configured'
           pillEl.className = 'badge ' + (res.inboxConfig.watcherActive ? 'badge-ready' : 'badge-waiting')
         }
         if (descEl) {
           descEl.textContent = 'Watching folder for assignment PDFs and notes from your phone.'
         }
+        if (btnEl) btnEl.textContent = 'Check for incoming files'
+      } else {
+        if (pathEl) pathEl.textContent = 'No folder selected'
+        if (pillEl) {
+          pillEl.textContent = 'Not Configured'
+          pillEl.className = 'badge badge-waiting'
+        }
+        if (descEl) {
+          descEl.textContent = 'Select an iCloud Drive or local folder to automatically ingest homework assignments and notes from your phone.'
+        }
+        if (btnEl) btnEl.textContent = 'Configure Inbox Folder'
       }
     }
   } catch {
@@ -842,12 +1090,12 @@ export function initWelcomeArtShader(): ShaderController | null {
     void main() {
       vec2 uv = vec2(v_uv.x, 1.0 - v_uv.y);
 
-      // Slow organic undulation: period ~ 22 seconds
-      float t = u_time * 0.22;
+      // Organic undulation with calm silk motion: period ~ 14 seconds
+      float t = u_time * 0.45;
 
       // Multi-frequency sinusoidal displacement simulating billowing silk / satin
-      float waveX = sin(uv.y * 3.2 + t) * 0.022 + cos(uv.x * 2.1 - t * 0.7) * 0.014;
-      float waveY = cos(uv.x * 2.8 + t * 0.8) * 0.018 + sin(uv.y * 2.4 - t * 0.5) * 0.012;
+      float waveX = sin(uv.y * 3.4 + t) * 0.042 + cos(uv.x * 2.4 - t * 0.8) * 0.026;
+      float waveY = cos(uv.x * 3.0 + t * 0.9) * 0.038 + sin(uv.y * 2.6 - t * 0.6) * 0.022;
 
       vec2 distortedUV = uv + vec2(waveX, waveY);
       distortedUV = clamp(distortedUV, vec2(0.005), vec2(0.995));
@@ -855,8 +1103,8 @@ export function initWelcomeArtShader(): ShaderController | null {
       vec4 texColor = texture2D(u_image, distortedUV);
 
       // Subtle lighting undulation along the crests of the waves
-      float lightWave = sin((distortedUV.x * 2.4 + distortedUV.y * 1.6) - t * 0.6) * 0.045;
-      texColor.rgb += vec3(lightWave * 0.2, lightWave * 0.5, lightWave * 0.95);
+      float lightWave = sin((distortedUV.x * 2.6 + distortedUV.y * 1.8) - t * 0.75) * 0.065;
+      texColor.rgb += vec3(lightWave * 0.22, lightWave * 0.52, lightWave * 0.95);
 
       // Soft vignette inside the frame
       vec2 d = v_uv - vec2(0.5);
@@ -1638,6 +1886,21 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       }
     })
 
+    document.getElementById('workspace-btn-add-task-modal')?.addEventListener('click', async () => {
+      const title = prompt('Enter study task or assignment title:')
+      if (title && bridge.saveIdea) {
+        await bridge.saveIdea({ title, originalText: title, collection: 'PLAN_TASK' })
+        await refreshWorkspace(bridge)
+      }
+    })
+    document.getElementById('workspace-btn-add-note-modal')?.addEventListener('click', async () => {
+      const title = prompt('Enter note title:')
+      if (title && bridge.saveIdea) {
+        await bridge.saveIdea({ title, originalText: title, collection: 'IDEA' })
+        await refreshWorkspace(bridge)
+      }
+    })
+
     document.getElementById('workspace-btn-companion')?.addEventListener('click', () => {
       void bridge.toggleCompanionWindow?.()
     })
@@ -1646,6 +1909,19 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     })
     document.getElementById('workspace-btn-check-inbox')?.addEventListener('click', async () => {
       if (bridge.executeStudyGuardianOperation) {
+        const config = await bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' })
+        if (!config.inboxConfig?.inboxFolderPath && bridge.selectInboxFolder) {
+          const pick = await bridge.selectInboxFolder()
+          if (pick.selected && pick.folderPath) {
+            await bridge.executeStudyGuardianOperation({
+              action: 'SET_INBOX_FOLDER',
+              folderPath: pick.folderPath,
+            })
+            await refreshWorkspace(bridge)
+            announce(`Configured inbox folder: ${pick.folderPath}`)
+            return
+          }
+        }
         const res = await bridge.executeStudyGuardianOperation({ action: 'TEST_INBOX_SETUP' })
         announce(res.inboxVerificationResult?.message || 'Inbox scan complete')
         await refreshWorkspace(bridge)
