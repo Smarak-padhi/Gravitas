@@ -89,6 +89,8 @@ async function run() {
     }),
   ])
 
+  mkdirSync(join(__dirname, 'dist/renderer/assets'), { recursive: true })
+  copyFileSync(join(__dirname, 'src/renderer/assets/signature-blue-bg.png'), join(__dirname, 'dist/renderer/assets/signature-blue-bg.png'))
   copyFileSync(join(__dirname, 'src/renderer/index.html'), join(__dirname, 'dist/renderer/index.html'))
   copyFileSync(join(__dirname, 'src/renderer/companion.html'), join(__dirname, 'dist/renderer/companion.html'))
   console.log('Desktop package bundled successfully.')

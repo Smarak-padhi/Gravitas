@@ -806,6 +806,8 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   let selectedPlatform: PhoneSyncPlatform = 'IPHONE'
   let selectedAction: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE' = 'SAVE_IDEA'
 
+  dialog.classList.toggle('is-welcome', currentScreen === 1)
+
   const PHONE_INSTRUCTIONS: Record<string, string> = {
     IPHONE: `
       <strong>iPhone iCloud Drive Setup:</strong><br>
@@ -849,6 +851,10 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   function setScreen(screen: number): void {
     if (screen < 1 || screen > TOTAL_SCREENS) return
     currentScreen = screen
+
+    if (dialog) {
+      dialog.classList.toggle('is-welcome', currentScreen === 1)
+    }
 
     for (let i = 1; i <= TOTAL_SCREENS; i++) {
       const el = document.getElementById(`onboarding-screen-${i}`)

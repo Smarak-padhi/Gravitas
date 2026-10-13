@@ -289,6 +289,24 @@
       align-items: flex-end;
       flex-wrap: wrap;
       gap: 16px;
+      position: relative;
+      border-radius: 12px;
+      padding: 24px 28px;
+      background-color: var(--bg-surface);
+      background-image: 
+        linear-gradient(90deg, #171A1D 0%, #171A1D 48%, rgba(23, 26, 29, 0.75) 72%, transparent 100%),
+        url('assets/signature-blue-bg.png');
+      background-repeat: no-repeat;
+      background-position: right 30%;
+      background-size: cover;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    body.light-theme .workspace-greeting-section {
+      background-color: var(--bg-surface);
+      background-image: none;
+      border-color: var(--border);
     }
 
     .workspace-greeting-title {
@@ -608,34 +626,78 @@
       margin: auto;
       position: relative;
       overflow: hidden;
+      transition: max-width 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+    dialog#onboarding-dialog.is-welcome {
+      max-width: 760px;
+      background-color: #040608;
+      background-image: url('assets/signature-blue-bg.png');
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: cover;
+      border-color: rgba(90, 130, 175, 0.32);
+      box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+    body.light-theme dialog#onboarding-dialog.is-welcome {
+      background-color: var(--bg-surface);
+      background-image: none;
+      border-color: var(--border);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
+    }
+    dialog#onboarding-dialog.is-welcome .ob-header-right {
+      background: rgba(10, 14, 18, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 3px 8px;
+      backdrop-filter: blur(8px);
+    }
+    body.light-theme dialog#onboarding-dialog.is-welcome .ob-header-right {
+      background: transparent;
+      border: none;
+      backdrop-filter: none;
+    }
+    dialog#onboarding-dialog.is-welcome .ob-feature-card {
+      background: rgba(18, 22, 27, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+    }
+    body.light-theme dialog#onboarding-dialog.is-welcome .ob-feature-card {
+      background: var(--bg-surface-subtle);
+      border-color: var(--border);
+      backdrop-filter: none;
+    }
+    dialog#onboarding-dialog.is-welcome .ob-actions-footer {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
+    body.light-theme dialog#onboarding-dialog.is-welcome .ob-actions-footer {
+      border-top-color: var(--border-subtle);
     }
     dialog::backdrop {
       background: rgba(14, 16, 18, 0.75);
       backdrop-filter: blur(4px);
     }
 
-    /* Subtle static grid pattern for Welcome Screen only */
+    /* Welcome Screen container & text in dark negative space */
     .welcome-canvas {
       position: relative;
     }
     .welcome-grid-bg {
-      position: absolute;
-      top: -32px;
-      left: -32px;
-      right: -32px;
-      bottom: -32px;
-      pointer-events: none;
-      background-size: 24px 24px;
-      background-image: 
-        linear-gradient(to right, rgba(240, 238, 232, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(240, 238, 232, 0.04) 1px, transparent 1px);
-      mask-image: radial-gradient(circle at 40% 30%, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 70%);
-      -webkit-mask-image: radial-gradient(circle at 40% 30%, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 70%);
-      z-index: 0;
+      display: none;
     }
     .welcome-content {
       position: relative;
       z-index: 1;
+      max-width: 440px;
+    }
+    @media (max-width: 820px) {
+      dialog#onboarding-dialog.is-welcome {
+        max-width: 94%;
+        background-position: right 20% center;
+        padding: 24px 22px;
+      }
+      .welcome-content {
+        max-width: 390px;
+      }
     }
 
     .ob-header {
@@ -1157,7 +1219,7 @@
         <span style="font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em;">GRAVITAS</span>
         <span id="onboarding-heading" style="font-size: 13px; color: var(--text-secondary);">Setup</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="ob-header-right" style="display: flex; align-items: center; gap: 12px;">
         <button id="ob-btn-theme-toggle" class="btn btn-ghost" style="font-size: 12px;">Theme</button>
         <span id="onboarding-step-indicator" style="font-size: 12px; color: var(--text-secondary);">1 of 5</span>
       </div>
@@ -1172,16 +1234,16 @@
       <div class="ob-dot" data-step="5"></div>
     </div>
 
-    <!-- SCREEN 1: Welcome (With subtle static grid canvas) -->
+    <!-- SCREEN 1: Welcome (Signature Blue Background) -->
     <div id="onboarding-screen-1" class="onboarding-screen welcome-canvas" data-screen="1">
       <div class="welcome-grid-bg"></div>
       <div class="welcome-content">
         <h2 style="font-size: 24px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.015em;">Welcome to your workspace</h2>
-        <p style="font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); max-width: 580px; margin-bottom: 24px;">
+        <p style="font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); max-width: 440px; margin-bottom: 24px;">
           GRAVITAS is a calm, local-first intelligence environment for your ideas, semester studies, tasks, and daily focus. Everything stays securely on your machine.
         </p>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; max-width: 440px;">
           <div class="ob-feature-card">
             <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Local by design</h4>
             <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
