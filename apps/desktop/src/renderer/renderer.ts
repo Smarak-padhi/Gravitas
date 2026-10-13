@@ -797,6 +797,224 @@ export function renderDoctorReport(container: HTMLElement, report: DoctorReport)
   container.appendChild(table)
 }
 
+interface ShaderController {
+  start: () => void
+  stop: () => void
+  resize: () => void
+}
+
+export function initWelcomeArtShader(): ShaderController | null {
+  const canvas = document.getElementById('welcome-art-canvas') as HTMLCanvasElement | null
+  if (!canvas) return null
+
+  const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  let prefersReducedMotion = mediaQuery.matches
+
+  const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null
+  if (!gl) {
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      const img = new Image()
+      img.src = 'assets/signature-blue-bg.png'
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      }
+    }
+    return null
+  }
+
+  const vsSource = `
+    attribute vec2 a_position;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = (a_position + 1.0) * 0.5;
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  `
+
+  const fsSource = `
+    precision mediump float;
+    uniform sampler2D u_image;
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    varying vec2 v_uv;
+
+    void main() {
+      vec2 uv = vec2(v_uv.x, 1.0 - v_uv.y);
+
+      // Slow organic undulation: period ~ 22 seconds
+      float t = u_time * 0.22;
+
+      // Multi-frequency sinusoidal displacement simulating billowing silk / satin
+      float waveX = sin(uv.y * 3.2 + t) * 0.022 + cos(uv.x * 2.1 - t * 0.7) * 0.014;
+      float waveY = cos(uv.x * 2.8 + t * 0.8) * 0.018 + sin(uv.y * 2.4 - t * 0.5) * 0.012;
+
+      vec2 distortedUV = uv + vec2(waveX, waveY);
+      distortedUV = clamp(distortedUV, vec2(0.005), vec2(0.995));
+
+      vec4 texColor = texture2D(u_image, distortedUV);
+
+      // Subtle lighting undulation along the crests of the waves
+      float lightWave = sin((distortedUV.x * 2.4 + distortedUV.y * 1.6) - t * 0.6) * 0.045;
+      texColor.rgb += vec3(lightWave * 0.2, lightWave * 0.5, lightWave * 0.95);
+
+      // Soft vignette inside the frame
+      vec2 d = v_uv - vec2(0.5);
+      float vignette = clamp(1.0 - dot(d, d) * 0.45, 0.0, 1.0);
+      texColor.rgb *= vignette;
+
+      gl_FragColor = texColor;
+    }
+  `
+
+  function createShader(glCtx: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
+    const s = glCtx.createShader(type)
+    if (!s) return null
+    glCtx.shaderSource(s, source)
+    glCtx.compileShader(s)
+    if (!glCtx.getShaderParameter(s, glCtx.COMPILE_STATUS)) {
+      glCtx.deleteShader(s)
+      return null
+    }
+    return s
+  }
+
+  const vs = createShader(gl, gl.VERTEX_SHADER, vsSource)
+  const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource)
+  if (!vs || !fs) return null
+
+  const program = gl.createProgram()
+  if (!program) return null
+  gl.attachShader(program, vs)
+  gl.attachShader(program, fs)
+  gl.linkProgram(program)
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    return null
+  }
+
+  const posBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
+  const vertices = new Float32Array([
+    -1, -1,
+     1, -1,
+    -1,  1,
+    -1,  1,
+     1, -1,
+     1,  1,
+  ])
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+
+  const aPosLoc = gl.getAttribLocation(program, 'a_position')
+  const uTimeLoc = gl.getUniformLocation(program, 'u_time')
+  const uResLoc = gl.getUniformLocation(program, 'u_resolution')
+  const uImageLoc = gl.getUniformLocation(program, 'u_image')
+
+  const texture = gl.createTexture()
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10, 15, 25, 255]))
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+  let isRunning = false
+  let animFrameId = 0
+  let startTime = 0
+
+  const img = new Image()
+  img.src = 'assets/signature-blue-bg.png'
+  img.onload = () => {
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img)
+    renderFrame(0)
+  }
+
+  function resize(): void {
+    const rect = canvas.getBoundingClientRect()
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const w = Math.round((rect.width || 480) * dpr)
+    const h = Math.round((rect.height || 380) * dpr)
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w
+      canvas.height = h
+      gl.viewport(0, 0, w, h)
+    }
+  }
+
+  function renderFrame(timeSec: number): void {
+    if (!gl || !program) return
+    gl.useProgram(program)
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer)
+    gl.enableVertexAttribArray(aPosLoc)
+    gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0)
+
+    gl.uniform1f(uTimeLoc, timeSec)
+    gl.uniform2f(uResLoc, canvas.width, canvas.height)
+
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.uniform1i(uImageLoc, 0)
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6)
+  }
+
+  function loop(now: number): void {
+    if (!isRunning) return
+    if (startTime === 0) startTime = now
+    const elapsed = (now - startTime) / 1000
+
+    renderFrame(elapsed)
+
+    if (!prefersReducedMotion) {
+      animFrameId = requestAnimationFrame(loop)
+    }
+  }
+
+  function start(): void {
+    if (isRunning) return
+    isRunning = true
+    resize()
+    if (prefersReducedMotion) {
+      renderFrame(0)
+    } else {
+      startTime = performance.now()
+      animFrameId = requestAnimationFrame(loop)
+    }
+  }
+
+  function stop(): void {
+    isRunning = false
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId)
+      animFrameId = 0
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stop()
+    } else {
+      const d = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
+      if (d?.open && d.classList.contains('is-welcome')) {
+        start()
+      }
+    }
+  })
+
+  mediaQuery.addEventListener('change', (e) => {
+    prefersReducedMotion = e.matches
+    if (prefersReducedMotion) {
+      stop()
+      renderFrame(0)
+    } else {
+      start()
+    }
+  })
+
+  return { start, stop, resize }
+}
+
 export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
   if (!dialog) return
@@ -806,7 +1024,12 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   let selectedPlatform: PhoneSyncPlatform = 'IPHONE'
   let selectedAction: 'SAVE_IDEA' | 'CREATE_TASK' | 'IMPORT_ASSIGNMENT' | 'EXPLORE_SAMPLE' = 'SAVE_IDEA'
 
+  const shaderCtrl = initWelcomeArtShader()
+
   dialog.classList.toggle('is-welcome', currentScreen === 1)
+  dialog.addEventListener('close', () => {
+    shaderCtrl?.stop()
+  })
 
   const PHONE_INSTRUCTIONS: Record<string, string> = {
     IPHONE: `
@@ -852,14 +1075,29 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     if (screen < 1 || screen > TOTAL_SCREENS) return
     currentScreen = screen
 
+    const isWelcome = currentScreen === 1
     if (dialog) {
-      dialog.classList.toggle('is-welcome', currentScreen === 1)
+      dialog.classList.toggle('is-welcome', isWelcome)
+    }
+
+    const obHeader = document.querySelector('.ob-header') as HTMLElement | null
+    const obProgressBar = document.querySelector('.ob-progress-bar') as HTMLElement | null
+    const obFooter = document.querySelector('.ob-actions-footer') as HTMLElement | null
+
+    if (obHeader) obHeader.style.display = isWelcome ? 'none' : 'flex'
+    if (obProgressBar) obProgressBar.style.display = isWelcome ? 'none' : 'flex'
+    if (obFooter) obFooter.style.display = isWelcome ? 'none' : 'flex'
+
+    if (isWelcome) {
+      shaderCtrl?.start()
+    } else {
+      shaderCtrl?.stop()
     }
 
     for (let i = 1; i <= TOTAL_SCREENS; i++) {
       const el = document.getElementById(`onboarding-screen-${i}`)
       if (el) {
-        el.style.display = i === currentScreen ? 'block' : 'none'
+        el.style.display = i === currentScreen ? (i === 1 ? 'grid' : 'block') : 'none'
       }
     }
 
@@ -873,7 +1111,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     const btnFinish = document.getElementById('onboarding-btn-finish')
 
     if (btnPrev) btnPrev.style.display = currentScreen > 1 ? 'inline-block' : 'none'
-    if (btnNext) btnNext.style.display = currentScreen < TOTAL_SCREENS ? 'inline-block' : 'none'
+    if (btnNext) btnNext.style.display = (currentScreen > 1 && currentScreen < TOTAL_SCREENS) ? 'inline-block' : 'none'
     if (btnFinish) btnFinish.style.display = currentScreen === TOTAL_SCREENS ? 'inline-block' : 'none'
 
     if (currentScreen === 3) {
@@ -1181,7 +1419,12 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
     }
   })
 
-  // System Surface "Run setup again" Button
+  // Header & System Surface "Run setup again" Buttons
+  document.getElementById('btn-header-onboarding')?.addEventListener('click', () => {
+    setScreen(1)
+    dialog.showModal()
+  })
+
   document.getElementById('btn-run-setup-wizard')?.addEventListener('click', async () => {
     if (bridge.executeStudyGuardianOperation) {
       await bridge.executeStudyGuardianOperation({ action: 'RESET_ONBOARDING' })
@@ -1412,10 +1655,6 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     document.getElementById('btn-header-theme')?.addEventListener('click', () => {
       document.body.classList.toggle('light-theme')
     })
-    document.getElementById('btn-header-onboarding')?.addEventListener('click', () => {
-      const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
-      dialog?.showModal()
-    })
 
     // Subnav buttons in devtools
     document.querySelectorAll<HTMLButtonElement>('.subnav-btn').forEach((st) => {
@@ -1426,6 +1665,16 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     })
 
     // Notes / Tasks / Subjects actions
+    const searchInput = document.getElementById('notes-search-input') as HTMLInputElement | null
+    searchInput?.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim()
+      const noteItems = document.querySelectorAll('#notes-full-list .note-item')
+      noteItems.forEach((el) => {
+        const text = (el.textContent || '').toLowerCase()
+        ;(el as HTMLElement).style.display = !q || text.includes(q) ? '' : 'none'
+      })
+    })
+
     document.getElementById('notes-btn-create')?.addEventListener('click', async () => {
       const title = prompt('Enter note title:')
       if (title && bridge.saveIdea) {

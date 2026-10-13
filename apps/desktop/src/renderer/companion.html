@@ -5,24 +5,59 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self';">
   <title>GRAVITAS Companion — Knowledge Hub</title>
   <style>
+    @font-face {
+      font-family: 'Geist';
+      src: url('assets/fonts/Geist-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Geist Mono';
+      src: url('assets/fonts/GeistMono-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
     :root {
-      --bg-primary: #0b0f19;
-      --bg-surface: #111827;
-      --bg-card: #1f2937;
-      --border: #374151;
-      --border-focus: #38bdf8;
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --accent: #0284c7;
-      --accent-hover: #0369a1;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
+      --bg-primary: #121518;
+      --bg-surface: #1C2025;
+      --bg-card: #22262B;
+      --border: #2E3339;
+      --border-subtle: #24282D;
+      --border-focus: #4A89C8;
+      --text-main: #F0EEE8;
+      --text-muted: #9FA4A8;
+      --accent: #4A89C8;
+      --accent-hover: #5D9BD8;
+      --success: #7DA684;
+      --warning: #C79D5E;
+      --danger: #C96B61;
+      --font-stack: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+    }
+
+    body.light-theme, [data-theme="light"] {
+      --bg-primary: #F5F4F0;
+      --bg-surface: #FCFBF9;
+      --bg-card: #F2F0E8;
+      --border: #E2DFD8;
+      --border-subtle: #EBE8E1;
+      --border-focus: #1D548F;
+      --text-main: #1C2024;
+      --text-muted: #60666D;
+      --accent: #1D548F;
+      --accent-hover: #164373;
+      --success: #2D6A4F;
+      --warning: #9C6A1D;
+      --danger: #A83A32;
     }
 
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--font-stack);
       background: var(--bg-primary);
       color: var(--text-main);
       margin: 0;
@@ -31,8 +66,9 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      border: 1px solid #38bdf8;
-      border-radius: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5);
     }
 
     /* Draggable Top Titlebar */
@@ -52,9 +88,9 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #38bdf8;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
     }
 
     .header-controls {
@@ -68,16 +104,16 @@
       font-size: 10px;
       padding: 2px 7px;
       border-radius: 9999px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
-      font-family: monospace;
+      font-family: var(--font-stack);
     }
-    .state-IDLE { background: #1f2937; color: #9ca3af; border: 1px solid #4b5563; }
-    .state-LISTENING { background: #78350f; color: #fbbf24; border: 1px solid #f59e0b; }
-    .state-PROCESSING { background: #0c4a6e; color: #38bdf8; border: 1px solid #0284c7; }
-    .state-SUCCESS { background: #064e3b; color: #34d399; border: 1px solid #059669; }
-    .state-ERROR { background: #7f1d1d; color: #f87171; border: 1px solid #dc2626; }
-    .state-CANCELLED { background: #4c1d95; color: #c4b5fd; border: 1px solid #7c3aed; }
+    .state-IDLE { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+    .state-LISTENING { background: rgba(199, 157, 94, 0.15); color: var(--warning); border: 1px solid rgba(199, 157, 94, 0.3); }
+    .state-PROCESSING { background: rgba(74, 137, 200, 0.15); color: var(--accent); border: 1px solid rgba(74, 137, 200, 0.3); }
+    .state-SUCCESS { background: rgba(125, 166, 132, 0.15); color: var(--success); border: 1px solid rgba(125, 166, 132, 0.3); }
+    .state-ERROR { background: rgba(201, 107, 97, 0.15); color: var(--danger); border: 1px solid rgba(201, 107, 97, 0.3); }
+    .state-CANCELLED { background: rgba(140, 120, 180, 0.15); color: #B0A4D6; border: 1px solid rgba(140, 120, 180, 0.3); }
 
     .btn {
       -webkit-app-region: no-drag;
@@ -114,12 +150,13 @@
 
     .command-input {
       flex: 1;
-      background: #090d16;
+      background: var(--bg-primary);
       color: var(--text-main);
       border: 1px solid var(--border);
-      border-radius: 5px;
+      border-radius: 6px;
       padding: 7px 10px;
-      font-size: 12px;
+      font-size: 13px;
+      font-family: var(--font-stack);
     }
     .command-input:focus {
       outline: none;
@@ -140,9 +177,9 @@
 
     .approval-banner {
       display: none;
-      background: #1e3a8a;
-      border: 1px solid #38bdf8;
-      color: #e0f2fe;
+      background: var(--bg-surface);
+      border: 1px solid var(--accent);
+      color: var(--text-main);
       padding: 8px 10px;
       border-radius: 5px;
       font-size: 11px;
@@ -150,12 +187,12 @@
     .approval-banner.active { display: block; }
 
     .status-box {
-      background: #090d16;
+      background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 5px;
       padding: 6px 10px;
       font-size: 12px;
-      color: #e5e7eb;
+      color: var(--text-main);
       min-height: 30px;
       line-height: 1.35;
     }
@@ -167,15 +204,15 @@
     }
 
     .chip {
-      background: #1e293b;
-      color: #cbd5e1;
-      border: 1px solid #334155;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       border-radius: 999px;
       padding: 2px 8px;
       font-size: 10px;
       cursor: pointer;
     }
-    .chip:hover, .chip.active { border-color: #38bdf8; color: #fff; background: #0c4a6e; }
+    .chip:hover, .chip.active { border-color: var(--accent); color: var(--text-main); background: var(--bg-surface); }
 
     .tabs-bar {
       display: flex;
@@ -195,8 +232,8 @@
       cursor: pointer;
     }
     .tab-btn.active {
-      color: #38bdf8;
-      border-bottom-color: #38bdf8;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
 
     .companion-body {
@@ -237,10 +274,15 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
-    .col-IDEA { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
-    .col-STUDY_NOTE { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
-    .col-PROJECT { background: #4c1d95; color: #ddd6fe; border: 1px solid #7c3aed; }
-    .col-PLAN_TASK { background: #78350f; color: #fde68a; border: 1px solid #d97706; }
+    .col-IDEA { background: rgba(74, 137, 200, 0.15); color: #7DB5EA; border: 1px solid rgba(74, 137, 200, 0.35); }
+    .col-STUDY_NOTE { background: rgba(125, 166, 132, 0.15); color: #9ECBA3; border: 1px solid rgba(125, 166, 132, 0.35); }
+    .col-PROJECT { background: rgba(160, 140, 200, 0.15); color: #C5B8EA; border: 1px solid rgba(160, 140, 200, 0.35); }
+    .col-PLAN_TASK { background: rgba(199, 157, 94, 0.15); color: #E5BE82; border: 1px solid rgba(199, 157, 94, 0.35); }
+
+    body.light-theme .col-IDEA, [data-theme="light"] .col-IDEA { background: #E8F0F8; color: #1D548F; border-color: #BED4EB; }
+    body.light-theme .col-STUDY_NOTE, [data-theme="light"] .col-STUDY_NOTE { background: #EAF4EE; color: #2D6A4F; border-color: #B8DFCA; }
+    body.light-theme .col-PROJECT, [data-theme="light"] .col-PROJECT { background: #F1EDF8; color: #5B3F8A; border-color: #D6CAE9; }
+    body.light-theme .col-PLAN_TASK, [data-theme="light"] .col-PLAN_TASK { background: #F8F3EA; color: #8A5B1D; border-color: #E8D6B8; }
 
     .idea-card {
       background: var(--bg-card);
@@ -258,17 +300,17 @@
     }
     .idea-title {
       font-size: 13px;
-      font-weight: 700;
-      color: #f3f4f6;
+      font-weight: 600;
+      color: var(--text-main);
       margin: 0;
     }
     .idea-original {
       font-size: 12px;
-      color: #e5e7eb;
-      background: #111827;
+      color: var(--text-main);
+      background: var(--bg-surface);
       padding: 6px 8px;
       border-radius: 4px;
-      border-left: 3px solid #38bdf8;
+      border-left: 3px solid var(--accent);
       margin: 5px 0;
       white-space: pre-wrap;
     }
@@ -288,46 +330,61 @@
       color: var(--text-muted);
     }
     .tag-pill {
-      background: #0f172a;
-      color: #7dd3fc;
-      border: 1px solid #0369a1;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
       padding: 1px 6px;
       border-radius: 999px;
       font-size: 10px;
       margin-right: 4px;
     }
     .subject-pill {
-      background: #064e3b;
-      color: #a7f3d0;
-      border: 1px solid #10b981;
+      background: rgba(125, 166, 132, 0.15);
+      color: #9ECBA3;
+      border: 1px solid rgba(125, 166, 132, 0.35);
       padding: 1px 6px;
       border-radius: 999px;
       font-size: 10px;
       margin-right: 4px;
+    }
+    body.light-theme .subject-pill, [data-theme="light"] .subject-pill {
+      background: #EAF4EE;
+      color: #2D6A4F;
+      border-color: #B8DFCA;
     }
     .due-pill {
-      background: #451a03;
-      color: #fcd34d;
-      border: 1px solid #f59e0b;
+      background: rgba(199, 157, 94, 0.15);
+      color: #E5BE82;
+      border: 1px solid rgba(199, 157, 94, 0.35);
       padding: 1px 6px;
       border-radius: 999px;
       font-size: 10px;
       margin-right: 4px;
     }
+    body.light-theme .due-pill, [data-theme="light"] .due-pill {
+      background: #F8F3EA;
+      color: #8A5B1D;
+      border-color: #E8D6B8;
+    }
     .link-pill {
-      background: #2e1065;
-      color: #c4b5fd;
-      border: 1px solid #8b5cf6;
+      background: rgba(160, 140, 200, 0.15);
+      color: #C5B8EA;
+      border: 1px solid rgba(160, 140, 200, 0.35);
       padding: 1px 6px;
       border-radius: 999px;
       font-size: 10px;
       margin-right: 4px;
+    }
+    body.light-theme .link-pill, [data-theme="light"] .link-pill {
+      background: #F1EDF8;
+      color: #5B3F8A;
+      border-color: #D6CAE9;
     }
 
     .detail-panel {
       display: none;
       background: var(--bg-surface);
-      border: 1px solid #38bdf8;
+      border: 1px solid var(--accent);
       border-radius: 6px;
       padding: 10px;
       margin-bottom: 10px;
@@ -475,7 +532,7 @@
       <!-- Markdown Import Drawer -->
       <div id="knowledge-import-md-panel" class="detail-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="font-size:11px; color:#38bdf8;">Import Markdown Note (Obsidian Frontmatter Supported)</strong>
+          <strong style="font-size:11px; color:var(--accent);">Import Markdown Note (Obsidian Frontmatter Supported)</strong>
           <button id="knowledge-import-md-close-btn" class="btn btn-sm">Close</button>
         </div>
         <div class="field-group">
@@ -487,7 +544,7 @@
       <!-- Item Edit, Links & Delete Confirmation Drawer -->
       <div id="idea-detail-panel" class="detail-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <strong style="font-size:12px; color:#38bdf8;">Inspect / Edit Knowledge Item</strong>
+          <strong style="font-size:12px; color:var(--accent);">Inspect / Edit Knowledge Item</strong>
           <button id="detail-close-btn" class="btn btn-sm">Close</button>
         </div>
         <input type="hidden" id="detail-idea-id" />
@@ -575,12 +632,12 @@
     <!-- Panel 2: V1-G-01 Study Guardian & iCloud Drive Assignment Inbox -->
     <div id="panel-study-guardian" class="tab-panel">
       <!-- Startup / Active Session Unfinished Assignment Briefing -->
-      <div id="study-guardian-briefing-box" class="idea-card" style="border-color:#0284c7; margin-bottom:8px;">
+      <div id="study-guardian-briefing-box" class="idea-card" style="border-color:var(--accent); margin-bottom:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="font-size:11px; color:#38bdf8;">STUDY GUARDIAN SESSION BRIEFING</strong>
+          <strong style="font-size:11px; color:var(--accent);">STUDY GUARDIAN SESSION BRIEFING</strong>
           <button id="guardian-eval-reminders-btn" class="btn btn-sm" type="button">Check Reminders</button>
         </div>
-        <div id="study-guardian-briefing-text" style="font-size:11px; color:#e5e7eb; margin-top:4px;">
+        <div id="study-guardian-briefing-text" style="font-size:11px; color:var(--text-main); margin-top:4px;">
           Loading unfinished semester assignments...
         </div>
       </div>
@@ -588,7 +645,7 @@
       <!-- iCloud Drive Inbox Controls -->
       <div class="idea-card" style="margin-bottom:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="font-size:11px; color:#38bdf8;">iCloud Drive Assignment Inbox (iPhone → Windows → GRAVITAS)</strong>
+          <strong style="font-size:11px; color:var(--accent);">iCloud Drive Assignment Inbox (iPhone → Windows → GRAVITAS)</strong>
           <div style="display:flex; gap:4px;">
             <button id="inbox-pick-folder-btn" class="btn btn-sm" type="button">Select Inbox Folder</button>
             <button id="inbox-import-now-btn" class="btn btn-primary btn-sm" type="button">Import now</button>
@@ -686,7 +743,7 @@
 
       <!-- Active Study Guardian Assignments -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 4px 0;">
-        <span style="font-size:11px; font-weight:700; color:#38bdf8;">Study Guardian Assignments</span>
+        <span style="font-size:11px; font-weight:700; color:var(--accent);">Study Guardian Assignments</span>
         <div class="quick-chips">
           <button class="chip active" data-guardian-filter="ALL" type="button">All</button>
           <button class="chip" data-guardian-filter="UNFINISHED" type="button">Unfinished</button>
@@ -696,7 +753,7 @@
       <div id="study-assignments-list"></div>
 
       <!-- 7 Real Semester Subjects Overview -->
-      <div style="font-size:11px; font-weight:700; color:#a7f3d0; margin:10px 0 4px 0;">
+      <div style="font-size:11px; font-weight:700; color:var(--success); margin:10px 0 4px 0;">
         7 Semester Subjects (Notes · Assignments · Answers · Resources · Revision Tasks)
       </div>
       <div id="semester-subjects-list"></div>
@@ -706,10 +763,10 @@
     <div id="panel-capabilities" class="tab-panel">
       <div class="idea-card" id="stt-status-card">
         <div class="idea-title" style="margin-bottom:4px;">Offline Speech-to-Text (Push-to-Talk)</div>
-        <div id="stt-status-summary" class="idea-summary" style="color:#e5e7eb;">Checking local STT setup...</div>
+        <div id="stt-status-summary" class="idea-summary" style="color:var(--text-muted);">Checking local STT setup...</div>
       </div>
 
-      <div style="font-size:12px; font-weight:700; color:#38bdf8; margin:10px 0 6px 0;">
+      <div style="font-size:12px; font-weight:700; color:var(--accent); margin:10px 0 6px 0;">
         Supervised Capability Registry
       </div>
       <div id="capabilities-list"></div>

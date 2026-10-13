@@ -5,53 +5,77 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self';">
   <title>GRAVITAS — Workspace</title>
   <style>
-    /* ─── Warm Graphite Design Tokens ────────────────────────────────────────── */
-    :root {
-      --bg-app: #171A1D;
-      --bg-surface: #22262A;
-      --bg-surface-hover: #2B3036;
-      --bg-surface-subtle: #1C2024;
-      --border: #34383D;
-      --border-subtle: #272B2F;
-      --border-focus: #A9B9AC;
-      --text-primary: #F0EEE8;
-      --text-secondary: #A4A6A5;
-      --text-tertiary: #6E7173;
-      --accent-sage: #A9B9AC;
-      --accent-sage-hover: #BAC9BD;
-      --accent-sage-subtle: rgba(169, 185, 172, 0.12);
-      --accent-sage-text: #171A1D;
-      --success: #8FA693;
-      --warning: #C29F6C;
-      --danger: #C77369;
-      --badge-ready: #8FA693;
-      --badge-waiting: #C29F6C;
-      --badge-offline: #C77369;
-      --font-stack: "Segoe UI Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+    /* ─── Editorial Typography: Geist Local Variable Fonts ────────────────── */
+    @font-face {
+      font-family: 'Geist';
+      src: url('assets/fonts/Geist-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
     }
 
+    @font-face {
+      font-family: 'Geist Mono';
+      src: url('assets/fonts/GeistMono-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* ─── Warm Graphite Design Tokens (Dark Theme) ────────────────────────── */
+    :root {
+      --bg-app: #121518;
+      --bg-surface: #1C2025;
+      --bg-surface-hover: #262B31;
+      --bg-surface-subtle: #16191D;
+      --border: #2E3339;
+      --border-subtle: #24282D;
+      --border-focus: #4A89C8;
+      --text-primary: #F0EEE8;
+      --text-secondary: #9FA4A8;
+      --text-tertiary: #686E74;
+      --accent-sage: #8EA89D;
+      --accent-sage-hover: #A1BAAF;
+      --accent-sage-subtle: rgba(142, 168, 157, 0.12);
+      --accent-sage-text: #121518;
+      --accent-blue: #4A89C8;
+      --accent-blue-hover: #5D9BD8;
+      --accent-blue-subtle: rgba(74, 137, 200, 0.14);
+      --success: #7DA684;
+      --warning: #C79D5E;
+      --danger: #C96B61;
+      --badge-ready: #7DA684;
+      --badge-waiting: #C79D5E;
+      --badge-offline: #C96B61;
+      --font-stack: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+    }
+
+    /* ─── Reimagined Warm Architectural Light Mode ─────────────────────────── */
     body.light-theme, [data-theme="light"] {
       --bg-app: #F5F4F0;
-      --bg-surface: #FFFFFF;
-      --bg-surface-hover: #ECEAE4;
-      --bg-surface-subtle: #FAFAF8;
-      --border: #D8D6CE;
-      --border-subtle: #E8E6DF;
-      --border-focus: #4E6352;
-      --text-primary: #1C1E21;
-      --text-secondary: #5C6065;
-      --text-tertiary: #8C9095;
-      --accent-sage: #4E6352;
-      --accent-sage-hover: #3E5142;
-      --accent-sage-subtle: rgba(78, 99, 82, 0.12);
+      --bg-surface: #FCFBF9;
+      --bg-surface-hover: #EFECE4;
+      --bg-surface-subtle: #F6F5F0;
+      --border: #E2DFD8;
+      --border-subtle: #EBE8E1;
+      --border-focus: #1D548F;
+      --text-primary: #1C2024;
+      --text-secondary: #60666D;
+      --text-tertiary: #8E959E;
+      --accent-sage: #3C6E52;
+      --accent-sage-hover: #2F5942;
+      --accent-sage-subtle: rgba(60, 110, 82, 0.12);
       --accent-sage-text: #FFFFFF;
-      --success: #3E7348;
-      --warning: #946927;
-      --danger: #A6473D;
-      --badge-ready: #3E7348;
-      --badge-waiting: #946927;
-      --badge-offline: #A6473D;
+      --accent-blue: #1D548F;
+      --accent-blue-hover: #164373;
+      --accent-blue-subtle: rgba(29, 84, 143, 0.10);
+      --success: #2D6A4F;
+      --warning: #9C6A1D;
+      --danger: #A83A32;
+      --badge-ready: #2D6A4F;
+      --badge-waiting: #9C6A1D;
+      --badge-offline: #A83A32;
     }
 
     /* ─── Global Reset & Typography ────────────────────────────────────────── */
@@ -274,91 +298,421 @@
 
     /* ─── Home Workspace Styles ────────────────────────────────────────────── */
     .workspace-wrapper {
-      max-width: 1120px;
+      max-width: 1160px;
       width: 100%;
       margin: 0 auto;
-      padding: 36px 32px;
+      padding: 36px 32px 48px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 32px;
     }
 
-    .workspace-greeting-section {
+    /* ─── Editorial Workspace Hero Header ───────────────────────────────────── */
+    .workspace-hero {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 16px;
-      position: relative;
-      border-radius: 12px;
-      padding: 24px 28px;
-      background-color: var(--bg-surface);
-      background-image: 
-        linear-gradient(90deg, #171A1D 0%, #171A1D 48%, rgba(23, 26, 29, 0.75) 72%, transparent 100%),
-        url('assets/signature-blue-bg.png');
-      background-repeat: no-repeat;
-      background-position: right 30%;
-      background-size: cover;
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    body.light-theme .workspace-greeting-section {
-      background-color: var(--bg-surface);
-      background-image: none;
-      border-color: var(--border);
+      padding-bottom: 4px;
     }
 
     .workspace-greeting-title {
-      font-size: 26px;
-      font-weight: 600;
+      font-size: 30px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .workspace-greeting-subtitle {
+      font-size: 14.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-stack);
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--badge-ready);
+    }
+
+    /* ─── Sleek Quick Capture Bar ───────────────────────────────────────────── */
+    .workspace-capture-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 10px 7px 16px;
+      box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.15s;
+    }
+    body.light-theme .workspace-capture-bar {
+      box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.05);
+    }
+    .workspace-capture-bar:focus-within {
+      border-color: var(--border-focus);
+    }
+
+    .capture-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .capture-icon {
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .workspace-capture-input {
+      flex: 1;
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      font-family: var(--font-stack);
+      font-size: 14.5px;
+      color: var(--text-primary);
+      padding: 4px 0;
+    }
+    .workspace-capture-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .capture-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .capture-btn {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: var(--font-stack);
+      padding: 6px 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .capture-btn:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    .capture-btn-accent {
+      background: var(--accent-blue-subtle);
+      color: var(--accent-blue);
+      border-color: rgba(74, 137, 200, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    body.light-theme .capture-btn-accent {
+      border-color: rgba(29, 84, 143, 0.3);
+    }
+    .capture-btn-accent kbd {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+    }
+
+    /* ─── Asymmetric Layout: Primary Stream (1.65fr) & Secondary Rail (1fr) ── */
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .workspace-layout {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+    }
+
+    .workspace-primary-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .workspace-stream-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-editorial-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .section-editorial-title {
+      font-size: 16px;
+      font-weight: 550;
       color: var(--text-primary);
       letter-spacing: -0.015em;
-      margin-bottom: 4px;
+      font-family: var(--font-stack);
     }
-    .workspace-greeting-subtitle {
+
+    .section-count-chip {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--bg-surface-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      font-family: var(--font-stack);
+    }
+
+    .section-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: var(--font-stack);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .section-action-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .task-stream-list, .notes-stream-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .empty-state-editorial {
+      padding: 24px 16px;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-tertiary);
+      background: var(--bg-surface-subtle);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+    }
+
+    /* ─── Secondary Rail Cards ─────────────────────────────────────────────── */
+    .workspace-secondary-rail {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .rail-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.15s;
+    }
+    .rail-card-subtle {
+      background: var(--bg-surface-subtle);
+    }
+
+    .rail-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .rail-card-title {
+      font-size: 14px;
+      font-weight: 550;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .rail-count-chip {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 9px;
+      background: var(--bg-surface-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .rail-card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .rail-code-path {
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      color: var(--text-tertiary);
+      background: var(--bg-surface-subtle);
+      padding: 5px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 14px;
+      word-break: break-all;
+    }
+
+    .rail-btn-action {
+      width: 100%;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-stack);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .rail-btn-action:hover {
+      background: var(--bg-surface-hover);
+    }
+
+    .rail-btn-outline {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-stack);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .rail-btn-outline:hover {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    .rail-subtle-title {
+      font-size: 13.5px;
+      font-weight: 550;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .rail-subjects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* ─── Editorial Sub-Views (Notes, Tasks, Subjects) ───────────────────────── */
+    .subview-editorial-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .subview-editorial-title {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.025em;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .subview-editorial-subtitle {
       font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.5;
     }
 
-    .workspace-prompt-bar {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
+    .subview-editorial-actions {
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .workspace-prompt-input {
-      flex: 1;
-      background: transparent !important;
-      border: none !important;
+    .subview-search-input {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
       color: var(--text-primary);
-      font-size: 14px;
-      padding: 4px 6px;
+      font-size: 13.5px;
+      font-family: var(--font-stack);
+      width: 240px;
+      transition: border-color 0.15s;
     }
-    .workspace-prompt-input:focus {
+    .subview-search-input:focus {
       outline: none;
+      border-color: var(--border-focus);
     }
 
-    .workspace-grid {
+    .btn-primary-action {
+      background: var(--text-primary);
+      color: var(--bg-app);
+      border: 1px solid transparent;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 550;
+      cursor: pointer;
+      font-family: var(--font-stack);
+      transition: opacity 0.15s;
+    }
+    .btn-primary-action:hover {
+      opacity: 0.9;
+    }
+
+    .subjects-stream-grid {
       display: grid;
-      grid-template-columns: 1.35fr 1fr;
-      gap: 24px;
-    }
-    @media (max-width: 900px) {
-      .workspace-grid { grid-template-columns: 1fr; }
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
     }
 
-    /* ─── Workspace Cards ──────────────────────────────────────────────────── */
+    /* ─── Generic Cards (for full sub-views) ─────────────────────────────────── */
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 22px 24px;
       margin-bottom: 20px;
     }
@@ -617,87 +971,192 @@
     dialog#onboarding-dialog {
       max-width: 680px;
       width: 92%;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid var(--border);
       background: var(--bg-surface);
       color: var(--text-primary);
       padding: 32px;
-      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
       margin: auto;
       position: relative;
       overflow: hidden;
-      transition: max-width 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+      transition: max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease;
     }
     dialog#onboarding-dialog.is-welcome {
-      max-width: 760px;
-      background-color: #040608;
-      background-image: url('assets/signature-blue-bg.png');
-      background-repeat: no-repeat;
-      background-position: right center;
-      background-size: cover;
-      border-color: rgba(90, 130, 175, 0.32);
-      box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      max-width: 960px;
+      padding: 40px 44px;
+      background-color: var(--bg-surface);
+      background-image: none;
+      border-color: var(--border);
+      box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
     }
     body.light-theme dialog#onboarding-dialog.is-welcome {
       background-color: var(--bg-surface);
       background-image: none;
       border-color: var(--border);
-      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
-    }
-    dialog#onboarding-dialog.is-welcome .ob-header-right {
-      background: rgba(10, 14, 18, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      padding: 3px 8px;
-      backdrop-filter: blur(8px);
-    }
-    body.light-theme dialog#onboarding-dialog.is-welcome .ob-header-right {
-      background: transparent;
-      border: none;
-      backdrop-filter: none;
-    }
-    dialog#onboarding-dialog.is-welcome .ob-feature-card {
-      background: rgba(18, 22, 27, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-    }
-    body.light-theme dialog#onboarding-dialog.is-welcome .ob-feature-card {
-      background: var(--bg-surface-subtle);
-      border-color: var(--border);
-      backdrop-filter: none;
-    }
-    dialog#onboarding-dialog.is-welcome .ob-actions-footer {
-      border-top-color: rgba(255, 255, 255, 0.08);
-    }
-    body.light-theme dialog#onboarding-dialog.is-welcome .ob-actions-footer {
-      border-top-color: var(--border-subtle);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04);
     }
     dialog::backdrop {
-      background: rgba(14, 16, 18, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(10, 13, 16, 0.8);
+      backdrop-filter: blur(8px);
+    }
+    body.light-theme dialog::backdrop {
+      background: rgba(40, 44, 50, 0.35);
+      backdrop-filter: blur(8px);
     }
 
-    /* Welcome Screen container & text in dark negative space */
-    .welcome-canvas {
+    /* ─── Composed Welcome Screen (2-Column) ──────────────────────────────── */
+    .welcome-composed {
+      display: grid;
+      grid-template-columns: 1.18fr 0.92fr;
+      gap: 36px;
+      align-items: center;
       position: relative;
-    }
-    .welcome-grid-bg {
-      display: none;
-    }
-    .welcome-content {
-      position: relative;
-      z-index: 1;
-      max-width: 440px;
     }
     @media (max-width: 820px) {
+      .welcome-composed {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .welcome-right-col {
+        display: none;
+      }
       dialog#onboarding-dialog.is-welcome {
         max-width: 94%;
-        background-position: right 20% center;
-        padding: 24px 22px;
+        padding: 28px 24px;
       }
-      .welcome-content {
-        max-width: 390px;
+    }
+
+    .welcome-left-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      z-index: 1;
+    }
+
+    .welcome-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .welcome-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    .welcome-hero-title {
+      font-family: var(--font-stack);
+      font-size: 34px;
+      font-weight: 550;
+      line-height: 1.18;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+    @media (min-width: 1100px) {
+      .welcome-hero-title {
+        font-size: 38px;
       }
+    }
+
+    .welcome-hero-desc {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      max-width: 440px;
+    }
+
+    .welcome-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-primary-hero {
+      background: var(--text-primary);
+      color: var(--bg-app);
+      font-weight: 550;
+      font-size: 14px;
+      padding: 10px 22px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      font-family: var(--font-stack);
+    }
+    .btn-primary-hero:hover {
+      opacity: 0.92;
+    }
+
+    .btn-secondary-hero {
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 13.5px;
+      padding: 10px 18px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: var(--font-stack);
+    }
+    .btn-secondary-hero:hover {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    .welcome-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    .welcome-meta-sep {
+      opacity: 0.4;
+    }
+
+    .welcome-right-col {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .welcome-art-frame {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #040608;
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.7), 0 16px 36px -12px rgba(0, 0, 0, 0.5);
+    }
+    body.light-theme .welcome-art-frame {
+      border: 1px solid var(--border);
+      background: #0A1017;
+      box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.18);
+    }
+
+    #welcome-art-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
     }
 
     .ob-header {
@@ -863,94 +1322,113 @@
     <section id="surface-workspace" class="surface active" role="tabpanel" aria-labelledby="tab-workspace">
       <div class="workspace-wrapper">
 
-        <!-- Greeting Header -->
-        <div class="workspace-greeting-section">
+        <!-- Editorial Greeting Header -->
+        <div class="workspace-hero">
           <div>
-            <h2 id="workspace-greeting" class="workspace-greeting-title">Good afternoon</h2>
-            <p class="workspace-subtitle">Here is what is happening across your workspace today.</p>
+            <h1 id="workspace-greeting" class="workspace-greeting-title">Good afternoon</h1>
+            <p class="workspace-greeting-subtitle">Here is your daily overview — 7 semester subjects active, local vault synchronized.</p>
+          </div>
+          <div>
+            <span class="status-pill">
+              <span class="status-dot"></span>
+              Local Engine Ready
+            </span>
           </div>
         </div>
 
-        <!-- Quick Capture / Assistant Prompt Bar -->
-        <div class="workspace-prompt-bar">
-          <input type="text" id="workspace-quick-input" class="workspace-prompt-input" placeholder="Capture a note, add a task, or ask a question..." aria-label="Quick capture" />
-          <button id="workspace-btn-quick-note" class="btn btn-secondary">+ Note</button>
-          <button id="workspace-btn-quick-task" class="btn btn-secondary">+ Task</button>
-          <button id="workspace-btn-companion" class="btn">Ask Alt+Space</button>
+        <!-- Sleek Quick Capture Bar -->
+        <div class="workspace-capture-bar">
+          <div class="capture-input-wrap">
+            <svg class="capture-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <input type="text" id="workspace-quick-input" class="workspace-capture-input" placeholder="Capture a note, add a task, or press Alt+Space..." aria-label="Quick capture" />
+          </div>
+          <div class="capture-actions">
+            <button id="workspace-btn-quick-note" class="capture-btn">+ Note</button>
+            <button id="workspace-btn-quick-task" class="capture-btn">+ Task</button>
+            <button id="workspace-btn-companion" class="capture-btn capture-btn-accent">
+              <span>Companion</span>
+              <kbd>Alt+Space</kbd>
+            </button>
+          </div>
         </div>
 
-        <!-- Core Workspace Grid -->
-        <div class="workspace-grid">
-          <!-- Left Column: Tasks and Notes -->
-          <div>
-            <!-- Upcoming Tasks Card -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  Upcoming Tasks
-                  <span id="workspace-tasks-count" class="card-count-badge">0</span>
-                </h3>
-                <button id="workspace-btn-add-task-modal" class="btn btn-ghost" style="font-size: 12px;">+ Add Task</button>
-              </div>
-              <div id="workspace-tasks-list">
-                <div class="empty-state">No pending tasks. You are all caught up!</div>
-              </div>
-            </div>
+        <!-- Asymmetric Content Architecture -->
+        <div class="workspace-layout">
+          <!-- Primary Stream: Priorities, Tasks & Thoughts (1.65fr) -->
+          <div class="workspace-primary-stream">
 
-            <!-- Recent Notes & Ideas Card -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  Recent Notes & Ideas
-                  <span id="workspace-notes-count" class="card-count-badge">0</span>
-                </h3>
-                <button id="workspace-btn-add-note-modal" class="btn btn-ghost" style="font-size: 12px;">+ New Note</button>
+            <!-- Priorities & Tasks Section -->
+            <section class="workspace-stream-section">
+              <div class="section-editorial-header">
+                <div class="section-title-wrap">
+                  <h2 class="section-editorial-title">Upcoming Tasks & Revisions</h2>
+                  <span id="workspace-tasks-count" class="section-count-chip">0</span>
+                </div>
+                <button id="workspace-btn-add-task-modal" class="section-action-btn">+ Add Task</button>
               </div>
-              <div id="workspace-notes-list">
-                <div class="empty-state">No recent notes. Use the bar above to write one.</div>
+              <div id="workspace-tasks-list" class="task-stream-list">
+                <div class="empty-state-editorial">No pending tasks. You are all caught up!</div>
               </div>
-            </div>
+            </section>
+
+            <!-- Recent Thoughts & Notes Section -->
+            <section class="workspace-stream-section">
+              <div class="section-editorial-header">
+                <div class="section-title-wrap">
+                  <h2 class="section-editorial-title">Recent Notes & Ideas</h2>
+                  <span id="workspace-notes-count" class="section-count-chip">0</span>
+                </div>
+                <button id="workspace-btn-add-note-modal" class="section-action-btn">+ New Note</button>
+              </div>
+              <div id="workspace-notes-list" class="notes-stream-list">
+                <div class="empty-state-editorial">No recent notes. Use the capture bar above to write one.</div>
+              </div>
+            </section>
+
           </div>
 
-          <!-- Right Column: Subjects and Sync -->
-          <div>
-            <!-- Semester Subjects & Projects Card -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  Subjects & Collections
-                  <span id="workspace-subjects-count" class="card-count-badge">0</span>
-                </h3>
+          <!-- Secondary Rail: Curricula, Sync & Companion (1fr) -->
+          <aside class="workspace-secondary-rail">
+
+            <!-- Subjects & Collections -->
+            <div class="rail-card">
+              <div class="rail-card-header">
+                <h3 class="rail-card-title">Enrolled Subjects</h3>
+                <span id="workspace-subjects-count" class="rail-count-chip">0</span>
               </div>
-              <div id="workspace-subjects-list" class="subjects-list">
-                <div class="empty-state">Loading enrolled subjects...</div>
+              <div id="workspace-subjects-list" class="rail-subjects-list">
+                <div class="empty-state-editorial">Loading subjects...</div>
               </div>
             </div>
 
-            <!-- Inbox & Phone Sync Status Card -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Phone & Inbox Sync</h3>
+            <!-- Phone & Inbox Sync -->
+            <div class="rail-card">
+              <div class="rail-card-header">
+                <h3 class="rail-card-title">Phone Inbox</h3>
                 <span id="workspace-inbox-status-pill" class="badge badge-ready">Connected</span>
               </div>
-              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;" id="workspace-inbox-desc">
-                Watching folder for assignment PDFs and lecture notes from your phone.
+              <p class="rail-card-desc" id="workspace-inbox-desc">
+                Watching folder for assignment PDFs and lecture notes from your mobile devices.
               </p>
-              <div style="font-size: 11px; font-family: var(--font-mono); color: var(--text-tertiary); margin-bottom: 14px; word-break: break-all;" id="workspace-inbox-path">
+              <div class="rail-code-path" id="workspace-inbox-path">
                 iCloud Drive/GRAVITAS/Inbox
               </div>
-              <button id="workspace-btn-check-inbox" class="btn btn-secondary" style="width: 100%; font-size: 12px;">Check for incoming files</button>
+              <button id="workspace-btn-check-inbox" class="rail-btn-action">Check for incoming files</button>
             </div>
 
-            <!-- Companion Guide Card -->
-            <div class="card" style="background: var(--bg-surface-subtle);">
-              <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">Desktop Companion</h4>
-              <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
-                Press <kbd>Alt+Space</kbd> anywhere on Windows to summon your assistant. Use voice push-to-talk or natural text commands offline.
+            <!-- Desktop Companion -->
+            <div class="rail-card rail-card-subtle">
+              <h4 class="rail-subtle-title">Floating Companion</h4>
+              <p class="rail-card-desc">
+                Summon your companion anywhere on Windows with <kbd>Alt+Space</kbd>. Dictate notes or issue system commands offline.
               </p>
-              <button id="workspace-btn-summon-assistant" class="btn btn-secondary" style="font-size: 12px;">Open Companion Window</button>
+              <button id="workspace-btn-summon-assistant" class="rail-btn-outline">Open Companion Window</button>
             </div>
-          </div>
+
+          </aside>
         </div>
 
       </div>
@@ -959,42 +1437,49 @@
     <!-- SURFACE 0B: FULL NOTES VIEW -->
     <section id="surface-notes" class="surface" role="tabpanel" aria-labelledby="tab-notes">
       <div class="workspace-wrapper">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Notes & Knowledge Hub</h2>
-            <div style="display: flex; gap: 8px;">
-              <input type="text" id="notes-search-input" placeholder="Search notes..." style="width: 220px;" />
-              <button id="notes-btn-create" class="btn">+ New Note</button>
-            </div>
+        <header class="subview-editorial-header">
+          <div>
+            <h1 class="subview-editorial-title">Notes & Knowledge Hub</h1>
+            <p class="subview-editorial-subtitle">Thoughts, capture logs, and indexed knowledge across all collections.</p>
           </div>
-          <div id="notes-full-list"></div>
-        </div>
+          <div class="subview-editorial-actions">
+            <input type="text" id="notes-search-input" class="subview-search-input" placeholder="Search notes..." />
+            <button id="notes-btn-create" class="btn-primary-action">+ New Note</button>
+          </div>
+        </header>
+        <div id="notes-full-list"></div>
       </div>
     </section>
 
     <!-- SURFACE 0C: FULL TASKS VIEW -->
     <section id="surface-tasks" class="surface" role="tabpanel" aria-labelledby="tab-tasks">
       <div class="workspace-wrapper">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Tasks & Revisions</h2>
-            <button id="tasks-btn-create" class="btn">+ Add Task</button>
+        <header class="subview-editorial-header">
+          <div>
+            <h1 class="subview-editorial-title">Tasks & Revisions</h1>
+            <p class="subview-editorial-subtitle">Organized checklist, study assignments, and planned milestones.</p>
           </div>
-          <div id="tasks-full-list"></div>
-        </div>
+          <div class="subview-editorial-actions">
+            <button id="tasks-btn-create" class="btn-primary-action">+ Add Task</button>
+          </div>
+        </header>
+        <div id="tasks-full-list"></div>
       </div>
     </section>
 
     <!-- SURFACE 0D: FULL SUBJECTS VIEW -->
     <section id="surface-subjects" class="surface" role="tabpanel" aria-labelledby="tab-subjects">
       <div class="workspace-wrapper">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Enrolled Semester Subjects</h2>
+        <header class="subview-editorial-header">
+          <div>
+            <h1 class="subview-editorial-title">Enrolled Semester Subjects</h1>
+            <p class="subview-editorial-subtitle">Academic units, course materials, and connected assignments.</p>
+          </div>
+          <div class="subview-editorial-actions">
             <button id="subjects-btn-refresh" class="btn btn-secondary">Refresh</button>
           </div>
-          <div id="subjects-full-list" class="subjects-list"></div>
-        </div>
+        </header>
+        <div id="subjects-full-list" class="subjects-stream-grid"></div>
       </div>
     </section>
 
@@ -1234,33 +1719,32 @@
       <div class="ob-dot" data-step="5"></div>
     </div>
 
-    <!-- SCREEN 1: Welcome (Signature Blue Background) -->
-    <div id="onboarding-screen-1" class="onboarding-screen welcome-canvas" data-screen="1">
-      <div class="welcome-grid-bg"></div>
-      <div class="welcome-content">
-        <h2 style="font-size: 24px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; letter-spacing: -0.015em;">Welcome to your workspace</h2>
-        <p style="font-size: 14.5px; line-height: 1.6; color: var(--text-secondary); max-width: 440px; margin-bottom: 24px;">
-          GRAVITAS is a calm, local-first intelligence environment for your ideas, semester studies, tasks, and daily focus. Everything stays securely on your machine.
-        </p>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; max-width: 440px;">
-          <div class="ob-feature-card">
-            <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Local by design</h4>
-            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
-              Notes, SQLite databases, and task state live entirely on your computer without accounts or subscriptions.
-            </p>
-          </div>
-          <div class="ob-feature-card">
-            <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Quick summon</h4>
-            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 0;">
-              Press <kbd>Alt+Space</kbd> anytime to capture thoughts, schedule tasks, or ask a question from any application.
-            </p>
-          </div>
+    <!-- SCREEN 1: Welcome (Composed 2-Column with Organic Shader Art) -->
+    <div id="onboarding-screen-1" class="onboarding-screen welcome-composed" data-screen="1">
+      <div class="welcome-left-col">
+        <div class="welcome-brand-badge">
+          <span class="welcome-badge-dot"></span>
+          <span class="welcome-badge-text">GRAVITAS DESKTOP</span>
         </div>
-
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <button id="ob-btn-get-started" class="btn" style="padding: 10px 24px; font-size: 14px;">Get started</button>
-          <button id="ob-btn-explore-demo" class="btn btn-ghost" style="font-size: 13px;">Explore sample workspace</button>
+        <h1 class="welcome-hero-title">A calm space for your thoughts, studies & daily focus.</h1>
+        <p class="welcome-hero-desc">
+          Local-first intelligence designed to keep you in flow. Notes, semester curriculums, and tasks stay entirely on your computer — private, offline, and subscription-free.
+        </p>
+        <div class="welcome-actions-row">
+          <button id="ob-btn-get-started" class="btn-primary-hero">Get started</button>
+          <button id="ob-btn-explore-demo" class="btn-secondary-hero">Explore sample</button>
+        </div>
+        <div class="welcome-meta-row">
+          <span>Private SQLite storage</span>
+          <span class="welcome-meta-sep">•</span>
+          <span>Offline transcription</span>
+          <span class="welcome-meta-sep">•</span>
+          <span>Zero telemetry</span>
+        </div>
+      </div>
+      <div class="welcome-right-col">
+        <div class="welcome-art-frame">
+          <canvas id="welcome-art-canvas" width="480" height="380"></canvas>
         </div>
       </div>
     </div>
