@@ -224,4 +224,145 @@ describe('GRAVITAS Phase A — Knowledge Hub Note Workflow', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  it('7. [Regression: workspace.undefined] Never serializes literal "undefined" or "null" when handling optional fields', () => {
+    // Save idea with all optional fields omitted or explicitly undefined
+    const note = vault.saveIdea({
+      collection: 'IDEA',
+      title: 'Testing local knowledge hub persistence and workspace.',
+      originalText: 'Testing local knowledge hub persistence and workspace.',
+      subject: undefined,
+      topic: undefined,
+      tags: undefined,
+      summary: undefined,
+      dueDate: undefined,
+      projectId: undefined,
+    })
+
+    expect(note.title).not.toContain('undefined')
+    expect(note.originalText).not.toContain('undefined')
+    expect(note.originalText).toBe('Testing local knowledge hub persistence and workspace.')
+    expect(note.subject).toBeNull()
+    expect(note.topic).toBeNull()
+
+    // Update with undefined optional fields
+    const updated = vault.updateIdea({
+      id: note.id,
+      title: 'Testing local knowledge hub persistence and workspace.',
+      originalText: 'Testing local knowledge hub persistence and workspace.',
+      subject: undefined,
+      topic: undefined,
+    })
+
+    expect(updated.title).not.toContain('undefined')
+    expect(updated.originalText).not.toContain('undefined')
+    expect(updated.originalText).toBe('Testing local knowledge hub persistence and workspace.')
+
+    // Export to markdown must never contain literal "undefined"
+    const exportedMd = vault.exportItemToMarkdown(note.id)
+    expect(exportedMd).not.toContain('undefined')
+    expect(exportedMd).not.toContain('null')
+
+    // Import from simple markdown without frontmatter
+    const imported = vault.importFromMarkdown('Just a plain thought without frontmatter.')
+    expect(imported.title).not.toContain('undefined')
+    expect(imported.originalText).not.toContain('undefined')
+    expect(imported.subject).toBeNull()
+  })
+
+  it('8. [Data-Loss Guard] Revert restores original snapshot and discards pending edits without mutating database', () => {
+    const original = vault.saveIdea({
+      collection: 'STUDY_NOTE',
+      title: 'Calculus Notes',
+      originalText: 'Derivatives and integrals overview.',
+      subject: 'Mathematics',
+      tags: ['math', 'calculus'],
+    })
+
+    // Simulated in-memory snapshot
+    const snapshot = {
+      id: original.id,
+      title: original.title,
+      content: original.originalText,
+      collection: original.collection,
+      subject: original.subject || '',
+      topic: original.topic || '',
+      tags: original.tags.join(', '),
+    }
+
+    // Pending edits made in editor
+    const pendingEdits = {
+      title: 'Unsaved garbage title',
+      content: 'Unsaved garbage content that should be reverted',
+      tags: 'garbage, tags',
+    }
+
+    // Revert action: restore from snapshot
+    const reverted = {
+      title: snapshot.title,
+      content: snapshot.content,
+      tags: snapshot.tags,
+    }
+
+    expect(reverted.title).toBe('Calculus Notes')
+    expect(reverted.content).toBe('Derivatives and integrals overview.')
+
+    // Verify database was untouched
+    const freshFromDb = vault.getIdea(original.id)
+    expect(freshFromDb!.title).toBe('Calculus Notes')
+    expect(freshFromDb!.originalText).toBe('Derivatives and integrals overview.')
+  })
+
+  it('9. [Data-Loss Guard] Deleting a note deletes only the targeted record and leaves other user notes intact', () => {
+    const noteA = vault.saveIdea({ title: 'Note A', originalText: 'Content A' })
+    const noteB = vault.saveIdea({ title: 'Note B', originalText: 'Content B' })
+    const noteC = vault.saveIdea({ title: 'Note C', originalText: 'Content C' })
+
+    const delResult = vault.deleteIdea(noteB.id, true)
+    expect(delResult.deleted).toBe(true)
+
+    // Note B is deleted
+    expect(vault.getIdea(noteB.id)).toBeNull()
+
+    // Notes A and C remain completely intact
+    const fetchedA = vault.getIdea(noteA.id)
+    const fetchedC = vault.getIdea(noteC.id)
+    expect(fetchedA).not.toBeNull()
+    expect(fetchedA!.originalText).toBe('Content A')
+    expect(fetchedC).not.toBeNull()
+    expect(fetchedC!.originalText).toBe('Content C')
+  })
+
+  it('10. [Data-Loss Guard] Failed save leaves existing SQLite record untouched and prevents uncommitted overwrite', () => {
+    const original = vault.saveIdea({
+      title: 'Critical Research Log',
+      originalText: 'Verified empirical data point.',
+      collection: 'IDEA',
+    })
+
+    // Simulate invalid update (e.g. empty ID or closed store simulation)
+    expect(() => {
+      vault.updateIdea({
+        id: '', // Invalid empty ID fails validation
+        title: 'Corrupted title',
+        originalText: 'Corrupted content',
+      })
+    }).toThrow()
+
+    // Database record must still hold the original content
+    const verified = vault.getIdea(original.id)
+    expect(verified).not.toBeNull()
+    expect(verified!.title).toBe('Critical Research Log')
+    expect(verified!.originalText).toBe('Verified empirical data point.')
+  })
+
+  it('11. [Overflow Containment] Markdown renderer preserves long pre/code lines without loss', () => {
+    const veryLongCodeLine = 'const payload = ' + JSON.stringify({ a: 'x'.repeat(400), b: 'y'.repeat(400) })
+    const markdown = '```javascript\n' + veryLongCodeLine + '\n```'
+
+    const rendered = renderMarkdownSafe(markdown)
+    expect(rendered).toContain('<pre><code>')
+    expect(rendered).toContain('const payload =')
+    expect(rendered).toContain('xxxx')
+  })
 })

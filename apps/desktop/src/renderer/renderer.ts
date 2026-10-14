@@ -345,6 +345,8 @@ export function setMarkdownViewMode(mode: 'WRITE' | 'PREVIEW' | 'SPLIT'): void {
     if (textarea) {
       textarea.style.display = 'block'
       textarea.style.width = '100%'
+      textarea.style.flex = '1 1 100%'
+      textarea.style.minWidth = '0'
       textarea.style.borderRight = 'none'
     }
     if (preview) preview.style.display = 'none'
@@ -353,15 +355,21 @@ export function setMarkdownViewMode(mode: 'WRITE' | 'PREVIEW' | 'SPLIT'): void {
     if (preview) {
       preview.style.display = 'block'
       preview.style.width = '100%'
+      preview.style.flex = '1 1 100%'
+      preview.style.minWidth = '0'
       updateMarkdownPreview()
     }
   } else if (mode === 'SPLIT') {
     if (textarea && preview) {
       textarea.style.display = 'block'
       textarea.style.width = '50%'
+      textarea.style.flex = '1 1 50%'
+      textarea.style.minWidth = '0'
       textarea.style.borderRight = '1px solid var(--border)'
       preview.style.display = 'block'
       preview.style.width = '50%'
+      preview.style.flex = '1 1 50%'
+      preview.style.minWidth = '0'
       updateMarkdownPreview()
     }
   }
@@ -526,6 +534,12 @@ export async function saveCurrentNote(bridge: GravitasDesktopBridge): Promise<bo
     return true
   } catch (err) {
     const msg = (err as Error).message
+    setNotesDirty(true)
+    const dirtyIndicator = document.getElementById('notes-dirty-indicator')
+    if (dirtyIndicator) {
+      dirtyIndicator.textContent = '● Save failed'
+      dirtyIndicator.className = 'notes-dirty-indicator dirty'
+    }
     if (bannerEl) {
       bannerEl.textContent = `Save error: ${msg}`
       bannerEl.style.color = 'var(--badge-offline)'
