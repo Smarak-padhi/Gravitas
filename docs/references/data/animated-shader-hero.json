@@ -1,0 +1,52 @@
+{
+  "id": "animated-shader-hero",
+  "name": "Animated Shader Hero",
+  "url": "https://21st.dev/@ravikatiyar162/components/animated-shader-hero",
+  "category": "hero-background",
+  "timestamp": "2026-10-14T04:38:41.705Z",
+  "status": 200,
+  "technique": "WebGL Shader / 3D Canvas",
+  "iframeUrl": "https://cdn.21st.dev/ravikatiyar162/animated-shader-hero/default/bundle.1755360493435.html?theme=light",
+  "iframeHtmlLength": 250179,
+  "canvasCount": 1,
+  "hasWebGL": true,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.145 0 0)",
+    "oklch(1 0 0)",
+    "rgb(255, 255, 255)",
+    "oklab(0.705 0.143615 0.157301 / 0.1)",
+    "oklch(0.954 0.038 75.164)",
+    "rgba(0, 0, 0, 0)",
+    "oklab(0.954 0.00973002 0.0367332 / 0.9)",
+    "oklch(0.967 0.003 264.542)",
+    "oklch(0.278 0.033 256.848)"
+  ],
+  "transitions": [
+    "all",
+    "0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [
+    "animate-fade-in-down",
+    "animate-fade-in-up",
+    "hover:from-orange-600",
+    "hover:to-yellow-600",
+    "transition-all",
+    "duration-300",
+    "hover:scale-105",
+    "hover:shadow-xl",
+    "hover:shadow-orange-500/25",
+    "hover:bg-orange-500/20",
+    "hover:border-orange-300/50"
+  ],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-full\"><div class=\"relative w-full h-screen overflow-hidden bg-black \"><style>\n        @keyframes fade-in-down {\n          from {\n            opacity: 0;\n            transform: translateY(-20px);\n          }\n          to {\n            opacity: 1;\n            transform: translateY(0);\n          }\n        }\n        \n        @keyframes fade-in-up {\n          from {\n            opacity: 0;\n            transform: translateY(30px);\n          }\n          to {\n            opacity: 1;\n            transform: translateY(0);\n          }\n        }\n        \n        .animate-fade-in-down {\n          animation: fade-in-down 0.8s ease-out forwards;\n        }\n        \n        .animate-fade-in-up {\n          animation: fade-in-up 0.8s ease-out forwards;\n          opacity: 0;\n        }\n        \n        .animation-delay-200 {\n          animation-delay: 0.2s;\n        }\n        \n        .animation-delay-400 {\n          animation-delay: 0.4s;\n        }\n        \n        .animation-delay-600 {\n          animation-delay: 0.6s;\n        }\n        \n        .animation-delay-800 {\n          animation-delay: 0.8s;\n        }\n        \n        @keyframes gradient-shift {\n          0% { background-position: 0% 50%; }\n          50% { background-position: 100% 50%; }\n          100% { background-position: 0% 50%; }\n        }\n        \n        .animat",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\animated-shader-hero.webm",
+  "notes": ""
+}

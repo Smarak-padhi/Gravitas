@@ -1,0 +1,50 @@
+{
+  "id": "hero-dithering-card",
+  "name": "Hero Dithering Card",
+  "url": "https://21st.dev/@moazamtrade/components/hero-dithering-card",
+  "category": "hero-background",
+  "timestamp": "2026-10-14T04:38:21.802Z",
+  "status": 200,
+  "technique": "WebGL Shader / 3D Canvas",
+  "iframeUrl": "https://cdn.21st.dev/moazamtrade/hero-dithering-card/default/bundle.1769113686731.html?theme=light",
+  "iframeHtmlLength": 478711,
+  "canvasCount": 1,
+  "hasWebGL": true,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "ui-serif, Georgia, Cambria, \"Times New Roman\", Times, serif"
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.145 0 0)",
+    "oklch(1 0 0)",
+    "oklch(0.205 0 0)",
+    "oklab(0.205 0 0 / 0.05)",
+    "oklab(0.145 0 0 / 0.8)",
+    "oklch(0.556 0 0)",
+    "oklch(0.985 0 0)"
+  ],
+  "transitions": [
+    "all",
+    "0.5s",
+    "0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), translate 0.3s cubic-bezier(0.4, 0, 0.2, 1), scale 0.3s cubic-bezier(0.4, 0, 0.2, 1), rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [
+    "duration-500",
+    "animate-ping",
+    "transition-all",
+    "duration-300",
+    "hover:bg-primary/90",
+    "hover:scale-105",
+    "active:scale-95",
+    "hover:ring-4",
+    "hover:ring-primary/20"
+  ],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><section class=\"py-12 w-full flex justify-center items-center px-4 md:px-6\"><div class=\"w-full max-w-7xl relative\"><div class=\"relative overflow-hidden rounded-[48px] border border-border bg-card shadow-sm min-h-[600px] md:min-h-[600px] flex flex-col items-center justify-center duration-500\"><div class=\"absolute inset-0 z-0 pointer-events-none opacity-40 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen\"><div class=\"size-full\" data-paper-shader=\"\"><canvas width=\"732\" height=\"598\"></canvas></div></div><div class=\"relative z-10 px-6 max-w-4xl mx-auto text-center flex flex-col items-center\"><div class=\"mb-8 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm\"><span class=\"relative flex h-2 w-2\"><span class=\"animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75\"></span><span class=\"relative inline-flex rounded-full h-2 w-2 bg-primary\"></span></span>AI-Powered Writing</div><h2 class=\"font-serif text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-foreground mb-8 leading-[1.05]\">Your words, <br><span class=\"text-foreground/80\">delivered perfectly.</span></h2><p class=\"text-muted-foreground text-lg md:text-xl max-w-2xl mb-12 leading-relaxed\">Join 2,847 founders using the only AI that understa",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\hero-dithering-card.webm",
+  "notes": ""
+}

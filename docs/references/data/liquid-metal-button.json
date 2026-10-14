@@ -1,0 +1,36 @@
+{
+  "id": "liquid-metal-button",
+  "name": "Liquid Metal Button",
+  "url": "https://docs.21st.dev/community/components?q=buttons&preview=%2F%40johuniq%2Fcomponents%2Fliquid-metal-button",
+  "category": "button",
+  "timestamp": "2026-10-14T04:40:19.150Z",
+  "status": 200,
+  "technique": "WebGL Shader / 3D Canvas",
+  "iframeUrl": "https://cdn.21st.dev/larsen66/liquid-metal-button/demos/default/bundle.1773244704587.html?theme=light&pv=1",
+  "iframeHtmlLength": 269014,
+  "canvasCount": 2,
+  "hasWebGL": true,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.145 0 0)",
+    "oklch(1 0 0)",
+    "rgb(102, 102, 102)"
+  ],
+  "transitions": [
+    "all",
+    "0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s",
+    "0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s, gap 0.4s",
+    "0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    "0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s, box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"flex flex-col items-center justify-center gap-8 p-8\"><div class=\"flex items-center gap-8\"><div class=\"relative inline-block\"><div style=\"perspective: 1000px; perspective-origin: 50% 50%;\"><div style=\"position: relative; width: 142px; height: 46px; transform-style: preserve-3d; transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s; transform: none;\"><div style=\"position: absolute; top: 0px; left: 0px; width: 142px; height: 46px; display: flex; align-items: center; justify-content: center; gap: 6px; transform-style: preserve-3d; transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s, gap 0.4s; transform: translateZ(20px); z-index: 30; pointer-events: none;\"><span style=\"font-size: 14px; color: rgb(102, 102, 102); font-weight: 400; text-shadow: rgba(0, 0, 0, 0.5) 0px 1px 2px; transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(1); white-space: nowrap;\">Get Started</span></div><div style=\"position: absolute; top: 0px; left: 0px; width: 142px; height: 46px; transform-style: preserve-3d; transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s, height 0.4s; transform: translateZ(10px) translateY(0px) scale(1); z-index: 20;\"><div style=\"width: 138px; height: 42px; margin: 2px; border-radius: 100px; background: linear-gradient(rgb(32, 32, 32) 0%, rgb(0, ",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\liquid-metal-button.webm",
+  "notes": ""
+}

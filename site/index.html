@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GRAVITAS — Local-First Study Guardian &amp; Academic Operating System</title>
-  <meta name="description" content="A distraction-free study guardian and multi-agent desktop environment for STEM students and researchers. 100% local SQLite, verbatim audio truth, zero cloud telemetry.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%230D1013'/><path d='M4 6h16M4 12h10M4 18h16' stroke='%234A89C8' stroke-width='2'/></svg>">
+  <title>GRAVITAS — Sovereign Academic Command Center &amp; Study Guardian</title>
+  <meta name="description" content="A motion-rich, local-first academic operating system for engineering minds. Verbatim audio capture, 3D folder intake, and verified filesystem mutation barriers. 100% offline, zero cloud telemetry.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%2308090B'/><path d='M4 6h16M4 12h11M4 18h16' stroke='%2338BDF8' stroke-width='2'/></svg>">
   <style>
-    /* ─── Bundled Variable Fonts (Zero External CDN Dependency) ─────────── */
+    /* ─── Self-Hosted Variable Typography (Zero CDN) ─────────────────────── */
     @font-face {
       font-family: 'Geist';
       src: url('assets/fonts/Geist-Variable.woff2') format('woff2');
@@ -15,7 +15,6 @@
       font-style: normal;
       font-display: swap;
     }
-
     @font-face {
       font-family: 'Geist Mono';
       src: url('assets/fonts/GeistMono-Variable.woff2') format('woff2');
@@ -24,59 +23,56 @@
       font-display: swap;
     }
 
-    /* ─── Architectural Basalt Design Tokens ────────────────────────────── */
+    /* ─── Design Tokens: Deep Obsidian & Titanium Craft ─────────────────── */
     :root {
-      --bg-app: #0D1013;
-      --bg-surface: #14171C;
-      --bg-surface-elevated: #1B1F26;
-      --bg-surface-subtle: #101317;
-      --border: #232832;
-      --border-subtle: #1A1E26;
-      --border-focus: #4A89C8;
+      --bg-canvas: #08090B;
+      --bg-surface: #0F1216;
+      --bg-surface-elevated: #161A21;
+      --bg-surface-subtle: #0B0E11;
+      --border: #1E232B;
+      --border-subtle: #161A20;
+      --border-focus: #38BDF8;
       --text-primary: #F0EEE8;
       --text-secondary: #9FA4A8;
-      --text-tertiary: #686E75;
-      --accent-blue: #4A89C8;
-      --accent-blue-hover: #5B9AE0;
-      --accent-blue-subtle: rgba(74, 137, 200, 0.12);
-      --accent-blue-border: rgba(74, 137, 200, 0.35);
-      --cta-bg: #F0EEE8;
-      --cta-text: #0D1013;
-      --cta-hover-bg: #FFFFFF;
-      --state-ready: #52B788;
-      --state-warning: #D4A373;
-      --state-danger: #D90429;
-      --font-stack: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+      --text-tertiary: #656B73;
+      --accent-blue: #38BDF8;
+      --accent-blue-hover: #60A5FA;
+      --accent-blue-subtle: rgba(56, 189, 248, 0.1);
+      --accent-blue-border: rgba(56, 189, 248, 0.28);
+      --accent-emerald: #10B981;
+      --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
+      --cta-primary-bg: #FFFFFF;
+      --cta-primary-text: #08090B;
       --radius-sm: 2px;
       --radius-none: 0px;
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+      --transition-spring: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* ─── Warm Tactile Parchment Architectural Light Mode ────────────────── */
+    /* ─── Warm Tactile Parchment Light Theme ────────────────────────────── */
     body.light-theme, [data-theme="light"] {
-      --bg-app: #F5F4F0;
-      --bg-surface: #FCFAF6;
-      --bg-surface-elevated: #EFECE5;
-      --bg-surface-subtle: #F7F5EF;
-      --border: #DCD8CE;
-      --border-subtle: #E8E5DB;
+      --bg-canvas: #F4F2EC;
+      --bg-surface: #FCFAF5;
+      --bg-surface-elevated: #ECE8DD;
+      --bg-surface-subtle: #F7F5EE;
+      --border: #DCD8CF;
+      --border-subtle: #E8E5DD;
       --border-focus: #1D548F;
-      --text-primary: #1C2024;
-      --text-secondary: #5F666D;
-      --text-tertiary: #757B84;
+      --text-primary: #14171A;
+      --text-secondary: #575D65;
+      --text-tertiary: #787F89;
       --accent-blue: #1D548F;
       --accent-blue-hover: #15406E;
       --accent-blue-subtle: rgba(29, 84, 143, 0.08);
-      --accent-blue-border: rgba(29, 84, 143, 0.35);
-      --cta-bg: #1C2024;
-      --cta-text: #F5F4F0;
-      --cta-hover-bg: #000000;
-      --state-ready: #2D6A4F;
-      --state-warning: #B07D30;
-      --state-danger: #A31D1D;
+      --accent-blue-border: rgba(29, 84, 143, 0.28);
+      --accent-emerald: #059669;
+      --accent-emerald-subtle: rgba(5, 150, 105, 0.12);
+      --cta-primary-bg: #14171A;
+      --cta-primary-text: #F4F2EC;
     }
 
-    /* ─── Baseline Reset & Architectural Principles ─────────────────────── */
+    /* ─── Reset & Geometry Discipline (Zero-Pills Everywhere) ────────────── */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -89,8 +85,8 @@
     }
 
     body {
-      font-family: var(--font-stack);
-      background-color: var(--bg-app);
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
       color: var(--text-primary);
       line-height: 1.6;
       font-size: 0.9375rem; /* 15px */
@@ -102,10 +98,9 @@
 
     ::selection {
       background: var(--accent-blue);
-      color: #FFFFFF;
+      color: #08090B;
     }
 
-    /* Accessible focus states */
     :focus-visible {
       outline: 2px solid var(--border-focus);
       outline-offset: 2px;
@@ -120,82 +115,56 @@
       font-family: inherit;
       border: none;
       background: none;
+      color: inherit;
       cursor: pointer;
     }
 
-    /* ─── Skip Link for Accessibility ───────────────────────────────────── */
+    /* ─── Skip Link Accessibility ───────────────────────────────────────── */
     .skip-to-content {
       position: absolute;
-      top: -60px;
+      top: -100px;
       left: 16px;
-      background: var(--cta-bg);
-      color: var(--cta-text);
+      background: var(--accent-blue);
+      color: #08090B;
       padding: 10px 18px;
-      font-weight: 600;
-      font-size: 13px;
-      z-index: 9999;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 10000;
       border-radius: var(--radius-sm);
-      transition: top 0.2s ease;
+      transition: top 0.2s;
     }
     .skip-to-content:focus {
       top: 16px;
     }
 
-    /* ─── Ambient Sculptural Backdrop (Centerpiece with WebGL & Fallback) ── */
-    .ambient-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    #silk-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      opacity: 0.42;
-      filter: saturate(1.1) contrast(1.15);
-      transition: opacity 0.6s ease;
-    }
-    body.light-theme #silk-canvas {
-      opacity: 0.16;
-      filter: saturate(0.9) contrast(1.05) invert(1);
-    }
-
-    /* Subtle Architectural Vignette & Pointer Light Field */
-    .ambient-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle 800px at var(--mouse-x, 50%) var(--mouse-y, 35%), var(--accent-blue-subtle), transparent 75%),
-                  radial-gradient(ellipse at bottom, rgba(13, 16, 19, 0.75) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    body.light-theme .ambient-vignette {
-      background: radial-gradient(circle 800px at var(--mouse-x, 50%) var(--mouse-y, 35%), var(--accent-blue-subtle), transparent 75%),
-                  radial-gradient(ellipse at bottom, rgba(245, 244, 240, 0.75) 0%, transparent 60%);
-    }
-
-    /* ─── Header Navigation ─────────────────────────────────────────────── */
-    header.site-header {
+    /* ─── Global Sticky Navigation Header ───────────────────────────────── */
+    .site-header {
       position: sticky;
       top: 0;
-      background: rgba(13, 16, 19, 0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
+      width: 100%;
       height: 64px;
+      background: rgba(8, 9, 11, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    body.light-theme .site-header {
+      background: rgba(244, 242, 236, 0.88);
+    }
+
+    .header-container {
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
-      z-index: 100;
-    }
-    body.light-theme header.site-header {
-      background: rgba(245, 244, 240, 0.94);
     }
 
     .brand-group {
@@ -205,51 +174,48 @@
     }
 
     .brand-mark {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       color: var(--text-primary);
-      text-transform: uppercase;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
     }
 
-    .brand-status-tag {
-      font-family: var(--font-mono);
-      font-size: 11px;
+    .brand-mark svg {
+      width: 20px;
+      height: 20px;
       color: var(--accent-blue);
-      background: var(--accent-blue-subtle);
-      border: 1px solid var(--accent-blue-border);
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
-      letter-spacing: 0.04em;
     }
 
-    nav.site-nav {
+    .brand-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      background: var(--bg-surface-elevated);
+      color: var(--accent-blue);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.05em;
+    }
+
+    .desktop-nav {
       display: flex;
       align-items: center;
-      gap: 28px;
+      gap: 24px;
     }
 
     .nav-link {
       font-size: 13.5px;
-      color: var(--text-secondary);
       font-weight: 500;
-      transition: color 0.15s ease;
-      position: relative;
+      color: var(--text-secondary);
+      transition: color 0.2s;
     }
-    .nav-link:hover, .nav-link.active {
+    .nav-link:hover {
       color: var(--text-primary);
-    }
-    .nav-link.active::after {
-      content: '';
-      position: absolute;
-      bottom: -6px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent-blue);
     }
 
     .header-actions {
@@ -258,2263 +224,1776 @@
       gap: 12px;
     }
 
-    /* ─── Zero-Pill Rectangular Button System ───────────────────────────── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 8px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      border-radius: var(--radius-sm); /* Strictly 0-2px rectangular */
-      transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.08s;
-      white-space: nowrap;
-      border: 1px solid transparent;
-      user-select: none;
-    }
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    /* Monumental Ivory / Contrast Slab CTA (<5% accent rule) */
-    .btn-slab {
-      background: var(--cta-bg);
-      color: var(--cta-text);
-      border-color: var(--cta-bg);
-    }
-    .btn-slab:hover {
-      background: var(--cta-hover-bg);
-      border-color: var(--cta-hover-bg);
-      color: var(--cta-text);
-    }
-
-    .btn-secondary {
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      border-color: var(--border);
-    }
-    .btn-secondary:hover {
-      background: var(--bg-surface-elevated);
-      border-color: var(--border-focus);
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text-primary);
-      border-color: var(--border);
-    }
-    .btn-outline:hover {
-      border-color: var(--accent-blue);
-      background: var(--accent-blue-subtle);
-    }
-
+    /* Icon Buttons (Theme & Mobile Menu) */
     .btn-icon {
       width: 38px;
       height: 38px;
-      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      color: var(--text-secondary);
       border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+      font-size: 15px;
     }
     .btn-icon:hover {
       color: var(--text-primary);
       border-color: var(--border-focus);
     }
 
-    /* Mobile Menu Toggle */
     .mobile-menu-toggle {
       display: none;
     }
 
-    /* Mobile Nav Drawer */
-    .mobile-nav-drawer {
-      display: none;
-      position: fixed;
-      top: 64px;
-      left: 0;
-      right: 0;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      padding: 24px;
-      z-index: 99;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    }
-    .mobile-nav-drawer.open {
-      display: flex;
-    }
-    .mobile-nav-link {
-      font-size: 15px;
-      font-weight: 500;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-    }
-
-    /* ─── Page Container & Asymmetric Layout ────────────────────────────── */
-    main.content-root {
+    /* ─── BUTTON COMPONENT FAMILY (Liquid Metal & Interactive Hover) ─────── */
+    /* 1. Primary CTA: Liquid Metal Button */
+    .btn-liquid-metal {
       position: relative;
-      z-index: 10;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 56px 32px 104px;
-      display: flex;
-      flex-direction: column;
-      gap: 96px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 26px;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--cta-primary-text);
+      background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 50%, #CBD5E1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 18px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    body.light-theme .btn-liquid-metal {
+      background: linear-gradient(135deg, #181D24 0%, #0F1216 100%);
+      color: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
     }
 
-    /* ─── Section 1: Asymmetric Monumental Hero ─────────────────────────── */
-    section.hero-stage {
-      display: grid;
-      grid-template-columns: 1.45fr 1fr;
-      gap: 48px;
-      align-items: start;
-      padding-top: 16px;
+    .btn-liquid-metal::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.85) 0%, transparent 60%);
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
     }
 
-    .hero-narrative {
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
+    .btn-liquid-metal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(56, 189, 248, 0.28), inset 0 1px 0 #FFFFFF;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 50%, #BAE6FD 100%);
+    }
+    body.light-theme .btn-liquid-metal:hover {
+      background: linear-gradient(135deg, #2A313C 0%, #161A21 100%);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
     }
 
-    .hero-metadata-line {
+    .btn-liquid-metal:hover::before {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+    .btn-liquid-metal:active {
+      transform: translateY(0);
+    }
+
+    /* 2. Secondary CTA: Interactive Hover Button */
+    .btn-interactive-hover {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .btn-interactive-hover .btn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-blue);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-interactive-hover .btn-text-init {
+      display: inline-block;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    }
+
+    .btn-interactive-hover .btn-text-reveal {
+      position: absolute;
+      left: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(12px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      color: var(--accent-blue);
+    }
+
+    .btn-interactive-hover:hover {
+      border-color: var(--accent-blue-border);
+      background: var(--bg-surface-elevated);
+    }
+
+    .btn-interactive-hover:hover .btn-dot {
+      transform: scale(2.2);
+      background: var(--accent-blue);
+    }
+
+    .btn-interactive-hover:hover .btn-text-init {
+      transform: translateX(18px);
+      opacity: 0;
+    }
+
+    .btn-interactive-hover:hover .btn-text-reveal {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* 3. Outline Action Button */
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    .btn-outline:hover {
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+      background: var(--bg-surface-elevated);
+    }
+
+    /* ─── HERO SECTION WITH 3D LIQUID SCULPTURE ──────────────────────────── */
+    .hero-section {
+      position: relative;
+      width: 100%;
+      min-height: calc(100vh - 64px);
       display: flex;
       align-items: center;
-      gap: 12px;
+      overflow: hidden;
+      padding: 60px 0;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 75% 45%, transparent 20%, rgba(8, 9, 11, 0.72) 65%, rgba(8, 9, 11, 0.96) 100%),
+                  linear-gradient(to bottom, transparent 65%, var(--bg-canvas) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    body.light-theme .hero-vignette {
+      background: radial-gradient(circle at 75% 45%, transparent 20%, rgba(244, 242, 236, 0.72) 65%, rgba(244, 242, 236, 0.96) 100%),
+                  linear-gradient(to bottom, transparent 65%, var(--bg-canvas) 100%);
+    }
+
+    .hero-container {
+      position: relative;
+      z-index: 2;
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .hero-content {
+      max-width: 700px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       font-family: var(--font-mono);
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--accent-blue);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      margin-bottom: 24px;
+      width: fit-content;
     }
-    .hero-status-pip {
-      width: 7px;
-      height: 7px;
-      background: var(--state-ready);
-      border-radius: var(--radius-none);
-      display: inline-block;
-    }
-
-    /* Monumental Hero Typography with Strict Balanced Line Breaks */
-    h1.hero-title {
-      font-size: clamp(2.4rem, 4.2vw, 3.4rem);
-      font-weight: 600;
-      line-height: 1.15;
-      letter-spacing: -0.035em;
-      color: var(--text-primary);
-      text-wrap: balance;
+    .hero-badge .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-emerald);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 0 8px var(--accent-emerald);
     }
 
-    p.hero-lead {
-      font-size: 1.0625rem; /* 17px */
-      line-height: 1.65;
+    .hero-headline {
+      font-size: clamp(40px, 5.2vw, 76px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      color: #FFFFFF;
+    }
+    body.light-theme .hero-headline {
+      color: #14171A;
+    }
+
+    /* Shimmering Text Effect (from @ElevenLabs/components/shimmering-text) */
+    .hero-headline span.shimmer {
+      background: linear-gradient(90deg, #F0EEE8 0%, #FFFFFF 35%, #38BDF8 50%, #F0EEE8 65%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 7s infinite ease-in-out;
+    }
+    body.light-theme .hero-headline span.shimmer {
+      background: linear-gradient(90deg, #14171A 0%, #000000 35%, #1D548F 50%, #14171A 65%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 7s infinite ease-in-out;
+    }
+
+    @keyframes textShimmer {
+      0%, 25% { background-position: 100% 0%; }
+      75%, 100% { background-position: -100% 0%; }
+    }
+
+    .hero-subhead {
+      font-size: clamp(16px, 1.25vw, 19px);
+      line-height: 1.6;
       color: var(--text-secondary);
+      margin-bottom: 36px;
       max-width: 620px;
     }
 
-    .hero-action-cluster {
+    .hero-actions {
       display: flex;
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      margin-top: 6px;
+      margin-bottom: 40px;
     }
 
-    /* Architectural Technical Spec Grid */
-    .hero-spec-matrix {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 24px;
+    .hero-meta-strip {
+      display: flex;
+      gap: 24px;
       padding-top: 24px;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-subtle);
     }
-    .spec-block {
+    .hero-meta-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
-    .spec-label {
+    .hero-meta-val {
       font-family: var(--font-mono);
-      font-size: 10.5px;
-      letter-spacing: 0.06em;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .hero-meta-lbl {
+      font-size: 11px;
       color: var(--text-tertiary);
       text-transform: uppercase;
-    }
-    .spec-value {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: -0.01em;
+      letter-spacing: 0.05em;
     }
 
-    /* Hero Right Rail: Architectural Course Schedule & SQLite Schema */
-    .hero-reference-rail {
-      background: var(--bg-surface);
+    /* Hero Right Telemetry Card */
+    .hero-terminal-card {
+      background: rgba(15, 18, 22, 0.85);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      padding: 24px;
+      box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+    }
+    body.light-theme .hero-terminal-card {
+      background: rgba(252, 250, 245, 0.92);
+      box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.1);
     }
 
-    .rail-header-bar {
-      background: var(--bg-surface-elevated);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+    .terminal-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 16px;
     }
-    .rail-tab-group {
-      display: flex;
-      gap: 4px;
-    }
-    .rail-tab-btn {
+    .terminal-title {
       font-family: var(--font-mono);
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      border: 1px solid transparent;
-      cursor: pointer;
+      letter-spacing: 0.06em;
     }
-    .rail-tab-btn.active {
-      color: var(--text-primary);
-      background: var(--bg-surface);
-      border-color: var(--border);
-      font-weight: 600;
-    }
-    .rail-status-badge {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      color: var(--state-ready);
-      letter-spacing: 0.04em;
-    }
-
-    .rail-content-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-height: 290px;
-    }
-
-    /* Course List View */
-    .course-manifest-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .course-row-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 10px;
-      background: var(--bg-surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      font-size: 12.5px;
-      cursor: pointer;
-      transition: border-color 0.15s, background-color 0.15s;
-    }
-    .course-row-item:hover, .course-row-item.selected {
-      border-color: var(--border-focus);
-      background: var(--bg-surface-elevated);
-    }
-    .course-code {
-      font-family: var(--font-mono);
-      font-weight: 600;
-      color: var(--accent-blue);
-      font-size: 11.5px;
-    }
-    .course-name {
-      color: var(--text-primary);
-      margin-left: 8px;
-      font-weight: 500;
-    }
-    .course-sync-tag {
+    .terminal-status {
       font-family: var(--font-mono);
       font-size: 10px;
-      color: var(--text-tertiary);
-    }
-
-    /* SQL Schema View */
-    .code-schema-block {
-      display: none;
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      color: var(--text-secondary);
-      line-height: 1.55;
-      background: var(--bg-app);
-      border: 1px solid var(--border-subtle);
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      overflow-x: auto;
-      white-space: pre;
-    }
-
-    /* ─── Structural Section Framing ────────────────────────────────────── */
-    section.architectural-section {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      padding-top: 40px;
-      border-top: 1px solid var(--border);
-    }
-
-    .section-intro-block {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 760px;
-    }
-
-    h2.section-heading {
-      font-size: 1.875rem; /* 30px */
-      font-weight: 600;
-      letter-spacing: -0.025em;
-      color: var(--text-primary);
-      line-height: 1.25;
-    }
-
-    p.section-description {
-      font-size: 1rem; /* 16px */
-      line-height: 1.6;
-      color: var(--text-secondary);
-    }
-
-    /* ─── Section 2: Study Guardian (Phone-to-Desktop Ingestion) ────────── */
-    .guardian-simulator-frame {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .simulator-control-toolbar {
-      background: var(--bg-surface-elevated);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .source-sample-selector {
+      color: var(--accent-emerald);
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
     }
-    .sample-pill-btn {
+
+    .terminal-code {
       font-family: var(--font-mono);
-      font-size: 11.5px;
-      color: var(--text-secondary);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      padding: 5px 12px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .sample-pill-btn:hover {
+      font-size: 12px;
       color: var(--text-primary);
-      border-color: var(--border-focus);
+      line-height: 1.7;
     }
-    .sample-pill-btn.active {
-      color: var(--cta-text);
-      background: var(--cta-bg);
-      border-color: var(--cta-bg);
-      font-weight: 600;
-    }
+    .terminal-code .kw { color: #38BDF8; font-weight: 600; }
+    .terminal-code .lit { color: #FCD34D; }
+    .terminal-code .fn { color: #34D399; }
+    .terminal-code .cmt { color: var(--text-tertiary); font-style: italic; }
 
-    .simulator-dual-pane {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      divide-x: 1px solid var(--border);
-    }
-
-    .pane-half {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .pane-label-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .pane-title {
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-    .pane-badge-status {
-      font-family: var(--font-mono);
-      font-size: 10.5px;
-      color: var(--accent-blue);
-      background: var(--accent-blue-subtle);
-      border: 1px solid var(--accent-blue-border);
-      padding: 2px 6px;
-      border-radius: var(--radius-sm);
-    }
-
-    .verbatim-quote-box {
-      background: var(--bg-surface-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-primary);
-      font-style: italic;
+    /* ─── REAL PRODUCT SHOWCASE GALLERY ─────────────────────────────────── */
+    .section-wrap {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 100px 32px;
       position: relative;
     }
 
-    .provenance-metadata-strip {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      color: var(--text-tertiary);
+    .section-header {
+      margin-bottom: 48px;
     }
-    .provenance-item strong {
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .student-scratchpad-area {
-      background: var(--bg-app);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 14px;
+    .section-kicker {
       font-family: var(--font-mono);
-      font-size: 12.5px;
-      line-height: 1.5;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-blue);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: clamp(28px, 3.2vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
       color: var(--text-primary);
-      min-height: 140px;
-      white-space: pre-wrap;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 680px;
+      line-height: 1.6;
     }
 
-    .pane-footer-action-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 8px;
-    }
-
-    /* ─── Section 3: Filesystem Mutation Barrier (Human Approval Gate) ─── */
-    .barrier-architecture-panel {
+    .gallery-container {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.5);
     }
 
-    .barrier-header-info {
+    .gallery-topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
       gap: 12px;
     }
 
-    .diff-inspection-viewport {
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.5;
-      overflow-x: auto;
-    }
-    .diff-line {
-      display: block;
-      padding: 2px 4px;
-    }
-    .diff-meta {
-      color: var(--text-tertiary);
-    }
-    .diff-del {
-      background: rgba(217, 4, 41, 0.12);
-      color: #FF8585;
-    }
-    .diff-add {
-      background: rgba(82, 183, 136, 0.12);
-      color: #79D9A8;
-    }
-
-    .barrier-actions-strip {
+    .gallery-tabs {
       display: flex;
       align-items: center;
-      gap: 16px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
+      gap: 6px;
+      overflow-x: auto;
+      max-width: 100%;
     }
 
-    .barrier-feedback-msg {
-      font-family: var(--font-mono);
+    .gallery-tab {
+      padding: 6px 12px;
       font-size: 12px;
-      color: var(--state-ready);
-      margin-right: auto;
-      display: none;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .gallery-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+    .gallery-tab.active {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+      border-color: var(--border);
     }
 
-    /* ─── Section 4: Floating Companion (<100ms Assistant) ──────────────── */
-    .companion-split-grid {
+    .gallery-nav-arrows {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gallery-stage {
+      position: relative;
+      width: 100%;
+      height: 640px;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .gallery-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-caption-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .gallery-caption {
+      color: var(--text-secondary);
+    }
+    .gallery-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-emerald);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── STUDY GUARDIAN WITH 3D FOLDER INTERACTION ──────────────────────── */
+    .folder-sandbox-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 40px;
       align-items: center;
     }
 
-    .companion-feature-dossier {
+    /* 3D Folder Container (Inspired by @0xUrvish/components/folder-interaction) */
+    .folder-stage {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+      overflow: hidden;
+    }
+
+    .folder-wrap {
+      position: relative;
+      width: 320px;
+      height: 220px;
+      cursor: pointer;
+      transition: transform 0.4s var(--transition-spring);
+    }
+    .folder-wrap:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Folder Back Wall */
+    .folder-back {
+      position: absolute;
+      inset: 0;
+      background: #181D24;
+      border: 1px solid #2B3340;
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+    body.light-theme .folder-back {
+      background: #D8D4C8;
+      border-color: #B8B3A4;
+    }
+
+    .folder-tab {
+      position: absolute;
+      top: -16px;
+      left: 16px;
+      width: 90px;
+      height: 18px;
+      background: #202730;
+      border: 1px solid #2B3340;
+      border-bottom: none;
+      border-radius: 2px 2px 0 0;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.05em;
+    }
+
+    /* Assignment File Cards inside Folder */
+    .folder-file {
+      position: absolute;
+      top: 14px;
+      left: 20px;
+      right: 20px;
+      height: 180px;
+      background: #0F1216;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      justify-content: space-between;
     }
-    .dossier-point {
+    body.light-theme .folder-file {
+      background: #FCFAF5;
+    }
+
+    .folder-file[data-file="1"] {
+      transform: translateY(-28px) rotate(-3deg);
+      z-index: 10;
+    }
+    .folder-file[data-file="2"] {
+      transform: translateY(-16px) rotate(2deg);
+      z-index: 9;
+      opacity: 0.85;
+    }
+    .folder-file[data-file="3"] {
+      transform: translateY(-4px) rotate(-1deg);
+      z-index: 8;
+      opacity: 0.7;
+    }
+
+    /* Active Intake State: Flap Opens, Card Emerges */
+    .folder-wrap.active-intake .folder-file[data-file="1"] {
+      transform: translateY(-70px) rotate(0deg) scale(1.05);
+      box-shadow: 0 16px 36px rgba(56, 189, 248, 0.25);
+      border-color: var(--accent-blue);
+    }
+
+    /* Folder Front Wall */
+    .folder-front {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 130px;
+      background: linear-gradient(to bottom, #1E252E 0%, #151A22 100%);
+      border: 1px solid #2B3340;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      z-index: 20;
+      transform-origin: bottom center;
+      transform: rotateX(0deg);
+      transition: transform 0.4s var(--transition-spring);
+      padding: 16px;
       display: flex;
-      gap: 16px;
-      align-items: flex-start;
+      flex-direction: column;
+      justify-content: flex-end;
     }
-    .dossier-point-icon {
+    body.light-theme .folder-front {
+      background: linear-gradient(to bottom, #ECE8DD 0%, #DFDACD 100%);
+      border-color: #C5BFB0;
+    }
+
+    .folder-wrap.active-intake .folder-front {
+      transform: rotateX(-24deg);
+    }
+
+    .folder-label {
       font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 700;
-      color: var(--accent-blue);
-      background: var(--accent-blue-subtle);
-      border: 1px solid var(--accent-blue-border);
-      width: 32px;
-      height: 32px;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
+      justify-content: space-between;
     }
-    .dossier-point-content h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    .dossier-point-content p {
-      font-size: 13.5px;
-      color: var(--text-secondary);
-      line-height: 1.55;
+    .folder-count {
+      color: var(--accent-blue);
     }
 
-    /* Interactive Voice Dictation Sandbox Card */
-    .companion-sandbox-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 24px;
+    /* Folder Control Panel */
+    .intake-controls {
       display: flex;
       flex-direction: column;
       gap: 20px;
-      box-shadow: 0 16px 36px rgba(0,0,0,0.3);
-    }
-    .sandbox-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .sandbox-hud-title {
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--accent-blue);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .hotkey-badge {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border);
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
     }
 
-    /* Animated Audio Waveform */
-    .waveform-visualizer-container {
-      background: var(--bg-app);
+    .intake-selector-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .intake-tab-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .intake-tab-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+    }
+    .intake-tab-btn.active {
+      color: var(--accent-blue);
+      background: var(--bg-surface-elevated);
+      border-color: var(--accent-blue-border);
+    }
+
+    .diff-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .diff-line.add { color: #34D399; background: rgba(52, 211, 153, 0.08); padding: 1px 4px; }
+    .diff-line.del { color: #F87171; background: rgba(248, 113, 113, 0.08); padding: 1px 4px; }
+
+    .intake-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ─── KNOWLEDGE HUB & FANCY TODO CHECKBOX ─────────────────────────────── */
+    .hub-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 32px;
+    }
+
+    .hub-nav-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+    }
+
+    .hub-category-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .hub-category-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+    }
+    .hub-category-btn.active {
+      color: var(--text-primary);
+      background: var(--bg-surface-elevated);
+      border-color: var(--border);
+    }
+
+    /* Fancy Todo Checkbox Items (Inspired by @originui/components/checkbox/fancy-todo-checkbox) */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      height: 64px;
+      transition: border-color 0.2s, background-color 0.2s;
+      cursor: pointer;
+    }
+    .task-item:hover {
+      border-color: var(--border);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Custom Animated Checkbox Component */
+    .fancy-checkbox {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      padding: 0 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+    }
+    .task-item:hover .fancy-checkbox {
+      border-color: var(--accent-blue);
+    }
+
+    .fancy-checkbox svg {
+      width: 14px;
+      height: 14px;
+      color: #FFFFFF;
+      stroke-dasharray: 20;
+      stroke-dashoffset: 20;
+      transition: stroke-dashoffset 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fancy-checkbox::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: var(--radius-sm);
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    /* Checked State */
+    .task-item.checked .fancy-checkbox {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+    }
+    .task-item.checked .fancy-checkbox svg {
+      stroke-dashoffset: 0;
+    }
+    .task-item.checked .fancy-checkbox::after {
+      opacity: 1;
+      transform: scale(1.6);
+    }
+
+    /* Task Label Strikethrough Animation */
+    .task-text {
       position: relative;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      transition: color 0.25s ease;
+    }
+    .task-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1.5px;
+      background: var(--text-tertiary);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .task-item.checked .task-text {
+      color: var(--text-tertiary);
+    }
+    .task-item.checked .task-text::after {
+      transform: scaleX(1);
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .task-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .hub-progress-bar {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .hub-progress-track {
+      width: 200px;
+      height: 4px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-sm);
       overflow: hidden;
+    }
+    .hub-progress-fill {
+      height: 100%;
+      background: var(--accent-emerald);
+      width: 60%;
+      transition: width 0.35s ease;
+    }
+
+    /* ─── COMPANION HUD VOICE PTT DEMO ───────────────────────────────────── */
+    .companion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .companion-hud-window {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: 0 16px 48px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    .hud-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .hud-body {
+      padding: 24px;
+    }
+
+    .waveform-visualizer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 54px;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      padding: 0 16px;
     }
     .wave-bar {
       width: 4px;
-      height: 8px;
-      background: var(--text-tertiary);
-      border-radius: var(--radius-none);
-      transition: height 0.1s ease, background-color 0.2s ease;
-    }
-    .waveform-visualizer-container.recording .wave-bar {
+      height: 12px;
       background: var(--accent-blue);
-      animation: wavePulse 0.8s ease-in-out infinite alternate;
+      border-radius: var(--radius-none);
+      transition: height 0.15s ease;
     }
-    .waveform-visualizer-container.recording .wave-bar:nth-child(2n) { animation-delay: 0.15s; }
-    .waveform-visualizer-container.recording .wave-bar:nth-child(3n) { animation-delay: 0.3s; }
-    .waveform-visualizer-container.recording .wave-bar:nth-child(4n) { animation-delay: 0.45s; }
+    .waveform-visualizer.active .wave-bar {
+      animation: wavePulse 0.8s infinite ease-in-out;
+    }
+    .waveform-visualizer.active .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform-visualizer.active .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform-visualizer.active .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+    .waveform-visualizer.active .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+    .waveform-visualizer.active .wave-bar:nth-child(6) { animation-delay: 0.5s; }
+    .waveform-visualizer.active .wave-bar:nth-child(7) { animation-delay: 0.6s; }
+    .waveform-visualizer.active .wave-bar:nth-child(8) { animation-delay: 0.7s; }
 
     @keyframes wavePulse {
-      0% { height: 6px; }
-      100% { height: 48px; }
+      0%, 100% { height: 10px; }
+      50% { height: 42px; background: #60A5FA; }
     }
 
-    .sandbox-transcript-output {
-      font-family: var(--font-mono);
-      font-size: 12.5px;
-      color: var(--text-primary);
+    .transcript-box {
       background: var(--bg-surface-subtle);
       border: 1px solid var(--border-subtle);
-      padding: 12px;
       border-radius: var(--radius-sm);
-      min-height: 60px;
-      line-height: 1.5;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      min-height: 80px;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
 
-    .sandbox-controls-row {
+    .hud-controls {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       gap: 12px;
     }
 
-    /* ─── Section 5: Knowledge Hub (4-Collection Matrix) ────────────────── */
-    .hub-matrix-wrapper {
+    /* ─── LOCAL SOVEREIGNTY MATRIX ───────────────────────────────────────── */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      margin-bottom: 40px;
+    }
+    .matrix-table th, .matrix-table td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+    }
+    .matrix-table th {
+      background: var(--bg-surface-elevated);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .matrix-table tr:last-child td {
+      border-bottom: none;
+    }
+    .matrix-table td.brand-col {
+      color: var(--accent-blue);
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* ─── FINAL CTA & FOOTER ─────────────────────────────────────────────── */
+    .cta-banner {
+      background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-elevated) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 64px 48px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+    }
+    .cta-banner-title {
+      font-size: clamp(32px, 3.8vw, 52px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+    }
+    .cta-banner-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 580px;
+      line-height: 1.6;
+    }
+
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 32px;
+      background: var(--bg-canvas);
+    }
+    .footer-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* ─── MOBILE DRAWER (Below 860px) ────────────────────────────────────── */
+    .mobile-drawer {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 64px);
+      background: var(--bg-canvas);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
-    }
-
-    .hub-collection-tabs-bar {
-      display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-      overflow-x: auto;
-    }
-
-    .hub-tab-btn {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      padding: 7px 16px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-    }
-    .hub-tab-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-focus);
-    }
-    .hub-tab-btn.active {
-      background: var(--cta-bg);
-      color: var(--cta-text);
-      border-color: var(--cta-bg);
-      font-weight: 600;
-    }
-
-    .hub-active-display-board {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .hub-board-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .hub-board-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .hub-board-spec {
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      color: var(--text-tertiary);
-    }
-
-    .hub-records-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .hub-record-item {
-      background: var(--bg-surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      font-size: 13.5px;
-    }
-    .hub-record-info strong {
-      color: var(--text-primary);
-      display: block;
-      margin-bottom: 2px;
-    }
-    .hub-record-info span {
-      color: var(--text-secondary);
-      font-size: 12.5px;
-    }
-    .hub-record-tag {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--accent-blue);
-      border: 1px solid var(--accent-blue-border);
-      background: var(--accent-blue-subtle);
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
-    }
-
-    /* ─── Section 6: Product Preview Gallery (Verified Electron Captures) ─ */
-    .gallery-showcase-frame {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .gallery-nav-bar {
-      background: var(--bg-surface-elevated);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      overflow-x: auto;
-      gap: 12px;
-    }
-
-    .gallery-tabs-strip {
-      display: flex;
-      gap: 6px;
-      flex-wrap: nowrap;
-    }
-    .gallery-nav-btn {
-      font-family: var(--font-stack);
-      font-size: 12.5px;
-      color: var(--text-secondary);
-      background: transparent;
-      border: 1px solid var(--border);
-      padding: 5px 12px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-    }
-    .gallery-nav-btn:hover {
-      color: var(--text-primary);
-      border-color: var(--border-focus);
-    }
-    .gallery-nav-btn.active {
-      color: var(--cta-text);
-      background: var(--cta-bg);
-      border-color: var(--cta-bg);
-      font-weight: 600;
-    }
-
-    .gallery-viewport {
-      background: #000000;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 480px;
-      overflow: hidden;
-    }
-    body.light-theme .gallery-viewport {
-      background: #EAE7DF;
-    }
-
-    .gallery-active-img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-      transition: opacity 0.25s ease;
-    }
-
-    .gallery-caption-bar {
-      background: var(--bg-surface-elevated);
-      border-top: 1px solid var(--border);
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .gallery-verified-pill {
-      color: var(--state-ready);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    /* ─── Section 7: Local Sovereignty vs. Cloud SaaS Matrix ────────────── */
-    .sovereignty-tabular-matrix {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
-      margin-top: 12px;
-    }
-    .sovereignty-tabular-matrix th,
-    .sovereignty-tabular-matrix td {
-      padding: 14px 18px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-    .sovereignty-tabular-matrix th {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-tertiary);
-      background: var(--bg-surface);
-    }
-    .sovereignty-tabular-matrix tr:hover td {
-      background: var(--bg-surface-subtle);
-    }
-    .gravitas-col {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-    .cloud-col {
-      color: var(--text-tertiary);
-    }
-
-    /* ─── Section 8: Colophon & Final CTA ───────────────────────────────── */
-    .colophon-cta-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      align-items: flex-start;
-    }
-
-    .terminal-install-strip {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--text-primary);
-      width: 100%;
-      max-width: 640px;
-    }
-    .terminal-install-strip code {
-      flex: 1;
-      overflow-x: auto;
-    }
-
-    /* ─── Site Footer ───────────────────────────────────────────────────── */
-    footer.site-footer {
-      border-top: 1px solid var(--border);
-      background: var(--bg-surface);
-      padding: 48px 32px;
-      font-size: 13px;
-      color: var(--text-tertiary);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 24px;
-      position: relative;
-      z-index: 10;
-    }
-    .footer-meta-block {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .footer-links-group {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .footer-link {
-      color: var(--text-secondary);
-      transition: color 0.15s ease;
-    }
-    .footer-link:hover {
-      color: var(--text-primary);
-    }
-
-    /* ─── Toast Feedback Element ────────────────────────────────────────── */
-    .action-toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--cta-bg);
-      color: var(--cta-text);
-      padding: 10px 18px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      z-index: 9999;
+      z-index: 999;
+      transform: translateY(-120%);
       opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
       pointer-events: none;
     }
-    .action-toast.show {
-      opacity: 1;
+    .mobile-drawer.open {
       transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mobile-drawer-link {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    /* ─── Responsive Media Queries ──────────────────────────────────────── */
+    /* ─── RESPONSIVE BREAKPOINTS (390px, 768px, 1024px, 1280px) ────────── */
     @media (max-width: 1024px) {
-      section.hero-stage {
+      .hero-container {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 36px;
       }
-      .companion-split-grid {
+      .folder-sandbox-grid, .companion-grid {
         grid-template-columns: 1fr;
+      }
+      .gallery-stage {
+        height: 480px;
       }
     }
 
     @media (max-width: 860px) {
-      nav.site-nav {
-        display: none;
-      }
-      .site-header .btn-slab {
+      .desktop-nav, .header-cta-slab {
         display: none;
       }
       .mobile-menu-toggle {
         display: inline-flex;
       }
-      .hero-spec-matrix {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .simulator-dual-pane {
-        grid-template-columns: 1fr;
-        divide-x: none;
-      }
-      .simulator-dual-pane > .pane-half:first-child {
-        border-bottom: 1px solid var(--border);
-      }
-      .companion-split-grid {
-        grid-template-columns: 1fr;
-        min-width: 0;
-      }
-      .companion-feature-dossier,
-      .companion-sandbox-card {
-        min-width: 0;
-        max-width: 100%;
-      }
-      .sandbox-controls-row {
-        flex-wrap: wrap;
-      }
-      .sandbox-controls-row .btn {
-        width: 100%;
-      }
     }
 
     @media (max-width: 640px) {
-      main.content-root {
-        padding: 24px 16px 80px;
-        gap: 64px;
-        max-width: 100vw;
+      .section-wrap {
+        padding: 60px 20px;
       }
-      header.site-header {
-        padding: 0 16px;
+      .header-container {
+        padding: 0 20px;
       }
-      .brand-status-tag {
-        display: none;
-      }
-      .hero-spec-matrix {
-        grid-template-columns: 1fr;
-      }
-      .sovereignty-tabular-matrix {
-        display: block;
-        overflow-x: auto;
-      }
-      .colophon-cta-card {
-        padding: 24px 16px;
-      }
-      .terminal-install-strip {
+      .hero-actions {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
-      .terminal-install-strip code {
-        font-size: 11px;
-        word-break: break-all;
+      .btn-liquid-metal, .btn-interactive-hover {
+        justify-content: center;
+        width: 100%;
       }
-      .provenance-metadata-strip {
-        grid-template-columns: 1fr;
+      .gallery-stage {
+        height: 280px;
       }
-      .pane-half {
-        padding: 16px;
+      .folder-wrap {
+        width: 280px;
+        height: 200px;
       }
-      .barrier-architecture-panel {
-        padding: 18px 14px;
+      .matrix-table th, .matrix-table td {
+        padding: 12px 10px;
+        font-size: 12px;
       }
-      .hub-active-display-board {
-        padding: 16px 14px;
-      }
-      .gallery-viewport {
-        min-height: 280px;
+      .cta-banner {
+        padding: 40px 20px;
       }
     }
 
-    /* ─── Reduced Motion Support ────────────────────────────────────────── */
+    /* ─── ACCESSIBILITY: REDUCED MOTION DISCIPLINE ───────────────────────── */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.001ms !important;
+        animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
       }
-      #silk-canvas {
-        display: none !important;
-      }
-      .ambient-backdrop {
-        background: radial-gradient(ellipse at top, rgba(74, 137, 200, 0.08), transparent 70%);
-      }
-      .waveform-visualizer-container.recording .wave-bar {
+      .hero-headline span.shimmer {
         animation: none !important;
-        height: 24px !important;
+        background: none !important;
+        -webkit-text-fill-color: var(--text-primary) !important;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Skip to Content Link -->
   <a href="#main-content" class="skip-to-content">Skip to primary content</a>
 
-  <!-- Ambient Sculptural Backdrop (WebGL Undulation with Organic Silk Physics) -->
-  <div class="ambient-backdrop" aria-hidden="true">
-    <canvas id="silk-canvas" width="640" height="480"></canvas>
-    <div class="ambient-vignette" id="ambient-vignette"></div>
-  </div>
+  <!-- Global Sticky Navigation Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <a href="#main-content" class="brand-mark" aria-label="GRAVITAS Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6h16M4 12h11M4 18h16"/>
+          </svg>
+          GRAVITAS
+        </a>
+        <span class="brand-tag">v0.1 · SOVEREIGN</span>
+      </div>
 
-  <!-- Header Navigation -->
-  <header class="site-header" role="banner">
-    <div class="brand-group">
-      <a href="#main-content" class="brand-mark" aria-label="GRAVITAS Home">
-        GRAVITAS
-      </a>
-      <span class="brand-status-tag">LOCAL KERNEL // v0.0.1</span>
-    </div>
+      <nav class="desktop-nav" aria-label="Primary Navigation">
+        <a href="#product" class="nav-link">Product</a>
+        <a href="#study-guardian" class="nav-link">Study Guardian</a>
+        <a href="#knowledge-hub" class="nav-link">Knowledge Hub</a>
+        <a href="#companion" class="nav-link">Companion HUD</a>
+        <a href="#sovereignty" class="nav-link">Local Sovereignty</a>
+      </nav>
 
-    <nav class="site-nav" aria-label="Primary Navigation">
-      <a href="#study-guardian" class="nav-link">Study Guardian</a>
-      <a href="#mutation-barrier" class="nav-link">Mutation Barrier</a>
-      <a href="#companion" class="nav-link">Companion HUD</a>
-      <a href="#knowledge-hub" class="nav-link">Knowledge Hub</a>
-      <a href="#preview" class="nav-link">Desktop Preview</a>
-      <a href="#sovereignty" class="nav-link">Sovereignty Matrix</a>
-    </nav>
-
-    <div class="header-actions">
-      <button id="theme-toggle-btn" class="btn btn-icon" aria-label="Toggle Dark or Light Architectural Theme" title="Toggle Theme (T)">
-        <span id="theme-icon" aria-hidden="true">☼</span>
-      </button>
-      <a href="#preview" class="btn btn-slab">Explore Workspace</a>
-      <button id="mobile-menu-toggle" class="btn btn-icon mobile-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-        ☰
-      </button>
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="btn-icon" aria-label="Toggle Theme" title="Toggle Light / Dark (T)">
+          <span id="theme-icon">☼</span>
+        </button>
+        <button id="mobile-menu-toggle" class="btn-icon mobile-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          ☰
+        </button>
+        <a href="#product" class="btn-interactive-hover header-cta-slab">
+          <span class="btn-dot"></span>
+          <span class="btn-text-init">Explore Demo</span>
+          <span class="btn-text-reveal">View Build →</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Mobile Navigation Drawer -->
-  <div id="mobile-drawer" class="mobile-nav-drawer" role="navigation" aria-label="Mobile Navigation">
-    <a href="#study-guardian" class="mobile-nav-link">Study Guardian</a>
-    <a href="#mutation-barrier" class="mobile-nav-link">Mutation Barrier</a>
-    <a href="#companion" class="mobile-nav-link">Companion HUD</a>
-    <a href="#knowledge-hub" class="mobile-nav-link">Knowledge Hub</a>
-    <a href="#preview" class="mobile-nav-link">Desktop Preview</a>
-    <a href="#sovereignty" class="mobile-nav-link">Sovereignty Matrix</a>
-    <div style="padding-top: 12px;">
-      <a href="#preview" class="btn btn-slab" style="width: 100%;">Explore Workspace</a>
+  <!-- Mobile Drawer -->
+  <div id="mobile-drawer" class="mobile-drawer" aria-label="Mobile Navigation" role="dialog" aria-modal="true">
+    <a href="#product" class="mobile-drawer-link">01 · Real Product Preview</a>
+    <a href="#study-guardian" class="mobile-drawer-link">02 · Study Guardian &amp; Folders</a>
+    <a href="#knowledge-hub" class="mobile-drawer-link">03 · Knowledge Hub &amp; Tasks</a>
+    <a href="#companion" class="mobile-drawer-link">04 · Companion HUD &amp; PTT</a>
+    <a href="#sovereignty" class="mobile-drawer-link">05 · Local Sovereignty Matrix</a>
+    <div style="margin-top: 16px;">
+      <a href="#product" class="btn-liquid-metal" style="width: 100%; text-align: center;">Explore Production Build</a>
     </div>
   </div>
 
-  <!-- Main Content Structure -->
-  <main class="content-root" id="main-content">
+  <main id="main-content">
+    <!-- ─── HERO SECTION: 3D LIQUID SCULPTURE CENTERPIECE ─────────────────── -->
+    <section class="hero-section" aria-label="Introduction">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-vignette"></div>
 
-    <!-- ─── Section 1: Hero Stage ─────────────────────────────────────────── -->
-    <section class="hero-stage" aria-labelledby="hero-title">
-      <div class="hero-narrative">
-        <div class="hero-metadata-line">
-          <span class="hero-status-pip"></span>
-          <span>AIR-GAPPED ENGINE · ZERO CLOUD EGRESS · 100% LOCAL SQLITE</span>
+      <div class="hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="status-dot"></span>
+            100% Local SQLite Vault · Zero Telemetry
+          </div>
+          <h1 class="hero-headline">
+            The sovereign operating system for <span class="shimmer">engineering minds</span>.
+          </h1>
+          <p class="hero-subhead">
+            GRAVITAS unifies multi-agent study flows, verbatim audio capture, and local filesystem mutations behind a verified human approval barrier. No cloud accounts. No surveillance.
+          </p>
+          <div class="hero-actions">
+            <a href="#study-guardian" class="btn-liquid-metal" id="hero-primary-cta">
+              Explore Architecture
+            </a>
+            <a href="#product" class="btn-interactive-hover" id="hero-secondary-cta">
+              <span class="btn-dot"></span>
+              <span class="btn-text-init">Live Desktop Preview</span>
+              <span class="btn-text-reveal">Inspect Screenshots →</span>
+            </a>
+          </div>
+          <div class="hero-meta-strip">
+            <div class="hero-meta-item">
+              <span class="hero-meta-val">7 COURSES</span>
+              <span class="hero-meta-lbl">Integrated Syllabus</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hero-meta-val">&lt; 100ms</span>
+              <span class="hero-meta-lbl">Companion Voice PTT</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hero-meta-val">0 BITS</span>
+              <span class="hero-meta-lbl">External Telemetry</span>
+            </div>
+          </div>
         </div>
 
-        <h1 id="hero-title" class="hero-title">
-          A private desktop command center for rigorous academic study.
-        </h1>
-
-        <p class="hero-lead">
-          GRAVITAS unifies verbatim classroom audio, local SQLite knowledge indexing, and sub-100ms push-to-talk intelligence under personal data sovereignty. Zero telemetry, zero required cloud accounts, and zero third-party subscription locks.
-        </p>
-
-        <div class="hero-action-cluster">
-          <a href="#study-guardian" class="btn btn-slab">Inspect Study Guardian</a>
-          <a href="#mutation-barrier" class="btn btn-secondary">Audit Mutation Barrier</a>
-        </div>
-
-        <div class="hero-spec-matrix">
-          <div class="spec-block">
-            <span class="spec-label">STORAGE KERNEL</span>
-            <span class="spec-value">Local SQLite WAL</span>
+        <!-- Right Rail Telemetry Terminal -->
+        <div class="hero-terminal-card" aria-label="System Architecture Status">
+          <div class="terminal-header">
+            <span class="terminal-title">KERNEL ENGINE · DDL AUDIT</span>
+            <span class="terminal-status">● PRAGMA FOREIGN_KEYS = ON</span>
           </div>
-          <div class="spec-block">
-            <span class="spec-label">GLOBAL HOTKEY</span>
-            <span class="spec-value">&lt; 100ms Ctrl+Shift+Space</span>
-          </div>
-          <div class="spec-block">
-            <span class="spec-label">ACADEMIC SCOPE</span>
-            <span class="spec-value">7 Verified Courses</span>
-          </div>
-          <div class="spec-block">
-            <span class="spec-label">NETWORK EGRESS</span>
-            <span class="spec-value">0.00 KB/s Air-Gapped</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hero Right Rail: Live Semester Schedule & SQLite Bootstrap Schema -->
-      <aside class="hero-reference-rail" aria-label="Academic Course Schedule and Database Schema">
-        <div class="rail-header-bar">
-          <div class="rail-tab-group" role="tablist">
-            <button class="rail-tab-btn active" id="tab-btn-courses" role="tab" aria-selected="true" aria-controls="view-courses">Semester Schedule</button>
-            <button class="rail-tab-btn" id="tab-btn-schema" role="tab" aria-selected="false" aria-controls="view-schema">SQLite DDL Schema</button>
-          </div>
-          <span class="rail-status-badge">● 7 / 7 ACTIVE</span>
-        </div>
-
-        <div class="rail-content-body">
-          <!-- Course Manifest View -->
-          <div class="course-manifest-list" id="view-courses" role="tabpanel" aria-labelledby="tab-btn-courses">
-            <div class="course-row-item selected" data-code="CSE 2631" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2631</span>
-                <span class="course-name">Algorithms Analysis &amp; Design</span>
-              </div>
-              <span class="course-sync-tag">4.0 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="CSE 2221" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2221</span>
-                <span class="course-name">Modern Computing Systems Design</span>
-              </div>
-              <span class="course-sync-tag">4.0 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="CSE 2811" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2811</span>
-                <span class="course-name">Database Systems</span>
-              </div>
-              <span class="course-sync-tag">3.5 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="CSE 2195" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2195</span>
-                <span class="course-name">Data Science Workshop 1</span>
-              </div>
-              <span class="course-sync-tag">3.0 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="CSE 2411" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2411</span>
-                <span class="course-name">Web Technologies</span>
-              </div>
-              <span class="course-sync-tag">3.0 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="CSE 2311" tabindex="0">
-              <div>
-                <span class="course-code">CSE 2311</span>
-                <span class="course-name">Microprocessor Systems</span>
-              </div>
-              <span class="course-sync-tag">3.5 CREDITS</span>
-            </div>
-            <div class="course-row-item" data-code="MATH 2011" tabindex="0">
-              <div>
-                <span class="course-code">MATH 2011</span>
-                <span class="course-name">Linear Algebra &amp; Diff Eq</span>
-              </div>
-              <span class="course-sync-tag">4.0 CREDITS</span>
-            </div>
-          </div>
-
-          <!-- SQLite Schema Code Block -->
-          <pre class="code-schema-block" id="view-schema" role="tabpanel" aria-labelledby="tab-btn-schema"><code>-- study_db_bootstrap.sql: Immutable Local Storage
-CREATE TABLE courses (
-  id TEXT PRIMARY KEY,
-  catalog_code TEXT NOT NULL UNIQUE,
-  title TEXT NOT NULL,
-  credits REAL NOT NULL DEFAULT 4.0
-);
-
-CREATE TABLE verbatim_directives (
-  id TEXT PRIMARY KEY,
-  course_id TEXT REFERENCES courses(id),
-  lecture_timestamp INTEGER NOT NULL,
-  audio_sha256 BLOB,
-  verbatim_instruction TEXT NOT NULL,
-  immutable_audit_lock INTEGER DEFAULT 1
-);
-
-CREATE TABLE student_working_drafts (
-  id TEXT PRIMARY KEY,
-  directive_id TEXT REFERENCES verbatim_directives(id),
-  draft_markdown TEXT NOT NULL,
-  updated_at INTEGER NOT NULL
-);</code></pre>
-        </div>
-      </aside>
-    </section>
-
-    <!-- ─── Section 2: Study Guardian Workflow ────────────────────────────── -->
-    <section id="study-guardian" class="architectural-section" aria-labelledby="guardian-heading">
-      <div class="section-intro-block">
-        <h2 id="guardian-heading" class="section-heading">
-          Study Guardian: Verbatim Capture &amp; Syllabus Routing
-        </h2>
-        <p class="section-description">
-          Bridging mobile capture and focused desktop execution. Drop audio notes, assignment PDFs, or lecture clips into your phone's iCloud folder; GRAVITAS ingests them locally into verified course syllabi, keeping original instructor instructions permanently unedited.
-        </p>
-      </div>
-
-      <div class="guardian-simulator-frame">
-        <div class="simulator-control-toolbar">
-          <div class="source-sample-selector" role="group" aria-label="Select Intake Sample">
-            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); text-transform: uppercase;">Intake Stream:</span>
-            <button class="sample-pill-btn active" data-sample="algorithms" aria-pressed="true">Sample 1: CSE 2631 PSet 4</button>
-            <button class="sample-pill-btn" data-sample="systems" aria-pressed="false">Sample 2: CSE 2221 Latch Crabbing</button>
-            <button class="sample-pill-btn" data-sample="databases" aria-pressed="false">Sample 3: CSE 2811 B-Tree Lab</button>
-          </div>
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--state-ready);">SHA-256 AUDIT VERIFIED</span>
-        </div>
-
-        <div class="simulator-dual-pane">
-          <!-- Pane A: Professor Verbatim Directive (Immutable) -->
-          <div class="pane-half">
-            <div class="pane-label-bar">
-              <span class="pane-title" id="directive-course-tag">CSE 2631 · PROFESSOR VERBATIM DIRECTIVE</span>
-              <span class="pane-badge-status">IMMUTABLE RECORD</span>
-            </div>
-
-            <div class="verbatim-quote-box" id="directive-quote-text">
-              "PSet 4: Implement B-Tree node splitting and concurrent latch crabbing. Submit valgrind trace and thread sanitizer logs by Friday 23:59 EST. Zero memory leaks permitted."
-            </div>
-
-            <div class="provenance-metadata-strip">
-              <div class="provenance-item">
-                <span>INBOX SOURCE:</span><br>
-                <strong id="directive-source-val">iPhone iCloud Drive / Audio</strong>
-              </div>
-              <div class="provenance-item">
-                <span>AUDIO HASH:</span><br>
-                <strong id="directive-hash-val">sha256:d8a2...3f1c</strong>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pane B: Student Working Draft Scratchpad -->
-          <div class="pane-half">
-            <div class="pane-label-bar">
-              <span class="pane-title">STUDENT WORKING DRAFT (LOCAL SQLITE)</span>
-              <span class="pane-badge-status" id="draft-save-status">AUTO-SAVED IN WAL</span>
-            </div>
-
-            <textarea class="student-scratchpad-area" id="student-draft-input" aria-label="Student Working Draft Notes" spellcheck="false">// Concurrent Latch Crabbing proof notes:
-void BTree::insert(const Key&amp; k, const Value&amp; v) {
-    Node* curr = root;
-    curr->write_lock(); // Hold root lock
-    while (!curr->is_leaf()) {
-        Node* next = curr->find_child(k);
-        next->write_lock();
-        if (next->is_safe()) {
-            curr->unlock(); // Latch released early
-        }
-        curr = next;
-    }
-    curr->insert_internal(k, v);
-    curr->unlock();
-}</textarea>
-
-            <div class="pane-footer-action-bar">
-              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);">LATENCY: 0.18ms WAL</span>
-              <button class="btn btn-slab" id="btn-commit-draft">Commit Draft to SQLite</button>
-            </div>
+          <div class="terminal-code">
+            <span class="cmt">-- Local SQLite Database Schema Verification</span><br>
+            <span class="kw">CREATE TABLE</span> <span class="fn">study_guardian_intake</span> (<br>
+            &nbsp;&nbsp;id <span class="lit">TEXT PRIMARY KEY</span>,<br>
+            &nbsp;&nbsp;course_code <span class="lit">VARCHAR(16) NOT NULL</span>,<br>
+            &nbsp;&nbsp;due_timestamp <span class="lit">INTEGER NOT NULL</span>,<br>
+            &nbsp;&nbsp;wal_sync_state <span class="lit">TEXT DEFAULT 'COMMITTED'</span><br>
+            );<br><br>
+            <span class="cmt">-- Filesystem Mutation Gate</span><br>
+            <span class="kw">CREATE TABLE</span> <span class="fn">mutation_barriers</span> (<br>
+            &nbsp;&nbsp;mutation_id <span class="lit">TEXT PRIMARY KEY</span>,<br>
+            &nbsp;&nbsp;human_approved <span class="lit">BOOLEAN DEFAULT 0</span>,<br>
+            &nbsp;&nbsp;atomic_diff <span class="lit">TEXT NOT NULL</span><br>
+            );
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ─── Section 3: Filesystem Mutation Barrier ────────────────────────── -->
-    <section id="mutation-barrier" class="architectural-section" aria-labelledby="barrier-heading">
-      <div class="section-intro-block">
-        <h2 id="barrier-heading" class="section-heading">
-          Filesystem Mutation Barrier: Zero Silent Execution
-        </h2>
-        <p class="section-description">
-          Automated agents and AI assistants must never silently alter your filesystem. Every note export, source code edit, or external shell trigger passes through an explicit pre-commit human approval gate.
+    <!-- ─── REAL PRODUCT SHOWCASE: AUTHENTIC SCREENSHOT GALLERY ────────────── -->
+    <section id="product" class="section-wrap" aria-label="Real Product Preview">
+      <div class="section-header">
+        <div class="section-kicker">Authentic Desktop Software</div>
+        <h2 class="section-title">A real desktop application. Zero simulated dashboards.</h2>
+        <p class="section-desc">
+          Inspect authentic screenshots captured directly from the live Electron desktop build running with local SQLite persistence and native Windows/macOS window frames.
         </p>
       </div>
 
-      <div class="barrier-architecture-panel">
-        <div class="barrier-header-info">
-          <div>
-            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-blue); text-transform: uppercase;">MUTATION PROPOSAL · ATOMIC PATCH</span>
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">
-              Target: ~/stem-vault/CSE2631/pset4_latch_proof.md
-            </h3>
+      <div class="gallery-container">
+        <div class="gallery-topbar">
+          <div class="gallery-tabs" role="tablist">
+            <button class="gallery-tab active" data-img="assets/07-proto-home-dark-1280x800.png" data-caption="Home Workspace (Basalt Dark Mode, 1280×800)" role="tab" aria-selected="true">01 · Home Workspace (Dark)</button>
+            <button class="gallery-tab" data-img="assets/06-proto-home-light-1280x800.png" data-caption="Home Workspace (Tactile Parchment Light Mode, 1280×800)" role="tab" aria-selected="false">02 · Home Workspace (Light)</button>
+            <button class="gallery-tab" data-img="assets/10-proto-subjects-dark-1280x800.png" data-caption="Semester Subjects View (7 Engineering Courses Active)" role="tab" aria-selected="false">03 · Semester Subjects</button>
+            <button class="gallery-tab" data-img="assets/09-proto-tasks-dark-1280x800.png" data-caption="Semester Tasks &amp; Assignment Agenda Stream" role="tab" aria-selected="false">04 · Task Agenda Stream</button>
+            <button class="gallery-tab" data-img="assets/08-proto-notes-dark-1280x800.png" data-caption="Local Knowledge Notes Stream" role="tab" aria-selected="false">05 · Study Notes Vault</button>
+            <button class="gallery-tab" data-img="assets/14-proto-companion-dark.png" data-caption="Floating Companion Assistant Window (Dark Mode)" role="tab" aria-selected="false">06 · Companion HUD</button>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--state-warning); background: rgba(212, 163, 115, 0.12); border: 1px solid rgba(212, 163, 115, 0.3); padding: 3px 8px; border-radius: var(--radius-sm);">
-            STATUS: PENDING HUMAN CONFIRMATION
-          </span>
-        </div>
-
-        <div class="diff-inspection-viewport" role="region" aria-label="Unified Diff Preview">
-          <span class="diff-line diff-meta">--- a/CSE2631/pset4_latch_proof.md (Working Tree)</span>
-          <span class="diff-line diff-meta">+++ b/CSE2631/pset4_latch_proof.md (Staged Mutation)</span>
-          <span class="diff-line diff-meta">@@ -14,4 +14,8 @@ Invariant verification</span>
-          <span class="diff-line diff-del">- // Unbounded global root mutex (Contention bottleneck)</span>
-          <span class="diff-line diff-del">- std::lock_guard&lt;std::mutex&gt; lock(global_tree_mutex);</span>
-          <span class="diff-line diff-add">+ // Hand-over-hand reader-writer latches (Deadlock-free crabbing)</span>
-          <span class="diff-line diff-add">+ std::shared_lock&lt;std::shared_mutex&gt; parent_latch(curr-&gt;mutex);</span>
-          <span class="diff-line diff-add">+ if (child-&gt;is_safe()) { parent_latch.unlock(); }</span>
-        </div>
-
-        <div class="barrier-actions-strip">
-          <span class="barrier-feedback-msg" id="barrier-feedback">✓ Mutation committed to local disk with cryptographic hash.</span>
-          <button class="btn btn-outline" id="btn-reject-mutation">Reject Mutation</button>
-          <button class="btn btn-slab" id="btn-approve-mutation">Write to Local Disk</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Section 4: Floating Companion HUD (<100ms Assistant) ──────────── -->
-    <section id="companion" class="architectural-section" aria-labelledby="companion-heading">
-      <div class="section-intro-block">
-        <h2 id="companion-heading" class="section-heading">
-          Floating Companion: Sub-100ms Desktop Presence
-        </h2>
-        <p class="section-description">
-          Summoned instantly across your operating system with <kbd style="background:var(--bg-surface-elevated); border:1px solid var(--border); padding:2px 6px; border-radius:var(--radius-sm); font-family:var(--font-mono); font-size:12px;">Ctrl+Shift+Space</kbd>. Push-to-talk voice dictation that never listens silently in the background, with direct Markdown and Obsidian export.
-        </p>
-      </div>
-
-      <div class="companion-split-grid">
-        <div class="companion-feature-dossier">
-          <div class="dossier-point">
-            <span class="dossier-point-icon">PTT</span>
-            <div class="dossier-point-content">
-              <h3>Push-to-Talk (PTT) Audio Transduction</h3>
-              <p>Hardware microphone is engaged only while the hotkey is held. Instant audio buffer capture, local transcription, and immediate release.</p>
-            </div>
-          </div>
-
-          <div class="dossier-point">
-            <span class="dossier-point-icon">VAL</span>
-            <div class="dossier-point-content">
-              <h3>Sub-100ms Native Latency</h3>
-              <p>Built directly over local IPC and shared memory. No network round-trips to remote cloud models or third-party webhooks.</p>
-            </div>
-          </div>
-
-          <div class="dossier-point">
-            <span class="dossier-point-icon">OBS</span>
-            <div class="dossier-point-content">
-              <h3>Obsidian &amp; Markdown Interoperability</h3>
-              <p>Exports structured notes directly to standard YAML frontmatter Markdown files compatible with your local Obsidian vault.</p>
-            </div>
+          <div class="gallery-nav-arrows">
+            <button class="btn-icon" id="btn-gallery-prev" aria-label="Previous Screenshot" title="Previous (←)">‹</button>
+            <button class="btn-icon" id="btn-gallery-next" aria-label="Next Screenshot" title="Next (→)">›</button>
           </div>
         </div>
 
-        <!-- Interactive Voice Dictation Sandbox -->
-        <div class="companion-sandbox-card">
-          <div class="sandbox-header-bar">
-            <span class="sandbox-hud-title">COMPANION VOICE SANDBOX</span>
-            <span class="hotkey-badge">SHORTCUT: CTRL+SHIFT+SPACE</span>
-          </div>
-
-          <div class="waveform-visualizer-container" id="waveform-box" aria-label="Audio Waveform Display">
-            <div class="wave-bar" style="height: 12px;"></div>
-            <div class="wave-bar" style="height: 18px;"></div>
-            <div class="wave-bar" style="height: 32px;"></div>
-            <div class="wave-bar" style="height: 48px;"></div>
-            <div class="wave-bar" style="height: 24px;"></div>
-            <div class="wave-bar" style="height: 16px;"></div>
-            <div class="wave-bar" style="height: 38px;"></div>
-            <div class="wave-bar" style="height: 44px;"></div>
-            <div class="wave-bar" style="height: 20px;"></div>
-            <div class="wave-bar" style="height: 10px;"></div>
-          </div>
-
-          <div class="sandbox-transcript-output" id="companion-transcript-text">
-            [STATUS: READY] Hold button to dictate or test audio transcription simulation.
-          </div>
-
-          <div class="sandbox-controls-row">
-            <button class="btn btn-outline" id="btn-export-markdown">Copy Markdown to Clipboard</button>
-            <button class="btn btn-slab" id="btn-ptt-toggle">Hold to Talk</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Section 5: Knowledge Hub (4 Collections) ──────────────────────── -->
-    <section id="knowledge-hub" class="architectural-section" aria-labelledby="hub-heading">
-      <div class="section-intro-block">
-        <h2 id="hub-heading" class="section-heading">
-          Knowledge Hub: 4 Deterministic SQLite Collections
-        </h2>
-        <p class="section-description">
-          A unified local knowledge graph stored in high-performance SQLite. Every thought, study note, engineering project, and revision milestone stays interconnected.
-        </p>
-      </div>
-
-      <div class="hub-matrix-wrapper">
-        <div class="hub-collection-tabs-bar" role="tablist" aria-label="Knowledge Collections">
-          <button class="hub-tab-btn active" data-collection="ideas" role="tab" aria-selected="true">01 · Ideas &amp; Sparks</button>
-          <button class="hub-tab-btn" data-collection="notes" role="tab" aria-selected="false">02 · Study Notes</button>
-          <button class="hub-tab-btn" data-collection="projects" role="tab" aria-selected="false">03 · Engineering Projects</button>
-          <button class="hub-tab-btn" data-collection="tasks" role="tab" aria-selected="false">04 · Plan Tasks &amp; Milestones</button>
-        </div>
-
-        <div class="hub-active-display-board">
-          <div class="hub-board-header">
-            <span class="hub-board-title" id="hub-board-title">COLLECTION: IDEAS &amp; SPARKS</span>
-            <span class="hub-board-spec" id="hub-board-spec">SQLITE TABLE: ideas_sparks · 3 RECORDS</span>
-          </div>
-
-          <div class="hub-records-list" id="hub-records-container">
-            <!-- Populated via JavaScript dynamically -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Section 6: Product Preview Gallery ────────────────────────────── -->
-    <section id="preview" class="architectural-section" aria-labelledby="gallery-heading">
-      <div class="section-intro-block">
-        <h2 id="gallery-heading" class="section-heading">
-          Authentic Desktop &amp; Companion Preview
-        </h2>
-        <p class="section-description">
-          Real screenshots captured directly from the running GRAVITAS Electron application at 1280×800 and native companion window resolutions. Zero artificial marketing renders.
-        </p>
-      </div>
-
-      <div class="gallery-showcase-frame">
-        <div class="gallery-nav-bar">
-          <div class="gallery-tabs-strip" role="tablist" aria-label="Screenshots">
-            <button class="gallery-nav-btn active" data-img="assets/07-proto-home-dark-1280x800.png" data-caption="Home Workspace (Basalt Dark Mode, 1280×800)" role="tab" aria-selected="true">Home Dark</button>
-            <button class="gallery-nav-btn" data-img="assets/06-proto-home-light-1280x800.png" data-caption="Home Workspace (Tactile Parchment Light Mode, 1280×800)" role="tab" aria-selected="false">Home Light</button>
-            <button class="gallery-nav-btn" data-img="assets/10-proto-subjects-dark-1280x800.png" data-caption="Semester Subjects View (7 Engineering Courses Active)" role="tab" aria-selected="false">Subjects</button>
-            <button class="gallery-nav-btn" data-img="assets/09-proto-tasks-dark-1280x800.png" data-caption="Semester Tasks &amp; Assignment Agenda Stream" role="tab" aria-selected="false">Tasks</button>
-            <button class="gallery-nav-btn" data-img="assets/08-proto-notes-dark-1280x800.png" data-caption="Local Knowledge Notes Stream" role="tab" aria-selected="false">Notes</button>
-            <button class="gallery-nav-btn" data-img="assets/14-proto-companion-dark.png" data-caption="Floating Companion Assistant Window (Dark Mode)" role="tab" aria-selected="false">Companion Dark</button>
-            <button class="gallery-nav-btn" data-img="assets/15-proto-companion-light.png" data-caption="Floating Companion Assistant Window (Light Mode)" role="tab" aria-selected="false">Companion Light</button>
-          </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-icon" id="btn-gallery-prev" aria-label="Previous Screenshot" title="Previous (←)">‹</button>
-            <button class="btn btn-icon" id="btn-gallery-next" aria-label="Next Screenshot" title="Next (→)">›</button>
-          </div>
-        </div>
-
-        <div class="gallery-viewport">
-          <img src="assets/07-proto-home-dark-1280x800.png" alt="GRAVITAS Desktop Workspace Preview" class="gallery-active-img" id="gallery-target-image">
+        <div class="gallery-stage">
+          <img id="gallery-current-img" class="gallery-image" src="assets/07-proto-home-dark-1280x800.png" alt="Home Workspace (Basalt Dark Mode, 1280×800)">
         </div>
 
         <div class="gallery-caption-bar">
-          <span id="gallery-caption-label">Home Workspace (Basalt Dark Mode, 1280×800)</span>
-          <span class="gallery-verified-pill">ELECTRON RUNTIME · PASS</span>
+          <span id="gallery-caption-text" class="gallery-caption">Home Workspace (Basalt Dark Mode, 1280×800)</span>
+          <span class="gallery-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Verified Local Desktop Capture
+          </span>
         </div>
       </div>
     </section>
 
-    <!-- ─── Section 7: Local Sovereignty vs. Cloud SaaS Matrix ────────────── -->
-    <section id="sovereignty" class="architectural-section" aria-labelledby="sovereignty-heading">
-      <div class="section-intro-block">
-        <h2 id="sovereignty-heading" class="section-heading">
-          Local Sovereignty: Built Against Cloud Telemetry
-        </h2>
-        <p class="section-description">
-          We believe intellectual work requires total privacy. GRAVITAS operates in complete isolation from advertising networks, third-party analytics trackers, or remote telemetry servers.
+    <!-- ─── STUDY GUARDIAN: 3D FOLDER INTAKE INTERACTION ──────────────────── -->
+    <section id="study-guardian" class="section-wrap" aria-label="Study Guardian Intake">
+      <div class="section-header">
+        <div class="section-kicker">Interactive Workflow Intake</div>
+        <h2 class="section-title">Assignment intake with 3D physical folder depth.</h2>
+        <p class="section-desc">
+          Drop complex course syllabi and problem sets into the Study Guardian folder. Watch the engine unpack assignments, parse milestones, and queue atomic file updates.
         </p>
       </div>
 
-      <table class="sovereignty-tabular-matrix" aria-label="Architecture Comparison">
+      <div class="folder-sandbox-grid">
+        <!-- Left: 3D Folder Stage -->
+        <div class="folder-stage">
+          <div class="folder-wrap" id="interactive-folder" title="Click to trigger folder intake animation">
+            <div class="folder-back">
+              <div class="folder-tab">STUDY VAULT</div>
+            </div>
+
+            <!-- 3 Stacked Assignment File Cards -->
+            <div class="folder-file" data-file="1">
+              <div>
+                <span class="brand-tag" style="font-size: 9px;">CSE 2631</span>
+                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">PSet 4: Dynamic Programming</div>
+                <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Matrix Chain Multiplication</div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-blue);">Due: Thu, Oct 22 · 11:59 PM</div>
+            </div>
+
+            <div class="folder-file" data-file="2">
+              <div>
+                <span class="brand-tag" style="font-size: 9px;">CSE 2221</span>
+                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">Systems Concurrency Lab</div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary);">Due: Mon, Oct 26</div>
+            </div>
+
+            <div class="folder-file" data-file="3">
+              <div>
+                <span class="brand-tag" style="font-size: 9px;">CSE 2811</span>
+                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">B-Tree Page Buffer Lab</div>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary);">Due: Wed, Oct 28</div>
+            </div>
+
+            <div class="folder-front">
+              <div class="folder-label">
+                <span>SEMESTER FOLDER</span>
+                <span class="folder-count">3 ACTIVE FILES</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Intake Controls & Mutation Barrier -->
+        <div class="intake-controls">
+          <div>
+            <div style="font-size: 12px; font-family: var(--font-mono); color: var(--text-tertiary); margin-bottom: 8px;">SELECT SAMPLE ASSIGNMENT:</div>
+            <div class="intake-selector-group">
+              <button class="intake-tab-btn active" data-sample="algorithms">01 · CSE 2631 PSet 4</button>
+              <button class="intake-tab-btn" data-sample="systems">02 · CSE 2221 Systems</button>
+              <button class="intake-tab-btn" data-sample="databases">03 · CSE 2811 B-Tree</button>
+            </div>
+          </div>
+
+          <div class="diff-box" id="diff-display">
+            <div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2631/schedule.md</div>
+            <div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2631/schedule.md</div>
+            <div class="diff-line add">+ ## Milestone: Implement Memoized Matrix Chain (Due Oct 20)</div>
+            <div class="diff-line add">+ - [ ] Base cases: single matrix multiplications cost 0 operations</div>
+            <div class="diff-line add">+ - [ ] Recurrence: m[i,j] = min(m[i,k] + m[k+1,j] + p[i-1]p[k]p[j])</div>
+          </div>
+
+          <div class="intake-actions">
+            <button class="btn-liquid-metal" id="btn-approve-mutation">
+              Write to Local Disk
+            </button>
+            <button class="btn-outline" id="btn-reject-mutation">
+              Reject Mutation
+            </button>
+          </div>
+          <div id="barrier-feedback" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-emerald); display: none;">
+            ✓ [ATOMIC COMMIT APPROVED] 1 file mutated locally. Lock released.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── KNOWLEDGE HUB: FANCY TODO CHECKBOX MATRIX ─────────────────────── -->
+    <section id="knowledge-hub" class="section-wrap" aria-label="Knowledge Hub and Tasks">
+      <div class="section-header">
+        <div class="section-kicker">Knowledge Hub &amp; Tasks</div>
+        <h2 class="section-title">Refined task execution with persistent feedback.</h2>
+        <p class="section-desc">
+          Inspired by Origin UI's Fancy Todo Checkbox reference. Experience smooth SVG path draw animations, ripple completion feedback, and persistent local tracking.
+        </p>
+      </div>
+
+      <div class="hub-container">
+        <div class="hub-nav-strip" role="tablist">
+          <button class="hub-category-btn active" data-cat="tasks" role="tab" aria-selected="true">01 · Semester Milestone Tasks</button>
+          <button class="hub-category-btn" data-cat="notes" role="tab" aria-selected="false">02 · Synthesized Lecture Notes</button>
+          <button class="hub-category-btn" data-cat="projects" role="tab" aria-selected="false">03 · Engineering Repositories</button>
+          <button class="hub-category-btn" data-cat="ideas" role="tab" aria-selected="false">04 · Research Sparks &amp; Ideas</button>
+        </div>
+
+        <div class="task-list" id="task-list-container">
+          <!-- Item 1 -->
+          <div class="task-item checked" data-task-id="t1" role="checkbox" aria-checked="true" tabindex="0">
+            <div class="task-left">
+              <div class="fancy-checkbox" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <span class="task-text">Derive recurrence relation for Optimal Binary Search Trees</span>
+            </div>
+            <div class="task-meta">
+              <span class="task-badge">CSE 2631</span>
+              <span class="task-badge" style="color: var(--accent-emerald);">DONE</span>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="task-item" data-task-id="t2" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="task-left">
+              <div class="fancy-checkbox" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <span class="task-text">Implement lock-coupling latch crabbing in B-Tree index traversal</span>
+            </div>
+            <div class="task-meta">
+              <span class="task-badge">CSE 2221</span>
+              <span class="task-badge" style="color: var(--accent-blue);">PSET 3</span>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="task-item" data-task-id="t3" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="task-left">
+              <div class="fancy-checkbox" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <span class="task-text">Configure WAL checkpointing pragma in study vault database</span>
+            </div>
+            <div class="task-meta">
+              <span class="task-badge">CSE 2811</span>
+              <span class="task-badge" style="color: var(--accent-blue);">CORE ENGINE</span>
+            </div>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="task-item checked" data-task-id="t4" role="checkbox" aria-checked="true" tabindex="0">
+            <div class="task-left">
+              <div class="fancy-checkbox" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <span class="task-text">Capture verbatim audio notes during Concurrency Lecture 14</span>
+            </div>
+            <div class="task-meta">
+              <span class="task-badge">AUDIO</span>
+              <span class="task-badge" style="color: var(--accent-emerald);">DONE</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hub-progress-bar">
+          <div>PROGRESS: <span id="completed-count" style="color: var(--text-primary); font-weight: 700;">2</span> OF 4 MILESTONES COMPLETED</div>
+          <div class="hub-progress-track">
+            <div id="progress-fill" class="hub-progress-fill" style="width: 50%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── COMPANION HUD: HONEST VOICE PTT DEMONSTRATION ─────────────────── -->
+    <section id="companion" class="section-wrap" aria-label="Companion HUD">
+      <div class="section-header">
+        <div class="section-kicker">Companion Assistant HUD</div>
+        <h2 class="section-title">Push-To-Talk voice dictation. Verbatim truth.</h2>
+        <p class="section-desc">
+          Capture lightning-fast lecture insights without opening heavy editor windows. Streams verbatim 16kHz audio directly to local Whisper models.
+        </p>
+      </div>
+
+      <div class="companion-grid">
+        <div>
+          <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Zero Hallucinations. Pure Audio Grounding.</h3>
+          <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
+            The GRAVITAS Companion HUD floats discreetly above your compiler or lecture stream. When triggered, it streams uncompressed audio straight to your local SQLite scratchpad and generates Obsidian-ready markdown notes with exact timestamp references.
+          </p>
+          <div style="display: flex; gap: 16px;">
+            <button class="btn-liquid-metal" id="btn-ptt-trigger">
+              Hold to Talk (PTT)
+            </button>
+            <button class="btn-outline" id="btn-copy-markdown">
+              Copy Markdown to Clipboard
+            </button>
+          </div>
+        </div>
+
+        <div class="companion-hud-window" aria-label="Simulated Companion HUD Window">
+          <div class="hud-titlebar">
+            <span>COMPANION HUD · FLOATING OVERLAY</span>
+            <span id="ptt-status-text" style="color: var(--accent-blue);">IDLE</span>
+          </div>
+          <div class="hud-body">
+            <div class="waveform-visualizer" id="wave-vis">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+            <div class="transcript-box" id="transcript-display">
+              "In latch crabbing, you must lock the parent page before descending into the child node, releasing the parent only when the child is verified safe from split."
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); display: flex; justify-content: space-between;">
+              <span>LATENCY: 42ms (ON-DEVICE)</span>
+              <span>BUFFER: 16kHz PCM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── LOCAL SOVEREIGNTY: ZERO COMPROMISE PRIVACY ─────────────────────── -->
+    <section id="sovereignty" class="section-wrap" aria-label="Local Sovereignty">
+      <div class="section-header">
+        <div class="section-kicker">Data Sovereignty &amp; Privacy</div>
+        <h2 class="section-title">Your notes and study data belong to you.</h2>
+        <p class="section-desc">
+          Compare GRAVITAS with conventional cloud SaaS platforms. Every byte is written to transparent, open-source SQLite files on your physical machine.
+        </p>
+      </div>
+
+      <table class="matrix-table" aria-label="Architecture Comparison">
         <thead>
           <tr>
-            <th scope="col">SYSTEM ARCHITECTURE</th>
-            <th scope="col">GRAVITAS (LOCAL-FIRST)</th>
-            <th scope="col">CONVENTIONAL CLOUD SAAS</th>
+            <th>Architecture Capability</th>
+            <th>Cloud SaaS &amp; Web Dashboards</th>
+            <th>GRAVITAS Sovereign Engine</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Database Engine</td>
-            <td class="gravitas-col">Embedded SQLite v3.45.1 WAL (Direct File Ownership)</td>
-            <td class="cloud-col">Remote Cloud DB (Vendor Lock-in)</td>
+            <td><strong>Storage Substrate</strong></td>
+            <td>Proprietary cloud servers (AWS / Supabase)</td>
+            <td class="brand-col">100% Local SQLite WAL Database</td>
           </tr>
           <tr>
-            <td>Network Egress</td>
-            <td class="gravitas-col">0.00 KB/s Outbound (Wireshark Air-Gap Verified)</td>
-            <td class="cloud-col">Continuous Telemetry &amp; Sentry Beacons</td>
+            <td><strong>Filesystem Access</strong></td>
+            <td>Zero local integration or opaque syncing</td>
+            <td class="brand-col">Direct Working Tree + Human Approval Gate</td>
           </tr>
           <tr>
-            <td>Filesystem Access</td>
-            <td class="gravitas-col">Bounded Human Approvals (Explicit Diff Confirmation)</td>
-            <td class="cloud-col">Silent Sync to Remote Server</td>
+            <td><strong>Voice Transcription</strong></td>
+            <td>Audio streamed to third-party cloud APIs</td>
+            <td class="brand-col">On-device 16kHz PCM via Local Whisper</td>
           </tr>
           <tr>
-            <td>Summon Latency</td>
-            <td class="gravitas-col">&lt; 100ms via Global Hotkey (Local IPC)</td>
-            <td class="cloud-col">200ms – 1200ms Round-Trip Web Latency</td>
+            <td><strong>Offline Operation</strong></td>
+            <td>Requires active internet &amp; recurring login</td>
+            <td class="brand-col">Fully functional air-gapped without internet</td>
           </tr>
           <tr>
-            <td>Export Compatibility</td>
-            <td class="gravitas-col">100% Plaintext Markdown + YAML (Obsidian Compatible)</td>
-            <td class="cloud-col">Proprietary Closed Data Export</td>
-          </tr>
-          <tr>
-            <td>Account &amp; Pricing</td>
-            <td class="gravitas-col">Zero Mandatory Accounts · Zero Subscription Locks</td>
-            <td class="cloud-col">$10–$25 / Month Recurring Paywall</td>
+            <td><strong>Telemetry &amp; Tracking</strong></td>
+            <td>Google Analytics, PostHog, Hotjar trackers</td>
+            <td class="brand-col">0 bits sent. Zero telemetry scripts.</td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Terminal Build Box -->
+      <div class="hero-terminal-card" style="max-width: 800px; margin: 0 auto;">
+        <div class="terminal-header">
+          <span class="terminal-title">TERMINAL · SOURCE-AVAILABLE LOCAL BUILD</span>
+          <button class="btn-outline" id="btn-copy-install" style="padding: 4px 10px; font-size: 11px;">Copy Command</button>
+        </div>
+        <div class="terminal-code">
+          <span class="cmt"># Clone and build the verified desktop environment</span><br>
+          git clone https://github.com/Smarak-padhi/Gravitas.git<br>
+          cd Gravitas && npm install && npm run build
+        </div>
+      </div>
     </section>
 
-    <!-- ─── Section 8: Colophon & Technical CTA ──────────────────────────── -->
-    <section class="colophon-cta-card" aria-labelledby="colophon-heading">
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <h2 id="colophon-heading" style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary);">
-          Run GRAVITAS in Your Local Environment
-        </h2>
-        <p style="font-size: 15px; color: var(--text-secondary); max-width: 600px;">
-          GRAVITAS is an open-architecture, local-first software project. Clone the repository and execute the verified test and run harness directly on your machine.
+    <!-- ─── FINAL CTA BANNER ──────────────────────────────────────────────── -->
+    <section class="section-wrap" style="padding-top: 40px; padding-bottom: 80px;">
+      <div class="cta-banner">
+        <div class="section-kicker">Get Started</div>
+        <h2 class="cta-banner-title">Build your sovereign academic second brain.</h2>
+        <p class="cta-banner-desc">
+          Run GRAVITAS independently on your machine. Explore the real desktop preview and experience the motion-rich command center.
         </p>
-      </div>
-
-      <div class="terminal-install-strip">
-        <span style="color: var(--accent-blue);">$</span>
-        <code id="install-cmd-text">git clone https://github.com/smara/gravitas.git &amp;&amp; npm install &amp;&amp; npm test</code>
-        <button class="btn btn-secondary" id="btn-copy-install" style="padding: 4px 12px; font-size: 11.5px;">Copy</button>
-      </div>
-
-      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-        <a href="#preview" class="btn btn-slab">Review Desktop Screenshots</a>
-        <a href="#study-guardian" class="btn btn-outline">Back to Top</a>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+          <a href="#product" class="btn-liquid-metal">Explore Workspace Preview</a>
+          <a href="#study-guardian" class="btn-interactive-hover">
+            <span class="btn-dot"></span>
+            <span class="btn-text-init">Study Guardian</span>
+            <span class="btn-text-reveal">Open Folder →</span>
+          </a>
+        </div>
       </div>
     </section>
   </main>
 
   <!-- Site Footer -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="footer-meta-block">
-      <strong style="color: var(--text-primary); letter-spacing: 0.04em;">GRAVITAS ARCHITECTURAL OPERATING SYSTEM</strong>
-      <span>Self-Hosted Geist Variable Typography · Zero External CDNs · Local SQLite v3.45.1</span>
-    </div>
-
-    <div class="footer-links-group">
-      <a href="#study-guardian" class="footer-link">Study Guardian</a>
-      <a href="#mutation-barrier" class="footer-link">Mutation Barrier</a>
-      <a href="#companion" class="footer-link">Companion HUD</a>
-      <a href="#knowledge-hub" class="footer-link">Knowledge Hub</a>
-      <a href="#preview" class="footer-link">Desktop Preview</a>
-      <a href="#sovereignty" class="footer-link">Sovereignty Matrix</a>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: var(--font-mono); font-weight: 700; color: var(--text-primary);">GRAVITAS</span>
+        <span>· Sovereign Multi-Agent Academic Command Center</span>
+      </div>
+      <div>
+        <a href="#main-content" class="btn-outline" style="font-size: 12px; padding: 6px 14px;">Back to Top ↑</a>
+      </div>
     </div>
   </footer>
 
-  <!-- Action Toast Feedback -->
-  <div class="action-toast" id="action-toast" role="status" aria-live="polite">Action Completed</div>
-
-  <!-- ─── Interactive Client-Side Simulation & Motion Engine ─────────────── -->
+  <!-- ─── JAVASCRIPT: WEBGL SCULPTURE & REFERENCE INTERACTIONS ───────────── -->
   <script>
-    (function() {
-      'use strict';
+    /* 1. WebGL Raymarched Liquid Sculpture Engine */
+    const canvas = document.getElementById('hero-canvas');
+    const gl = canvas.getContext('webgl', { antialias: true, powerPreference: 'high-performance' });
 
-      // ─── 1. Toast Notification Helper ─────────────────────────────────
-      const toast = document.getElementById('action-toast');
-      let toastTimer = null;
-      function showToast(msg) {
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          toast.classList.remove('show');
-        }, 2200);
-      }
+    let mouseX = 0.5, mouseY = 0.5;
+    let targetMouseX = 0.5, targetMouseY = 0.5;
 
-      // ─── 2. Theme Persistence & Toggle ────────────────────────────────
-      const themeToggleBtn = document.getElementById('theme-toggle-btn');
-      const themeIcon = document.getElementById('theme-icon');
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX / window.innerWidth;
+      targetMouseY = 1.0 - (e.clientY / window.innerHeight);
+    });
 
-      function setTheme(isLight) {
-        if (isLight) {
-          document.body.classList.add('light-theme');
-          document.documentElement.setAttribute('data-theme', 'light');
-          if (themeIcon) themeIcon.textContent = '☾';
-          localStorage.setItem('gravitas-site-theme', 'light');
-        } else {
-          document.body.classList.remove('light-theme');
-          document.documentElement.removeAttribute('data-theme');
-          if (themeIcon) themeIcon.textContent = '☼';
-          localStorage.setItem('gravitas-site-theme', 'dark');
-        }
-      }
-
-      const savedTheme = localStorage.getItem('gravitas-site-theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(savedTheme === 'light' || (!savedTheme && !prefersDark && false));
-
-      if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-          const isCurrentlyLight = document.body.classList.contains('light-theme');
-          setTheme(!isCurrentlyLight);
-          showToast(!isCurrentlyLight ? 'Switched to Parchment Light Theme' : 'Switched to Basalt Dark Theme');
-        });
-      }
-
-      // Keyboard shortcut 'T' for theme toggle
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 't' || e.key === 'T') {
-          // Only if not focused on an input or textarea
-          if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-          const isCurrentlyLight = document.body.classList.contains('light-theme');
-          setTheme(!isCurrentlyLight);
-          showToast(!isCurrentlyLight ? 'Switched to Parchment Light Theme' : 'Switched to Basalt Dark Theme');
-        }
-      });
-
-      // ─── 3. Mobile Navigation Drawer ──────────────────────────────────
-      const mobileToggle = document.getElementById('mobile-menu-toggle');
-      const mobileDrawer = document.getElementById('mobile-drawer');
-
-      if (mobileToggle && mobileDrawer) {
-        mobileToggle.addEventListener('click', () => {
-          const isOpen = mobileDrawer.classList.contains('open');
-          if (isOpen) {
-            mobileDrawer.classList.remove('open');
-            mobileToggle.setAttribute('aria-expanded', 'false');
-          } else {
-            mobileDrawer.classList.add('open');
-            mobileToggle.setAttribute('aria-expanded', 'true');
-          }
-        });
-
-        // Close mobile drawer upon clicking any link
-        mobileDrawer.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', () => {
-            mobileDrawer.classList.remove('open');
-            mobileToggle.setAttribute('aria-expanded', 'false');
-          });
-        });
-
-        // Escape key closes drawer
-        window.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
-            mobileDrawer.classList.remove('open');
-            mobileToggle.setAttribute('aria-expanded', 'false');
-            mobileToggle.focus();
-          }
-        });
-      }
-
-      // ─── 4. Pointer Reactive Ambient Lighting ─────────────────────────
-      const vignette = document.getElementById('ambient-vignette');
-      if (vignette && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        window.addEventListener('pointermove', (e) => {
-          const xPercent = ((e.clientX / window.innerWidth) * 100).toFixed(1) + '%';
-          const yPercent = ((e.clientY / window.innerHeight) * 100).toFixed(1) + '%';
-          vignette.style.setProperty('--mouse-x', xPercent);
-          vignette.style.setProperty('--mouse-y', yPercent);
-        }, { passive: true });
-      }
-
-      // ─── 5. Hero Right Rail: Courses vs SQLite Schema Tabs ─────────────
-      const tabCourses = document.getElementById('tab-btn-courses');
-      const tabSchema = document.getElementById('tab-btn-schema');
-      const viewCourses = document.getElementById('view-courses');
-      const viewSchema = document.getElementById('view-schema');
-
-      if (tabCourses && tabSchema && viewCourses && viewSchema) {
-        tabCourses.addEventListener('click', () => {
-          tabCourses.classList.add('active');
-          tabCourses.setAttribute('aria-selected', 'true');
-          tabSchema.classList.remove('active');
-          tabSchema.setAttribute('aria-selected', 'false');
-          viewCourses.style.display = 'flex';
-          viewSchema.style.display = 'none';
-        });
-
-        tabSchema.addEventListener('click', () => {
-          tabSchema.classList.add('active');
-          tabSchema.setAttribute('aria-selected', 'true');
-          tabCourses.classList.remove('active');
-          tabCourses.setAttribute('aria-selected', 'false');
-          viewCourses.style.display = 'none';
-          viewSchema.style.display = 'block';
-        });
-
-        // Interactive course list selection
-        const courseRows = document.querySelectorAll('.course-row-item');
-        courseRows.forEach(row => {
-          row.addEventListener('click', () => {
-            courseRows.forEach(r => r.classList.remove('selected'));
-            row.classList.add('selected');
-            const code = row.getAttribute('data-code');
-            showToast(`Active Syllabus Filter: ${code}`);
-          });
-          row.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              row.click();
-            }
-          });
-        });
-      }
-
-      // ─── 6. Study Guardian Interactive Ingest Simulation ──────────────
-      const sampleButtons = document.querySelectorAll('.sample-pill-btn');
-      const directiveCourseTag = document.getElementById('directive-course-tag');
-      const directiveQuoteText = document.getElementById('directive-quote-text');
-      const directiveSourceVal = document.getElementById('directive-source-val');
-      const directiveHashVal = document.getElementById('directive-hash-val');
-      const studentDraftInput = document.getElementById('student-draft-input');
-      const draftSaveStatus = document.getElementById('draft-save-status');
-      const btnCommitDraft = document.getElementById('btn-commit-draft');
-
-      const sampleData = {
-        algorithms: {
-          tag: 'CSE 2631 · PROFESSOR VERBATIM DIRECTIVE',
-          quote: '"PSet 4: Implement B-Tree node splitting and concurrent latch crabbing. Submit valgrind trace and thread sanitizer logs by Friday 23:59 EST. Zero memory leaks permitted."',
-          source: 'iPhone iCloud Drive / Audio Memo',
-          hash: 'sha256:d8a2...3f1c',
-          draft: `// Concurrent Latch Crabbing proof notes:
-void BTree::insert(const Key& k, const Value& v) {
-    Node* curr = root;
-    curr->write_lock(); // Hold root lock
-    while (!curr->is_leaf()) {
-        Node* next = curr->find_child(k);
-        next->write_lock();
-        if (next->is_safe()) {
-            curr->unlock(); // Latch released early
-        }
-        curr = next;
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      if (gl) gl.viewport(0, 0, canvas.width, canvas.height);
     }
-    curr->insert_internal(k, v);
-    curr->unlock();
-}`
-        },
-        systems: {
-          tag: 'CSE 2221 · PROFESSOR VERBATIM DIRECTIVE',
-          quote: '"Midterm Design Review: Verify cache coherency protocol under MESI state transitions. Write trace simulator handling bus snooping and invalidation queues."',
-          source: 'iPhone iCloud Drive / Handout PDF',
-          hash: 'sha256:4f1e...b902',
-          draft: `// MESI Protocol State Machine Transition:
-enum CacheState { MODIFIED, EXCLUSIVE, SHARED, INVALID };
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-void handle_bus_read(CacheLine& line) {
-    if (line.state == MODIFIED) {
-        flush_to_memory(line);
-        line.state = SHARED;
-    } else if (line.state == EXCLUSIVE) {
-        line.state = SHARED;
-    }
-}`
-        },
-        databases: {
-          tag: 'CSE 2811 · PROFESSOR VERBATIM DIRECTIVE',
-          quote: '"Lab 3: Build ARIES write-ahead logging (WAL) recovery manager. Implement Analysis, Redo, and Undo passes with physiological log records."',
-          source: 'iPhone iCloud Drive / Lecture Clip',
-          hash: 'sha256:88bc...01fa',
-          draft: `// ARIES WAL Recovery: Analysis Pass
-void ARIESRecovery::analysis_pass() {
-    LSN checkpoint_lsn = read_master_record();
-    for (auto it = log_iterator(checkpoint_lsn); it.has_next(); it.next()) {
-        const LogRecord& rec = it.get();
-        if (rec.type == COMMIT) {
-            transaction_table.remove(rec.tx_id);
-        } else {
-            transaction_table[rec.tx_id].last_lsn = rec.lsn;
-        }
-    }
-}`
-        }
-      };
-
-      sampleButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          sampleButtons.forEach(b => {
-            b.classList.remove('active');
-            b.setAttribute('aria-pressed', 'false');
-          });
-          btn.classList.add('active');
-          btn.setAttribute('aria-pressed', 'true');
-
-          const key = btn.getAttribute('data-sample');
-          const data = sampleData[key];
-          if (data && directiveCourseTag && directiveQuoteText) {
-            directiveCourseTag.textContent = data.tag;
-            directiveQuoteText.textContent = data.quote;
-            directiveSourceVal.textContent = data.source;
-            directiveHashVal.textContent = data.hash;
-            studentDraftInput.value = data.draft;
-            draftSaveStatus.textContent = 'LOADED FROM SQLITE';
-            draftSaveStatus.style.color = 'var(--accent-blue)';
-            showToast(`Ingested sample: ${data.tag.split('·')[0].trim()}`);
-          }
-        });
-      });
-
-      if (btnCommitDraft) {
-        btnCommitDraft.addEventListener('click', () => {
-          draftSaveStatus.textContent = 'COMMITTED TO WAL';
-          draftSaveStatus.style.color = 'var(--state-ready)';
-          showToast('Draft committed to local SQLite WAL (0.18ms)');
-        });
-      }
-
-      // ─── 7. Filesystem Mutation Barrier Interactions ──────────────────
-      const btnApproveMutation = document.getElementById('btn-approve-mutation');
-      const btnRejectMutation = document.getElementById('btn-reject-mutation');
-      const barrierFeedback = document.getElementById('barrier-feedback');
-
-      if (btnApproveMutation && btnRejectMutation && barrierFeedback) {
-        btnApproveMutation.addEventListener('click', () => {
-          barrierFeedback.style.display = 'block';
-          barrierFeedback.style.color = 'var(--state-ready)';
-          barrierFeedback.textContent = '✓ Mutation committed to local disk with cryptographic hash.';
-          btnApproveMutation.disabled = true;
-          btnRejectMutation.disabled = true;
-          btnApproveMutation.style.opacity = '0.5';
-          btnRejectMutation.style.opacity = '0.5';
-          showToast('Approved: Patch written to local markdown file');
-        });
-
-        btnRejectMutation.addEventListener('click', () => {
-          barrierFeedback.style.display = 'block';
-          barrierFeedback.style.color = 'var(--state-danger)';
-          barrierFeedback.textContent = '✕ Mutation rejected by human operator. Zero filesystem bytes changed.';
-          btnApproveMutation.disabled = true;
-          btnRejectMutation.disabled = true;
-          btnApproveMutation.style.opacity = '0.5';
-          btnRejectMutation.style.opacity = '0.5';
-          showToast('Rejected: Filesystem protected');
-        });
-      }
-
-      // ─── 8. Companion Voice Sandbox & PTT Simulation ──────────────────
-      const btnPtt = document.getElementById('btn-ptt-toggle');
-      const waveformBox = document.getElementById('waveform-box');
-      const companionTranscript = document.getElementById('companion-transcript-text');
-      const btnExportMarkdown = document.getElementById('btn-export-markdown');
-
-      let isRecording = false;
-      const sampleTranscriptions = [
-        "\"Review CSE 2631 Dynamic Programming formulation for longest common subsequence: optimal substructure verified.\"",
-        "\"Note: Compare B-Tree latch crabbing vs lock coupling in memory-constrained workloads. Add reference to Gray & Reuter Chapter 7.\"",
-        "\"Task: Prepare valgrind memory leak trace before Friday 23:59. Verify zero leaked bytes in leaf node splits.\""
-      ];
-      let transcriptIndex = 0;
-
-      function startPTT() {
-        isRecording = true;
-        if (waveformBox) waveformBox.classList.add('recording');
-        if (btnPtt) {
-          btnPtt.textContent = 'Listening... (Release to Stop)';
-          btnPtt.style.background = 'var(--accent-blue)';
-          btnPtt.style.color = '#FFFFFF';
-        }
-        if (companionTranscript) {
-          companionTranscript.textContent = '[16kHz PCM CAPTURE ACTIVE] Streaming audio to local Whisper speech-to-text...';
-        }
-      }
-
-      function stopPTT() {
-        if (!isRecording) return;
-        isRecording = false;
-        if (waveformBox) waveformBox.classList.remove('recording');
-        if (btnPtt) {
-          btnPtt.textContent = 'Hold to Talk';
-          btnPtt.style.background = '';
-          btnPtt.style.color = '';
-        }
-        const text = sampleTranscriptions[transcriptIndex % sampleTranscriptions.length];
-        transcriptIndex++;
-        if (companionTranscript) {
-          companionTranscript.textContent = `[TRANSCRIBED IN 43ms] ${text}`;
-        }
-        showToast('Local voice transcription completed in 43ms');
-      }
-
-      if (btnPtt) {
-        // Pointer events for hold-to-talk
-        btnPtt.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          startPTT();
-        });
-        window.addEventListener('pointerup', () => {
-          if (isRecording) stopPTT();
-        });
-
-        // Click fallback for accessibility
-        btnPtt.addEventListener('click', (e) => {
-          if (isRecording) {
-            stopPTT();
-          } else {
-            startPTT();
-            setTimeout(() => {
-              if (isRecording) stopPTT();
-            }, 2500);
-          }
-        });
-      }
-
-      if (btnExportMarkdown) {
-        btnExportMarkdown.addEventListener('click', () => {
-          const content = `---
-collection: study_note
-course: CSE 2631
-title: Algorithms & Complexity Notes
-captured_at: ${new Date().toISOString()}
-provenance: local_whisper_ptt
-air_gap_verified: true
----
-
-# PSet 4: Latch Crabbing & Concurrency Invariants
-${companionTranscript ? companionTranscript.textContent : ''}
-`;
-          navigator.clipboard.writeText(content).then(() => {
-            showToast('Obsidian YAML Markdown copied to clipboard');
-          }).catch(() => {
-            showToast('Markdown ready for Obsidian vault');
-          });
-        });
-      }
-
-      // ─── 9. Knowledge Hub Collections Filter Matrix ───────────────────
-      const hubTabs = document.querySelectorAll('.hub-tab-btn');
-      const hubBoardTitle = document.getElementById('hub-board-title');
-      const hubBoardSpec = document.getElementById('hub-board-spec');
-      const hubRecordsContainer = document.getElementById('hub-records-container');
-
-      const hubCollections = {
-        ideas: {
-          title: 'COLLECTION: IDEAS & SPARKS',
-          spec: 'SQLITE TABLE: ideas_sparks · 3 ENTRIES',
-          records: [
-            { title: 'Asynchronous Latch Free B-Tree Variants', sub: 'Sparks memo: evaluate Masstree vs Blink-Tree for high-concurrency NVMe memory systems.', tag: 'CSE 2631' },
-            { title: 'Hardware Profiling with ETTrace on Linux Kernel', sub: 'Instruction-level IPC and cache misses profiling using perf events and eBPF.', tag: 'CSE 2221' },
-            { title: 'Differential Privacy Bounds for Student Submissions', sub: 'Laplace mechanism applied to anonymous peer review grade aggregation.', tag: 'CSE 2195' }
-          ]
-        },
-        notes: {
-          title: 'COLLECTION: STUDY NOTES',
-          spec: 'SQLITE TABLE: study_notes · 3 ENTRIES',
-          records: [
-            { title: 'Linear Algebra: Eigenvalue Decomposition & SVD', sub: 'Geometric interpretation of singular values, orthogonal matrices, and low-rank approximation.', tag: 'MATH 2011' },
-            { title: 'Computer Architecture: Tomasulo Algorithm Proof', sub: 'Reservation stations, common data bus (CDB) broadcasting, and out-of-order execution.', tag: 'CSE 2311' },
-            { title: 'Web Technologies: HTTP/3 & QUIC Multiplexing', sub: 'Head-of-line blocking elimination over UDP datagram transport layers.', tag: 'CSE 2411' }
-          ]
-        },
-        projects: {
-          title: 'COLLECTION: ENGINEERING PROJECTS',
-          spec: 'SQLITE TABLE: projects_registry · 2 ENTRIES',
-          records: [
-            { title: 'Custom SQLite Virtual Table Engine in Rust', sub: 'Implemented SQLite vtab interface for querying local directory files as relational tables.', tag: 'SYSTEMS' },
-            { title: 'Zero-Egress Multi-Agent Task Scheduler', sub: 'Formal FSM verification for dependency-directed agent orchestrator with SQLite durability.', tag: 'GRAVITAS CORE' }
-          ]
-        },
-        tasks: {
-          title: 'COLLECTION: PLAN TASKS & MILESTONES',
-          spec: 'SQLITE TABLE: plan_tasks · 3 ENTRIES',
-          records: [
-            { title: 'Submit CSE 2631 PSet 4 Valgrind Traces', sub: 'Deadline: Friday 23:59 EST · Reminder interval: 180 min · Status: Pending audit', tag: 'DUE IN 2 DAYS' },
-            { title: 'CSE 2221 Cache Coherency Simulation Review', sub: 'Deadline: Tuesday 17:00 EST · Reading: Hennessy & Patterson Section 5.4', tag: 'DUE IN 5 DAYS' },
-            { title: 'MATH 2011 Problem Set 6: Differential Operators', sub: 'Deadline: Next Monday 10:00 EST · Eigenvector orthogonal projections', tag: 'DUE IN 8 DAYS' }
-          ]
-        }
-      };
-
-      function renderHubCollection(key) {
-        const col = hubCollections[key];
-        if (!col || !hubRecordsContainer) return;
-        hubBoardTitle.textContent = col.title;
-        hubBoardSpec.textContent = col.spec;
-        hubRecordsContainer.innerHTML = '';
-
-        col.records.forEach(rec => {
-          const div = document.createElement('div');
-          div.className = 'hub-record-item';
-          div.innerHTML = `
-            <div class="hub-record-info">
-              <strong>${rec.title}</strong>
-              <span>${rec.sub}</span>
-            </div>
-            <span class="hub-record-tag">${rec.tag}</span>
-          `;
-          hubRecordsContainer.appendChild(div);
-        });
-      }
-
-      // Initial render of Ideas
-      renderHubCollection('ideas');
-
-      hubTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          hubTabs.forEach(t => {
-            t.classList.remove('active');
-            t.setAttribute('aria-selected', 'false');
-          });
-          tab.classList.add('active');
-          tab.setAttribute('aria-selected', 'true');
-          const key = tab.getAttribute('data-collection');
-          renderHubCollection(key);
-        });
-      });
-
-      // ─── 10. Verified Screenshot Gallery Controller ───────────────────
-      const galleryNavBtns = document.querySelectorAll('.gallery-nav-btn');
-      const galleryTargetImg = document.getElementById('gallery-target-image');
-      const galleryCaption = document.getElementById('gallery-caption-label');
-      const btnGalleryPrev = document.getElementById('btn-gallery-prev');
-      const btnGalleryNext = document.getElementById('btn-gallery-next');
-
-      let currentGalleryIndex = 0;
-      const galleryItems = Array.from(galleryNavBtns).map(btn => ({
-        btn,
-        src: btn.getAttribute('data-img'),
-        caption: btn.getAttribute('data-caption')
-      }));
-
-      function showGalleryItem(index) {
-        if (index < 0) index = galleryItems.length - 1;
-        if (index >= galleryItems.length) index = 0;
-        currentGalleryIndex = index;
-
-        galleryItems.forEach((item, i) => {
-          if (i === currentGalleryIndex) {
-            item.btn.classList.add('active');
-            item.btn.setAttribute('aria-selected', 'true');
-            if (galleryTargetImg) {
-              galleryTargetImg.style.opacity = '0.3';
-              setTimeout(() => {
-                galleryTargetImg.src = item.src;
-                galleryTargetImg.style.opacity = '1';
-              }, 120);
-            }
-            if (galleryCaption) {
-              galleryCaption.textContent = item.caption;
-            }
-          } else {
-            item.btn.classList.remove('active');
-            item.btn.setAttribute('aria-selected', 'false');
-          }
-        });
-      }
-
-      galleryNavBtns.forEach((btn, idx) => {
-        btn.addEventListener('click', () => {
-          showGalleryItem(idx);
-        });
-      });
-
-      if (btnGalleryPrev) {
-        btnGalleryPrev.addEventListener('click', () => {
-          showGalleryItem(currentGalleryIndex - 1);
-        });
-      }
-      if (btnGalleryNext) {
-        btnGalleryNext.addEventListener('click', () => {
-          showGalleryItem(currentGalleryIndex + 1);
-        });
-      }
-
-      // Keyboard left/right arrow gallery navigation when preview is in view
-      window.addEventListener('keydown', (e) => {
-        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-        if (e.key === 'ArrowLeft') {
-          showGalleryItem(currentGalleryIndex - 1);
-        } else if (e.key === 'ArrowRight') {
-          showGalleryItem(currentGalleryIndex + 1);
-        }
-      });
-
-      // ─── 11. Copy Install Command ─────────────────────────────────────
-      const btnCopyInstall = document.getElementById('btn-copy-install');
-      const installCmdText = document.getElementById('install-cmd-text');
-
-      if (btnCopyInstall && installCmdText) {
-        btnCopyInstall.addEventListener('click', () => {
-          navigator.clipboard.writeText(installCmdText.textContent).then(() => {
-            btnCopyInstall.textContent = 'Copied!';
-            showToast('Terminal install command copied to clipboard');
-            setTimeout(() => {
-              btnCopyInstall.textContent = 'Copy';
-            }, 2000);
-          }).catch(() => {
-            btnCopyInstall.textContent = 'Copied!';
-            setTimeout(() => {
-              btnCopyInstall.textContent = 'Copy';
-            }, 2000);
-          });
-        });
-      }
-
-      // ─── 12. Active Nav Link Intersection Observer ────────────────────
-      const navLinks = document.querySelectorAll('nav.site-nav a.nav-link');
-      const observedSections = document.querySelectorAll('section[id]');
-
-      if ('IntersectionObserver' in window && observedSections.length > 0) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const id = entry.target.getAttribute('id');
-              navLinks.forEach(link => {
-                if (link.getAttribute('href') === `#${id}`) {
-                  link.classList.add('active');
-                } else {
-                  link.classList.remove('active');
-                }
-              });
-            }
-          });
-        }, { rootMargin: '-20% 0px -70% 0px' });
-
-        observedSections.forEach(section => observer.observe(section));
-      }
-
-      // ─── 13. Performant WebGL Silk Undulation Background Shader ──────
-      const canvas = document.getElementById('silk-canvas');
-      if (!canvas) return;
-
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        canvas.style.display = 'none';
-        return;
-      }
-
-      const gl = canvas.getContext('webgl', { alpha: true, antialias: false, depth: false }) ||
-                 canvas.getContext('experimental-webgl', { alpha: true, antialias: false, depth: false });
-      if (!gl) {
-        canvas.style.display = 'none';
-        return;
-      }
-
+    if (gl) {
       const vsSource = `
-        attribute vec2 a_position;
-        varying vec2 v_uv;
+        attribute vec2 position;
+        varying vec2 vUv;
         void main() {
-          v_uv = (a_position + 1.0) * 0.5;
-          gl_Position = vec4(a_position, 0.0, 1.0);
+          vUv = position * 0.5 + 0.5;
+          gl_Position = vec4(position, 0.0, 1.0);
         }
       `;
 
       const fsSource = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        uniform float u_time;
-        varying vec2 v_uv;
+        precision highp float;
+        uniform float uTime;
+        uniform vec2 uResolution;
+        uniform vec2 uMouse;
+        uniform float uIsLight;
+        varying vec2 vUv;
+
+        float smin(float a, float b, float k) {
+          float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+          return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        mat3 rotateY(float angle) {
+          float c = cos(angle);
+          float s = sin(angle);
+          return mat3(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
+        }
+
+        mat3 rotateX(float angle) {
+          float c = cos(angle);
+          float s = sin(angle);
+          return mat3(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
+        }
+
+        float map(vec3 p) {
+          p = rotateY(uTime * 0.12 + (uMouse.x - 0.5) * 0.75) * rotateX(0.28 + (uMouse.y - 0.5) * 0.45) * p;
+          p.x -= 0.62;
+          float wave = sin(p.x * 2.5 + uTime * 0.6) * cos(p.y * 2.5 + uTime * 0.5) * 0.18;
+          float d1 = length(p + vec3(0.0, sin(uTime * 0.3) * 0.1, 0.0)) - 0.95 + wave;
+          vec2 q = vec2(length(p.xz) - 1.25, p.y);
+          float d2 = length(q) - (0.28 + sin(atan(p.z, p.x) * 3.0 + uTime * 0.8) * 0.12);
+          float d3 = length(p + vec3(sin(uTime * 0.4) * 1.1, cos(uTime * 0.5) * 0.8, sin(uTime * 0.3) * 0.6)) - 0.35;
+          return smin(smin(d1, d2, 0.45), d3, 0.35);
+        }
+
+        vec3 calcNormal(vec3 p) {
+          float h = 0.001;
+          vec2 k = vec2(1.0, -1.0);
+          return normalize(
+            k.xyy * map(p + k.xyy * h) +
+            k.yyx * map(p + k.yyx * h) +
+            k.yxy * map(p + k.yxy * h) +
+            k.xxx * map(p + k.xxx * h)
+          );
+        }
 
         void main() {
-          vec2 uv = vec2(v_uv.x, 1.0 - v_uv.y);
-          float t = u_time * 0.25; // Gentle, organic undulation
+          vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
+          vec3 ro = vec3(0.0, 0.0, 3.4);
+          vec3 rd = normalize(vec3(uv, -1.35));
 
-          // Smooth dual-harmonic displacement
-          float waveX = sin(uv.y * 3.4 + t) * 0.032 + cos(uv.x * 2.1 - t * 0.6) * 0.018;
-          float waveY = cos(uv.x * 2.6 + t * 0.7) * 0.028 + sin(uv.y * 2.2 - t * 0.4) * 0.016;
+          float t = 0.0;
+          float d = 0.0;
+          for (int i = 0; i < 54; i++) {
+            vec3 p = ro + rd * t;
+            d = map(p);
+            if (d < 0.001 || t > 7.0) break;
+            t += d * 0.75;
+          }
 
-          vec2 distortedUV = clamp(uv + vec2(waveX, waveY), vec2(0.005), vec2(0.995));
-          vec4 texColor = texture2D(u_image, distortedUV);
+          vec3 baseVoid = (uIsLight > 0.5) ? vec3(0.95, 0.94, 0.92) : vec3(0.031, 0.035, 0.043);
+          vec3 color = baseVoid;
 
-          // Deep horizon crest illumination
-          float crest = sin((distortedUV.x * 2.2 + distortedUV.y * 1.5) - t * 0.5) * 0.045;
-          texColor.rgb += vec3(crest * 0.25, crest * 0.55, crest * 0.95);
+          if (t < 7.0) {
+            vec3 p = ro + rd * t;
+            vec3 n = calcNormal(p);
+            vec3 keyLightDir = normalize(vec3(0.8, 1.2, 1.0));
+            float diff = max(dot(n, keyLightDir), 0.0);
+            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 3.5);
+            vec3 ref = reflect(rd, n);
+            float spec = pow(max(dot(ref, keyLightDir), 0.0), 32.0);
 
-          // Soft vignette darkening edges
-          vec2 d = v_uv - vec2(0.5);
-          float vignette = clamp(1.0 - dot(d, d) * 0.55, 0.0, 1.0);
-          texColor.rgb *= vignette;
+            vec3 baseColor = (uIsLight > 0.5) ? vec3(0.85, 0.88, 0.92) : vec3(0.04, 0.06, 0.09);
+            vec3 blueGleam = (uIsLight > 0.5) ? vec3(0.11, 0.33, 0.56) : vec3(0.22, 0.74, 0.97);
+            vec3 specularColor = vec3(0.9, 0.95, 1.0);
 
-          gl_FragColor = texColor;
+            color = baseColor + (diff * blueGleam * 0.45) + (fresnel * blueGleam * 0.85) + (spec * specularColor * 0.95);
+          }
+
+          float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
+          color += noise;
+
+          gl_FragColor = vec4(color, 1.0);
         }
       `;
 
-      function createShader(glCtx, type, source) {
-        const s = glCtx.createShader(type);
-        glCtx.shaderSource(s, source);
-        glCtx.compileShader(s);
-        return glCtx.getShaderParameter(s, glCtx.COMPILE_STATUS) ? s : null;
+      function compileShader(gl, src, type) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
       }
 
-      const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
-      const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
-      if (!vs || !fs) return;
-
       const program = gl.createProgram();
-      gl.attachShader(program, vs);
-      gl.attachShader(program, fs);
+      gl.attachShader(program, compileShader(gl, vsSource, gl.VERTEX_SHADER));
+      gl.attachShader(program, compileShader(gl, fsSource, gl.FRAGMENT_SHADER));
       gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+      gl.useProgram(program);
 
       const posBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
@@ -2523,76 +2002,288 @@ ${companionTranscript ? companionTranscript.textContent : ''}
         -1,  1,  1, -1,  1,  1
       ]), gl.STATIC_DRAW);
 
-      const aPosLoc = gl.getAttribLocation(program, 'a_position');
-      const uTimeLoc = gl.getUniformLocation(program, 'u_time');
-      const uImageLoc = gl.getUniformLocation(program, 'u_image');
+      const posAttr = gl.getAttribLocation(program, 'position');
+      gl.enableVertexAttribArray(posAttr);
+      gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
 
-      const texture = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-      const img = new Image();
-      img.src = 'assets/signature-blue-bg.png';
-      img.onload = () => {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-        startLoop();
-      };
-
-      function resizeCanvas() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        const w = Math.round(window.innerWidth * 0.45 * dpr);
-        const h = Math.round(window.innerHeight * 0.45 * dpr);
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-          gl.viewport(0, 0, w, h);
-        }
-      }
-      window.addEventListener('resize', resizeCanvas, { passive: true });
-      resizeCanvas();
-
-      let startTime = performance.now();
-      let animFrameId = null;
+      const uTimeLoc = gl.getUniformLocation(program, 'uTime');
+      const uResLoc = gl.getUniformLocation(program, 'uResolution');
+      const uMouseLoc = gl.getUniformLocation(program, 'uMouse');
+      const uIsLightLoc = gl.getUniformLocation(program, 'uIsLight');
 
       function render(now) {
-        gl.useProgram(program);
-        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-        gl.enableVertexAttribArray(aPosLoc);
-        gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0);
+        mouseX += (targetMouseX - mouseX) * 0.05;
+        mouseY += (targetMouseY - mouseY) * 0.05;
 
-        const elapsed = (now - startTime) / 1000;
-        gl.uniform1f(uTimeLoc, elapsed);
+        const isLight = document.body.classList.contains('light-theme') ? 1.0 : 0.0;
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(uImageLoc, 0);
+        gl.uniform1f(uTimeLoc, now * 0.001);
+        gl.uniform2f(uResLoc, canvas.width, canvas.height);
+        gl.uniform2f(uMouseLoc, mouseX, mouseY);
+        gl.uniform1f(uIsLightLoc, isLight);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-        animFrameId = requestAnimationFrame(render);
-      }
 
-      function startLoop() {
-        if (!animFrameId) {
-          animFrameId = requestAnimationFrame(render);
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          requestAnimationFrame(render);
         }
       }
+      requestAnimationFrame(render);
+    }
 
-      // Pause rendering when tab is hidden to save GPU/battery
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          if (animFrameId) {
-            cancelAnimationFrame(animFrameId);
-            animFrameId = null;
-          }
-        } else {
-          startLoop();
+    /* 2. Theme Toggle & Persistence */
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+
+    function setTheme(mode) {
+      if (mode === 'light') {
+        document.body.classList.add('light-theme');
+        themeIcon.textContent = '☾';
+        themeBtn.setAttribute('aria-label', 'Switch to Dark Theme');
+        localStorage.setItem('gravitas-theme', 'light');
+      } else {
+        document.body.classList.remove('light-theme');
+        themeIcon.textContent = '☼';
+        themeBtn.setAttribute('aria-label', 'Switch to Light Theme');
+        localStorage.setItem('gravitas-theme', 'dark');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('gravitas-theme');
+    if (savedTheme === 'light') setTheme('light');
+
+    themeBtn.addEventListener('click', () => {
+      const isLight = document.body.classList.contains('light-theme');
+      setTheme(isLight ? 'dark' : 'light');
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 't' || e.key === 'T') && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        const isLight = document.body.classList.contains('light-theme');
+        setTheme(isLight ? 'dark' : 'light');
+      }
+    });
+
+    /* 3. Mobile Navigation Drawer */
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileDrawer = document.getElementById('mobile-drawer');
+
+    function toggleMobileDrawer() {
+      const isOpen = mobileDrawer.classList.toggle('open');
+      mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      mobileToggle.textContent = isOpen ? '✕' : '☰';
+    }
+
+    mobileToggle.addEventListener('click', toggleMobileDrawer);
+
+    document.querySelectorAll('.mobile-drawer-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileDrawer.classList.remove('open');
+        mobileToggle.setAttribute('aria-expanded', 'false');
+        mobileToggle.textContent = '☰';
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+        toggleMobileDrawer();
+      }
+    });
+
+    /* 4. Real Product Showcase Gallery Navigation */
+    const galleryImg = document.getElementById('gallery-current-img');
+    const galleryCaption = document.getElementById('gallery-caption-text');
+    const galleryTabs = document.querySelectorAll('.gallery-tab');
+    const prevBtn = document.getElementById('btn-gallery-prev');
+    const nextBtn = document.getElementById('btn-gallery-next');
+
+    let currentGalleryIdx = 0;
+
+    function setGallerySlide(idx) {
+      if (idx < 0) idx = galleryTabs.length - 1;
+      if (idx >= galleryTabs.length) idx = 0;
+      currentGalleryIdx = idx;
+
+      galleryTabs.forEach((tab, i) => {
+        const isActive = i === idx;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) {
+          galleryImg.style.opacity = '0';
+          setTimeout(() => {
+            galleryImg.src = tab.getAttribute('data-img');
+            galleryCaption.textContent = tab.getAttribute('data-caption');
+            galleryImg.style.opacity = '1';
+          }, 150);
         }
       });
-    })();
+    }
+
+    galleryTabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => setGallerySlide(i));
+    });
+
+    prevBtn.addEventListener('click', () => setGallerySlide(currentGalleryIdx - 1));
+    nextBtn.addEventListener('click', () => setGallerySlide(currentGalleryIdx + 1));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') setGallerySlide(currentGalleryIdx - 1);
+      if (e.key === 'ArrowRight') setGallerySlide(currentGalleryIdx + 1);
+    });
+
+    /* 5. Study Guardian 3D Folder Intake Interaction */
+    const folderWrap = document.getElementById('interactive-folder');
+    const sampleTabs = document.querySelectorAll('.intake-tab-btn');
+    const diffDisplay = document.getElementById('diff-display');
+    const approveBtn = document.getElementById('btn-approve-mutation');
+    const rejectBtn = document.getElementById('btn-reject-mutation');
+    const feedbackEl = document.getElementById('barrier-feedback');
+
+    const sampleDiffs = {
+      algorithms: `
+<div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2631/schedule.md</div>
+<div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2631/schedule.md</div>
+<div class="diff-line add">+ ## Milestone: Implement Memoized Matrix Chain (Due Oct 22)</div>
+<div class="diff-line add">+ - [ ] Base cases: single matrix multiplications cost 0 operations</div>
+<div class="diff-line add">+ - [ ] Recurrence: m[i,j] = min(m[i,k] + m[k+1,j] + p[i-1]p[k]p[j])</div>
+      `,
+      systems: `
+<div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2221/schedule.md</div>
+<div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2221/schedule.md</div>
+<div class="diff-line add">+ ## Milestone: Latch Crabbing Protocol (Due Oct 26)</div>
+<div class="diff-line add">+ - [ ] Hold parent read-latch until child page is pinned & latched</div>
+<div class="diff-line add">+ - [ ] Upgrade to write-latch strictly during page split allocation</div>
+      `,
+      databases: `
+<div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2811/schedule.md</div>
+<div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2811/schedule.md</div>
+<div class="diff-line add">+ ## Milestone: B-Tree Buffer Manager WAL Checkpoint (Due Oct 28)</div>
+<div class="diff-line add">+ - [ ] Ensure dirty pages flushed before truncate commit checkpoint</div>
+<div class="diff-line add">+ - [ ] Verify frame eviction policy maintains least-recently-used pool</div>
+      `
+    };
+
+    folderWrap.addEventListener('click', () => {
+      folderWrap.classList.toggle('active-intake');
+    });
+
+    sampleTabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sampleTabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const key = btn.getAttribute('data-sample');
+        diffDisplay.innerHTML = sampleDiffs[key] || '';
+        folderWrap.classList.add('active-intake');
+        feedbackEl.style.display = 'none';
+        approveBtn.disabled = false;
+        rejectBtn.disabled = false;
+      });
+    });
+
+    approveBtn.addEventListener('click', () => {
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      feedbackEl.style.display = 'block';
+      feedbackEl.textContent = '✓ [ATOMIC COMMIT APPROVED] 1 file mutated locally. Lock released.';
+      feedbackEl.style.color = 'var(--accent-emerald)';
+      folderWrap.classList.remove('active-intake');
+    });
+
+    rejectBtn.addEventListener('click', () => {
+      approveBtn.disabled = true;
+      rejectBtn.disabled = true;
+      feedbackEl.style.display = 'block';
+      feedbackEl.textContent = '✕ [MUTATION REJECTED] Changes discarded. Working tree untouched.';
+      feedbackEl.style.color = '#F87171';
+      folderWrap.classList.remove('active-intake');
+    });
+
+    /* 6. Knowledge Hub Fancy Todo Checkbox Logic */
+    const taskItems = document.querySelectorAll('.task-item');
+    const completedCountEl = document.getElementById('completed-count');
+    const progressFillEl = document.getElementById('progress-fill');
+
+    function updateTaskProgress() {
+      const total = taskItems.length;
+      const checked = document.querySelectorAll('.task-item.checked').length;
+      completedCountEl.textContent = checked;
+      progressFillEl.style.width = (checked / total * 100) + '%';
+    }
+
+    taskItems.forEach(item => {
+      function toggle() {
+        const isChecked = item.classList.toggle('checked');
+        item.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+        updateTaskProgress();
+      }
+
+      item.addEventListener('click', toggle);
+      item.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
+
+    /* 7. Companion HUD Voice PTT Demo */
+    const pttBtn = document.getElementById('btn-ptt-trigger');
+    const waveVis = document.getElementById('wave-vis');
+    const pttStatus = document.getElementById('ptt-status-text');
+    const transcriptBox = document.getElementById('transcript-display');
+    const copyMdBtn = document.getElementById('btn-copy-markdown');
+
+    let isRecording = false;
+
+    function startRecording() {
+      isRecording = true;
+      waveVis.classList.add('active');
+      pttStatus.textContent = 'RECORDING 16kHz...';
+      pttStatus.style.color = '#F87171';
+      pttBtn.textContent = 'Release to Transcribe';
+      transcriptBox.textContent = '[Listening to microphone input...]';
+    }
+
+    function stopRecording() {
+      if (!isRecording) return;
+      isRecording = false;
+      waveVis.classList.remove('active');
+      pttStatus.textContent = 'TRANSCRIBED (LOCAL WHISPER)';
+      pttStatus.style.color = 'var(--accent-emerald)';
+      pttBtn.textContent = 'Hold to Talk (PTT)';
+      transcriptBox.textContent = '"In latch crabbing, you must lock the parent page before descending into the child node, releasing the parent only when the child is verified safe from split."';
+    }
+
+    pttBtn.addEventListener('mousedown', startRecording);
+    pttBtn.addEventListener('mouseup', stopRecording);
+    pttBtn.addEventListener('touchstart', startRecording);
+    pttBtn.addEventListener('touchend', stopRecording);
+
+    copyMdBtn.addEventListener('click', () => {
+      const text = `---
+source: companion-voice
+timestamp: ${new Date().toISOString()}
+course: CSE 2221
+verified: true
+---
+
+## Concurrency Note
+"In latch crabbing, you must lock the parent page before descending into the child node, releasing the parent only when the child is verified safe from split."`;
+      navigator.clipboard.writeText(text).then(() => {
+        copyMdBtn.textContent = '✓ Copied Markdown!';
+        setTimeout(() => { copyMdBtn.textContent = 'Copy Markdown to Clipboard'; }, 2000);
+      });
+    });
+
+    /* 8. Install Command Copy */
+    const copyInstallBtn = document.getElementById('btn-copy-install');
+    copyInstallBtn.addEventListener('click', () => {
+      const cmd = 'git clone https://github.com/Smarak-padhi/Gravitas.git && cd Gravitas && npm install && npm run build';
+      navigator.clipboard.writeText(cmd).then(() => {
+        copyInstallBtn.textContent = 'Copied!';
+        setTimeout(() => { copyInstallBtn.textContent = 'Copy Command'; }, 2000);
+      });
+    });
   </script>
 </body>
 </html>

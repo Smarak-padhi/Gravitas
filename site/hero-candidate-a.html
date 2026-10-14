@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRAVITAS — Hero Candidate A (Liquid Sculpture)</title>
+  <style>
+    @font-face {
+      font-family: 'Geist';
+      src: url('assets/fonts/Geist-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Geist Mono';
+      src: url('assets/fonts/GeistMono-Variable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    :root {
+      --bg-canvas: #08090B;
+      --bg-surface: #101317;
+      --border-subtle: #1C2128;
+      --text-primary: #F0EEE8;
+      --text-secondary: #9FA4A8;
+      --accent-blue: #38BDF8;
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* WebGL Canvas Background */
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Vignette & Contrast Overlay */
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: radial-gradient(circle at 75% 45%, transparent 20%, rgba(8, 9, 11, 0.75) 70%, rgba(8, 9, 11, 0.95) 100%),
+                  linear-gradient(to bottom, transparent 60%, var(--bg-canvas) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-container {
+      position: relative;
+      z-index: 2;
+      max-width: 1360px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 48px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: rgba(16, 19, 23, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-blue);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      backdrop-filter: blur(8px);
+      width: fit-content;
+    }
+
+    .hero-title {
+      font-size: clamp(44px, 6.5vw, 84px);
+      font-weight: 700;
+      line-height: 1.04;
+      letter-spacing: -0.04em;
+      max-width: 820px;
+      margin-bottom: 24px;
+      color: #FFFFFF;
+    }
+
+    .hero-title span.shimmer {
+      background: linear-gradient(90deg, #F0EEE8 0%, #FFFFFF 40%, #7DD3FC 50%, #F0EEE8 60%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 6s infinite ease-in-out;
+    }
+
+    @keyframes textShimmer {
+      0%, 30% { background-position: 100% 0%; }
+      70%, 100% { background-position: -100% 0%; }
+    }
+
+    .hero-description {
+      font-size: clamp(16px, 1.3vw, 20px);
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Liquid Metal Primary CTA */
+    .btn-liquid-metal {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: #08090B;
+      background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 50%, #CBD5E1 100%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .btn-liquid-metal::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 60%);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
+    }
+
+    .btn-liquid-metal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(56, 189, 248, 0.3), inset 0 1px 0 #FFFFFF;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 50%, #BAE6FD 100%);
+    }
+
+    .btn-liquid-metal:hover::before {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+
+    /* Interactive Hover Secondary CTA */
+    .btn-interactive-hover {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 24px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
+      color: #F0EEE8;
+      background: rgba(16, 19, 23, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+
+    .btn-interactive-hover .btn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--accent-blue);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+    }
+
+    .btn-interactive-hover .btn-text-init {
+      display: inline-block;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    }
+
+    .btn-interactive-hover .btn-text-reveal {
+      position: absolute;
+      left: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateX(12px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      color: #FFFFFF;
+    }
+
+    .btn-interactive-hover:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .btn-interactive-hover:hover .btn-dot {
+      transform: scale(2.2);
+      background: #FFFFFF;
+    }
+
+    .btn-interactive-hover:hover .btn-text-init {
+      transform: translateX(18px);
+      opacity: 0;
+    }
+
+    .btn-interactive-hover:hover .btn-text-reveal {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Performance HUD */
+    .perf-badge {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(8, 9, 11, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #9FA4A8;
+      z-index: 100;
+      display: flex;
+      gap: 12px;
+      backdrop-filter: blur(8px);
+    }
+    .perf-badge span.val { color: #38BDF8; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .hero-container { padding: 0 24px; }
+      .hero-title { font-size: 40px; }
+      .hero-actions { flex-direction: column; align-items: stretch; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #hero-canvas { display: block; }
+      .shimmer { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- WebGL 3D Liquid Sculpture Canvas -->
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-container">
+    <div class="hero-badge">Candidate A · 3D Liquid Sculpture</div>
+    <h1 class="hero-title">
+      The sovereign operating system for <span class="shimmer">engineering minds</span>.
+    </h1>
+    <p class="hero-description">
+      GRAVITAS unifies academic task graphs, local SQLite study vaults, and non-destructive filesystem mutations behind a verified human approval barrier.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-liquid-metal" id="btn-primary-a">Explore Architecture</button>
+      <button class="btn-interactive-hover" id="btn-secondary-a">
+        <span class="btn-dot"></span>
+        <span class="btn-text-init">Interactive Demo</span>
+        <span class="btn-text-reveal">Launch Live Demo →</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="perf-badge">
+    <div>FPS: <span class="val" id="fps-val">60</span></div>
+    <div>ENGINE: <span class="val">Raymarched 3D Sculpture</span></div>
+  </div>
+
+  <script>
+    // WebGL Raymarched Liquid Sculpture Implementation
+    const canvas = document.getElementById('hero-canvas');
+    const gl = canvas.getContext('webgl', { antialias: true, powerPreference: 'high-performance' });
+
+    let mouseX = 0.5, mouseY = 0.5;
+    let targetMouseX = 0.5, targetMouseY = 0.5;
+
+    window.addEventListener('mousemove', (e) => {
+      targetMouseX = e.clientX / window.innerWidth;
+      targetMouseY = 1.0 - (e.clientY / window.innerHeight);
+    });
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const vsSource = `
+      attribute vec2 position;
+      varying vec2 vUv;
+      void main() {
+        vUv = position * 0.5 + 0.5;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision highp float;
+      uniform float uTime;
+      uniform vec2 uResolution;
+      uniform vec2 uMouse;
+      varying vec2 vUv;
+
+      // Smooth Min for Organic Metasurface Blending
+      float smin(float a, float b, float k) {
+        float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+        return mix(b, a, h) - k * h * (1.0 - h);
+      }
+
+      // 3D Rotation Matrix
+      mat3 rotateY(float angle) {
+        float c = cos(angle);
+        float s = sin(angle);
+        return mat3(
+          c, 0.0, s,
+          0.0, 1.0, 0.0,
+          -s, 0.0, c
+        );
+      }
+
+      mat3 rotateX(float angle) {
+        float c = cos(angle);
+        float s = sin(angle);
+        return mat3(
+          1.0, 0.0, 0.0,
+          0.0, c, -s,
+          0.0, s, c
+        );
+      }
+
+      // Signed Distance Field: Organic Sculptural Ribbon / Torus Blend
+      float map(vec3 p) {
+        // Slow rotation + mouse parallax
+        p = rotateY(uTime * 0.12 + (uMouse.x - 0.5) * 0.8) * rotateX(0.3 + (uMouse.y - 0.5) * 0.5) * p;
+
+        // Shift slightly right on desktop
+        p.x -= 0.65;
+        
+        // Fluid wave modulation
+        float wave = sin(p.x * 2.5 + uTime * 0.6) * cos(p.y * 2.5 + uTime * 0.5) * 0.18;
+        
+        // Sphere 1 (core mass)
+        float d1 = length(p + vec3(0.0, sin(uTime * 0.3) * 0.1, 0.0)) - 0.95 + wave;
+        
+        // Torus ribbon wrapping around core
+        vec2 q = vec2(length(p.xz) - 1.25, p.y);
+        float d2 = length(q) - (0.28 + sin(atan(p.z, p.x) * 3.0 + uTime * 0.8) * 0.12);
+
+        // Third organic satellite droplet
+        float d3 = length(p + vec3(sin(uTime * 0.4) * 1.1, cos(uTime * 0.5) * 0.8, sin(uTime * 0.3) * 0.6)) - 0.35;
+
+        // Smooth organic union
+        return smin(smin(d1, d2, 0.45), d3, 0.35);
+      }
+
+      vec3 calcNormal(vec3 p) {
+        float h = 0.001;
+        vec2 k = vec2(1.0, -1.0);
+        return normalize(
+          k.xyy * map(p + k.xyy * h) +
+          k.yyx * map(p + k.yyx * h) +
+          k.yxy * map(p + k.yxy * h) +
+          k.xxx * map(p + k.xxx * h)
+        );
+      }
+
+      void main() {
+        vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
+        
+        // Camera setup
+        vec3 ro = vec3(0.0, 0.0, 3.4);
+        vec3 rd = normalize(vec3(uv, -1.35));
+
+        float t = 0.0;
+        float d = 0.0;
+        for (int i = 0; i < 64; i++) {
+          vec3 p = ro + rd * t;
+          d = map(p);
+          if (d < 0.001 || t > 7.0) break;
+          t += d * 0.7; // Relaxed ray step for high fidelity
+        }
+
+        vec3 color = vec3(0.031, 0.035, 0.043); // Deep basalt void
+
+        if (t < 7.0) {
+          vec3 p = ro + rd * t;
+          vec3 n = calcNormal(p);
+          
+          // Lighting: Key Light (cool cyan-blue), Rim Light, Ambient
+          vec3 keyLightDir = normalize(vec3(0.8, 1.2, 1.0));
+          vec3 fillLightDir = normalize(vec3(-1.0, -0.5, -0.5));
+          
+          float diff = max(dot(n, keyLightDir), 0.0);
+          float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 3.5);
+          
+          vec3 ref = reflect(rd, n);
+          float spec = pow(max(dot(ref, keyLightDir), 0.0), 32.0);
+
+          // Sculptural Material: Obsidian with Deep Cobalt Blue Specular
+          vec3 baseColor = vec3(0.04, 0.06, 0.09);
+          vec3 blueGleam = vec3(0.22, 0.74, 0.97); // 38BDF8
+          vec3 specularColor = vec3(0.9, 0.95, 1.0);
+
+          color = baseColor + (diff * blueGleam * 0.45) + (fresnel * blueGleam * 0.85) + (spec * specularColor * 0.95);
+        }
+
+        // Subtle film grain
+        float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
+        color += noise;
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+
+    function compileShader(gl, source, type) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+      }
+      return shader;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, compileShader(gl, vsSource, gl.VERTEX_SHADER));
+    gl.attachShader(program, compileShader(gl, fsSource, gl.FRAGMENT_SHADER));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    const posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1,
+       1, -1,
+      -1,  1,
+      -1,  1,
+       1, -1,
+       1,  1
+    ]), gl.STATIC_DRAW);
+
+    const posAttr = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(posAttr);
+    gl.vertexAttribPointer(posAttr, 2, gl.FLOAT, false, 0, 0);
+
+    const uTimeLoc = gl.getUniformLocation(program, 'uTime');
+    const uResLoc = gl.getUniformLocation(program, 'uResolution');
+    const uMouseLoc = gl.getUniformLocation(program, 'uMouse');
+
+    // Smooth FPS Meter
+    let lastTime = performance.now();
+    let frameCount = 0;
+    const fpsEl = document.getElementById('fps-val');
+
+    function render(currentTime) {
+      frameCount++;
+      if (currentTime - lastTime >= 1000) {
+        fpsEl.textContent = frameCount;
+        frameCount = 0;
+        lastTime = currentTime;
+      }
+
+      // Smooth mouse interpolation
+      mouseX += (targetMouseX - mouseX) * 0.05;
+      mouseY += (targetMouseY - mouseY) * 0.05;
+
+      gl.uniform1f(uTimeLoc, currentTime * 0.001);
+      gl.uniform2f(uResLoc, canvas.width, canvas.height);
+      gl.uniform2f(uMouseLoc, mouseX, mouseY);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      // Check reduced motion
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        requestAnimationFrame(render);
+      }
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "id": "skiper-ui",
+  "name": "Skiper UI Component Gallery",
+  "url": "https://skiper-ui.com/",
+  "category": "gallery",
+  "timestamp": "2026-10-14T04:38:11.088Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": null,
+  "iframeHtmlLength": 179079,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)"
+  ],
+  "transitions": [
+    "all"
+  ],
+  "extractedClasses": [],
+  "previewHtmlSample": "<div hidden=\"\"><!--$--><!--/$--></div><script>((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=[\"light\",\"dark\"];function k(b){var c;(Array.isArray(a)?a:[a]).forEach(a=>{let c=\"class\"===a,d=c&&f?e.map(a=>f[a]||a):e;c?(i.classList.remove(...d),i.classList.add(f&&f[b]?f[b]:b)):i.setAttribute(a,b)}),c=b,h&&j.includes(c)&&(i.style.colorScheme=c)}if(d)k(d);else try{let a=localStorage.getItem(b)||c,d=g&&\"system\"===a?window.matchMedia(\"(prefers-color-scheme: dark)\").matches?\"dark\":\"light\":a;k(d)}catch(a){}})(\"class\",\"theme\",\"system\",null,[\"light\",\"dark\"],null,true,true)</script><div><div class=\"fixed left-1/2 top-0 z-[90] flex w-screen -translate-x-1/2 justify-center overflow-hidden md:w-full md:max-w-3xl\" style=\"height:63px\"><div class=\"absolute flex h-[100dvh] w-full flex-col gap-px px-3 py-2\" style=\"gap:3px\"><nav class=\"bg-muted shadow-glass border-muted2 flex w-full items-center justify-between rounded-2xl border px-5 py-2.5 pr-2.5 backdrop-blur-md\"><div class=\"fc gap-2 py-1 text-sm font-semibold\"><img src=\"https://cdn.skiper-ui.com/logos/logo.svg\" alt=\"Logo\" class=\"size-6\"><a href=\"/\">SKIPER-UI</a></div><div class=\"fc gap-4 text-[13px]\"><a class=\"hidden rounded-md opacity-50 outline-offset-4 outline-sky-500 hover:opacity-100 focus-visible:outline-1 md:block\" href=\"/pricing\">Pricing</a><a class=\"re text-foreground/50 hover:text-foreground hidden gap-1 rounded-md outline-offset-4 outline-sky-500 focus-visible:outline-1 md:flex\" href=\"/components\">Components</a><div class=\"fle",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\skiper-ui.webm",
+  "notes": ""
+}

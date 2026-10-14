@@ -1,0 +1,45 @@
+{
+  "id": "prisma-hero",
+  "name": "Prisma Hero",
+  "url": "https://21st.dev/@rahil1202/components/prisma-hero",
+  "category": "hero-background",
+  "timestamp": "2026-10-14T04:39:17.194Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": "https://cdn.21st.dev/rahil1202/prisma-hero/default/bundle.1776747545948.html?theme=light",
+  "iframeHtmlLength": 362439,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.145 0 0)",
+    "oklch(1 0 0)",
+    "rgba(225, 224, 204, 0.8)",
+    "rgb(225, 224, 204)",
+    "oklab(0.205 0 0 / 0.7)",
+    "oklch(0.205 0 0)"
+  ],
+  "transitions": [
+    "all",
+    "color 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), outline-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), fill 0.15s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-from 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-via 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-to 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+    "0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+    "transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), translate 0.15s cubic-bezier(0.4, 0, 0.2, 1), scale 0.15s cubic-bezier(0.4, 0, 0.2, 1), rotate 0.15s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [
+    "-translate-x-1/2",
+    "transition-colors",
+    "transition-all",
+    "hover:gap-3",
+    "transition-transform",
+    "group-hover:scale-110"
+  ],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><section class=\"h-screen w-full\"><div class=\"relative h-full w-full overflow-hidden rounded-2xl md:rounded-[2rem]\"><video autoplay=\"\" loop=\"\" playsinline=\"\" class=\"absolute inset-0 h-full w-full object-cover\" src=\"https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4\"></video><div class=\"noise-overlay pointer-events-none absolute inset-0 opacity-[0.7] mix-blend-overlay\"></div><div class=\"pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60\"></div><nav class=\"absolute left-1/2 top-0 z-20 -translate-x-1/2\"><div class=\"flex items-center gap-3 rounded-b-2xl bg-black px-4 py-2 sm:gap-6 md:gap-12 md:rounded-b-3xl md:px-8 lg:gap-14\"><a href=\"#\" class=\"text-[10px] transition-colors sm:text-xs md:text-sm\" style=\"color: rgba(225, 224, 204, 0.8);\">Our story</a><a href=\"#\" class=\"text-[10px] transition-colors sm:text-xs md:text-sm\" style=\"color: rgba(225, 224, 204, 0.8);\">Collective</a><a href=\"#\" class=\"text-[10px] transition-colors sm:text-xs md:text-sm\" style=\"color: rgba(225, 224, 204, 0.8);\">Workshops</a><a href=\"#\" class=\"text-[10px] transition-colors sm:text-xs md:text-sm\" style=\"color: rgba(225, 224, 204, 0.8);\">Programs</a><a href=\"#\" class=\"text-[10px] transition-colors sm:text-xs md:text-sm\" style=\"color: r",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\prisma-hero.webm",
+  "notes": ""
+}

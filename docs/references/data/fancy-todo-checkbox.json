@@ -1,0 +1,40 @@
+{
+  "id": "fancy-todo-checkbox",
+  "name": "Fancy Todo Checkbox",
+  "url": "https://docs.21st.dev/@originui/components/checkbox/fancy-todo-checkbox",
+  "category": "control",
+  "timestamp": "2026-10-14T04:40:38.443Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": "https://cdn.21st.dev/bundled/660.html?theme=light",
+  "iframeHtmlLength": 357374,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "rgb(9, 9, 11)",
+    "rgb(255, 255, 255)",
+    "rgb(250, 250, 250)",
+    "rgb(16, 185, 129)",
+    "rgb(113, 113, 122)"
+  ],
+  "transitions": [
+    "all"
+  ],
+  "extractedClasses": [
+    "after:-translate-y-1/2",
+    "after:scale-x-0",
+    "after:transition-transform",
+    "after:ease-in-out",
+    "peer-data-[state=checked]:after:scale-x-100"
+  ],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"relative flex items-center justify-center h-screen w-full m-auto p-16 bg-background text-foreground\"><div class=\"absolute lab-bg inset-0 size-full\"><div class=\"absolute inset-0 bg-[radial-gradient(#00000021_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff22_1px,transparent_1px)]\"></div></div><div class=\"flex w-full justify-center relative\"><div class=\"flex items-center gap-2\"><button type=\"button\" role=\"checkbox\" aria-checked=\"true\" data-state=\"checked\" value=\"on\" class=\"peer size-4 shrink-0 border border-input shadow-sm shadow-black/5 outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring/70 disabled:cursor-not-allowed disabled:opacity-50 data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary data-[state=checked]:text-primary-foreground data-[state=indeterminate]:text-primary-foreground rounded-full data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500\" id=\"_r_0_\"><span data-state=\"checked\" class=\"flex items-center justify-center text-current\" style=\"pointer-events: none;\"><svg width=\"9\" height=\"9\" viewBox=\"0 0 9 9\" fill=\"currentcolor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\fancy-todo-checkbox.webm",
+  "notes": ""
+}

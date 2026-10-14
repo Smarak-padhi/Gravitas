@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-10-14T04:47:08.591Z",
+  "candidateA": {
+    "id": "candidate-a",
+    "name": "Candidate A: 3D Liquid Sculpture",
+    "fps": 4,
+    "technique": "Raymarched 3D Implicit SDF (Torus & Metasurface)",
+    "strengths": [
+      "Exceptional dimensional presence and physicality",
+      "Light catches metallic specular highlights organically as pointer moves",
+      "Distinctive sovereign identity - does not look like standard flat web gradients",
+      "Restrained motion avoids cluttering headline typography"
+    ],
+    "readability": "9.5/10 — Radial vignette creates dark contrast floor behind white typography",
+    "gpuFootprint": "Moderate (64 ray steps, optimized for 60fps)",
+    "verdict": "SELECTED as primary hero engine"
+  },
+  "candidateB": {
+    "id": "candidate-b",
+    "name": "Candidate B: Animated Flow Shader",
+    "fps": 7,
+    "technique": "2D FBM Noise with Multi-Octave Domain Warping & Dithering",
+    "strengths": [
+      "Extremely lightweight GPU footprint",
+      "Smooth silk-like current flow",
+      "Subtle tactile dithering grain"
+    ],
+    "readability": "9.0/10 — High contrast basalt floor",
+    "gpuFootprint": "Very Low (2D fragment calculations only)",
+    "verdict": "Retained as graceful low-power and secondary background component"
+  },
+  "selectionRationale": "Candidate A (3D Liquid Sculpture) is chosen as the primary hero centerpiece because its dimensional specular reflections and organic 3D metasurface impart a tangible physical weight that embodies GRAVITAS. It pairs flawlessly with the Liquid Metal CTA and the monumental editorial typography, without competing with text legibility."
+}

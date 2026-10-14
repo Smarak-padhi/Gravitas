@@ -1,0 +1,41 @@
+{
+  "id": "liquid-sculpture-hero",
+  "name": "Liquid Sculpture Hero",
+  "url": "https://docs.21st.dev/community/components?preview=%2F%40gughigug%2Fcomponents%2Fliquid-sculpture-hero",
+  "category": "hero-background",
+  "timestamp": "2026-10-14T04:39:31.451Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": null,
+  "iframeHtmlLength": 2199887,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": true,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "\"General Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif, \"General Sans\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", sans-serif",
+    "\"General Sans\", system-ui, -apple-system, sans-serif"
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.141 0.004 285.824)",
+    "oklch(1 0 0)",
+    "oklch(0.967 0 0)"
+  ],
+  "transitions": [
+    "all",
+    "0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    "color 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), outline-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), text-decoration-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), fill 0.15s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-from 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-via 0.15s cubic-bezier(0.4, 0, 0.2, 1), --tw-gradient-to 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), translate 0.15s cubic-bezier(0.4, 0, 0.2, 1), scale 0.15s cubic-bezier(0.4, 0, 0.2, 1), rotate 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.15s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.15s cubic-bezier(0.4, 0, 0.2, 1), display 0.15s cubic-bezier(0.4, 0, 0.2, 1), content-visibility 0.15s cubic-bezier(0.4, 0, 0.2, 1), overlay 0.15s cubic-bezier(0.4, 0, 0.2, 1), pointer-events 0.15s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [
+    "transition-all",
+    "duration-200",
+    "transition",
+    "active:scale-[0.97]",
+    "hover:bg-foreground/10"
+  ],
+  "previewHtmlSample": "<span data-radix-focus-guard=\"\" tabindex=\"0\" style=\"outline: none; opacity: 0; position: fixed; pointer-events: none;\" data-aria-hidden=\"true\" aria-hidden=\"true\"></span><div hidden=\"\" data-aria-hidden=\"true\" aria-hidden=\"true\"><!--$--><!--/$--></div><noscript data-aria-hidden=\"true\" aria-hidden=\"true\"><iframe src=\"https://www.googletagmanager.com/ns.html?id=GTM-T76WQSTW\" height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe><img height=\"1\" width=\"1\" style=\"display:none\" alt=\"\" src=\"https://www.facebook.com/tr?id=27506327459026405&amp;ev=PageView&amp;noscript=1\"/></noscript><svg aria-hidden=\"true\" focusable=\"false\" width=\"0\" height=\"0\" style=\"position:absolute;width:0;height:0;overflow:hidden\" data-aria-hidden=\"true\"><defs><filter id=\"avatar-grain\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\"><feTurbulence type=\"fractalNoise\" baseFrequency=\"0.9\" numOctaves=\"3\" stitchTiles=\"stitch\"></feTurbulence><feColorMatrix type=\"saturate\" values=\"0\"></feColorMatrix></filter></defs></svg><div class=\"h-full\"><script>!function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){c.add('dark')}else{c.add('light')}}else if(e){c.add(e|| '')}}catch(e){}}()</script><div style=\"--sidebar-width:16rem;--sidebar-width-icon:3rem\" class=\"group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar h-sv",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\liquid-sculpture-hero.webm",
+  "notes": ""
+}

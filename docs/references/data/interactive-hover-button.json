@@ -1,0 +1,50 @@
+{
+  "id": "interactive-hover-button",
+  "name": "Interactive Hover Button",
+  "url": "https://docs.21st.dev/@dillionverma/components/interactive-hover-button",
+  "category": "button",
+  "timestamp": "2026-10-14T04:40:52.359Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": "https://cdn.21st.dev/bundled/969.html?theme=light",
+  "iframeHtmlLength": 331392,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "rgb(9, 9, 11)",
+    "rgb(255, 255, 255)",
+    "rgb(250, 250, 250)",
+    "rgb(24, 24, 27)"
+  ],
+  "transitions": [
+    "all",
+    "0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+  ],
+  "extractedClasses": [
+    "translate-x-1",
+    "transition-all",
+    "duration-300",
+    "group-hover:translate-x-12",
+    "group-hover:opacity-0",
+    "translate-x-12",
+    "group-hover:-translate-x-1",
+    "group-hover:opacity-100",
+    "scale-[1]",
+    "group-hover:left-[0%]",
+    "group-hover:top-[0%]",
+    "group-hover:h-full",
+    "group-hover:w-full",
+    "group-hover:scale-[1.8]",
+    "group-hover:bg-primary"
+  ],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"relative flex items-center justify-center h-screen w-full m-auto p-16 bg-background text-foreground\"><div class=\"absolute lab-bg inset-0 size-full\"><div class=\"absolute inset-0 bg-[radial-gradient(#00000021_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff22_1px,transparent_1px)]\"></div></div><div class=\"flex w-full justify-center relative\"><div class=\"relative justify-center\"><button class=\"group relative w-32 cursor-pointer overflow-hidden rounded-full border bg-background p-2 text-center font-semibold\"><span class=\"inline-block translate-x-1 transition-all duration-300 group-hover:translate-x-12 group-hover:opacity-0\">Button</span><div class=\"absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-primary-foreground opacity-0 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-100\"><span>Button</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-arrow-right\" aria-hidden=\"true\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\"></path></svg></div><div class=\"absolute left-[20%] top-[40%] h-2 w-2 scale-[1] rounded-lg bg-primary transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:bg-primary\"></div></button></div></div></div></div>\n  <scr",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\interactive-hover-button.webm",
+  "notes": ""
+}

@@ -1,0 +1,33 @@
+{
+  "id": "folder-interaction",
+  "name": "Folder Interaction",
+  "url": "https://docs.21st.dev/community/components?q=interactions&preview=%2F%400xUrvish%2Fcomponents%2Ffolder-interaction",
+  "category": "interaction",
+  "timestamp": "2026-10-14T04:41:43.071Z",
+  "status": 200,
+  "technique": "SVG + CSS Transitions",
+  "iframeUrl": "https://cdn.21st.dev/larsen66/folder-interaction/default/bundle.1773297116494.html?theme=light&pv=1",
+  "iframeHtmlLength": 378157,
+  "canvasCount": 0,
+  "hasWebGL": false,
+  "hasThreeJs": false,
+  "hasSvgAnimation": false,
+  "hasCssAnimation": false,
+  "fontFamilies": [
+    "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\""
+  ],
+  "colors": [
+    "rgb(0, 0, 0)",
+    "oklch(0.145 0 0)",
+    "oklch(1 0 0)",
+    "rgb(24, 21, 27)",
+    "rgb(207, 205, 224)"
+  ],
+  "transitions": [
+    "all"
+  ],
+  "extractedClasses": [],
+  "previewHtmlSample": "\n    <div id=\"root\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"w-screen min-h-screen flex justify-center items-center\"><div class=\"flex items-center justify-center w-full min-h-screen bg-background p-8\"><div class=\"w-full  flex justify-center items-center\"><div class=\"w-80 h-52 relative wrapper\"><div class=\"folder relative w-[87.5%] mx-auto items-center h-full flex justify-center \" style=\"background: rgb(24, 21, 27); box-shadow: rgba(79, 73, 85, 0.3) 0px 0px 15.7px 16px inset; border-radius: 10px;\"><div class=\"absolute top-2 w-32 h-fit rounded-xl z-10 shadow-md\" style=\"transform: translateX(-38px) translateY(2px) rotate(-3deg);\"><div class=\"w-full h-full bg-gradient-to-b from-[#E8E7F0] to-[#DCDAE8] rounded-xl shadow-lg p-3 sm:p-4\"><div class=\"flex flex-col gap-1.5 sm:gap-2\"><div class=\"w-full h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div><div class=\"flex gap-1.5 sm:gap-2\"><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div></div><div class=\"flex gap-1.5 sm:gap-2\"><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div></div><div class=\"flex gap-1.5 sm:gap-2\"><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div></div><div class=\"flex gap-1.5 sm:gap-2\"><div class=\"flex-1 h-1 sm:h-1.5 bg-[#CFCDE0] rounded-full\"></div>",
+  "videoPath": "C:\\Users\\smara\\Desktop\\Multi-agent\\docs\\references\\videos\\folder-interaction.webm",
+  "notes": ""
+}
