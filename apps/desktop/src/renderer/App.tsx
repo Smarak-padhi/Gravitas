@@ -450,8 +450,8 @@ export const App: React.FC = () => {
       setBuddyThought("Transcribing speech offline...")
       try {
         const res = await bridge.stopPushToTalk?.('session_ptt')
-        if (res?.transcribedText) {
-          handleSendMessage(res.transcribedText)
+        if (res?.transcript) {
+          handleSendMessage(res.transcript)
         } else {
           setBuddyExpression('idle')
           setBuddyThought("Voice input complete.")
