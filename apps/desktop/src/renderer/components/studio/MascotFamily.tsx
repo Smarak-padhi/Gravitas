@@ -19,6 +19,14 @@ export interface MascotBubbleData {
   timestamp?: number
 }
 
+export const MASCOT_REGISTRY: Record<MascotId, { name: string; role: string; color: string }> = {
+  grav: { name: 'Grav', role: 'Companion & Coordinator', color: '#F4A261' },
+  ada: { name: 'Ada', role: 'Study & Coursework Specialist', color: '#81B29A' },
+  pixel: { name: 'Pixel', role: 'Visual & UI Design Specialist', color: '#FF7B72' },
+  cipher: { name: 'Cipher', role: 'Backend, Systems & DB Specialist', color: '#4A89C8' },
+  scout: { name: 'Scout', role: 'Research & Source Specialist', color: '#E9C46A' },
+}
+
 interface MascotProps {
   state: MascotState
   bubble: MascotBubbleData | null
