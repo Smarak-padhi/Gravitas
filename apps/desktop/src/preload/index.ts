@@ -257,6 +257,10 @@ const bridge: GravitasDesktopBridge = {
       ipcRenderer.removeListener('gravitas:theme-changed', sub)
     }
   },
+
+  openApprovedExternal: async (url: string) => {
+    return ipcRenderer.invoke('gravitas:open-approved-external', url)
+  },
 }
 
 contextBridge.exposeInMainWorld('gravitasDesktop', bridge)

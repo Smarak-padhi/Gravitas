@@ -1,56 +1,90 @@
-# Product
+# GRAVITAS 2.0 — Canonical Product Charter
 
-<!-- impeccable:product-schema 1 -->
+<!-- gravitas:product-charter 2.0 -->
 
-## Platform
+## 1. Product Mission & Identity
 
-web
+**GRAVITAS 2.0** transforms GRAVITAS from a corporate-feeling productivity dashboard into a **private, delightful personal engineering studio** and spatial workspace.
 
-## Users
+The primary product goal is **staying installed, cherished, and indispensable** — never replaced during cleanup. It serves a single owner on local hardware, creating an intimate, cozy, creative environment where real engineering work, focused study, deep note-taking, project tracking, and relaxed recovery coexist seamlessly.
 
-University STEM students, researchers, and self-directed knowledge workers managing high cognitive-demand workflows across study, coursework, projects, and personal tasks. Specifically designed for a computer science / engineering student handling rigorous course loads (e.g., modern computing systems, algorithms, database systems, linear algebra, microprocessors) who needs local-first organization without cloud leakage or paid SaaS dependencies.
+---
 
-## Product Purpose
+## 2. Target Platform & Hardware Envelope
 
-GRAVITAS is a local-first, distraction-free study guardian and multi-agent command center. It unifies natural-language task capture, voice dictation, semester coursework organization, local markdown knowledge management, and automated study reminders into a private, high-performance desktop experience. Success means zero cognitive clutter, total data sovereignty, zero required cloud subscriptions, and an immediate, reliable assistant accessible in under 100 milliseconds via global shortcut.
+- **Target Device**: Lenovo IdeaPad Gaming 3 (Intel Core i5-12th Gen, 16 GB RAM, NVIDIA GeForce RTX 3050 Laptop GPU, Windows 11 x64).
+- **Resource Constraints**:
+  - Idle baseline: ≤ 200 MB RAM across all desktop processes.
+  - Studio mode with 2D mascot animations: 60 FPS, ≤ 2% background CPU.
+  - Optional 3D Office mode: Lazy-loaded on demand, WebGL loop paused when unmounted or hidden, strict 60 FPS cap.
+  - Local speech-to-text: Offline-first with on-demand Whisper base/tiny inference, offloaded when inactive.
+- **Data Sovereignty**: 100% single-owner local-first SQLite persistence (`%APPDATA%\gravitas\`). Zero required cloud accounts or telemetry.
 
-## Positioning
+---
 
-Unlike cloud productivity suites (Notion, Todoist, Linear) that harvest data and lock users into proprietary clouds, GRAVITAS runs 100% locally on user hardware. It preserves raw user transcripts verbatim alongside extracted structured tasks, monitors an offline iCloud Drive inbox for phone-to-desktop capture without internet relay, and maintains complete compatibility with local Markdown tools (such as Obsidian) without requiring proprietary database sync or accounts.
+## 3. Core Product Pillars
 
-## Operating Context
+### 3.1 The Living Studio & 2D Mascot Family
+- **Studio-First Environment**: An illustrated, cozy, tactile studio replaces rigid SaaS tables and cold dashboard cards.
+- **Original Mascot Family led by Grav**: Expressive 2D characters with distinct personalities, authentic micro-animations, and genuine activity-driven behaviors — no generic AI orbs or corporate chatbots:
+  - **Grav (Studio Lead & Personal Companion)**: Orchestrates focus, morning briefings, study schedules, and system commands.
+  - **Ada (Study & Knowledge Guardian)**: Manages university courses, assignment deadlines, lecture notes, and active recall.
+  - **Cipher (Backend & Systems Specialist)**: Oversees background tasks, compilers, local processes, and SQLite persistence.
+  - **Pixel (Frontend & Visual Specialist)**: Inspires UI development, motion design, design tokens, and creative experiments.
+  - **Scout (Researcher & Pattern Scout)**: Indexes documentation, local markdown, references, and web research.
+- **Authentic Status Bubbles & On-Demand Chat**: Characters display real-time work status bubbles only when tasks or events occur; conversational drawers open on demand, never cluttering the studio space.
 
-- Desktop environment (Electron on Windows/macOS/Linux) with a main Workspace window and an ultra-fast floating Companion window (toggled via `Ctrl+Shift+Space`).
-- Academic semester workflow tracking exact semester courses (e.g., 7 core CSE subjects: Data Science Workshop 1, Modern Computing Systems Design, Algorithms Analysis & Design, Database Systems, Web Technologies, Computer Organization & Microprocessor Systems, Linear Algebra & Differential Equations).
-- Cross-device workflow: capturing ideas, audio, or PDFs on phone into local iCloud Drive Inbox folder, auto-ingested by GRAVITAS desktop into semester-tagged tasks and study answers.
-- Dual-role usage: high-focus study/revision sessions alternating with quick-fire capture and voice dictation.
+### 3.2 Knowledge Hub, Study & Engineering Continuity
+- **Verbatim Capture & Local Persistence**: Raw voice transcripts and typed inputs are preserved verbatim alongside structured tags, summaries, and Markdown exports.
+- **Semester Coursework Guardian**: Real-time tracking of semester subjects, assignments, due dates, and draft answers with sub-millisecond SQLite queries.
+- **Project & Notes Workspace**: Bidirectional linking between ideas, study notes, semester projects, and plan tasks with full Obsidian-compatible Markdown export.
 
-## Capabilities and Constraints
+### 3.3 Safe Windows Automation & Media Relaxation
+- **Bounded Desktop Automation**: Strict allowlist for approved external applications (`notepad`, `calc`, `mspaint`) and web entertainment services (`Spotify`, `Netflix`, `YouTube`).
+- **Zero-Unbounded Shell Execution**: Dangerous or irreversible actions require explicit user confirmation.
+- **Chill Mode & Focus Media**: One-click transition into relaxation and focus states with media control and ambient soundtracks.
 
-- Local SQLite storage for instant sub-millisecond querying of notes, tasks, ideas, and subject syllabi.
-- Universal offline Push-to-Talk (PTT) audio dictation and text command parser with explicit user confirmation before system changes.
-- Strict separation between original teacher material (instructions/questions) and student answer drafts.
-- Strict privacy: zero telemetry, zero mandatory cloud accounts, zero paid API locks.
-- Pure local-first UI: bundled Geist / Geist Mono typography, zero external Google Fonts CDN or runtime web font fetching, zero analytics.
+### 3.4 Lazy-Loaded 3D Office View
+- The verified Three.js 3D multi-room virtual headquarters (`apps/web/src/hq3d/`) is preserved intact as an **optional, on-demand spatial inspector**.
+- Runs only when explicitly requested; never burns GPU cycles or battery in the everyday workspace.
 
-## Brand Commitments
+---
 
-- Name: GRAVITAS.
-- Signature visual identity: Sculptural deep blue and obsidian forms with restrained negative space.
-- Atmospheric dignity: Calm, authoritative, architectural, and restrained.
-- Inviolable visual rule: ABSOLUTELY NO PILL-SHAPED BUTTONS, NAVIGATION TABS, SUGGESTION CHIPS, OR STATUS CONTAINERS. No `border-radius: 9999px`. Form language must be architectural, crisp, and geometric (0–4px subtle corners, clean hairline borders).
-- No generic AI dashboard tropes: no glowing neon borders, no gratuitous purple gradients, no meaningless metric cards or nested containers.
+## 4. Non-Negotiable Design Rules
 
-## Evidence on Hand
+1. **Studio First, Chat on Demand**: The everyday interface is an inviting spatial studio. Chat conversations live in responsive overlay panels summoned by click, shortcut (`Alt+Space`), or voice.
+2. **Floating Spatial Panels**: Information is surfaced in transient, draggable, dockable floating panels instead of permanent rigid grids.
+3. **Meaningful Animation**: Micro-interactions provide tactile confirmation (button scale, checkbox pop, character glance). Zero gratuitous loops.
+4. **Zero Fake Work**: Characters and status bubbles reflect only genuine tasks, real system events, and verified SQLite data. No simulated activity or fake metrics.
+5. **Distinctive Creative Personality**: Warm stone light palettes (`#F5F4F0`), dark graphite themes (`#121518`), architectural typography (`Geist` / `Geist Mono`), and custom mascot art. No purple gradients or generic SaaS tropes.
+6. **Accessibility & Reduced Motion**: Full keyboard navigation, screen reader live regions, and an explicit reduced-motion media query that disables character locomotion while preserving semantic clarity.
+7. **Explicit Privacy & Mute Controls**: Microphone state is clearly indicated (Muted / Active). PTT requires positive user action.
+8. **Protected Secrets**: Secrets, tokens, and credentials are never stored in conversational memory or serialized into SQLite plaintext logs.
+9. **Informed Opt-In for Cloud Inference**: Local inference is the default; cloud providers (NVIDIA NIM, Claude, etc.) require explicit configuration and permission.
+10. **Data Inspection & Deletion**: The owner has total authority to inspect, export, and delete any recorded memory, note, or task.
 
-- Verified 7 active semester courses with real catalog codes and credit structures.
-- Bundled offline variable fonts (`assets/fonts/Geist-Variable.woff2`, `assets/fonts/GeistMono-Variable.woff2`).
-- Bundled sculptural blue signature visual asset (`assets/welcome-bg.png`).
-- Active suite of over 370 automated unit and integration tests verifying scheduler, storage, and IPC integrity.
+---
 
-## Product Principles
+## 5. Architectural Alignment
 
-1. **Local-First & Data Sovereign**: Every byte belongs to the student on their own machine.
-2. **Architectural Restraint**: Form follows cognitive clarity; no decorative fluff, no generic dashboard cards, and no cartoonish pill shapes.
-3. **Verbatim Truth & Provenance**: Raw user prompts, dictation audio, and instructor prompts are preserved exactly as captured alongside structured summaries.
-4. **Frictionless Immediacy**: Every core task (capture, search, study briefing, guardian reminders) is accessible in under one second.
+| Layer | Technology | Responsibility |
+|---|---|---|
+| **Host Shell** | Electron 44 + Node 24 | Window management, system tray, global shortcuts, power monitoring, secure IPC bridge |
+| **Kernel Process** | Node 24 `utilityProcess` | Isolated process running `@gravitas/core`, scheduling, and SQLite persistence |
+| **Studio Renderer** | React 19 + TypeScript + Motion + Vite | 60 FPS living studio, 2D mascot system, spatial panels, and responsive UI |
+| **Voice & STT** | Native PTT + Whisper.cpp (tiny/base) | Local offline voice dictation, intent classification |
+| **Persistence** | SQLite (`node:sqlite` in WAL mode) | `gravitas_kernel.db` (scheduler & runs) + `ideas-vault.db` (Knowledge Hub & Study Guardian) |
+| **3D Office** | Three.js (lazy-loaded) | Multi-room spatial diorama and agent activity visualization (Phase 08) |
+
+---
+
+## 6. Review & Evolution Gates
+
+- **Phase 00–01**: Baseline verification, repository cleanup, product charter lock. *(Current)*
+- **Phase 02**: Desktop renderer foundation (Vite + React 19 + Motion in Electron).
+- **Phase 03**: Living Studio, mascot family rendering, and 2D animation engine.
+- **Phase 04**: Event-driven mascot speech bubbles and on-demand conversation drawer.
+- **Phase 05**: Deep Knowledge Hub, course subjects, assignments, and Markdown workflows.
+- **Phase 06**: Push-to-talk offline voice dictation and approved Windows actions.
+- **Phase 07**: Chill mode and Spotify / focus media integrations.
+- **Phase 08**: On-demand 3D office diorama integration, 16 GB RAM performance tuning, and owner trial.

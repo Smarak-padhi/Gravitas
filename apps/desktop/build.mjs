@@ -42,11 +42,14 @@ async function run() {
       external: ['electron'],
     }),
     build({
-      entryPoints: [join(__dirname, 'src/renderer/renderer.ts')],
+      entryPoints: [join(__dirname, 'src/renderer/main.tsx')],
       bundle: true,
       platform: 'browser',
       format: 'esm',
       outfile: join(__dirname, 'dist/renderer/renderer.js'),
+      define: {
+        'process.env.NODE_ENV': '"production"',
+      },
     }),
     build({
       entryPoints: [join(__dirname, 'src/renderer/companion.ts')],

@@ -11,7 +11,7 @@
  * - CSP: default-src 'self', no unsafe-eval, no remote scripts
  */
 
-import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativeImage, globalShortcut, dialog, powerMonitor } from 'electron'
+import { app, BrowserWindow, ipcMain, utilityProcess, session, Tray, Menu, nativeImage, globalShortcut, dialog, powerMonitor, shell } from 'electron'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, join } from 'node:path'
 import { DesktopSupervisor } from './supervisor.js'
@@ -80,8 +80,10 @@ export function createDesktopWindow(): BrowserWindow {
   }
 
   const win = new BrowserWindow({
-    width: 1040,
-    height: 720,
+    width: 1280,
+    height: 800,
+    minWidth: 1024,
+    minHeight: 640,
     show: false,
     webPreferences: {
       nodeIntegration: false,
@@ -643,6 +645,35 @@ export function initMainIpc(
       companionWindow.webContents.send('gravitas:theme-changed', theme)
     }
     return { success: true }
+  })
+
+  handle('gravitas:open-approved-external', async (_event, targetUrl: string) => {
+    const APPROVED_URL_PREFIXES = [
+      'https://www.netflix.com',
+      'https://netflix.com',
+      'https://open.spotify.com',
+      'https://www.spotify.com',
+      'https://youtube.com',
+      'https://www.youtube.com',
+    ]
+    if (typeof targetUrl !== 'string') {
+      return { success: false, url: '', error: 'URL must be a string' }
+    }
+    const cleanUrl = targetUrl.trim()
+    const isApproved = APPROVED_URL_PREFIXES.some((prefix) => cleanUrl.startsWith(prefix))
+    if (!isApproved) {
+      return {
+        success: false,
+        url: cleanUrl,
+        error: `URL "${cleanUrl}" is not in the allowlisted external applications/services list.`,
+      }
+    }
+    try {
+      await shell.openExternal(cleanUrl)
+      return { success: true, url: cleanUrl }
+    } catch (err: any) {
+      return { success: false, url: cleanUrl, error: err?.message || 'Failed to open external URL' }
+    }
   })
 
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)

@@ -654,8 +654,9 @@ export class IdeasVaultStore {
       const subLower = filter.subject.trim().toLowerCase()
       items = items.filter(
         (item) =>
-          (item.subject && item.subject.toLowerCase() === subLower) ||
-          item.tags.includes(subLower)
+          (item.subject && (item.subject.toLowerCase() === subLower || item.subject.toLowerCase().includes(subLower) || subLower.includes(item.subject.toLowerCase()))) ||
+          item.tags.includes(subLower) ||
+          item.title.toLowerCase().includes(subLower)
       )
     }
     if (filter.topic && filter.topic.trim()) {

@@ -2240,6 +2240,25 @@ export class KernelHost {
           }
         }
 
+        case 'OPEN_ENTERTAINMENT': {
+          await completeKernelTask(`Requested approved entertainment service: ${intent.displayName}`)
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message: `Opening ${intent.displayName} (${intent.url}) in your desktop browser.`,
+            entertainmentAction: {
+              service: intent.service,
+              url: intent.url,
+              displayName: intent.displayName,
+            },
+          }
+        }
+
         case 'AUTOMATE_NOTEPAD': {
           const approvedDir = join(this.dataRoot, 'approved-notes')
           const notepadRes = await this.appLauncher.executeNotepadAutomation({
@@ -2413,6 +2432,37 @@ export class KernelHost {
                     .join('; ')}.`
                 : 'No assignments have confirmed due dates within the next 7 days.',
             assignments: dueAssignments,
+          }
+        }
+
+        case 'DUE_TODAY': {
+          const today = new Date().toISOString().slice(0, 10)
+          const vaultTasks = this.getIdeasVault().listUnfinishedTasks().filter((t) => t.dueDate === today)
+          const guardian = this.getStudyGuardian()
+          const assignmentsToday = guardian.listAssignments().filter((a) => a.dueDate.startsWith(today) && a.status !== 'COMPLETED')
+          await completeKernelTask(`Found ${vaultTasks.length} task(s) and ${assignmentsToday.length} assignment(s) due today`)
+          const count = vaultTasks.length + assignmentsToday.length
+          const summaryParts: string[] = []
+          if (vaultTasks.length > 0) {
+            summaryParts.push(...vaultTasks.map((t) => `Task: ${t.title}`))
+          }
+          if (assignmentsToday.length > 0) {
+            summaryParts.push(...assignmentsToday.map((a) => `Assignment: ${a.subjectCode} — ${a.title}`))
+          }
+          return {
+            commandId,
+            workSessionId,
+            runId,
+            taskId,
+            intentKind: intent.kind,
+            status: 'SUCCESS',
+            terminalState: 'SUCCEEDED',
+            message:
+              count > 0
+                ? `You have ${count} item(s) due today: ${summaryParts.join('; ')}.`
+                : 'Nothing is due today! Your schedule is completely clear.',
+            ideas: vaultTasks,
+            assignments: assignmentsToday,
           }
         }
 

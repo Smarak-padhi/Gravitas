@@ -15,9 +15,15 @@
     "@gravitas/gateways": "*",
     "@gravitas/harnesses": "*",
     "@gravitas/orchestrator": "*",
+    "framer-motion": "^12.43.0",
+    "lucide-react": "^1.47.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "three": "^0.186.0"
   },
   "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@types/three": "^0.186.0",
     "electron": "^44.5.1",
     "geist": "^1.7.2",

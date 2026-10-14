@@ -20,6 +20,7 @@ export type AssistantIntentKind =
   | 'EXPORT_MARKDOWN'
   | 'SHOW_ASSIGNMENTS'
   | 'DUE_THIS_WEEK'
+  | 'DUE_TODAY'
   | 'SHOW_SUBJECT_ASSIGNMENTS'
   | 'UPDATE_ASSIGNMENT_PROGRESS'
   | 'SNOOZE_ASSIGNMENT_REMINDER'
@@ -27,11 +28,25 @@ export type AssistantIntentKind =
   | 'LIST_IDEAS'
   | 'SEARCH_IDEAS'
   | 'LAUNCH_APP'
+  | 'OPEN_ENTERTAINMENT'
   | 'AUTOMATE_NOTEPAD'
   | 'BLOCKED_APP'
   | 'DELETE_IDEA_PROMPT'
   | 'SIMULATE_LONG_TASK'
   | 'UNKNOWN_COMMAND'
+
+export interface ParsedDueTodayIntent {
+  readonly kind: 'DUE_TODAY'
+  readonly rawInput: string
+}
+
+export interface ParsedOpenEntertainmentIntent {
+  readonly kind: 'OPEN_ENTERTAINMENT'
+  readonly rawInput: string
+  readonly service: 'netflix' | 'spotify' | 'youtube'
+  readonly url: string
+  readonly displayName: string
+}
 
 export type AllowlistedAppId = 'notepad' | 'calc' | 'mspaint'
 
@@ -198,6 +213,7 @@ export type ParsedAssistantIntent =
   | ParsedExportMarkdownIntent
   | ParsedShowAssignmentsIntent
   | ParsedDueThisWeekIntent
+  | ParsedDueTodayIntent
   | ParsedShowSubjectAssignmentsIntent
   | ParsedUpdateAssignmentProgressIntent
   | ParsedSnoozeAssignmentReminderIntent
@@ -205,6 +221,7 @@ export type ParsedAssistantIntent =
   | ParsedListIdeasIntent
   | ParsedSearchIdeasIntent
   | ParsedLaunchAppIntent
+  | ParsedOpenEntertainmentIntent
   | ParsedAutomateNotepadIntent
   | ParsedBlockedAppIntent
   | ParsedDeleteIdeaPromptIntent
@@ -386,6 +403,19 @@ export function parseAssistantCommand(rawInput: string): ParsedAssistantIntent {
     }
   }
 
+  // (b2) "What's due today?" / "What is due today?" / "Show what's due today" / "Due today"
+  if (
+    /^(?:what(?:'s|\s+is)|show|list|view)\s+(?:all\s+)?(?:assignments?\s+|tasks?\s+)?due\s+today[.!?]*$/i.test(
+      trimmed
+    ) ||
+    /^(?:what(?:'s|\s+is)\s+due\s+today|due\s+today)[.!?]*$/i.test(trimmed)
+  ) {
+    return {
+      kind: 'DUE_TODAY',
+      rawInput: trimmed,
+    }
+  }
+
   // (c) "Show Algorithms assignments." / "Show CSE 2631 assignments." / "Show my Physics assignments."
   const subjAsgnMatch = trimmed.match(
     /^(?:show|list|view|display|get)\s+(?:all\s+)?(?:my\s+|the\s+)?([a-z0-9\s_-]+?)\s+assignments?[.!?]*$/i
@@ -538,7 +568,7 @@ export function parseAssistantCommand(rawInput: string): ParsedAssistantIntent {
     }
   }
   const subjectNotesMatch = trimmed.match(
-    /^(?:show|list|view|display|get)\s+(?:all\s+)?(?:my\s+|the\s+)?([a-z0-9\s_-]+?)\s+notes[.!?]*$/i
+    /^(?:show|list|view|display|get|open)\s+(?:all\s+)?(?:my\s+|the\s+)?([a-z0-9\s_-]+?)\s+notes?[.!?]*$/i
   )
   if (subjectNotesMatch && subjectNotesMatch[1]) {
     const subj = subjectNotesMatch[1].trim()
@@ -646,6 +676,34 @@ export function parseAssistantCommand(rawInput: string): ParsedAssistantIntent {
         rawInput: trimmed,
         requestedApp: targetRaw,
         reason: `Refused application launch "${targetRaw}": shell metacharacters, paths, or flags are forbidden.`,
+      }
+    }
+
+    if (targetKey === 'netflix') {
+      return {
+        kind: 'OPEN_ENTERTAINMENT',
+        rawInput: trimmed,
+        service: 'netflix',
+        url: 'https://www.netflix.com',
+        displayName: 'Netflix',
+      }
+    }
+    if (targetKey === 'spotify') {
+      return {
+        kind: 'OPEN_ENTERTAINMENT',
+        rawInput: trimmed,
+        service: 'spotify',
+        url: 'https://open.spotify.com',
+        displayName: 'Spotify',
+      }
+    }
+    if (targetKey === 'youtube') {
+      return {
+        kind: 'OPEN_ENTERTAINMENT',
+        rawInput: trimmed,
+        service: 'youtube',
+        url: 'https://www.youtube.com',
+        displayName: 'YouTube',
       }
     }
 

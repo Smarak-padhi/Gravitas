@@ -749,6 +749,7 @@ export interface AssistantCommandResult {
   readonly assignments?: readonly StudyAssignmentRecord[] | undefined
   readonly updatedAssignment?: StudyAssignmentRecord | undefined
   readonly clarificationCandidates?: readonly StudyAssignmentRecord[] | undefined
+  readonly entertainmentAction?: { readonly service: string; readonly url: string; readonly displayName: string } | undefined
 }
 
 export interface ExecuteAssistantCommandRequest extends BaseProtocolMessage {
@@ -1190,6 +1191,7 @@ export interface GravitasDesktopBridge {
   onNavigateTarget?(callback: (target: { surface: string; targetId?: string; tab?: string; assignmentId?: string }) => void): () => void
   setTheme?(theme: 'light' | 'dark'): Promise<{ success: boolean }>
   onThemeChanged?(callback: (theme: 'light' | 'dark') => void): () => void
+  openApprovedExternal?(url: string): Promise<{ readonly success: boolean; readonly url: string; readonly error?: string }>
 }
 
 declare global {
