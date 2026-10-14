@@ -761,6 +761,258 @@
       padding: 3px 8px;
       border-radius: 4px;
     }
+    .subject-card.clickable {
+      cursor: pointer;
+    }
+    .subject-card.clickable:hover {
+      border-color: var(--accent-sage);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .subject-card-action-btn {
+      margin-top: auto;
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-family: var(--font-stack);
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .subject-card-action-btn:hover {
+      background: var(--accent-sage-subtle);
+      border-color: var(--accent-sage);
+      color: var(--accent-sage);
+    }
+
+    /* Tactile animated checkbox */
+    .tactile-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      background: var(--bg-surface);
+      margin-top: 2px;
+      flex-shrink: 0;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+    .tactile-checkbox:hover {
+      border-color: var(--accent-sage);
+      background: var(--bg-surface-hover);
+    }
+    .tactile-checkbox:focus-visible {
+      box-shadow: 0 0 0 2px var(--accent-sage);
+    }
+    .tactile-checkbox:checked {
+      background: var(--accent-sage);
+      border-color: var(--accent-sage);
+    }
+    .tactile-checkbox:checked::before {
+      content: "";
+      width: 8px;
+      height: 4px;
+      border-left: 1.8px solid #fff;
+      border-bottom: 1.8px solid #fff;
+      transform: rotate(-45deg) translate(0.5px, -0.5px);
+    }
+
+    /* Compact Enrolled Subjects sidebar */
+    .rail-compact-subjects {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .rail-compact-chip {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .rail-compact-chip:hover {
+      background: var(--accent-sage-subtle);
+      color: var(--accent-sage);
+      border-color: var(--accent-sage);
+    }
+    .rail-compact-chip.has-activity {
+      border-color: rgba(125, 166, 132, 0.4);
+      background: rgba(125, 166, 132, 0.08);
+      color: var(--accent-sage);
+      font-weight: 550;
+    }
+
+    /* Subjects Groups & Detail View */
+    .subjects-group-header {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .subjects-group-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .subjects-group-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .subject-detail-top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .subject-detail-hero {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+    }
+    .subject-detail-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .subject-detail-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .subject-detail-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.45;
+    }
+    .subject-detail-tabs-row {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .subject-detail-tabs-row::-webkit-scrollbar {
+      display: none;
+    }
+    .subject-nav-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--font-stack);
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .subject-nav-tab:hover {
+      color: var(--text-primary);
+    }
+    .subject-nav-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-sage);
+      font-weight: 600;
+    }
+    .subject-detail-panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
+    }
+    .subject-stat-pill.active {
+      color: var(--accent-sage);
+      background: var(--accent-sage-subtle);
+      border-color: rgba(125, 166, 132, 0.4);
+    }
+    .subject-stat-pill.subtle {
+      color: var(--text-tertiary);
+      border: 1px dashed var(--border-subtle);
+      background: transparent;
+    }
+    .subject-entry-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.15s;
+    }
+    .subject-entry-card:hover {
+      border-color: var(--border-hover);
+    }
+    .subject-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .subject-entry-title {
+      font-size: 14px;
+      font-weight: 550;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .subject-entry-content {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .subject-entry-meta {
+      font-size: 11.5px;
+      color: var(--text-tertiary);
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Quick capture subject selector */
+    .capture-subject-select {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: var(--font-stack);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .capture-subject-select:focus {
+      border-color: var(--accent-sage);
+    }
 
     /* ─── Generic Cards (for full sub-views) ─────────────────────────────────── */
     .card {
@@ -1909,9 +2161,12 @@
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            <input type="text" id="workspace-quick-input" class="workspace-capture-input" placeholder="Capture a note, add a task, or press Alt+Space..." aria-label="Quick capture" />
+            <input type="text" id="workspace-quick-input" class="workspace-capture-input" placeholder="Capture note, task, or #subject... (Press Enter)" aria-label="Quick capture" />
           </div>
           <div class="capture-actions">
+            <select id="workspace-quick-subject" class="capture-subject-select" title="Link to subject (optional)">
+              <option value="">No subject</option>
+            </select>
             <button id="workspace-btn-quick-note" class="capture-btn">+ Note</button>
             <button id="workspace-btn-quick-task" class="capture-btn">+ Task</button>
             <button id="workspace-btn-companion" class="capture-btn capture-btn-accent">
@@ -1920,6 +2175,7 @@
             </button>
           </div>
         </div>
+        <div id="workspace-capture-feedback" style="display: none; font-size: 12px; color: var(--accent-sage); margin-top: -10px; margin-bottom: 12px; padding-left: 4px;"></div>
 
         <!-- Asymmetric Content Architecture -->
         <div class="workspace-layout">
@@ -1959,15 +2215,21 @@
           <!-- Secondary Rail: Curricula, Sync & Companion (1fr) -->
           <aside class="workspace-secondary-rail">
 
-            <!-- Subjects & Collections -->
+            <!-- Compact Enrolled Subjects Summary -->
             <div class="rail-card">
               <div class="rail-card-header">
                 <h3 class="rail-card-title">Enrolled Subjects</h3>
-                <span id="workspace-subjects-count" class="rail-count-chip">0</span>
+                <span id="workspace-subjects-count" class="rail-count-chip">10</span>
               </div>
-              <div id="workspace-subjects-list" class="rail-subjects-list">
-                <div class="empty-state-editorial">Loading subjects...</div>
+              <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px;">
+                <strong>7</strong> Semester 3 courses · <strong>3</strong> Foundational
               </div>
+              <div id="workspace-subjects-compact-list" class="rail-compact-subjects">
+                <div class="empty-state-editorial" style="padding: 6px; font-size: 12px;">Loading subjects...</div>
+              </div>
+              <button id="workspace-btn-view-all-subjects" class="rail-btn-action" style="margin-top: 6px;">
+                View All Subjects (10) →
+              </button>
             </div>
 
             <!-- Phone & Inbox Sync -->
@@ -2145,16 +2407,98 @@
     <!-- SURFACE 0D: FULL SUBJECTS VIEW -->
     <section id="surface-subjects" class="surface" role="tabpanel" aria-labelledby="tab-subjects">
       <div class="workspace-wrapper">
-        <header class="subview-editorial-header">
-          <div>
-            <h1 class="subview-editorial-title">Enrolled Semester Subjects</h1>
-            <p class="subview-editorial-subtitle">Academic units, course materials, and connected assignments.</p>
+
+        <!-- 1. All Subjects Overview View -->
+        <div id="subjects-overview-view">
+          <header class="subview-editorial-header">
+            <div>
+              <h1 class="subview-editorial-title">Curricula & Subjects</h1>
+              <p class="subview-editorial-subtitle">Enrolled semester courses and foundational study disciplines.</p>
+            </div>
+            <div class="subview-editorial-actions">
+              <input type="text" id="subjects-search-input" class="subview-search-input" placeholder="Filter courses or topics..." aria-label="Filter subjects" />
+              <button id="subjects-btn-refresh" class="btn btn-secondary">Refresh</button>
+            </div>
+          </header>
+
+          <!-- Group 1: Semester 3 Courses -->
+          <div style="margin-bottom: 28px;">
+            <div class="subjects-group-header">
+              <h2 class="subjects-group-title">Semester 3 Courses</h2>
+              <span class="subjects-group-desc">7 curriculum modules with scheduled lecture topics and coursework</span>
+            </div>
+            <div id="subjects-semester-grid" class="subjects-stream-grid">
+              <div class="empty-state-editorial">Loading semester courses...</div>
+            </div>
           </div>
-          <div class="subview-editorial-actions">
-            <button id="subjects-btn-refresh" class="btn btn-secondary">Refresh</button>
+
+          <!-- Group 2: Foundational Disciplines -->
+          <div style="margin-bottom: 24px;">
+            <div class="subjects-group-header">
+              <h2 class="subjects-group-title">Foundational Disciplines</h2>
+              <span class="subjects-group-desc">3 core academic domains for self-study, reference, and cross-course practice</span>
+            </div>
+            <div id="subjects-generic-grid" class="subjects-stream-grid">
+              <div class="empty-state-editorial">Loading foundational disciplines...</div>
+            </div>
           </div>
-        </header>
-        <div id="subjects-full-list" class="subjects-stream-grid"></div>
+
+          <!-- Hidden legacy container to maintain backward compatibility -->
+          <div id="subjects-full-list" style="display: none;"></div>
+        </div>
+
+        <!-- 2. Dedicated Subject Detail View (Hidden until a subject is opened) -->
+        <div id="subject-detail-view" style="display: none;">
+          <div class="subject-detail-top-nav">
+            <button id="subject-detail-back-btn" class="btn btn-secondary">← Back to All Subjects</button>
+            <div style="display: flex; gap: 8px;">
+              <button id="subject-detail-btn-new-note" class="btn btn-secondary">+ Note for Subject</button>
+              <button id="subject-detail-btn-new-task" class="btn btn-secondary">+ Revision Task</button>
+            </div>
+          </div>
+
+          <!-- Subject Hero Banner -->
+          <div class="subject-detail-hero">
+            <div class="subject-detail-title-wrap">
+              <span id="subject-detail-code" class="subject-card-code" style="font-size: 13px; padding: 4px 10px;">CSE 2195</span>
+              <h1 id="subject-detail-title" class="subject-detail-title">Data Science Workshop 1</h1>
+              <span id="subject-detail-credits" class="subject-card-credits" style="font-size: 13px; font-weight: 500;">4 Credits</span>
+            </div>
+            <p id="subject-detail-desc" class="subject-detail-desc">Subject workspace overview and course materials.</p>
+            <div class="subject-card-stats" style="margin-top: 12px;" id="subject-detail-stats-bar">
+              <span id="subject-stat-chip-notes" class="subject-stat-pill"><strong>0</strong> notes</span>
+              <span id="subject-stat-chip-assignments" class="subject-stat-pill"><strong>0</strong> assignments</span>
+              <span id="subject-stat-chip-answers" class="subject-stat-pill"><strong>0</strong> answers</span>
+              <span id="subject-stat-chip-resources" class="subject-stat-pill"><strong>0</strong> resources</span>
+              <span id="subject-stat-chip-tasks" class="subject-stat-pill"><strong>0</strong> revisions</span>
+            </div>
+          </div>
+
+          <!-- 5 Bucket Navigation Tabs -->
+          <div class="subject-detail-tabs-row" role="tablist" aria-label="Subject workspace sections">
+            <button class="subject-nav-tab active" data-subject-tab="NOTES" role="tab" aria-selected="true" id="subtab-notes">
+              Notes & Ideas (<span id="subject-tab-notes-count">0</span>)
+            </button>
+            <button class="subject-nav-tab" data-subject-tab="ASSIGNMENTS" role="tab" aria-selected="false" id="subtab-assignments">
+              Assignments (<span id="subject-tab-assignments-count">0</span>)
+            </button>
+            <button class="subject-nav-tab" data-subject-tab="ANSWERS" role="tab" aria-selected="false" id="subtab-answers">
+              Answers (<span id="subject-tab-answers-count">0</span>)
+            </button>
+            <button class="subject-nav-tab" data-subject-tab="RESOURCES" role="tab" aria-selected="false" id="subtab-resources">
+              Resources (<span id="subject-tab-resources-count">0</span>)
+            </button>
+            <button class="subject-nav-tab" data-subject-tab="REVISION_TASKS" role="tab" aria-selected="false" id="subtab-tasks">
+              Revision Tasks (<span id="subject-tab-tasks-count">0</span>)
+            </button>
+          </div>
+
+          <!-- Bucket Content Container -->
+          <div id="subject-detail-panel-content" class="subject-detail-panel-content" role="tabpanel">
+            <div class="empty-state-editorial">Select a tab above to inspect subject materials.</div>
+          </div>
+        </div>
+
       </div>
     </section>
 

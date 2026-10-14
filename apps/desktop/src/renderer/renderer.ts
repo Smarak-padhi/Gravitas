@@ -27,6 +27,9 @@ import type {
   DoctorReport,
   IdeaRecord,
   KnowledgeCollection,
+  StudySubjectSummary,
+  SubjectWorkspaceProjection,
+  SubjectSectionEntryRecord,
 } from '../types.js'
 import type { PhoneSyncPlatform, PersonaArchetype } from '@gravitas/core'
 import { initWorldView } from './world/worldView.js'
@@ -804,6 +807,15 @@ export function activateSurface(surfaceId: string, skipGuard = false): boolean {
 
   currentActiveSurfaceId = surfaceId
 
+  if (surfaceId === 'surface-subjects') {
+    const overviewEl = document.getElementById('subjects-overview-view')
+    const detailEl = document.getElementById('subject-detail-view')
+    if (!detailEl || detailEl.style.display === 'none') {
+      if (overviewEl) overviewEl.style.display = 'block'
+      if (detailEl) detailEl.style.display = 'none'
+    }
+  }
+
   const isDevSurface = [
     'surface-overview',
     'surface-work',
@@ -1280,6 +1292,520 @@ export async function refreshSystem(bridge: GravitasDesktopBridge): Promise<void
   }
 }
 
+export function isSemesterCourse(codeOrSubject?: string): boolean {
+  if (!codeOrSubject) return false
+  const trimmed = codeOrSubject.trim()
+  return /^[A-Z]{2,4}\s*\d{3,4}/i.test(trimmed)
+}
+
+export function renderSubjectsOverview(bridge: GravitasDesktopBridge, subjects: readonly StudySubjectSummary[]): void {
+  const semesterGrid = document.getElementById('subjects-semester-grid')
+  const genericGrid = document.getElementById('subjects-generic-grid')
+  const legacyFullList = document.getElementById('subjects-full-list')
+  const searchInput = document.getElementById('subjects-search-input') as HTMLInputElement | null
+  const refreshBtn = document.getElementById('subjects-btn-refresh')
+
+  if (refreshBtn && !refreshBtn.dataset.wired) {
+    refreshBtn.dataset.wired = 'true'
+    refreshBtn.onclick = () => {
+      void refreshWorkspace(bridge)
+    }
+  }
+
+  if (!semesterGrid || !genericGrid) return
+
+  const filterQuery = (searchInput?.value || '').trim().toLowerCase()
+
+  const matchesFilter = (s: StudySubjectSummary) => {
+    if (!filterQuery) return true
+    const code = (s.code || s.subject || '').toLowerCase()
+    const name = (s.name || '').toLowerCase()
+    const topics = (s.topics || []).join(' ').toLowerCase()
+    return code.includes(filterQuery) || name.includes(filterQuery) || topics.includes(filterQuery)
+  }
+
+  const filtered = subjects.filter(matchesFilter)
+  const semesterList = filtered.filter((s) => isSemesterCourse(s.code || s.subject))
+  const genericList = filtered.filter((s) => !isSemesterCourse(s.code || s.subject))
+
+  const createSubjectCard = (s: StudySubjectSummary): HTMLElement => {
+    const card = document.createElement('div')
+    card.className = 'subject-card clickable'
+    card.setAttribute('role', 'button')
+    card.setAttribute('tabindex', '0')
+    card.title = `Open workspace for ${s.name || s.subject}`
+
+    const cardHeader = document.createElement('div')
+    cardHeader.className = 'subject-card-header'
+
+    const codeBadge = document.createElement('span')
+    codeBadge.className = 'subject-card-code'
+    codeBadge.textContent = s.code || s.subject
+
+    const creditsBadge = document.createElement('span')
+    creditsBadge.className = 'subject-card-credits'
+    creditsBadge.textContent = `${s.credits ?? 4} Credits`
+
+    cardHeader.appendChild(codeBadge)
+    cardHeader.appendChild(creditsBadge)
+    card.appendChild(cardHeader)
+
+    const title = document.createElement('h3')
+    title.className = 'subject-card-title'
+    title.textContent = s.name || s.subject
+    card.appendChild(title)
+
+    // Stats: Real activity presentation, no repetitive zero-count badges!
+    const stats = document.createElement('div')
+    stats.className = 'subject-card-stats'
+
+    const notes = s.noteCount || 0
+    const asgns = s.assignmentCount || 0
+    const tasks = s.taskCount || 0
+    const totalActivity = notes + asgns + tasks
+
+    if (totalActivity === 0) {
+      const cleanPill = document.createElement('span')
+      cleanPill.className = 'subject-stat-pill subtle'
+      cleanPill.textContent = 'Curriculum ready · No active items'
+      stats.appendChild(cleanPill)
+    } else {
+      if (notes > 0) {
+        const p = document.createElement('span')
+        p.className = 'subject-stat-pill active'
+        p.innerHTML = `<strong>${notes}</strong> ${notes === 1 ? 'note' : 'notes'}`
+        stats.appendChild(p)
+      }
+      if (asgns > 0) {
+        const p = document.createElement('span')
+        p.className = 'subject-stat-pill active'
+        p.innerHTML = `<strong>${asgns}</strong> ${asgns === 1 ? 'assignment' : 'assignments'}`
+        stats.appendChild(p)
+      }
+      if (tasks > 0) {
+        const p = document.createElement('span')
+        p.className = 'subject-stat-pill active'
+        p.innerHTML = `<strong>${tasks}</strong> ${tasks === 1 ? 'revision' : 'revisions'}`
+        stats.appendChild(p)
+      }
+    }
+    card.appendChild(stats)
+
+    const actionBtn = document.createElement('button')
+    actionBtn.className = 'subject-card-action-btn'
+    actionBtn.textContent = 'Open Workspace →'
+    card.appendChild(actionBtn)
+
+    const handleOpen = () => {
+      void openSubjectDetailView(bridge, s.code || s.subject)
+    }
+
+    card.addEventListener('click', handleOpen)
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleOpen()
+      }
+    })
+
+    return card
+  }
+
+  semesterGrid.innerHTML = ''
+  if (semesterList.length === 0) {
+    semesterGrid.innerHTML = `<div class="empty-state-editorial" style="grid-column: 1 / -1;">${filterQuery ? 'No matching semester courses.' : 'No semester courses enrolled.'}</div>`
+  } else {
+    for (const s of semesterList) {
+      semesterGrid.appendChild(createSubjectCard(s))
+    }
+  }
+
+  genericGrid.innerHTML = ''
+  if (genericList.length === 0) {
+    genericGrid.innerHTML = `<div class="empty-state-editorial" style="grid-column: 1 / -1;">${filterQuery ? 'No matching foundational disciplines.' : 'No foundational disciplines enrolled.'}</div>`
+  } else {
+    for (const s of genericList) {
+      genericGrid.appendChild(createSubjectCard(s))
+    }
+  }
+
+  if (legacyFullList) {
+    legacyFullList.innerHTML = ''
+    for (const s of subjects) {
+      legacyFullList.appendChild(createSubjectCard(s))
+    }
+  }
+
+  if (searchInput && !searchInput.dataset.wired) {
+    searchInput.dataset.wired = 'true'
+    searchInput.addEventListener('input', () => {
+      renderSubjectsOverview(bridge, subjects)
+    })
+  }
+}
+
+export async function openSubjectDetailView(bridge: GravitasDesktopBridge, subjectCode: string): Promise<void> {
+  activateSurface('surface-subjects')
+  const overviewEl = document.getElementById('subjects-overview-view')
+  const detailEl = document.getElementById('subject-detail-view')
+  if (overviewEl) overviewEl.style.display = 'none'
+  if (detailEl) detailEl.style.display = 'block'
+
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  const codeEl = document.getElementById('subject-detail-code')
+  const titleEl = document.getElementById('subject-detail-title')
+  const creditsEl = document.getElementById('subject-detail-credits')
+  const descEl = document.getElementById('subject-detail-desc')
+  const contentEl = document.getElementById('subject-detail-panel-content')
+
+  if (codeEl) codeEl.textContent = subjectCode
+  if (titleEl) titleEl.textContent = 'Loading subject...'
+  if (contentEl) contentEl.innerHTML = '<div class="empty-state-editorial">Loading subject workspace projection...</div>'
+
+  try {
+    let workspaceProjection: SubjectWorkspaceProjection | undefined
+    if (bridge.executeStudyGuardianOperation) {
+      const res = await bridge.executeStudyGuardianOperation({
+        action: 'GET_SUBJECT_WORKSPACE',
+        subjectCodeOrQuery: subjectCode,
+      })
+      workspaceProjection = res.subjectWorkspace
+    }
+
+    if (!workspaceProjection) {
+      if (contentEl) contentEl.innerHTML = `<div class="empty-state-editorial">Could not load workspace for ${subjectCode}.</div>`
+      return
+    }
+
+    const { subject, notes, assignments, answers, resources, revisionTasks, knowledgeHubItems } = workspaceProjection
+
+    if (codeEl) codeEl.textContent = subject.code
+    if (titleEl) titleEl.textContent = subject.name || subject.code
+    if (creditsEl) creditsEl.textContent = `${subject.credits} Credits`
+    if (descEl) descEl.textContent = subject.notes || `Curriculum workspace for ${subject.name || subject.code}.`
+
+    const allNotes = [
+      ...notes.map((n) => ({
+        id: n.entryId,
+        title: n.title,
+        content: n.generatedOrEditedContent || n.originalContent,
+        updatedAt: n.updatedAt,
+        type: 'ENTRY',
+      })),
+      ...(knowledgeHubItems || [])
+        .filter((k) => k.collection !== 'PLAN_TASK')
+        .map((k) => ({
+          id: k.id,
+          title: k.title,
+          content: k.originalText || k.summary || '',
+          updatedAt: k.updatedAt,
+          type: 'HUB',
+        })),
+    ]
+
+    const allTasks = [
+      ...revisionTasks.map((t) => ({
+        id: t.entryId,
+        title: t.title,
+        completed: false,
+        type: 'ENTRY',
+      })),
+      ...(knowledgeHubItems || [])
+        .filter((k) => k.collection === 'PLAN_TASK')
+        .map((k) => ({
+          id: k.id,
+          title: k.title,
+          completed: Boolean(k.completed),
+          type: 'HUB',
+        })),
+    ]
+
+    const notesCount = allNotes.length
+    const asgnCount = assignments.length
+    const ansCount = answers.length
+    const resCount = resources.length
+    const tasksCount = allTasks.length
+
+    const setElText = (id: string, text: string) => {
+      const el = document.getElementById(id)
+      if (el) el.textContent = text
+    }
+
+    setElText('subject-tab-notes-count', String(notesCount))
+    setElText('subject-tab-assignments-count', String(asgnCount))
+    setElText('subject-tab-answers-count', String(ansCount))
+    setElText('subject-tab-resources-count', String(resCount))
+    setElText('subject-tab-tasks-count', String(tasksCount))
+
+    const statsBar = document.getElementById('subject-detail-stats-bar')
+    if (statsBar) {
+      statsBar.innerHTML = ''
+      const addStatPill = (label: string, count: number) => {
+        const pill = document.createElement('span')
+        pill.className = `subject-stat-pill ${count > 0 ? 'active' : 'subtle'}`
+        pill.innerHTML = `<strong>${count}</strong> ${label}`
+        statsBar.appendChild(pill)
+      }
+      addStatPill('notes', notesCount)
+      addStatPill('assignments', asgnCount)
+      addStatPill('answers', ansCount)
+      addStatPill('resources', resCount)
+      addStatPill('revisions', tasksCount)
+    }
+
+    let activeTab: 'NOTES' | 'ASSIGNMENTS' | 'ANSWERS' | 'RESOURCES' | 'REVISION_TASKS' = 'NOTES'
+
+    const renderActiveTab = () => {
+      if (!contentEl) return
+      contentEl.innerHTML = ''
+
+      document.querySelectorAll('.subject-nav-tab').forEach((b) => {
+        const tab = b.getAttribute('data-subject-tab')
+        if (tab === activeTab) {
+          b.classList.add('active')
+          b.setAttribute('aria-selected', 'true')
+        } else {
+          b.classList.remove('active')
+          b.setAttribute('aria-selected', 'false')
+        }
+      })
+
+      if (activeTab === 'NOTES') {
+        if (allNotes.length === 0) {
+          contentEl.innerHTML = `
+            <div class="empty-state-editorial">
+              No notes for ${subject.code} yet.
+              <div style="margin-top: 10px;">
+                <button id="subject-tab-empty-note-btn" class="btn btn-secondary">+ Create Note for this Subject</button>
+              </div>
+            </div>
+          `
+          contentEl.querySelector('#subject-tab-empty-note-btn')?.addEventListener('click', () => {
+            activateSurface('surface-notes')
+            startNewNote()
+            const subjInput = document.getElementById('notes-input-subject') as HTMLInputElement | null
+            if (subjInput) {
+              subjInput.value = subject.code
+              subjInput.dispatchEvent(new Event('input'))
+            }
+          })
+          return
+        }
+
+        for (const n of allNotes) {
+          const card = document.createElement('div')
+          card.className = 'subject-entry-card'
+          if (n.type === 'HUB') {
+            card.style.cursor = 'pointer'
+            card.title = 'Click to open in Knowledge Hub'
+            card.addEventListener('click', () => {
+              activateSurface('surface-notes')
+              void openNoteInEditor(bridge, n.id)
+            })
+          }
+
+          const hRow = document.createElement('div')
+          hRow.className = 'subject-entry-header'
+          const hTitle = document.createElement('h4')
+          hTitle.className = 'subject-entry-title'
+          hTitle.textContent = n.title
+          const hDate = document.createElement('span')
+          hDate.className = 'subject-entry-meta'
+          hDate.textContent = n.type === 'HUB' ? 'Knowledge Hub Note' : 'Subject Entry'
+
+          hRow.appendChild(hTitle)
+          hRow.appendChild(hDate)
+          card.appendChild(hRow)
+
+          if (n.content) {
+            const body = document.createElement('div')
+            body.className = 'subject-entry-content'
+            body.textContent = n.content.slice(0, 300) + (n.content.length > 300 ? '...' : '')
+            card.appendChild(body)
+          }
+
+          contentEl.appendChild(card)
+        }
+      } else if (activeTab === 'ASSIGNMENTS') {
+        if (assignments.length === 0) {
+          contentEl.innerHTML = `<div class="empty-state-editorial">No active assignments for ${subject.code}. Ingest assignments via Phone Inbox or create one.</div>`
+          return
+        }
+        for (const a of assignments) {
+          const card = document.createElement('div')
+          card.className = 'subject-entry-card'
+          const hRow = document.createElement('div')
+          hRow.className = 'subject-entry-header'
+          const hTitle = document.createElement('h4')
+          hTitle.className = 'subject-entry-title'
+          hTitle.textContent = a.title
+          hRow.appendChild(hTitle)
+          card.appendChild(hRow)
+
+          const body = document.createElement('div')
+          body.className = 'subject-entry-content'
+          body.textContent = a.generatedOrEditedContent || a.originalContent
+          card.appendChild(body)
+          contentEl.appendChild(card)
+        }
+      } else if (activeTab === 'ANSWERS') {
+        if (answers.length === 0) {
+          contentEl.innerHTML = `<div class="empty-state-editorial">No answers or homework solutions generated for ${subject.code} yet.</div>`
+          return
+        }
+        for (const ans of answers) {
+          const card = document.createElement('div')
+          card.className = 'subject-entry-card'
+          const hRow = document.createElement('div')
+          hRow.className = 'subject-entry-header'
+          const hTitle = document.createElement('h4')
+          hTitle.className = 'subject-entry-title'
+          hTitle.textContent = ans.title
+          hRow.appendChild(hTitle)
+          card.appendChild(hRow)
+
+          const body = document.createElement('div')
+          body.className = 'subject-entry-content'
+          body.textContent = ans.generatedOrEditedContent || ans.originalContent
+          card.appendChild(body)
+          contentEl.appendChild(card)
+        }
+      } else if (activeTab === 'RESOURCES') {
+        if (resources.length === 0) {
+          contentEl.innerHTML = `<div class="empty-state-editorial">No learning resources or syllabus attachments for ${subject.code} yet.</div>`
+          return
+        }
+        for (const r of resources) {
+          const card = document.createElement('div')
+          card.className = 'subject-entry-card'
+          const hRow = document.createElement('div')
+          hRow.className = 'subject-entry-header'
+          const hTitle = document.createElement('h4')
+          hTitle.className = 'subject-entry-title'
+          hTitle.textContent = r.title
+          hRow.appendChild(hTitle)
+          card.appendChild(hRow)
+
+          const body = document.createElement('div')
+          body.className = 'subject-entry-content'
+          body.textContent = r.generatedOrEditedContent || r.originalContent
+          card.appendChild(body)
+          contentEl.appendChild(card)
+        }
+      } else if (activeTab === 'REVISION_TASKS') {
+        if (allTasks.length === 0) {
+          contentEl.innerHTML = `
+            <div class="empty-state-editorial">
+              No pending revision tasks for ${subject.code}.
+              <div style="margin-top: 10px;">
+                <button id="subject-tab-empty-task-btn" class="btn btn-secondary">+ Add Revision Task</button>
+              </div>
+            </div>
+          `
+          contentEl.querySelector('#subject-tab-empty-task-btn')?.addEventListener('click', async () => {
+            const taskTitle = prompt(`Add revision task for ${subject.code}:`)
+            if (taskTitle && bridge.saveIdea) {
+              await bridge.saveIdea({
+                title: taskTitle,
+                originalText: taskTitle,
+                collection: 'PLAN_TASK',
+                subject: subject.code,
+              })
+              await openSubjectDetailView(bridge, subject.code)
+            }
+          })
+          return
+        }
+
+        for (const t of allTasks) {
+          const item = document.createElement('div')
+          item.className = `task-item ${t.completed ? 'completed' : ''}`
+
+          const chk = document.createElement('input')
+          chk.type = 'checkbox'
+          chk.className = 'tactile-checkbox task-checkbox'
+          chk.checked = t.completed
+          chk.setAttribute('aria-label', `Mark "${t.title}" ${t.completed ? 'incomplete' : 'complete'}`)
+          chk.addEventListener('change', async () => {
+            if (chk.checked) {
+              item.classList.add('completed')
+            } else {
+              item.classList.remove('completed')
+            }
+            if (t.type === 'HUB' && bridge.completeTask) {
+              await bridge.completeTask(t.id, chk.checked)
+            }
+          })
+
+          const cont = document.createElement('div')
+          cont.className = 'task-content'
+          const txt = document.createElement('span')
+          txt.className = 'task-text'
+          txt.textContent = t.title
+          cont.appendChild(txt)
+
+          item.appendChild(chk)
+          item.appendChild(cont)
+          contentEl.appendChild(item)
+        }
+      }
+    }
+
+    document.querySelectorAll<HTMLButtonElement>('.subject-nav-tab').forEach((btn) => {
+      btn.onclick = () => {
+        const tab = btn.getAttribute('data-subject-tab') as typeof activeTab
+        if (tab) {
+          activeTab = tab
+          renderActiveTab()
+        }
+      }
+    })
+
+    renderActiveTab()
+
+    const backBtn = document.getElementById('subject-detail-back-btn')
+    if (backBtn) {
+      backBtn.onclick = () => {
+        if (detailEl) detailEl.style.display = 'none'
+        if (overviewEl) overviewEl.style.display = 'block'
+      }
+    }
+
+    const newNoteBtn = document.getElementById('subject-detail-btn-new-note')
+    if (newNoteBtn) {
+      newNoteBtn.onclick = () => {
+        activateSurface('surface-notes')
+        startNewNote()
+        const subjInput = document.getElementById('notes-input-subject') as HTMLInputElement | null
+        if (subjInput) {
+          subjInput.value = subject.code
+          subjInput.dispatchEvent(new Event('input'))
+        }
+      }
+    }
+
+    const newTaskBtn = document.getElementById('subject-detail-btn-new-task')
+    if (newTaskBtn) {
+      newTaskBtn.onclick = async () => {
+        const taskTitle = prompt(`Enter revision task title for ${subject.code}:`)
+        if (taskTitle && bridge.saveIdea) {
+          await bridge.saveIdea({
+            title: taskTitle,
+            originalText: taskTitle,
+            collection: 'PLAN_TASK',
+            subject: subject.code,
+          })
+          await openSubjectDetailView(bridge, subject.code)
+        }
+      }
+    }
+
+  } catch (err) {
+    if (contentEl) contentEl.innerHTML = `<div class="empty-state-editorial">Failed to load subject workspace: ${String(err)}</div>`
+  }
+}
+
 export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<void> {
   // 1. Dynamic Greeting
   const greetingEl = document.getElementById('workspace-greeting')
@@ -1336,10 +1862,16 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
 
       const chk = document.createElement('input')
       chk.type = 'checkbox'
-      chk.className = 'task-checkbox'
+      chk.className = 'tactile-checkbox task-checkbox'
       chk.checked = Boolean(t.completed)
+      chk.setAttribute('aria-label', `Mark "${t.title}" ${t.completed ? 'incomplete' : 'complete'}`)
       chk.title = t.completed ? 'Mark task incomplete' : 'Mark task complete'
       chk.addEventListener('change', async () => {
+        if (chk.checked) {
+          item.classList.add('completed')
+        } else {
+          item.classList.remove('completed')
+        }
         if (bridge.completeTask) {
           await bridge.completeTask(t.id, chk.checked)
           await refreshWorkspace(bridge)
@@ -1418,12 +1950,22 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
       target.innerHTML = ''
 
       if (isCompact) {
-        // Workspace Home Stream: prioritized slice
+        // Workspace Home Stream: prioritized slice (Overdue -> Due Today -> Upcoming -> Undated -> Completed)
+        const getPriorityWeight = (t: IdeaRecord): number => {
+          if (t.completed) return 100
+          if (isOverdue(t)) return 1
+          if (isDueToday(t)) return 2
+          if (t.dueDate) return 3
+          return 4
+        }
         const sorted = [...tasks].sort((a, b) => {
-          if (a.completed !== b.completed) return (a.completed ? 1 : 0) - (b.completed ? 1 : 0)
+          const wA = getPriorityWeight(a)
+          const wB = getPriorityWeight(b)
+          if (wA !== wB) return wA - wB
           const dueA = a.dueDate ? a.dueDate.slice(0, 10) : '9999-99-99'
           const dueB = b.dueDate ? b.dueDate.slice(0, 10) : '9999-99-99'
-          return dueA.localeCompare(dueB)
+          if (dueA !== dueB) return dueA.localeCompare(dueB)
+          return (b.updatedAt || '').localeCompare(a.updatedAt || '')
         })
         const slice = sorted.slice(0, 6)
         for (const t of slice) {
@@ -1589,105 +2131,58 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
       }
     }
 
-    const listEl = document.getElementById('workspace-subjects-list')
-    const fullSubjectsEl = document.getElementById('subjects-full-list')
-
-    if (listEl) {
-      if (subjects.length === 0) {
-        listEl.innerHTML = '<div class="empty-state-editorial">No study subjects enrolled yet.</div>'
-      } else {
-        listEl.innerHTML = ''
-        const slice = subjects.slice(0, 5)
-        for (const s of slice) {
-          const pill = document.createElement('div')
-          pill.className = 'subject-pill'
-
-          const info = document.createElement('div')
-          info.className = 'subject-info'
-
-          const codeRow = document.createElement('div')
-          codeRow.style.display = 'flex'
-          codeRow.style.alignItems = 'center'
-          codeRow.style.gap = '6px'
-
-          const codeEl = document.createElement('span')
-          codeEl.className = 'subject-code'
-          codeEl.textContent = s.code || s.subject
-
-          codeRow.appendChild(codeEl)
-
-          if (s.credits !== undefined) {
-            const cr = document.createElement('span')
-            cr.className = 'subject-credits'
-            cr.textContent = `${s.credits} cr`
-            codeRow.appendChild(cr)
-          }
-
-          const meta = document.createElement('div')
-          meta.className = 'subject-name'
-          meta.textContent = s.name && s.name !== s.code ? s.name : `${s.noteCount || 0} notes · ${s.taskCount || 0} tasks`
-
-          info.appendChild(codeRow)
-          info.appendChild(meta)
-          pill.appendChild(info)
-          listEl.appendChild(pill)
-        }
+    const quickSubjectSelect = document.getElementById('workspace-quick-subject') as HTMLSelectElement | null
+    if (quickSubjectSelect) {
+      const prevVal = quickSubjectSelect.value
+      quickSubjectSelect.innerHTML = '<option value="">No subject</option>'
+      for (const s of subjects) {
+        const opt = document.createElement('option')
+        opt.value = s.code || s.subject
+        opt.textContent = s.name && s.name !== s.code ? `${s.code || s.subject} (${s.name})` : (s.code || s.subject)
+        quickSubjectSelect.appendChild(opt)
       }
+      quickSubjectSelect.value = prevVal
     }
 
-    if (fullSubjectsEl) {
+    // Compact Sidebar Subjects List
+    const compactListEl = document.getElementById('workspace-subjects-compact-list')
+    if (compactListEl) {
       if (subjects.length === 0) {
-        fullSubjectsEl.innerHTML = '<div class="empty-state-editorial">No semester subjects enrolled.</div>'
+        compactListEl.innerHTML = '<div class="empty-state-editorial" style="padding: 6px; font-size: 12px;">No subjects enrolled.</div>'
       } else {
-        fullSubjectsEl.innerHTML = ''
+        compactListEl.innerHTML = ''
         for (const s of subjects) {
-          const card = document.createElement('div')
-          card.className = 'subject-card'
-
-          const cardHeader = document.createElement('div')
-          cardHeader.className = 'subject-card-header'
-
-          const codeBadge = document.createElement('span')
-          codeBadge.className = 'subject-card-code'
-          codeBadge.textContent = s.code || s.subject
-
-          const creditsBadge = document.createElement('span')
-          creditsBadge.className = 'subject-card-credits'
-          creditsBadge.textContent = `${s.credits ?? 4} Credits`
-
-          cardHeader.appendChild(codeBadge)
-          cardHeader.appendChild(creditsBadge)
-          card.appendChild(cardHeader)
-
-          const title = document.createElement('h3')
-          title.className = 'subject-card-title'
-          title.textContent = s.name || s.subject
-          card.appendChild(title)
-
-          const stats = document.createElement('div')
-          stats.className = 'subject-card-stats'
-
-          const notesPill = document.createElement('span')
-          notesPill.className = 'subject-stat-pill'
-          notesPill.innerHTML = `<strong>${s.noteCount || 0}</strong> notes`
-
-          const asgnPill = document.createElement('span')
-          asgnPill.className = 'subject-stat-pill'
-          asgnPill.innerHTML = `<strong>${s.assignmentCount || 0}</strong> assignments`
-
-          const taskPill = document.createElement('span')
-          taskPill.className = 'subject-stat-pill'
-          taskPill.innerHTML = `<strong>${s.taskCount || 0}</strong> revisions`
-
-          stats.appendChild(notesPill)
-          stats.appendChild(asgnPill)
-          stats.appendChild(taskPill)
-          card.appendChild(stats)
-
-          fullSubjectsEl.appendChild(card)
+          const chip = document.createElement('button')
+          chip.className = 'rail-compact-chip'
+          const totalActivity = (s.noteCount || 0) + (s.taskCount || 0) + (s.assignmentCount || 0)
+          if (totalActivity > 0) {
+            chip.classList.add('has-activity')
+          }
+          const labelCode = s.code || s.subject
+          chip.textContent = totalActivity > 0 ? `${labelCode} (${totalActivity})` : labelCode
+          chip.title = `${s.name || s.subject} — ${totalActivity > 0 ? `${totalActivity} active items` : 'Curriculum ready'}`
+          chip.addEventListener('click', () => {
+            void openSubjectDetailView(bridge, s.code || s.subject)
+          })
+          compactListEl.appendChild(chip)
         }
       }
     }
+
+    const viewAllBtn = document.getElementById('workspace-btn-view-all-subjects')
+    if (viewAllBtn) {
+      viewAllBtn.textContent = `View All Subjects (${subjects.length}) →`
+      viewAllBtn.onclick = () => {
+        activateSurface('surface-subjects')
+        const overviewEl = document.getElementById('subjects-overview-view')
+        const detailEl = document.getElementById('subject-detail-view')
+        if (overviewEl) overviewEl.style.display = 'block'
+        if (detailEl) detailEl.style.display = 'none'
+      }
+    }
+
+    // Render Full Subjects Overview View
+    renderSubjectsOverview(bridge, subjects)
   } catch {
     // Graceful fallback
   }
@@ -2637,19 +3132,59 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 
     // Workspace prompt bar interactions
     const quickInput = document.getElementById('workspace-quick-input') as HTMLInputElement | null
+    const quickSubject = document.getElementById('workspace-quick-subject') as HTMLSelectElement | null
+    const captureFeedback = document.getElementById('workspace-capture-feedback')
+
+    const showCaptureFeedback = (msg: string) => {
+      if (captureFeedback) {
+        captureFeedback.textContent = msg
+        captureFeedback.style.display = 'block'
+        setTimeout(() => {
+          if (captureFeedback) captureFeedback.style.display = 'none'
+        }, 3000)
+      }
+    }
 
     const handleCreateItem = async (type: 'IDEA' | 'TASK') => {
-      const val = quickInput?.value.trim()
+      let val = quickInput?.value.trim()
       if (!val) return
+
+      let linkedSubject = quickSubject?.value || undefined
+
+      // Parse subject hashtag if included in text e.g. "Review lecture #CSE 2195" or "#Mathematics Linear algebra"
+      const hashtagMatch = val.match(/#([A-Za-z0-9\s]+)$/) || val.match(/#([A-Za-z0-9_-]+)/)
+      if (hashtagMatch && hashtagMatch[1]) {
+        const potentialSubj = hashtagMatch[1].trim()
+        val = val.replace(hashtagMatch[0], '').trim()
+        if (!linkedSubject) {
+          linkedSubject = potentialSubj
+        }
+      }
+
+      if (type === 'TASK') {
+        val = val.replace(/^(todo:|task:|\[\s*\])\s*/i, '').trim()
+      }
+
+      if (!val) return
+
       if (bridge.saveIdea) {
+        const collection: KnowledgeCollection =
+          type === 'TASK' ? 'PLAN_TASK' : linkedSubject ? 'STUDY_NOTE' : 'IDEA'
         await bridge.saveIdea({
           title: val,
           originalText: val,
-          collection: type === 'TASK' ? 'PLAN_TASK' : 'IDEA',
+          collection,
+          subject: linkedSubject,
         })
         if (quickInput) quickInput.value = ''
+        if (quickSubject) quickSubject.value = ''
         await refreshWorkspace(bridge)
-        announce(`${type === 'TASK' ? 'Task' : 'Note'} saved`)
+        const typeLabel = type === 'TASK' ? 'Task' : 'Note'
+        const feedbackMsg = linkedSubject
+          ? `✓ Created ${typeLabel.toLowerCase()} linked to ${linkedSubject}`
+          : `✓ Saved ${typeLabel.toLowerCase()}`
+        showCaptureFeedback(feedbackMsg)
+        announce(feedbackMsg)
       }
     }
 
@@ -2664,6 +3199,23 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         const val = quickInput.value.trim().toLowerCase()
         const isTask = val.startsWith('todo:') || val.startsWith('task:') || val.startsWith('[]')
         void handleCreateItem(isTask ? 'TASK' : 'IDEA')
+      }
+    })
+
+    // Global keyboard shortcut: pressing '/' or Ctrl+K when not in an input focuses quick capture
+    window.addEventListener('keydown', (e) => {
+      const activeEl = document.activeElement
+      const isInput =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.tagName === 'SELECT' ||
+          (activeEl as HTMLElement).isContentEditable)
+      if (!isInput) {
+        if (e.key === '/' || (e.ctrlKey && e.key.toLowerCase() === 'k')) {
+          e.preventDefault()
+          quickInput?.focus()
+        }
       }
     })
 
