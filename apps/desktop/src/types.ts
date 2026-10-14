@@ -1186,6 +1186,8 @@ export interface GravitasDesktopBridge {
   selectInboxFolder?(): Promise<{ readonly selected: boolean; readonly folderPath: string | null }>
   toggleCompanionWindow?(): Promise<{ visible: boolean }>
   hideCompanionWindow?(): Promise<{ visible: boolean }>
+  showMainWindow?(target?: { surface: string; targetId?: string }): Promise<{ visible: boolean }>
+  onNavigateTarget?(callback: (target: { surface: string; targetId?: string }) => void): () => void
 }
 
 declare global {

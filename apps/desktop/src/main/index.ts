@@ -627,6 +627,14 @@ export function initMainIpc(
     return { visible: false }
   })
 
+  handle('gravitas:show-main-window', async (_event, target?: { surface: string; targetId?: string }) => {
+    restoreCommandCenter()
+    if (mainWindow && !mainWindow.isDestroyed() && target) {
+      mainWindow.webContents.send('gravitas:navigate-target', target)
+    }
+    return { visible: true }
+  })
+
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)
   handle('gravitas:hide-window', async () => {
     hideCommandCenter()

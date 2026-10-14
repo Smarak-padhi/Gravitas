@@ -147,6 +147,18 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
     actionsWrap.style.display = 'flex'
     actionsWrap.style.gap = '4px'
 
+    const viewWsBtn = document.createElement('button')
+    viewWsBtn.className = 'btn btn-sm'
+    viewWsBtn.textContent = 'View in Workspace ↗'
+    viewWsBtn.title = 'Open note in Main Workspace'
+    viewWsBtn.setAttribute('data-view-workspace-btn', idea.id)
+    viewWsBtn.addEventListener('click', async () => {
+      try {
+        localStorage.setItem('gravitas_pending_navigate', JSON.stringify({ surface: 'surface-notes', targetId: idea.id }))
+      } catch {}
+      await bridge?.showMainWindow?.({ surface: 'surface-notes', targetId: idea.id })
+    })
+
     const openBtn = document.createElement('button')
     openBtn.className = 'btn btn-sm'
     openBtn.textContent = 'Open / Edit'
@@ -161,6 +173,7 @@ export function renderIdeasList(ideas: readonly IdeaRecord[], bridge?: GravitasD
       openIdeaDetailPanel(idea, true, bridge)
     })
 
+    actionsWrap.appendChild(viewWsBtn)
     actionsWrap.appendChild(openBtn)
     actionsWrap.appendChild(delBtn)
     header.appendChild(titleWrap)
@@ -411,21 +424,47 @@ export function renderCapabilitiesAndStt(
 
 export async function refreshSubjectsBar(bridge: GravitasDesktopBridge): Promise<void> {
   const bar = document.getElementById('knowledge-subjects-bar')
-  if (!bar || !bridge.listStudySubjects) return
+  const select = document.getElementById('companion-subject-select') as HTMLSelectElement | null
+  if (!bridge.listStudySubjects) return
   const subjects = await bridge.listStudySubjects()
-  bar.innerHTML = ''
-  if (subjects.length === 0) return
 
-  for (const s of subjects) {
-    const subj = s.subject
-    const chip = document.createElement('button')
-    chip.className = `chip${activeSubjectFilter === subj ? ' active' : ''}`
-    chip.textContent = `Subject: ${subj} (${s.noteCount + s.taskCount})`
-    chip.addEventListener('click', () => {
-      activeSubjectFilter = activeSubjectFilter === subj ? null : subj
-      void refreshVault(bridge)
-    })
-    bar.appendChild(chip)
+  if (select) {
+    select.innerHTML = `<option value="">All Subjects (${subjects.length})</option>`
+    for (const s of subjects) {
+      const opt = document.createElement('option')
+      opt.value = s.subject
+      const totalCount = s.noteCount + s.taskCount
+      opt.textContent = `${s.subject} (${totalCount})`
+      if (s.subject === activeSubjectFilter) {
+        opt.selected = true
+      }
+      select.appendChild(opt)
+    }
+    if (!select.dataset.listenerAttached) {
+      select.dataset.listenerAttached = 'true'
+      select.addEventListener('change', () => {
+        activeSubjectFilter = select.value || null
+        void refreshVault(bridge)
+      })
+    }
+  }
+
+  if (bar) {
+    bar.innerHTML = ''
+    if (subjects.length > 0) {
+      for (const s of subjects) {
+        const subj = s.subject
+        const chip = document.createElement('button')
+        chip.className = `chip${activeSubjectFilter === subj ? ' active' : ''}`
+        chip.textContent = `Subject: ${subj} (${s.noteCount + s.taskCount})`
+        chip.addEventListener('click', () => {
+          activeSubjectFilter = activeSubjectFilter === subj ? null : subj
+          if (select) select.value = activeSubjectFilter || ''
+          void refreshVault(bridge)
+        })
+        bar.appendChild(chip)
+      }
+    }
   }
 }
 
@@ -647,6 +686,19 @@ export async function refreshStudyGuardianView(bridge: GravitasDesktopBridge): P
         const btnWrap = document.createElement('div')
         btnWrap.style.display = 'flex'
         btnWrap.style.gap = '4px'
+
+        const viewSubjBtn = document.createElement('button')
+        viewSubjBtn.className = 'btn btn-sm'
+        viewSubjBtn.textContent = 'View in Subject ↗'
+        viewSubjBtn.title = 'Open subject detail in Main Workspace'
+        viewSubjBtn.setAttribute('data-view-subject-btn', asgn.subjectCode)
+        viewSubjBtn.addEventListener('click', async () => {
+          try {
+            localStorage.setItem('gravitas_pending_navigate', JSON.stringify({ surface: 'surface-subjects', targetId: asgn.subjectCode }))
+          } catch {}
+          await bridge.showMainWindow?.({ surface: 'surface-subjects', targetId: asgn.subjectCode })
+        })
+        btnWrap.appendChild(viewSubjBtn)
 
         const answerBtn = document.createElement('button')
         answerBtn.className = 'btn btn-sm'
@@ -1243,6 +1295,8 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
     if (searchInput) searchInput.value = ''
     activeCollectionFilter = 'ALL'
     activeSubjectFilter = null
+    const subjSel = document.getElementById('companion-subject-select') as HTMLSelectElement | null
+    if (subjSel) subjSel.value = ''
     document.querySelectorAll('[data-collection-filter]').forEach((el) =>
       el.classList.toggle('active', el.getAttribute('data-collection-filter') === 'ALL')
     )

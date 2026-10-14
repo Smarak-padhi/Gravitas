@@ -2226,6 +2226,7 @@
       <button class="nav-btn" data-surface="surface-notes" role="tab" aria-selected="false" id="tab-notes">Notes & Ideas</button>
       <button class="nav-btn" data-surface="surface-tasks" role="tab" aria-selected="false" id="tab-tasks">Tasks</button>
       <button class="nav-btn" data-surface="surface-subjects" role="tab" aria-selected="false" id="tab-subjects">Subjects</button>
+      <button class="nav-btn" data-surface="surface-settings" role="tab" aria-selected="false" id="tab-settings">Settings</button>
       <button class="nav-btn" data-surface="surface-devtools" role="tab" aria-selected="false" id="tab-devtools">Developer Tools</button>
     </nav>
 
@@ -2772,6 +2773,187 @@
         <div class="card" id="card-doctor-results" style="display: none; margin-top: 16px;">
           <h2 class="card-title">Doctor Diagnostic Report</h2>
           <div id="doctor-results-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURFACE: SETTINGS -->
+    <section id="surface-settings" class="surface" role="tabpanel" aria-labelledby="tab-settings">
+      <div class="settings-surface-content" style="max-width: 900px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+          <div>
+            <h1 style="font-size: 24px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">Settings &amp; Preferences</h1>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Manage keyboard shortcuts, study quiet hours, mobile synchronization, and local inference routing.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="settings-save-feedback" style="display: none; font-size: 13px; font-weight: 600; color: var(--success);">✓ Settings saved</span>
+            <button id="settings-btn-save" class="btn btn-primary" style="padding: 8px 18px;">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Section 1: Shortcuts & Floating Companion -->
+        <div class="card" style="padding: 20px;">
+          <h2 class="card-title" style="margin-bottom: 6px;">1. Shortcuts &amp; Floating Companion</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            Global system hotkeys and companion window behavior across Windows applications.
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label for="settings-shortcut-input" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Summon Companion Shortcut</label>
+              <input type="text" id="settings-shortcut-input" value="Alt+Space" style="width: 100%; font-family: var(--font-mono); font-size: 13px;" />
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Press to summon or hide floating companion from any window.</div>
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Quick Capture Hotkey (In-App)</label>
+              <div style="padding: 9px 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+                <kbd>/</kbd> or <kbd>Ctrl+K</kbd> to focus Quick Capture
+              </div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Instantly focus the workspace quick capture bar.</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-companion-always-on-top" class="tactile-checkbox" checked />
+              <span>Keep Floating Companion always on top of other windows</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-companion-compact-mode" class="tactile-checkbox" checked />
+              <span>Use compact subject dropdown in companion (hides full chip wall)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 2: Study Guardian & Quiet Hours -->
+        <div class="card" style="padding: 20px;">
+          <h2 class="card-title" style="margin-bottom: 6px;">2. Study Guardian &amp; Quiet Hours</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            Schedule notifications for assignments and avoid interruptions during focus or sleep.
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label for="settings-quiet-start" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Quiet Hours Start</label>
+              <input type="time" id="settings-quiet-start" value="22:00" style="width: 100%;" />
+            </div>
+            <div>
+              <label for="settings-quiet-end" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Quiet Hours End</label>
+              <input type="time" id="settings-quiet-end" value="07:00" style="width: 100%;" />
+            </div>
+            <div>
+              <label for="settings-reminder-interval" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Reminder Interval</label>
+              <select id="settings-reminder-interval" style="width: 100%;">
+                <option value="30">Every 30 minutes</option>
+                <option value="60">Every 60 minutes</option>
+                <option value="120">Every 2 hours</option>
+                <option value="180" selected>Every 3 hours (Default)</option>
+                <option value="240">Every 4 hours</option>
+              </select>
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-notifications-enabled" class="tactile-checkbox" checked />
+              <span>Enable native Windows desktop notifications for upcoming assignments</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 3: Startup & Desktop Continuity -->
+        <div class="card" style="padding: 20px;">
+          <h2 class="card-title" style="margin-bottom: 6px;">3. Startup &amp; Desktop Continuity</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            Control app launch and tray minimization behaviors.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-start-with-windows" class="tactile-checkbox" />
+              <span>Launch GRAVITAS minimized on Windows startup</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-minimize-to-tray" class="tactile-checkbox" checked />
+              <span>Minimize to system tray when main window is closed</span>
+            </label>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <div>
+              <label for="settings-theme-select" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Interface Theme</label>
+              <select id="settings-theme-select" style="width: 100%;">
+                <option value="dark">Dark Graphite (#121518)</option>
+                <option value="light">Warm Stone Light (#F5F4F0)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Re-run Setup</label>
+              <button id="settings-btn-reopen-onboarding" class="btn btn-secondary" style="width: 100%;">Open Setup Wizard</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Phone Inbox (Mobile Ingestion & Sync) -->
+        <div class="card" style="padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div>
+              <h2 class="card-title">4. Phone Inbox (iCloud Drive / Mobile Ingestion)</h2>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                Ingest assignment PDFs, lecture notes, and study prompts dropped from mobile devices.
+              </p>
+            </div>
+            <span id="settings-inbox-status-pill" class="badge badge-waiting">Not Configured</span>
+          </div>
+
+          <div style="margin: 16px 0;">
+            <label for="settings-inbox-folder" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Monitored Inbox Folder Path</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="settings-inbox-folder" readonly placeholder="No folder selected — pick local iCloud Drive folder" style="flex: 1; font-family: var(--font-mono); font-size: 12px;" />
+              <button id="settings-btn-pick-inbox" class="btn btn-secondary">Browse Folder...</button>
+              <button id="settings-btn-test-inbox" class="btn">Test &amp; Scan</button>
+            </div>
+            <div id="settings-inbox-message" style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">
+              Folder watcher scans for newly dropped files and drafts them into your study guardian inbox.
+            </div>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--bg-surface-subtle); border: 1px solid var(--border); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+            <strong>Hardware &amp; Sync Transparency:</strong> Uses standard Windows local folder watching. No cloud service or proprietary phone daemon is required or claimed. Device sync operates through standard folder sync clients (Apple iCloud Drive for Windows, Syncthing, or local network file transfer).
+          </div>
+        </div>
+
+        <!-- Section 5: AI Model & Inference Configuration -->
+        <div class="card" style="padding: 20px;">
+          <h2 class="card-title" style="margin-bottom: 6px;">5. AI Model &amp; Inference Routing</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            Strict offline-first local intelligence with optional cloud hybrid fallback.
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Primary Engine (Local Kernel)</label>
+              <div style="padding: 9px 12px; background: var(--bg-surface-subtle); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 500;">
+                Deterministic SQLite Kernel (100% Offline)
+              </div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Runs locally on device with zero telemetry or tracking.</div>
+            </div>
+            <div>
+              <label for="settings-model-router-select" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">Hybrid Cloud Model Tier (Optional)</label>
+              <select id="settings-model-router-select" style="width: 100%;">
+                <option value="meta/llama-3.1-8b-instruct" selected>meta/llama-3.1-8b-instruct (Fast Tier)</option>
+                <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct (Frontier Tier)</option>
+                <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1 (MoE)</option>
+              </select>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Used only when explicitly dispatching via model router.</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" id="settings-deny-cloud-egress" class="tactile-checkbox" checked />
+              <span>Default Deny Cloud Egress (Prevent automatic background transmission of notes or study data)</span>
+            </label>
+            <div style="font-size: 12.5px; color: var(--text-tertiary); margin-top: 4px;">
+              <strong>Voice / STT Hardware Status:</strong> Microphone Push-to-Talk operates strictly user-initiated. Audio egress: NONE. Audio transcription requires verified local audio hardware and Vosk/Whisper models.
+            </div>
+          </div>
         </div>
       </div>
     </section>

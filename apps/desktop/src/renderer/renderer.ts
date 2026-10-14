@@ -3109,6 +3109,223 @@ export function initModelDispatch(bridge: GravitasDesktopBridge): void {
   })
 }
 
+export async function navigateToTarget(
+  bridge: GravitasDesktopBridge,
+  target: { surface: string; targetId?: string }
+): Promise<void> {
+  if (target.surface === 'surface-notes') {
+    activateSurface('surface-notes')
+    if (target.targetId) {
+      await openNoteInEditor(bridge, target.targetId)
+    }
+  } else if (target.surface === 'surface-subjects') {
+    activateSurface('surface-subjects')
+    if (target.targetId) {
+      await openSubjectDetailView(bridge, target.targetId)
+    }
+  } else if (target.surface === 'surface-settings') {
+    activateSurface('surface-settings')
+  } else if (target.surface) {
+    activateSurface(target.surface)
+  }
+}
+
+export function setupSettingsController(bridge: GravitasDesktopBridge): void {
+  const shortcutInput = document.getElementById('settings-shortcut-input') as HTMLInputElement | null
+  const companionAlwaysOnTop = document.getElementById('settings-companion-always-on-top') as HTMLInputElement | null
+  const companionCompactMode = document.getElementById('settings-companion-compact-mode') as HTMLInputElement | null
+  const quietStart = document.getElementById('settings-quiet-start') as HTMLInputElement | null
+  const quietEnd = document.getElementById('settings-quiet-end') as HTMLInputElement | null
+  const reminderInterval = document.getElementById('settings-reminder-interval') as HTMLSelectElement | null
+  const notifsEnabled = document.getElementById('settings-notifications-enabled') as HTMLInputElement | null
+  const startWithWindows = document.getElementById('settings-start-with-windows') as HTMLInputElement | null
+  const minimizeToTray = document.getElementById('settings-minimize-to-tray') as HTMLInputElement | null
+  const themeSelect = document.getElementById('settings-theme-select') as HTMLSelectElement | null
+  const modelSelect = document.getElementById('settings-model-router-select') as HTMLSelectElement | null
+  const denyCloudEgress = document.getElementById('settings-deny-cloud-egress') as HTMLInputElement | null
+  const inboxFolderInput = document.getElementById('settings-inbox-folder') as HTMLInputElement | null
+  const inboxStatusPill = document.getElementById('settings-inbox-status-pill')
+  const inboxMsg = document.getElementById('settings-inbox-message')
+  const saveBtn = document.getElementById('settings-btn-save')
+  const saveFeedback = document.getElementById('settings-save-feedback')
+  const pickInboxBtn = document.getElementById('settings-btn-pick-inbox')
+  const testInboxBtn = document.getElementById('settings-btn-test-inbox')
+  const reopenObBtn = document.getElementById('settings-btn-reopen-onboarding')
+
+  const loadSettings = async () => {
+    try {
+      const savedTheme = localStorage.getItem('gravitas_theme') || 'dark'
+      if (themeSelect) themeSelect.value = savedTheme
+
+      let settingsJson: any = {}
+      try {
+        const raw = localStorage.getItem('gravitas_settings')
+        if (raw) settingsJson = JSON.parse(raw)
+      } catch {}
+
+      if (companionAlwaysOnTop && settingsJson.alwaysOnTop !== undefined) {
+        companionAlwaysOnTop.checked = Boolean(settingsJson.alwaysOnTop)
+      }
+      if (companionCompactMode && settingsJson.compactMode !== undefined) {
+        companionCompactMode.checked = Boolean(settingsJson.compactMode)
+      }
+      if (minimizeToTray && settingsJson.minimizeToTray !== undefined) {
+        minimizeToTray.checked = Boolean(settingsJson.minimizeToTray)
+      }
+      if (modelSelect && settingsJson.modelTier) {
+        modelSelect.value = settingsJson.modelTier
+      }
+
+      if (bridge.getOnboarding) {
+        const ob = await bridge.getOnboarding()
+        if (ob.preferences) {
+          const p = ob.preferences
+          if (shortcutInput && p.companionShortcut) shortcutInput.value = p.companionShortcut
+          if (quietStart && p.quietHoursStart) quietStart.value = p.quietHoursStart
+          if (quietEnd && p.quietHoursEnd) quietEnd.value = p.quietHoursEnd
+          if (reminderInterval && p.reminderFrequencyMinutes) {
+            reminderInterval.value = String(p.reminderFrequencyMinutes)
+          }
+          if (notifsEnabled && p.notificationsEnabled !== undefined) {
+            notifsEnabled.checked = Boolean(p.notificationsEnabled)
+          }
+          if (startWithWindows && p.startWithWindows !== undefined) {
+            startWithWindows.checked = Boolean(p.startWithWindows)
+          }
+          if (denyCloudEgress && p.defaultDenyCloudEgress !== undefined) {
+            denyCloudEgress.checked = Boolean(p.defaultDenyCloudEgress)
+          }
+        }
+      }
+
+      if (bridge.executeStudyGuardianOperation) {
+        const res = await bridge.executeStudyGuardianOperation({ action: 'GET_INBOX_CONFIG' })
+        const path = res.inboxConfig?.inboxFolderPath
+        if (inboxFolderInput && path) inboxFolderInput.value = path
+        if (inboxStatusPill) {
+          if (path) {
+            inboxStatusPill.textContent = res.inboxConfig.watcherActive ? 'Watching' : 'Configured'
+            inboxStatusPill.className = 'badge ' + (res.inboxConfig.watcherActive ? 'badge-ready' : 'badge-waiting')
+          } else {
+            inboxStatusPill.textContent = 'Not Configured'
+            inboxStatusPill.className = 'badge badge-waiting'
+          }
+        }
+      }
+    } catch {
+      // Graceful fallback
+    }
+  }
+
+  void loadSettings()
+
+  const saveSettings = async () => {
+    try {
+      const themeVal = themeSelect?.value as 'light' | 'dark'
+      if (themeVal) {
+        applyTheme(themeVal)
+      }
+
+      const settingsObj = {
+        alwaysOnTop: companionAlwaysOnTop?.checked ?? true,
+        compactMode: companionCompactMode?.checked ?? true,
+        minimizeToTray: minimizeToTray?.checked ?? true,
+        modelTier: modelSelect?.value || 'meta/llama-3.1-8b-instruct',
+        theme: themeVal || 'dark',
+      }
+      localStorage.setItem('gravitas_settings', JSON.stringify(settingsObj))
+
+      if (bridge.saveOnboarding) {
+        await bridge.saveOnboarding({
+          completed: true,
+          step: 'COMPLETED',
+          preferences: {
+            companionShortcut: shortcutInput?.value || 'Alt+Space',
+            assistantShortcut: shortcutInput?.value || 'Alt+Space',
+            reminderFrequencyMinutes: Number(reminderInterval?.value || '180'),
+            reminderIntervalMinutes: Number(reminderInterval?.value || '180'),
+            quietHoursStart: quietStart?.value || '22:00',
+            quietHoursEnd: quietEnd?.value || '07:00',
+            notificationsEnabled: notifsEnabled?.checked ?? true,
+            startWithWindows: startWithWindows?.checked ?? false,
+            defaultDenyCloudEgress: denyCloudEgress?.checked ?? true,
+          },
+        })
+      }
+
+      if (saveFeedback) {
+        saveFeedback.style.display = 'inline'
+        saveFeedback.style.color = 'var(--success)'
+        saveFeedback.textContent = '✓ Settings saved'
+        setTimeout(() => {
+          if (saveFeedback) saveFeedback.style.display = 'none'
+        }, 3000)
+      }
+      announce('Settings saved successfully.')
+    } catch (err) {
+      if (saveFeedback) {
+        saveFeedback.style.display = 'inline'
+        saveFeedback.style.color = 'var(--danger)'
+        saveFeedback.textContent = `Save failed: ${(err as Error).message}`
+      }
+    }
+  }
+
+  saveBtn?.addEventListener('click', () => {
+    void saveSettings()
+  })
+
+  pickInboxBtn?.addEventListener('click', async () => {
+    if (!bridge.selectInboxFolder || !bridge.executeStudyGuardianOperation) return
+    const pick = await bridge.selectInboxFolder()
+    if (pick.selected && pick.folderPath) {
+      if (inboxFolderInput) inboxFolderInput.value = pick.folderPath
+      const res = await bridge.executeStudyGuardianOperation({
+        action: 'SET_INBOX_FOLDER',
+        folderPath: pick.folderPath,
+      })
+      if (inboxStatusPill) {
+        inboxStatusPill.textContent = 'Configured'
+        inboxStatusPill.className = 'badge badge-ready'
+      }
+      if (inboxMsg) {
+        inboxMsg.textContent = res.errorMessage ?? `Watching folder: ${pick.folderPath}`
+      }
+      announce(`Configured inbox folder: ${pick.folderPath}`)
+    }
+  })
+
+  testInboxBtn?.addEventListener('click', async () => {
+    if (!bridge.executeStudyGuardianOperation) return
+    try {
+      if (inboxMsg) inboxMsg.textContent = 'Testing connection and scanning folder...'
+      const res = await bridge.executeStudyGuardianOperation({ action: 'TEST_INBOX_SETUP' })
+      if (inboxMsg) {
+        inboxMsg.textContent = res.inboxVerificationResult?.message || 'Inbox test complete.'
+      }
+      if (inboxStatusPill) {
+        const ok = res.inboxVerificationResult?.isAccessible
+        inboxStatusPill.textContent = ok ? 'Verified' : 'Error'
+        inboxStatusPill.className = 'badge ' + (ok ? 'badge-ready' : 'badge-offline')
+      }
+      announce(res.inboxVerificationResult?.message || 'Inbox test complete.')
+    } catch (err) {
+      if (inboxMsg) inboxMsg.textContent = `Test failed: ${(err as Error).message}`
+    }
+  })
+
+  reopenObBtn?.addEventListener('click', () => {
+    const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
+    dialog?.showModal()
+  })
+
+  themeSelect?.addEventListener('change', () => {
+    if (themeSelect.value === 'light' || themeSelect.value === 'dark') {
+      applyTheme(themeSelect.value)
+    }
+  })
+}
+
 // ─── Initialization ──────────────────────────────────────────────────────────
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
@@ -3124,6 +3341,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
 
     // Initialize model selection & router dispatch
     initModelDispatch(bridge)
+
+    // Initialize dedicated settings controller
+    setupSettingsController(bridge)
 
     // Tab navigation logic
     const tabs = document.querySelectorAll<HTMLButtonElement>('.nav-btn')
@@ -3378,8 +3598,36 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       if (worldView?.isVisible()) void worldView.refresh()
     })
 
-    // Initial load: start on workspace surface
-    activateSurface('surface-workspace')
+    // Navigation target listener from Companion or IPC
+    bridge.onNavigateTarget?.((target) => {
+      void navigateToTarget(bridge, target)
+    })
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'gravitas_pending_navigate' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue)
+          localStorage.removeItem('gravitas_pending_navigate')
+          void navigateToTarget(bridge, parsed)
+        } catch {}
+      }
+    })
+
+    // Initial load: start on workspace surface or pending navigation target
+    let hasPendingNav = false
+    try {
+      const pendingNav = localStorage.getItem('gravitas_pending_navigate')
+      if (pendingNav) {
+        localStorage.removeItem('gravitas_pending_navigate')
+        const parsed = JSON.parse(pendingNav)
+        hasPendingNav = true
+        void navigateToTarget(bridge, parsed)
+      }
+    } catch {}
+
+    if (!hasPendingNav) {
+      activateSurface('surface-workspace')
+    }
     refreshAll(bridge)
   })
 }

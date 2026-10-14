@@ -233,6 +233,18 @@ const bridge: GravitasDesktopBridge = {
   hideCompanionWindow: async () => {
     return ipcRenderer.invoke('gravitas:hide-companion')
   },
+
+  showMainWindow: async (target?: { surface: string; targetId?: string }) => {
+    return ipcRenderer.invoke('gravitas:show-main-window', target)
+  },
+
+  onNavigateTarget: (callback: (target: { surface: string; targetId?: string }) => void) => {
+    const sub = (_event: any, target: { surface: string; targetId?: string }) => callback(target)
+    ipcRenderer.on('gravitas:navigate-target', sub)
+    return () => {
+      ipcRenderer.removeListener('gravitas:navigate-target', sub)
+    }
+  },
 }
 
 contextBridge.exposeInMainWorld('gravitasDesktop', bridge)
