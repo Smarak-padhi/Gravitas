@@ -26,6 +26,7 @@ import type {
   RecordHumanDecisionIntent,
   DoctorReport,
   IdeaRecord,
+  KnowledgeCollection,
 } from '../types.js'
 import type { PhoneSyncPlatform, PersonaArchetype } from '@gravitas/core'
 import { initWorldView } from './world/worldView.js'
@@ -36,11 +37,758 @@ let activeDialogTriggerButton: HTMLElement | null = null
 let currentDialogItem: { targetId: string; revision: number; outcome: string } | null = null
 let worldView: WorldViewController | null = null
 
-/** Select a surface (tab + panel). Pure navigation. */
-export function activateSurface(surfaceId: string): void {
+// ─── Notes & Knowledge Hub Master-Detail Controller ──────────────────────────
+
+export interface NoteEditorState {
+  id?: string
+  title: string
+  content: string
+  collection: KnowledgeCollection
+  subject: string
+  topic: string
+  tags: string
+}
+
+let activeNoteId: string | null = null
+let isNewNotePending = false
+let isNoteDirtyState = false
+let originalNoteSnapshot: NoteEditorState | null = null
+let loadedNotesCache: IdeaRecord[] = []
+let activeFilterCollection = 'ALL'
+let activeSearchQuery = ''
+let currentMarkdownViewMode: 'WRITE' | 'PREVIEW' | 'SPLIT' = 'WRITE'
+let currentActiveSurfaceId = 'surface-workspace'
+
+export function isNotesDirty(): boolean {
+  return isNoteDirtyState
+}
+
+export function checkNotesUnsavedGuard(): boolean {
+  if (!isNoteDirtyState) return true
+  const proceed = confirm('You have unsaved changes in this note. Discard changes and leave?')
+  if (proceed) {
+    isNoteDirtyState = false
+    return true
+  }
+  return false
+}
+
+export function revertNoteEdits(): void {
+  if (originalNoteSnapshot) {
+    populateEditorFields(originalNoteSnapshot)
+    setNotesDirty(false)
+  } else {
+    clearEditorFields()
+    setNotesDirty(false)
+    showNotesEmptyState(true)
+  }
+}
+
+export function setNotesDirty(dirty: boolean): void {
+  isNoteDirtyState = dirty
+  const indicator = document.getElementById('notes-dirty-indicator')
+  const cancelBtn = document.getElementById('notes-btn-cancel')
+  const saveBtn = document.getElementById('notes-btn-save')
+
+  if (indicator) {
+    if (dirty) {
+      indicator.className = 'notes-dirty-indicator dirty'
+      indicator.textContent = isNewNotePending ? '● New (Unsaved)' : '● Unsaved changes'
+    } else {
+      indicator.className = 'notes-dirty-indicator clean'
+      indicator.textContent = '✓ Saved'
+    }
+  }
+
+  if (cancelBtn) {
+    cancelBtn.style.display = dirty ? 'inline-flex' : 'none'
+  }
+
+  if (saveBtn) {
+    saveBtn.classList.toggle('btn-primary-action', dirty)
+  }
+}
+
+export function showNotesEmptyState(empty: boolean): void {
+  const emptyEl = document.getElementById('notes-empty-state')
+  const editorEl = document.getElementById('notes-editor-wrapper')
+  if (emptyEl) emptyEl.style.display = empty ? 'flex' : 'none'
+  if (editorEl) editorEl.style.display = empty ? 'none' : 'flex'
+}
+
+export function populateEditorFields(state: NoteEditorState): void {
+  const titleInput = document.getElementById('notes-input-title') as HTMLInputElement | null
+  const contentInput = document.getElementById('notes-textarea-content') as HTMLTextAreaElement | null
+  const collectionSelect = document.getElementById('notes-select-collection') as HTMLSelectElement | null
+  const subjectInput = document.getElementById('notes-input-subject') as HTMLInputElement | null
+  const topicInput = document.getElementById('notes-input-topic') as HTMLInputElement | null
+  const tagsInput = document.getElementById('notes-input-tags') as HTMLInputElement | null
+
+  if (titleInput) titleInput.value = state.title
+  if (contentInput) contentInput.value = state.content
+  if (collectionSelect) collectionSelect.value = state.collection
+  if (subjectInput) subjectInput.value = state.subject
+  if (topicInput) topicInput.value = state.topic
+  if (tagsInput) tagsInput.value = state.tags
+
+  updateWordAndCharCounts()
+  updateMarkdownPreview()
+}
+
+export function clearEditorFields(): void {
+  populateEditorFields({
+    title: '',
+    content: '',
+    collection: 'IDEA',
+    subject: '',
+    topic: '',
+    tags: '',
+  })
+}
+
+export function updateWordAndCharCounts(): void {
+  const contentInput = document.getElementById('notes-textarea-content') as HTMLTextAreaElement | null
+  const text = contentInput?.value || ''
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0
+  const chars = text.length
+
+  const wordsEl = document.getElementById('notes-stat-words')
+  const charsEl = document.getElementById('notes-stat-chars')
+  if (wordsEl) wordsEl.textContent = `${words} ${words === 1 ? 'word' : 'words'}`
+  if (charsEl) charsEl.textContent = `${chars} ${chars === 1 ? 'character' : 'characters'}`
+}
+
+export function renderMarkdownSafe(markdownText: string): string {
+  if (!markdownText || !markdownText.trim()) {
+    return '<p style="color: var(--text-tertiary); font-style: italic;">No Markdown content. Start typing on the left or switch to Write mode.</p>'
+  }
+
+  const escapeHtml = (str: string): string => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
+  const lines = markdownText.split(/\r?\n/)
+  const htmlParts: string[] = []
+  let inCodeBlock = false
+  let codeBlockContent: string[] = []
+  let inUl = false
+  let inOl = false
+  let inBlockquote = false
+  let blockquoteContent: string[] = []
+
+  const closeList = () => {
+    if (inUl) { htmlParts.push('</ul>'); inUl = false }
+    if (inOl) { htmlParts.push('</ol>'); inOl = false }
+  }
+
+  const closeBlockquote = () => {
+    if (inBlockquote) {
+      htmlParts.push(`<blockquote>${blockquoteContent.join('<br>')}</blockquote>`)
+      inBlockquote = false
+      blockquoteContent = []
+    }
+  }
+
+  const formatInline = (text: string): string => {
+    let s = escapeHtml(text)
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>')
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>')
+    s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    s = s.replace(/_([^_]+)_/g, '<em>$1</em>')
+    s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>')
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, href) => {
+      const cleanHref = href.startsWith('http://') || href.startsWith('https://') || href.startsWith('#')
+        ? href
+        : '#'
+      return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); text-decoration: underline;">${label}</a>`
+    })
+    return s
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!
+    const trimmed = line.trim()
+
+    if (trimmed.startsWith('```')) {
+      if (inCodeBlock) {
+        htmlParts.push(`<pre><code>${codeBlockContent.join('\n')}</code></pre>`)
+        inCodeBlock = false
+        codeBlockContent = []
+      } else {
+        closeList()
+        closeBlockquote()
+        inCodeBlock = true
+      }
+      continue
+    }
+
+    if (inCodeBlock) {
+      codeBlockContent.push(escapeHtml(line))
+      continue
+    }
+
+    if (/^(\*{3,}|-{3,}|_{3,})$/.test(trimmed)) {
+      closeList()
+      closeBlockquote()
+      htmlParts.push('<hr>')
+      continue
+    }
+
+    if (line.startsWith('>')) {
+      closeList()
+      inBlockquote = true
+      blockquoteContent.push(formatInline(line.replace(/^>\s?/, '')))
+      continue
+    } else {
+      closeBlockquote()
+    }
+
+    const h1Match = line.match(/^#\s+(.+)$/)
+    if (h1Match) {
+      closeList()
+      htmlParts.push(`<h1>${formatInline(h1Match[1]!)}</h1>`)
+      continue
+    }
+    const h2Match = line.match(/^##\s+(.+)$/)
+    if (h2Match) {
+      closeList()
+      htmlParts.push(`<h2>${formatInline(h2Match[1]!)}</h2>`)
+      continue
+    }
+    const h3Match = line.match(/^###\s+(.+)$/)
+    if (h3Match) {
+      closeList()
+      htmlParts.push(`<h3>${formatInline(h3Match[1]!)}</h3>`)
+      continue
+    }
+    const h4Match = line.match(/^####\s+(.+)$/)
+    if (h4Match) {
+      closeList()
+      htmlParts.push(`<h4>${formatInline(h4Match[1]!)}</h4>`)
+      continue
+    }
+
+    const checkMatch = line.match(/^[-*]\s+\[([ xX])\]\s+(.+)$/)
+    if (checkMatch) {
+      if (inOl) { htmlParts.push('</ol>'); inOl = false }
+      if (!inUl) { htmlParts.push('<ul style="list-style: none; padding-left: 0;">'); inUl = true }
+      const checked = checkMatch[1]!.toLowerCase() === 'x'
+      const checkIcon = checked
+        ? '<span style="color: var(--accent-sage); margin-right: 6px; font-weight: bold;">[✓]</span>'
+        : '<span style="color: var(--text-tertiary); margin-right: 6px;">[ ]</span>'
+      htmlParts.push(`<li style="${checked ? 'text-decoration: line-through; color: var(--text-tertiary);' : ''}">${checkIcon}${formatInline(checkMatch[2]!)}</li>`)
+      continue
+    }
+
+    const ulMatch = line.match(/^[-*]\s+(.+)$/)
+    if (ulMatch) {
+      if (inOl) { htmlParts.push('</ol>'); inOl = false }
+      if (!inUl) { htmlParts.push('<ul>'); inUl = true }
+      htmlParts.push(`<li>${formatInline(ulMatch[1]!)}</li>`)
+      continue
+    }
+
+    const olMatch = line.match(/^(\d+)\.\s+(.+)$/)
+    if (olMatch) {
+      if (inUl) { htmlParts.push('</ul>'); inUl = false }
+      if (!inOl) { htmlParts.push('<ol>'); inOl = true }
+      htmlParts.push(`<li>${formatInline(olMatch[2]!)}</li>`)
+      continue
+    }
+
+    if (!trimmed) {
+      closeList()
+      closeBlockquote()
+      continue
+    }
+
+    closeList()
+    htmlParts.push(`<p>${formatInline(line)}</p>`)
+  }
+
+  closeList()
+  closeBlockquote()
+  if (inCodeBlock) {
+    htmlParts.push(`<pre><code>${codeBlockContent.join('\n')}</code></pre>`)
+  }
+
+  return htmlParts.join('\n')
+}
+
+export function updateMarkdownPreview(): void {
+  const contentInput = document.getElementById('notes-textarea-content') as HTMLTextAreaElement | null
+  const previewEl = document.getElementById('notes-markdown-preview')
+  if (previewEl && contentInput) {
+    previewEl.innerHTML = renderMarkdownSafe(contentInput.value)
+  }
+}
+
+export function setMarkdownViewMode(mode: 'WRITE' | 'PREVIEW' | 'SPLIT'): void {
+  currentMarkdownViewMode = mode
+  const writeBtn = document.getElementById('notes-tab-write')
+  const previewBtn = document.getElementById('notes-tab-preview')
+  const splitBtn = document.getElementById('notes-tab-split')
+  const textarea = document.getElementById('notes-textarea-content') as HTMLTextAreaElement | null
+  const preview = document.getElementById('notes-markdown-preview') as HTMLElement | null
+
+  writeBtn?.classList.toggle('active', mode === 'WRITE')
+  previewBtn?.classList.toggle('active', mode === 'PREVIEW')
+  splitBtn?.classList.toggle('active', mode === 'SPLIT')
+
+  if (mode === 'WRITE') {
+    if (textarea) {
+      textarea.style.display = 'block'
+      textarea.style.width = '100%'
+      textarea.style.borderRight = 'none'
+    }
+    if (preview) preview.style.display = 'none'
+  } else if (mode === 'PREVIEW') {
+    if (textarea) textarea.style.display = 'none'
+    if (preview) {
+      preview.style.display = 'block'
+      preview.style.width = '100%'
+      updateMarkdownPreview()
+    }
+  } else if (mode === 'SPLIT') {
+    if (textarea && preview) {
+      textarea.style.display = 'block'
+      textarea.style.width = '50%'
+      textarea.style.borderRight = '1px solid var(--border)'
+      preview.style.display = 'block'
+      preview.style.width = '50%'
+      updateMarkdownPreview()
+    }
+  }
+}
+
+export async function openNoteInEditor(bridge: GravitasDesktopBridge, noteId: string): Promise<void> {
+  if (isNoteDirtyState && activeNoteId !== noteId) {
+    if (!checkNotesUnsavedGuard()) {
+      return
+    }
+  }
+
+  const note = await bridge.getIdea?.(noteId)
+  if (!note) {
+    announce(`Note ${noteId} not found`)
+    return
+  }
+
+  activeNoteId = note.id
+  isNewNotePending = false
+
+  const state: NoteEditorState = {
+    id: note.id,
+    title: note.title,
+    content: note.originalText || '',
+    collection: note.collection,
+    subject: note.subject || '',
+    topic: note.topic || '',
+    tags: (note.tags || []).join(', '),
+  }
+  originalNoteSnapshot = { ...state }
+
+  populateEditorFields(state)
+  setNotesDirty(false)
+  showNotesEmptyState(false)
+
+  document.querySelectorAll('.note-card-item').forEach((el) => {
+    el.classList.toggle('selected', el.getAttribute('data-note-id') === note.id)
+  })
+
+  const updatedEl = document.getElementById('notes-stat-updated')
+  if (updatedEl) {
+    const dObj = new Date(note.updatedAt)
+    updatedEl.textContent = `Saved ${dObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  }
+
+  updateWordAndCharCounts()
+  updateMarkdownPreview()
+}
+
+export function startNewNote(
+  defaultCollection: KnowledgeCollection = 'IDEA',
+  defaultSubject?: string,
+  initialContent?: string
+): void {
+  if (isNoteDirtyState) {
+    if (!checkNotesUnsavedGuard()) return
+  }
+
+  activeNoteId = null
+  isNewNotePending = true
+
+  const defaultTitle = initialContent ? (initialContent.slice(0, 32).trim() || 'Untitled Note') : 'Untitled Note'
+
+  const state: NoteEditorState = {
+    title: defaultTitle,
+    content: initialContent || '',
+    collection: defaultCollection,
+    subject: defaultSubject || '',
+    topic: '',
+    tags: '',
+  }
+  originalNoteSnapshot = null
+
+  populateEditorFields(state)
+  setNotesDirty(true)
+  showNotesEmptyState(false)
+
+  document.querySelectorAll('.note-card-item').forEach((el) => el.classList.remove('selected'))
+
+  const titleInput = document.getElementById('notes-input-title') as HTMLInputElement | null
+  titleInput?.focus()
+  titleInput?.select()
+
+  updateWordAndCharCounts()
+  updateMarkdownPreview()
+}
+
+export async function saveCurrentNote(bridge: GravitasDesktopBridge): Promise<boolean> {
+  const titleInput = document.getElementById('notes-input-title') as HTMLInputElement | null
+  const contentInput = document.getElementById('notes-textarea-content') as HTMLTextAreaElement | null
+  const collectionSelect = document.getElementById('notes-select-collection') as HTMLSelectElement | null
+  const subjectInput = document.getElementById('notes-input-subject') as HTMLInputElement | null
+  const topicInput = document.getElementById('notes-input-topic') as HTMLInputElement | null
+  const tagsInput = document.getElementById('notes-input-tags') as HTMLInputElement | null
+  const bannerEl = document.getElementById('notes-feedback-banner')
+
+  const title = (titleInput?.value || '').trim() || 'Untitled Note'
+  const originalText = contentInput?.value || ''
+  const collection = (collectionSelect?.value || 'IDEA') as KnowledgeCollection
+  const subject = (subjectInput?.value || '').trim() || undefined
+  const topic = (topicInput?.value || '').trim() || undefined
+  const rawTags = (tagsInput?.value || '')
+    .split(',')
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean)
+
+  try {
+    let saved: IdeaRecord
+    if (isNewNotePending || !activeNoteId) {
+      if (!bridge.saveIdea) throw new Error('bridge.saveIdea unavailable')
+      saved = await bridge.saveIdea({
+        title,
+        originalText,
+        collection,
+        subject,
+        topic,
+        tags: rawTags,
+      })
+      activeNoteId = saved.id
+      isNewNotePending = false
+    } else {
+      if (!bridge.updateIdea) throw new Error('bridge.updateIdea unavailable')
+      saved = await bridge.updateIdea({
+        id: activeNoteId,
+        title,
+        originalText,
+        collection,
+        subject,
+        topic,
+        tags: rawTags,
+      })
+    }
+
+    originalNoteSnapshot = {
+      id: saved.id,
+      title: saved.title,
+      content: saved.originalText,
+      collection: saved.collection,
+      subject: saved.subject || '',
+      topic: saved.topic || '',
+      tags: (saved.tags || []).join(', '),
+    }
+
+    setNotesDirty(false)
+    if (bannerEl) {
+      bannerEl.textContent = '✓ Saved to SQLite database'
+      bannerEl.style.color = 'var(--badge-ready)'
+      setTimeout(() => {
+        if (bannerEl && bannerEl.textContent?.includes('Saved')) bannerEl.textContent = ''
+      }, 3000)
+    }
+
+    const updatedEl = document.getElementById('notes-stat-updated')
+    if (updatedEl) {
+      updatedEl.textContent = 'Saved just now'
+    }
+
+    announce(`Note "${saved.title}" saved successfully`)
+    await loadAndRenderNotesList(bridge, saved.id)
+    await refreshWorkspace(bridge)
+    return true
+  } catch (err) {
+    const msg = (err as Error).message
+    if (bannerEl) {
+      bannerEl.textContent = `Save error: ${msg}`
+      bannerEl.style.color = 'var(--badge-offline)'
+    }
+    announce(`Failed to save note: ${msg}`)
+    return false
+  }
+}
+
+export async function deleteCurrentNote(bridge: GravitasDesktopBridge): Promise<void> {
+  if (!activeNoteId) return
+  const title = (document.getElementById('notes-input-title') as HTMLInputElement | null)?.value || 'this note'
+  const confirmed = confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)
+  if (!confirmed) return
+
+  try {
+    if (bridge.deleteIdea) {
+      await bridge.deleteIdea(activeNoteId, true)
+    }
+    activeNoteId = null
+    isNewNotePending = false
+    isNoteDirtyState = false
+    originalNoteSnapshot = null
+    showNotesEmptyState(true)
+    await loadAndRenderNotesList(bridge)
+    await refreshWorkspace(bridge)
+    announce(`Note "${title}" deleted`)
+  } catch (err) {
+    alert(`Failed to delete note: ${(err as Error).message}`)
+  }
+}
+
+export async function handleImportMarkdown(bridge: GravitasDesktopBridge): Promise<void> {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.md,.markdown,.txt'
+  input.onchange = async () => {
+    const file = input.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    if (!text.trim()) {
+      alert('Selected file is empty.')
+      return
+    }
+    try {
+      if (bridge.importKnowledgeMarkdown) {
+        const imported = await bridge.importKnowledgeMarkdown(text)
+        await loadAndRenderNotesList(bridge, imported.id)
+        await openNoteInEditor(bridge, imported.id)
+        announce(`Imported "${imported.title}" successfully`)
+      }
+    } catch (err) {
+      alert(`Import failed: ${(err as Error).message}`)
+    }
+  }
+  input.click()
+}
+
+export async function handleExportMarkdown(bridge: GravitasDesktopBridge): Promise<void> {
+  try {
+    if (bridge.exportKnowledgeMarkdown) {
+      const res = await bridge.exportKnowledgeMarkdown()
+      announce(`Exported ${res.exportedCount} notes to ${res.exportDirectory}`)
+      alert(`Exported ${res.exportedCount} notes to Markdown folder:\n${res.exportDirectory}`)
+    }
+  } catch (err) {
+    alert(`Export failed: ${(err as Error).message}`)
+  }
+}
+
+export async function loadAndRenderNotesList(bridge: GravitasDesktopBridge, selectId?: string): Promise<void> {
+  const listEl = document.getElementById('notes-master-list')
+  const countEl = document.getElementById('notes-master-count')
+  if (!listEl) return
+
+  try {
+    const allItems = (await bridge.listIdeas?.()) || []
+    loadedNotesCache = [...allItems]
+
+    const filter = activeFilterCollection
+    let filtered = allItems
+    if (filter !== 'ALL') {
+      filtered = filtered.filter((i) => i.collection === filter)
+    }
+
+    const q = activeSearchQuery.toLowerCase().trim()
+    if (q) {
+      filtered = filtered.filter((i) => {
+        const text = [i.title, i.originalText, i.subject, i.topic, ...(i.tags || [])].join(' ').toLowerCase()
+        return text.includes(q)
+      })
+    }
+
+    if (countEl) {
+      countEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'note' : 'notes'}`
+    }
+
+    listEl.innerHTML = ''
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="empty-state-editorial" style="margin: 12px 6px;">No notes found matching your filter or search.</div>'
+      return
+    }
+
+    for (const note of filtered) {
+      const card = document.createElement('div')
+      card.className = `note-card-item ${activeNoteId === note.id ? 'selected' : ''}`
+      card.setAttribute('data-note-id', note.id)
+
+      const header = document.createElement('div')
+      header.className = 'note-card-header'
+
+      const title = document.createElement('div')
+      title.className = 'note-card-title'
+      title.textContent = note.title
+
+      const time = document.createElement('div')
+      time.className = 'note-card-time'
+      const dObj = new Date(note.updatedAt)
+      time.textContent = dObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+
+      header.appendChild(title)
+      header.appendChild(time)
+      card.appendChild(header)
+
+      const snippet = document.createElement('div')
+      snippet.className = 'note-card-snippet'
+      snippet.textContent = note.originalText || note.summary || 'No text preview.'
+      card.appendChild(snippet)
+
+      const meta = document.createElement('div')
+      meta.className = 'note-card-meta'
+
+      const collBadge = document.createElement('span')
+      collBadge.className = 'note-collection-badge'
+      collBadge.textContent = note.collection.replace('_', ' ')
+      meta.appendChild(collBadge)
+
+      if (note.subject) {
+        const subjBadge = document.createElement('span')
+        subjBadge.className = 'note-subject-badge'
+        subjBadge.textContent = note.subject
+        meta.appendChild(subjBadge)
+      }
+
+      if (note.tags && note.tags.length > 0) {
+        for (const tg of note.tags.slice(0, 2)) {
+          const tBadge = document.createElement('span')
+          tBadge.className = 'task-tag'
+          tBadge.textContent = tg
+          meta.appendChild(tBadge)
+        }
+      }
+
+      card.appendChild(meta)
+
+      card.addEventListener('click', () => {
+        void openNoteInEditor(bridge, note.id)
+      })
+
+      listEl.appendChild(card)
+    }
+
+    if (selectId) {
+      void openNoteInEditor(bridge, selectId)
+    } else if (activeNoteId && filtered.some((n) => n.id === activeNoteId)) {
+      document.querySelector(`[data-note-id="${activeNoteId}"]`)?.classList.add('selected')
+    }
+  } catch (err) {
+    listEl.innerHTML = `<div class="empty-state-editorial">Failed to load notes: ${(err as Error).message}</div>`
+  }
+}
+
+export function setupNotesHubListeners(bridge: GravitasDesktopBridge): void {
+  const searchInput = document.getElementById('notes-search-input') as HTMLInputElement | null
+  searchInput?.addEventListener('input', () => {
+    activeSearchQuery = searchInput.value
+    void loadAndRenderNotesList(bridge)
+  })
+
+  document.querySelectorAll<HTMLButtonElement>('.notes-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.notes-chip').forEach((c) => c.classList.remove('active'))
+      chip.classList.add('active')
+      activeFilterCollection = chip.getAttribute('data-filter') || 'ALL'
+      void loadAndRenderNotesList(bridge)
+    })
+  })
+
+  document.getElementById('notes-btn-create')?.addEventListener('click', () => {
+    startNewNote()
+  })
+  document.getElementById('notes-empty-create-btn')?.addEventListener('click', () => {
+    startNewNote()
+  })
+
+  document.getElementById('notes-btn-save')?.addEventListener('click', () => {
+    void saveCurrentNote(bridge)
+  })
+
+  document.getElementById('notes-btn-cancel')?.addEventListener('click', () => {
+    revertNoteEdits()
+  })
+
+  document.getElementById('notes-btn-delete')?.addEventListener('click', () => {
+    void deleteCurrentNote(bridge)
+  })
+
+  document.getElementById('notes-btn-import')?.addEventListener('click', () => {
+    void handleImportMarkdown(bridge)
+  })
+  document.getElementById('notes-btn-export')?.addEventListener('click', () => {
+    void handleExportMarkdown(bridge)
+  })
+
+  document.getElementById('notes-tab-write')?.addEventListener('click', () => setMarkdownViewMode('WRITE'))
+  document.getElementById('notes-tab-preview')?.addEventListener('click', () => setMarkdownViewMode('PREVIEW'))
+  document.getElementById('notes-tab-split')?.addEventListener('click', () => setMarkdownViewMode('SPLIT'))
+
+  const trackDirty = () => {
+    setNotesDirty(true)
+    updateWordAndCharCounts()
+    if (currentMarkdownViewMode !== 'WRITE') {
+      updateMarkdownPreview()
+    }
+  }
+
+  const titleInput = document.getElementById('notes-input-title')
+  const contentInput = document.getElementById('notes-textarea-content')
+  const collectionSelect = document.getElementById('notes-select-collection')
+  const subjectInput = document.getElementById('notes-input-subject')
+  const topicInput = document.getElementById('notes-input-topic')
+  const tagsInput = document.getElementById('notes-input-tags')
+
+  titleInput?.addEventListener('input', trackDirty)
+  contentInput?.addEventListener('input', trackDirty)
+  collectionSelect?.addEventListener('change', trackDirty)
+  subjectInput?.addEventListener('input', trackDirty)
+  topicInput?.addEventListener('input', trackDirty)
+  tagsInput?.addEventListener('input', trackDirty)
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault()
+      void saveCurrentNote(bridge)
+    }
+  }
+  titleInput?.addEventListener('keydown', handleKeydown)
+  contentInput?.addEventListener('keydown', handleKeydown)
+}
+
+/** Select a surface (tab + panel). Pure navigation with unsaved changes guard. */
+export function activateSurface(surfaceId: string, skipGuard = false): boolean {
   if (surfaceId === 'surface-devtools') {
     surfaceId = 'surface-overview'
   }
+
+  if (!skipGuard && currentActiveSurfaceId === 'surface-notes' && surfaceId !== 'surface-notes') {
+    if (!checkNotesUnsavedGuard()) {
+      return false
+    }
+  }
+
+  currentActiveSurfaceId = surfaceId
 
   const isDevSurface = [
     'surface-overview',
@@ -73,6 +821,7 @@ export function activateSurface(surfaceId: string): void {
   document.querySelectorAll<HTMLElement>('.surface').forEach((s) => s.classList.toggle('active', s.id === surfaceId))
   document.getElementById('btn-view-world')?.setAttribute('aria-pressed', 'false')
   document.getElementById('btn-view-command')?.setAttribute('aria-pressed', 'true')
+  return true
 }
 
 export function announce(text: string): void {
@@ -739,6 +1488,12 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
       for (const n of slice) {
         const item = document.createElement('div')
         item.className = 'note-item'
+        item.style.cursor = 'pointer'
+        item.title = 'Click to open and edit note'
+        item.addEventListener('click', () => {
+          activateSurface('surface-notes')
+          void openNoteInEditor(bridge, n.id)
+        })
 
         const header = document.createElement('div')
         header.className = 'note-header'
@@ -796,7 +1551,9 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
     }
 
     if (listEl) renderNoteNodes(listEl, 4)
-    if (fullNotesEl) renderNoteNodes(fullNotesEl)
+    if (document.getElementById('notes-master-list')) {
+      void loadAndRenderNotesList(bridge)
+    }
   } catch {
     // Graceful fallback
   }
@@ -807,6 +1564,16 @@ export async function refreshWorkspace(bridge: GravitasDesktopBridge): Promise<v
     totalSubjectCount = subjects.length
     const countEl = document.getElementById('workspace-subjects-count')
     if (countEl) countEl.textContent = String(subjects.length)
+
+    const datalist = document.getElementById('notes-subject-datalist')
+    if (datalist && subjects.length > 0) {
+      datalist.innerHTML = ''
+      for (const s of subjects) {
+        const opt = document.createElement('option')
+        opt.value = s.code || s.subject
+        datalist.appendChild(opt)
+      }
+    }
 
     const listEl = document.getElementById('workspace-subjects-list')
     const fullSubjectsEl = document.getElementById('subjects-full-list')
@@ -1893,12 +2660,9 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         await refreshWorkspace(bridge)
       }
     })
-    document.getElementById('workspace-btn-add-note-modal')?.addEventListener('click', async () => {
-      const title = prompt('Enter note title:')
-      if (title && bridge.saveIdea) {
-        await bridge.saveIdea({ title, originalText: title, collection: 'IDEA' })
-        await refreshWorkspace(bridge)
-      }
+    document.getElementById('workspace-btn-add-note-modal')?.addEventListener('click', () => {
+      activateSurface('surface-notes')
+      startNewNote()
     })
 
     document.getElementById('workspace-btn-companion')?.addEventListener('click', () => {
@@ -1940,22 +2704,15 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       })
     })
 
-    // Notes / Tasks / Subjects actions
-    const searchInput = document.getElementById('notes-search-input') as HTMLInputElement | null
-    searchInput?.addEventListener('input', () => {
-      const q = searchInput.value.toLowerCase().trim()
-      const noteItems = document.querySelectorAll('#notes-full-list .note-item')
-      noteItems.forEach((el) => {
-        const text = (el.textContent || '').toLowerCase()
-        ;(el as HTMLElement).style.display = !q || text.includes(q) ? '' : 'none'
-      })
-    })
+    // Notes Hub Master-Detail Workspace Setup
+    setupNotesHubListeners(bridge)
+    void loadAndRenderNotesList(bridge)
 
-    document.getElementById('notes-btn-create')?.addEventListener('click', async () => {
-      const title = prompt('Enter note title:')
-      if (title && bridge.saveIdea) {
-        await bridge.saveIdea({ title, originalText: title, collection: 'IDEA' })
-        await refreshWorkspace(bridge)
+    // Unsaved changes beforeunload prevention
+    window.addEventListener('beforeunload', (e) => {
+      if (isNotesDirty()) {
+        e.preventDefault()
+        e.returnValue = ''
       }
     })
     document.getElementById('tasks-btn-create')?.addEventListener('click', async () => {

@@ -88,6 +88,7 @@ export interface UpdateIdeaInput {
   readonly id: string
   readonly collection?: KnowledgeCollection | undefined
   readonly title?: string | undefined
+  readonly originalText?: string | undefined
   readonly summary?: string | null | undefined
   readonly category?: string | undefined
   readonly tags?: readonly string[] | undefined
@@ -1054,6 +1055,11 @@ export class IdeasVaultStore {
       throw new Error(`Idea not found: ${input.id}`)
     }
 
+    const updatedOriginalText =
+      input.originalText !== undefined && input.originalText.trim().length > 0
+        ? input.originalText.trim()
+        : existing.originalText
+
     const updatedCollection: KnowledgeCollection = input.collection ?? existing.collection
 
     const updatedTitle =
@@ -1127,7 +1133,7 @@ export class IdeasVaultStore {
     try {
       const stmt = this.db.prepare(`
         UPDATE ideas_vault
-        SET collection = ?, title = ?, summary = ?, category = ?, tags_json = ?,
+        SET collection = ?, title = ?, original_text = ?, summary = ?, category = ?, tags_json = ?,
             subject = ?, topic = ?, task_status = ?, completed = ?, due_date = ?,
             completed_at = ?, project_id = ?, updated_at = ?
         WHERE id = ?;
@@ -1135,6 +1141,7 @@ export class IdeasVaultStore {
       stmt.run(
         updatedCollection,
         updatedTitle,
+        updatedOriginalText,
         updatedSummary,
         updatedCategory,
         JSON.stringify(updatedTags),
