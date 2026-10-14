@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GRAVITAS — Sovereign Academic Command Center &amp; Study Guardian</title>
-  <meta name="description" content="A motion-rich, local-first academic operating system for engineering minds. Verbatim audio capture, 3D folder intake, and verified filesystem mutation barriers. 100% offline, zero cloud telemetry.">
+  <meta name="description" content="A motion-rich, local-first academic workspace for engineering minds. Verbatim audio capture demo, 3D folder intake, and verified filesystem mutation barriers. Offline-first core with optional peer folder sync; zero mandatory cloud telemetry.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%2308090B'/><path d='M4 6h16M4 12h11M4 18h16' stroke='%2338BDF8' stroke-width='2'/></svg>">
   <style>
     /* ─── Self-Hosted Variable Typography (Zero CDN) ─────────────────────── */
@@ -404,6 +404,10 @@
       align-items: center;
       overflow: hidden;
       padding: 60px 0;
+      background: radial-gradient(ellipse at 78% 44%, rgba(56, 189, 248, 0.04) 0%, rgba(20, 24, 30, 0.75) 35%, var(--bg-canvas) 75%);
+    }
+    body.light-theme .hero-section {
+      background: radial-gradient(ellipse at 78% 44%, rgba(29, 84, 143, 0.05) 0%, rgba(220, 216, 207, 0.65) 35%, var(--bg-canvas) 75%);
     }
 
     #hero-canvas {
@@ -1132,13 +1136,20 @@
     }
 
     /* ─── LOCAL SOVEREIGNTY MATRIX ───────────────────────────────────────── */
-    .matrix-table {
+    .matrix-table-wrap {
       width: 100%;
-      border-collapse: collapse;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 40px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
+    }
+    .matrix-table {
+      width: 100%;
+      min-width: 580px;
+      border-collapse: collapse;
       background: var(--bg-surface);
-      margin-bottom: 40px;
+      margin-bottom: 0;
     }
     .matrix-table th, .matrix-table td {
       padding: 16px 20px;
@@ -1264,32 +1275,60 @@
 
     @media (max-width: 640px) {
       .section-wrap {
-        padding: 60px 20px;
+        padding: 56px 16px;
       }
       .header-container {
-        padding: 0 20px;
+        padding: 0 16px;
       }
       .hero-actions {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
       }
       .btn-liquid-metal, .btn-interactive-hover {
         justify-content: center;
         width: 100%;
+        min-height: 46px;
       }
       .gallery-stage {
-        height: 280px;
+        height: auto;
+        min-height: 240px;
+        aspect-ratio: 16/10;
+      }
+      .gallery-tab, .intake-tab-btn, .hub-category-btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .folder-stage {
+        height: 320px;
       }
       .folder-wrap {
-        width: 280px;
-        height: 200px;
+        width: 260px;
+        height: 180px;
+      }
+      .diff-box {
+        font-size: 12px;
+        padding: 12px;
+        overflow-x: auto;
+      }
+      .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px 14px;
+      }
+      .task-meta {
+        align-self: flex-start;
+        padding-left: 34px;
       }
       .matrix-table th, .matrix-table td {
-        padding: 12px 10px;
+        padding: 12px 12px;
         font-size: 12px;
+        white-space: normal;
       }
       .cta-banner {
-        padding: 40px 20px;
+        padding: 36px 16px;
       }
     }
 
@@ -1382,7 +1421,7 @@
           </p>
           <div class="hero-actions">
             <a href="#product" class="btn-liquid-metal" id="hero-primary-cta">
-              <span>Get GRAVITAS for Desktop</span>
+              <span>View Desktop Preview</span>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -1399,8 +1438,8 @@
               <span class="hero-meta-lbl">Zero External Telemetry</span>
             </div>
             <div class="hero-meta-item">
-              <span class="hero-meta-val">100% Offline Desktop</span>
-              <span class="hero-meta-lbl">Air-gapped Native App</span>
+              <span class="hero-meta-val">Local-First Desktop</span>
+              <span class="hero-meta-lbl">Offline Core · Optional Peer Sync</span>
             </div>
           </div>
         </div>
@@ -1485,8 +1524,8 @@
 
             <div class="folder-file" data-file="3">
               <div>
-                <span class="brand-tag">CSE 2811</span>
-                <div style="font-size: 14px; font-weight: 700; margin-top: 6px;">B-Tree Page Buffer Lab</div>
+                <span class="brand-tag">CSE 2195</span>
+                <div style="font-size: 14px; font-weight: 700; margin-top: 6px;">EDA &amp; Data Cleaning Pipeline</div>
               </div>
               <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">Due: Wed, Oct 28</div>
             </div>
@@ -1507,7 +1546,7 @@
             <div class="intake-selector-group">
               <button class="intake-tab-btn active" data-sample="algorithms">01 · CSE 2631 PSet 4</button>
               <button class="intake-tab-btn" data-sample="systems">02 · CSE 2221 Systems</button>
-              <button class="intake-tab-btn" data-sample="databases">03 · CSE 2811 B-Tree</button>
+              <button class="intake-tab-btn" data-sample="datascience">03 · CSE 2195 Data Science</button>
             </div>
           </div>
 
@@ -1593,11 +1632,11 @@
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </div>
-              <span class="task-text">Configure WAL checkpointing pragma in study vault database</span>
+              <span class="task-text">Clean and normalize exploratory dataset features</span>
             </div>
             <div class="task-meta">
-              <span class="task-badge">CSE 2811</span>
-              <span class="task-badge" style="color: var(--accent-blue);">CORE ENGINE</span>
+              <span class="task-badge">CSE 2195</span>
+              <span class="task-badge" style="color: var(--accent-blue);">DATA SCIENCE</span>
             </div>
           </div>
 
@@ -1672,9 +1711,9 @@
             <div class="transcript-box" id="transcript-display">
               "In latch crabbing, you must lock the parent page before descending into the child node, releasing the parent only when the child is verified safe from split."
             </div>
-            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); display: flex; justify-content: space-between;">
-              <span>LATENCY: 42ms (ON-DEVICE)</span>
-              <span>BUFFER: 16kHz PCM</span>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>TRANSCRIPTION: SIMULATED (ON-DEVICE MODEL)</span>
+              <span>BUFFER: 16kHz PCM (LOCAL)</span>
             </div>
           </div>
         </div>
@@ -1691,42 +1730,44 @@
         </p>
       </div>
 
-      <table class="matrix-table" aria-label="Architecture Comparison">
-        <thead>
-          <tr>
-            <th>Architecture Capability</th>
-            <th>Cloud SaaS &amp; Web Dashboards</th>
-            <th>GRAVITAS Sovereign Engine</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Storage Substrate</strong></td>
-            <td>Proprietary cloud servers (AWS / Supabase)</td>
-            <td class="brand-col">100% Local SQLite WAL Database</td>
-          </tr>
-          <tr>
-            <td><strong>Filesystem Access</strong></td>
-            <td>Zero local integration or opaque syncing</td>
-            <td class="brand-col">Direct Working Tree + Human Approval Gate</td>
-          </tr>
-          <tr>
-            <td><strong>Voice Transcription</strong></td>
-            <td>Audio streamed to third-party cloud APIs</td>
-            <td class="brand-col">On-device 16kHz PCM via Local Whisper</td>
-          </tr>
-          <tr>
-            <td><strong>Offline Operation</strong></td>
-            <td>Requires active internet &amp; recurring login</td>
-            <td class="brand-col">Fully functional air-gapped without internet</td>
-          </tr>
-          <tr>
-            <td><strong>Telemetry &amp; Tracking</strong></td>
-            <td>Google Analytics, PostHog, Hotjar trackers</td>
-            <td class="brand-col">0 bits sent. Zero telemetry scripts.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="matrix-table-wrap">
+        <table class="matrix-table" aria-label="Architecture Comparison">
+          <thead>
+            <tr>
+              <th>Architecture Capability</th>
+              <th>Cloud SaaS &amp; Web Dashboards</th>
+              <th>GRAVITAS Sovereign Engine</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Storage Substrate</strong></td>
+              <td>Proprietary cloud servers (AWS / Supabase)</td>
+              <td class="brand-col">100% Local SQLite WAL Database</td>
+            </tr>
+            <tr>
+              <td><strong>Filesystem Access</strong></td>
+              <td>Zero local integration or opaque syncing</td>
+              <td class="brand-col">Direct Working Tree + Human Approval Gate</td>
+            </tr>
+            <tr>
+              <td><strong>Voice Transcription</strong></td>
+              <td>Audio streamed to third-party cloud APIs</td>
+              <td class="brand-col">On-device 16kHz PCM via Local Whisper</td>
+            </tr>
+            <tr>
+              <td><strong>Offline Operation</strong></td>
+              <td>Requires active internet &amp; recurring login</td>
+              <td class="brand-col">Runs fully offline; optional iCloud peer sync</td>
+            </tr>
+            <tr>
+              <td><strong>Telemetry &amp; Tracking</strong></td>
+              <td>Google Analytics, PostHog, Hotjar trackers</td>
+              <td class="brand-col">0 bits sent. Zero telemetry scripts.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Terminal Build Box -->
       <div class="hero-terminal-card" style="max-width: 800px; margin: 0 auto;">
@@ -1751,7 +1792,7 @@
           Organize your semester with a tool built for focus, clarity, and control.
         </p>
         <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
-          <a href="#product" class="btn-liquid-metal">Get GRAVITAS for Desktop</a>
+          <a href="#product" class="btn-liquid-metal">View Desktop Preview</a>
           <a href="#study-guardian" class="btn-interactive-hover">
             <span class="btn-dot"></span>
             <span class="btn-text-init">Explore the Guide</span>
@@ -1806,8 +1847,8 @@
         }
       `;
 
-      // Sculptural Obsidian Shader: Architectural interlocking folded metallic slabs
-      // Positioned cleanly to the right of headline with directional lighting and titanium light mode
+      // Sculptural Obsidian Shader: Coherent architectural monolith with continuous fillets,
+      // soft brushed metallic sheen, zero checkerboard artifacts, and restrained sapphire rim
       const fsSource = `
         precision highp float;
         uniform vec2 uResolution;
@@ -1820,54 +1861,56 @@
           return mat2(c, -s, s, c);
         }
 
-        // Box distance field with bevel
+        // Smooth minimum for continuous architectural fillets
+        float smin(float a, float b, float k) {
+          float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+          return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        // Chamfered beveled box distance field
         float sdBevelBox(vec3 p, vec3 b, float r) {
           vec3 q = abs(p) - b;
           return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
         }
 
-        // Signed Distance Function: Architectural Interlocking Monolith Slabs
+        // Unified Architectural Monolith
         float map(vec3 p) {
           float aspect = uResolution.x / uResolution.y;
 
-          // Responsive Positioning: Shift to right on desktop, top-right on mobile
+          // Responsive Positioning: generous breathing room for headline
           if (aspect > 1.1) {
-            p.x -= 1.18; // Keep well clear of headline on desktop
-            p.y -= 0.05;
+            p.x -= 1.25; // Cleanly positioned to the right of text
+            p.y -= 0.08;
           } else {
-            p.x -= 0.38;
-            p.y -= 0.95; // Position in upper half on mobile
+            p.x -= 0.22;
+            p.y -= 0.85; // Upper field on mobile
           }
 
-          // Slow stately rotation + subtle mouse parallax
-          p.xz *= rot2D(uTime * 0.07 + (uMouse.x - 0.5) * 0.5);
-          p.yz *= rot2D(0.28 + (uMouse.y - 0.5) * 0.35);
+          // Slow, stately rotation with subtle pointer response
+          p.xz *= rot2D(uTime * 0.055 + (uMouse.x - 0.5) * 0.42);
+          p.yz *= rot2D(0.22 + (uMouse.y - 0.5) * 0.28);
 
-          // Slab 1: Tall architectural central monolith
+          // Primary architectural monolith: tall faceted pillar
           vec3 p1 = p;
-          p1.xy *= rot2D(0.35);
-          float slab1 = sdBevelBox(p1, vec3(0.38, 1.15, 0.09), 0.04);
+          p1.xy *= rot2D(0.24);
+          float pillar = sdBevelBox(p1, vec3(0.52, 1.30, 0.26), 0.055);
 
-          // Slab 2: Intersecting folded horizontal cantilever slab
+          // Integrated cantilever wing smoothly filleted into the main body
           vec3 p2 = p;
-          p2.yz *= rot2D(-0.55);
-          p2.xz *= rot2D(0.42);
-          p2.y += 0.15;
-          float slab2 = sdBevelBox(p2, vec3(0.95, 0.32, 0.08), 0.035);
+          p2.yz *= rot2D(-0.42);
+          p2.xz *= rot2D(0.36);
+          p2.y += 0.08;
+          p2.x -= 0.14;
+          float wing = sdBevelBox(p2, vec3(0.82, 0.42, 0.22), 0.045);
 
-          // Slab 3: Angled architectural fin
-          vec3 p3 = p;
-          p3.xz *= rot2D(-0.65);
-          p3.xy *= rot2D(-0.25);
-          p3.z -= 0.22;
-          float slab3 = sdBevelBox(p3, vec3(0.55, 0.65, 0.07), 0.035);
+          // Smooth fillet union: welds pillar & wing into ONE unified architectural sculpture
+          float composition = smin(pillar, wing, 0.24);
 
-          // Union of architectural slabs
-          float form = min(min(slab1, slab2), slab3);
+          // Architectural chamfer cuts to give crisp planar facets
+          float chamferTop = dot(p, normalize(vec3(0.35, 1.0, -0.4))) - 1.25;
+          float chamferSide = dot(p, normalize(vec3(-0.7, 0.2, 0.6))) - 0.95;
 
-          // Micro surface striations (brushed architectural metallic texture)
-          float striation = sin(p.y * 42.0) * cos(p.x * 32.0) * 0.003;
-          return form + striation;
+          return max(max(composition, chamferTop), chamferSide);
         }
 
         vec3 calcNormal(vec3 p) {
@@ -1884,7 +1927,7 @@
         void main() {
           vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
 
-          vec3 ro = vec3(0.0, 0.0, 3.8);
+          vec3 ro = vec3(0.0, 0.0, 4.0);
           vec3 rd = normalize(vec3(uv, -1.35));
 
           float t = 0.0;
@@ -1904,48 +1947,51 @@
             vec3 p = ro + rd * t;
             vec3 n = calcNormal(p);
 
-            // Directional key light from upper right
-            vec3 keyLight = normalize(vec3(0.7, 1.2, 0.8));
-            vec3 fillLight = normalize(vec3(-0.9, -0.4, 0.3));
+            // Key light from top-right, fill from bottom-left
+            vec3 keyLight = normalize(vec3(0.65, 1.15, 0.8));
+            vec3 fillLight = normalize(vec3(-0.8, -0.4, 0.3));
 
             float diff = max(dot(n, keyLight), 0.0);
-            float fill = max(dot(n, fillLight), 0.0) * 0.25;
+            float fill = max(dot(n, fillLight), 0.0) * 0.22;
 
-            // Anisotropic specular highlight along planar facets
-            vec3 ref = reflect(rd, n);
-            float spec = pow(max(dot(ref, keyLight), 0.0), 36.0);
-            float broadSpec = pow(max(dot(ref, keyLight), 0.0), 8.0) * 0.2;
+            // Brushed metallic specularity: soft Blinn-Phong sheen, zero harsh spots
+            vec3 h = normalize(keyLight - rd);
+            float ndh = max(dot(n, h), 0.0);
+            float metallicSpec = pow(ndh, 24.0) * 0.42;
+            float softSheen = pow(ndh, 6.0) * 0.16;
 
-            // Controlled grazing rim light (sparse cobalt accent)
-            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 5.0);
+            // Controlled grazing rim light (restrained sapphire cobalt)
+            // Powers glancing edges only, leaving 95%+ dark titanium
+            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 4.8);
 
-            // Dark Mode Material: Deep Obsidian Metallic Slabs with Cobalt Grazing Highlight
-            vec3 darkBase = vec3(0.018, 0.022, 0.03);
-            vec3 darkBlueRim = vec3(0.22, 0.74, 0.97); // #38BDF8
-            vec3 darkSpec = vec3(0.9, 0.95, 1.0);
+            // Dark Mode Material: Pure Monolithic Dark Titanium / Obsidian
+            vec3 darkTitanium = vec3(0.026, 0.030, 0.036);
+            vec3 darkDiffuse = vec3(0.12, 0.14, 0.17);
+            vec3 darkCobaltRim = vec3(0.22, 0.58, 0.92);
 
-            vec3 colDark = darkBase +
-                           (diff * vec3(0.09, 0.11, 0.15)) +
-                           (fill * vec3(0.03, 0.04, 0.06)) +
-                           (broadSpec * vec3(0.12, 0.18, 0.26)) +
-                           (spec * darkSpec * 0.9) +
-                           (fresnel * darkBlueRim * 0.7);
+            vec3 colDark = darkTitanium +
+                           (diff * darkDiffuse) +
+                           (fill * vec3(0.035, 0.045, 0.06)) +
+                           (softSheen * vec3(0.12, 0.16, 0.22)) +
+                           (metallicSpec * vec3(0.58, 0.64, 0.74)) +
+                           (fresnel * darkCobaltRim * 0.38);
 
-            // Light Mode Material: Brushed Architectural Titanium / Platinum on Parchment
+            // Light Mode Material: Machined Architectural Titanium / Platinum on Parchment
             vec3 lightBase = vec3(0.78, 0.77, 0.74);
-            vec3 lightShadow = vec3(0.42, 0.41, 0.39);
-            vec3 lightBlueRim = vec3(0.11, 0.33, 0.56); // #1D548F steel slate
+            vec3 lightShadow = vec3(0.38, 0.37, 0.35);
+            vec3 lightSteelRim = vec3(0.14, 0.32, 0.52);
 
             vec3 colLight = mix(lightShadow, lightBase, diff) +
-                            (broadSpec * vec3(0.25, 0.25, 0.25)) +
-                            (spec * vec3(1.0, 1.0, 1.0) * 0.75) +
-                            (fresnel * lightBlueRim * 0.4);
+                            (fill * vec3(0.14, 0.14, 0.13)) +
+                            (softSheen * vec3(0.22, 0.22, 0.21)) +
+                            (metallicSpec * vec3(0.92, 0.92, 0.88) * 0.5) +
+                            (fresnel * lightSteelRim * 0.28);
 
             col = mix(colDark, colLight, uIsLight);
           }
 
-          // Analog film grain
-          float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.014;
+          // Subtle uniform analog film grain (no diagonal or checkerboard artifacts)
+          float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.008;
           col += grain * (1.0 - uIsLight * 0.5);
 
           gl_FragColor = vec4(col, 1.0);
@@ -2141,12 +2187,12 @@
 <div class="diff-line add">+ - [ ] Hold parent read-latch until child page is pinned & latched</div>
 <div class="diff-line add">+ - [ ] Upgrade to write-latch strictly during page split allocation</div>
       `,
-      databases: `
-<div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2811/schedule.md</div>
-<div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2811/schedule.md</div>
-<div class="diff-line add">+ ## Milestone: B-Tree Buffer Manager WAL Checkpoint (Due Oct 28)</div>
-<div class="diff-line add">+ - [ ] Ensure dirty pages flushed before truncate commit checkpoint</div>
-<div class="diff-line add">+ - [ ] Verify frame eviction policy maintains least-recently-used pool</div>
+      datascience: `
+<div style="color: var(--text-tertiary); margin-bottom: 6px;">--- a/vault/courses/cse2195/schedule.md</div>
+<div style="color: var(--text-tertiary); margin-bottom: 10px;">+++ b/vault/courses/cse2195/schedule.md</div>
+<div class="diff-line add">+ ## Milestone: Feature Imputation & Exploratory Analysis (Due Oct 28)</div>
+<div class="diff-line add">+ - [ ] Impute missing numerical vectors with median baseline</div>
+<div class="diff-line add">+ - [ ] Normalize continuous columns before correlation analysis</div>
       `
     };
 

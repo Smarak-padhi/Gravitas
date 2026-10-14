@@ -548,8 +548,8 @@
         }
       `;
 
-      // Sculptural Obsidian Shader: Architectural interlocking folded metallic slabs
-      // Positioned cleanly to the right of the headline, with sharp chamfers, layered shadows, controlled blue highlights
+      // Sculptural Obsidian Shader: Coherent architectural monolith with continuous fillets,
+      // soft brushed metallic sheen, zero checkerboard artifacts, and restrained sapphire rim
       const fsSource = `
         precision highp float;
         uniform vec2 uResolution;
@@ -562,54 +562,56 @@
           return mat2(c, -s, s, c);
         }
 
-        // Box distance field with bevel
+        // Smooth minimum for continuous architectural fillets
+        float smin(float a, float b, float k) {
+          float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+          return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        // Chamfered beveled box distance field
         float sdBevelBox(vec3 p, vec3 b, float r) {
           vec3 q = abs(p) - b;
           return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
         }
 
-        // Signed Distance Function: Architectural Interlocking Monolith Slabs
+        // Unified Architectural Monolith
         float map(vec3 p) {
           float aspect = uResolution.x / uResolution.y;
 
-          // Responsive Positioning: Shift to right on desktop, top-right on mobile
+          // Responsive Positioning: generous breathing room for headline
           if (aspect > 1.1) {
-            p.x -= 1.18; // Keep well clear of headline on desktop
-            p.y -= 0.05;
+            p.x -= 1.25; // Cleanly positioned to the right of text
+            p.y -= 0.08;
           } else {
-            p.x -= 0.38;
-            p.y -= 0.95; // Position in upper half on mobile
+            p.x -= 0.22;
+            p.y -= 0.85; // Upper field on mobile
           }
 
-          // Slow stately rotation + subtle mouse parallax
-          p.xz *= rot2D(uTime * 0.07 + (uMouse.x - 0.5) * 0.5);
-          p.yz *= rot2D(0.28 + (uMouse.y - 0.5) * 0.35);
+          // Slow, stately rotation with subtle pointer response
+          p.xz *= rot2D(uTime * 0.055 + (uMouse.x - 0.5) * 0.42);
+          p.yz *= rot2D(0.22 + (uMouse.y - 0.5) * 0.28);
 
-          // Slab 1: Tall architectural central monolith
+          // Primary architectural monolith: tall faceted pillar
           vec3 p1 = p;
-          p1.xy *= rot2D(0.35);
-          float slab1 = sdBevelBox(p1, vec3(0.38, 1.15, 0.09), 0.04);
+          p1.xy *= rot2D(0.24);
+          float pillar = sdBevelBox(p1, vec3(0.52, 1.30, 0.26), 0.055);
 
-          // Slab 2: Intersecting folded horizontal cantilever slab
+          // Integrated cantilever wing smoothly filleted into the main body
           vec3 p2 = p;
-          p2.yz *= rot2D(-0.55);
-          p2.xz *= rot2D(0.42);
-          p2.y += 0.15;
-          float slab2 = sdBevelBox(p2, vec3(0.95, 0.32, 0.08), 0.035);
+          p2.yz *= rot2D(-0.42);
+          p2.xz *= rot2D(0.36);
+          p2.y += 0.08;
+          p2.x -= 0.14;
+          float wing = sdBevelBox(p2, vec3(0.82, 0.42, 0.22), 0.045);
 
-          // Slab 3: Angled architectural fin
-          vec3 p3 = p;
-          p3.xz *= rot2D(-0.65);
-          p3.xy *= rot2D(-0.25);
-          p3.z -= 0.22;
-          float slab3 = sdBevelBox(p3, vec3(0.55, 0.65, 0.07), 0.035);
+          // Smooth fillet union: welds pillar & wing into ONE unified architectural sculpture
+          float composition = smin(pillar, wing, 0.24);
 
-          // Union of architectural slabs
-          float form = min(min(slab1, slab2), slab3);
+          // Architectural chamfer cuts to give crisp planar facets
+          float chamferTop = dot(p, normalize(vec3(0.35, 1.0, -0.4))) - 1.25;
+          float chamferSide = dot(p, normalize(vec3(-0.7, 0.2, 0.6))) - 0.95;
 
-          // Micro surface striations (brushed architectural metallic texture)
-          float striation = sin(p.y * 42.0) * cos(p.x * 32.0) * 0.003;
-          return form + striation;
+          return max(max(composition, chamferTop), chamferSide);
         }
 
         vec3 calcNormal(vec3 p) {
@@ -626,7 +628,7 @@
         void main() {
           vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
 
-          vec3 ro = vec3(0.0, 0.0, 3.8);
+          vec3 ro = vec3(0.0, 0.0, 4.0);
           vec3 rd = normalize(vec3(uv, -1.35));
 
           float t = 0.0;
@@ -646,51 +648,51 @@
             vec3 p = ro + rd * t;
             vec3 n = calcNormal(p);
 
-            // Directional key light from upper right
-            vec3 keyLight = normalize(vec3(0.7, 1.2, 0.8));
-            vec3 fillLight = normalize(vec3(-0.9, -0.4, 0.3));
+            // Key light from top-right, fill from bottom-left
+            vec3 keyLight = normalize(vec3(0.65, 1.15, 0.8));
+            vec3 fillLight = normalize(vec3(-0.8, -0.4, 0.3));
 
             float diff = max(dot(n, keyLight), 0.0);
-            float fill = max(dot(n, fillLight), 0.0) * 0.25;
+            float fill = max(dot(n, fillLight), 0.0) * 0.22;
 
-            // Anisotropic specular highlight along planar facets
-            vec3 ref = reflect(rd, n);
-            float spec = pow(max(dot(ref, keyLight), 0.0), 36.0);
-            float broadSpec = pow(max(dot(ref, keyLight), 0.0), 8.0) * 0.2;
+            // Brushed metallic specularity: soft Blinn-Phong sheen, zero harsh spots
+            vec3 h = normalize(keyLight - rd);
+            float ndh = max(dot(n, h), 0.0);
+            float metallicSpec = pow(ndh, 24.0) * 0.42;
+            float softSheen = pow(ndh, 6.0) * 0.16;
 
-            // Controlled grazing rim light (sparse cobalt accent)
-            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 5.0);
+            // Controlled grazing rim light (restrained sapphire cobalt)
+            // Powers glancing edges only, leaving 95%+ dark titanium
+            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 4.8);
 
-            // Ambient Occlusion estimate based on step count
-            float ao = clamp(1.0 - float(d) * 8.0, 0.3, 1.0);
+            // Dark Mode Material: Pure Monolithic Dark Titanium / Obsidian
+            vec3 darkTitanium = vec3(0.026, 0.030, 0.036);
+            vec3 darkDiffuse = vec3(0.12, 0.14, 0.17);
+            vec3 darkCobaltRim = vec3(0.22, 0.58, 0.92);
 
-            // Dark Mode Material: Deep Obsidian Metallic Slabs with Cobalt Grazing Highlight
-            vec3 darkBase = vec3(0.018, 0.022, 0.03);
-            vec3 darkBlueRim = vec3(0.22, 0.74, 0.97); // #38BDF8
-            vec3 darkSpec = vec3(0.9, 0.95, 1.0);
+            vec3 colDark = darkTitanium +
+                           (diff * darkDiffuse) +
+                           (fill * vec3(0.035, 0.045, 0.06)) +
+                           (softSheen * vec3(0.12, 0.16, 0.22)) +
+                           (metallicSpec * vec3(0.58, 0.64, 0.74)) +
+                           (fresnel * darkCobaltRim * 0.38);
 
-            vec3 colDark = darkBase +
-                           (diff * vec3(0.09, 0.11, 0.15)) +
-                           (fill * vec3(0.03, 0.04, 0.06)) +
-                           (broadSpec * vec3(0.12, 0.18, 0.26)) +
-                           (spec * darkSpec * 0.9) +
-                           (fresnel * darkBlueRim * 0.7); // Controlled rim light
-
-            // Light Mode Material: Brushed Architectural Titanium / Platinum on Parchment
+            // Light Mode Material: Machined Architectural Titanium / Platinum on Parchment
             vec3 lightBase = vec3(0.78, 0.77, 0.74);
-            vec3 lightShadow = vec3(0.42, 0.41, 0.39);
-            vec3 lightBlueRim = vec3(0.11, 0.33, 0.56); // #1D548F steel slate
+            vec3 lightShadow = vec3(0.38, 0.37, 0.35);
+            vec3 lightSteelRim = vec3(0.14, 0.32, 0.52);
 
             vec3 colLight = mix(lightShadow, lightBase, diff) +
-                            (broadSpec * vec3(0.25, 0.25, 0.25)) +
-                            (spec * vec3(1.0, 1.0, 1.0) * 0.75) +
-                            (fresnel * lightBlueRim * 0.4);
+                            (fill * vec3(0.14, 0.14, 0.13)) +
+                            (softSheen * vec3(0.22, 0.22, 0.21)) +
+                            (metallicSpec * vec3(0.92, 0.92, 0.88) * 0.5) +
+                            (fresnel * lightSteelRim * 0.28);
 
             col = mix(colDark, colLight, uIsLight);
           }
 
-          // Analog film grain
-          float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.014;
+          // Subtle uniform analog film grain (no diagonal or checkerboard artifacts)
+          float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.008;
           col += grain * (1.0 - uIsLight * 0.5);
 
           gl_FragColor = vec4(col, 1.0);
