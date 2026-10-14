@@ -126,18 +126,26 @@ async function runStudioAlphaVerification() {
     }
     await new Promise((r) => setTimeout(r, 1200))
 
-    // Click checkbox on first task
-    const checkbox = await mainWin.$('input[type="checkbox"]')
-    if (checkbox) {
-      await checkbox.click()
-      await new Promise((r) => setTimeout(r, 1000))
-    }
+    // Click visible checkbox on first task in the active floating panel
+    await mainWin.evaluate(() => {
+      const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'))
+      const visible = checkboxes.find((el) => el.offsetParent !== null)
+      if (visible) visible.click()
+    })
+    await new Promise((r) => setTimeout(r, 1000))
 
     // Close Cipher's panel to view the activity bubble in the studio
     await mainWin.evaluate(() => {
       const closeButtons = Array.from(document.querySelectorAll('button'))
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
+    })
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Click interactive Coffee Mug on Grav's desk to demonstrate Phase 03 prop hotspot micro-interaction
+    await mainWin.evaluate(() => {
+      const coffeeBtn = document.querySelector('button[aria-label*="Coffee Mug"]')
+      if (coffeeBtn) coffeeBtn.click()
     })
     await new Promise((r) => setTimeout(r, 1500))
 

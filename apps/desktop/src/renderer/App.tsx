@@ -346,6 +346,23 @@ export const App: React.FC = () => {
           setActivePanel('GRAV_CONVERSATION')
           setActiveAgent('grav')
         }}
+        onOpenAdaNotes={() => {
+          setActivePanel('ADA_NOTES')
+          setActiveAgent('ada')
+        }}
+        onOpenCipherTasks={() => {
+          setActivePanel('CIPHER_TASKS')
+          setActiveAgent('cipher')
+        }}
+        onCoffeeSip={() => {
+          triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info')
+        }}
+        onPixelCanvas={() => {
+          triggerBubble('pixel', 'Drafting board active — UI wireframes loaded', 'info')
+        }}
+        onScoutObservatory={() => {
+          triggerBubble('scout', 'Observatory focused — Scanning research sources', 'info')
+        }}
       />
 
       {/* ── BOTTOM FLOATING SUMMON CONTROLS ── */}

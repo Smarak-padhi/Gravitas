@@ -250,11 +250,25 @@ export const GravMascot: React.FC<MascotProps> = ({
               <path d="M30 36 L38 32" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
               <path d="M48 32 L56 36" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
             </g>
+          ) : state === 'waiting_permission' ? (
+            <g>
+              <circle cx="34" cy="34" r="3" fill="#F4A261" />
+              <circle cx="52" cy="34" r="3" fill="#F4A261" />
+              {/* Amber Permission Shield Glyph on Visor */}
+              <path d="M40 30 L43 28 L46 30 V35 C46 38 43 40 43 40 C43 40 40 38 40 35 Z" fill="#F4A261" opacity="0.9" />
+            </g>
           ) : state === 'speaking' ? (
             <g>
               <circle cx="34" cy="33" r="3.5" fill="#F4A261" />
               <circle cx="52" cy="33" r="3.5" fill="#F4A261" />
               <path d="M38 41 Q43 45 48 41" stroke="#F4A261" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </g>
+          ) : state === 'attentive' ? (
+            <g>
+              <circle cx="34" cy="33" r="4.2" fill="#F4A261" />
+              <circle cx="52" cy="33" r="4.2" fill="#F4A261" />
+              <circle cx="35.5" cy="31.5" r="1.5" fill="#FFF" />
+              <circle cx="53.5" cy="31.5" r="1.5" fill="#FFF" />
             </g>
           ) : (
             <g>
@@ -405,36 +419,79 @@ export const AdaMascot: React.FC<MascotProps> = ({
           <circle cx="49" cy="40" r="7" stroke="#81B29A" strokeWidth="1.2" fill="none" />
           <line x1="38" y1="40" x2="42" y2="40" stroke="#81B29A" strokeWidth="1.2" />
 
-          {/* Sage Glowing Eyes */}
-          <circle cx="31" cy="40" r="2.8" fill="#81B29A">
-            {!isReducedMotion && (
-              <animate
-                attributeName="ry"
-                values="2.8;2.8;0.4;2.8;2.8"
-                keyTimes="0;0.9;0.94;0.97;1"
-                dur="4.5s"
-                repeatCount="indefinite"
-              />
-            )}
-          </circle>
-          <circle cx="49" cy="40" r="2.8" fill="#81B29A">
-            {!isReducedMotion && (
-              <animate
-                attributeName="ry"
-                values="2.8;2.8;0.4;2.8;2.8"
-                keyTimes="0;0.9;0.94;0.97;1"
-                dur="4.5s"
-                repeatCount="indefinite"
-              />
-            )}
-          </circle>
+          {/* Sage Glowing Eyes (Dynamic Expressions) */}
+          {state === 'success' ? (
+            <g>
+              <path d="M28 40 Q31 36 34 40" stroke="#81B29A" strokeWidth="2" strokeLinecap="round" />
+              <path d="M46 40 Q49 36 52 40" stroke="#81B29A" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          ) : state === 'error' ? (
+            <g>
+              <line x1="28" y1="42" x2="34" y2="38" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <line x1="46" y1="38" x2="52" y2="42" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          ) : state === 'waiting_permission' ? (
+            <g>
+              <circle cx="31" cy="40" r="2.5" fill="#F4A261" />
+              <circle cx="49" cy="40" r="2.5" fill="#F4A261" />
+              {/* Permission Badge */}
+              <circle cx="40" cy="33" r="3" fill="#F4A261" opacity="0.9" />
+            </g>
+          ) : state === 'speaking' ? (
+            <g>
+              <circle cx="31" cy="40" r="2.8" fill="#81B29A" />
+              <circle cx="49" cy="40" r="2.8" fill="#81B29A" />
+              <line x1="37" y1="45" x2="43" y2="45" stroke="#81B29A" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+          ) : state === 'attentive' ? (
+            <g>
+              <circle cx="31" cy="40" r="3.2" fill="#81B29A" />
+              <circle cx="49" cy="40" r="3.2" fill="#81B29A" />
+              <circle cx="32" cy="38.5" r="1.2" fill="#FFF" />
+              <circle cx="50" cy="38.5" r="1.2" fill="#FFF" />
+            </g>
+          ) : (
+            <g>
+              <circle cx="31" cy="40" r="2.8" fill="#81B29A">
+                {!isReducedMotion && (
+                  <animate
+                    attributeName="ry"
+                    values="2.8;2.8;0.4;2.8;2.8"
+                    keyTimes="0;0.9;0.94;0.97;1"
+                    dur="4.5s"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </circle>
+              <circle cx="49" cy="40" r="2.8" fill="#81B29A">
+                {!isReducedMotion && (
+                  <animate
+                    attributeName="ry"
+                    values="2.8;2.8;0.4;2.8;2.8"
+                    keyTimes="0;0.9;0.94;0.97;1"
+                    dur="4.5s"
+                    repeatCount="indefinite"
+                  />
+                )}
+              </circle>
+            </g>
+          )}
 
           {/* Leather-bound Study Notebook (held in hands) */}
           <g transform="translate(24, 62)">
-            <rect x="0" y="0" width="32" height="20" rx="3" fill="#2C3E35" stroke="#81B29A" strokeWidth="1.2" />
+            <rect
+              x="0"
+              y="0"
+              width="32"
+              height="20"
+              rx="3"
+              fill={state === 'waiting_permission' ? '#382B1E' : '#2C3E35'}
+              stroke={state === 'waiting_permission' ? '#F4A261' : '#81B29A'}
+              strokeWidth="1.2"
+            />
             <line x1="16" y1="0" x2="16" y2="20" stroke="#81B29A" strokeWidth="1" strokeDasharray="2 1" />
             {/* Book Bookmark Ribbon */}
-            <path d="M14 20 L16 16 L18 20 Z" fill="#D97736" />
+            <path d="M14 20 L16 16 L18 20 Z" fill={state === 'success' ? '#81B29A' : '#D97736'} />
           </g>
 
           <defs>
@@ -552,13 +609,54 @@ export const PixelMascot: React.FC<MascotProps> = ({
             strokeWidth="1.5"
           />
 
-          {/* Sharp Vibrant Coral Eyes */}
-          <polygon points="30,42 36,46 30,50" fill="#FF7B72" />
-          <polygon points="52,42 46,46 52,50" fill="#FF7B72" />
+          {/* Sharp Vibrant Coral Eyes (Dynamic Expressions) */}
+          {state === 'success' ? (
+            <g>
+              <path d="M28 46 L32 50 L38 44" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <path d="M46 46 L50 50 L56 44" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </g>
+          ) : state === 'error' ? (
+            <g>
+              <line x1="28" y1="42" x2="36" y2="50" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <line x1="36" y1="42" x2="28" y2="50" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <line x1="48" y1="42" x2="56" y2="50" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <line x1="56" y1="42" x2="48" y2="50" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          ) : state === 'waiting_permission' ? (
+            <g>
+              <polygon points="30,44 34,46 30,48" fill="#F4A261" />
+              <polygon points="52,44 48,46 52,48" fill="#F4A261" />
+              <circle cx="41" cy="38" r="3" fill="#F4A261" />
+            </g>
+          ) : state === 'speaking' ? (
+            <g>
+              <line x1="28" y1="46" x2="28" y2="50" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" />
+              <line x1="34" y1="43" x2="34" y2="53" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" />
+              <line x1="41" y1="41" x2="41" y2="55" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" />
+              <line x1="48" y1="43" x2="48" y2="53" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" />
+              <line x1="54" y1="46" x2="54" y2="50" stroke="#FF7B72" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          ) : state === 'attentive' ? (
+            <g>
+              <polygon points="28,40 38,46 28,52" fill="#FF7B72" />
+              <polygon points="54,40 44,46 54,52" fill="#FF7B72" />
+              <circle cx="33" cy="46" r="1.5" fill="#FFF" />
+              <circle cx="49" cy="46" r="1.5" fill="#FFF" />
+            </g>
+          ) : (
+            <g>
+              <polygon points="30,42 36,46 30,50" fill="#FF7B72" />
+              <polygon points="52,42 46,46 52,50" fill="#FF7B72" />
+            </g>
+          )}
 
           {/* Digital Stylus Pen (slung across shoulder) */}
           <line x1="60" y1="50" x2="74" y2="76" stroke="#E76F51" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="74" cy="76" r="2" fill="#A371F7" />
+          <circle cx="74" cy="76" r={state === 'working' ? 3.5 : 2} fill={state === 'working' ? '#FF7B72' : '#A371F7'}>
+            {state === 'working' && !isReducedMotion && (
+              <animate attributeName="r" values="2;4;2" dur="0.8s" repeatCount="indefinite" />
+            )}
+          </circle>
 
           {/* Floating Color Swatch Badge */}
           <rect x="20" y="66" width="6" height="6" rx="1.5" fill="#FF7B72" />
@@ -675,13 +773,36 @@ export const CipherMascot: React.FC<MascotProps> = ({
           {/* Reinforced Head Turret */}
           <rect x="24" y="16" width="38" height="18" rx="6" fill="#1C232B" stroke="#2D3B47" strokeWidth="1.5" />
 
-          {/* Dual Band Horizontal Telemetry Visor */}
+          {/* Dual Band Horizontal Telemetry Visor (Dynamic Expressions) */}
           <rect x="28" y="22" width="30" height="7" rx="3.5" fill="#0D1117" />
-          <rect x="30" y="24" width="26" height="3" rx="1.5" fill="#4A89C8">
-            {!isReducedMotion && (
-              <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite" />
-            )}
-          </rect>
+          {state === 'success' ? (
+            <path d="M30 25.5 L36 25.5 L40 23 L44 28 L48 25.5 L56 25.5" stroke="#81B29A" strokeWidth="1.5" fill="none" />
+          ) : state === 'error' ? (
+            <path d="M30 25.5 L39 25.5 L42 22 L45 29 L48 25.5 L56 25.5" stroke="#E76F51" strokeWidth="1.5" fill="none" />
+          ) : state === 'waiting_permission' ? (
+            <rect x="30" y="24" width="26" height="3" rx="1.5" fill="#F4A261" />
+          ) : state === 'speaking' ? (
+            <g>
+              <line x1="32" y1="24" x2="32" y2="27" stroke="#4A89C8" strokeWidth="1.5" />
+              <line x1="36" y1="23" x2="36" y2="28" stroke="#4A89C8" strokeWidth="1.5" />
+              <line x1="40" y1="22.5" x2="40" y2="28.5" stroke="#4A89C8" strokeWidth="1.5" />
+              <line x1="44" y1="23" x2="44" y2="28" stroke="#4A89C8" strokeWidth="1.5" />
+              <line x1="48" y1="24" x2="48" y2="27" stroke="#4A89C8" strokeWidth="1.5" />
+              <line x1="52" y1="24.5" x2="52" y2="26.5" stroke="#4A89C8" strokeWidth="1.5" />
+            </g>
+          ) : state === 'attentive' ? (
+            <rect x="30" y="23.5" width="26" height="4" rx="2" fill="#5D9BD8">
+              {!isReducedMotion && (
+                <animate attributeName="opacity" values="0.8;1;0.8" dur="1.2s" repeatCount="indefinite" />
+              )}
+            </rect>
+          ) : (
+            <rect x="30" y="24" width="26" height="3" rx="1.5" fill="#4A89C8">
+              {!isReducedMotion && (
+                <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite" />
+              )}
+            </rect>
+          )}
 
           {/* Cooling Grille on Chest */}
           <line x1="28" y1="46" x2="58" y2="46" stroke="#2D3B47" strokeWidth="2" strokeLinecap="round" />
@@ -689,7 +810,16 @@ export const CipherMascot: React.FC<MascotProps> = ({
           <line x1="28" y1="58" x2="58" y2="58" stroke="#2D3B47" strokeWidth="2" strokeLinecap="round" />
 
           {/* Database WAL Activity Status Dot */}
-          <circle cx="28" cy="72" r="3" fill="#81B29A" />
+          <circle
+            cx="28"
+            cy="72"
+            r={state === 'working' ? 3.5 : 3}
+            fill={state === 'error' ? '#E76F51' : state === 'waiting_permission' ? '#F4A261' : '#81B29A'}
+          >
+            {state === 'working' && !isReducedMotion && (
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" repeatCount="indefinite" />
+            )}
+          </circle>
           <text x="36" y="75" fill="#9DA3A8" fontSize="8" fontFamily="Geist Mono, monospace" fontWeight="600">
             SQLITE
           </text>
@@ -812,25 +942,58 @@ export const ScoutMascot: React.FC<MascotProps> = ({
             strokeWidth="1.8"
           />
 
-          {/* Dual Camera Shutter Lens Eyes */}
-          <circle cx="32" cy="54" r="8.5" fill="#1A1812" stroke="#D4A373" strokeWidth="1.5" />
-          <circle cx="48" cy="54" r="8.5" fill="#1A1812" stroke="#D4A373" strokeWidth="1.5" />
+          {/* Dual Camera Shutter Lens Eyes (Dynamic Expressions) */}
+          <circle cx="32" cy="54" r="8.5" fill="#1A1812" stroke={state === 'error' ? '#E76F51' : '#D4A373'} strokeWidth="1.5" />
+          <circle cx="48" cy="54" r="8.5" fill="#1A1812" stroke={state === 'error' ? '#E76F51' : '#D4A373'} strokeWidth="1.5" />
 
-          {/* Aperture Lenses */}
-          <circle cx="32" cy="54" r="4.5" fill="#E9C46A">
-            {!isReducedMotion && (
-              <animate attributeName="r" values="4.5;4.5;1;4.5;4.5" keyTimes="0;0.88;0.92;0.96;1" dur="4.2s" repeatCount="indefinite" />
-            )}
-          </circle>
-          <circle cx="48" cy="54" r="4.5" fill="#E9C46A">
-            {!isReducedMotion && (
-              <animate attributeName="r" values="4.5;4.5;1;4.5;4.5" keyTimes="0;0.88;0.92;0.96;1" dur="4.2s" repeatCount="indefinite" />
-            )}
-          </circle>
+          {state === 'success' ? (
+            <g>
+              <polygon points="32,50 33.5,53 36.5,54 33.5,55 32,58 30.5,55 27.5,54 30.5,53" fill="#E9C46A" />
+              <polygon points="48,50 49.5,53 52.5,54 49.5,55 48,58 46.5,55 43.5,54 46.5,53" fill="#E9C46A" />
+            </g>
+          ) : state === 'error' ? (
+            <g>
+              <line x1="28" y1="50" x2="36" y2="58" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <line x1="44" y1="58" x2="52" y2="50" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          ) : state === 'waiting_permission' ? (
+            <g>
+              <circle cx="32" cy="54" r="3.5" fill="#F4A261" />
+              <circle cx="48" cy="54" r="3.5" fill="#F4A261" />
+              {/* Permission Alert Badge */}
+              <circle cx="40" cy="46" r="3" fill="#F4A261" />
+            </g>
+          ) : state === 'speaking' ? (
+            <g>
+              <circle cx="32" cy="54" r="4.5" fill="#E9C46A" />
+              <circle cx="48" cy="54" r="4.5" fill="#E9C46A" />
+              <path d="M37 62 Q40 65 43 62" stroke="#E9C46A" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            </g>
+          ) : state === 'attentive' ? (
+            <g>
+              <circle cx="32" cy="54" r="5" fill="#E9C46A" />
+              <circle cx="48" cy="54" r="5" fill="#E9C46A" />
+              <circle cx="33.5" cy="52" r="1.5" fill="#FFF" />
+              <circle cx="49.5" cy="52" r="1.5" fill="#FFF" />
+            </g>
+          ) : (
+            <g>
+              <circle cx="32" cy="54" r="4.5" fill="#E9C46A">
+                {!isReducedMotion && (
+                  <animate attributeName="r" values="4.5;4.5;1;4.5;4.5" keyTimes="0;0.88;0.92;0.96;1" dur="4.2s" repeatCount="indefinite" />
+                )}
+              </circle>
+              <circle cx="48" cy="54" r="4.5" fill="#E9C46A">
+                {!isReducedMotion && (
+                  <animate attributeName="r" values="4.5;4.5;1;4.5;4.5" keyTimes="0;0.88;0.92;0.96;1" dur="4.2s" repeatCount="indefinite" />
+                )}
+              </circle>
+            </g>
+          )}
 
           {/* Compass / Research Satchel Strap */}
           <path d="M20 64 Q40 76 60 64" stroke="#8A6240" strokeWidth="2.5" fill="none" />
-          <circle cx="40" cy="73" r="3.5" fill="#E9C46A" />
+          <circle cx="40" cy="73" r="3.5" fill={state === 'waiting_permission' ? '#F4A261' : '#E9C46A'} />
 
           <defs>
             <linearGradient id="scoutBodyGradient" x1="14" y1="28" x2="66" y2="80" gradientUnits="userSpaceOnUse">

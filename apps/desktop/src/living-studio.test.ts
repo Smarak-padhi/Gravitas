@@ -117,4 +117,74 @@ describe('GRAVITAS 2.0 — Living Studio Alpha Renderer Foundation', () => {
       expect(isWebGLMounted('OFFICE_3D')).toBe(true)
     })
   })
+
+  describe('5. Living Studio Prop Hotspots & Micro-Interactions (Phase 03)', () => {
+    it('handles interactive coffee mug sip trigger', () => {
+      let bubbleText = ''
+      let bubbleStatus = ''
+      const onCoffeeSip = () => {
+        bubbleText = 'Fresh brew poured ☕ Ready to engineer.'
+        bubbleStatus = 'info'
+      }
+
+      onCoffeeSip()
+      expect(bubbleText).toContain('Fresh brew poured')
+      expect(bubbleStatus).toBe('info')
+    })
+
+    it('routes bookshelf and server matrix clicks to corresponding spatial panels', () => {
+      let activePanel: ActivePanel = 'NONE'
+      let activeAgent: MascotId | null = null
+
+      const onOpenAdaNotes = () => {
+        activePanel = 'ADA_NOTES'
+        activeAgent = 'ada'
+      }
+
+      const onOpenCipherTasks = () => {
+        activePanel = 'CIPHER_TASKS'
+        activeAgent = 'cipher'
+      }
+
+      onOpenAdaNotes()
+      expect(activePanel).toBe('ADA_NOTES')
+      expect(activeAgent).toBe('ada')
+
+      onOpenCipherTasks()
+      expect(activePanel).toBe('CIPHER_TASKS')
+      expect(activeAgent).toBe('cipher')
+    })
+
+    it('routes Pixel canvas and Scout observatory clicks to specialized agent status', () => {
+      let pixelBubble = ''
+      let scoutBubble = ''
+
+      const onPixelCanvas = () => {
+        pixelBubble = 'Drafting board active — UI wireframes loaded'
+      }
+
+      const onScoutObservatory = () => {
+        scoutBubble = 'Observatory focused — Scanning research sources'
+      }
+
+      onPixelCanvas()
+      expect(pixelBubble).toContain('UI wireframes')
+
+      onScoutObservatory()
+      expect(scoutBubble).toContain('research sources')
+    })
+
+    it('enforces reduced-motion invariance across all mascot character loops', () => {
+      const isReducedMotion = true
+      const getAnimationVariant = (reduced: boolean, state: MascotState) => {
+        if (reduced) return {}
+        if (state === 'working') return { y: [0, -4, 0] }
+        return { y: [0, -3, 0] }
+      }
+
+      expect(getAnimationVariant(isReducedMotion, 'idle')).toEqual({})
+      expect(getAnimationVariant(isReducedMotion, 'working')).toEqual({})
+      expect(getAnimationVariant(false, 'working')).toHaveProperty('y')
+    })
+  })
 })

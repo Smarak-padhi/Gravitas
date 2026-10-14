@@ -20,6 +20,11 @@ export interface StudioSceneProps {
   onSelectAgent: (id: MascotId) => void
   onOpenMusicCorner: () => void
   onOpenQuickSummon: () => void
+  onOpenAdaNotes?: () => void
+  onOpenCipherTasks?: () => void
+  onCoffeeSip?: () => void
+  onPixelCanvas?: () => void
+  onScoutObservatory?: () => void
 }
 
 export const StudioScene: React.FC<StudioSceneProps> = ({
@@ -30,6 +35,11 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
   onSelectAgent,
   onOpenMusicCorner,
   onOpenQuickSummon,
+  onOpenAdaNotes,
+  onOpenCipherTasks,
+  onCoffeeSip,
+  onPixelCanvas,
+  onScoutObservatory,
 }) => {
   return (
     <div
@@ -134,14 +144,28 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
           <line x1="680" y1="180" x2="920" y2="180" stroke="#262C34" strokeWidth="2" />
           <line x1="680" y1="280" x2="920" y2="280" stroke="#262C34" strokeWidth="2" />
 
-          {/* Distant Stars & Soft City Horizon */}
-          <circle cx="430" cy="110" r="1.5" fill="#EDEAE3" opacity="0.8" />
-          <circle cx="530" cy="90" r="1.2" fill="#EDEAE3" opacity="0.6" />
-          <circle cx="400" cy="150" r="1" fill="#EDEAE3" opacity="0.5" />
-          <circle cx="560" cy="140" r="1.5" fill="#EDEAE3" opacity="0.7" />
-          <circle cx="740" cy="100" r="1.5" fill="#EDEAE3" opacity="0.8" />
-          <circle cx="850" cy="120" r="1.2" fill="#EDEAE3" opacity="0.6" />
-          <circle cx="880" cy="70" r="1" fill="#EDEAE3" opacity="0.5" />
+          {/* Distant Stars & Soft City Horizon with Ambient Twinkle */}
+          <circle cx="430" cy="110" r="1.5" fill="#EDEAE3" opacity="0.8">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.8s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="530" cy="90" r="1.2" fill="#EDEAE3" opacity="0.6">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3.4s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="400" cy="150" r="1" fill="#EDEAE3" opacity="0.5">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="560" cy="140" r="1.5" fill="#EDEAE3" opacity="0.7">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="740" cy="100" r="1.5" fill="#EDEAE3" opacity="0.8">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.8;0.3;0.8" dur="3.1s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="850" cy="120" r="1.2" fill="#EDEAE3" opacity="0.6">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.7s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="880" cy="70" r="1" fill="#EDEAE3" opacity="0.5">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.5;1;0.5" dur="2.2s" repeatCount="indefinite" />}
+          </circle>
 
           {/* Crescent Moon */}
           <path d="M 860 110 A 10 10 0 0 0 870 120 A 12 12 0 0 1 860 110 Z" fill="#FFE8A3" opacity="0.85" />
@@ -201,14 +225,22 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
           <rect x="1070" y="120" width="170" height="420" rx="6" fill="#14181D" stroke="#252C34" strokeWidth="2.5" />
           {/* Server Unit 1 */}
           <rect x="1080" y="140" width="150" height="36" rx="3" fill="#1C2229" stroke="#2B343F" strokeWidth="1" />
-          <circle cx="1096" cy="158" r="3" fill="#81B29A" />
-          <circle cx="1108" cy="158" r="3" fill="#4A89C8" />
+          <circle cx="1096" cy="158" r="3" fill="#81B29A">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="1108" cy="158" r="3" fill="#4A89C8">
+            {!isReducedMotion && <animate attributeName="opacity" values="1;0.3;1" dur="2.4s" repeatCount="indefinite" />}
+          </circle>
           <line x1="1130" y1="158" x2="1210" y2="158" stroke="#323C47" strokeWidth="2" strokeDasharray="4 2" />
 
           {/* Server Unit 2 */}
           <rect x="1080" y="188" width="150" height="36" rx="3" fill="#1C2229" stroke="#2B343F" strokeWidth="1" />
-          <circle cx="1096" cy="206" r="3" fill="#81B29A" />
-          <circle cx="1108" cy="206" r="3" fill="#E9C46A" />
+          <circle cx="1096" cy="206" r="3" fill="#81B29A">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.5s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="1108" cy="206" r="3" fill="#E9C46A">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.1s" repeatCount="indefinite" />}
+          </circle>
           <line x1="1130" y1="206" x2="1210" y2="206" stroke="#323C47" strokeWidth="2" strokeDasharray="4 2" />
 
           {/* Server Unit 3 (Storage Array) */}
@@ -217,8 +249,12 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
           <rect x="1118" y="248" width="20" height="30" rx="1.5" fill="#252D37" />
           <rect x="1144" y="248" width="20" height="30" rx="1.5" fill="#252D37" />
           <rect x="1170" y="248" width="20" height="30" rx="1.5" fill="#252D37" />
-          <circle cx="1210" cy="255" r="2.5" fill="#4A89C8" />
-          <circle cx="1210" cy="265" r="2.5" fill="#81B29A" />
+          <circle cx="1210" cy="255" r="2.5" fill="#4A89C8">
+            {!isReducedMotion && <animate attributeName="opacity" values="0.3;1;0.3" dur="0.9s" repeatCount="indefinite" />}
+          </circle>
+          <circle cx="1210" cy="265" r="2.5" fill="#81B29A">
+            {!isReducedMotion && <animate attributeName="opacity" values="1;0.4;1" dur="1.2s" repeatCount="indefinite" />}
+          </circle>
 
           {/* Server Unit 4 (Telemetry Monitor) */}
           <rect x="1080" y="302" width="150" height="42" rx="3" fill="#0F1318" stroke="#2B343F" strokeWidth="1" />
@@ -276,12 +312,21 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
           {/* Desk Lamp on Left Side */}
           <path d="M 460 540 L 470 480 L 495 480" stroke="#D97736" strokeWidth="3" strokeLinecap="round" fill="none" />
           <polygon points="490,470 515,465 520,490 495,490" fill="#F4A261" />
+
           {/* Steaming Ceramic Coffee Mug on Right Side */}
           <rect x="790" y="565" width="20" height="24" rx="3" fill="#EDEAE3" />
           <path d="M 810 570 C 816 570 816 582 810 582" stroke="#EDEAE3" strokeWidth="2" fill="none" />
-          {/* Subtle Rising Steam */}
-          <path d="M 796 558 Q 798 550 795 544" stroke="#9DA3A8" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5" />
-          <path d="M 804 558 Q 806 548 803 540" stroke="#9DA3A8" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5" />
+          {/* Subtle Rising Steam with Fluid Animation */}
+          <path d="M 796 558 Q 798 550 795 544" stroke="#9DA3A8" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5">
+            {!isReducedMotion && (
+              <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.6s" repeatCount="indefinite" />
+            )}
+          </path>
+          <path d="M 804 558 Q 806 548 803 540" stroke="#9DA3A8" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5">
+            {!isReducedMotion && (
+              <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3.2s" repeatCount="indefinite" />
+            )}
+          </path>
 
           {/* Central Desk Lamp Radial Glow */}
           <ellipse cx="640" cy="530" rx="220" ry="120" fill="url(#deskLampGlow)" />
@@ -585,6 +630,68 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ── INTERACTIVE STUDIO PROP HOTSPOTS ── */}
+
+      {/* Coffee Mug on Grav's Desk */}
+      <button
+        onClick={onCoffeeSip}
+        className="studio-prop-hotspot"
+        aria-label="Steaming Coffee Mug on Grav's desk"
+        title="Steaming Coffee Mug (Click for fresh brew)"
+        style={{
+          position: 'absolute',
+          left: '62.2%',
+          top: '70.8%',
+          width: '34px',
+          height: '38px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          zIndex: 12,
+          borderRadius: '6px',
+        }}
+      />
+
+      {/* Bookshelf Study Hub Shortcut */}
+      <button
+        onClick={onOpenAdaNotes}
+        className="studio-prop-hotspot"
+        aria-label="Bookshelf Study Hub"
+        title="Bookshelf Study Nook (Click to open Course Notes)"
+        style={{
+          position: 'absolute',
+          left: '2.5%',
+          top: '14%',
+          width: '13%',
+          height: '46%',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          zIndex: 8,
+          borderRadius: '8px',
+        }}
+      />
+
+      {/* Server Matrix Cabinet Shortcut */}
+      <button
+        onClick={onOpenCipherTasks}
+        className="studio-prop-hotspot"
+        aria-label="Server Matrix Cabinet"
+        title="Server Matrix Cabinet (Click to open Agenda)"
+        style={{
+          position: 'absolute',
+          right: '2.5%',
+          top: '16%',
+          width: '13%',
+          height: '46%',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          zIndex: 8,
+          borderRadius: '8px',
+        }}
+      />
     </div>
   )
 }
