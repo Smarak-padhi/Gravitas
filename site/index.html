@@ -88,8 +88,8 @@
       font-family: var(--font-sans);
       background-color: var(--bg-canvas);
       color: var(--text-primary);
-      line-height: 1.6;
-      font-size: 0.9375rem; /* 15px */
+      line-height: 1.62;
+      font-size: 1rem; /* 16px */
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -143,7 +143,7 @@
       position: sticky;
       top: 0;
       width: 100%;
-      height: 64px;
+      height: 68px;
       background: rgba(8, 9, 11, 0.82);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
@@ -192,9 +192,9 @@
 
     .brand-tag {
       font-family: var(--font-mono);
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 3px 8px;
       background: var(--bg-surface-elevated);
       color: var(--accent-blue);
       border: 1px solid var(--border-subtle);
@@ -209,7 +209,7 @@
     }
 
     .nav-link {
-      font-size: 13.5px;
+      font-size: 14.5px;
       font-weight: 500;
       color: var(--text-secondary);
       transition: color 0.2s;
@@ -248,15 +248,15 @@
     }
 
     /* ─── BUTTON COMPONENT FAMILY (Liquid Metal & Interactive Hover) ─────── */
-    /* 1. Primary CTA: Liquid Metal Button */
+    /* 1. Primary CTA: Liquid Metal Button (15-16px scale) */
     .btn-liquid-metal {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 13px 26px;
+      padding: 15px 30px;
       font-family: var(--font-sans);
-      font-size: 13.5px;
+      font-size: 15.5px;
       font-weight: 600;
       color: var(--cta-primary-text);
       background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 50%, #CBD5E1 100%);
@@ -308,15 +308,15 @@
       transform: translateY(0);
     }
 
-    /* 2. Secondary CTA: Interactive Hover Button */
+    /* 2. Secondary CTA: Interactive Hover Button (15-16px scale) */
     .btn-interactive-hover {
       position: relative;
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 12px 22px;
+      padding: 15px 26px;
       font-family: var(--font-sans);
-      font-size: 13.5px;
+      font-size: 15.5px;
       font-weight: 500;
       color: var(--text-primary);
       background: var(--bg-surface);
@@ -439,14 +439,14 @@
       width: 100%;
       margin: 0 auto;
       padding: 0 32px;
-      display: grid;
-      grid-template-columns: 1.25fr 0.95fr;
-      gap: 48px;
+      display: flex;
       align-items: center;
+      min-height: calc(100vh - 68px);
     }
 
     .hero-content {
-      max-width: 700px;
+      max-width: 640px;
+      padding: 40px 0 60px 0;
     }
 
     .hero-badge {
@@ -458,7 +458,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       color: var(--accent-blue);
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -474,10 +474,10 @@
     }
 
     .hero-headline {
-      font-size: clamp(40px, 5.2vw, 76px);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -0.04em;
+      font-size: clamp(2.5rem, 5.2vw, 4.5rem); /* 40-48px mobile -> 64-76px desktop */
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.035em;
       margin-bottom: 24px;
       color: #FFFFFF;
     }
@@ -485,33 +485,16 @@
       color: #14171A;
     }
 
-    /* Shimmering Text Effect (from @ElevenLabs/components/shimmering-text) */
-    .hero-headline span.shimmer {
-      background: linear-gradient(90deg, #F0EEE8 0%, #FFFFFF 35%, #38BDF8 50%, #F0EEE8 65%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: textShimmer 7s infinite ease-in-out;
-    }
-    body.light-theme .hero-headline span.shimmer {
-      background: linear-gradient(90deg, #14171A 0%, #000000 35%, #1D548F 50%, #14171A 65%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: textShimmer 7s infinite ease-in-out;
-    }
-
-    @keyframes textShimmer {
-      0%, 25% { background-position: 100% 0%; }
-      75%, 100% { background-position: -100% 0%; }
+    .hero-headline span.accent-highlight {
+      color: var(--accent-blue);
     }
 
     .hero-subhead {
-      font-size: clamp(16px, 1.25vw, 19px);
-      line-height: 1.6;
+      font-size: clamp(1rem, 1.2vw, 1.125rem); /* 16-18px body copy */
+      line-height: 1.62;
       color: var(--text-secondary);
       margin-bottom: 36px;
-      max-width: 620px;
+      max-width: 560px;
     }
 
     .hero-actions {
@@ -519,7 +502,7 @@
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 36px;
     }
 
     .hero-meta-strip {
@@ -527,6 +510,7 @@
       gap: 24px;
       padding-top: 24px;
       border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
     }
     .hero-meta-item {
       display: flex;
@@ -535,87 +519,39 @@
     }
     .hero-meta-val {
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--text-primary);
     }
     .hero-meta-lbl {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-tertiary);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    /* Hero Right Telemetry Card */
-    .hero-terminal-card {
-      background: rgba(15, 18, 22, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 24px;
-      box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
-    }
-    body.light-theme .hero-terminal-card {
-      background: rgba(252, 250, 245, 0.92);
-      box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.1);
-    }
-
-    .terminal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 16px;
-    }
-    .terminal-title {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-secondary);
-      letter-spacing: 0.06em;
-    }
-    .terminal-status {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--accent-emerald);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .terminal-code {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-primary);
-      line-height: 1.7;
-    }
-    .terminal-code .kw { color: #38BDF8; font-weight: 600; }
-    .terminal-code .lit { color: #FCD34D; }
-    .terminal-code .fn { color: #34D399; }
-    .terminal-code .cmt { color: var(--text-tertiary); font-style: italic; }
-
     /* ─── REAL PRODUCT SHOWCASE GALLERY ─────────────────────────────────── */
     .section-wrap {
       max-width: 1360px;
       margin: 0 auto;
-      padding: 100px 32px;
+      padding: 80px 32px;
       position: relative;
     }
 
     .section-header {
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
     .section-kicker {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--accent-blue);
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .section-title {
-      font-size: clamp(28px, 3.2vw, 44px);
+      font-size: clamp(1.75rem, 3.2vw, 2.75rem); /* 28-36px mobile; 38-48px desktop */
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--text-primary);
@@ -623,10 +559,10 @@
       margin-bottom: 16px;
     }
     .section-desc {
-      font-size: 16px;
+      font-size: clamp(1rem, 1.15vw, 1.125rem); /* 16-18px body copy */
       color: var(--text-secondary);
-      max-width: 680px;
-      line-height: 1.6;
+      max-width: 640px;
+      line-height: 1.62;
     }
 
     .gallery-container {
@@ -657,8 +593,8 @@
     }
 
     .gallery-tab {
-      padding: 6px 12px;
-      font-size: 12px;
+      padding: 8px 14px;
+      font-size: 13px;
       font-weight: 500;
       color: var(--text-secondary);
       border: 1px solid transparent;
@@ -685,7 +621,7 @@
     .gallery-stage {
       position: relative;
       width: 100%;
-      height: 640px;
+      height: 720px;
       background: #000000;
       display: flex;
       align-items: center;
@@ -714,7 +650,7 @@
     }
     .gallery-badge {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       color: var(--accent-emerald);
       display: inline-flex;
       align-items: center;
@@ -771,21 +707,21 @@
 
     .folder-tab {
       position: absolute;
-      top: -16px;
+      top: -21px;
       left: 16px;
-      width: 90px;
-      height: 18px;
+      width: 110px;
+      height: 22px;
       background: #202730;
       border: 1px solid #2B3340;
       border-bottom: none;
       border-radius: 2px 2px 0 0;
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 12px;
       color: var(--accent-blue);
       display: flex;
       align-items: center;
       justify-content: center;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     /* Assignment File Cards inside Folder */
@@ -861,7 +797,7 @@
 
     .folder-label {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-primary);
       display: flex;
@@ -1076,7 +1012,7 @@
     }
     .task-badge {
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       padding: 3px 8px;
       border-radius: var(--radius-sm);
       background: var(--bg-surface);
@@ -1133,7 +1069,7 @@
       background: var(--bg-surface-elevated);
       border-bottom: 1px solid var(--border);
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-secondary);
     }
 
@@ -1213,7 +1149,7 @@
     .matrix-table th {
       background: var(--bg-surface-elevated);
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-secondary);
       letter-spacing: 0.08em;
@@ -1426,7 +1362,7 @@
   </div>
 
   <main id="main-content">
-    <!-- ─── HERO SECTION: 3D LIQUID SCULPTURE CENTERPIECE ─────────────────── -->
+    <!-- ─── HERO SECTION: SCULPTURAL CENTERPIECE ────────────────────────── -->
     <section class="hero-section" aria-label="Introduction">
       <canvas id="hero-canvas"></canvas>
       <div class="hero-vignette"></div>
@@ -1435,60 +1371,37 @@
         <div class="hero-content">
           <div class="hero-badge">
             <span class="status-dot"></span>
-            100% Local SQLite Vault · Zero Telemetry
+            Sovereign Academic Command Center
           </div>
           <h1 class="hero-headline">
-            The sovereign operating system for <span class="shimmer">engineering minds</span>.
+            Your work, <br>
+            finally in <span class="accent-highlight">one place.</span>
           </h1>
           <p class="hero-subhead">
-            GRAVITAS unifies multi-agent study flows, verbatim audio capture, and local filesystem mutations behind a verified human approval barrier. No cloud accounts. No surveillance.
+            Bring notes, assignments, plans, and projects into one focused desktop workspace. Stay organized and keep control of your data.
           </p>
           <div class="hero-actions">
-            <a href="#study-guardian" class="btn-liquid-metal" id="hero-primary-cta">
-              Explore Architecture
+            <a href="#product" class="btn-liquid-metal" id="hero-primary-cta">
+              <span>Get GRAVITAS for Desktop</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </a>
-            <a href="#product" class="btn-interactive-hover" id="hero-secondary-cta">
+            <a href="#study-guardian" class="btn-interactive-hover" id="hero-secondary-cta">
               <span class="btn-dot"></span>
-              <span class="btn-text-init">Live Desktop Preview</span>
-              <span class="btn-text-reveal">Inspect Screenshots →</span>
+              <span class="btn-text-init">Explore the Guide</span>
+              <span class="btn-text-reveal">Read Docs →</span>
             </a>
           </div>
           <div class="hero-meta-strip">
             <div class="hero-meta-item">
-              <span class="hero-meta-val">7 COURSES</span>
-              <span class="hero-meta-lbl">Integrated Syllabus</span>
+              <span class="hero-meta-val">Local SQLite Storage</span>
+              <span class="hero-meta-lbl">Zero External Telemetry</span>
             </div>
             <div class="hero-meta-item">
-              <span class="hero-meta-val">&lt; 100ms</span>
-              <span class="hero-meta-lbl">Companion Voice PTT</span>
+              <span class="hero-meta-val">100% Offline Desktop</span>
+              <span class="hero-meta-lbl">Air-gapped Native App</span>
             </div>
-            <div class="hero-meta-item">
-              <span class="hero-meta-val">0 BITS</span>
-              <span class="hero-meta-lbl">External Telemetry</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Rail Telemetry Terminal -->
-        <div class="hero-terminal-card" aria-label="System Architecture Status">
-          <div class="terminal-header">
-            <span class="terminal-title">KERNEL ENGINE · DDL AUDIT</span>
-            <span class="terminal-status">● PRAGMA FOREIGN_KEYS = ON</span>
-          </div>
-          <div class="terminal-code">
-            <span class="cmt">-- Local SQLite Database Schema Verification</span><br>
-            <span class="kw">CREATE TABLE</span> <span class="fn">study_guardian_intake</span> (<br>
-            &nbsp;&nbsp;id <span class="lit">TEXT PRIMARY KEY</span>,<br>
-            &nbsp;&nbsp;course_code <span class="lit">VARCHAR(16) NOT NULL</span>,<br>
-            &nbsp;&nbsp;due_timestamp <span class="lit">INTEGER NOT NULL</span>,<br>
-            &nbsp;&nbsp;wal_sync_state <span class="lit">TEXT DEFAULT 'COMMITTED'</span><br>
-            );<br><br>
-            <span class="cmt">-- Filesystem Mutation Gate</span><br>
-            <span class="kw">CREATE TABLE</span> <span class="fn">mutation_barriers</span> (<br>
-            &nbsp;&nbsp;mutation_id <span class="lit">TEXT PRIMARY KEY</span>,<br>
-            &nbsp;&nbsp;human_approved <span class="lit">BOOLEAN DEFAULT 0</span>,<br>
-            &nbsp;&nbsp;atomic_diff <span class="lit">TEXT NOT NULL</span><br>
-            );
           </div>
         </div>
       </div>
@@ -1497,10 +1410,10 @@
     <!-- ─── REAL PRODUCT SHOWCASE: AUTHENTIC SCREENSHOT GALLERY ────────────── -->
     <section id="product" class="section-wrap" aria-label="Real Product Preview">
       <div class="section-header">
-        <div class="section-kicker">Authentic Desktop Software</div>
-        <h2 class="section-title">A real desktop application. Zero simulated dashboards.</h2>
+        <div class="section-kicker">Product Showcase</div>
+        <h2 class="section-title">A workspace built around your day.</h2>
         <p class="section-desc">
-          Inspect authentic screenshots captured directly from the live Electron desktop build running with local SQLite persistence and native Windows/macOS window frames.
+          See your upcoming work, notes, and subjects together—without juggling separate tools.
         </p>
       </div>
 
@@ -1537,10 +1450,10 @@
     <!-- ─── STUDY GUARDIAN: 3D FOLDER INTAKE INTERACTION ──────────────────── -->
     <section id="study-guardian" class="section-wrap" aria-label="Study Guardian Intake">
       <div class="section-header">
-        <div class="section-kicker">Interactive Workflow Intake</div>
-        <h2 class="section-title">Assignment intake with 3D physical folder depth.</h2>
+        <div class="section-kicker">Study Guardian</div>
+        <h2 class="section-title">From assignment to action.</h2>
         <p class="section-desc">
-          Drop complex course syllabi and problem sets into the Study Guardian folder. Watch the engine unpack assignments, parse milestones, and queue atomic file updates.
+          Bring in an assignment, review the details, confirm the deadline, and keep track of what comes next.
         </p>
       </div>
 
@@ -1555,27 +1468,27 @@
             <!-- 3 Stacked Assignment File Cards -->
             <div class="folder-file" data-file="1">
               <div>
-                <span class="brand-tag" style="font-size: 9px;">CSE 2631</span>
-                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">PSet 4: Dynamic Programming</div>
-                <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Matrix Chain Multiplication</div>
+                <span class="brand-tag">CSE 2631</span>
+                <div style="font-size: 14px; font-weight: 700; margin-top: 6px;">PSet 4: Dynamic Programming</div>
+                <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">Matrix Chain Multiplication</div>
               </div>
-              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-blue);">Due: Thu, Oct 22 · 11:59 PM</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-blue);">Due: Thu, Oct 22 · 11:59 PM</div>
             </div>
 
             <div class="folder-file" data-file="2">
               <div>
-                <span class="brand-tag" style="font-size: 9px;">CSE 2221</span>
-                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">Systems Concurrency Lab</div>
+                <span class="brand-tag">CSE 2221</span>
+                <div style="font-size: 14px; font-weight: 700; margin-top: 6px;">Systems Concurrency Lab</div>
               </div>
-              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary);">Due: Mon, Oct 26</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">Due: Mon, Oct 26</div>
             </div>
 
             <div class="folder-file" data-file="3">
               <div>
-                <span class="brand-tag" style="font-size: 9px;">CSE 2811</span>
-                <div style="font-size: 13px; font-weight: 700; margin-top: 6px;">B-Tree Page Buffer Lab</div>
+                <span class="brand-tag">CSE 2811</span>
+                <div style="font-size: 14px; font-weight: 700; margin-top: 6px;">B-Tree Page Buffer Lab</div>
               </div>
-              <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary);">Due: Wed, Oct 28</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">Due: Wed, Oct 28</div>
             </div>
 
             <div class="folder-front">
@@ -1608,14 +1521,14 @@
 
           <div class="intake-actions">
             <button class="btn-liquid-metal" id="btn-approve-mutation">
-              Write to Local Disk
+              Simulate Approval
             </button>
             <button class="btn-outline" id="btn-reject-mutation">
-              Reject Mutation
+              Reset Demo
             </button>
           </div>
-          <div id="barrier-feedback" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-emerald); display: none;">
-            ✓ [ATOMIC COMMIT APPROVED] 1 file mutated locally. Lock released.
+          <div id="barrier-feedback" style="font-family: var(--font-mono); font-size: 12px; color: var(--accent-emerald); display: none;">
+            ✓ [SIMULATION APPROVED] 3 assignment milestones parsed into local queue. Zero disk mutations without your explicit action.
           </div>
         </div>
       </div>
@@ -1625,9 +1538,9 @@
     <section id="knowledge-hub" class="section-wrap" aria-label="Knowledge Hub and Tasks">
       <div class="section-header">
         <div class="section-kicker">Knowledge Hub &amp; Tasks</div>
-        <h2 class="section-title">Refined task execution with persistent feedback.</h2>
+        <h2 class="section-title">Keep ideas connected to the work.</h2>
         <p class="section-desc">
-          Inspired by Origin UI's Fancy Todo Checkbox reference. Experience smooth SVG path draw animations, ripple completion feedback, and persistent local tracking.
+          Notes, projects, plans, and tasks live together in a workspace you control.
         </p>
       </div>
 
@@ -1717,18 +1630,18 @@
     <!-- ─── COMPANION HUD: HONEST VOICE PTT DEMONSTRATION ─────────────────── -->
     <section id="companion" class="section-wrap" aria-label="Companion HUD">
       <div class="section-header">
-        <div class="section-kicker">Companion Assistant HUD</div>
-        <h2 class="section-title">Push-To-Talk voice dictation. Verbatim truth.</h2>
+        <div class="section-kicker">Companion Assistant</div>
+        <h2 class="section-title">Capture the thought. Stay in flow.</h2>
         <p class="section-desc">
-          Capture lightning-fast lecture insights without opening heavy editor windows. Streams verbatim 16kHz audio directly to local Whisper models.
+          Turn a quick thought into something you can keep and work on. Explore the voice and fast-capture flow below.
         </p>
       </div>
 
       <div class="companion-grid">
         <div>
-          <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Zero Hallucinations. Pure Audio Grounding.</h3>
-          <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
-            The GRAVITAS Companion HUD floats discreetly above your compiler or lecture stream. When triggered, it streams uncompressed audio straight to your local SQLite scratchpad and generates Obsidian-ready markdown notes with exact timestamp references.
+          <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 16px;">Interactive Audio Capture Demonstration</h3>
+          <p style="color: var(--text-secondary); line-height: 1.62; font-size: 16px; margin-bottom: 24px;">
+            The GRAVITAS Companion HUD simulates push-to-talk dictation with on-device waveform processing. Explore how fast notes are converted into local markdown without leaving your current workspace.
           </p>
           <div style="display: flex; gap: 16px;">
             <button class="btn-liquid-metal" id="btn-ptt-trigger">
@@ -1742,7 +1655,7 @@
 
         <div class="companion-hud-window" aria-label="Simulated Companion HUD Window">
           <div class="hud-titlebar">
-            <span>COMPANION HUD · FLOATING OVERLAY</span>
+            <span>COMPANION HUD · INTERACTIVE DEMO</span>
             <span id="ptt-status-text" style="color: var(--accent-blue);">IDLE</span>
           </div>
           <div class="hud-body">
@@ -1759,7 +1672,7 @@
             <div class="transcript-box" id="transcript-display">
               "In latch crabbing, you must lock the parent page before descending into the child node, releasing the parent only when the child is verified safe from split."
             </div>
-            <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); display: flex; justify-content: space-between;">
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); display: flex; justify-content: space-between;">
               <span>LATENCY: 42ms (ON-DEVICE)</span>
               <span>BUFFER: 16kHz PCM</span>
             </div>
@@ -1772,9 +1685,9 @@
     <section id="sovereignty" class="section-wrap" aria-label="Local Sovereignty">
       <div class="section-header">
         <div class="section-kicker">Data Sovereignty &amp; Privacy</div>
-        <h2 class="section-title">Your notes and study data belong to you.</h2>
+        <h2 class="section-title">Your workspace. Your files.</h2>
         <p class="section-desc">
-          Compare GRAVITAS with conventional cloud SaaS platforms. Every byte is written to transparent, open-source SQLite files on your physical machine.
+          Everything stays on your machine by default. No mandatory sync, no hidden lock-in, and no loss of access to your work.
         </p>
       </div>
 
@@ -1819,7 +1732,7 @@
       <div class="hero-terminal-card" style="max-width: 800px; margin: 0 auto;">
         <div class="terminal-header">
           <span class="terminal-title">TERMINAL · SOURCE-AVAILABLE LOCAL BUILD</span>
-          <button class="btn-outline" id="btn-copy-install" style="padding: 4px 10px; font-size: 11px;">Copy Command</button>
+          <button class="btn-outline" id="btn-copy-install" style="padding: 4px 10px; font-size: 12px;">Copy Command</button>
         </div>
         <div class="terminal-code">
           <span class="cmt"># Clone and build the verified desktop environment</span><br>
@@ -1833,16 +1746,16 @@
     <section class="section-wrap" style="padding-top: 40px; padding-bottom: 80px;">
       <div class="cta-banner">
         <div class="section-kicker">Get Started</div>
-        <h2 class="cta-banner-title">Build your sovereign academic second brain.</h2>
+        <h2 class="cta-banner-title">Make room for what matters.</h2>
         <p class="cta-banner-desc">
-          Run GRAVITAS independently on your machine. Explore the real desktop preview and experience the motion-rich command center.
+          Organize your semester with a tool built for focus, clarity, and control.
         </p>
         <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
-          <a href="#product" class="btn-liquid-metal">Explore Workspace Preview</a>
+          <a href="#product" class="btn-liquid-metal">Get GRAVITAS for Desktop</a>
           <a href="#study-guardian" class="btn-interactive-hover">
             <span class="btn-dot"></span>
-            <span class="btn-text-init">Study Guardian</span>
-            <span class="btn-text-reveal">Open Folder →</span>
+            <span class="btn-text-init">Explore the Guide</span>
+            <span class="btn-text-reveal">Read Docs →</span>
           </a>
         </div>
       </div>
@@ -1888,47 +1801,73 @@
     if (gl) {
       const vsSource = `
         attribute vec2 position;
-        varying vec2 vUv;
         void main() {
-          vUv = position * 0.5 + 0.5;
           gl_Position = vec4(position, 0.0, 1.0);
         }
       `;
 
+      // Sculptural Obsidian Shader: Architectural interlocking folded metallic slabs
+      // Positioned cleanly to the right of headline with directional lighting and titanium light mode
       const fsSource = `
         precision highp float;
-        uniform float uTime;
         uniform vec2 uResolution;
+        uniform float uTime;
         uniform vec2 uMouse;
         uniform float uIsLight;
-        varying vec2 vUv;
 
-        float smin(float a, float b, float k) {
-          float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
-          return mix(b, a, h) - k * h * (1.0 - h);
+        mat2 rot2D(float a) {
+          float c = cos(a), s = sin(a);
+          return mat2(c, -s, s, c);
         }
 
-        mat3 rotateY(float angle) {
-          float c = cos(angle);
-          float s = sin(angle);
-          return mat3(c, 0.0, s, 0.0, 1.0, 0.0, -s, 0.0, c);
+        // Box distance field with bevel
+        float sdBevelBox(vec3 p, vec3 b, float r) {
+          vec3 q = abs(p) - b;
+          return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
         }
 
-        mat3 rotateX(float angle) {
-          float c = cos(angle);
-          float s = sin(angle);
-          return mat3(1.0, 0.0, 0.0, 0.0, c, -s, 0.0, s, c);
-        }
-
+        // Signed Distance Function: Architectural Interlocking Monolith Slabs
         float map(vec3 p) {
-          p = rotateY(uTime * 0.12 + (uMouse.x - 0.5) * 0.75) * rotateX(0.28 + (uMouse.y - 0.5) * 0.45) * p;
-          p.x -= 0.62;
-          float wave = sin(p.x * 2.5 + uTime * 0.6) * cos(p.y * 2.5 + uTime * 0.5) * 0.18;
-          float d1 = length(p + vec3(0.0, sin(uTime * 0.3) * 0.1, 0.0)) - 0.95 + wave;
-          vec2 q = vec2(length(p.xz) - 1.25, p.y);
-          float d2 = length(q) - (0.28 + sin(atan(p.z, p.x) * 3.0 + uTime * 0.8) * 0.12);
-          float d3 = length(p + vec3(sin(uTime * 0.4) * 1.1, cos(uTime * 0.5) * 0.8, sin(uTime * 0.3) * 0.6)) - 0.35;
-          return smin(smin(d1, d2, 0.45), d3, 0.35);
+          float aspect = uResolution.x / uResolution.y;
+
+          // Responsive Positioning: Shift to right on desktop, top-right on mobile
+          if (aspect > 1.1) {
+            p.x -= 1.18; // Keep well clear of headline on desktop
+            p.y -= 0.05;
+          } else {
+            p.x -= 0.38;
+            p.y -= 0.95; // Position in upper half on mobile
+          }
+
+          // Slow stately rotation + subtle mouse parallax
+          p.xz *= rot2D(uTime * 0.07 + (uMouse.x - 0.5) * 0.5);
+          p.yz *= rot2D(0.28 + (uMouse.y - 0.5) * 0.35);
+
+          // Slab 1: Tall architectural central monolith
+          vec3 p1 = p;
+          p1.xy *= rot2D(0.35);
+          float slab1 = sdBevelBox(p1, vec3(0.38, 1.15, 0.09), 0.04);
+
+          // Slab 2: Intersecting folded horizontal cantilever slab
+          vec3 p2 = p;
+          p2.yz *= rot2D(-0.55);
+          p2.xz *= rot2D(0.42);
+          p2.y += 0.15;
+          float slab2 = sdBevelBox(p2, vec3(0.95, 0.32, 0.08), 0.035);
+
+          // Slab 3: Angled architectural fin
+          vec3 p3 = p;
+          p3.xz *= rot2D(-0.65);
+          p3.xy *= rot2D(-0.25);
+          p3.z -= 0.22;
+          float slab3 = sdBevelBox(p3, vec3(0.55, 0.65, 0.07), 0.035);
+
+          // Union of architectural slabs
+          float form = min(min(slab1, slab2), slab3);
+
+          // Micro surface striations (brushed architectural metallic texture)
+          float striation = sin(p.y * 42.0) * cos(p.x * 32.0) * 0.003;
+          return form + striation;
         }
 
         vec3 calcNormal(vec3 p) {
@@ -1944,41 +1883,72 @@
 
         void main() {
           vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
-          vec3 ro = vec3(0.0, 0.0, 3.4);
+
+          vec3 ro = vec3(0.0, 0.0, 3.8);
           vec3 rd = normalize(vec3(uv, -1.35));
 
           float t = 0.0;
           float d = 0.0;
-          for (int i = 0; i < 54; i++) {
+          for (int i = 0; i < 68; i++) {
             vec3 p = ro + rd * t;
             d = map(p);
-            if (d < 0.001 || t > 7.0) break;
+            if (d < 0.001 || t > 7.5) break;
             t += d * 0.75;
           }
 
-          vec3 baseVoid = (uIsLight > 0.5) ? vec3(0.95, 0.94, 0.92) : vec3(0.031, 0.035, 0.043);
-          vec3 color = baseVoid;
+          vec3 bgDark = vec3(0.031, 0.035, 0.043);  // #08090B deep obsidian
+          vec3 bgLight = vec3(0.957, 0.949, 0.925); // #F4F2EC warm parchment
+          vec3 col = mix(bgDark, bgLight, uIsLight);
 
-          if (t < 7.0) {
+          if (t < 7.5) {
             vec3 p = ro + rd * t;
             vec3 n = calcNormal(p);
-            vec3 keyLightDir = normalize(vec3(0.8, 1.2, 1.0));
-            float diff = max(dot(n, keyLightDir), 0.0);
-            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 3.5);
+
+            // Directional key light from upper right
+            vec3 keyLight = normalize(vec3(0.7, 1.2, 0.8));
+            vec3 fillLight = normalize(vec3(-0.9, -0.4, 0.3));
+
+            float diff = max(dot(n, keyLight), 0.0);
+            float fill = max(dot(n, fillLight), 0.0) * 0.25;
+
+            // Anisotropic specular highlight along planar facets
             vec3 ref = reflect(rd, n);
-            float spec = pow(max(dot(ref, keyLightDir), 0.0), 32.0);
+            float spec = pow(max(dot(ref, keyLight), 0.0), 36.0);
+            float broadSpec = pow(max(dot(ref, keyLight), 0.0), 8.0) * 0.2;
 
-            vec3 baseColor = (uIsLight > 0.5) ? vec3(0.85, 0.88, 0.92) : vec3(0.04, 0.06, 0.09);
-            vec3 blueGleam = (uIsLight > 0.5) ? vec3(0.11, 0.33, 0.56) : vec3(0.22, 0.74, 0.97);
-            vec3 specularColor = vec3(0.9, 0.95, 1.0);
+            // Controlled grazing rim light (sparse cobalt accent)
+            float fresnel = pow(1.0 - max(dot(-rd, n), 0.0), 5.0);
 
-            color = baseColor + (diff * blueGleam * 0.45) + (fresnel * blueGleam * 0.85) + (spec * specularColor * 0.95);
+            // Dark Mode Material: Deep Obsidian Metallic Slabs with Cobalt Grazing Highlight
+            vec3 darkBase = vec3(0.018, 0.022, 0.03);
+            vec3 darkBlueRim = vec3(0.22, 0.74, 0.97); // #38BDF8
+            vec3 darkSpec = vec3(0.9, 0.95, 1.0);
+
+            vec3 colDark = darkBase +
+                           (diff * vec3(0.09, 0.11, 0.15)) +
+                           (fill * vec3(0.03, 0.04, 0.06)) +
+                           (broadSpec * vec3(0.12, 0.18, 0.26)) +
+                           (spec * darkSpec * 0.9) +
+                           (fresnel * darkBlueRim * 0.7);
+
+            // Light Mode Material: Brushed Architectural Titanium / Platinum on Parchment
+            vec3 lightBase = vec3(0.78, 0.77, 0.74);
+            vec3 lightShadow = vec3(0.42, 0.41, 0.39);
+            vec3 lightBlueRim = vec3(0.11, 0.33, 0.56); // #1D548F steel slate
+
+            vec3 colLight = mix(lightShadow, lightBase, diff) +
+                            (broadSpec * vec3(0.25, 0.25, 0.25)) +
+                            (spec * vec3(1.0, 1.0, 1.0) * 0.75) +
+                            (fresnel * lightBlueRim * 0.4);
+
+            col = mix(colDark, colLight, uIsLight);
           }
 
-          float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
-          color += noise;
+          // Analog film grain
+          float grain = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453) * 0.014;
+          col += grain * (1.0 - uIsLight * 0.5);
 
-          gl_FragColor = vec4(color, 1.0);
+          gl_FragColor = vec4(col, 1.0);
         }
       `;
 
@@ -1986,6 +1956,11 @@
         const s = gl.createShader(type);
         gl.shaderSource(s, src);
         gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+          console.error('Shader compilation error:', gl.getShaderInfoLog(s));
+          gl.deleteShader(s);
+          return null;
+        }
         return s;
       }
 
@@ -2011,23 +1986,32 @@
       const uMouseLoc = gl.getUniformLocation(program, 'uMouse');
       const uIsLightLoc = gl.getUniformLocation(program, 'uIsLight');
 
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let startTime = performance.now();
+
       function render(now) {
         mouseX += (targetMouseX - mouseX) * 0.05;
         mouseY += (targetMouseY - mouseY) * 0.05;
 
         const isLight = document.body.classList.contains('light-theme') ? 1.0 : 0.0;
+        const elapsed = prefersReducedMotion ? 2.5 : (now - startTime) * 0.001;
 
-        gl.uniform1f(uTimeLoc, now * 0.001);
+        gl.uniform1f(uTimeLoc, elapsed);
         gl.uniform2f(uResLoc, canvas.width, canvas.height);
         gl.uniform2f(uMouseLoc, mouseX, mouseY);
         gl.uniform1f(uIsLightLoc, isLight);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (!prefersReducedMotion) {
           requestAnimationFrame(render);
         }
       }
+
+      window.renderShaderOnce = function() {
+        render(performance.now());
+      };
+
       requestAnimationFrame(render);
     }
 
@@ -2046,6 +2030,9 @@
         themeIcon.textContent = '☼';
         themeBtn.setAttribute('aria-label', 'Switch to Light Theme');
         localStorage.setItem('gravitas-theme', 'dark');
+      }
+      if (typeof window.renderShaderOnce === 'function') {
+        window.renderShaderOnce();
       }
     }
 
@@ -2182,19 +2169,19 @@
 
     approveBtn.addEventListener('click', () => {
       approveBtn.disabled = true;
-      rejectBtn.disabled = true;
+      rejectBtn.disabled = false;
       feedbackEl.style.display = 'block';
-      feedbackEl.textContent = '✓ [ATOMIC COMMIT APPROVED] 1 file mutated locally. Lock released.';
+      feedbackEl.textContent = '✓ [SIMULATION APPROVED] 3 assignment milestones parsed into local queue. Zero disk mutations without your explicit action.';
       feedbackEl.style.color = 'var(--accent-emerald)';
       folderWrap.classList.remove('active-intake');
     });
 
     rejectBtn.addEventListener('click', () => {
-      approveBtn.disabled = true;
+      approveBtn.disabled = false;
       rejectBtn.disabled = true;
       feedbackEl.style.display = 'block';
-      feedbackEl.textContent = '✕ [MUTATION REJECTED] Changes discarded. Working tree untouched.';
-      feedbackEl.style.color = '#F87171';
+      feedbackEl.textContent = '✕ [DEMO RESET] Simulation cleared. Local working tree remains pristine.';
+      feedbackEl.style.color = 'var(--text-secondary)';
       folderWrap.classList.remove('active-intake');
     });
 

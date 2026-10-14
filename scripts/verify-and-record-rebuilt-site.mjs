@@ -175,8 +175,10 @@ async function runVisualAcceptance() {
     const origVideo = await videoObj.path().catch(() => null)
     if (origVideo && fs.existsSync(origVideo)) {
       finalWalkthroughPath = path.join(VIDEO_DIR, 'walkthrough-video.webm')
+      const v2WalkthroughPath = path.join(VIDEO_DIR, 'walkthrough-v2.webm')
       fs.copyFileSync(origVideo, finalWalkthroughPath)
-      console.log(`[PASS] Final walkthrough video saved: ${finalWalkthroughPath}`)
+      fs.copyFileSync(origVideo, v2WalkthroughPath)
+      console.log(`[PASS] Final walkthrough video saved: ${finalWalkthroughPath} and ${v2WalkthroughPath}`)
     }
   }
 
@@ -275,6 +277,7 @@ async function runVisualAcceptance() {
   }
   if (finalWalkthroughPath && fs.existsSync(finalWalkthroughPath)) {
     fs.copyFileSync(finalWalkthroughPath, path.join(ARTIFACT_DIR, 'walkthrough-video.webm'))
+    fs.copyFileSync(finalWalkthroughPath, path.join(ARTIFACT_DIR, 'walkthrough-v2.webm'))
     console.log('Mirrored walkthrough video to Brain directory.')
   }
 
