@@ -627,12 +627,22 @@ export function initMainIpc(
     return { visible: false }
   })
 
-  handle('gravitas:show-main-window', async (_event, target?: { surface: string; targetId?: string }) => {
+  handle('gravitas:show-main-window', async (_event, target?: { surface: string; targetId?: string; tab?: string; assignmentId?: string }) => {
     restoreCommandCenter()
     if (mainWindow && !mainWindow.isDestroyed() && target) {
       mainWindow.webContents.send('gravitas:navigate-target', target)
     }
     return { visible: true }
+  })
+
+  handle('gravitas:set-theme', async (_event, theme: 'light' | 'dark') => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('gravitas:theme-changed', theme)
+    }
+    if (companionWindow && !companionWindow.isDestroyed()) {
+      companionWindow.webContents.send('gravitas:theme-changed', theme)
+    }
+    return { success: true }
   })
 
   // D2 Lifecycle IPC Methods (Strictly typed, zero generic execution)

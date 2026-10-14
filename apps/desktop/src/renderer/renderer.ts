@@ -1444,7 +1444,12 @@ export function renderSubjectsOverview(bridge: GravitasDesktopBridge, subjects: 
   }
 }
 
-export async function openSubjectDetailView(bridge: GravitasDesktopBridge, subjectCode: string): Promise<void> {
+export async function openSubjectDetailView(
+  bridge: GravitasDesktopBridge,
+  subjectCode: string,
+  initialTab?: 'NOTES' | 'ASSIGNMENTS' | 'ANSWERS' | 'RESOURCES' | 'REVISION_TASKS',
+  targetAssignmentId?: string
+): Promise<void> {
   activateSurface('surface-subjects')
   const overviewEl = document.getElementById('subjects-overview-view')
   const detailEl = document.getElementById('subject-detail-view')
@@ -1554,7 +1559,7 @@ export async function openSubjectDetailView(bridge: GravitasDesktopBridge, subje
       addStatPill('revisions', tasksCount)
     }
 
-    let activeTab: 'NOTES' | 'ASSIGNMENTS' | 'ANSWERS' | 'RESOURCES' | 'REVISION_TASKS' = 'NOTES'
+    let activeTab: 'NOTES' | 'ASSIGNMENTS' | 'ANSWERS' | 'RESOURCES' | 'REVISION_TASKS' = initialTab || 'NOTES'
 
     const renderActiveTab = () => {
       if (!contentEl) return
@@ -1634,7 +1639,13 @@ export async function openSubjectDetailView(bridge: GravitasDesktopBridge, subje
         }
         for (const a of assignments) {
           const card = document.createElement('div')
-          card.className = 'subject-entry-card'
+          const asgnId = a.linkedAssignmentId || a.entryId
+          card.setAttribute('data-subject-assignment-id', asgnId)
+          card.setAttribute('data-subject-assignment-title', a.title)
+          if (targetAssignmentId && (asgnId === targetAssignmentId || a.entryId === targetAssignmentId)) {
+            card.classList.add('selected')
+            card.style.outline = '2px solid var(--accent-sage)'
+          }
           const hRow = document.createElement('div')
           hRow.className = 'subject-entry-header'
           const hTitle = document.createElement('h4')
@@ -2539,7 +2550,7 @@ export function initWelcomeArtShader(): ShaderController | null {
   return { start, stop, resize }
 }
 
-export function applyTheme(theme: 'light' | 'dark'): void {
+export function applyTheme(theme: 'light' | 'dark', notifyBridge = true): void {
   const isLight = theme === 'light'
   document.body.classList.toggle('light-theme', isLight)
   try {
@@ -2556,29 +2567,41 @@ export function applyTheme(theme: 'light' | 'dark'): void {
   if (obBtn) {
     obBtn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark'
   }
+  const settingsThemeSelect = document.getElementById('settings-theme-select') as HTMLSelectElement | null
+  if (settingsThemeSelect && settingsThemeSelect.value !== theme) {
+    settingsThemeSelect.value = theme
+  }
+  if (notifyBridge && window.gravitasDesktop?.setTheme) {
+    void window.gravitasDesktop.setTheme(theme)
+  }
 }
 
 export function toggleTheme(): void {
   const isLight = document.body.classList.contains('light-theme')
-  applyTheme(isLight ? 'dark' : 'light')
+  applyTheme(isLight ? 'dark' : 'light', true)
 }
 
-export function initTheme(): void {
+export function initTheme(bridge?: GravitasDesktopBridge): void {
+  const b = bridge || window.gravitasDesktop
   try {
     const saved = localStorage.getItem('gravitas_theme')
     if (saved === 'light') {
-      applyTheme('light')
+      applyTheme('light', false)
     } else {
-      applyTheme('dark')
+      applyTheme('dark', false)
     }
   } catch {
-    applyTheme('dark')
+    applyTheme('dark', false)
   }
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'gravitas_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
-      applyTheme(e.newValue)
+      applyTheme(e.newValue, false)
     }
+  })
+
+  b?.onThemeChanged?.((theme) => {
+    applyTheme(theme, false)
   })
 }
 
@@ -3111,7 +3134,7 @@ export function initModelDispatch(bridge: GravitasDesktopBridge): void {
 
 export async function navigateToTarget(
   bridge: GravitasDesktopBridge,
-  target: { surface: string; targetId?: string }
+  target: { surface: string; targetId?: string; tab?: string; assignmentId?: string }
 ): Promise<void> {
   if (target.surface === 'surface-notes') {
     activateSurface('surface-notes')
@@ -3121,7 +3144,7 @@ export async function navigateToTarget(
   } else if (target.surface === 'surface-subjects') {
     activateSurface('surface-subjects')
     if (target.targetId) {
-      await openSubjectDetailView(bridge, target.targetId)
+      await openSubjectDetailView(bridge, target.targetId, target.tab as any, target.assignmentId)
     }
   } else if (target.surface === 'surface-settings') {
     activateSurface('surface-settings')
@@ -3518,7 +3541,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       }
     })
 
-    initTheme()
+    initTheme(bridge)
 
     document.getElementById('btn-header-theme')?.addEventListener('click', () => {
       toggleTheme()

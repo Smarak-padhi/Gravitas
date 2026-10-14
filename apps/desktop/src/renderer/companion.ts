@@ -693,10 +693,16 @@ export async function refreshStudyGuardianView(bridge: GravitasDesktopBridge): P
         viewSubjBtn.title = 'Open subject detail in Main Workspace'
         viewSubjBtn.setAttribute('data-view-subject-btn', asgn.subjectCode)
         viewSubjBtn.addEventListener('click', async () => {
+          const navPayload = {
+            surface: 'surface-subjects',
+            targetId: asgn.subjectCode,
+            tab: 'ASSIGNMENTS',
+            assignmentId: asgn.assignmentId,
+          }
           try {
-            localStorage.setItem('gravitas_pending_navigate', JSON.stringify({ surface: 'surface-subjects', targetId: asgn.subjectCode }))
+            localStorage.setItem('gravitas_pending_navigate', JSON.stringify(navPayload))
           } catch {}
-          await bridge.showMainWindow?.({ surface: 'surface-subjects', targetId: asgn.subjectCode })
+          await bridge.showMainWindow?.(navPayload)
         })
         btnWrap.appendChild(viewSubjBtn)
 
@@ -916,7 +922,7 @@ export async function togglePushToTalk(bridge: GravitasDesktopBridge): Promise<v
   }
 }
 
-export function applyCompanionTheme(theme: 'light' | 'dark'): void {
+export function applyCompanionTheme(theme: 'light' | 'dark', notifyBridge = true): void {
   const isLight = theme === 'light'
   document.body.classList.toggle('light-theme', isLight)
   try {
@@ -929,23 +935,27 @@ export function applyCompanionTheme(theme: 'light' | 'dark'): void {
     themeBtn.textContent = isLight ? 'Light' : 'Dark'
     themeBtn.title = `Toggle Theme (current: ${theme})`
   }
+  if (notifyBridge && window.gravitasDesktop?.setTheme) {
+    void window.gravitasDesktop.setTheme(theme)
+  }
 }
 
 export function toggleCompanionTheme(): void {
   const isLight = document.body.classList.contains('light-theme')
-  applyCompanionTheme(isLight ? 'dark' : 'light')
+  applyCompanionTheme(isLight ? 'dark' : 'light', true)
 }
 
-export function initCompanionTheme(): void {
+export function initCompanionTheme(bridge?: GravitasDesktopBridge): void {
+  const b = bridge || window.gravitasDesktop
   try {
     const saved = localStorage.getItem('gravitas_theme')
     if (saved === 'light') {
-      applyCompanionTheme('light')
+      applyCompanionTheme('light', false)
     } else {
-      applyCompanionTheme('dark')
+      applyCompanionTheme('dark', false)
     }
   } catch {
-    applyCompanionTheme('dark')
+    applyCompanionTheme('dark', false)
   }
 
   document.getElementById('companion-theme-btn')?.addEventListener('click', () => {
@@ -954,14 +964,18 @@ export function initCompanionTheme(): void {
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'gravitas_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
-      applyCompanionTheme(e.newValue)
+      applyCompanionTheme(e.newValue, false)
     }
+  })
+
+  b?.onThemeChanged?.((theme) => {
+    applyCompanionTheme(theme, false)
   })
 }
 
 export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
-  initCompanionTheme()
   const b = bridge ?? window.gravitasDesktop
+  initCompanionTheme(b)
   if (!b) return
 
   const cmdInput = document.getElementById('companion-command-input') as HTMLInputElement | null
@@ -1078,6 +1092,8 @@ export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
         void refreshCapabilitiesView(b)
       } else if (targetId === 'panel-study-guardian') {
         void refreshStudyGuardianView(b)
+      } else if (targetId === 'panel-vault') {
+        void refreshVault(b)
       }
     })
   })

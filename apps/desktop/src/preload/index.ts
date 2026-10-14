@@ -234,15 +234,27 @@ const bridge: GravitasDesktopBridge = {
     return ipcRenderer.invoke('gravitas:hide-companion')
   },
 
-  showMainWindow: async (target?: { surface: string; targetId?: string }) => {
+  showMainWindow: async (target?: { surface: string; targetId?: string; tab?: string; assignmentId?: string }) => {
     return ipcRenderer.invoke('gravitas:show-main-window', target)
   },
 
-  onNavigateTarget: (callback: (target: { surface: string; targetId?: string }) => void) => {
-    const sub = (_event: any, target: { surface: string; targetId?: string }) => callback(target)
+  onNavigateTarget: (callback: (target: { surface: string; targetId?: string; tab?: string; assignmentId?: string }) => void) => {
+    const sub = (_event: any, target: { surface: string; targetId?: string; tab?: string; assignmentId?: string }) => callback(target)
     ipcRenderer.on('gravitas:navigate-target', sub)
     return () => {
       ipcRenderer.removeListener('gravitas:navigate-target', sub)
+    }
+  },
+
+  setTheme: async (theme: 'light' | 'dark') => {
+    return ipcRenderer.invoke('gravitas:set-theme', theme)
+  },
+
+  onThemeChanged: (callback: (theme: 'light' | 'dark') => void) => {
+    const sub = (_event: any, theme: 'light' | 'dark') => callback(theme)
+    ipcRenderer.on('gravitas:theme-changed', sub)
+    return () => {
+      ipcRenderer.removeListener('gravitas:theme-changed', sub)
     }
   },
 }
