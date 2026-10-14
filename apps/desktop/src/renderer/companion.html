@@ -22,44 +22,100 @@
     }
 
     :root {
-      --bg-primary: #171A1D;
-      --bg-surface: #202428;
-      --bg-card: #272B31;
-      --border: #34383E;
-      --border-subtle: #2C3036;
+      --bg-app: #121518;
+      --bg-primary: #121518;
+      --bg-surface: #1C2025;
+      --bg-surface-hover: #262B31;
+      --bg-card: #262B31;
+      --border: #2E3339;
+      --border-subtle: #24282D;
+      --border-hover: #3E454D;
       --border-focus: #4A89C8;
+      --text-primary: #F0EEE8;
       --text-main: #F0EEE8;
-      --text-muted: #A4A6A5;
+      --text-secondary: #9FA4A8;
+      --text-muted: #9FA4A8;
+      --text-tertiary: #686E74;
       --accent: #4A89C8;
       --accent-hover: #5D9BD8;
-      --accent-sage: #A9B9AC;
-      --accent-sage-subtle: rgba(169, 185, 172, 0.12);
+      --accent-blue: #4A89C8;
+      --accent-blue-hover: #5D9BD8;
+      --accent-blue-subtle: rgba(74, 137, 200, 0.14);
+      --accent-sage: #8EA89D;
+      --accent-sage-hover: #A1BAAF;
+      --accent-sage-subtle: rgba(142, 168, 157, 0.12);
+      --accent-sage-text: #121518;
       --success: #7DA684;
       --warning: #C79D5E;
       --danger: #C96B61;
-      --font-stack: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-stack: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
     }
 
     body.light-theme, [data-theme="light"] {
+      --bg-app: #F5F4F0;
       --bg-primary: #F5F4F0;
       --bg-surface: #FCFBF9;
-      --bg-card: #F0EEE9;
-      --border: #DEDBD3;
-      --border-subtle: #E8E5DC;
+      --bg-surface-hover: #EFECE4;
+      --bg-card: #EFECE4;
+      --border: #E2DFD8;
+      --border-subtle: #EBE8E1;
+      --border-hover: #D4D0C7;
       --border-focus: #1D548F;
+      --text-primary: #1C2024;
       --text-main: #1C2024;
+      --text-secondary: #60666D;
       --text-muted: #60666D;
+      --text-tertiary: #8E959E;
       --accent: #1D548F;
       --accent-hover: #164373;
-      --accent-sage: #4E6B56;
-      --accent-sage-subtle: rgba(78, 107, 86, 0.12);
+      --accent-blue: #1D548F;
+      --accent-blue-hover: #164373;
+      --accent-blue-subtle: rgba(29, 84, 143, 0.10);
+      --accent-sage: #3C6E52;
+      --accent-sage-hover: #2F5942;
+      --accent-sage-subtle: rgba(60, 110, 82, 0.12);
+      --accent-sage-text: #FFFFFF;
       --success: #2D6A4F;
       --warning: #9C6A1D;
       --danger: #A83A32;
     }
 
-    * { box-sizing: border-box; }
+    :focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
+    }
+
+    @keyframes surfaceFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
     body {
       font-family: var(--font-stack);
       background: var(--bg-primary);
@@ -156,20 +212,32 @@
       font-weight: 550;
       cursor: pointer;
       font-family: var(--font-stack);
-      transition: all 0.15s ease;
+      transition: background-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.08s ease,
+                  box-shadow 0.14s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
-    .btn:hover { background: var(--border); }
+    .btn:hover { background: var(--bg-surface-hover); border-color: var(--border-hover); }
+    .btn:active { transform: scale(0.98); box-shadow: none; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; transform: none; box-shadow: none; }
     .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-primary:active { transform: scale(0.98); }
     .btn-ptt { background: var(--accent-sage-subtle); border-color: var(--accent-sage); color: var(--accent-sage); }
-    .btn-ptt:hover { background: var(--accent-sage); color: #171A1D; }
-    .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
-    .btn-ghost:hover { background: var(--bg-card); color: var(--text-main); }
+    .btn-ptt:hover { background: var(--accent-sage); color: var(--accent-sage-text); }
+    .btn-ptt:active { transform: scale(0.98); }
+    .btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted); box-shadow: none; }
+    .btn-ghost:hover { background: var(--bg-surface-hover); color: var(--text-main); }
+    .btn-ghost:active { transform: scale(0.98); }
+    .btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; transform: none; }
     .btn-danger { background: rgba(201, 107, 97, 0.15); border-color: var(--danger); color: var(--danger); }
     .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-danger:active { transform: scale(0.98); }
     .btn-warning { background: rgba(199, 157, 94, 0.15); border-color: var(--warning); color: var(--warning); }
     .btn-sm { padding: 4px 8px; font-size: 11.5px; }
 
@@ -268,12 +336,21 @@
       font-weight: 500;
       cursor: pointer;
       font-family: var(--font-stack);
-      transition: all 0.15s ease;
+      transition: all 0.14s ease;
     }
-    .chip:hover, .chip.active {
+    .chip:hover {
+      border-color: var(--border-hover);
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
+    }
+    .chip:active {
+      transform: scale(0.97);
+    }
+    .chip.active {
       border-color: var(--accent-sage);
       color: var(--text-main);
-      background: var(--bg-surface);
+      background: var(--accent-sage-subtle);
+      font-weight: 600;
     }
 
     .tabs-bar {
@@ -293,9 +370,10 @@
       font-weight: 550;
       cursor: pointer;
       font-family: var(--font-stack);
-      transition: all 0.15s ease;
+      transition: color 0.14s ease, border-color 0.14s ease, transform 0.08s ease;
     }
     .tab-btn:hover { color: var(--text-main); }
+    .tab-btn:active { transform: scale(0.98); }
     .tab-btn.active {
       color: var(--accent);
       border-bottom-color: var(--accent);
@@ -308,7 +386,10 @@
     }
 
     .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    .tab-panel.active {
+      display: block;
+      animation: surfaceFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
     .search-row {
       display: flex;
@@ -454,7 +535,10 @@
       padding: 10px;
       margin-bottom: 10px;
     }
-    .detail-panel.active { display: block; }
+    .detail-panel.active {
+      display: block;
+      animation: surfaceFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
     .field-group {
       margin-bottom: 8px;
     }
@@ -468,25 +552,74 @@
     }
     .field-group input, .field-group textarea, .field-group select {
       width: 100%;
-      background: #090d16;
+      background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 5px 8px;
-      font-size: 12px;
+      padding: 6px 9px;
+      font-size: 12.5px;
       font-family: inherit;
+      transition: border-color 0.14s ease;
+    }
+    .field-group input:focus, .field-group textarea:focus, .field-group select:focus {
+      outline: none;
+      border-color: var(--border-focus);
     }
     .confirm-delete-bar {
       display: none;
-      background: #450a0a;
+      background: rgba(201, 107, 97, 0.12);
       border: 1px solid var(--danger);
       border-radius: 5px;
-      padding: 8px;
+      padding: 8px 10px;
       margin-top: 8px;
-      font-size: 11px;
-      color: #fecaca;
+      font-size: 11.5px;
+      color: var(--danger);
     }
     .confirm-delete-bar.active { display: block; }
+
+    /* Tactile animated checkbox */
+    .tactile-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      background: var(--bg-surface);
+      margin-top: 2px;
+      flex-shrink: 0;
+      transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.14s ease;
+    }
+    .tactile-checkbox:hover {
+      border-color: var(--accent-sage);
+      background: var(--bg-surface-hover);
+    }
+    .tactile-checkbox:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px var(--accent-sage-subtle);
+    }
+    .tactile-checkbox:active {
+      transform: scale(0.92);
+    }
+    .tactile-checkbox:checked {
+      background: var(--accent-sage);
+      border-color: var(--accent-sage);
+      animation: checkmarkPop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tactile-checkbox:checked::before {
+      content: "";
+      width: 8px;
+      height: 4px;
+      border-left: 1.8px solid #fff;
+      border-bottom: 1.8px solid #fff;
+      transform: rotate(-45deg) translate(0.5px, -0.5px);
+      animation: checkmarkDraw 0.14s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -499,6 +632,7 @@
       <span id="companion-state-badge" class="state-badge state-IDLE">IDLE</span>
     </div>
     <div class="header-controls">
+      <button id="companion-theme-btn" class="btn btn-ghost btn-sm" title="Toggle Theme (Light / Dark)">Theme</button>
       <button id="companion-stop-btn" class="btn btn-ghost btn-sm" title="Immediately stop or cancel active action">STOP</button>
       <button id="companion-close-btn" class="btn btn-ghost btn-sm" title="Hide Floating Companion (Ctrl+Shift+Space)">✕</button>
     </div>
@@ -650,9 +784,9 @@
             <input id="detail-duedate-input" type="text" placeholder="YYYY-MM-DD" />
           </div>
           <div style="flex:1; padding-top:14px;">
-            <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer; text-transform:none; color:#f9fafb;">
-              <input id="detail-completed-checkbox" type="checkbox" style="width:auto;" />
-              Task Completed
+            <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; color:var(--text-main);">
+              <input id="detail-completed-checkbox" class="tactile-checkbox" type="checkbox" />
+              <span>Task Completed</span>
             </label>
           </div>
         </div>
@@ -732,7 +866,7 @@
       <!-- Extracted Assignment Drafts Queue & Confirmation Panel -->
       <div id="confirm-draft-panel" class="detail-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="font-size:12px; color:#fbbf24;">Confirm Extracted Assignment Draft</strong>
+          <strong style="font-size:12px; color:var(--warning);">Confirm Extracted Assignment Draft</strong>
           <button id="confirm-draft-close-btn" class="btn btn-sm" type="button">Close</button>
         </div>
         <input type="hidden" id="confirm-draft-id" />
@@ -774,7 +908,7 @@
       <!-- Study Answers Drawer ("Prepare answer draft" + "Copy for ChatGPT/Claude" + Paste-Back) -->
       <div id="study-answer-panel" class="detail-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="font-size:12px; color:#34d399;">Study Answers Workspace (Teacher Material Separated)</strong>
+          <strong style="font-size:12px; color:var(--success);">Study Answers Workspace (Teacher Material Separated)</strong>
           <button id="study-answer-close-btn" class="btn btn-sm" type="button">Close</button>
         </div>
         <input type="hidden" id="study-answer-assignment-id" />
@@ -799,7 +933,7 @@
       </div>
 
       <!-- Extracted Drafts List -->
-      <div style="font-size:11px; font-weight:700; color:#fbbf24; margin:6px 0 4px 0;">
+      <div style="font-size:11px; font-weight:700; color:var(--warning); margin:6px 0 4px 0;">
         Inbox Assignment Drafts Awaiting Confirmation (<span id="inbox-drafts-count">0</span>)
       </div>
       <div id="inbox-drafts-list"></div>
@@ -834,7 +968,7 @@
       </div>
       <div id="capabilities-list"></div>
 
-      <div style="font-size:12px; font-weight:700; color:#fbbf24; margin:10px 0 6px 0;">
+      <div style="font-size:12px; font-weight:700; color:var(--warning); margin:10px 0 6px 0;">
         Supervised Improvement Proposals
       </div>
       <div id="proposals-list"></div>

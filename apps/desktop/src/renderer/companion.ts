@@ -864,7 +864,51 @@ export async function togglePushToTalk(bridge: GravitasDesktopBridge): Promise<v
   }
 }
 
+export function applyCompanionTheme(theme: 'light' | 'dark'): void {
+  const isLight = theme === 'light'
+  document.body.classList.toggle('light-theme', isLight)
+  try {
+    localStorage.setItem('gravitas_theme', theme)
+  } catch {
+    // Ignore in tests
+  }
+  const themeBtn = document.getElementById('companion-theme-btn')
+  if (themeBtn) {
+    themeBtn.textContent = isLight ? 'Light' : 'Dark'
+    themeBtn.title = `Toggle Theme (current: ${theme})`
+  }
+}
+
+export function toggleCompanionTheme(): void {
+  const isLight = document.body.classList.contains('light-theme')
+  applyCompanionTheme(isLight ? 'dark' : 'light')
+}
+
+export function initCompanionTheme(): void {
+  try {
+    const saved = localStorage.getItem('gravitas_theme')
+    if (saved === 'light') {
+      applyCompanionTheme('light')
+    } else {
+      applyCompanionTheme('dark')
+    }
+  } catch {
+    applyCompanionTheme('dark')
+  }
+
+  document.getElementById('companion-theme-btn')?.addEventListener('click', () => {
+    toggleCompanionTheme()
+  })
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'gravitas_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+      applyCompanionTheme(e.newValue)
+    }
+  })
+}
+
 export function initCompanionRenderer(bridge?: GravitasDesktopBridge): void {
+  initCompanionTheme()
   const b = bridge ?? window.gravitasDesktop
   if (!b) return
 

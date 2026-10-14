@@ -103,6 +103,36 @@
       outline-offset: 2px;
     }
 
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
+    }
+
+    @keyframes surfaceFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     /* ─── Header Navigation ────────────────────────────────────────────────── */
     header[role="banner"] {
       background: var(--bg-surface);
@@ -157,11 +187,20 @@
       font-weight: 500;
       cursor: pointer;
       font-family: var(--font-stack);
-      transition: color 0.15s, background-color 0.15s;
+      transition: color 0.14s ease, background-color 0.14s ease, transform 0.08s ease;
     }
     .nav-btn:hover {
       color: var(--text-primary);
       background: var(--bg-surface-hover);
+    }
+    .nav-btn:active {
+      transform: scale(0.98);
+    }
+    .nav-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
     }
     .nav-btn.active {
       color: var(--text-primary);
@@ -196,35 +235,83 @@
       justify-content: center;
       gap: 6px;
       font-family: var(--font-stack);
-      transition: background-color 0.15s, border-color 0.15s;
+      transition: background-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.08s ease,
+                  box-shadow 0.14s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     .btn:hover {
       background: var(--accent-sage-hover);
       border-color: var(--accent-sage-hover);
     }
+    .btn:active {
+      transform: scale(0.98);
+      box-shadow: none;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
+      box-shadow: none;
+    }
     .btn-secondary {
       background: transparent;
       color: var(--text-primary);
       border: 1px solid var(--border);
+      box-shadow: none;
     }
     .btn-secondary:hover {
       background: var(--bg-surface-hover);
       border-color: var(--border-hover);
+    }
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    .btn-secondary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
     }
     .btn-ghost {
       background: transparent;
       color: var(--text-secondary);
       border: 1px solid transparent;
       padding: 6px 12px;
+      box-shadow: none;
     }
     .btn-ghost:hover {
       color: var(--text-primary);
       background: var(--bg-surface-hover);
     }
+    .btn-ghost:active {
+      transform: scale(0.98);
+    }
+    .btn-ghost:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
+    }
     .btn-danger {
       background: var(--danger);
       color: #fff;
       border: 1px solid var(--danger);
+    }
+    .btn-danger:hover {
+      opacity: 0.92;
+    }
+    .btn-danger:active {
+      transform: scale(0.98);
+    }
+    .btn-danger:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
     }
 
     input[type="text"], input[type="time"], input[type="date"], select, textarea {
@@ -273,10 +360,20 @@
       font-weight: 500;
       cursor: pointer;
       font-family: var(--font-stack);
+      transition: color 0.14s ease, background-color 0.14s ease, transform 0.08s ease;
     }
     .subnav-btn:hover {
       color: var(--text-primary);
       background: var(--bg-surface-hover);
+    }
+    .subnav-btn:active {
+      transform: scale(0.98);
+    }
+    .subnav-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
     }
     .subnav-btn.active {
       color: var(--text-primary);
@@ -294,7 +391,10 @@
     }
 
     .surface { display: none; }
-    .surface.active { display: block; }
+    .surface.active {
+      display: block;
+      animation: surfaceFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
     /* ─── Home Workspace Styles ────────────────────────────────────────────── */
     .workspace-wrapper {
@@ -802,18 +902,24 @@
       background: var(--bg-surface);
       margin-top: 2px;
       flex-shrink: 0;
-      transition: background-color 0.15s, border-color 0.15s;
+      transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.14s ease;
     }
     .tactile-checkbox:hover {
       border-color: var(--accent-sage);
       background: var(--bg-surface-hover);
     }
     .tactile-checkbox:focus-visible {
-      box-shadow: 0 0 0 2px var(--accent-sage);
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px var(--accent-sage-subtle);
+    }
+    .tactile-checkbox:active {
+      transform: scale(0.92);
     }
     .tactile-checkbox:checked {
       background: var(--accent-sage);
       border-color: var(--accent-sage);
+      animation: checkmarkPop 0.16s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tactile-checkbox:checked::before {
       content: "";
@@ -822,6 +928,16 @@
       border-left: 1.8px solid #fff;
       border-bottom: 1.8px solid #fff;
       transform: rotate(-45deg) translate(0.5px, -0.5px);
+      animation: checkmarkDraw 0.14s ease-out;
+    }
+    @keyframes checkmarkPop {
+      0% { transform: scale(0.88); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    @keyframes checkmarkDraw {
+      from { opacity: 0; transform: rotate(-45deg) scale(0.7) translate(0.5px, -0.5px); }
+      to { opacity: 1; transform: rotate(-45deg) scale(1) translate(0.5px, -0.5px); }
     }
 
     /* Compact Enrolled Subjects sidebar */
@@ -1061,14 +1177,18 @@
       border: 1px solid var(--border-subtle);
       background: var(--bg-surface-subtle);
       margin-bottom: 8px;
-      transition: background-color 0.15s;
+      transition: background-color 0.14s ease, opacity 0.2s ease, border-color 0.14s ease;
     }
     .task-item:hover {
       background: var(--bg-surface-hover);
     }
+    .task-item.completed {
+      opacity: 0.55;
+    }
     .task-item.completed .task-text {
       text-decoration: line-through;
       color: var(--text-tertiary);
+      transition: color 0.18s ease;
     }
     .task-checkbox {
       margin-top: 3px;

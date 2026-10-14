@@ -2539,6 +2539,49 @@ export function initWelcomeArtShader(): ShaderController | null {
   return { start, stop, resize }
 }
 
+export function applyTheme(theme: 'light' | 'dark'): void {
+  const isLight = theme === 'light'
+  document.body.classList.toggle('light-theme', isLight)
+  try {
+    localStorage.setItem('gravitas_theme', theme)
+  } catch {
+    // Ignore in test/restricted environments
+  }
+  const headerBtn = document.getElementById('btn-header-theme')
+  if (headerBtn) {
+    headerBtn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark'
+    headerBtn.setAttribute('aria-label', `Toggle Theme (current: ${theme})`)
+  }
+  const obBtn = document.getElementById('ob-btn-theme-toggle')
+  if (obBtn) {
+    obBtn.textContent = isLight ? 'Theme: Light' : 'Theme: Dark'
+  }
+}
+
+export function toggleTheme(): void {
+  const isLight = document.body.classList.contains('light-theme')
+  applyTheme(isLight ? 'dark' : 'light')
+}
+
+export function initTheme(): void {
+  try {
+    const saved = localStorage.getItem('gravitas_theme')
+    if (saved === 'light') {
+      applyTheme('light')
+    } else {
+      applyTheme('dark')
+    }
+  } catch {
+    applyTheme('dark')
+  }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'gravitas_theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+      applyTheme(e.newValue)
+    }
+  })
+}
+
 export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   const dialog = document.getElementById('onboarding-dialog') as HTMLDialogElement | null
   if (!dialog) return
@@ -2661,10 +2704,7 @@ export function setupOnboardingController(bridge: GravitasDesktopBridge): void {
   // Theme Toggle
   const themeToggle = document.getElementById('ob-btn-theme-toggle')
   themeToggle?.addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-theme')
-    if (themeToggle) {
-      themeToggle.textContent = isLight ? 'Theme: Light' : 'Theme: Dark'
-    }
+    toggleTheme()
   })
 
   // Screen 1: Welcome buttons
@@ -3258,8 +3298,10 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       }
     })
 
+    initTheme()
+
     document.getElementById('btn-header-theme')?.addEventListener('click', () => {
-      document.body.classList.toggle('light-theme')
+      toggleTheme()
     })
 
     // Subnav buttons in devtools
