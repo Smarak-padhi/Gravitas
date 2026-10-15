@@ -20,3 +20,7 @@ export * from './providers/nvidia.js';
 export * from './credentials/modelCredentialBroker.js';
 export * from './security/networkContainment.js';
 export * from './security/k3DispatchEnforcement.js';
+
+// Phase 05 Local Inference & Specialist Runtime Exports
+export * from './providers/localOllama.js';
+export * from './runtime/SpecialistModelRouter.js';
