@@ -187,94 +187,104 @@ export const GravMascot: React.FC<MascotProps> = ({
           {/* Subtle Drop Shadow */}
           <ellipse cx="43" cy="98" rx="24" ry="5" fill="#000000" fillOpacity="0.35" />
 
-          {/* Floating Repulsor Ring */}
+          {/* Floating Repulsor Ring (Machine-burnished brass & cyan pulse) */}
           <ellipse
             cx="43"
-            cy="84"
-            rx="18"
-            ry="4.5"
-            stroke="#F4A261"
-            strokeWidth="2"
+            cy="86"
+            rx="20"
+            ry="5.5"
+            stroke="url(#gravBrassGradient)"
+            strokeWidth="2.2"
+            fill="#12161A"
+          />
+          <ellipse
+            cx="43"
+            cy="86"
+            rx="16"
+            ry="4"
+            stroke="#56B6C2"
+            strokeWidth="1.2"
             strokeDasharray="4 2"
-            strokeOpacity="0.8"
+            strokeOpacity="0.85"
           />
 
-          {/* Left Magnetic Antenna Pod */}
+          {/* Left Magnetic Antenna Pod / Articulated Gimbal */}
           <g className="grav-ear-left">
-            <rect x="6" y="32" width="7" height="16" rx="3.5" fill="#252A30" stroke="#F4A261" strokeWidth="1.5" />
-            <circle cx="9.5" cy="40" r="2" fill="#F4A261" />
+            <rect x="5" y="32" width="8" height="18" rx="4" fill="#14181B" stroke="url(#gravBrassGradient)" strokeWidth="1.6" />
+            <circle cx="9" cy="41" r="2.5" fill="#D4A373" />
+            <circle cx="9" cy="41" r="1" fill="#0B0D0F" />
           </g>
 
-          {/* Right Magnetic Antenna Pod */}
+          {/* Right Magnetic Antenna Pod / Articulated Gimbal */}
           <g className="grav-ear-right">
-            <rect x="73" y="32" width="7" height="16" rx="3.5" fill="#252A30" stroke="#F4A261" strokeWidth="1.5" />
-            <circle cx="76.5" cy="40" r="2" fill="#F4A261" />
+            <rect x="73" y="32" width="8" height="18" rx="4" fill="#14181B" stroke="url(#gravBrassGradient)" strokeWidth="1.6" />
+            <circle cx="77" cy="41" r="2.5" fill="#D4A373" />
+            <circle cx="77" cy="41" r="1" fill="#0B0D0F" />
           </g>
 
-          {/* Main Capsule Body */}
+          {/* Main Basalt Carbon Monocoque Capsule */}
           <rect
-            x="17"
-            y="14"
-            width="52"
-            height="68"
-            rx="26"
-            fill="url(#gravBodyGradient)"
-            stroke={isSelected ? '#F4A261' : '#373D45'}
-            strokeWidth="2"
+            x="16"
+            y="13"
+            width="54"
+            height="70"
+            rx="27"
+            fill="url(#gravBasaltGradient)"
+            stroke="url(#gravBrassGradient)"
+            strokeWidth={isSelected ? '2.5' : '1.8'}
           />
 
-          {/* Copper Chest Inset Plate */}
+          {/* Burnished Brass Breastplate Plate */}
           <path
-            d="M26 50 Q43 54 60 50 L58 66 Q43 72 28 66 Z"
-            fill="#D97736"
-            fillOpacity="0.85"
-            stroke="#E08E58"
-            strokeWidth="1"
+            d="M24 52 Q43 57 62 52 L59 68 Q43 74 27 68 Z"
+            fill="#1C2227"
+            stroke="url(#gravBrassGradient)"
+            strokeWidth="1.4"
           />
 
-          {/* Core Power Crystal / Heartbeat */}
-          <circle cx="43" cy="60" r="3.5" fill="#81B29A">
-            <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+          {/* Core Telemetry Node / Hardware Authority Crystal */}
+          <circle cx="43" cy="62" r="3.2" fill="#56B6C2">
+            <animate attributeName="opacity" values="0.75;1;0.75" dur="2s" repeatCount="indefinite" />
           </circle>
 
           {/* Curved Black Visor Screen */}
-          <rect x="23" y="24" width="40" height="23" rx="10" fill="#101214" stroke="#252A30" strokeWidth="1.5" />
+          <rect x="22" y="23" width="42" height="25" rx="11" fill="#080A0C" stroke="url(#gravBrassGradient)" strokeWidth="1.5" />
 
-          {/* Visor Eye Displays (Dynamic Expressions) */}
+          {/* Visor Eye Displays (Dynamic Telemetry Apertures) */}
           {state === 'success' ? (
             <g>
-              <path d="M29 34 Q34 29 39 34" stroke="#81B29A" strokeWidth="2.5" strokeLinecap="round" />
-              <path d="M47 34 Q52 29 57 34" stroke="#81B29A" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M28 35 Q34 29 40 35" stroke="#81B29A" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M46 35 Q52 29 58 35" stroke="#81B29A" strokeWidth="2.5" strokeLinecap="round" />
             </g>
           ) : state === 'error' ? (
             <g>
-              <path d="M30 36 L38 32" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
-              <path d="M48 32 L56 36" stroke="#E76F51" strokeWidth="2" strokeLinecap="round" />
+              <path d="M29 37 L39 33" stroke="#E76F51" strokeWidth="2.2" strokeLinecap="round" />
+              <path d="M47 33 L57 37" stroke="#E76F51" strokeWidth="2.2" strokeLinecap="round" />
             </g>
           ) : state === 'waiting_permission' ? (
             <g>
-              <circle cx="34" cy="34" r="3" fill="#F4A261" />
-              <circle cx="52" cy="34" r="3" fill="#F4A261" />
-              {/* Amber Permission Shield Glyph on Visor */}
-              <path d="M40 30 L43 28 L46 30 V35 C46 38 43 40 43 40 C43 40 40 38 40 35 Z" fill="#F4A261" opacity="0.9" />
+              <circle cx="34" cy="34" r="3" fill="#D4A373" />
+              <circle cx="52" cy="34" r="3" fill="#D4A373" />
+              {/* Brass Permission Shield Glyph */}
+              <path d="M40 30 L43 28 L46 30 V35 C46 38 43 40 43 40 C43 40 40 38 40 35 Z" fill="#D4A373" opacity="0.95" />
             </g>
           ) : state === 'speaking' ? (
             <g>
-              <circle cx="34" cy="33" r="3.5" fill="#F4A261" />
-              <circle cx="52" cy="33" r="3.5" fill="#F4A261" />
-              <path d="M38 41 Q43 45 48 41" stroke="#F4A261" strokeWidth="2" strokeLinecap="round" fill="none" />
+              <circle cx="34" cy="33" r="3.5" fill="#D4A373" />
+              <circle cx="52" cy="33" r="3.5" fill="#D4A373" />
+              <path d="M38 41 Q43 45 48 41" stroke="#56B6C2" strokeWidth="2" strokeLinecap="round" fill="none" />
             </g>
           ) : state === 'attentive' ? (
             <g>
-              <circle cx="34" cy="33" r="4.2" fill="#F4A261" />
-              <circle cx="52" cy="33" r="4.2" fill="#F4A261" />
+              <circle cx="34" cy="33" r="4.2" fill="#D4A373" />
+              <circle cx="52" cy="33" r="4.2" fill="#D4A373" />
               <circle cx="35.5" cy="31.5" r="1.5" fill="#FFF" />
               <circle cx="53.5" cy="31.5" r="1.5" fill="#FFF" />
             </g>
           ) : (
             <g>
-              {/* Natural Resting Eyes with Subtle Blink */}
-              <circle cx="34" cy="34" r="3.5" fill="#F4A261">
+              {/* Natural Telemetry Aperture with Subtle Blink */}
+              <circle cx="34" cy="34" r="3.5" fill="#D4A373">
                 {!isReducedMotion && (
                   <animate
                     attributeName="ry"
@@ -285,7 +295,7 @@ export const GravMascot: React.FC<MascotProps> = ({
                   />
                 )}
               </circle>
-              <circle cx="52" cy="34" r="3.5" fill="#F4A261">
+              <circle cx="52" cy="34" r="3.5" fill="#D4A373">
                 {!isReducedMotion && (
                   <animate
                     attributeName="ry"
@@ -299,16 +309,23 @@ export const GravMascot: React.FC<MascotProps> = ({
             </g>
           )}
 
-          {/* Head Antenna Stem & Bulb */}
-          <path d="M43 14 V7" stroke="#F4A261" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="43" cy="5" r="3" fill="#F4A261" />
+          {/* Head Antenna Stem & Calibrated Brass Finial */}
+          <path d="M43 13 V6" stroke="url(#gravBrassGradient)" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="43" cy="5" r="3.2" fill="#D4A373" />
+          <circle cx="43" cy="5" r="1.2" fill="#56B6C2" />
 
           {/* Gradients */}
           <defs>
-            <linearGradient id="gravBodyGradient" x1="17" y1="14" x2="69" y2="82" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#252A30" />
-              <stop offset="0.6" stopColor="#1C2025" />
-              <stop offset="1" stopColor="#14171A" />
+            <linearGradient id="gravBasaltGradient" x1="16" y1="13" x2="70" y2="83" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#252C33" />
+              <stop offset="0.5" stopColor="#14181B" />
+              <stop offset="1" stopColor="#0B0D0F" />
+            </linearGradient>
+            <linearGradient id="gravBrassGradient" x1="0" y1="0" x2="86" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#C8963E" />
+              <stop offset="35%" stopColor="#E8C07D" />
+              <stop offset="70%" stopColor="#D4A373" />
+              <stop offset="100%" stopColor="#8F5F20" />
             </linearGradient>
           </defs>
         </svg>

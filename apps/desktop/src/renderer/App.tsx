@@ -14,6 +14,16 @@ import {
   dispatchAgentEvent,
   subscribeAgentEvent,
 } from './events/agentEventBus.js'
+import { InstrumentSpine, SurfaceMode } from './components/studio/InstrumentSpine.js'
+import {
+  FolioTheme,
+  SLATE_TOKENS,
+  VELLUM_TOKENS,
+} from './components/studio/telemetryCodexTokens.js'
+import { SanctuaryIndex } from './components/studio/SanctuaryIndex.js'
+import { AdaStudyFolio } from './components/studio/AdaStudyFolio.js'
+import { CompanionDialogueFlap } from './components/studio/CompanionDialogueFlap.js'
+import { GravPrototypeInspector } from './components/studio/GravPrototypeInspector.js'
 
 export const App: React.FC = () => {
   // Theme state
@@ -27,6 +37,13 @@ export const App: React.FC = () => {
   const [activePanel, setActivePanel] = useState<ActivePanel>('NONE')
   const [activeAgent, setActiveAgent] = useState<MascotId | null>(null)
   const [activeSpecialist, setActiveSpecialist] = useState<MascotId>('grav')
+
+  // Telemetry Codex Surface & Theme State
+  const [activeSurface, setActiveSurface] = useState<SurfaceMode>('SANCTUARY')
+  const [folioTheme, setFolioTheme] = useState<FolioTheme>('slate')
+  const [isDialogueFlapOpen, setIsDialogueFlapOpen] = useState<boolean>(false)
+  const [activeFolioNoteId, setActiveFolioNoteId] = useState<string | undefined>('note_algorithms_core')
+  const currentTokens = folioTheme === 'slate' ? SLATE_TOKENS : VELLUM_TOKENS
 
   // Mascot states and activity bubbles
   const [agentStates, setAgentStates] = useState<Record<MascotId, MascotState>>({
@@ -617,84 +634,156 @@ export const App: React.FC = () => {
 
   return (
     <div
+      id="telemetry-codex-chassis"
+      data-surface={activeSurface}
+      data-folio-theme={folioTheme}
       style={{
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
         position: 'relative',
-        background: '#101214',
-        color: '#EDEAE3',
-        fontFamily: 'Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        background: '#0B0D0F',
+        display: 'flex',
+        flexDirection: 'row',
+        color: currentTokens.textPrimary,
+        fontFamily: currentTokens.fontSans,
       }}
     >
-      {/* ── TOP STUDIO CONTROLS BAR ── */}
-      <StudioHeader
-        theme={theme}
-        isMicMuted={isMicMuted}
-        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-        onToggleMicMute={() => setIsMicMuted((m) => !m)}
-        onOpen3DOffice={() => {
-          setActivePanel('OFFICE_3D')
-          setActiveAgent(null)
-        }}
-        onOpenMusicCorner={() => {
-          setActivePanel('MUSIC_CORNER')
-          setActiveAgent(null)
-        }}
+      {/* ── 44PX INSTRUMENT SPINE & TELEMETRY BEZEL ── */}
+      <InstrumentSpine
+        activeSurface={activeSurface}
+        folioTheme={folioTheme}
+        isDialogueFlapOpen={isDialogueFlapOpen}
+        onSelectSurface={(surface) => setActiveSurface(surface)}
+        onToggleFolioTheme={() => setFolioTheme((t) => (t === 'slate' ? 'vellum' : 'slate'))}
+        onToggleDialogueFlap={() => setIsDialogueFlapOpen((open) => !open)}
       />
 
-      {/* ── 2D LIVING STUDIO SCENE (EVERYDAY HOME SCREEN) ── */}
-      <StudioScene
-        activeAgent={activeAgent}
-        agentStates={agentStates}
-        agentBubbles={agentBubbles}
-        isReducedMotion={isReducedMotion}
-        onSelectAgent={handleSelectAgent}
-        onOpenMusicCorner={() => setActivePanel('MUSIC_CORNER')}
-        onOpenQuickSummon={() => {
-          setActivePanel('GRAV_CONVERSATION')
-          setActiveAgent('grav')
-          setActiveSpecialist('grav')
+      {/* ── MAIN WORKSPACE SURFACE (FLEX 1) ── */}
+      <div
+        id="main-workspace-surface"
+        style={{
+          flex: 1,
+          height: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: currentTokens.bgMain,
         }}
-        onOpenAdaNotes={() => {
-          setActivePanel('ADA_NOTES')
-          setActiveAgent('ada')
+      >
+        {activeSurface === 'SANCTUARY' && (
+          <SanctuaryIndex
+            tokens={currentTokens}
+            onOpenAdaFolio={(noteId) => {
+              if (noteId) setActiveFolioNoteId(noteId)
+              setActiveSurface('ADA_FOLIO')
+            }}
+            onOpenDialogueFlap={() => setIsDialogueFlapOpen(true)}
+          />
+        )}
+
+        {activeSurface === 'ADA_FOLIO' && (
+          <AdaStudyFolio
+            tokens={currentTokens}
+            activeNoteId={activeFolioNoteId}
+            onSaveNote={handleSaveNote}
+            onReviewFlashcard={handleReviewFlashcard}
+            onExportObsidian={handleExportMarkdown}
+          />
+        )}
+
+        {activeSurface === 'GRAV_PROTOTYPE' && (
+          <GravPrototypeInspector
+            tokens={currentTokens}
+            onOpenDialogueFlap={() => setIsDialogueFlapOpen(true)}
+          />
+        )}
+
+        {activeSurface === 'STUDIO' && (
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <StudioHeader
+              theme={theme}
+              isMicMuted={isMicMuted}
+              onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              onToggleMicMute={() => setIsMicMuted((m) => !m)}
+              onOpen3DOffice={() => {
+                setActivePanel('OFFICE_3D')
+                setActiveAgent(null)
+              }}
+              onOpenMusicCorner={() => {
+                setActivePanel('MUSIC_CORNER')
+                setActiveAgent(null)
+              }}
+            />
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              <StudioScene
+                activeAgent={activeAgent}
+                agentStates={agentStates}
+                agentBubbles={agentBubbles}
+                isReducedMotion={isReducedMotion}
+                onSelectAgent={handleSelectAgent}
+                onOpenMusicCorner={() => setActivePanel('MUSIC_CORNER')}
+                onOpenQuickSummon={() => {
+                  setActivePanel('GRAV_CONVERSATION')
+                  setActiveAgent('grav')
+                  setActiveSpecialist('grav')
+                }}
+                onOpenAdaNotes={() => {
+                  setActivePanel('ADA_NOTES')
+                  setActiveAgent('ada')
+                }}
+                onOpenCipherTasks={() => {
+                  setActivePanel('CIPHER_TASKS')
+                  setActiveAgent('cipher')
+                }}
+                onCoffeeSip={() => {
+                  triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info', 'decorative')
+                }}
+                onPixelCanvas={() => {
+                  triggerBubble('pixel', 'Drafting board active — UI wireframes loaded', 'info', 'decorative')
+                }}
+                onScoutObservatory={() => {
+                  triggerBubble('scout', 'Observatory focused — Scanning research sources', 'info', 'decorative')
+                }}
+              />
+            </div>
+            <StudioSummonBar
+              onOpenGravChat={() => {
+                setActivePanel('GRAV_CONVERSATION')
+                setActiveAgent('grav')
+                setActiveSpecialist('grav')
+              }}
+              onOpenAdaNotes={() => {
+                setActivePanel('ADA_NOTES')
+                setActiveAgent('ada')
+              }}
+              onOpenCipherTasks={() => {
+                setActivePanel('CIPHER_TASKS')
+                setActiveAgent('cipher')
+              }}
+              onVoiceDictation={handleVoiceToggle}
+              isListening={isListening}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── 300PX COMPANION DIALOGUE FLAP (DOCKED ALONGSIDE WORKSPACE, NOT OCCLUDING) ── */}
+      <CompanionDialogueFlap
+        isOpen={isDialogueFlapOpen}
+        tokens={currentTokens}
+        activeCompanion={activeSpecialist}
+        messages={messagesByAgent[activeSpecialist] || []}
+        onSelectCompanion={(id) => {
+          setActiveSpecialist(id)
+          setActiveAgent(id)
         }}
-        onOpenCipherTasks={() => {
-          setActivePanel('CIPHER_TASKS')
-          setActiveAgent('cipher')
-        }}
-        onCoffeeSip={() => {
-          triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info', 'decorative')
-        }}
-        onPixelCanvas={() => {
-          triggerBubble('pixel', 'Drafting board active — UI wireframes loaded', 'info', 'decorative')
-        }}
-        onScoutObservatory={() => {
-          triggerBubble('scout', 'Observatory focused — Scanning research sources', 'info', 'decorative')
-        }}
+        onSendMessage={handleSendMessage}
+        onCloseFlap={() => setIsDialogueFlapOpen(false)}
       />
 
-      {/* ── BOTTOM FLOATING SUMMON CONTROLS ── */}
-      <StudioSummonBar
-        onOpenGravChat={() => {
-          setActivePanel('GRAV_CONVERSATION')
-          setActiveAgent('grav')
-          setActiveSpecialist('grav')
-        }}
-        onOpenAdaNotes={() => {
-          setActivePanel('ADA_NOTES')
-          setActiveAgent('ada')
-        }}
-        onOpenCipherTasks={() => {
-          setActivePanel('CIPHER_TASKS')
-          setActiveAgent('cipher')
-        }}
-        onVoiceDictation={handleVoiceToggle}
-        isListening={isListening}
-      />
-
-      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES (PHASE 04) ── */}
+      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES (PHASE 04 & 05 MODALS) ── */}
       <FloatingPanels
         activePanel={activePanel}
         minimizedPanel={minimizedPanel}
