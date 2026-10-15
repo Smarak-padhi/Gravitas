@@ -491,6 +491,14 @@ export function initMainIpc(
     return sup.dispatchModel(payload)
   })
 
+  handle('gravitas:dispatch-specialist', async (_event, payload) => {
+    return sup.dispatchSpecialist(payload)
+  })
+
+  handle('gravitas:deep-discovery-workflow', async (_event, payload) => {
+    return sup.executeDeepDiscoveryWorkflow(payload)
+  })
+
   handle('gravitas:restart-kernel', async (event) => {
     const activeWindow = winGetter()
     if (!isAuthorizedRestartCaller(event, activeWindow, companionWinGetter())) {

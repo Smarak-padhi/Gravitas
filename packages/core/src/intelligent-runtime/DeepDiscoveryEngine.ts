@@ -19,6 +19,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import * as crypto from 'node:crypto'
 
 export interface GlobalPreferences {
   readonly author: string
@@ -40,6 +41,14 @@ export interface ProjectProfile {
 
 export interface DiscussionInterview {
   readonly topic: string
+  readonly vision?: string
+  readonly references?: readonly string[]
+  readonly typography?: { readonly bodyFont?: string; readonly headingFont?: string }
+  readonly colors?: { readonly background?: string; readonly text?: string; readonly accent?: string; readonly contrastRatio?: number }
+  readonly layout?: { readonly mode?: string; readonly maxContentWidth?: string }
+  readonly animation?: { readonly spring?: string; readonly reducedMotionSupported?: boolean }
+  readonly features?: readonly string[]
+  readonly constraints?: readonly string[]
   readonly answeredQuestions: readonly {
     readonly question: string
     readonly answer: string
@@ -52,14 +61,26 @@ export interface DiscussionInterview {
   }[]
 }
 
+export interface ApprovalGrant {
+  readonly projectSlug: string
+  readonly revisionHash: string
+  readonly approvedBy: string
+  readonly timestamp: string
+  readonly notes: string
+  readonly allowedPaths?: readonly string[]
+  readonly signature: string
+}
+
 export interface SpecificationManifest {
   readonly projectSlug: string
+  readonly revisionHash: string
   readonly projectMdPath: string
   readonly questionsMdPath: string
   readonly decisionsMdPath: string
   readonly architectureMdPath: string
   readonly planMdPath: string
   readonly approvalsMdPath: string
+  readonly grantJsonPath?: string
   readonly isApproved: boolean
 }
 
@@ -68,6 +89,23 @@ export class ApprovalGateBlockedError extends Error {
     super(`APPROVAL_GATE_BLOCKED [${projectSlug}]: ${reason}`)
     this.name = 'ApprovalGateBlockedError'
   }
+}
+
+/**
+ * Computes deterministic SHA-256 revision hash across specification artifacts:
+ * PROJECT.md + ARCHITECTURE.md + PLAN.md
+ */
+export function computeSpecificationHash(projectRoot: string, projectSlug: string): string {
+  const specsDir = path.join(projectRoot, '.gravitas', 'specs', projectSlug)
+  const files = ['PROJECT.md', 'ARCHITECTURE.md', 'PLAN.md']
+  const hasher = crypto.createHash('sha256')
+  for (const f of files) {
+    const p = path.join(specsDir, f)
+    if (fs.existsSync(p)) {
+      hasher.update(fs.readFileSync(p, 'utf-8'))
+    }
+  }
+  return `sha256:${hasher.digest('hex')}`
 }
 
 export class DeepDiscoveryEngine {
@@ -240,15 +278,18 @@ ${data.architectureOverview}
     const planMdPath = path.join(specsDir, 'PLAN.md')
     fs.writeFileSync(planMdPath, planMd, 'utf-8')
 
+    const initialRevisionHash = computeSpecificationHash(projectRoot, projectSlug)
+
     // 6. APPROVALS.md (Initial State: PENDING)
     const approvalsMd = `# ${data.projectTitle} — Human Approval Ledger
 
 > [!IMPORTANT]
-> The execution engine strictly enforces that this document must record an \`APPROVED\` status
-> before any file mutations or terminal commands are permitted to execute.
+> The execution engine strictly enforces that this document and its cryptographic grant must record an \`APPROVED\` status
+> matching the current specification revision hash before any file mutations or terminal commands are permitted to execute.
 
 ## Current Gate Status: \`PENDING_APPROVAL\`
 
+- **Specification Revision Hash:** \`${initialRevisionHash}\`
 - **Sign-off Status:** \`PENDING\`
 - **Reviewer:** \`Awaiting Sign-off\`
 - **Timestamp:** \`None\`
@@ -259,26 +300,34 @@ ${data.architectureOverview}
 
     return {
       projectSlug,
+      revisionHash: initialRevisionHash,
       projectMdPath,
       questionsMdPath,
       decisionsMdPath,
       architectureMdPath,
       planMdPath,
       approvalsMdPath,
+      grantJsonPath: path.join(specsDir, 'approval-grant.json'),
       isApproved: false,
     }
   }
 
   /**
-   * Checks if human sign-off has been recorded in APPROVALS.md.
+   * Checks if human sign-off has been recorded in APPROVALS.md and validates revision hash.
    */
   public checkApprovalStatus(projectRoot: string, projectSlug: string): {
     approved: boolean
     reviewer?: string | undefined
     timestamp?: string | undefined
     notes?: string | undefined
+    revisionHash?: string | undefined
+    currentHash?: string | undefined
+    hashMatches?: boolean | undefined
+    grant?: ApprovalGrant | undefined
   } {
-    const approvalsPath = path.join(projectRoot, '.gravitas', 'specs', projectSlug, 'APPROVALS.md')
+    const specsDir = path.join(projectRoot, '.gravitas', 'specs', projectSlug)
+    const approvalsPath = path.join(specsDir, 'APPROVALS.md')
+    const grantPath = path.join(specsDir, 'approval-grant.json')
     if (!fs.existsSync(approvalsPath)) {
       return { approved: false }
     }
@@ -289,45 +338,85 @@ ${data.architectureOverview}
     const reviewerMatch = content.match(/Reviewer:\*{0,2}\s*`?([^`\r\n]+)`?/)
     const timestampMatch = content.match(/Timestamp:\*{0,2}\s*`?([^`\r\n]+)`?/)
     const notesMatch = content.match(/Review Notes:\*{0,2}\s*`?([^`\r\n]+)`?/)
+    const revMatch = content.match(/Revision Hash:\*{0,2}\s*`?([^`\r\n]+)`?/)
+
+    let grant: ApprovalGrant | undefined
+    if (fs.existsSync(grantPath)) {
+      try {
+        grant = JSON.parse(fs.readFileSync(grantPath, 'utf-8'))
+      } catch {
+        // Fallback to text parsed fields
+      }
+    }
+
+    const currentHash = computeSpecificationHash(projectRoot, projectSlug)
+    const recordedHash = grant?.revisionHash || revMatch?.[1]
+    const hashMatches = recordedHash ? recordedHash === currentHash : true
 
     return {
       approved: isApproved,
-      reviewer: reviewerMatch?.[1],
-      timestamp: timestampMatch?.[1],
-      notes: notesMatch?.[1],
+      reviewer: grant?.approvedBy || reviewerMatch?.[1],
+      timestamp: grant?.timestamp || timestampMatch?.[1],
+      notes: grant?.notes || notesMatch?.[1],
+      revisionHash: recordedHash,
+      currentHash,
+      hashMatches,
+      grant,
     }
   }
 
   /**
-   * Records human approval in APPROVALS.md, unlocking execution.
+   * Records human approval in APPROVALS.md and creates approval-grant.json, unlocking execution.
    */
   public recordApproval(
     projectRoot: string,
     projectSlug: string,
     reviewer: string,
-    notes = 'Approved by user for phased execution.'
-  ): void {
-    const approvalsPath = path.join(projectRoot, '.gravitas', 'specs', projectSlug, 'APPROVALS.md')
+    notes = 'Approved by user for phased execution.',
+    options?: { allowedPaths?: readonly string[] }
+  ): ApprovalGrant {
+    const specsDir = path.join(projectRoot, '.gravitas', 'specs', projectSlug)
+    const approvalsPath = path.join(specsDir, 'APPROVALS.md')
+    const grantPath = path.join(specsDir, 'approval-grant.json')
     const timestamp = new Date().toISOString()
+    const revisionHash = computeSpecificationHash(projectRoot, projectSlug)
+
+    const signaturePayload = `${projectSlug}:${revisionHash}:${timestamp}:${reviewer}`
+    const signature = crypto.createHmac('sha256', 'gravitas-kernel-local-auth').update(signaturePayload).digest('hex')
+
+    const grant: ApprovalGrant = {
+      projectSlug,
+      revisionHash,
+      approvedBy: reviewer,
+      timestamp,
+      notes,
+      allowedPaths: options?.allowedPaths ?? [],
+      signature,
+    }
+
+    fs.mkdirSync(specsDir, { recursive: true })
+    fs.writeFileSync(grantPath, JSON.stringify(grant, null, 2), 'utf-8')
 
     const content = `# Approval Ledger — ${projectSlug}
 
 > [!NOTE]
-> Specification approved. Human sign-off recorded.
+> Specification approved. Human sign-off cryptographically bound to revision hash.
 
 ## Current Gate Status: \`APPROVED\`
 
+- **Specification Revision Hash:** \`${revisionHash}\`
 - **Sign-off Status:** \`APPROVED\`
 - **Reviewer:** \`${reviewer}\`
 - **Timestamp:** \`${timestamp}\`
 - **Review Notes:** \`${notes}\`
+- **Cryptographic Grant:** \`approval-grant.json\`
 `
-    fs.mkdirSync(path.dirname(approvalsPath), { recursive: true })
     fs.writeFileSync(approvalsPath, content, 'utf-8')
+    return grant
   }
 
   /**
-   * Strictly asserts that approval has been granted. Throws if blocked.
+   * Strictly asserts that approval has been granted and revision hash matches current spec files. Throws if blocked.
    */
   public assertApprovalGranted(projectRoot: string, projectSlug: string): void {
     const status = this.checkApprovalStatus(projectRoot, projectSlug)
@@ -335,6 +424,12 @@ ${data.architectureOverview}
       throw new ApprovalGateBlockedError(
         projectSlug,
         'Execution blocked by Human Approval Gate. Explicit sign-off required in APPROVALS.md.'
+      )
+    }
+    if (status.revisionHash && !status.hashMatches) {
+      throw new ApprovalGateBlockedError(
+        projectSlug,
+        `Execution blocked: Specification modified post-approval (approved=${status.revisionHash}, current=${status.currentHash}). Re-approval required.`
       )
     }
   }

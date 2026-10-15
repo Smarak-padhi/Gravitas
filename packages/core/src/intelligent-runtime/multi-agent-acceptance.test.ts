@@ -162,10 +162,17 @@ describe('Gate 05.4: Multi-Agent Acceptance Scenario on Disposable Fixture', () 
         action: async () => {
           const htmlPath = path.join(workDir, 'index.html')
           let html = fs.readFileSync(htmlPath, 'utf-8')
-          html = html.replace(
-            '</nav>',
-            '  <button id="theme-toggle" aria-label="Toggle High-Contrast Theme">Toggle Contrast</button>\n      </nav>'
-          )
+          if (html.includes('</nav>')) {
+            html = html.replace(
+              '</nav>',
+              '  <button id="theme-toggle" aria-label="Toggle High-Contrast Theme">Toggle Contrast</button>\n      </nav>'
+            )
+          } else {
+            html = html.replace(
+              '</header>',
+              '  <nav><button id="theme-toggle" aria-label="Toggle High-Contrast Theme">Toggle Contrast</button></nav>\n    </header>'
+            )
+          }
           fs.writeFileSync(htmlPath, html, 'utf-8')
           return 'Injected theme toggle button'
         },

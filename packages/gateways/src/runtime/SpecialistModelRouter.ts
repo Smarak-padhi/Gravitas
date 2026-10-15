@@ -48,6 +48,7 @@ export interface SpecialistDispatchResult {
   readonly provider: string
   readonly model: string
   readonly latencyMs: number
+  readonly providerUnavailableMessage?: string
   readonly tokenUsage?: {
     readonly promptTokens: number
     readonly completionTokens: number
@@ -186,7 +187,11 @@ export class SpecialistModelRouter {
 
     // 1. Attempt Local Ollama / LM Studio (Local-First)
     try {
-      const isLocalOnline = await this.localOllama.isAvailable(800)
+      const localAdapter = options.localUrl
+        ? new LocalOllamaAdapter({ baseUrl: options.localUrl, defaultModel: options.preferredModel })
+        : this.localOllama
+
+      const isLocalOnline = await localAdapter.isAvailable(800)
       if (isLocalOnline) {
         const req: ProviderInferenceRequest = {
           model: options.preferredModel || 'llama3.2',
@@ -194,7 +199,7 @@ export class SpecialistModelRouter {
           temperature: options.temperatureOverride ?? persona.defaultTemperature,
           maxTokens: persona.maxTokens,
         }
-        const resp = await this.localOllama.execute(req)
+        const resp = await localAdapter.execute(req)
         if (resp.terminationStatus === 'COMPLETED' && resp.outputContent) {
           return {
             specialistId,
@@ -241,7 +246,7 @@ export class SpecialistModelRouter {
       }
     }
 
-    // 3. High-Quality Bounded Deterministic Fallback
+    // 3. High-Quality Bounded Deterministic Fallback with honest unavailable status
     const fallbackContent = this.generateDeterministicFallback(specialistId, userMessage)
     return {
       specialistId,
@@ -250,6 +255,7 @@ export class SpecialistModelRouter {
       provider: 'deterministic-specialist',
       model: 'deterministic-v2',
       latencyMs: Date.now() - startTime,
+      providerUnavailableMessage: '[PROVIDER_UNAVAILABLE: No LLM daemon running on localhost:11434] Falling back to deterministic specialist response',
     }
   }
 

@@ -178,9 +178,9 @@ export function renderMarkdownWithMath(markdownText: string): string {
     html = processed
   }
 
-  // 4. Restore math placeholders
+  // 4. Restore math placeholders safely (split/join avoids $ regex replacement corruption in KaTeX output)
   for (const { token, html: mathHtml } of mathPlaceholders) {
-    html = html.replace(token, mathHtml)
+    html = html.split(token).join(mathHtml)
   }
 
   return html
@@ -988,10 +988,11 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           transition={{ type: 'spring', damping: 24, stiffness: 320 }}
           style={{
             position: 'relative',
-            width: noteViewMode === 'split' ? '960px' : '820px',
-            minWidth: '640px',
+            width: noteViewMode === 'split' ? 'min(960px, 94vw)' : 'min(820px, 92vw)',
+            minWidth: 'min(580px, 92vw)',
             maxWidth: '96vw',
             height: '600px',
+            maxHeight: '88vh',
             background: 'rgba(20, 25, 23, 0.98)',
             border: '1px solid #2D3A32',
             borderRadius: '16px',
@@ -1014,9 +1015,11 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               justifyContent: 'space-between',
               background: 'rgba(22, 29, 25, 0.92)',
               gap: '8px',
+              flexWrap: 'wrap',
+              rowGap: '6px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'wrap' }}>
               <BookOpen size={16} color="#81B29A" style={{ flexShrink: 0 }} />
               <span style={{ fontSize: '13px', fontWeight: 600, color: '#EDEAE3', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Ada's Knowledge Hub
@@ -1085,7 +1088,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0, flexWrap: 'wrap', rowGap: '4px' }}>
               {/* Mode Toggle: Edit | Preview | Split | Flashcards */}
               <div
                 style={{

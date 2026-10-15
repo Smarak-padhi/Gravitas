@@ -28,6 +28,10 @@ import type {
   IntentResult,
   DesktopModelDispatchPayload,
   DesktopModelDispatchResult,
+  SpecialistDispatchPayload,
+  SpecialistDispatchResult,
+  DeepDiscoveryWorkflowPayload,
+  DeepDiscoveryWorkflowResult,
 } from '../types.js'
 
 const bridge: GravitasDesktopBridge = {
@@ -93,6 +97,14 @@ const bridge: GravitasDesktopBridge = {
 
   dispatchModel: async (payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult> => {
     return ipcRenderer.invoke('gravitas:dispatch-model', payload)
+  },
+
+  dispatchSpecialist: async (payload: SpecialistDispatchPayload): Promise<SpecialistDispatchResult> => {
+    return ipcRenderer.invoke('gravitas:dispatch-specialist', payload)
+  },
+
+  executeDeepDiscoveryWorkflow: async (payload: DeepDiscoveryWorkflowPayload): Promise<DeepDiscoveryWorkflowResult> => {
+    return ipcRenderer.invoke('gravitas:deep-discovery-workflow', payload)
   },
 
   restartKernel: async (): Promise<boolean> => {

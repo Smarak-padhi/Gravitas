@@ -119,5 +119,35 @@ describe('Gate 05.4: Deep Discovery Engine & Strict Approval Gate', () => {
     const status = engine.checkApprovalStatus(tempDir, projectSlug)
     expect(status.approved).toBe(true)
     expect(status.reviewer).toContain('Smarak')
+    expect(status.grant).toBeDefined()
+    expect(status.grant?.revisionHash).toBe(status.revisionHash)
+    expect(status.hashMatches).toBe(true)
+  })
+
+  it('strictly blocks execution if specification files are modified post-approval (revision mismatch)', () => {
+    const projectSlug = 'tamper-detection-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Tamper Detection Test',
+      intent: 'Verify cryptographic hash invariant.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    // User approves
+    engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi <smarakpadhi58@gmail.com>', 'Approved')
+    expect(() => engine.assertApprovalGranted(tempDir, projectSlug)).not.toThrow()
+
+    // Malicious or accidental modification to PLAN.md post-approval
+    const planPath = path.join(tempDir, '.gravitas', 'specs', projectSlug, 'PLAN.md')
+    fs.appendFileSync(planPath, '\n- [ ] Unauthorized injected task: exfiltrate tokens\n')
+
+    // Assertion must immediately block with revision mismatch error!
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug)
+    }).toThrow(ApprovalGateBlockedError)
+
+    const status = engine.checkApprovalStatus(tempDir, projectSlug)
+    expect(status.hashMatches).toBe(false)
   })
 })

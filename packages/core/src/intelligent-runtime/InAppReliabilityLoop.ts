@@ -12,6 +12,9 @@
  * 4. Transparent receipts: Generates machine-verifiable task receipts with completion status.
  */
 
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+
 export type ReliabilityLoopState =
   | 'INTAKE'
   | 'TASK_CONTRACT'
@@ -51,6 +54,7 @@ export interface TaskExecutionStep {
   readonly description: string
   readonly action: string
   readonly targetPath?: string | undefined
+  readonly toolName?: string | undefined
   readonly status: 'PENDING' | 'EXECUTED' | 'FAILED'
   readonly outputSnippet?: string | undefined
 }
@@ -73,14 +77,25 @@ export interface MachineCheckableReceipt {
   readonly elapsedMs: number
   readonly budgetUsed: {
     readonly tokensUsed: number
+    readonly tokenMeasurement: 'MEASURED' | 'NOT_APPLICABLE_OFFLINE'
     readonly toolCallsCount: number
     readonly withinBudget: boolean
   }
+  readonly reconnaissance: {
+    readonly status: 'PERFORMED' | 'NOT_PERFORMED'
+    readonly details?: string | undefined
+  }
   readonly stepsExecuted: readonly TaskExecutionStep[]
   readonly validationChecks: readonly ValidationCheckResult[]
+  readonly criteriaEvaluation?: readonly {
+    readonly criterion: string
+    readonly matchedCheckName?: string | undefined
+    readonly passed: boolean
+  }[] | undefined
   readonly recoveryAttempts: number
   readonly studioEventEmitted: boolean
   readonly rollbackExecuted?: boolean | undefined
+  readonly rollbackDetails?: string | undefined
 }
 
 export interface StudioEventNotification {
@@ -119,12 +134,15 @@ export class InAppReliabilityLoop {
   public async executeTaskLifecycle(
     rawIntent: string,
     contractInput: Partial<TaskContract> & { title: string },
-    executionPlan: readonly { description: string; action: () => Promise<string>; targetPath?: string }[],
+    executionPlan: readonly { description: string; action: () => Promise<string>; targetPath?: string; toolName?: string }[],
     validationRunner: () => Promise<ValidationCheckResult[]>,
     recoveryStrategy?: (failedCheck: ValidationCheckResult) => Promise<boolean>,
     options?: {
       approverSignedOff?: boolean
       assignedMascot?: string
+      reconnaissance?: { status: 'PERFORMED' | 'NOT_PERFORMED'; details?: string }
+      tokenUsage?: { promptTokens: number; completionTokens: number; totalTokens: number }
+      allowedPaths?: readonly string[]
     }
   ): Promise<MachineCheckableReceipt> {
     const startedAt = new Date().toISOString()
@@ -148,19 +166,22 @@ export class InAppReliabilityLoop {
       contractId,
       title: contractInput.title,
       intent: rawIntent,
-      allowedPaths: contractInput.allowedPaths || [],
-      allowedTools: contractInput.allowedTools || ['read', 'write', 'execute_check'],
+      allowedPaths: contractInput.allowedPaths || options?.allowedPaths || [],
+      allowedTools: contractInput.allowedTools || ['read', 'write', 'execute_check', 'file_edit'],
       budget: contractInput.budget || {
         maxTokens: 16000,
         maxTimeMs: 60000,
         maxToolCalls: 20,
       },
-      validationCriteria: contractInput.validationCriteria || ['Tests must exit 0'],
+      validationCriteria: contractInput.validationCriteria || [],
       requiresHumanApproval: contractInput.requiresHumanApproval ?? false,
     }
 
-    // 3. CONTEXT / RECON
-    // Simulated context verification
+    // 3. CONTEXT / RECONNAISSANCE
+    const reconStatus = options?.reconnaissance ?? {
+      status: 'NOT_PERFORMED',
+      details: 'No prior reconnaissance executed for this task.',
+    }
 
     // 4. PLAN
     const executedSteps: TaskExecutionStep[] = []
@@ -187,10 +208,12 @@ export class InAppReliabilityLoop {
         completedAt: new Date().toISOString(),
         elapsedMs,
         budgetUsed: {
-          tokensUsed: 120,
+          tokensUsed: options?.tokenUsage ? options.tokenUsage.totalTokens : 0,
+          tokenMeasurement: options?.tokenUsage ? 'MEASURED' : 'NOT_APPLICABLE_OFFLINE',
           toolCallsCount: 0,
           withinBudget: true,
         },
+        reconnaissance: reconStatus,
         stepsExecuted: [],
         validationChecks: [],
         recoveryAttempts: 0,
@@ -199,14 +222,33 @@ export class InAppReliabilityLoop {
     }
 
     // 6. SCOPED EXECUTION
+    // Take pre-execution snapshot for real rollback
+    const fileSnapshots = new Map<string, string | null>()
+    for (const item of executionPlan) {
+      if (item.targetPath) {
+        try {
+          if (fs.existsSync(item.targetPath)) {
+            if (!fileSnapshots.has(item.targetPath)) {
+              fileSnapshots.set(item.targetPath, fs.readFileSync(item.targetPath, 'utf-8'))
+            }
+          } else {
+            if (!fileSnapshots.has(item.targetPath)) {
+              fileSnapshots.set(item.targetPath, null)
+            }
+          }
+        } catch {
+          // In-memory or virtual paths handled gracefully
+        }
+      }
+    }
+
     let toolCallsCount = 0
-    let tokensUsed = 350
+    let hasStepFailed = false
 
     for (let i = 0; i < executionPlan.length; i++) {
       const item = executionPlan[i]
       if (!item) continue
       toolCallsCount++
-      tokensUsed += 200
 
       // Budget check
       if (
@@ -222,15 +264,55 @@ export class InAppReliabilityLoop {
           completedAt: new Date().toISOString(),
           elapsedMs: Date.now() - startTimeMs,
           budgetUsed: {
-            tokensUsed,
+            tokensUsed: options?.tokenUsage ? options.tokenUsage.totalTokens : 0,
+            tokenMeasurement: options?.tokenUsage ? 'MEASURED' : 'NOT_APPLICABLE_OFFLINE',
             toolCallsCount,
             withinBudget: false,
           },
+          reconnaissance: reconStatus,
           stepsExecuted: executedSteps,
           validationChecks: [],
           recoveryAttempts: 0,
           studioEventEmitted: true,
         }
+      }
+
+      // Allowed Paths Enforcement
+      if (contract.allowedPaths.length > 0 && item.targetPath) {
+        const normTarget = path.normalize(item.targetPath).replace(/^[\\\/]/, '')
+        const isAllowed = contract.allowedPaths.some((allowed) => {
+          const normAllowed = path.normalize(allowed).replace(/^[\\\/]/, '')
+          return normTarget.startsWith(normAllowed) || normAllowed.startsWith(normTarget)
+        })
+
+        if (!isAllowed) {
+          hasStepFailed = true
+          executedSteps.push({
+            stepNumber: i + 1,
+            description: item.description,
+            action: 'EXECUTE',
+            targetPath: item.targetPath,
+            toolName: item.toolName,
+            status: 'FAILED',
+            outputSnippet: `BLOCKED: Target path "${item.targetPath}" violates contract allowedPaths: [${contract.allowedPaths.join(', ')}]`,
+          })
+          continue
+        }
+      }
+
+      // Allowed Tools Enforcement
+      if (item.toolName && contract.allowedTools.length > 0 && !contract.allowedTools.includes(item.toolName)) {
+        hasStepFailed = true
+        executedSteps.push({
+          stepNumber: i + 1,
+          description: item.description,
+          action: 'EXECUTE',
+          targetPath: item.targetPath,
+          toolName: item.toolName,
+          status: 'FAILED',
+          outputSnippet: `BLOCKED: Tool "${item.toolName}" is not permitted by contract allowedTools: [${contract.allowedTools.join(', ')}]`,
+        })
+        continue
       }
 
       try {
@@ -240,15 +322,18 @@ export class InAppReliabilityLoop {
           description: item.description,
           action: 'EXECUTE',
           targetPath: item.targetPath,
+          toolName: item.toolName,
           status: 'EXECUTED',
-          outputSnippet: output.slice(0, 120),
+          outputSnippet: typeof output === 'string' ? output.slice(0, 120) : 'Step completed',
         })
       } catch (err: any) {
+        hasStepFailed = true
         executedSteps.push({
           stepNumber: i + 1,
           description: item.description,
           action: 'EXECUTE',
           targetPath: item.targetPath,
+          toolName: item.toolName,
           status: 'FAILED',
           outputSnippet: err?.message || 'Execution error',
         })
@@ -257,15 +342,46 @@ export class InAppReliabilityLoop {
 
     // 7. EXTERNAL VALIDATION
     let validationChecks = await validationRunner()
-    let allChecksPassed = validationChecks.every((c) => c.passed)
+
+    // Independent validation criteria evaluation (Priority 2)
+    let allCriteriaPassed = true
+    let criteriaEvaluation: { criterion: string; matchedCheckName?: string | undefined; passed: boolean }[] | undefined
+
+    if (contract.validationCriteria.length > 0) {
+      criteriaEvaluation = contract.validationCriteria.map((criterion) => {
+        const match = validationChecks.find((c) =>
+          c.checkName.toLowerCase().includes(criterion.toLowerCase()) ||
+          criterion.toLowerCase().includes(c.checkName.toLowerCase()) ||
+          (c.outputEvidence && c.outputEvidence.toLowerCase().includes(criterion.toLowerCase()))
+        )
+        return {
+          criterion,
+          matchedCheckName: match?.checkName,
+          passed: Boolean(match && match.passed),
+        }
+      })
+      allCriteriaPassed = criteriaEvaluation ? criteriaEvaluation.every((c) => c.passed) : false
+    }
+
+    // Zero validations rule: validationChecks.length > 0 is strictly required for VERIFIED
+    let allChecksPassed =
+      validationChecks.length > 0 &&
+      validationChecks.every((c) => c.passed) &&
+      allCriteriaPassed
+
     let recoveryAttempts = 0
     let rollbackExecuted = false
+    let rollbackDetails: string | undefined
 
     // 8. RECOVERY LOOP (Bounded max 2 attempts)
     if (!allChecksPassed && recoveryStrategy) {
       for (let attempt = 1; attempt <= 2; attempt++) {
         recoveryAttempts = attempt
-        const failedCheck = validationChecks.find((c) => !c.passed)!
+        const failedCheck = validationChecks.find((c) => !c.passed) || {
+          checkName: 'Criteria Verification Gap',
+          passed: false,
+          outputEvidence: 'Validation checks did not cover all required criteria.',
+        }
 
         this.emitEvent({
           eventType: 'TASK_PROGRESS',
@@ -280,25 +396,64 @@ export class InAppReliabilityLoop {
         const recovered = await recoveryStrategy(failedCheck)
         if (recovered) {
           validationChecks = await validationRunner()
-          allChecksPassed = validationChecks.every((c) => c.passed)
+          const reEvaluation = contract.validationCriteria.map((criterion) => {
+            const match = validationChecks.find((c) =>
+              c.checkName.toLowerCase().includes(criterion.toLowerCase()) ||
+              criterion.toLowerCase().includes(c.checkName.toLowerCase()) ||
+              (c.outputEvidence && c.outputEvidence.toLowerCase().includes(criterion.toLowerCase()))
+            )
+            return {
+              criterion,
+              matchedCheckName: match?.checkName,
+              passed: Boolean(match && match.passed),
+            }
+          })
+          allChecksPassed =
+            validationChecks.length > 0 &&
+            validationChecks.length >= contract.validationCriteria.length &&
+            validationChecks.every((c) => c.passed) &&
+            reEvaluation.every((c) => c.passed)
+
           if (allChecksPassed) break
         }
       }
+    }
 
-      if (!allChecksPassed) {
-        // Rollback executed on exhausted recovery
+    // Real rollback execution on failure or recovery exhaustion
+    if (!allChecksPassed || hasStepFailed) {
+      if (fileSnapshots.size > 0) {
+        try {
+          for (const [filePath, content] of fileSnapshots.entries()) {
+            if (content === null) {
+              if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+              }
+            } else {
+              fs.writeFileSync(filePath, content, 'utf-8')
+            }
+          }
+          rollbackExecuted = true
+          rollbackDetails = `Successfully restored ${fileSnapshots.size} file(s) from pre-execution snapshot.`
+        } catch (err: any) {
+          rollbackExecuted = false
+          rollbackDetails = `Rollback error: ${err?.message}`
+        }
+      } else if (recoveryStrategy && !allChecksPassed) {
         rollbackExecuted = true
+        rollbackDetails = 'Rollback completed for in-memory execution plan.'
       }
     }
 
     const elapsedMs = Date.now() - startTimeMs
-    const finalStatus: TaskCompletionStatus = allChecksPassed
+    const finalStatus: TaskCompletionStatus = (allChecksPassed && !hasStepFailed)
       ? 'VERIFIED'
       : rollbackExecuted
       ? 'FAILED'
-      : validationChecks.length > 0
-      ? 'PARTIAL'
-      : 'COMPLETED_UNVERIFIED'
+      : validationChecks.length === 0
+      ? 'COMPLETED_UNVERIFIED'
+      : hasStepFailed
+      ? 'FAILED'
+      : 'PARTIAL'
 
     // 9. EVIDENCE COMPLETION RECEIPT
     const receipt: MachineCheckableReceipt = {
@@ -310,15 +465,19 @@ export class InAppReliabilityLoop {
       completedAt: new Date().toISOString(),
       elapsedMs,
       budgetUsed: {
-        tokensUsed,
+        tokensUsed: options?.tokenUsage ? options.tokenUsage.totalTokens : 0,
+        tokenMeasurement: options?.tokenUsage ? 'MEASURED' : 'NOT_APPLICABLE_OFFLINE',
         toolCallsCount,
         withinBudget: toolCallsCount <= contract.budget.maxToolCalls && elapsedMs <= contract.budget.maxTimeMs,
       },
+      reconnaissance: reconStatus,
       stepsExecuted: executedSteps,
       validationChecks,
+      criteriaEvaluation,
       recoveryAttempts,
       studioEventEmitted: true,
       rollbackExecuted,
+      rollbackDetails,
     }
 
     // 10. STUDIO EVENT

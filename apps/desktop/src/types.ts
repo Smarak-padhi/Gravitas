@@ -571,6 +571,65 @@ export interface DesktopModelDispatchResult {
   } | undefined
 }
 
+export interface SpecialistDispatchPayload {
+  readonly specialistId: 'grav' | 'ada' | 'pixel' | 'cipher' | 'scout'
+  readonly message: string
+  readonly conversationHistory?: readonly { readonly role: 'user' | 'assistant'; readonly content: string }[] | undefined
+  readonly preferredModel?: string | undefined
+  readonly localUrl?: string | undefined
+}
+
+export interface SpecialistDispatchResult {
+  readonly success: boolean
+  readonly specialistId: 'grav' | 'ada' | 'pixel' | 'cipher' | 'scout'
+  readonly content: string
+  readonly mode: 'LOCAL_INFERENCE' | 'CLOUD_INFERENCE' | 'OFFLINE_DETERMINISTIC'
+  readonly provider: string
+  readonly model: string
+  readonly latencyMs: number
+  readonly providerUnavailableMessage?: string | undefined
+  readonly tokenUsage?: {
+    readonly promptTokens: number
+    readonly completionTokens: number
+    readonly totalTokens: number
+  } | undefined
+}
+
+export interface DeepDiscoveryWorkflowPayload {
+  readonly action: 'START' | 'GENERATE_SPECS' | 'CHECK_APPROVAL' | 'APPROVE' | 'EXECUTE'
+  readonly projectSlug?: string | undefined
+  readonly interviewAnswers?: {
+    readonly topic?: string | undefined
+    readonly vision?: string | undefined
+    readonly references?: readonly string[] | undefined
+    readonly typography?: { readonly bodyFont?: string | undefined; readonly headingFont?: string | undefined } | undefined
+    readonly colors?: { readonly background?: string | undefined; readonly text?: string | undefined; readonly accent?: string | undefined; readonly contrastRatio?: number | undefined } | undefined
+    readonly layout?: { readonly mode?: string | undefined; readonly maxContentWidth?: string | undefined } | undefined
+    readonly animation?: { readonly spring?: string | undefined; readonly reducedMotionSupported?: boolean | undefined } | undefined
+    readonly features?: readonly string[] | undefined
+    readonly constraints?: readonly string[] | undefined
+    readonly verificationCommand?: string | undefined
+  } | undefined
+  readonly approval?: {
+    readonly revisionHash: string
+    readonly reviewer?: string | undefined
+    readonly notes?: string | undefined
+  } | undefined
+}
+
+export interface DeepDiscoveryWorkflowResult {
+  readonly success: boolean
+  readonly action: string
+  readonly projectSlug: string
+  readonly status: string
+  readonly message: string
+  readonly revisionHash?: string | undefined
+  readonly questions?: readonly string[] | undefined
+  readonly receipt?: any | undefined
+  readonly grant?: any | undefined
+  readonly filesCreated?: readonly string[] | undefined
+}
+
 export interface DispatchModelRequest extends BaseProtocolMessage {
   readonly type: 'DISPATCH_MODEL_REQUEST'
   readonly requestId: string
@@ -1155,6 +1214,8 @@ export interface GravitasDesktopBridge {
   runDoctor(): Promise<DoctorReport>
   configureProvider(payload: ConfigureProviderPayload): Promise<ConfigureProviderResult>
   dispatchModel(payload: DesktopModelDispatchPayload): Promise<DesktopModelDispatchResult>
+  dispatchSpecialist?(payload: SpecialistDispatchPayload): Promise<SpecialistDispatchResult>
+  executeDeepDiscoveryWorkflow?(payload: DeepDiscoveryWorkflowPayload): Promise<DeepDiscoveryWorkflowResult>
   restartKernel(): Promise<boolean>
   requestHideWindow(): Promise<void>
   requestQuitApplication(): Promise<void>
