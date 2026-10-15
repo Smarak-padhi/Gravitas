@@ -1,0 +1,9 @@
+{
+  "name": "smarak-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Disposable portfolio test fixture for multi-agent acceptance scenarios",
+  "scripts": {
+    "test": "node test.mjs"
+  }
+}

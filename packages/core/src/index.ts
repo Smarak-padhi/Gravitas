@@ -285,3 +285,7 @@ export {
   runGravitasDoctor,
 } from './doctor.js'
 
+// Phase 05 Intelligent Runtime & Deep Discovery Exports
+export * from './intelligent-runtime/InAppReliabilityLoop.js'
+export * from './intelligent-runtime/DeepDiscoveryEngine.js'
+
