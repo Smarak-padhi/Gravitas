@@ -14,10 +14,11 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { execSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import {
   validatePathAgainstAllowlist,
   validateShellCommand,
+  parseExecName,
 } from './path-security.js'
 
 export type ReliabilityLoopState =
@@ -362,12 +363,27 @@ export class InAppReliabilityLoop {
           fs.appendFileSync(canonical, item.payload.content, item.payload.encoding || 'utf-8')
           output = `Appended ${Buffer.byteLength(item.payload.content)} bytes to ${canonical}`
         } else if (item.toolName === 'command.exec' && item.payload?.command) {
-          const out = execSync(item.payload.command, {
+          // Security: use spawnSync with shell:false — never execSync which invokes cmd.exe on Windows.
+          // The executable was already allowlist-checked by validateShellCommand above.
+          const rawCmd = item.payload.command
+          const execBasename = parseExecName(rawCmd)
+          // Split remaining tokens after the executable name
+          const trimmedCmd = rawCmd.trim()
+          const afterExec = trimmedCmd.startsWith('"')
+            ? trimmedCmd.slice(trimmedCmd.indexOf('"', 1) + 1).trim()
+            : trimmedCmd.slice(execBasename.length).trim()
+          const args = afterExec.length > 0 ? afterExec.split(/\s+/) : []
+          const spawnResult = spawnSync(execBasename, args, {
             cwd: item.payload.cwd || process.cwd(),
             encoding: 'utf-8',
             timeout: 10000,
+            shell: false,  // Critical: never invoke a shell interpreter
           })
-          output = out.trim()
+          if (spawnResult.error) throw spawnResult.error
+          if (spawnResult.status !== 0) {
+            throw new Error(`Command exited with code ${spawnResult.status}: ${spawnResult.stderr || '(no stderr)'}`)
+          }
+          output = (spawnResult.stdout || '').trim()
         } else if (item.action) {
           output = await item.action()
         } else {

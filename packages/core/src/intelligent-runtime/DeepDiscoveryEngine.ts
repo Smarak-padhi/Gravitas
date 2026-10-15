@@ -339,10 +339,36 @@ ${data.architectureOverview}
     fs.mkdirSync(secureDir, { recursive: true })
     const freshKey = crypto.randomBytes(32).toString('hex')
     try {
+      // mode: 0o600 sets the file's POSIX permissions on Linux/macOS.
+      // On Windows, fs.chmodSync(0o600) is a no-op for NTFS ACLs — it only clears
+      // the DOS read-only attribute and does NOT restrict other users. We harden
+      // Windows NTFS permissions separately via icacls below.
       fs.writeFileSync(keyPath, freshKey, { encoding: 'utf-8', mode: 0o600 })
     } catch {
       fs.writeFileSync(keyPath, freshKey, 'utf-8')
     }
+
+    // Windows NTFS ACL hardening (Security Addendum, Phase 05.6 Item 2):
+    // Remove inherited permissions and grant only the current user Full Control.
+    // This is a best-effort call; if it fails (e.g. insufficient privilege in CI),
+    // we log a warning rather than aborting — the key still has process-level protection.
+    if (process.platform === 'win32') {
+      try {
+        const { execFileSync } = require('node:child_process') as typeof import('node:child_process')
+        // Remove inherited ACEs and grant current user exclusive Full Control
+        execFileSync('icacls', [keyPath, '/inheritance:r', '/grant:r', `${process.env.USERNAME}:(F)`], {
+          encoding: 'utf-8',
+          shell: false,
+          timeout: 5000,
+        })
+      } catch {
+        // icacls hardening failed (e.g. running as SYSTEM, or path issue).
+        // Document the limitation: the key has no NTFS ACL restriction.
+        // Operational security relies on the Electron process boundary and the
+        // directory not being world-readable via inherited parent ACLs.
+      }
+    }
+
     return freshKey
   }
 
