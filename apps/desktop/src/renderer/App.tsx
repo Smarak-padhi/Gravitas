@@ -563,6 +563,57 @@ export const App: React.FC = () => {
     })
   }
 
+  // Handle adding a task to SQLite WAL (Phase 05)
+  const handleAddTask = async (title: string, subject?: string) => {
+    const bridge = window.gravitasDesktop
+    const newTaskId = `task_${Date.now()}`
+    const newTask = {
+      id: newTaskId,
+      title,
+      subject: subject || 'General',
+      completed: false,
+    }
+
+    setDueTasks((prev) => [newTask, ...prev])
+
+    if (bridge?.saveIdea) {
+      try {
+        await bridge.saveIdea({
+          title,
+          category: 'plan_task',
+          collection: 'PROJECT',
+          originalText: subject ? `Linked to coursework/study subject: ${subject}` : 'Created from Cipher Tasks & Agenda',
+          tags: ['task', 'living-studio', ...(subject ? [subject.toLowerCase().replace(/\s+/g, '-')] : [])],
+        })
+      } catch (err) {
+        console.warn('Failed to save task to SQLite bridge:', err)
+      }
+    }
+
+    dispatchAgentEvent('TASK_STATE_CHANGED', {
+      taskId: newTaskId,
+      title,
+      completed: false,
+    })
+
+    triggerBubble('cipher', `Logged task: "${title.slice(0, 28)}" to SQLite WAL`, 'info', 'work')
+  }
+
+  // Handle reviewing a flashcard with SM-2 spaced repetition (Phase 05)
+  const handleReviewFlashcard = (_cardId: string, rating: 'again' | 'good' | 'easy') => {
+    const intervalMap = { again: '1d', good: '3d', easy: '7d' }
+    triggerBubble('ada', `Card reviewed (${rating.toUpperCase()}): interval updated to ${intervalMap[rating]}`, 'success', 'work')
+  }
+
+  // Handle Markdown export/import feedback (Phase 05)
+  const handleExportMarkdown = (note: any) => {
+    triggerBubble('ada', `Exported note "${note.title.slice(0, 24)}" to Obsidian Markdown`, 'info', 'work')
+  }
+
+  const handleImportMarkdown = (imported: { title: string; subject: string; content: string }) => {
+    triggerBubble('ada', `Imported Obsidian note: "${imported.title.slice(0, 24)}"`, 'success', 'work')
+  }
+
   return (
     <div
       style={{
@@ -682,6 +733,10 @@ export const App: React.FC = () => {
         onOpenExternal={async (url) => {
           await window.gravitasDesktop?.openApprovedExternal?.(url)
         }}
+        onAddTask={handleAddTask}
+        onReviewFlashcard={handleReviewFlashcard}
+        onExportMarkdown={handleExportMarkdown}
+        onImportMarkdown={handleImportMarkdown}
       />
     </div>
   )

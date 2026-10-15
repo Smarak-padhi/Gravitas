@@ -104,8 +104,8 @@ async function runStudioAlphaVerification() {
     })
     await new Promise((r) => setTimeout(r, 1200))
 
-    // ─── STEP 3: OPEN ADA'S NOTES PANEL (REAL SQLITE WAL) ──────────────────────
-    console.log('\n[Step 3] Opening Ada\'s Knowledge Hub & Course Notes (SQLite)...')
+    // ─── STEP 3: OPEN ADA'S KNOWLEDGE HUB, FLASHCARDS & NOTES (SQLITE WAL) ──────
+    console.log('\n[Step 3] Opening Ada\'s Knowledge Hub, Spaced Repetition Decks & Notes...')
     const notesBtn = await mainWin.$('button:has-text("Notes")') || await mainWin.$('div:has-text("Study & Notes")')
     if (notesBtn) {
       await notesBtn.click()
@@ -118,34 +118,50 @@ async function runStudioAlphaVerification() {
     if (previewBtn) {
       await previewBtn.click()
     }
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Click "Flashcards" tab to demonstrate Phase 05 Spaced Repetition Active Recall Deck
+    console.log('Switching to Flashcards Mode in Ada\'s Knowledge Hub...')
+    const flashcardsBtn = await mainWin.$('button:has-text("Flashcards")')
+    if (flashcardsBtn) {
+      await flashcardsBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Click "Reveal Solution" on flashcard
+    console.log('Clicking "Reveal Solution & Active-Recall Formula" button...')
+    const revealBtn = await mainWin.$('button:has-text("Reveal Solution")')
+    if (revealBtn) {
+      await revealBtn.click()
+    }
     await new Promise((r) => setTimeout(r, 1500))
+
+    // Click "Good (3d)" confidence rating to record review
+    console.log('Clicking "Good (3d)" recall confidence rating...')
+    const goodRatingBtn = await mainWin.$('button:has-text("Good (3d)")')
+    if (goodRatingBtn) {
+      await goodRatingBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Switch back to Preview mode to show note and linked coursework tasks
+    if (previewBtn) {
+      await previewBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Click "Export Obsidian" to demonstrate Obsidian YAML Frontmatter export
+    console.log('Clicking "Obsidian" export button...')
+    const exportBtn = await mainWin.$('button:has-text("Obsidian")')
+    if (exportBtn) {
+      await exportBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1200))
 
     const shot3 = path.join(EVIDENCE_DIR, '03-ada-notes-panel.png')
     await mainWin.screenshot({ path: shot3 })
     fs.copyFileSync(shot3, path.join(ARTIFACT_DIR, '03-ada-notes-panel.png'))
     console.log(`  Saved: ${shot3}`)
-
-    // Switch to Edit mode to demonstrate live editing and dirty-state tracking
-    const editBtn = await mainWin.$('button:has-text("Edit")')
-    if (editBtn) {
-      await editBtn.click()
-    }
-    await new Promise((r) => setTimeout(r, 800))
-
-    // Type an edit into note editor and save to SQLite
-    console.log('Editing note content and clicking Save to SQLite...')
-    const textarea = await mainWin.$('textarea')
-    if (textarea) {
-      await textarea.click()
-      await textarea.type('\n\n// Verified in Studio Beta with KaTeX Math at ' + new Date().toLocaleTimeString())
-      await new Promise((r) => setTimeout(r, 1000))
-      // Click Save to SQLite button
-      const saveBtn = await mainWin.$('button:has-text("Save to SQLite")')
-      if (saveBtn) {
-        await saveBtn.click()
-      }
-      await new Promise((r) => setTimeout(r, 2000))
-    }
 
     // Close Ada's notes panel
     await mainWin.evaluate(() => {
@@ -155,15 +171,39 @@ async function runStudioAlphaVerification() {
     })
     await new Promise((r) => setTimeout(r, 1200))
 
-    // ─── STEP 4: VERIFIED TASK EVENT PRODUCING AN ACTIVITY BUBBLE ────────────────
-    console.log('\n[Step 4] Opening Cipher\'s Agenda & Triggering Task Completion Bubble...')
+    // ─── STEP 4: CIPHER AGENDA, ENGINEERING PROJECTS & TASK ADDER ───────────────
+    console.log('\n[Step 4] Opening Cipher\'s Agenda & Engineering Projects...')
     const agendaBtn = await mainWin.$('button:has-text("Agenda")')
     if (agendaBtn) {
       await agendaBtn.click()
     }
     await new Promise((r) => setTimeout(r, 1500))
 
-    // Click visible checkbox on first task in the active floating panel
+    // Click "Engineering Projects" tab to demonstrate Phase 05 project tracking
+    console.log('Switching to Engineering Projects tab...')
+    const projectsTab = await mainWin.$('button:has-text("Engineering Projects")')
+    if (projectsTab) {
+      await projectsTab.click()
+    }
+    await new Promise((r) => setTimeout(r, 2000))
+
+    // Switch back to Tasks tab and add a new practice task via quick adder
+    console.log('Switching to Tasks & Coursework tab and adding a task...')
+    const tasksTab = await mainWin.$('button:has-text("Tasks & Coursework")')
+    if (tasksTab) {
+      await tasksTab.click()
+    }
+    await new Promise((r) => setTimeout(r, 1000))
+
+    const taskInput = await mainWin.$('input[placeholder*="Add new task"]')
+    if (taskInput) {
+      await taskInput.fill('Verify B+ Tree Latch Crabbing Protocol')
+      const addBtn = await mainWin.$('button:has-text("Add")')
+      if (addBtn) await addBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1200))
+
+    // Click visible checkbox on first task in the active floating panel to complete
     await mainWin.evaluate(() => {
       const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'))
       const visible = checkboxes.find((el) => el.offsetParent !== null)

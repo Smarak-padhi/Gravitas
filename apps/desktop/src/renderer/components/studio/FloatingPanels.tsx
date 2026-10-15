@@ -27,12 +27,26 @@ import {
   Square,
   Flame,
   Info,
+  Download,
+  Upload,
+  Plus,
+  FolderGit2,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react'
 import { marked } from 'marked'
 import katex from 'katex'
 import { ThreeOfficeViewport } from '../ThreeOfficeViewport.js'
 import type { MascotId } from './MascotFamily.js'
 import { SPECIALIST_CONFIGS, QuickPromptItem } from './SpecialistEngine.js'
+import {
+  StudyFlashcard,
+  DEFAULT_FLASHCARDS,
+  DEFAULT_ENGINEERING_PROJECTS,
+  EngineeringProject,
+  exportToObsidianMarkdown,
+  parseObsidianMarkdown,
+} from './KnowledgeHubEngine.js'
 
 export type ActivePanel =
   | 'NONE'
@@ -197,6 +211,11 @@ export interface FloatingPanelsProps {
   onClearHistory?: (agentId: MascotId) => void
   focusTimer?: { active: boolean; remainingSeconds: number; durationMinutes: number } | null
   onStopFocusTimer?: () => void
+  projects?: readonly EngineeringProject[]
+  onAddTask?: (title: string, subject?: string) => Promise<void>
+  onReviewFlashcard?: (cardId: string, rating: 'again' | 'good' | 'easy') => void
+  onExportMarkdown?: (note: StudyNoteItem) => void
+  onImportMarkdown?: (imported: { title: string; subject: string; content: string }) => void
 }
 
 export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
@@ -224,6 +243,11 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   onClearHistory,
   focusTimer,
   onStopFocusTimer,
+  projects = DEFAULT_ENGINEERING_PROJECTS,
+  onAddTask,
+  onReviewFlashcard,
+  onExportMarkdown,
+  onImportMarkdown,
 }) => {
   // Grav Chat State
   const [inputText, setInputText] = useState('')
@@ -237,8 +261,22 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   const [noteContent, setNoteContent] = useState(activeNote?.content || DEFAULT_STUDY_NOTES[0].content)
   const [cleanContent, setCleanContent] = useState(activeNote?.content || DEFAULT_STUDY_NOTES[0].content)
   const [cleanTitle, setCleanTitle] = useState(activeNote?.title || DEFAULT_STUDY_NOTES[0].title)
-  const [noteViewMode, setNoteViewMode] = useState<'edit' | 'preview' | 'split'>('edit')
+  const [noteViewMode, setNoteViewMode] = useState<'edit' | 'preview' | 'split' | 'flashcards'>('edit')
   const [noteSavedFeedback, setNoteSavedFeedback] = useState(false)
+  const [exportFeedback, setExportFeedback] = useState<string | null>(null)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importInputText, setImportInputText] = useState('')
+
+  // Active Recall Flashcards State (Phase 05)
+  const [activeDeckSubject, setActiveDeckSubject] = useState<string>('Algorithms')
+  const [currentCardIndex, setCurrentCardIndex] = useState(0)
+  const [showCardSolution, setShowCardSolution] = useState(false)
+  const [reviewCountToday, setReviewCountToday] = useState(0)
+  const [newLinkedTaskInput, setNewLinkedTaskInput] = useState('')
+
+  // Cipher Tasks & Projects State (Phase 05)
+  const [cipherActiveTab, setCipherActiveTab] = useState<'tasks' | 'projects'>('tasks')
+  const [newTaskInput, setNewTaskInput] = useState('')
 
   // Unsaved Changes Protection Guard (Gate B2 / B3)
   const [showUnsavedGuard, setShowUnsavedGuard] = useState(false)
@@ -1033,7 +1071,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {/* Mode Toggle: Edit | Preview | Split */}
+              {/* Mode Toggle: Edit | Preview | Split | Flashcards */}
               <div
                 style={{
                   display: 'flex',
@@ -1101,7 +1139,86 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   <Columns size={11} />
                   <span>Split</span>
                 </button>
+                <button
+                  onClick={() => setNoteViewMode('flashcards')}
+                  title="Active Recall & Spaced Repetition Decks"
+                  style={{
+                    background: noteViewMode === 'flashcards' ? '#27342C' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: noteViewMode === 'flashcards' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Sparkles size={11} color={noteViewMode === 'flashcards' ? '#81B29A' : '#8E949B'} />
+                  <span>Flashcards</span>
+                </button>
               </div>
+
+              {/* Obsidian Export & Import Action Buttons */}
+              <button
+                onClick={() => {
+                  const currentNote = notesList.find((n) => n.id === selectedNoteId) || {
+                    id: selectedNoteId,
+                    title: noteTitle,
+                    subject: noteSubject,
+                    content: noteContent,
+                  }
+                  const linkedTasks = dueTasks
+                    .filter((t) => !t.subject || t.subject.toLowerCase() === noteSubject.toLowerCase())
+                    .map((t) => t.title)
+                  const obsidianMd = exportToObsidianMarkdown(currentNote, linkedTasks)
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(obsidianMd)
+                  }
+                  if (onExportMarkdown) {
+                    onExportMarkdown(currentNote)
+                  }
+                  setExportFeedback('Exported! 📋')
+                  setTimeout(() => setExportFeedback(null), 2500)
+                }}
+                title="Export note to Obsidian Markdown with YAML frontmatter & WikiLinks"
+                style={{
+                  background: '#151D18',
+                  border: '1px solid #2B3830',
+                  borderRadius: '6px',
+                  padding: '5px 9px',
+                  fontSize: '11px',
+                  color: '#81B29A',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Download size={12} />
+                <span>{exportFeedback || 'Obsidian'}</span>
+              </button>
+
+              <button
+                onClick={() => setShowImportModal(true)}
+                title="Import Markdown note with YAML frontmatter"
+                style={{
+                  background: '#151D18',
+                  border: '1px solid #2B3830',
+                  borderRadius: '6px',
+                  padding: '5px 9px',
+                  fontSize: '11px',
+                  color: '#EDEAE3',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Upload size={12} />
+                <span>Import</span>
+              </button>
 
               {/* Save Button */}
               <button
@@ -1200,58 +1317,471 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           </div>
 
           {/* Body Content: Edit, Preview, or Split */}
-          <div style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: '12px 20px' }}>
-            {/* Editor Pane */}
-            {(noteViewMode === 'edit' || noteViewMode === 'split') && (
+          {/* Body Content: Flashcards Deck OR Edit/Preview/Split Editor */}
+          {noteViewMode === 'flashcards' ? (
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '16px 20px',
+                overflowY: 'auto',
+                gap: '12px',
+              }}
+            >
+              {(() => {
+                const availableDecks = Object.keys(DEFAULT_FLASHCARDS)
+                const currentDeck = DEFAULT_FLASHCARDS[activeDeckSubject] || DEFAULT_FLASHCARDS.Algorithms
+                const cardIndex = currentCardIndex % currentDeck.length
+                const currentCard = currentDeck[cardIndex]
+
+                return (
+                  <>
+                    {/* Deck Selector & Progress Header */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#151D18',
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #243027',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', color: '#9FA4A8' }}>Deck:</span>
+                        <select
+                          value={activeDeckSubject}
+                          onChange={(e) => {
+                            setActiveDeckSubject(e.target.value)
+                            setCurrentCardIndex(0)
+                            setShowCardSolution(false)
+                          }}
+                          style={{
+                            background: '#1D2721',
+                            border: '1px solid #2E3E34',
+                            borderRadius: '6px',
+                            color: '#EDEAE3',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            padding: '3px 8px',
+                            outline: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {availableDecks.map((s) => (
+                            <option key={s} value={s}>
+                              {s} ({DEFAULT_FLASHCARDS[s]?.length || 0} cards)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '11px', color: '#81B29A', fontWeight: 600 }}>
+                          Reviewed Today: {reviewCountToday}
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            onClick={() => {
+                              setShowCardSolution(false)
+                              setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : currentDeck.length - 1))
+                            }}
+                            style={{
+                              background: '#1D2721',
+                              border: '1px solid #2E3E34',
+                              borderRadius: '4px',
+                              padding: '3px 6px',
+                              color: '#EDEAE3',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <ChevronLeft size={13} />
+                          </button>
+                          <span style={{ fontSize: '11.5px', color: '#EDEAE3', minWidth: '60px', textAlign: 'center' }}>
+                            {cardIndex + 1} / {currentDeck.length}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setShowCardSolution(false)
+                              setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
+                            }}
+                            style={{
+                              background: '#1D2721',
+                              border: '1px solid #2E3E34',
+                              borderRadius: '4px',
+                              padding: '3px 6px',
+                              color: '#EDEAE3',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <ChevronRight size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Flashcard Presentation Surface */}
+                    {currentCard && (
+                      <div
+                        style={{
+                          flex: 1,
+                          background: '#131815',
+                          border: '1px solid #28372D',
+                          borderRadius: '12px',
+                          padding: '20px 24px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+                        }}
+                      >
+                        <div>
+                          {/* Card Meta Badges */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: '14px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  color: '#81B29A',
+                                  background: 'rgba(129, 178, 154, 0.12)',
+                                  border: '1px solid rgba(129, 178, 154, 0.3)',
+                                  padding: '2px 8px',
+                                  borderRadius: '12px',
+                                }}
+                              >
+                                {currentCard.topic}
+                              </span>
+                              <span style={{ fontSize: '11px', color: '#687A70' }}>
+                                SRS Interval: {currentCard.intervalDays}d • Ease: {currentCard.easeFactor}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '11px', color: '#73857B' }}>
+                              Card #{currentCard.id}
+                            </span>
+                          </div>
+
+                          {/* Question (KaTeX Math Rendered) */}
+                          <div style={{ fontSize: '14.5px', fontWeight: 600, color: '#EDEAE3', lineHeight: 1.5, marginBottom: '16px' }}>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: renderMarkdownWithMath(currentCard.question),
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Solution Area or Reveal Button */}
+                        <div>
+                          {!showCardSolution ? (
+                            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                              <button
+                                onClick={() => setShowCardSolution(true)}
+                                style={{
+                                  background: 'rgba(129, 178, 154, 0.15)',
+                                  border: '1px solid #81B29A',
+                                  borderRadius: '8px',
+                                  padding: '8px 20px',
+                                  fontSize: '12.5px',
+                                  fontWeight: 600,
+                                  color: '#81B29A',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  transition: 'all 0.15s ease',
+                                }}
+                              >
+                                <Eye size={14} />
+                                <span>Reveal Solution & Active-Recall Formula</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                background: '#18211C',
+                                border: '1px solid #2C3C32',
+                                borderRadius: '8px',
+                                padding: '14px 18px',
+                                marginTop: '8px',
+                              }}
+                            >
+                              <div style={{ fontSize: '11.5px', fontWeight: 600, color: '#81B29A', marginBottom: '8px' }}>
+                                Verified Solution & Derivation:
+                              </div>
+                              <div
+                                style={{ fontSize: '13px', color: '#EDEAE3', lineHeight: 1.6 }}
+                                dangerouslySetInnerHTML={{
+                                  __html: renderMarkdownWithMath(currentCard.solution),
+                                }}
+                              />
+
+                              {/* SM-2 Recall Rating Buttons */}
+                              <div
+                                style={{
+                                  marginTop: '14px',
+                                  paddingTop: '10px',
+                                  borderTop: '1px solid #243027',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                }}
+                              >
+                                <span style={{ fontSize: '11px', color: '#8E949B' }}>
+                                  Rate your recall confidence:
+                                </span>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                  <button
+                                    onClick={() => {
+                                      onReviewFlashcard?.(currentCard.id, 'again')
+                                      setReviewCountToday((c) => c + 1)
+                                      setShowCardSolution(false)
+                                      setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
+                                    }}
+                                    style={{
+                                      background: 'rgba(231, 111, 81, 0.15)',
+                                      border: '1px solid #E76F51',
+                                      borderRadius: '6px',
+                                      padding: '5px 12px',
+                                      fontSize: '11.5px',
+                                      fontWeight: 600,
+                                      color: '#E76F51',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Again (&lt;1d)
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      onReviewFlashcard?.(currentCard.id, 'good')
+                                      setReviewCountToday((c) => c + 1)
+                                      setShowCardSolution(false)
+                                      setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
+                                    }}
+                                    style={{
+                                      background: 'rgba(74, 137, 200, 0.15)',
+                                      border: '1px solid #4A89C8',
+                                      borderRadius: '6px',
+                                      padding: '5px 12px',
+                                      fontSize: '11.5px',
+                                      fontWeight: 600,
+                                      color: '#4A89C8',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Good (3d)
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      onReviewFlashcard?.(currentCard.id, 'easy')
+                                      setReviewCountToday((c) => c + 1)
+                                      setShowCardSolution(false)
+                                      setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
+                                    }}
+                                    style={{
+                                      background: 'rgba(129, 178, 154, 0.15)',
+                                      border: '1px solid #81B29A',
+                                      borderRadius: '6px',
+                                      padding: '5px 12px',
+                                      fontSize: '11.5px',
+                                      fontWeight: 600,
+                                      color: '#81B29A',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Easy (7d)
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
+            </div>
+          ) : (
+            <>
+              {/* Editor & Preview Panes */}
+              <div style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: '12px 20px 6px 20px' }}>
+                {/* Editor Pane */}
+                {(noteViewMode === 'edit' || noteViewMode === 'split') && (
+                  <div
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      marginRight: noteViewMode === 'split' ? '12px' : 0,
+                    }}
+                  >
+                    <textarea
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
+                      style={{
+                        flex: 1,
+                        width: '100%',
+                        background: '#121714',
+                        border: '1px solid #243027',
+                        borderRadius: '8px',
+                        padding: '14px',
+                        color: '#EDEAE3',
+                        fontSize: '12.5px',
+                        fontFamily: 'Geist Mono, Cascadia Code, monospace',
+                        lineHeight: 1.6,
+                        resize: 'none',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Preview Pane with KaTeX Math Rendering (Gate B3) */}
+                {(noteViewMode === 'preview' || noteViewMode === 'split') && (
+                  <div
+                    style={{
+                      flex: 1,
+                      background: '#131815',
+                      border: '1px solid #243027',
+                      borderRadius: '8px',
+                      padding: '16px 20px',
+                      overflowY: 'auto',
+                      color: '#EDEAE3',
+                      fontSize: '13px',
+                      lineHeight: 1.6,
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: renderMarkdownWithMath(noteContent),
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Linked Coursework Tasks Section (Phase 05) */}
               <div
                 style={{
-                  flex: 1,
+                  padding: '8px 20px',
+                  background: 'rgba(16, 21, 18, 0.85)',
+                  borderTop: '1px solid #222C25',
                   display: 'flex',
-                  flexDirection: 'column',
-                  marginRight: noteViewMode === 'split' ? '12px' : 0,
+                  alignItems: 'center',
+                  gap: '12px',
                 }}
               >
-                <textarea
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '130px' }}>
+                  <CheckCircle size={13} color="#81B29A" />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#EDEAE3' }}>
+                    Linked Tasks ({dueTasks.filter((t) => !t.subject || t.subject.toLowerCase() === noteSubject.toLowerCase()).length}):
+                  </span>
+                </div>
+
+                <div
                   style={{
                     flex: 1,
-                    width: '100%',
-                    background: '#121714',
-                    border: '1px solid #243027',
-                    borderRadius: '8px',
-                    padding: '14px',
-                    color: '#EDEAE3',
-                    fontSize: '12.5px',
-                    fontFamily: 'Geist Mono, Cascadia Code, monospace',
-                    lineHeight: 1.6,
-                    resize: 'none',
-                    outline: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    overflowX: 'auto',
+                    whiteSpace: 'nowrap',
                   }}
-                />
-              </div>
-            )}
+                >
+                  {dueTasks
+                    .filter((t) => !t.subject || t.subject.toLowerCase() === noteSubject.toLowerCase())
+                    .slice(0, 3)
+                    .map((t) => (
+                      <span
+                        key={t.id}
+                        style={{
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          background: '#19221C',
+                          border: '1px solid #2C3C30',
+                          color: '#EDEAE3',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={t.completed}
+                          onChange={(e) => onTaskCompleted(t.id, e.target.checked)}
+                          style={{ cursor: 'pointer', accentColor: '#81B29A' }}
+                        />
+                        <span style={{ textDecoration: t.completed ? 'line-through' : 'none' }}>
+                          {t.title}
+                        </span>
+                      </span>
+                    ))}
+                </div>
 
-            {/* Preview Pane with KaTeX Math Rendering (Gate B3) */}
-            {(noteViewMode === 'preview' || noteViewMode === 'split') && (
-              <div
-                style={{
-                  flex: 1,
-                  background: '#131815',
-                  border: '1px solid #243027',
-                  borderRadius: '8px',
-                  padding: '16px 20px',
-                  overflowY: 'auto',
-                  color: '#EDEAE3',
-                  fontSize: '13px',
-                  lineHeight: 1.6,
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: renderMarkdownWithMath(noteContent),
-                }}
-              />
-            )}
-          </div>
+                {/* Inline task adder */}
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={newLinkedTaskInput}
+                    onChange={(e) => setNewLinkedTaskInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newLinkedTaskInput.trim()) {
+                        onAddTask?.(newLinkedTaskInput.trim(), noteSubject)
+                        setNewLinkedTaskInput('')
+                      }
+                    }}
+                    placeholder={`+ Practice task for ${noteSubject}...`}
+                    style={{
+                      background: '#121714',
+                      border: '1px solid #243027',
+                      borderRadius: '5px',
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      color: '#EDEAE3',
+                      outline: 'none',
+                      width: '180px',
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (newLinkedTaskInput.trim()) {
+                        onAddTask?.(newLinkedTaskInput.trim(), noteSubject)
+                        setNewLinkedTaskInput('')
+                      }
+                    }}
+                    disabled={!newLinkedTaskInput.trim()}
+                    style={{
+                      background: '#81B29A',
+                      border: 'none',
+                      borderRadius: '5px',
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#101713',
+                      cursor: newLinkedTaskInput.trim() ? 'pointer' : 'not-allowed',
+                      opacity: newLinkedTaskInput.trim() ? 1 : 0.5,
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Footer Status */}
           <div
@@ -1356,6 +1886,134 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               </div>
             </div>
           )}
+
+          {/* Obsidian Markdown Import Modal (Phase 05) */}
+          {showImportModal && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(10, 14, 12, 0.88)',
+                backdropFilter: 'blur(6px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 70,
+              }}
+            >
+              <div
+                style={{
+                  width: '520px',
+                  maxWidth: '92%',
+                  background: '#17201B',
+                  border: '1px solid #2F4034',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  boxShadow: '0 16px 40px rgba(0, 0, 0, 0.7)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#81B29A' }}>
+                    <Upload size={16} />
+                    <span style={{ fontWeight: 600, fontSize: '13.5px', color: '#EDEAE3' }}>
+                      Import Obsidian Markdown
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowImportModal(false)}
+                    style={{ background: 'transparent', border: 'none', color: '#8E949B', cursor: 'pointer' }}
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div style={{ fontSize: '11.5px', color: '#9FA4A8', lineHeight: 1.4 }}>
+                  Paste Markdown containing optional YAML frontmatter (<code>title: "..."</code>, <code>subject: "..."</code>) and <code>[[WikiLinks]]</code>.
+                </div>
+
+                <textarea
+                  value={importInputText}
+                  onChange={(e) => setImportInputText(e.target.value)}
+                  placeholder={`---\ntitle: "Distributed Consensus Protocols"\nsubject: "Distributed Systems"\ntags:\n  - study\n---\n# Paxos & Raft Summary\n\nNotes on leader election...`}
+                  style={{
+                    width: '100%',
+                    height: '180px',
+                    background: '#111713',
+                    border: '1px solid #233027',
+                    borderRadius: '8px',
+                    padding: '10px 12px',
+                    color: '#EDEAE3',
+                    fontSize: '11.5px',
+                    fontFamily: 'monospace',
+                    resize: 'none',
+                    outline: 'none',
+                  }}
+                />
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                  <button
+                    onClick={() => setShowImportModal(false)}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid #2E3E34',
+                      borderRadius: '6px',
+                      padding: '5px 12px',
+                      color: '#9FA4A8',
+                      fontSize: '11.5px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!importInputText.trim()) return
+                      const parsed = parseObsidianMarkdown(importInputText)
+                      const newId = `note_import_${Date.now()}`
+                      const importedNote: StudyNoteItem = {
+                        id: newId,
+                        title: parsed.title,
+                        subject: parsed.subject,
+                        content: parsed.content,
+                      }
+                      setNotesList((prev) => [importedNote, ...prev])
+                      setSelectedNoteId(importedNote.id)
+                      setNoteTitle(importedNote.title)
+                      setNoteSubject(importedNote.subject)
+                      setNoteContent(importedNote.content)
+                      setCleanTitle(importedNote.title)
+                      setCleanContent(importedNote.content)
+                      await onSaveNote(importedNote)
+                      if (onImportMarkdown) {
+                        onImportMarkdown(importedNote)
+                      }
+                      setShowImportModal(false)
+                      setImportInputText('')
+                      setNoteSavedFeedback(true)
+                      setTimeout(() => setNoteSavedFeedback(false), 2500)
+                    }}
+                    disabled={!importInputText.trim()}
+                    style={{
+                      background: '#81B29A',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '5px 14px',
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      color: '#101713',
+                      cursor: importInputText.trim() ? 'pointer' : 'not-allowed',
+                      opacity: importInputText.trim() ? 1 : 0.5,
+                    }}
+                  >
+                    Import & Save to SQLite
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -1394,12 +2052,60 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Clock size={16} color="#4A89C8" />
-              <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
-                Cipher's Agenda — Tasks & Coursework
-              </span>
+              {/* Tab Switcher: Daily Tasks vs Engineering Projects */}
+              <div
+                style={{
+                  display: 'flex',
+                  background: '#141A22',
+                  border: '1px solid #242E3B',
+                  borderRadius: '6px',
+                  padding: '2px',
+                  gap: '2px',
+                }}
+              >
+                <button
+                  onClick={() => setCipherActiveTab('tasks')}
+                  style={{
+                    background: cipherActiveTab === 'tasks' ? '#212B38' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: cipherActiveTab === 'tasks' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontWeight: cipherActiveTab === 'tasks' ? 600 : 400,
+                  }}
+                >
+                  <CheckCircle size={11} color={cipherActiveTab === 'tasks' ? '#4A89C8' : '#8E949B'} />
+                  <span>Tasks & Coursework ({dueTasks.length + dueAssignments.length})</span>
+                </button>
+                <button
+                  onClick={() => setCipherActiveTab('projects')}
+                  style={{
+                    background: cipherActiveTab === 'projects' ? '#212B38' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: cipherActiveTab === 'projects' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontWeight: cipherActiveTab === 'projects' ? 600 : 400,
+                  }}
+                >
+                  <FolderGit2 size={11} color={cipherActiveTab === 'projects' ? '#4A89C8' : '#8E949B'} />
+                  <span>Engineering Projects ({projects.length})</span>
+                </button>
+              </div>
+
               <span
                 style={{
-                  fontSize: '10.5px',
+                  fontSize: '10px',
                   padding: '2px 6px',
                   borderRadius: '4px',
                   background: '#1A232F',
@@ -1407,7 +2113,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   fontWeight: 600,
                 }}
               >
-                SQLite WAL Store
+                SQLite WAL
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1440,7 +2146,70 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
             </div>
           </div>
 
-          {/* Agenda Items List */}
+          {/* Quick Task Input Bar (When in Tasks Tab) */}
+          {cipherActiveTab === 'tasks' && (
+            <div
+              style={{
+                padding: '9px 16px',
+                background: '#141A22',
+                borderBottom: '1px solid #222C38',
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'center',
+              }}
+            >
+              <input
+                type="text"
+                value={newTaskInput}
+                onChange={(e) => setNewTaskInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newTaskInput.trim()) {
+                    onAddTask?.(newTaskInput.trim())
+                    setNewTaskInput('')
+                  }
+                }}
+                placeholder="+ Add new task or milestone to SQLite WAL..."
+                style={{
+                  flex: 1,
+                  background: '#10141A',
+                  border: '1px solid #263342',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  color: '#EDEAE3',
+                  fontSize: '12px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                onClick={() => {
+                  if (newTaskInput.trim()) {
+                    onAddTask?.(newTaskInput.trim())
+                    setNewTaskInput('')
+                  }
+                }}
+                disabled={!newTaskInput.trim()}
+                style={{
+                  background: '#4A89C8',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 14px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  color: '#10141A',
+                  cursor: newTaskInput.trim() ? 'pointer' : 'not-allowed',
+                  opacity: newTaskInput.trim() ? 1 : 0.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <Plus size={13} />
+                <span>Add</span>
+              </button>
+            </div>
+          )}
+
+          {/* Content Pane: Tasks List OR Engineering Projects */}
           <div
             style={{
               flex: 1,
@@ -1451,111 +2220,248 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               gap: '10px',
             }}
           >
-            {dueTasks.length === 0 && dueAssignments.length === 0 ? (
-              <div
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#7B8490',
-                  fontSize: '13px',
-                }}
-              >
-                <CheckCircle size={32} color="#81B29A" style={{ marginBottom: '10px' }} />
-                <span style={{ fontWeight: 600, color: '#EDEAE3' }}>Zero overdue items</span>
-                <span style={{ fontSize: '12px', marginTop: '4px' }}>Your daily schedule is clean.</span>
-              </div>
+            {cipherActiveTab === 'tasks' ? (
+              dueTasks.length === 0 && dueAssignments.length === 0 ? (
+                <div
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#7B8490',
+                    fontSize: '13px',
+                  }}
+                >
+                  <CheckCircle size={32} color="#81B29A" style={{ marginBottom: '10px' }} />
+                  <span style={{ fontWeight: 600, color: '#EDEAE3' }}>Zero overdue items</span>
+                  <span style={{ fontSize: '12px', marginTop: '4px' }}>Your daily schedule is clean.</span>
+                </div>
+              ) : (
+                <>
+                  {dueTasks.map((t) => (
+                    <div
+                      key={t.id}
+                      style={{
+                        background: '#14181F',
+                        border: '1px solid #242E3B',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <input
+                          type="checkbox"
+                          checked={t.completed}
+                          onChange={(e) => onTaskCompleted(t.id, e.target.checked)}
+                          style={{ cursor: 'pointer', accentColor: '#4A89C8' }}
+                        />
+                        <div>
+                          <div
+                            style={{
+                              fontSize: '13px',
+                              color: t.completed ? '#75808C' : '#EDEAE3',
+                              textDecoration: t.completed ? 'line-through' : 'none',
+                            }}
+                          >
+                            {t.title}
+                          </div>
+                          {t.subject && (
+                            <div style={{ fontSize: '11px', color: '#4A89C8', marginTop: '2px' }}>
+                              {t.subject}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: '#1F2732',
+                          color: '#9AA6B4',
+                        }}
+                      >
+                        Task
+                      </span>
+                    </div>
+                  ))}
+
+                  {dueAssignments.map((a) => (
+                    <div
+                      key={a.id}
+                      style={{
+                        background: '#14181F',
+                        border: '1px solid #242E3B',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Clock size={14} color="#F4A261" />
+                        <div>
+                          <div style={{ fontSize: '13px', color: '#EDEAE3' }}>{a.title}</div>
+                          <div style={{ fontSize: '11px', color: '#81B29A', marginTop: '2px' }}>
+                            {a.subjectCode} • Due {a.dueDate?.slice(0, 10)}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: '#2B231D',
+                          color: '#F4A261',
+                        }}
+                      >
+                        Coursework
+                      </span>
+                    </div>
+                  ))}
+                </>
+              )
             ) : (
-              <>
-                {dueTasks.map((t) => (
+              /* Engineering Projects List */
+              projects.map((proj) => {
+                const statusColor =
+                  proj.status === 'DONE'
+                    ? '#81B29A'
+                    : proj.status === 'IN_PROGRESS'
+                    ? '#4A89C8'
+                    : '#F4A261'
+
+                return (
                   <div
-                    key={t.id}
+                    key={proj.id}
                     style={{
-                      background: '#14181F',
-                      border: '1px solid #242E3B',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
+                      background: '#141922',
+                      border: '1px solid #232E3C',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <input
-                        type="checkbox"
-                        checked={t.completed}
-                        onChange={(e) => onTaskCompleted(t.id, e.target.checked)}
-                        style={{ cursor: 'pointer', accentColor: '#4A89C8' }}
-                      />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#EDEAE3' }}>
+                          {proj.name}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#8E98A5', marginTop: '3px', lineHeight: 1.4 }}>
+                          {proj.description}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          background: `${statusColor}18`,
+                          border: `1px solid ${statusColor}44`,
+                          color: statusColor,
+                        }}
+                      >
+                        {proj.status.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '11px',
+                          color: '#7E8B9B',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        <span>Sprint Velocity & Milestones</span>
+                        <span style={{ fontWeight: 600, color: statusColor }}>{proj.progressPercent}%</span>
+                      </div>
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '6px',
+                          background: '#1D2531',
+                          borderRadius: '3px',
+                          overflow: 'hidden',
+                        }}
+                      >
                         <div
                           style={{
-                            fontSize: '13px',
-                            color: t.completed ? '#75808C' : '#EDEAE3',
-                            textDecoration: t.completed ? 'line-through' : 'none',
+                            width: `${proj.progressPercent}%`,
+                            height: '100%',
+                            background: statusColor,
+                            borderRadius: '3px',
+                            transition: 'width 0.3s ease',
                           }}
-                        >
-                          {t.title}
-                        </div>
-                        {t.subject && (
-                          <div style={{ fontSize: '11px', color: '#4A89C8', marginTop: '2px' }}>
-                            {t.subject}
-                          </div>
-                        )}
+                        />
                       </div>
                     </div>
-                    <span
-                      style={{
-                        fontSize: '10.5px',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        background: '#1F2732',
-                        color: '#9AA6B4',
-                      }}
-                    >
-                      Task
-                    </span>
-                  </div>
-                ))}
 
-                {dueAssignments.map((a) => (
-                  <div
-                    key={a.id}
-                    style={{
-                      background: '#14181F',
-                      border: '1px solid #242E3B',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Clock size={14} color="#F4A261" />
-                      <div>
-                        <div style={{ fontSize: '13px', color: '#EDEAE3' }}>{a.title}</div>
-                        <div style={{ fontSize: '11px', color: '#81B29A', marginTop: '2px' }}>
-                          {a.subjectCode} • Due {a.dueDate?.slice(0, 10)}
-                        </div>
-                      </div>
-                    </div>
-                    <span
+                    {/* Tech Stack Chips & Linked Note Action */}
+                    <div
                       style={{
-                        fontSize: '10.5px',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        background: '#2B231D',
-                        color: '#F4A261',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: '2px',
                       }}
                     >
-                      Coursework
-                    </span>
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {proj.techStack.map((tech) => (
+                          <span
+                            key={tech}
+                            style={{
+                              fontSize: '10.5px',
+                              padding: '2px 7px',
+                              borderRadius: '4px',
+                              background: '#19202B',
+                              border: '1px solid #253140',
+                              color: '#9EABB8',
+                            }}
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+
+                      {proj.linkedNoteId && onOpenAdaNotes && (
+                        <button
+                          onClick={() => onOpenAdaNotes()}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid rgba(129, 178, 154, 0.4)',
+                            borderRadius: '6px',
+                            padding: '3px 8px',
+                            fontSize: '11px',
+                            color: '#81B29A',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                          title="Jump to associated technical notes in Ada's Knowledge Hub"
+                        >
+                          <BookOpen size={11} />
+                          <span>Study Note ↗</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </>
+                )
+              })
             )}
           </div>
         </motion.div>

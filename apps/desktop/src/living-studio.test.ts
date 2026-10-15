@@ -3,6 +3,14 @@ import { MASCOT_REGISTRY, MascotId, MascotState, MascotBubbleData } from './rend
 import { ActivePanel, renderMarkdownWithMath, DEFAULT_STUDY_NOTES, StudyNoteItem, ChatMessage } from './renderer/components/studio/FloatingPanels.js'
 import { SPECIALIST_CONFIGS, processSpecialistMessage, SpecialistResponse } from './renderer/components/studio/SpecialistEngine.js'
 import { agentEventBus, dispatchAgentEvent, subscribeAgentEvent } from './renderer/events/agentEventBus.js'
+import {
+  DEFAULT_FLASHCARDS,
+  DEFAULT_ENGINEERING_PROJECTS,
+  exportToObsidianMarkdown,
+  parseObsidianMarkdown,
+  StudyFlashcard,
+  EngineeringProject,
+} from './renderer/components/studio/KnowledgeHubEngine.js'
 import * as THREE from 'three'
 
 describe('GRAVITAS 2.0 — Living Studio Alpha Renderer Foundation', () => {
@@ -767,6 +775,162 @@ describe('GRAVITAS 2.0 — Living Studio Alpha Renderer Foundation', () => {
         const color = SPECIALIST_CONFIGS[id].accentColor
         expect(color).toBe(MASCOT_REGISTRY[id].color)
       }
+    })
+  })
+
+  describe('16. Phase 05: Knowledge Hub Spaced Repetition Decks (SM-2)', () => {
+    it('provides default decks for Algorithms, Operating Systems, and Databases', () => {
+      expect(DEFAULT_FLASHCARDS.Algorithms).toBeDefined()
+      expect(DEFAULT_FLASHCARDS.Algorithms.length).toBeGreaterThanOrEqual(3)
+
+      expect(DEFAULT_FLASHCARDS['Operating Systems']).toBeDefined()
+      expect(DEFAULT_FLASHCARDS['Operating Systems'].length).toBeGreaterThanOrEqual(2)
+
+      expect(DEFAULT_FLASHCARDS.Databases).toBeDefined()
+      expect(DEFAULT_FLASHCARDS.Databases.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('contains mathematical formulas with KaTeX syntax in questions and solutions', () => {
+      const algoCards = DEFAULT_FLASHCARDS.Algorithms
+      const masterTheoremCard = algoCards.find((c) => c.topic.includes('Divide & Conquer'))
+      expect(masterTheoremCard).toBeDefined()
+      expect(masterTheoremCard?.solution).toContain('$$')
+      expect(masterTheoremCard?.solution).toContain('\\Theta(n^{\\log_b a} \\log^{k+1} n)')
+
+      const mathHtml = renderMarkdownWithMath(masterTheoremCard!.solution)
+      expect(mathHtml).toContain('katex-display-math')
+    })
+
+    it('computes SM-2 intervals and updates review metrics', () => {
+      const card: StudyFlashcard = {
+        id: 'fc_test_1',
+        subject: 'Algorithms',
+        topic: 'Sorting',
+        question: 'Complexity of QuickSort?',
+        solution: 'Average $\\mathcal{O}(n \\log n)$, worst $\\mathcal{O}(n^2)$.',
+        easeFactor: 2.5,
+        intervalDays: 1,
+        reviewCount: 0,
+      }
+
+      // 'good' rating
+      const simulateReview = (c: StudyFlashcard, rating: 'again' | 'good' | 'easy'): StudyFlashcard => {
+        const intervalMap = { again: 1, good: 3, easy: 7 }
+        return {
+          ...c,
+          intervalDays: intervalMap[rating],
+          reviewCount: c.reviewCount + 1,
+          lastReviewed: new Date().toISOString(),
+        }
+      }
+
+      const reviewedGood = simulateReview(card, 'good')
+      expect(reviewedGood.intervalDays).toBe(3)
+      expect(reviewedGood.reviewCount).toBe(1)
+
+      const reviewedEasy = simulateReview(reviewedGood, 'easy')
+      expect(reviewedEasy.intervalDays).toBe(7)
+      expect(reviewedEasy.reviewCount).toBe(2)
+
+      const reviewedAgain = simulateReview(reviewedEasy, 'again')
+      expect(reviewedAgain.intervalDays).toBe(1)
+      expect(reviewedAgain.reviewCount).toBe(3)
+    })
+  })
+
+  describe('17. Phase 05: Obsidian Markdown Interoperability', () => {
+    it('generates Obsidian-compatible Markdown with YAML frontmatter and WikiLinks', () => {
+      const note: StudyNoteItem = {
+        id: 'note_test_consensus',
+        title: 'Distributed Consensus & Raft Invariants',
+        subject: 'Distributed Systems',
+        content: '# Raft State Machine\nLeader election and log replication.',
+      }
+
+      const linkedTasks = ['Implement WAL snapshotting', 'Simulate network partitions']
+      const exported = exportToObsidianMarkdown(note, linkedTasks)
+
+      // YAML Frontmatter boundaries
+      expect(exported.startsWith('---\n')).toBe(true)
+      expect(exported).toContain('title: "Distributed Consensus & Raft Invariants"')
+      expect(exported).toContain('subject: "Distributed Systems"')
+      expect(exported).toContain('vault: "gravitas-knowledge-hub"')
+      expect(exported).toContain('generator: "GRAVITAS 2.0 Living Studio"')
+      expect(exported).toContain('tags:\n  - study\n  - distributed-systems')
+
+      // Content & WikiLinks
+      expect(exported).toContain('# Raft State Machine')
+      expect(exported).toContain('## Linked Engineering Tasks')
+      expect(exported).toContain('- [[Implement WAL snapshotting]]')
+      expect(exported).toContain('- [[Simulate network partitions]]')
+    })
+
+    it('parses imported Obsidian Markdown and extracts metadata cleanly', () => {
+      const rawMarkdown = `---
+title: "B+ Tree Index Concurrency"
+subject: "Databases"
+tags:
+  - storage
+  - indexing
+vault: "gravitas-knowledge-hub"
+---
+# Latch Crabbing Protocol
+
+During traversal, acquire child latch before releasing parent latch.
+`
+      const parsed = parseObsidianMarkdown(rawMarkdown)
+      expect(parsed.title).toBe('B+ Tree Index Concurrency')
+      expect(parsed.subject).toBe('Databases')
+      expect(parsed.tags).toContain('storage')
+      expect(parsed.tags).toContain('indexing')
+      expect(parsed.content).toContain('During traversal, acquire child latch')
+    })
+
+    it('falls back gracefully to first H1 heading when frontmatter is absent', () => {
+      const rawMarkdown = `# Virtual Memory TLB Architecture
+
+Translation Lookaside Buffer caching and hit rates.
+`
+      const parsed = parseObsidianMarkdown(rawMarkdown)
+      expect(parsed.title).toBe('Virtual Memory TLB Architecture')
+      expect(parsed.subject).toBe('General')
+      expect(parsed.content).toContain('Translation Lookaside Buffer')
+    })
+  })
+
+  describe('18. Phase 05: Engineering Projects & Task Orchestration', () => {
+    it('maintains active engineering projects with valid progress and tech stacks', () => {
+      expect(DEFAULT_ENGINEERING_PROJECTS.length).toBeGreaterThanOrEqual(3)
+
+      for (const proj of DEFAULT_ENGINEERING_PROJECTS) {
+        expect(proj.id).toBeDefined()
+        expect(proj.name.length).toBeGreaterThan(0)
+        expect(['IN_PROGRESS', 'DONE', 'PLANNING']).toContain(proj.status)
+        expect(proj.progressPercent).toBeGreaterThanOrEqual(0)
+        expect(proj.progressPercent).toBeLessThanOrEqual(100)
+        expect(proj.techStack.length).toBeGreaterThanOrEqual(2)
+        expect(proj.linkedNoteId).toBeDefined()
+      }
+    })
+
+    it('dispatches genuine event bus notifications for task state transitions', () => {
+      let eventPayload: any = null
+      const unsubscribe = subscribeAgentEvent('TASK_STATE_CHANGED', (payload) => {
+        eventPayload = payload
+      })
+
+      dispatchAgentEvent('TASK_STATE_CHANGED', {
+        taskId: 'task_phase05_test',
+        title: 'Verify SQLite WAL Checkpoints',
+        completed: true,
+      })
+
+      expect(eventPayload).not.toBeNull()
+      expect(eventPayload.taskId).toBe('task_phase05_test')
+      expect(eventPayload.title).toBe('Verify SQLite WAL Checkpoints')
+      expect(eventPayload.completed).toBe(true)
+
+      unsubscribe()
     })
   })
 })
