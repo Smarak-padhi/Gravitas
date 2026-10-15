@@ -51,29 +51,52 @@ async function runStudioAlphaVerification() {
     fs.copyFileSync(shot1, path.join(ARTIFACT_DIR, '01-clean-studio.png'))
     console.log(`  Saved: ${shot1}`)
 
-    // ─── STEP 2: SUMMON GRAV CHAT FLOATING ON-DEMAND ─────────────────────────────
-    console.log('\n[Step 2] Summoning Grav Chat floating panel on demand...')
-    // Click "Talk with Grav" or "Summon Grav"
+    // ─── STEP 2: SUMMON MULTI-AGENT SPECIALIST CONVERSATION SURFACE ─────────────
+    console.log('\n[Step 2] Summoning Multi-Agent Specialist Conversation surface on demand...')
     const summonGravBtn = await mainWin.$('button:has-text("Talk with Grav")') || await mainWin.$('button:has-text("Summon Grav")')
     if (summonGravBtn) {
       await summonGravBtn.click()
     }
     await new Promise((r) => setTimeout(r, 1500))
 
-    // Type "What's due today?" in the chat input
-    const chatInput = 'input[placeholder*="Ask Grav something"]'
-    await mainWin.click(chatInput)
-    await mainWin.fill(chatInput, "What's due today?")
-    await new Promise((r) => setTimeout(r, 800))
-    await mainWin.press(chatInput, 'Enter')
-    await new Promise((r) => setTimeout(r, 3000))
+    // Click "Due Today" quick prompt chip
+    console.log('Clicking "Due Today" prompt chip...')
+    const dueTodayChip = await mainWin.$('button:has-text("Due Today")')
+    if (dueTodayChip) {
+      await dueTodayChip.click()
+    }
+    await new Promise((r) => setTimeout(r, 2000))
+
+    // Click "25m Focus" to trigger Focus Sprint
+    console.log('Clicking "25m Focus" prompt chip to trigger focus timer...')
+    const focusChip = await mainWin.$('button:has-text("25m Focus")')
+    if (focusChip) {
+      await focusChip.click()
+    }
+    await new Promise((r) => setTimeout(r, 2000))
+
+    // Switch Specialist tab to "Ada"
+    console.log('Switching specialist tab to Ada...')
+    const adaTab = await mainWin.$('button:has-text("Ada")')
+    if (adaTab) {
+      await adaTab.click()
+    }
+    await new Promise((r) => setTimeout(r, 1500))
+
+    // Click "Quiz: Master Theorem" in Ada's quick prompts to trigger KaTeX math rendering
+    console.log('Requesting Master Theorem quiz from Ada (LaTeX Math)...')
+    const quizChip = await mainWin.$('button:has-text("Quiz: Master Theorem")')
+    if (quizChip) {
+      await quizChip.click()
+    }
+    await new Promise((r) => setTimeout(r, 3500))
 
     const shot2 = path.join(EVIDENCE_DIR, '02-grav-chat-floating.png')
     await mainWin.screenshot({ path: shot2 })
     fs.copyFileSync(shot2, path.join(ARTIFACT_DIR, '02-grav-chat-floating.png'))
     console.log(`  Saved: ${shot2}`)
 
-    // Close Grav conversation surface
+    // Close conversation surface
     await mainWin.evaluate(() => {
       const closeButtons = Array.from(document.querySelectorAll('button'))
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))

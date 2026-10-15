@@ -20,10 +20,19 @@ import {
   Columns,
   AlertTriangle,
   RotateCcw,
+  Terminal,
+  Palette,
+  Compass,
+  Trash2,
+  Square,
+  Flame,
+  Info,
 } from 'lucide-react'
 import { marked } from 'marked'
 import katex from 'katex'
 import { ThreeOfficeViewport } from '../ThreeOfficeViewport.js'
+import type { MascotId } from './MascotFamily.js'
+import { SPECIALIST_CONFIGS, QuickPromptItem } from './SpecialistEngine.js'
 
 export type ActivePanel =
   | 'NONE'
@@ -35,10 +44,11 @@ export type ActivePanel =
 
 export interface ChatMessage {
   id: string
+  agentId?: MascotId
   sender: 'user' | 'assistant'
   text: string
   timestamp: string
-  actionReceipt?: { title: string; details: string } | undefined
+  actionReceipt?: { title: string; details: string; status?: 'success' | 'info' | 'warning' } | undefined
 }
 
 export interface StudyNoteItem {
@@ -165,6 +175,8 @@ export function renderMarkdownWithMath(markdownText: string): string {
 export interface FloatingPanelsProps {
   activePanel: ActivePanel
   minimizedPanel?: ActivePanel | null
+  activeSpecialist?: MascotId
+  onSelectSpecialist?: (id: MascotId) => void
   messages: readonly ChatMessage[]
   dueTasks: readonly any[]
   dueAssignments: readonly any[]
@@ -180,11 +192,18 @@ export interface FloatingPanelsProps {
   onSaveNote: (note: { id?: string; title: string; content: string; subject: string }) => Promise<void>
   onTaskCompleted: (taskId: string, completed: boolean) => Promise<void>
   onOpenExternal: (url: string) => Promise<void>
+  onOpenAdaNotes?: () => void
+  onOpenCipherTasks?: () => void
+  onClearHistory?: (agentId: MascotId) => void
+  focusTimer?: { active: boolean; remainingSeconds: number; durationMinutes: number } | null
+  onStopFocusTimer?: () => void
 }
 
 export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   activePanel,
   minimizedPanel,
+  activeSpecialist = 'grav',
+  onSelectSpecialist,
   messages,
   dueTasks,
   dueAssignments,
@@ -200,6 +219,11 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   onSaveNote,
   onTaskCompleted,
   onOpenExternal,
+  onOpenAdaNotes,
+  onOpenCipherTasks,
+  onClearHistory,
+  focusTimer,
+  onStopFocusTimer,
 }) => {
   // Grav Chat State
   const [inputText, setInputText] = useState('')
@@ -375,287 +399,543 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
         paddingBottom: '80px', // Gate B2: Maintain safe margin so no controls hide behind bottom dock
       }}
     >
-      {/* ── 1. GRAV FLOATING CONVERSATION SURFACE (CONTEXTUALLY TETHERED NEAR DESK) ── */}
-      {activePanel === 'GRAV_CONVERSATION' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 15 }}
-          transition={{ type: 'spring', damping: 24, stiffness: 320 }}
-          style={{
-            position: 'relative',
-            width: '560px',
-            maxWidth: '92vw',
-            height: '520px',
-            background: 'rgba(20, 23, 27, 0.97)',
-            border: '1px solid #37414D',
-            borderRadius: '16px',
-            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 24px rgba(244, 162, 97, 0.18)',
-            backdropFilter: 'blur(16px)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            pointerEvents: 'auto',
-          }}
-        >
-          {/* Panel Header */}
-          <div
+      {/* ── 1. ON-DEMAND MULTI-AGENT SPECIALIST CONVERSATION SURFACE (PHASE 04) ── */}
+      {activePanel === 'GRAV_CONVERSATION' && (() => {
+        const currentSpecialist = SPECIALIST_CONFIGS[activeSpecialist || 'grav'] || SPECIALIST_CONFIGS.grav
+        const accentColor = currentSpecialist.accentColor
+        const tetherPosition =
+          activeSpecialist === 'ada'
+            ? '20%'
+            : activeSpecialist === 'pixel'
+            ? '32%'
+            : activeSpecialist === 'cipher'
+            ? '80%'
+            : activeSpecialist === 'scout'
+            ? '68%'
+            : '50%'
+
+        const formatTimer = (seconds: number) => {
+          const m = Math.floor(seconds / 60)
+          const s = seconds % 60
+          return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+        }
+
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 15 }}
+            transition={{ type: 'spring', damping: 24, stiffness: 320 }}
             style={{
-              padding: '14px 18px',
-              borderBottom: '1px solid #282F37',
+              position: 'relative',
+              width: '600px',
+              maxWidth: '94vw',
+              height: '560px',
+              background: 'rgba(20, 23, 27, 0.98)',
+              border: `1px solid ${accentColor}55`,
+              borderRadius: '16px',
+              boxShadow: `0 24px 60px rgba(0, 0, 0, 0.75), 0 0 24px ${accentColor}22`,
+              backdropFilter: 'blur(16px)',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'rgba(24, 28, 33, 0.9)',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              pointerEvents: 'auto',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div
+            {/* Panel Top Header */}
+            <div
+              style={{
+                padding: '12px 18px',
+                borderBottom: '1px solid #282F37',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'rgba(24, 28, 33, 0.92)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div
+                  style={{
+                    width: '9px',
+                    height: '9px',
+                    borderRadius: '50%',
+                    background: accentColor,
+                    boxShadow: `0 0 8px ${accentColor}`,
+                  }}
+                />
+                <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
+                  Conversation with {currentSpecialist.name}
+                </span>
+                <span
+                  style={{
+                    fontSize: '10.5px',
+                    padding: '2px 7px',
+                    borderRadius: '6px',
+                    background: currentSpecialist.badgeBg,
+                    color: accentColor,
+                    fontWeight: 600,
+                  }}
+                >
+                  {currentSpecialist.role}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* Active Focus Sprint Pill */}
+                {focusTimer?.active && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '2px 8px',
+                      background: 'rgba(244, 162, 97, 0.15)',
+                      border: '1px solid rgba(244, 162, 97, 0.4)',
+                      borderRadius: '10px',
+                      fontSize: '11px',
+                      color: '#F4A261',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Flame size={12} color="#F4A261" />
+                    <span>Focus: {formatTimer(focusTimer.remainingSeconds)}</span>
+                    {onStopFocusTimer && (
+                      <button
+                        onClick={onStopFocusTimer}
+                        title="Cancel focus timer"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#E76F51',
+                          cursor: 'pointer',
+                          padding: '0 2px',
+                          display: 'flex',
+                        }}
+                      >
+                        <Square size={10} fill="#E76F51" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Clear History Button */}
+                {onClearHistory && (
+                  <button
+                    onClick={() => onClearHistory(activeSpecialist || 'grav')}
+                    title={`Clear conversation history with ${currentSpecialist.name}`}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#7E858D',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+
+                <button
+                  onClick={handleRequestMinimize}
+                  title="Minimize panel"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#8E949B',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Minus size={15} />
+                </button>
+                <button
+                  onClick={handleRequestClose}
+                  title="Close panel (Esc)"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#8E949B',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Specialist Switcher Tab Bar (Phase 04) */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '4px',
+                padding: '6px 12px',
+                background: 'rgba(16, 19, 23, 0.95)',
+                borderBottom: '1px solid #23282F',
+              }}
+            >
+              {(['grav', 'ada', 'pixel', 'cipher', 'scout'] as MascotId[]).map((mId) => {
+                const cfg = SPECIALIST_CONFIGS[mId]
+                const isActive = (activeSpecialist || 'grav') === mId
+                return (
+                  <button
+                    key={mId}
+                    onClick={() => onSelectSpecialist?.(mId)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '5px 6px',
+                      borderRadius: '8px',
+                      background: isActive ? `${cfg.accentColor}22` : 'transparent',
+                      border: `1px solid ${isActive ? cfg.accentColor : 'transparent'}`,
+                      color: isActive ? '#EDEAE3' : '#8E949B',
+                      fontSize: '11.5px',
+                      fontWeight: isActive ? 600 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '50%',
+                        background: cfg.accentColor,
+                        boxShadow: isActive ? `0 0 6px ${cfg.accentColor}` : 'none',
+                      }}
+                    />
+                    <span>{cfg.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Conversation Stream with KaTeX Math Rendering */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+              }}
+            >
+              {messages.length === 0 ? (
+                <div
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#7E858D',
+                    fontSize: '12.5px',
+                    textAlign: 'center',
+                    padding: '0 24px',
+                  }}
+                >
+                  <Sparkles size={24} color={accentColor} style={{ marginBottom: '8px', opacity: 0.8 }} />
+                  <span style={{ fontWeight: 600, color: '#EDEAE3', marginBottom: '4px' }}>
+                    {currentSpecialist.name} • {currentSpecialist.role}
+                  </span>
+                  <span style={{ color: '#9FA4A8', maxWidth: '420px', lineHeight: 1.5 }}>
+                    {currentSpecialist.welcomeMessage}
+                  </span>
+                </div>
+              ) : (
+                (showFullTranscript ? messages : messages.slice(-5)).map((msg) => (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <div
+                      style={{
+                        maxWidth: '88%',
+                        padding: '10px 14px',
+                        borderRadius: '12px',
+                        fontSize: '13px',
+                        lineHeight: 1.55,
+                        background: msg.sender === 'user' ? '#262D35' : '#171B20',
+                        color: msg.sender === 'user' ? '#EDEAE3' : '#D6D4CE',
+                        border: `1px solid ${msg.sender === 'user' ? '#3B4450' : `${accentColor}33`}`,
+                      }}
+                    >
+                      {msg.sender === 'assistant' ? (
+                        <div
+                          className="specialist-message-content"
+                          dangerouslySetInnerHTML={{
+                            __html: renderMarkdownWithMath(msg.text),
+                          }}
+                        />
+                      ) : (
+                        msg.text
+                      )}
+
+                      {/* Action Receipt Card */}
+                      {msg.actionReceipt && (
+                        <div
+                          style={{
+                            marginTop: '8px',
+                            padding: '6px 10px',
+                            background: '#101316',
+                            border: '1px solid #252B32',
+                            borderRadius: '6px',
+                            fontSize: '11.5px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              color:
+                                msg.actionReceipt.status === 'warning'
+                                  ? '#F4A261'
+                                  : msg.actionReceipt.status === 'info'
+                                  ? '#4A89C8'
+                                  : '#81B29A',
+                              fontWeight: 600,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            {msg.actionReceipt.status === 'warning' ? (
+                              <AlertTriangle size={12} />
+                            ) : msg.actionReceipt.status === 'info' ? (
+                              <Info size={12} />
+                            ) : (
+                              <CheckCircle size={12} />
+                            )}
+                            {msg.actionReceipt.title}
+                          </div>
+                          <div style={{ color: '#8E949B', marginTop: '2px', fontSize: '11px' }}>
+                            {msg.actionReceipt.details}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '10px', color: '#686E74', marginTop: '2px', padding: '0 4px' }}>
+                      {msg.timestamp}
+                    </span>
+                  </div>
+                ))
+              )}
+
+              {/* Cross-Surface Shortcut Banners */}
+              {activeSpecialist === 'ada' && onOpenAdaNotes && (
+                <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                  <button
+                    onClick={onOpenAdaNotes}
+                    style={{
+                      background: 'rgba(129, 178, 154, 0.12)',
+                      border: '1px solid rgba(129, 178, 154, 0.35)',
+                      borderRadius: '8px',
+                      padding: '4px 12px',
+                      color: '#81B29A',
+                      fontSize: '11.5px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <BookOpen size={12} />
+                    <span>Open Ada's Knowledge Hub Notes & Math Editor</span>
+                  </button>
+                </div>
+              )}
+
+              {activeSpecialist === 'cipher' && onOpenCipherTasks && (
+                <div style={{ textAlign: 'center', marginTop: '6px' }}>
+                  <button
+                    onClick={onOpenCipherTasks}
+                    style={{
+                      background: 'rgba(74, 137, 200, 0.12)',
+                      border: '1px solid rgba(74, 137, 200, 0.35)',
+                      borderRadius: '8px',
+                      padding: '4px 12px',
+                      color: '#4A89C8',
+                      fontSize: '11.5px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <Terminal size={12} />
+                    <span>Open Cipher's Tasks & Database Agenda</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Transcript expand toggle */}
+              {messages.length > 5 && (
+                <div style={{ textAlign: 'center', margin: '4px 0' }}>
+                  <button
+                    onClick={() => setShowFullTranscript((prev) => !prev)}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid #2B333D',
+                      borderRadius: '12px',
+                      padding: '3px 10px',
+                      fontSize: '11px',
+                      color: '#9FA4A8',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {showFullTranscript ? 'Show Recent Context' : `View Full Transcript (${messages.length} messages)`}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Action Suggestion Chips (Phase 04) */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+                overflowX: 'auto',
+                padding: '7px 14px',
+                background: 'rgba(18, 22, 27, 0.95)',
+                borderTop: '1px solid #23282F',
+              }}
+            >
+              {currentSpecialist.quickPrompts.map((chip, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    onSendMessage(chip.prompt)
+                  }}
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    background: '#15191F',
+                    border: `1px solid ${accentColor}44`,
+                    color: '#EDEAE3',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = accentColor
+                    e.currentTarget.style.background = `${accentColor}1A`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${accentColor}44`
+                    e.currentTarget.style.background = '#15191F'
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Compact Composer Input Bar */}
+            <div
+              style={{
+                padding: '12px 14px',
+                borderTop: '1px solid #282F37',
+                background: 'rgba(20, 24, 29, 0.95)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <button
+                onClick={onVoiceToggle}
                 style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#F4A261',
-                  boxShadow: '0 0 8px #F4A261',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: isListening ? '#E76F51' : '#23282F',
+                  border: `1px solid ${isListening ? '#E76F51' : '#343B45'}`,
+                  color: isListening ? '#FFF' : '#9DA3A8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+                title={isListening ? 'Stop Push-To-Talk' : 'Hold or click to speak (Offline STT)'}
+              >
+                <Mic size={15} />
+              </button>
+
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder={currentSpecialist.placeholder}
+                style={{
+                  flex: 1,
+                  background: '#13161A',
+                  border: '1px solid #2B333D',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  color: '#EDEAE3',
+                  fontSize: '13px',
+                  outline: 'none',
                 }}
               />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#EDEAE3' }}>
-                Conversation with Grav
-              </span>
-              <span
+
+              <button
+                onClick={handleSend}
+                disabled={!inputText.trim() || isExecuting}
                 style={{
-                  fontSize: '10.5px',
-                  padding: '2px 6px',
-                  borderRadius: '6px',
-                  background: '#23282F',
-                  color: '#F4A261',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: accentColor,
+                  border: 'none',
+                  color: '#101214',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: inputText.trim() && !isExecuting ? 'pointer' : 'not-allowed',
+                  opacity: inputText.trim() && !isExecuting ? 1 : 0.4,
                   fontWeight: 600,
                 }}
               >
-                Tethered to Center Desk
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <button
-                onClick={handleRequestMinimize}
-                title="Minimize panel"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#8E949B',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <Minus size={15} />
-              </button>
-              <button
-                onClick={handleRequestClose}
-                title="Close panel (Esc)"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#8E949B',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <X size={16} />
+                <Send size={15} />
               </button>
             </div>
-          </div>
 
-          {/* Conversation Stream */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
-            {messages.length === 0 ? (
-              <div
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#7E858D',
-                  fontSize: '12.5px',
-                  textAlign: 'center',
-                  padding: '0 24px',
-                }}
-              >
-                <Sparkles size={24} color="#F4A261" style={{ marginBottom: '8px', opacity: 0.7 }} />
-                <span>Ask Grav to check what's due, take study notes, or launch an approved desktop tool.</span>
-              </div>
-            ) : (
-              (showFullTranscript ? messages : messages.slice(-4)).map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  }}
-                >
-                  <div
-                    style={{
-                      maxWidth: '85%',
-                      padding: '9px 13px',
-                      borderRadius: '12px',
-                      fontSize: '13px',
-                      lineHeight: 1.5,
-                      background: msg.sender === 'user' ? '#262D35' : '#171B20',
-                      color: msg.sender === 'user' ? '#EDEAE3' : '#D6D4CE',
-                      border: `1px solid ${msg.sender === 'user' ? '#3B4450' : '#262D35'}`,
-                    }}
-                  >
-                    {msg.text}
-                    {msg.actionReceipt && (
-                      <div
-                        style={{
-                          marginTop: '8px',
-                          padding: '6px 10px',
-                          background: '#101316',
-                          border: '1px solid #252B32',
-                          borderRadius: '6px',
-                          fontSize: '11.5px',
-                        }}
-                      >
-                        <div style={{ color: '#81B29A', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <CheckCircle size={12} />
-                          {msg.actionReceipt.title}
-                        </div>
-                        <div style={{ color: '#8E949B', marginTop: '2px', fontSize: '11px' }}>
-                          {msg.actionReceipt.details}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <span style={{ fontSize: '10px', color: '#686E74', marginTop: '2px', padding: '0 4px' }}>
-                    {msg.timestamp}
-                  </span>
-                </div>
-              ))
-            )}
-
-            {/* Gate B2: Transcript expand toggle */}
-            {messages.length > 4 && (
-              <div style={{ textAlign: 'center', margin: '4px 0' }}>
-                <button
-                  onClick={() => setShowFullTranscript((prev) => !prev)}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid #2B333D',
-                    borderRadius: '12px',
-                    padding: '3px 10px',
-                    fontSize: '11px',
-                    color: '#9FA4A8',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {showFullTranscript ? 'Show Recent Context' : `View Full Transcript (${messages.length} messages)`}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Compact Composer Input Bar */}
-          <div
-            style={{
-              padding: '12px 14px',
-              borderTop: '1px solid #282F37',
-              background: 'rgba(20, 24, 29, 0.95)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <button
-              onClick={onVoiceToggle}
+            {/* Contextual downward tether anchor pointing toward active specialist's desk */}
+            <div
               style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '8px',
-                background: isListening ? '#E76F51' : '#23282F',
-                border: `1px solid ${isListening ? '#E76F51' : '#343B45'}`,
-                color: isListening ? '#FFF' : '#9DA3A8',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-              title={isListening ? 'Stop Push-To-Talk' : 'Hold or click to speak (Offline STT)'}
-            >
-              <Mic size={15} />
-            </button>
-
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask Grav something, or type 'Due today'..."
-              style={{
-                flex: 1,
-                background: '#13161A',
-                border: '1px solid #2B333D',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                color: '#EDEAE3',
-                fontSize: '13px',
-                outline: 'none',
+                position: 'absolute',
+                bottom: '-8px',
+                left: tetherPosition,
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '8px solid transparent',
+                borderRight: '8px solid transparent',
+                borderTop: `8px solid ${accentColor}88`,
+                transition: 'left 0.25s ease',
               }}
             />
-
-            <button
-              onClick={handleSend}
-              disabled={!inputText.trim() || isExecuting}
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '8px',
-                background: '#F4A261',
-                border: 'none',
-                color: '#101214',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: inputText.trim() && !isExecuting ? 'pointer' : 'not-allowed',
-                opacity: inputText.trim() && !isExecuting ? 1 : 0.4,
-              }}
-            >
-              <Send size={15} />
-            </button>
-          </div>
-
-          {/* Gate B2: Contextual downward tether anchor pointing toward Grav's center desk */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '-8px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 0,
-              height: 0,
-              borderLeft: '8px solid transparent',
-              borderRight: '8px solid transparent',
-              borderTop: '8px solid #37414D',
-            }}
-          />
-        </motion.div>
-      )}
+          </motion.div>
+        )
+      })()}
 
       {/* ── 2. ADA KNOWLEDGE HUB & UPGRADED STUDY NOTES PANEL (GATE B3) ── */}
       {activePanel === 'ADA_NOTES' && (

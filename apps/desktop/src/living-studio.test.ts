@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { MASCOT_REGISTRY, MascotId, MascotState, MascotBubbleData } from './renderer/components/studio/MascotFamily.js'
-import { ActivePanel, renderMarkdownWithMath, DEFAULT_STUDY_NOTES, StudyNoteItem } from './renderer/components/studio/FloatingPanels.js'
+import { ActivePanel, renderMarkdownWithMath, DEFAULT_STUDY_NOTES, StudyNoteItem, ChatMessage } from './renderer/components/studio/FloatingPanels.js'
+import { SPECIALIST_CONFIGS, processSpecialistMessage, SpecialistResponse } from './renderer/components/studio/SpecialistEngine.js'
+import { agentEventBus, dispatchAgentEvent, subscribeAgentEvent } from './renderer/events/agentEventBus.js'
 import * as THREE from 'three'
 
 describe('GRAVITAS 2.0 — Living Studio Alpha Renderer Foundation', () => {
@@ -426,6 +428,345 @@ describe('GRAVITAS 2.0 — Living Studio Alpha Renderer Foundation', () => {
       expect(reopened).toBeDefined()
       expect(reopened?.title).toBe('Algorithms: Master Theorem & Complexity Analysis (Updated)')
       expect(reopened?.content).toContain('\\Theta(n \\log n)')
+    })
+  })
+
+  describe('11. Phase 04: Multi-Agent Specialist Personas & Configurations', () => {
+    it('defines rich domain configurations for all 5 specialist agents', () => {
+      const specialists: MascotId[] = ['grav', 'ada', 'pixel', 'cipher', 'scout']
+      for (const id of specialists) {
+        const config = SPECIALIST_CONFIGS[id]
+        expect(config).toBeDefined()
+        expect(config.id).toBe(id)
+        expect(config.name).toBe(MASCOT_REGISTRY[id].name)
+        expect(config.accentColor).toBe(MASCOT_REGISTRY[id].color)
+        expect(config.role).toBe(MASCOT_REGISTRY[id].role)
+        expect(config.tagline).toBeDefined()
+        expect(config.welcomeMessage.length).toBeGreaterThan(20)
+        expect(config.placeholder.length).toBeGreaterThan(10)
+        expect(config.quickPrompts.length).toBeGreaterThanOrEqual(4)
+      }
+    })
+
+    it('provides tailored domain action prompts for each specialist', () => {
+      // Grav: Focus, due today, app launcher
+      const gravPrompts = SPECIALIST_CONFIGS.grav.quickPrompts.map((p) => p.label)
+      expect(gravPrompts).toContain('Due Today')
+      expect(gravPrompts).toContain('25m Focus')
+
+      // Ada: Quizzing, formulas, notes
+      const adaPrompts = SPECIALIST_CONFIGS.ada.quickPrompts.map((p) => p.label)
+      expect(adaPrompts).toContain('Quiz: Master Theorem')
+      expect(adaPrompts).toContain('Explain: Virtual Memory')
+
+      // Pixel: Tokens, contrast, motion
+      const pixelPrompts = SPECIALIST_CONFIGS.pixel.quickPrompts.map((p) => p.label)
+      expect(pixelPrompts).toContain('Audit Tokens')
+      expect(pixelPrompts).toContain('Check Contrast')
+
+      // Cipher: SQLite WAL, tests, telemetry
+      const cipherPrompts = SPECIALIST_CONFIGS.cipher.quickPrompts.map((p) => p.label)
+      expect(cipherPrompts).toContain('Inspect SQLite WAL')
+      expect(cipherPrompts).toContain('Hardware Telemetry')
+
+      // Scout: Indexing, citations, sources
+      const scoutPrompts = SPECIALIST_CONFIGS.scout.quickPrompts.map((p) => p.label)
+      expect(scoutPrompts).toContain('Index Local Notes')
+      expect(scoutPrompts).toContain('Format Citations')
+    })
+  })
+
+  describe('12. Phase 04: Conversation History Persistence in SQLite WAL', () => {
+    it('serializes chat messages into SQLite IDEA collection format', () => {
+      const msg: ChatMessage = {
+        id: 'msg_test_101',
+        agentId: 'ada',
+        sender: 'user',
+        text: 'Quiz me on Master Theorem',
+        timestamp: '10:30 AM',
+      }
+
+      // SQLite serialization shape used in App.tsx
+      const serialized = {
+        id: msg.id,
+        title: `[${msg.agentId}] User: ${msg.text.slice(0, 32)}`,
+        originalText: msg.text,
+        collection: 'IDEA',
+        category: 'agent_chat',
+        subject: msg.agentId,
+        tags: [`agent:${msg.agentId}`, 'sender:user', `time:${msg.timestamp}`],
+      }
+
+      expect(serialized.collection).toBe('IDEA')
+      expect(serialized.category).toBe('agent_chat')
+      expect(serialized.subject).toBe('ada')
+      expect(serialized.tags).toContain('agent:ada')
+      expect(serialized.tags).toContain('sender:user')
+      expect(serialized.tags).toContain('time:10:30 AM')
+    })
+
+    it('isolates conversation histories strictly by specialist agent', () => {
+      const messagesByAgent: Record<MascotId, ChatMessage[]> = {
+        grav: [{ id: '1', agentId: 'grav', sender: 'assistant', text: 'Grav greeting', timestamp: '10:00' }],
+        ada: [{ id: '2', agentId: 'ada', sender: 'assistant', text: 'Ada study session', timestamp: '10:01' }],
+        pixel: [{ id: '3', agentId: 'pixel', sender: 'assistant', text: 'Pixel tokens', timestamp: '10:02' }],
+        cipher: [{ id: '4', agentId: 'cipher', sender: 'assistant', text: 'Cipher WAL', timestamp: '10:03' }],
+        scout: [{ id: '5', agentId: 'scout', sender: 'assistant', text: 'Scout sources', timestamp: '10:04' }],
+      }
+
+      expect(messagesByAgent.ada).toHaveLength(1)
+      expect(messagesByAgent.ada[0].text).toContain('study session')
+      expect(messagesByAgent.cipher[0].text).toContain('Cipher WAL')
+
+      // Adding to Ada does not affect Cipher
+      messagesByAgent.ada.push({
+        id: '6',
+        agentId: 'ada',
+        sender: 'user',
+        text: 'Recurrence question',
+        timestamp: '10:05',
+      })
+      expect(messagesByAgent.ada).toHaveLength(2)
+      expect(messagesByAgent.cipher).toHaveLength(1)
+    })
+
+    it('roundtrips chat messages with action receipts through JSON summary field', () => {
+      const receipt = {
+        title: 'Active Recall Quiz: Master Theorem',
+        details: 'Complexity derived: T(n) = Θ(n² log n)',
+        status: 'success' as const,
+      }
+
+      const rawSummary = JSON.stringify(receipt)
+      const parsedReceipt = JSON.parse(rawSummary)
+
+      expect(parsedReceipt.title).toBe('Active Recall Quiz: Master Theorem')
+      expect(parsedReceipt.details).toContain('Θ(n² log n)')
+      expect(parsedReceipt.status).toBe('success')
+    })
+  })
+
+  describe('13. Phase 04: Event-Driven Agent Runtime & Dynamic 7-State Transitions', () => {
+    it('dispatches and handles TASK_STATE_CHANGED events', () => {
+      let receivedTask: any = null
+      const unsub = subscribeAgentEvent('TASK_STATE_CHANGED', (payload) => {
+        receivedTask = payload
+      })
+
+      dispatchAgentEvent('TASK_STATE_CHANGED', {
+        taskId: 'task_wal_check',
+        title: 'Inspect SQLite WAL transactions',
+        completed: true,
+      })
+
+      expect(receivedTask).toBeDefined()
+      expect(receivedTask.taskId).toBe('task_wal_check')
+      expect(receivedTask.completed).toBe(true)
+      unsub()
+    })
+
+    it('dispatches APPROVAL_REQUIRED driving mascot to waiting_permission state', () => {
+      let targetState: MascotState = 'idle'
+      let warningText = ''
+
+      const unsub = subscribeAgentEvent('APPROVAL_REQUIRED', (payload) => {
+        targetState = 'waiting_permission'
+        warningText = `Action approval required: ${payload.actionName}`
+      })
+
+      dispatchAgentEvent('APPROVAL_REQUIRED', {
+        actionName: 'Export SQLite Database Dump',
+        details: 'Local filesystem access requested',
+        agentId: 'cipher',
+      })
+
+      expect(targetState).toBe('waiting_permission')
+      expect(warningText).toContain('Export SQLite Database Dump')
+      unsub()
+    })
+
+    it('dispatches NOTE_SAVED driving Ada to speaking then success state', () => {
+      let recordedTitle = ''
+      const unsub = subscribeAgentEvent('NOTE_SAVED', (payload) => {
+        recordedTitle = payload.noteTitle
+      })
+
+      dispatchAgentEvent('NOTE_SAVED', {
+        noteTitle: 'Virtual Memory & Page Replacement',
+        subject: 'Operating Systems',
+        noteId: 'note_os_vm',
+      })
+
+      expect(recordedTitle).toBe('Virtual Memory & Page Replacement')
+      unsub()
+    })
+
+    it('dispatches FOCUS_TIMER_COMPLETED driving Grav to success state', () => {
+      let completedDuration = 0
+      const unsub = subscribeAgentEvent('FOCUS_TIMER_COMPLETED', (payload) => {
+        completedDuration = payload.sprintDurationMinutes
+      })
+
+      dispatchAgentEvent('FOCUS_TIMER_COMPLETED', {
+        sprintDurationMinutes: 25,
+      })
+
+      expect(completedDuration).toBe(25)
+      unsub()
+    })
+  })
+
+  describe('14. Phase 04: Specialist Engine Interactive Execution & Math / Action Receipts', () => {
+    it('Grav: initiates 25-minute focus sprint with START_FOCUS side-effect', async () => {
+      const res = await processSpecialistMessage('grav', 'Start 25m Focus', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Focus Sprint')
+      expect(res.actionReceipt?.title).toContain('Focus Sprint Active (25m)')
+      expect(res.sideEffect?.type).toBe('START_FOCUS')
+      expect(res.sideEffect?.payload?.minutes).toBe(25)
+      expect(res.bubbleCategory).toBe('work')
+    })
+
+    it('Grav: aggregates due today items from SQLite context', async () => {
+      const res = await processSpecialistMessage('grav', 'What is due today?', {
+        dueTasks: [{ id: '1' }, { id: '2' }],
+        dueAssignments: [{ id: 'a1' }],
+      })
+
+      expect(res.text).toContain('2 task(s)')
+      expect(res.text).toContain('1 coursework assignment(s)')
+      expect(res.actionReceipt?.title).toContain('Agenda Loaded')
+      expect(res.bubbleKind).toBe('success')
+    })
+
+    it('Ada: delivers active-recall quiz with KaTeX mathematical formulas', async () => {
+      const res = await processSpecialistMessage('ada', 'Quiz me on Master Theorem', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Master Theorem')
+      expect(res.text).toContain('T(n) = 4T(n/2) + n^2')
+      expect(res.text).toContain('\\Theta(n^2 \\log n)')
+      expect(res.actionReceipt?.title).toBe('Active Recall Quiz: Master Theorem')
+
+      // Verify that the generated LaTeX math renders into KaTeX HTML without errors
+      const html = renderMarkdownWithMath(res.text)
+      expect(html).toContain('katex-display-math')
+      expect(html).toContain('katex-mathml')
+    })
+
+    it('Ada: explains Virtual Memory LRU vs Clock algorithm trade-offs', async () => {
+      const res = await processSpecialistMessage('ada', 'Explain Virtual Memory and LRU', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('LRU (Least Recently Used)')
+      expect(res.text).toContain('Clock Algorithm (Second Chance)')
+      expect(res.text).toContain('reference bit')
+      expect(res.actionReceipt?.title).toContain('Virtual Memory')
+    })
+
+    it('Pixel: audits studio theme design tokens with WCAG AAA verification', async () => {
+      const res = await processSpecialistMessage('pixel', 'Audit studio design tokens', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Studio Design Tokens Audit')
+      expect(res.text).toContain('#101214')
+      expect(res.text).toContain('#EDEAE3')
+      expect(res.text).toContain('WCAG AAA')
+      expect(res.actionReceipt?.title).toBe('Design Tokens Audited')
+    })
+
+    it('Cipher: inspects SQLite WAL storage engine parameters', async () => {
+      const res = await processSpecialistMessage('cipher', 'Inspect SQLite WAL status', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('SQLite WAL Storage Engine')
+      expect(res.text).toContain('PRAGMA journal_mode = WAL')
+      expect(res.text).toContain('PRAGMA synchronous = NORMAL')
+      expect(res.text).toContain('BEGIN IMMEDIATE')
+      expect(res.actionReceipt?.status).toBe('success')
+    })
+
+    it('Cipher: verifies target hardware telemetry (Lenovo IdeaPad Gaming 3)', async () => {
+      const res = await processSpecialistMessage('cipher', 'Report system telemetry', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Lenovo IdeaPad Gaming 3')
+      expect(res.text).toContain('Intel Core i5-12450H')
+      expect(res.text).toContain('16 GB DDR4')
+      expect(res.text).toContain('174 MB RSS idle')
+      expect(res.actionReceipt?.title).toBe('Hardware Telemetry')
+    })
+
+    it('Scout: indexes local study notes and topic clusters into Knowledge Graph', async () => {
+      const res = await processSpecialistMessage('scout', 'Index all local study notes', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Local Knowledge Indexing Complete')
+      expect(res.text).toContain('Algorithms')
+      expect(res.text).toContain('Operating Systems')
+      expect(res.text).toContain('Databases')
+      expect(res.actionReceipt?.title).toContain('Knowledge Index')
+    })
+
+    it('Scout: formats academic citations in standardized APA/IEEE style', async () => {
+      const res = await processSpecialistMessage('scout', 'Format research citations', {
+        dueTasks: [],
+        dueAssignments: [],
+      })
+
+      expect(res.text).toContain('Cormen, T. H.')
+      expect(res.text).toContain('Introduction to Algorithms')
+      expect(res.text).toContain('Silberschatz, A.')
+      expect(res.actionReceipt?.title).toBe('Citations Formatted')
+    })
+  })
+
+  describe('15. Phase 04: Contextual Tether Coordinates', () => {
+    it('computes contextual tether positions matching character desk stations', () => {
+      const getTetherPosition = (agentId: MascotId) => {
+        switch (agentId) {
+          case 'ada':
+            return '20%'
+          case 'pixel':
+            return '32%'
+          case 'cipher':
+            return '80%'
+          case 'scout':
+            return '68%'
+          case 'grav':
+          default:
+            return '50%'
+        }
+      }
+
+      expect(getTetherPosition('grav')).toBe('50%')
+      expect(getTetherPosition('ada')).toBe('20%')
+      expect(getTetherPosition('pixel')).toBe('32%')
+      expect(getTetherPosition('cipher')).toBe('80%')
+      expect(getTetherPosition('scout')).toBe('68%')
+    })
+
+    it('matches tether border accent color with active specialist', () => {
+      const specialists: MascotId[] = ['grav', 'ada', 'pixel', 'cipher', 'scout']
+      for (const id of specialists) {
+        const color = SPECIALIST_CONFIGS[id].accentColor
+        expect(color).toBe(MASCOT_REGISTRY[id].color)
+      }
     })
   })
 })

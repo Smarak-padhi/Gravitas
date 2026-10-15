@@ -1,9 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { StudioHeader, StudioSummonBar } from './components/studio/StudioControls.js'
 import { StudioScene } from './components/studio/StudioScene.js'
 import { FloatingPanels, ActivePanel, ChatMessage } from './components/studio/FloatingPanels.js'
 import { MascotId, MascotState, MascotBubbleData } from './components/studio/MascotFamily.js'
 import { parseAssistantCommand } from '../assistant/commandParser.js'
+import {
+  SPECIALIST_CONFIGS,
+  processSpecialistMessage,
+  SpecialistResponse,
+} from './components/studio/SpecialistEngine.js'
+import {
+  agentEventBus,
+  dispatchAgentEvent,
+  subscribeAgentEvent,
+} from './events/agentEventBus.js'
 
 export const App: React.FC = () => {
   // Theme state
@@ -16,6 +26,7 @@ export const App: React.FC = () => {
   // Studio spatial state
   const [activePanel, setActivePanel] = useState<ActivePanel>('NONE')
   const [activeAgent, setActiveAgent] = useState<MascotId | null>(null)
+  const [activeSpecialist, setActiveSpecialist] = useState<MascotId>('grav')
 
   // Mascot states and activity bubbles
   const [agentStates, setAgentStates] = useState<Record<MascotId, MascotState>>({
@@ -35,7 +46,6 @@ export const App: React.FC = () => {
   })
 
   // Real SQLite Data
-  const [messages, setMessages] = useState<readonly ChatMessage[]>([])
   const [dueTasks, setDueTasks] = useState<readonly any[]>([])
   const [dueAssignments, setDueAssignments] = useState<readonly any[]>([])
   const [activeNote, setActiveNote] = useState<{ id?: string; title: string; content: string; subject: string } | null>({
@@ -45,9 +55,65 @@ export const App: React.FC = () => {
     content: `# Divide and Conquer Analysis\n\n## Master Theorem Form\nFor recurrence relations of the form:\n$$T(n) = aT(n/b) + f(n)$$\nwhere $a \\ge 1, b > 1$:\n\n1. **Case 1**: If $f(n) = O(n^{\\log_b a - \\epsilon})$ for some constant $\\epsilon > 0$, then $T(n) = \\Theta(n^{\\log_b a})$.\n2. **Case 2**: If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$ where $k \\ge 0$, then $T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$.\n3. **Case 3**: If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$ for some constant $\\epsilon > 0$, and regularity condition $af(n/b) \\le cf(n)$ holds, then $T(n) = \\Theta(f(n))$.`,
   })
 
+  // Multi-Agent Conversation Histories persisted to SQLite WAL (Phase 04)
+  const [messagesByAgent, setMessagesByAgent] = useState<Record<MascotId, ChatMessage[]>>({
+    grav: [
+      {
+        id: 'init_grav',
+        agentId: 'grav',
+        sender: 'assistant',
+        text: SPECIALIST_CONFIGS.grav.welcomeMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ],
+    ada: [
+      {
+        id: 'init_ada',
+        agentId: 'ada',
+        sender: 'assistant',
+        text: SPECIALIST_CONFIGS.ada.welcomeMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ],
+    pixel: [
+      {
+        id: 'init_pixel',
+        agentId: 'pixel',
+        sender: 'assistant',
+        text: SPECIALIST_CONFIGS.pixel.welcomeMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ],
+    cipher: [
+      {
+        id: 'init_cipher',
+        agentId: 'cipher',
+        sender: 'assistant',
+        text: SPECIALIST_CONFIGS.cipher.welcomeMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ],
+    scout: [
+      {
+        id: 'init_scout',
+        agentId: 'scout',
+        sender: 'assistant',
+        text: SPECIALIST_CONFIGS.scout.welcomeMessage,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ],
+  })
+
+  // Focus Timer state (Phase 04)
+  const [focusTimer, setFocusTimer] = useState<{
+    active: boolean
+    remainingSeconds: number
+    durationMinutes: number
+  } | null>(null)
+
   const [minimizedPanel, setMinimizedPanel] = useState<ActivePanel | null>(null)
 
-  // Helper: Trigger temporary activity bubble for an agent with category distinction (Gate B4)
+  // Helper: Trigger temporary activity bubble for an agent with category distinction
   const triggerBubble = useCallback(
     (
       agentId: MascotId,
@@ -87,12 +153,38 @@ export const App: React.FC = () => {
   const handleRestore = (panel: ActivePanel) => {
     setActivePanel(panel)
     setMinimizedPanel(null)
-    if (panel === 'GRAV_CONVERSATION') setActiveAgent('grav')
+    if (panel === 'GRAV_CONVERSATION') setActiveAgent(activeSpecialist)
     else if (panel === 'ADA_NOTES') setActiveAgent('ada')
     else if (panel === 'CIPHER_TASKS') setActiveAgent('cipher')
   }
 
-  // Initialize data from real SQLite databases
+  // Focus timer countdown engine
+  useEffect(() => {
+    if (!focusTimer?.active) return
+
+    const interval = setInterval(() => {
+      setFocusTimer((curr) => {
+        if (!curr || !curr.active) return null
+        if (curr.remainingSeconds <= 1) {
+          dispatchAgentEvent('FOCUS_TIMER_COMPLETED', {
+            sprintDurationMinutes: curr.durationMinutes,
+          })
+          return null
+        }
+        dispatchAgentEvent('FOCUS_TIMER_TICK', {
+          remainingSeconds: curr.remainingSeconds - 1,
+        })
+        return {
+          ...curr,
+          remainingSeconds: curr.remainingSeconds - 1,
+        }
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [focusTimer?.active])
+
+  // Initialize data from real SQLite databases & subscribe to Event Bus
   useEffect(() => {
     // Check reduced motion media query
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -108,7 +200,9 @@ export const App: React.FC = () => {
           const tasks = items.filter((i) => i.collection === 'PLAN_TASK')
           setDueTasks(tasks)
 
-          const algoNote = items.find((i) => i.collection === 'STUDY_NOTE' && (i.subject?.includes('Algo') || i.title?.includes('Algo')))
+          const algoNote = items.find(
+            (i) => i.collection === 'STUDY_NOTE' && (i.subject?.includes('Algo') || i.title?.includes('Algo'))
+          )
           if (algoNote) {
             setActiveNote({
               id: algoNote.id,
@@ -117,16 +211,113 @@ export const App: React.FC = () => {
               content: algoNote.originalText || '',
             })
           }
+
+          // Restore conversation histories from ideas-vault.db
+          const chatItems = items.filter((i) => i.collection === 'IDEA' && i.category === 'agent_chat')
+          if (chatItems.length > 0) {
+            setMessagesByAgent((prev) => {
+              const updated = { ...prev }
+              for (const item of chatItems) {
+                const targetAgent = (item.subject as MascotId) || 'grav'
+                if (updated[targetAgent]) {
+                  const exists = updated[targetAgent].some((m) => m.id === item.id)
+                  if (!exists) {
+                    const sender = item.tags?.includes('sender:user') ? 'user' : 'assistant'
+                    const timeTag = item.tags?.find((t: string) => t.startsWith('time:'))
+                    const timestamp = timeTag
+                      ? timeTag.slice(5)
+                      : new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    let actionReceipt: any
+                    if (item.summary) {
+                      try {
+                        actionReceipt = JSON.parse(item.summary)
+                      } catch {}
+                    }
+                    updated[targetAgent] = [
+                      ...updated[targetAgent],
+                      {
+                        id: item.id,
+                        agentId: targetAgent,
+                        sender,
+                        text: item.originalText,
+                        timestamp,
+                        actionReceipt,
+                      },
+                    ]
+                  }
+                }
+              }
+              return updated
+            })
+          }
         }
       }).catch((err) => console.warn('Could not load SQLite ideas:', err))
     }
+
+    // Subscribe to Agent Event Bus (Phase 04)
+    const unsubTask = subscribeAgentEvent('TASK_STATE_CHANGED', (payload) => {
+      triggerBubble(
+        'cipher',
+        `Task ${payload.completed ? 'completed' : 'updated'}: ${payload.title.slice(0, 20)}...`,
+        'success',
+        'work'
+      )
+    })
+
+    const unsubApproval = subscribeAgentEvent('APPROVAL_REQUIRED', (payload) => {
+      const targetAgent = payload.agentId || 'grav'
+      triggerBubble(
+        targetAgent,
+        `Action approval required: ${payload.actionName}`,
+        'warning',
+        'system',
+        7000
+      )
+    })
+
+    const unsubNote = subscribeAgentEvent('NOTE_SAVED', (payload) => {
+      triggerBubble(
+        'ada',
+        `Saved "${payload.noteTitle.slice(0, 22)}..." to SQLite`,
+        'success',
+        'work'
+      )
+    })
+
+    const unsubBuild = subscribeAgentEvent('BUILD_FINISHED', (payload) => {
+      triggerBubble(
+        'cipher',
+        `Build ${payload.outcome === 'success' ? 'verified' : 'failed'}: ${payload.summary.slice(0, 24)}`,
+        payload.outcome === 'success' ? 'success' : 'error',
+        'work'
+      )
+    })
+
+    const unsubFocus = subscribeAgentEvent('FOCUS_TIMER_COMPLETED', (payload) => {
+      triggerBubble(
+        'grav',
+        `Focus sprint finished (${payload.sprintDurationMinutes}m)! Great session ☕`,
+        'success',
+        'work',
+        6000
+      )
+    })
+
+    const unsubResearch = subscribeAgentEvent('RESEARCH_INDEXED', (payload) => {
+      triggerBubble(
+        'scout',
+        `Indexed ${payload.sourceCount} sources into Knowledge Graph`,
+        'info',
+        'work'
+      )
+    })
 
     // Keyboard shortcut handlers
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.code === 'Space') {
         e.preventDefault()
         setActivePanel((prev) => (prev === 'GRAV_CONVERSATION' ? 'NONE' : 'GRAV_CONVERSATION'))
-        setActiveAgent('grav')
+        setActiveAgent(activeSpecialist)
       } else if (e.key === 'Escape') {
         setActivePanel('NONE')
         setActiveAgent(null)
@@ -137,145 +328,168 @@ export const App: React.FC = () => {
     return () => {
       mql.removeEventListener('change', handleMql)
       window.removeEventListener('keydown', handleKeyDown)
+      unsubTask()
+      unsubApproval()
+      unsubNote()
+      unsubBuild()
+      unsubFocus()
+      unsubResearch()
     }
-  }, [])
+  }, [triggerBubble, activeSpecialist])
 
   // Handle agent selection in the 2D studio
   const handleSelectAgent = (id: MascotId) => {
     setActiveAgent(id)
-    switch (id) {
-      case 'grav':
-        setActivePanel('GRAV_CONVERSATION')
-        break
-      case 'ada':
-        setActivePanel('ADA_NOTES')
-        break
-      case 'cipher':
-        setActivePanel('CIPHER_TASKS')
-        break
-      case 'pixel':
-        triggerBubble('pixel', 'UI tokens synchronized • Dark Graphite', 'info')
-        break
-      case 'scout':
-        triggerBubble('scout', '3 Research references indexed in Knowledge Hub', 'info')
-        break
-    }
+    setActiveSpecialist(id)
+    setActivePanel('GRAV_CONVERSATION')
   }
 
-  // Handle sending a chat message to Grav / Assistant
+  // Handle sending a chat message to the current specialist agent
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isExecuting) return
 
+    const agentId = activeSpecialist
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     const userMsg: ChatMessage = {
       id: `msg_${Date.now()}_u`,
+      agentId,
       sender: 'user',
       text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp,
     }
-    setMessages((prev) => [...prev, userMsg])
+
+    // Append user message to active specialist's conversation thread
+    setMessagesByAgent((prev) => ({
+      ...prev,
+      [agentId]: [...(prev[agentId] || []), userMsg],
+    }))
+
     setIsExecuting(true)
-    setAgentStates((prev) => ({ ...prev, grav: 'working' }))
+    setAgentStates((prev) => ({ ...prev, [agentId]: 'working' }))
+
+    // Persist user message to SQLite WAL
+    const bridge = window.gravitasDesktop
+    if (bridge?.saveIdea) {
+      bridge.saveIdea({
+        id: userMsg.id,
+        title: `[${agentId}] User: ${text.slice(0, 32)}`,
+        originalText: text,
+        collection: 'IDEA',
+        category: 'agent_chat',
+        subject: agentId,
+        tags: [`agent:${agentId}`, 'sender:user', `time:${timestamp}`],
+      }).catch((err) => console.warn('Failed to persist user chat to SQLite:', err))
+    }
 
     try {
-      const intent = parseAssistantCommand(text)
-      const bridge = window.gravitasDesktop
+      // Process input via dedicated domain specialist engine
+      const response: SpecialistResponse = await processSpecialistMessage(agentId, text, {
+        dueTasks,
+        dueAssignments,
+        activeNoteTitle: activeNote?.title,
+        bridge,
+      })
 
-      if (intent.kind === 'DUE_TODAY') {
-        let taskCount = dueTasks.length
-        let asgnCount = dueAssignments.length
-        if (bridge?.executeAssistantCommand) {
-          const res = await bridge.executeAssistantCommand({ input: text })
-          if ((res as any)?.ideas) setDueTasks((res as any).ideas)
-          if ((res as any)?.assignments) setDueAssignments((res as any).assignments)
-          taskCount = (res as any)?.ideas?.length ?? taskCount
-          asgnCount = (res as any)?.assignments?.length ?? asgnCount
-        }
+      const replyMsg: ChatMessage = {
+        id: `msg_${Date.now()}_a`,
+        agentId,
+        sender: 'assistant',
+        text: response.text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        actionReceipt: response.actionReceipt,
+      }
 
-        const reply: ChatMessage = {
-          id: `msg_${Date.now()}_a`,
-          sender: 'assistant',
-          text: `You have ${taskCount + asgnCount} item(s) due today. I've prepared your agenda.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          actionReceipt: {
-            title: 'Agenda Loaded',
-            details: `${taskCount} task(s), ${asgnCount} coursework assignment(s)`,
-          },
+      // Append assistant reply to specialist's conversation thread
+      setMessagesByAgent((prev) => ({
+        ...prev,
+        [agentId]: [...(prev[agentId] || []), replyMsg],
+      }))
+
+      // Persist assistant message to SQLite WAL
+      if (bridge?.saveIdea) {
+        bridge.saveIdea({
+          id: replyMsg.id,
+          title: `[${agentId}] Assistant: ${response.text.slice(0, 32)}`,
+          originalText: response.text,
+          collection: 'IDEA',
+          category: 'agent_chat',
+          subject: agentId,
+          tags: [`agent:${agentId}`, 'sender:assistant', `time:${replyMsg.timestamp}`],
+          summary: response.actionReceipt ? JSON.stringify(response.actionReceipt) : null,
+        }).catch((err) => console.warn('Failed to persist assistant chat to SQLite:', err))
+      }
+
+      // Execute side-effects
+      if (response.sideEffect) {
+        if (response.sideEffect.type === 'START_FOCUS') {
+          const minutes = response.sideEffect.payload?.minutes || 25
+          setFocusTimer({
+            active: true,
+            remainingSeconds: minutes * 60,
+            durationMinutes: minutes,
+          })
+        } else if (response.sideEffect.type === 'OPEN_PANEL') {
+          setActivePanel(response.sideEffect.payload.panel)
+          if (response.sideEffect.payload.panel === 'ADA_NOTES') setActiveAgent('ada')
+          if (response.sideEffect.payload.panel === 'CIPHER_TASKS') setActiveAgent('cipher')
         }
-        setMessages((prev) => [...prev, reply])
-        triggerBubble('grav', `Found ${taskCount + asgnCount} items due today`, 'success')
-        triggerBubble('cipher', 'Agenda synced with SQLite', 'info')
-      } else if (intent.kind === 'OPEN_ENTERTAINMENT') {
-        const reply: ChatMessage = {
-          id: `msg_${Date.now()}_a`,
-          sender: 'assistant',
-          text: `Opening ${intent.displayName} (${intent.url}) in your desktop browser.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          actionReceipt: {
-            title: `Opened ${intent.displayName}`,
-            details: intent.url,
-          },
-        }
-        setMessages((prev) => [...prev, reply])
-        await bridge?.openApprovedExternal?.(intent.url)
-        triggerBubble('grav', `Launched ${intent.displayName}`, 'success')
-      } else if (
-        (intent.kind === 'LIST_COLLECTION' && intent.collection === 'STUDY_NOTE') ||
-        (intent.kind === 'SEARCH_IDEAS' && intent.query.toLowerCase().includes('algo')) ||
-        text.toLowerCase().includes('algo')
-      ) {
-        const reply: ChatMessage = {
-          id: `msg_${Date.now()}_a`,
-          sender: 'assistant',
-          text: "Here are your Algorithms study notes. Opened in Ada's Knowledge Hub.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          actionReceipt: {
-            title: 'Study Note Opened',
-            details: 'Algorithms: Master Theorem & Complexity Analysis',
-          },
-        }
-        setMessages((prev) => [...prev, reply])
-        setActivePanel('ADA_NOTES')
-        triggerBubble('ada', 'Loaded Algorithms note from SQLite', 'success')
-      } else if (bridge?.executeAssistantCommand) {
-        const res = await bridge.executeAssistantCommand({ input: text })
-        const reply: ChatMessage = {
-          id: `msg_${Date.now()}_a`,
-          sender: 'assistant',
-          text: res?.message || 'Command executed.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }
-        setMessages((prev) => [...prev, reply])
-        triggerBubble('grav', 'Done', 'success')
+      }
+
+      // Trigger character activity bubble & state
+      if (response.bubbleText) {
+        triggerBubble(
+          agentId,
+          response.bubbleText,
+          response.bubbleKind || 'success',
+          response.bubbleCategory || 'work'
+        )
       } else {
-        const reply: ChatMessage = {
-          id: `msg_${Date.now()}_a`,
-          sender: 'assistant',
-          text: `Processed: "${text}". Ready for your next command.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }
-        setMessages((prev) => [...prev, reply])
+        setAgentStates((prev) => ({
+          ...prev,
+          [agentId]: response.agentState || 'success',
+        }))
+        setTimeout(() => {
+          setAgentStates((prev) => ({ ...prev, [agentId]: 'idle' }))
+        }, 3000)
       }
     } catch (err: any) {
-      console.warn('Execution error:', err)
-      triggerBubble('grav', 'Error processing command', 'error')
+      console.warn('Specialist execution error:', err)
+      triggerBubble(agentId, 'Error processing specialist request', 'error', 'system')
     } finally {
       setIsExecuting(false)
-      setAgentStates((prev) => ({ ...prev, grav: 'idle' }))
     }
+  }
+
+  // Handle clearing conversation history for an agent
+  const handleClearHistory = (agentId: MascotId) => {
+    const welcome = SPECIALIST_CONFIGS[agentId]?.welcomeMessage || 'Conversation reset.'
+    setMessagesByAgent((prev) => ({
+      ...prev,
+      [agentId]: [
+        {
+          id: `init_${agentId}_${Date.now()}`,
+          agentId,
+          sender: 'assistant',
+          text: welcome,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ],
+    }))
+    triggerBubble(agentId, `History cleared for ${SPECIALIST_CONFIGS[agentId]?.name}`, 'info', 'system')
   }
 
   // Handle PTT Voice Toggle
   const handleVoiceToggle = async () => {
     if (isMicMuted) {
-      triggerBubble('grav', 'Microphone is muted for privacy', 'warning')
+      triggerBubble('grav', 'Microphone is muted for privacy', 'warning', 'system')
       return
     }
 
     const bridge = window.gravitasDesktop
     if (!isListening) {
       setIsListening(true)
-      setAgentStates((prev) => ({ ...prev, grav: 'attentive' }))
-      triggerBubble('grav', 'Listening (Push-To-Talk)...', 'info')
+      setAgentStates((prev) => ({ ...prev, [activeSpecialist]: 'attentive' }))
+      triggerBubble(activeSpecialist, 'Listening (Push-To-Talk)...', 'info', 'work')
       try {
         await bridge?.startPushToTalk?.(true)
       } catch (err) {
@@ -283,16 +497,16 @@ export const App: React.FC = () => {
       }
     } else {
       setIsListening(false)
-      setAgentStates((prev) => ({ ...prev, grav: 'working' }))
+      setAgentStates((prev) => ({ ...prev, [activeSpecialist]: 'working' }))
       try {
         const res = await bridge?.stopPushToTalk?.('session_ptt')
         if (res?.transcript) {
           handleSendMessage(res.transcript)
         } else {
-          setAgentStates((prev) => ({ ...prev, grav: 'idle' }))
+          setAgentStates((prev) => ({ ...prev, [activeSpecialist]: 'idle' }))
         }
       } catch (err) {
-        setAgentStates((prev) => ({ ...prev, grav: 'idle' }))
+        setAgentStates((prev) => ({ ...prev, [activeSpecialist]: 'idle' }))
       }
     }
   }
@@ -315,15 +529,23 @@ export const App: React.FC = () => {
         console.warn('Failed to save note to bridge:', err)
       }
     }
-    // Genuine activity bubble on Ada (Gate B4: work event)
-    triggerBubble('ada', `Saved "${note.title.slice(0, 22)}..." to SQLite`, 'success', 'work')
+    // Genuine event dispatched to AgentEventBus
+    dispatchAgentEvent('NOTE_SAVED', {
+      noteTitle: note.title,
+      subject: note.subject,
+      noteId: note.id,
+    })
   }
 
   // Handle Task completion in SQLite
   const handleTaskCompleted = async (taskId: string, completed: boolean) => {
+    const targetTask = dueTasks.find((t) => t.id === taskId)
+    const title = targetTask?.title || 'System Task'
+
     setDueTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, completed } : t))
     )
+
     const bridge = window.gravitasDesktop
     if (bridge?.completeTask) {
       try {
@@ -332,8 +554,13 @@ export const App: React.FC = () => {
         console.warn('Failed to update task:', err)
       }
     }
-    // Genuine activity bubble on Cipher (Gate B4: work event)
-    triggerBubble('cipher', `Task updated in local database`, 'success', 'work')
+
+    // Genuine event dispatched to AgentEventBus
+    dispatchAgentEvent('TASK_STATE_CHANGED', {
+      taskId,
+      title,
+      completed,
+    })
   }
 
   return (
@@ -375,6 +602,7 @@ export const App: React.FC = () => {
         onOpenQuickSummon={() => {
           setActivePanel('GRAV_CONVERSATION')
           setActiveAgent('grav')
+          setActiveSpecialist('grav')
         }}
         onOpenAdaNotes={() => {
           setActivePanel('ADA_NOTES')
@@ -385,7 +613,6 @@ export const App: React.FC = () => {
           setActiveAgent('cipher')
         }}
         onCoffeeSip={() => {
-          // Gate B4: Separate purely decorative reaction from true work updates
           triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info', 'decorative')
         }}
         onPixelCanvas={() => {
@@ -401,6 +628,7 @@ export const App: React.FC = () => {
         onOpenGravChat={() => {
           setActivePanel('GRAV_CONVERSATION')
           setActiveAgent('grav')
+          setActiveSpecialist('grav')
         }}
         onOpenAdaNotes={() => {
           setActivePanel('ADA_NOTES')
@@ -414,11 +642,16 @@ export const App: React.FC = () => {
         isListening={isListening}
       />
 
-      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES (GATE B2 & B3) ── */}
+      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES (PHASE 04) ── */}
       <FloatingPanels
         activePanel={activePanel}
         minimizedPanel={minimizedPanel}
-        messages={messages}
+        activeSpecialist={activeSpecialist}
+        onSelectSpecialist={(id) => {
+          setActiveSpecialist(id)
+          setActiveAgent(id)
+        }}
+        messages={messagesByAgent[activeSpecialist] || []}
         dueTasks={dueTasks}
         dueAssignments={dueAssignments}
         activeNote={activeNote}
@@ -435,6 +668,17 @@ export const App: React.FC = () => {
         onVoiceToggle={handleVoiceToggle}
         onSaveNote={handleSaveNote}
         onTaskCompleted={handleTaskCompleted}
+        onClearHistory={handleClearHistory}
+        focusTimer={focusTimer}
+        onStopFocusTimer={() => setFocusTimer(null)}
+        onOpenAdaNotes={() => {
+          setActivePanel('ADA_NOTES')
+          setActiveAgent('ada')
+        }}
+        onOpenCipherTasks={() => {
+          setActivePanel('CIPHER_TASKS')
+          setActiveAgent('cipher')
+        }}
         onOpenExternal={async (url) => {
           await window.gravitasDesktop?.openApprovedExternal?.(url)
         }}
