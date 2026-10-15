@@ -128,6 +128,13 @@ async function runStudioAlphaVerification() {
     }
     await new Promise((r) => setTimeout(r, 1200))
 
+    // Type into active recall scratchpad before revealing
+    const scratchpad = await mainWin.$('textarea[placeholder*="Type your derivation"]')
+    if (scratchpad) {
+      await scratchpad.fill('T(n) = aT(n/b) + f(n). Compare f(n) with n^(log_b a). Case 1 if f(n) is polynomial smaller, Case 2 if equal, Case 3 if polynomial larger with regularity condition.')
+    }
+    await new Promise((r) => setTimeout(r, 800))
+
     // Click "Reveal Solution" on flashcard
     console.log('Clicking "Reveal Solution & Active-Recall Formula" button...')
     const revealBtn = await mainWin.$('button:has-text("Reveal Solution")')
@@ -135,6 +142,11 @@ async function runStudioAlphaVerification() {
       await revealBtn.click()
     }
     await new Promise((r) => setTimeout(r, 1500))
+
+    const shot3b = path.join(EVIDENCE_DIR, '03b-ada-flashcards-recall.png')
+    await mainWin.screenshot({ path: shot3b })
+    fs.copyFileSync(shot3b, path.join(ARTIFACT_DIR, '03b-ada-flashcards-recall.png'))
+    console.log(`  Saved: ${shot3b}`)
 
     // Click "Good (3d)" confidence rating to record review
     console.log('Clicking "Good (3d)" recall confidence rating...')

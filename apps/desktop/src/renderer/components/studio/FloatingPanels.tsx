@@ -271,6 +271,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   const [activeDeckSubject, setActiveDeckSubject] = useState<string>('Algorithms')
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [showCardSolution, setShowCardSolution] = useState(false)
+  const [activeRecallInput, setActiveRecallInput] = useState('')
   const [reviewCountToday, setReviewCountToday] = useState(0)
   const [newLinkedTaskInput, setNewLinkedTaskInput] = useState('')
 
@@ -713,11 +714,14 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                         background: msg.sender === 'user' ? '#262D35' : '#171B20',
                         color: msg.sender === 'user' ? '#EDEAE3' : '#D6D4CE',
                         border: `1px solid ${msg.sender === 'user' ? '#3B4450' : `${accentColor}33`}`,
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
                       }}
                     >
                       {msg.sender === 'assistant' ? (
                         <div
                           className="specialist-message-content"
+                          style={{ overflowX: 'auto' }}
                           dangerouslySetInnerHTML={{
                             __html: renderMarkdownWithMath(msg.text),
                           }}
@@ -984,7 +988,8 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           transition={{ type: 'spring', damping: 24, stiffness: 320 }}
           style={{
             position: 'relative',
-            width: noteViewMode === 'split' ? '920px' : '680px',
+            width: noteViewMode === 'split' ? '960px' : '820px',
+            minWidth: '640px',
             maxWidth: '96vw',
             height: '600px',
             background: 'rgba(20, 25, 23, 0.98)',
@@ -1002,17 +1007,18 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           {/* Header */}
           <div
             style={{
-              padding: '12px 20px',
+              padding: '10px 16px',
               borderBottom: '1px solid #243028',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               background: 'rgba(22, 29, 25, 0.92)',
+              gap: '8px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <BookOpen size={16} color="#81B29A" />
-              <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <BookOpen size={16} color="#81B29A" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#EDEAE3', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Ada's Knowledge Hub
               </span>
 
@@ -1025,15 +1031,20 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   border: '1px solid #2B3830',
                   borderRadius: '6px',
                   color: '#EDEAE3',
-                  fontSize: '11.5px',
-                  padding: '3px 8px',
+                  fontSize: '11px',
+                  padding: '3px 6px',
                   outline: 'none',
                   cursor: 'pointer',
+                  maxWidth: '140px',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1,
                 }}
               >
                 {notesList.map((n) => (
                   <option key={n.id} value={n.id}>
-                    {n.subject}: {n.title.slice(0, 32)}...
+                    {n.subject}: {n.title.slice(0, 24)}...
                   </option>
                 ))}
               </select>
@@ -1042,35 +1053,39 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               {isDirty ? (
                 <span
                   style={{
-                    fontSize: '10.5px',
-                    padding: '2px 7px',
+                    fontSize: '10px',
+                    padding: '2px 6px',
                     borderRadius: '6px',
                     background: 'rgba(244, 162, 97, 0.15)',
                     border: '1px solid rgba(244, 162, 97, 0.4)',
                     color: '#F4A261',
                     fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
-                  ● Unsaved Changes
+                  ● Unsaved
                 </span>
               ) : (
                 <span
                   style={{
-                    fontSize: '10.5px',
-                    padding: '2px 7px',
+                    fontSize: '10px',
+                    padding: '2px 6px',
                     borderRadius: '6px',
                     background: 'rgba(129, 178, 154, 0.15)',
                     border: '1px solid rgba(129, 178, 154, 0.4)',
                     color: '#81B29A',
                     fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
-                  ✓ Saved to SQLite
+                  ✓ Saved
                 </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
               {/* Mode Toggle: Edit | Preview | Split | Flashcards */}
               <div
                 style={{
@@ -1080,6 +1095,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   borderRadius: '6px',
                   padding: '2px',
                   gap: '2px',
+                  flexShrink: 0,
                 }}
               >
                 <button
@@ -1089,8 +1105,8 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                     background: noteViewMode === 'edit' ? '#27342C' : 'transparent',
                     border: 'none',
                     borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
+                    padding: '3px 7px',
+                    fontSize: '10.5px',
                     color: noteViewMode === 'edit' ? '#EDEAE3' : '#8E949B',
                     cursor: 'pointer',
                     display: 'flex',
@@ -1108,8 +1124,8 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                     background: noteViewMode === 'preview' ? '#27342C' : 'transparent',
                     border: 'none',
                     borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
+                    padding: '3px 7px',
+                    fontSize: '10.5px',
                     color: noteViewMode === 'preview' ? '#EDEAE3' : '#8E949B',
                     cursor: 'pointer',
                     display: 'flex',
@@ -1127,8 +1143,8 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                     background: noteViewMode === 'split' ? '#27342C' : 'transparent',
                     border: 'none',
                     borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
+                    padding: '3px 7px',
+                    fontSize: '10.5px',
                     color: noteViewMode === 'split' ? '#EDEAE3' : '#8E949B',
                     cursor: 'pointer',
                     display: 'flex',
@@ -1140,14 +1156,18 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   <span>Split</span>
                 </button>
                 <button
-                  onClick={() => setNoteViewMode('flashcards')}
+                  onClick={() => {
+                    setShowCardSolution(false)
+                    setActiveRecallInput('')
+                    setNoteViewMode('flashcards')
+                  }}
                   title="Active Recall & Spaced Repetition Decks"
                   style={{
                     background: noteViewMode === 'flashcards' ? '#27342C' : 'transparent',
                     border: 'none',
                     borderRadius: '4px',
-                    padding: '3px 8px',
-                    fontSize: '11px',
+                    padding: '3px 7px',
+                    fontSize: '10.5px',
                     color: noteViewMode === 'flashcards' ? '#EDEAE3' : '#8E949B',
                     cursor: 'pointer',
                     display: 'flex',
@@ -1187,16 +1207,17 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   background: '#151D18',
                   border: '1px solid #2B3830',
                   borderRadius: '6px',
-                  padding: '5px 9px',
-                  fontSize: '11px',
+                  padding: '4px 7px',
+                  fontSize: '10.5px',
                   color: '#81B29A',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
+                  flexShrink: 0,
                 }}
               >
-                <Download size={12} />
+                <Download size={11} />
                 <span>{exportFeedback || 'Obsidian'}</span>
               </button>
 
@@ -1207,16 +1228,17 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   background: '#151D18',
                   border: '1px solid #2B3830',
                   borderRadius: '6px',
-                  padding: '5px 9px',
-                  fontSize: '11px',
+                  padding: '4px 7px',
+                  fontSize: '10.5px',
                   color: '#EDEAE3',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
+                  flexShrink: 0,
                 }}
               >
-                <Upload size={12} />
+                <Upload size={11} />
                 <span>Import</span>
               </button>
 
@@ -1227,19 +1249,20 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   background: isDirty ? '#81B29A' : '#233028',
                   border: '1px solid #81B29A',
                   borderRadius: '6px',
-                  padding: '5px 12px',
-                  fontSize: '11.5px',
+                  padding: '4px 9px',
+                  fontSize: '11px',
                   fontWeight: 600,
                   color: isDirty ? '#101713' : '#81B29A',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
+                  gap: '4px',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  flexShrink: 0,
                 }}
               >
-                <Save size={13} />
-                <span>{noteSavedFeedback ? 'Saved ✓' : 'Save to SQLite'}</span>
+                <Save size={12} />
+                <span>{noteSavedFeedback ? 'Saved ✓' : 'Save'}</span>
               </button>
 
               <button
@@ -1251,6 +1274,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   color: '#8E949B',
                   cursor: 'pointer',
                   padding: '4px',
+                  flexShrink: 0,
                 }}
               >
                 <Minus size={15} />
@@ -1264,6 +1288,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   color: '#8E949B',
                   cursor: 'pointer',
                   padding: '4px',
+                  flexShrink: 0,
                 }}
               >
                 <X size={16} />
@@ -1386,6 +1411,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                           <button
                             onClick={() => {
                               setShowCardSolution(false)
+                              setActiveRecallInput('')
                               setCurrentCardIndex((prev) => (prev > 0 ? prev - 1 : currentDeck.length - 1))
                             }}
                             style={{
@@ -1408,6 +1434,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                           <button
                             onClick={() => {
                               setShowCardSolution(false)
+                              setActiveRecallInput('')
                               setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
                             }}
                             style={{
@@ -1489,27 +1516,53 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                         {/* Solution Area or Reveal Button */}
                         <div>
                           {!showCardSolution ? (
-                            <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                              <button
-                                onClick={() => setShowCardSolution(true)}
-                                style={{
-                                  background: 'rgba(129, 178, 154, 0.15)',
-                                  border: '1px solid #81B29A',
-                                  borderRadius: '8px',
-                                  padding: '8px 20px',
-                                  fontSize: '12.5px',
-                                  fontWeight: 600,
-                                  color: '#81B29A',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  transition: 'all 0.15s ease',
-                                }}
-                              >
-                                <Eye size={14} />
-                                <span>Reveal Solution & Active-Recall Formula</span>
-                              </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                              <div>
+                                <label style={{ fontSize: '11px', color: '#81B29A', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                                  Active Recall Scratchpad (attempt derivation before revealing):
+                                </label>
+                                <textarea
+                                  value={activeRecallInput}
+                                  onChange={(e) => setActiveRecallInput(e.target.value)}
+                                  placeholder="Type your derivation, formula, or key points from memory..."
+                                  rows={3}
+                                  style={{
+                                    width: '100%',
+                                    background: '#151D18',
+                                    border: '1px solid #2B3830',
+                                    borderRadius: '6px',
+                                    padding: '8px 10px',
+                                    color: '#EDEAE3',
+                                    fontSize: '12px',
+                                    fontFamily: 'monospace',
+                                    resize: 'vertical',
+                                    outline: 'none',
+                                    boxSizing: 'border-box',
+                                  }}
+                                />
+                              </div>
+                              <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                                <button
+                                  onClick={() => setShowCardSolution(true)}
+                                  style={{
+                                    background: 'rgba(129, 178, 154, 0.15)',
+                                    border: '1px solid #81B29A',
+                                    borderRadius: '8px',
+                                    padding: '8px 20px',
+                                    fontSize: '12.5px',
+                                    fontWeight: 600,
+                                    color: '#81B29A',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    transition: 'all 0.15s ease',
+                                  }}
+                                >
+                                  <Eye size={14} />
+                                  <span>Reveal Solution & Active-Recall Formula</span>
+                                </button>
+                              </div>
                             </div>
                           ) : (
                             <div
@@ -1521,6 +1574,16 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                                 marginTop: '8px',
                               }}
                             >
+                              {activeRecallInput.trim() && (
+                                <div style={{ marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px dashed #2C3C32' }}>
+                                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#F2CC8F', marginBottom: '4px' }}>
+                                    Your Recall Attempt:
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: '#D8D4CF', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}>
+                                    {activeRecallInput}
+                                  </div>
+                                </div>
+                              )}
                               <div style={{ fontSize: '11.5px', fontWeight: 600, color: '#81B29A', marginBottom: '8px' }}>
                                 Verified Solution & Derivation:
                               </div>
@@ -1551,6 +1614,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                                       onReviewFlashcard?.(currentCard.id, 'again')
                                       setReviewCountToday((c) => c + 1)
                                       setShowCardSolution(false)
+                                      setActiveRecallInput('')
                                       setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
                                     }}
                                     style={{
@@ -1571,6 +1635,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                                       onReviewFlashcard?.(currentCard.id, 'good')
                                       setReviewCountToday((c) => c + 1)
                                       setShowCardSolution(false)
+                                      setActiveRecallInput('')
                                       setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
                                     }}
                                     style={{
@@ -1591,6 +1656,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                                       onReviewFlashcard?.(currentCard.id, 'easy')
                                       setReviewCountToday((c) => c + 1)
                                       setShowCardSolution(false)
+                                      setActiveRecallInput('')
                                       setCurrentCardIndex((prev) => (prev + 1) % currentDeck.length)
                                     }}
                                     style={{
