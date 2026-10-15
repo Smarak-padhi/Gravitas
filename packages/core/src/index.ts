@@ -288,4 +288,5 @@ export {
 // Phase 05 Intelligent Runtime & Deep Discovery Exports
 export * from './intelligent-runtime/InAppReliabilityLoop.js'
 export * from './intelligent-runtime/DeepDiscoveryEngine.js'
+export * from './intelligent-runtime/path-security.js'
 

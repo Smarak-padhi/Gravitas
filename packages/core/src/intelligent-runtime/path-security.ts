@@ -3,17 +3,31 @@
  *
  * Provides bulletproof filesystem containment, sibling-prefix rejection,
  * parent-path traversal prevention, symlink resolution security,
- * and allowlist-based command execution validation.
+ * and constrained allowlist-based Node command execution validation.
  *
- * Security Addendum (Phase 05.6):
- * - validateShellCommand now enforces an explicit executable allowlist instead of
- *   regex-based shell-operator scanning, which is bypassable on Windows via carets (^),
- *   percent-expansion (%VAR%), parentheses grouping, and encoded commands.
- * - All command.exec callers MUST use spawn/spawnSync with shell:false, never execSync.
- * - TOCTOU gap: validation and spawn are separate OS calls; a race window exists.
- *   Mitigated by re-verifying the approval grant immediately before every tool call.
- * - Windows ACL: fs.chmodSync(0o600) is a no-op on Windows (NTFS ignores POSIX mode bits).
- *   See DeepDiscoveryEngine.getOrCreateAuthorityKey() for icacls hardening.
+ * Security Closure (Phase 05.6 Final):
+ * 1. Node Execution Capabilities:
+ *    - The executable allowlist `{node, node.exe}` is combined with strict option filtering.
+ *    - Rejects `-e`, `--eval`, `-p`, `--print`, `-r`, `--require`, `--import`, and all code-loading options.
+ *    - Enforces that an explicit script path is provided and resolves within authorized workspace paths.
+ *    - Requires standard script extensions (.js, .mjs, .cjs, .ts).
+ *    - All command.exec callers MUST use spawn/spawnSync with shell:false, never execSync.
+ *
+ * IMPORTANT LIMITATION & THREAT MODEL:
+ * An approved script (e.g. test.mjs) executes in the host Node runtime without OS-level process sandboxing.
+ * Even with an allowlisted script path, resolved workspace containment, and restricted flags, Node scripts
+ * can execute arbitrary filesystem, network, or child process operations using Node's standard libraries
+ * (fs, net, child_process) once invoked. This layer enforces executable, flag, and script path containment,
+ * NOT OS-level kernel sandboxing (e.g. AppContainer, seccomp, or Docker).
+ *
+ * 2. Authority Protection & Windows ACLs:
+ *    - Fail-closed verification on Windows NTFS ACLs via icacls.
+ *    - Verifies that inheritance is removed and only %USERNAME% retains Full Control.
+ *    - Same-user process trust boundary documented: processes under the same user account share NTFS access.
+ *
+ * 3. Mutation Boundary Revalidation:
+ *    - Every mutating tool invocation (fs.writeFile, fs.appendFile, command.exec) re-validates the
+ *      active cryptographic grant, revision hash, expiry, operation, and path scope immediately before execution.
  */
 
 import * as fs from 'node:fs'
@@ -184,32 +198,51 @@ export function validatePathAgainstAllowlist(
 }
 
 // ---------------------------------------------------------------------------
-// Allowlist-based command execution validation
+// Constrained allowlist-based command execution validation
 // ---------------------------------------------------------------------------
 
 /**
  * Explicit allowlist of permitted executable base names.
- *
- * Security rationale: Regex-based pattern matching cannot contain Windows shell execution.
- * cmd.exe and powershell.exe support operator forms (carets ^, percent-expansion %VAR%,
- * parentheses grouping, -EncodedCommand, call chains) that bypass simple regex scans.
- *
- * The only safe approach on Windows is:
- *   1. Parse the executable name from argv[0].
- *   2. Verify it is in this allowlist.
- *   3. Spawn with { shell: false } so no shell interpreter is ever invoked.
- *      Use spawnSync(execName, args, { shell: false }), NOT execSync(rawCommand).
- *
- * TOCTOU NOTE: A race window exists between validateShellCommand() and the actual spawn()
- * call. Mitigated by: (a) this allowlist is a compile-time constant, not runtime-editable
- * data; (b) the approval grant is re-verified immediately before each tool execution.
- * No further mitigation is possible without a full OS-level sandbox.
- *
- * Windows case-insensitivity NOTE: executable comparison uses .toLowerCase() on Windows.
  */
 export const ALLOWED_EXEC_NAMES: ReadonlySet<string> = new Set([
   'node',
   'node.exe',
+])
+
+/**
+ * Forbidden Node.js option flags that execute inline code, evaluate strings,
+ * or load arbitrary modules before or instead of an approved script file.
+ */
+export const FORBIDDEN_NODE_FLAGS: ReadonlySet<string> = new Set([
+  '-e',
+  '--eval',
+  '-p',
+  '--print',
+  '-r',
+  '--require',
+  '-i',
+  '--interactive',
+  '--import',
+  '--loader',
+  '--experimental-loader',
+  '--entry-url',
+  '--inspect',
+  '--inspect-brk',
+  '--inspect-port',
+  '--prof',
+  '--expose-internals',
+  '--conditions',
+  '-C',
+])
+
+/**
+ * Permitted script file extensions for Node execution.
+ */
+export const PERMITTED_SCRIPT_EXTENSIONS: ReadonlySet<string> = new Set([
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.ts',
 ])
 
 /**
@@ -229,27 +262,70 @@ export function parseExecName(command: string): string {
 }
 
 /**
- * Validates a command string against the explicit executable allowlist.
+ * Tokenizes a command line string into an array of argument tokens,
+ * properly respecting double-quoted and single-quoted strings.
+ */
+export function tokenizeCommandLine(command: string): string[] {
+  const tokens: string[] = []
+  let current = ''
+  let inQuote: '"' | "'" | null = null
+
+  for (let i = 0; i < command.length; i++) {
+    const char = command[i]
+    if (char === undefined) continue
+    if (inQuote) {
+      if (char === inQuote) {
+        inQuote = null
+      } else {
+        current += char
+      }
+    } else if (char === '"' || char === "'") {
+      inQuote = char
+    } else if (/\s/.test(char)) {
+      if (current.length > 0) {
+        tokens.push(current)
+        current = ''
+      }
+    } else {
+      current += char
+    }
+  }
+
+  if (current.length > 0) {
+    tokens.push(current)
+  }
+
+  return tokens
+}
+
+export interface ShellValidationResult {
+  readonly allowed: boolean
+  readonly execName?: string
+  readonly scriptPath?: string
+  readonly args?: readonly string[]
+  readonly violationReason?: string
+}
+
+/**
+ * Validates a command string against the explicit executable allowlist and
+ * Node capability constraints.
  *
- * Returns:
- * - `{ allowed: false, violationReason }` if rejected.
- * - `{ allowed: true, execName }` if permitted; `execName` is the normalized basename.
+ * Security Rationale (Phase 05.6 Final Security Closure):
+ * 1. Executable Allowlist: Rejects non-Node binaries (powershell, cmd, bash, python, etc.).
+ * 2. Code-loading Options Rejection: Blocks -e, --eval, -p, --print, -r, --require, --import.
+ * 3. Script Path Verification: Requires an explicit script path resolved and verified within
+ *    the authorized workspace (allowedPaths).
+ * 4. Extension Verification: Permits only .js, .mjs, .cjs, .ts.
+ * 5. Defense-in-Depth: Rejects unquoted shell operator characters (&, |, ;, <, >, `, $).
  *
- * Callers MUST use `spawnSync(execName, args, { shell: false })`.
- * Never pass the raw `command` string to any shell interpreter.
- *
- * Previous implementation used regex pattern matching to scan for shell operators.
- * That approach is documented here as INSUFFICIENT for Windows security because:
- * - The caret (^) is a Windows CMD escape character invisible to JS regex.
- * - Percent-expansion (%PATHEXT%) runs before the command is parsed by the regex.
- * - Parentheses grouping and -EncodedCommand bypass operator-character scans entirely.
- * This function replaces it with allowlist + shell:false as the primary containment.
+ * Callers MUST invoke `spawnSync(execName, args, { shell: false })`.
+ * Never pass the command string to an OS shell.
  */
 export function validateShellCommand(
   command: string,
   authorizedCwd: string,
   allowedPaths: readonly string[]
-): { allowed: boolean; execName?: string; violationReason?: string } {
+): ShellValidationResult {
   if (!command || typeof command !== 'string') {
     return { allowed: false, violationReason: 'Command is empty or invalid.' }
   }
@@ -263,8 +339,15 @@ export function validateShellCommand(
     }
   }
 
-  // 2. Parse and allowlist-check the executable name
-  const rawExecName = parseExecName(command)
+  // 2. Tokenize command arguments
+  const tokens = tokenizeCommandLine(command)
+  if (tokens.length === 0) {
+    return { allowed: false, violationReason: 'Command contains no executable token.' }
+  }
+
+  // 3. Parse and allowlist-check the executable name
+  const rawExecToken = tokens[0] || ''
+  const rawExecName = parseExecName(rawExecToken)
   const isWindows = process.platform === 'win32'
   const normalizedExec = isWindows ? rawExecName.toLowerCase() : rawExecName
 
@@ -274,21 +357,99 @@ export function validateShellCommand(
       violationReason:
         `Executable "${rawExecName}" is not in the permitted allowlist ` +
         `[${[...ALLOWED_EXEC_NAMES].join(', ')}]. ` +
-        `Rejected to prevent arbitrary shell execution. ` +
+        `Rejected to prevent arbitrary execution. ` +
         `Callers must use spawnSync with shell:false and an explicit allowlist.`,
     }
   }
 
-  // 3. Defense-in-depth: reject shell operator characters in the argument portion.
-  // NOTE: With shell:false these characters are passed as literal argv bytes and are NOT
-  // interpreted by any shell. This check is belt-and-suspenders only.
-  const argPart = command.trim().slice(rawExecName.length)
-  if (/[&|;<>`$]/.test(argPart)) {
-    return {
-      allowed: false,
-      violationReason: `Command arguments contain shell operator characters that are forbidden as a defense-in-depth measure.`,
+  // 4. Node capability restrictions:
+  // Inspect all argument tokens for forbidden code-loading flags
+  const argTokens = tokens.slice(1)
+
+  for (const token of argTokens) {
+    const lowerToken = token.toLowerCase()
+    // Exact match against forbidden flags
+    if (FORBIDDEN_NODE_FLAGS.has(lowerToken)) {
+      return {
+        allowed: false,
+        violationReason: `Node code-loading or inline evaluation option "${token}" is forbidden.`,
+      }
+    }
+    // Prefix match for flags with values like --eval=code, --require=module, --import=module
+    if (
+      lowerToken.startsWith('--eval=') ||
+      lowerToken.startsWith('-e=') ||
+      lowerToken.startsWith('--print=') ||
+      lowerToken.startsWith('-p=') ||
+      lowerToken.startsWith('--require=') ||
+      lowerToken.startsWith('-r=') ||
+      lowerToken.startsWith('--import=') ||
+      lowerToken.startsWith('--loader=') ||
+      lowerToken.startsWith('--experimental-loader=') ||
+      lowerToken.startsWith('--conditions=')
+    ) {
+      return {
+        allowed: false,
+        violationReason: `Node code-loading or inline evaluation option "${token}" is forbidden.`,
+      }
     }
   }
 
-  return { allowed: true, execName: normalizedExec }
+  // 5. Require an explicit script path and verify it within the authorized workspace
+  // Find the first token that is not a flag (does not start with '-')
+  let scriptTokenIndex = -1
+  for (let idx = 0; idx < argTokens.length; idx++) {
+    const tok = argTokens[idx]
+    if (tok && !tok.startsWith('-')) {
+      scriptTokenIndex = idx
+      break
+    }
+  }
+
+  if (scriptTokenIndex === -1) {
+    return {
+      allowed: false,
+      violationReason:
+        'Node execution requires an explicit script file path within the authorized workspace. ' +
+        'Interactive REPL or flag-only invocations are forbidden.',
+    }
+  }
+
+  const scriptToken = argTokens[scriptTokenIndex]!
+  const resolvedScript = path.resolve(authorizedCwd, scriptToken)
+
+  // Verify that the script path is strictly contained within allowedPaths
+  const scriptPathCheck = validatePathAgainstAllowlist(resolvedScript, allowedPaths)
+  if (!scriptPathCheck.allowed) {
+    return {
+      allowed: false,
+      violationReason: `Script path "${scriptToken}" (${resolvedScript}) is not contained within authorized workspace: ${scriptPathCheck.violationReason}`,
+    }
+  }
+
+  // Verify permitted script extension
+  const scriptExt = path.extname(resolvedScript).toLowerCase()
+  if (!PERMITTED_SCRIPT_EXTENSIONS.has(scriptExt)) {
+    return {
+      allowed: false,
+      violationReason:
+        `Script "${scriptToken}" has unpermitted extension "${scriptExt}". ` +
+        `Only scripts with extensions [${[...PERMITTED_SCRIPT_EXTENSIONS].join(', ')}] are permitted.`,
+    }
+  }
+
+  // 6. Defense-in-depth: reject shell operator characters in raw command
+  if (/[&|;<>`$]/.test(command)) {
+    return {
+      allowed: false,
+      violationReason: 'Command contains shell operator characters that are forbidden as a defense-in-depth measure.',
+    }
+  }
+
+  return {
+    allowed: true,
+    execName: normalizedExec,
+    scriptPath: resolvedScript,
+    args: argTokens,
+  }
 }

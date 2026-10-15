@@ -184,6 +184,84 @@ describe('Adversarial Shell Containment (Security Addendum Phase 05.6 Item 1)', 
     expect(result.allowed).toBe(false)
     expect(result.violationReason).toContain('not in the permitted allowlist')
   })
+
+  // Security Closure (Phase 05.6 Final Requirement 1: Restrict Node execution capabilities)
+  it('rejects node -e and --eval code execution options', () => {
+    const eResult = validateShellCommand('node -e "console.log(process.mainModule)"', allowedCwd, [allowedCwd])
+    expect(eResult.allowed).toBe(false)
+    expect(eResult.violationReason).toContain('is forbidden')
+
+    const evalResult = validateShellCommand('node --eval "console.log(1)"', allowedCwd, [allowedCwd])
+    expect(evalResult.allowed).toBe(false)
+    expect(evalResult.violationReason).toContain('is forbidden')
+
+    const prefixResult = validateShellCommand('node --eval=console.log(1)', allowedCwd, [allowedCwd])
+    expect(prefixResult.allowed).toBe(false)
+    expect(prefixResult.violationReason).toContain('is forbidden')
+  })
+
+  it('rejects node -p and --print evaluation options', () => {
+    const pResult = validateShellCommand('node -p "process.env"', allowedCwd, [allowedCwd])
+    expect(pResult.allowed).toBe(false)
+    expect(pResult.violationReason).toContain('is forbidden')
+
+    const printResult = validateShellCommand('node --print "1+1"', allowedCwd, [allowedCwd])
+    expect(printResult.allowed).toBe(false)
+    expect(printResult.violationReason).toContain('is forbidden')
+  })
+
+  it('rejects node -r, --require, and --import module preloading options', () => {
+    const rResult = validateShellCommand('node -r ./evil.js test.mjs', allowedCwd, [allowedCwd])
+    expect(rResult.allowed).toBe(false)
+    expect(rResult.violationReason).toContain('is forbidden')
+
+    const reqResult = validateShellCommand('node --require ./evil.js test.mjs', allowedCwd, [allowedCwd])
+    expect(reqResult.allowed).toBe(false)
+    expect(reqResult.violationReason).toContain('is forbidden')
+
+    const impResult = validateShellCommand('node --import ./evil.js test.mjs', allowedCwd, [allowedCwd])
+    expect(impResult.allowed).toBe(false)
+    expect(impResult.violationReason).toContain('is forbidden')
+  })
+
+  it('rejects loader and inspect options', () => {
+    expect(validateShellCommand('node --loader ./evil.js test.mjs', allowedCwd, [allowedCwd]).allowed).toBe(false)
+    expect(validateShellCommand('node --inspect test.mjs', allowedCwd, [allowedCwd]).allowed).toBe(false)
+  })
+
+  it('rejects node invocation without an explicit script path', () => {
+    const result = validateShellCommand('node', allowedCwd, [allowedCwd])
+    expect(result.allowed).toBe(false)
+    expect(result.violationReason).toContain('requires an explicit script file path')
+  })
+
+  it('rejects script path resolving outside authorized workspace', () => {
+    const result = validateShellCommand('node ../outside/malicious.js', allowedCwd, [allowedCwd])
+    expect(result.allowed).toBe(false)
+    expect(result.violationReason).toContain('not contained within authorized workspace')
+  })
+
+  it('rejects script with unpermitted file extension', () => {
+    const batResult = validateShellCommand('node script.bat', allowedCwd, [allowedCwd])
+    expect(batResult.allowed).toBe(false)
+    expect(batResult.violationReason).toContain('unpermitted extension')
+
+    const exeResult = validateShellCommand('node binary.exe', allowedCwd, [allowedCwd])
+    expect(exeResult.allowed).toBe(false)
+    expect(exeResult.violationReason).toContain('unpermitted extension')
+  })
+
+  it('permits valid script within authorized workspace with permitted extension', () => {
+    const mjsResult = validateShellCommand('node test.mjs', allowedCwd, [allowedCwd])
+    expect(mjsResult.allowed).toBe(true)
+    expect(mjsResult.scriptPath).toBe(path.resolve(allowedCwd, 'test.mjs'))
+
+    const jsResult = validateShellCommand('node script.js', allowedCwd, [allowedCwd])
+    expect(jsResult.allowed).toBe(true)
+
+    const quotedResult = validateShellCommand('node "test.mjs"', allowedCwd, [allowedCwd])
+    expect(quotedResult.allowed).toBe(true)
+  })
 })
 
 // ──────────────────────────────────────────────────────────────────────────────

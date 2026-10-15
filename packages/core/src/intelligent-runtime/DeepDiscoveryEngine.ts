@@ -99,6 +99,13 @@ export class ApprovalGateBlockedError extends Error {
   }
 }
 
+export class AuthorityProtectionError extends Error {
+  public constructor(message: string) {
+    super(`AUTHORITY_PROTECTION_ERROR: ${message}`)
+    this.name = 'AuthorityProtectionError'
+  }
+}
+
 /**
  * Computes deterministic SHA-256 revision hash across specification artifacts:
  * PROJECT.md + ARCHITECTURE.md + PLAN.md
@@ -324,50 +331,124 @@ ${data.architectureOverview}
    * Retrieves or creates the application-owned machine authority secret key.
    * Stored in `.gravitas/secure/authority.key`, protected from ordinary spec edits.
    */
+  /**
+   * Enforces and strictly verifies OS-level file protection on authority.key.
+   *
+   * On Windows:
+   * 1. Strips all inherited permissions via icacls /inheritance:r.
+   * 2. Grants exclusively the current Windows user Full Control via icacls /grant:r %USERNAME%:(F).
+   * 3. Inspects the resulting ACL to verify inheritance is removed and expected user is granted.
+   * 4. Fails closed with AuthorityProtectionError if protection cannot be confirmed.
+   *
+   * On POSIX:
+   * Verifies file mode 0o600 (owner read/write only, zero access for group or others).
+   *
+   * TRUST BOUNDARY & ACCESS MODEL:
+   * 1. Multi-User OS Isolation:
+   *    On Windows, NTFS ACLs (/inheritance:r /grant:r %USERNAME%:(F)) restrict authority.key
+   *    exclusively to the current Windows user account, stripping inherited permissions and
+   *    blocking other local or domain user accounts.
+   *
+   * 2. Same-User Process Trust Boundary:
+   *    Processes running under the SAME Windows user identity have identical OS access rights
+   *    and can read/modify authority.key. The approval authority trust boundary protects against
+   *    unauthorized accounts and cross-user tampering, but NOT against unisolated hostile code
+   *    executing within the same user session.
+   */
+  public verifyAndEnforceKeyProtection(keyPath: string): void {
+    if (process.platform === 'win32') {
+      const username = process.env['USERNAME']
+      if (!username || username.trim().length === 0) {
+        throw new AuthorityProtectionError('Missing USERNAME environment variable; cannot establish Windows owner ACL.')
+      }
+
+      const { execFileSync } = require('node:child_process') as typeof import('node:child_process')
+      try {
+        execFileSync('icacls', [keyPath, '/inheritance:r', '/grant:r', `${username}:(F)`], {
+          encoding: 'utf-8',
+          shell: false,
+          timeout: 5000,
+        })
+      } catch (err: any) {
+        throw new AuthorityProtectionError(`Failed to apply Windows NTFS ACLs via icacls: ${err.message}`)
+      }
+
+      // Verify the actual key protection result
+      try {
+        const aclOutput = execFileSync('icacls', [keyPath], {
+          encoding: 'utf-8',
+          shell: false,
+          timeout: 5000,
+        })
+
+        if (!aclOutput.includes('Successfully processed 1 files; Failed processing 0 files')) {
+          throw new AuthorityProtectionError(`icacls inspection returned failure status: ${aclOutput.trim()}`)
+        }
+
+        // Verify that inherited permissions are stripped (no (I) inheritance flag)
+        if (/\(I\)/i.test(aclOutput)) {
+          throw new AuthorityProtectionError(`authority.key has inherited permissions that could not be stripped: ${aclOutput.trim()}`)
+        }
+
+        // Verify that current user has Full Control
+        const userPattern = new RegExp(username, 'i')
+        if (!userPattern.test(aclOutput)) {
+          throw new AuthorityProtectionError(`authority.key ACL does not grant expected user "${username}": ${aclOutput.trim()}`)
+        }
+      } catch (err: any) {
+        if (err instanceof AuthorityProtectionError) throw err
+        throw new AuthorityProtectionError(`Failed to verify Windows NTFS ACLs on authority.key: ${err.message}`)
+      }
+    } else {
+      // POSIX systems: verify and enforce 0o600
+      try {
+        const stat = fs.statSync(keyPath)
+        const currentMode = stat.mode & 0o777
+        if ((currentMode & 0o077) !== 0) {
+          fs.chmodSync(keyPath, 0o600)
+          const newStat = fs.statSync(keyPath)
+          const newMode = newStat.mode & 0o777
+          if ((newMode & 0o077) !== 0) {
+            throw new AuthorityProtectionError(
+              `authority.key has insecure file permissions (0o${newMode.toString(8)}); expected 0o600.`
+            )
+          }
+        }
+      } catch (err: any) {
+        if (err instanceof AuthorityProtectionError) throw err
+        throw new AuthorityProtectionError(`Cannot enforce POSIX 0o600 mode on authority.key: ${err.message}`)
+      }
+    }
+  }
+
+  /**
+   * Retrieves or creates the application-owned machine authority secret key.
+   * Stored in `.gravitas/secure/authority.key`, protected from ordinary spec edits.
+   * Fails closed if OS-level authority protection cannot be verified.
+   */
   public getOrCreateAuthorityKey(projectRoot = process.cwd()): string {
     const secureDir = path.join(projectRoot, '.gravitas', 'secure')
     const keyPath = path.join(secureDir, 'authority.key')
-    try {
-      if (fs.existsSync(keyPath)) {
-        const key = fs.readFileSync(keyPath, 'utf-8').trim()
-        if (key.length >= 32) return key
+
+    if (fs.existsSync(keyPath)) {
+      const key = fs.readFileSync(keyPath, 'utf-8').trim()
+      if (key.length >= 32) {
+        // Verify key protection on every load
+        this.verifyAndEnforceKeyProtection(keyPath)
+        return key
       }
-    } catch {
-      // Create fresh key if unreadable
     }
 
     fs.mkdirSync(secureDir, { recursive: true })
     const freshKey = crypto.randomBytes(32).toString('hex')
     try {
-      // mode: 0o600 sets the file's POSIX permissions on Linux/macOS.
-      // On Windows, fs.chmodSync(0o600) is a no-op for NTFS ACLs — it only clears
-      // the DOS read-only attribute and does NOT restrict other users. We harden
-      // Windows NTFS permissions separately via icacls below.
       fs.writeFileSync(keyPath, freshKey, { encoding: 'utf-8', mode: 0o600 })
-    } catch {
-      fs.writeFileSync(keyPath, freshKey, 'utf-8')
+    } catch (err: any) {
+      throw new AuthorityProtectionError(`Failed to write authority.key: ${err.message}`)
     }
 
-    // Windows NTFS ACL hardening (Security Addendum, Phase 05.6 Item 2):
-    // Remove inherited permissions and grant only the current user Full Control.
-    // This is a best-effort call; if it fails (e.g. insufficient privilege in CI),
-    // we log a warning rather than aborting — the key still has process-level protection.
-    if (process.platform === 'win32') {
-      try {
-        const { execFileSync } = require('node:child_process') as typeof import('node:child_process')
-        // Remove inherited ACEs and grant current user exclusive Full Control
-        execFileSync('icacls', [keyPath, '/inheritance:r', '/grant:r', `${process.env.USERNAME}:(F)`], {
-          encoding: 'utf-8',
-          shell: false,
-          timeout: 5000,
-        })
-      } catch {
-        // icacls hardening failed (e.g. running as SYSTEM, or path issue).
-        // Document the limitation: the key has no NTFS ACL restriction.
-        // Operational security relies on the Electron process boundary and the
-        // directory not being world-readable via inherited parent ACLs.
-      }
-    }
+    // Enforce and verify OS-level ACL protection
+    this.verifyAndEnforceKeyProtection(keyPath)
 
     return freshKey
   }
@@ -456,7 +537,15 @@ ${data.architectureOverview}
       return { approved: false, violationReason: 'No authorization grant recorded.' }
     }
 
-    const secretKey = this.getOrCreateAuthorityKey(projectRoot)
+    let secretKey: string
+    try {
+      secretKey = this.getOrCreateAuthorityKey(projectRoot)
+    } catch (err: any) {
+      return {
+        approved: false,
+        violationReason: `Authority protection failure: ${err?.message || 'Cannot access or protect authority.key'}. Execution disabled.`,
+      }
+    }
     const expectedSig = this.computeGrantSignature(secretKey, grant)
     const signatureValid = grant.signature === expectedSig
 
@@ -579,9 +668,9 @@ ${data.architectureOverview}
     projectRoot: string,
     projectSlug: string,
     options?: {
-      operation?: string
-      requestedPaths?: readonly string[]
-      requestedTools?: readonly string[]
+      operation?: string | undefined
+      requestedPaths?: readonly string[] | undefined
+      requestedTools?: readonly string[] | undefined
     }
   ): void {
     const status = this.checkApprovalStatus(projectRoot, projectSlug)

@@ -1555,6 +1555,8 @@ nav a:hover, nav a:focus {
           {
             approverSignedOff: true,
             assignedMascot: 'grav',
+            projectRoot,
+            projectSlug,
             reconnaissance: {
               status: 'PERFORMED',
               details: 'Scoped reconnaissance of test-fixtures/disposable-portfolio (index.html, styles.css, script.js, test.mjs)',

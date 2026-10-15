@@ -1,8 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import * as os from 'node:os'
 import {
   InAppReliabilityLoop,
   type ValidationCheckResult,
 } from './InAppReliabilityLoop.js'
+import { DeepDiscoveryEngine } from './DeepDiscoveryEngine.js'
 
 describe('Gate 05.3: In-App Reliability Loop', () => {
   it('successfully executes a task lifecycle through verification and emits studio events', async () => {
@@ -336,5 +340,218 @@ describe('Gate 05.3: In-App Reliability Loop', () => {
     expect(receipt.budgetUsed.tokenMeasurement).toBe('NOT_APPLICABLE_OFFLINE')
     expect(receipt.budgetUsed.tokensUsed).toBe(0)
     expect(receipt.reconnaissance.status).toBe('NOT_PERFORMED')
+  })
+})
+
+describe('Security Closure (Phase 05.6 Requirement 3: Mutation Boundary Authorization Revalidation)', () => {
+  let tempDir: string
+  let engine: DeepDiscoveryEngine
+  let projectSlug: string
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gravitas-loop-sec-'))
+    engine = new DeepDiscoveryEngine()
+    projectSlug = 'mutation-boundary-test'
+
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Mutation Boundary Verification Test',
+      intent: 'Verify continuous authorization checks at mutation boundary.',
+      discussion: { topic: 'Security', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Scoped architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1', 'Task 2'] }],
+    })
+  })
+
+  afterEach(() => {
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true })
+    } catch {
+      // Ignore
+    }
+  })
+
+  it('revalidates grant before each mutating step and halts + rolls back on mid-execution revocation', async () => {
+    const file1 = path.join(tempDir, 'file1.txt')
+    const file2 = path.join(tempDir, 'file2.txt')
+    fs.writeFileSync(file1, 'initial content 1\n')
+
+    engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved for execution', {
+      allowedPaths: [file1, file2],
+      allowedTools: ['fs.writeFile'],
+      operation: 'EXECUTE_PLAN',
+    })
+
+    const loop = new InAppReliabilityLoop()
+
+    const plan = [
+      {
+        description: 'Step 1: Write to file1.txt',
+        targetPath: file1,
+        toolName: 'fs.writeFile',
+        payload: { content: 'mutated content 1\n' },
+        action: async () => {
+          fs.writeFileSync(file1, 'mutated content 1\n')
+          // Simulate mid-execution revocation right after Step 1 finishes!
+          // Remove grant from secure registry and specs directory
+          const regPath = path.join(tempDir, '.gravitas', 'secure', 'approval-registry.json')
+          fs.writeFileSync(regPath, JSON.stringify({}), 'utf-8')
+          const grantPath = path.join(tempDir, '.gravitas', 'specs', projectSlug, 'approval-grant.json')
+          if (fs.existsSync(grantPath)) fs.unlinkSync(grantPath)
+          return 'Wrote file1'
+        },
+      },
+      {
+        description: 'Step 2: Write to file2.txt',
+        targetPath: file2,
+        toolName: 'fs.writeFile',
+        payload: { content: 'mutated content 2\n' },
+        action: async () => {
+          fs.writeFileSync(file2, 'mutated content 2\n')
+          return 'Wrote file2'
+        },
+      },
+    ]
+
+    const receipt = await loop.executeTaskLifecycle(
+      'Execute two-step plan with mid-execution revocation',
+      {
+        title: 'Revocation Test',
+        allowedPaths: [file1, file2],
+        allowedTools: ['fs.writeFile'],
+        requiresHumanApproval: true,
+      },
+      plan,
+      async () => [{ checkName: 'Check', passed: true }],
+      undefined,
+      {
+        approverSignedOff: true,
+        projectRoot: tempDir,
+        projectSlug,
+      }
+    )
+
+    // Step 1 was executed
+    expect(receipt.stepsExecuted[0]?.status).toBe('EXECUTED')
+
+    // Step 2 was BLOCKED at the mutation boundary because grant was revoked!
+    expect(receipt.stepsExecuted[1]?.status).toBe('FAILED')
+    expect(receipt.stepsExecuted[1]?.outputSnippet).toContain('MUTATION_BOUNDARY_BLOCKED')
+
+    // Safe rollback executed: file1.txt restored to pre-execution snapshot!
+    expect(receipt.rollbackExecuted).toBe(true)
+    expect(fs.readFileSync(file1, 'utf-8')).toBe('initial content 1\n')
+
+    // Final status is FAILED
+    expect(receipt.status).toBe('FAILED')
+  })
+
+  it('blocks step and rolls back if specification is mutated mid-execution (revision hash mismatch)', async () => {
+    const file1 = path.join(tempDir, 'file1.txt')
+    const file2 = path.join(tempDir, 'file2.txt')
+    fs.writeFileSync(file1, 'original content 1\n')
+
+    engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved for execution', {
+      allowedPaths: [file1, file2],
+      allowedTools: ['fs.writeFile'],
+      operation: 'EXECUTE_PLAN',
+    })
+
+    const loop = new InAppReliabilityLoop()
+
+    const plan = [
+      {
+        description: 'Step 1: Write file1 and tamper with PLAN.md',
+        targetPath: file1,
+        toolName: 'fs.writeFile',
+        payload: { content: 'updated 1\n' },
+        action: async () => {
+          fs.writeFileSync(file1, 'updated 1\n')
+          // Malicious post-approval spec edit mid-execution
+          const planPath = path.join(tempDir, '.gravitas', 'specs', projectSlug, 'PLAN.md')
+          fs.appendFileSync(planPath, '\n- [ ] Unauthorized injected step\n')
+          return 'Wrote file1'
+        },
+      },
+      {
+        description: 'Step 2: Write file2',
+        targetPath: file2,
+        toolName: 'fs.writeFile',
+        payload: { content: 'updated 2\n' },
+        action: async () => {
+          fs.writeFileSync(file2, 'updated 2\n')
+          return 'Wrote file2'
+        },
+      },
+    ]
+
+    const receipt = await loop.executeTaskLifecycle(
+      'Execute with mid-execution spec tamper',
+      {
+        title: 'Spec Tamper Test',
+        allowedPaths: [file1, file2],
+        allowedTools: ['fs.writeFile'],
+        requiresHumanApproval: true,
+      },
+      plan,
+      async () => [{ checkName: 'Check', passed: true }],
+      undefined,
+      {
+        approverSignedOff: true,
+        projectRoot: tempDir,
+        projectSlug,
+      }
+    )
+
+    // Step 1 executed
+    expect(receipt.stepsExecuted[0]?.status).toBe('EXECUTED')
+
+    // Step 2 blocked at mutation boundary due to revision hash mismatch!
+    expect(receipt.stepsExecuted[1]?.status).toBe('FAILED')
+    expect(receipt.stepsExecuted[1]?.outputSnippet).toContain('MUTATION_BOUNDARY_BLOCKED')
+    expect(receipt.stepsExecuted[1]?.outputSnippet).toContain('Specification modified post-approval')
+
+    // Rollback restored file1
+    expect(receipt.rollbackExecuted).toBe(true)
+    expect(fs.readFileSync(file1, 'utf-8')).toBe('original content 1\n')
+    expect(receipt.status).toBe('FAILED')
+  })
+
+  it('blocks step via custom revalidateAuthorization hook', async () => {
+    const file1 = path.join(tempDir, 'file1.txt')
+    fs.writeFileSync(file1, 'safe\n')
+
+    const loop = new InAppReliabilityLoop()
+    let calls = 0
+
+    const receipt = await loop.executeTaskLifecycle(
+      'Custom hook authorization check',
+      {
+        title: 'Hook Test',
+        allowedPaths: [file1],
+        allowedTools: ['fs.writeFile'],
+      },
+      [
+        {
+          description: 'Step 1: Write file1',
+          targetPath: file1,
+          toolName: 'fs.writeFile',
+          payload: { content: 'new content\n' },
+          action: async () => 'done',
+        },
+      ],
+      async () => [{ checkName: 'Check', passed: true }],
+      undefined,
+      {
+        revalidateAuthorization: () => {
+          calls++
+          throw new Error('Revoked by user security intervention')
+        },
+      }
+    )
+
+    expect(calls).toBe(1)
+    expect(receipt.stepsExecuted[0]?.status).toBe('FAILED')
+    expect(receipt.stepsExecuted[0]?.outputSnippet).toContain('MUTATION_BOUNDARY_BLOCKED: Revoked by user security intervention')
+    expect(receipt.status).toBe('FAILED')
   })
 })

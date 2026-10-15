@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
 import {
   DeepDiscoveryEngine,
   ApprovalGateBlockedError,
+  AuthorityProtectionError,
 } from './DeepDiscoveryEngine.js'
 
 describe('Gate 05.4: Deep Discovery Engine & Strict Approval Gate', () => {
@@ -280,6 +281,39 @@ describe('Gate 05.4: Deep Discovery Engine & Strict Approval Gate', () => {
         operation: 'RUN_UNAPPROVED_OP',
       })
     }).toThrow(ApprovalGateBlockedError)
+  })
+
+  // Security Closure (Phase 05.6 Final Requirement 2: Fail closed on authority protection errors)
+  it('strictly fails closed and disables grant issuance if authority key protection cannot be established', () => {
+    const projectSlug = 'authority-failure-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Authority Failure Test',
+      intent: 'Verify fail-closed behavior when key protection fails.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    // Mock verifyAndEnforceKeyProtection to throw AuthorityProtectionError
+    const spy = vi.spyOn(engine, 'verifyAndEnforceKeyProtection').mockImplementation(() => {
+      throw new AuthorityProtectionError('Simulated Windows ACL verification failure: access denied')
+    })
+
+    // Grant issuance must be completely disabled (fail closed)
+    expect(() => {
+      engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved')
+    }).toThrow(AuthorityProtectionError)
+
+    // Approval check must report unapproved with clear diagnostic
+    const status = engine.checkApprovalStatus(tempDir, projectSlug)
+    expect(status.approved).toBe(false)
+
+    // assertApprovalGranted must block execution
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug)
+    }).toThrow(ApprovalGateBlockedError)
+
+    spy.mockRestore()
   })
 })
 

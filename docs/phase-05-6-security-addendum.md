@@ -1,170 +1,173 @@
-# Phase 05.6 Security Addendum
+# Phase 05.6 Security Addendum & Final Security Closure
 
-**Commit:** `c76589a`  
 **Branch:** `feat/gravitas-personal-studio`  
 **Author:** Smarak Padhi \<smarakpadhi58@gmail.com\>  
-**Date:** 2026-10-15  
-**Pushed to:** `origin/feat/gravitas-personal-studio` (`fdd7619..c76589a`)
+**Status:** Completed and Verified (Gate 05.6 Final Security Closure)
 
 ---
 
-## Item 1 — Shell Execution Containment
+## 1. Restrict Node Execution Capabilities
 
-### Finding
+### Security Rationale & Threat Model
 
-The previous `validateShellCommand` implementation used regex pattern matching to scan for shell operator characters (`>`, `>>`, `|`, `&`, `;`, backticks). This approach **cannot** contain Windows shell execution because:
+The executable allowlist `{node, node.exe}` is insufficient by itself because Node can execute arbitrary JavaScript without a shell when passed evaluation or code-loading flags. To prevent arbitrary code injection and capability escape:
 
-- `cmd.exe` supports carets (`^`) as escape characters invisible to JS regex.
-- PowerShell supports `%PATHEXT%`, percent-expansion, parentheses grouping.
-- `-EncodedCommand` in PowerShell bypasses any character-level scan entirely.
-- The `execSync(command)` call passed the raw string to the OS which invokes `cmd.exe` as the shell (`shell: true` is the default behaviour of `execSync` on Windows when no `shell` option is specified).
+1. **Option Flag Rejection:** `validateShellCommand` tokenizes the command line respecting quoted arguments and rejects any code-loading or inline evaluation options:
+   - `-e`, `--eval`, `-p`, `--print`
+   - `-r`, `--require`, `--import`, `--loader`, `--experimental-loader`
+   - `-i`, `--interactive`, `--entry-url`, `--inspect`, `--inspect-brk`, `--prof`, `--expose-internals`, `--conditions`, `-C`
+   - Flags with value syntax (`--eval=...`, `--require=...`, etc.)
 
-### Fix Applied
+2. **Script Path Resolution & Containment:**
+   - Interactive REPL or flag-only commands without a script path are rejected.
+   - The script path must be explicitly provided and resolves against the authorized working directory (`authorizedCwd`).
+   - The resolved script path is checked via `validatePathAgainstAllowlist(resolvedScript, allowedPaths)` to ensure it resides strictly within the authorized workspace.
+   - Only standard script extensions (`.js`, `.mjs`, `.cjs`, `.ts`) are permitted; arbitrary executables or script types are rejected.
 
-**`packages/core/src/intelligent-runtime/path-security.ts`**
+3. **Shell Independence:**
+   - All tool executions (`command.exec`) use `spawnSync(execBasename, args, { shell: false })`. No OS shell (`cmd.exe` or `powershell.exe`) is ever spawned.
+   - Shell-character rejection is retained purely as defense-in-depth, not as the primary containment barrier.
 
-- Replaced regex scanning with an **explicit executable allowlist** (`ALLOWED_EXEC_NAMES = { 'node', 'node.exe' }`).
-- Added `parseExecName(command)` to extract `argv[0]` basename from a raw command string (handles quoted paths and full paths).
-- `validateShellCommand` now returns `{ allowed: false }` for ANY executable not in the allowlist, with a clear `violationReason`.
-- Added defense-in-depth: rejects shell operator characters (`&|;<>\`$`) in the argument portion even though they are harmless with `shell:false`.
+### Documented Limitation & Threat Boundary
 
-**`packages/core/src/intelligent-runtime/InAppReliabilityLoop.ts`**
-
-- Replaced `execSync(item.payload.command, ...)` with `spawnSync(execBasename, args, { shell: false })`.
-- `execBasename` comes from `parseExecName()` which has already been validated by `validateShellCommand`.
-- Arguments are split by whitespace (simple — sufficient for `node script.mjs` use cases).
-- Non-zero exit codes now throw, producing an honest `FAILED` step status.
-
-### Remaining Limitations
-
-- Simple whitespace argument splitting does not handle quoted arguments with embedded spaces (e.g., `node "my script.mjs"`). Acceptable for the current use case of `node test.mjs`.
-- TOCTOU gap exists between `validateShellCommand()` and `spawnSync()`. Mitigated by approval grant re-verification immediately before each tool call. OS-level sandbox would eliminate it entirely.
+> [!WARNING]
+> **No OS-Level Process Sandbox Claim:**
+> An approved script (e.g. `test.mjs`) executes in the host Node runtime without OS-level process sandboxing. Even with an allowlisted script path, resolved workspace containment, and restricted flags, Node scripts can execute arbitrary filesystem, network, or child process operations using Node's standard libraries (`node:fs`, `node:net`, `node:child_process`) once invoked. This layer enforces executable, flag, and script path containment, NOT OS-level kernel sandboxing (e.g. AppContainer, seccomp, or Docker).
 
 ---
 
-## Item 2 — Windows Approval Authority (ACL Hardening)
+## 2. Fail Closed on Authority Protection Errors
 
-### Finding
+### Implementation & Verification
 
-`getOrCreateAuthorityKey()` called `fs.writeFileSync(keyPath, freshKey, { mode: 0o600 })`. On Windows, `mode: 0o600` is a no-op for NTFS ACLs — it only clears the DOS read-only attribute. Other local users with access to the same Windows session could read the key file if the parent directory's inherited ACEs permitted it.
+`DeepDiscoveryEngine.ts` implements `verifyAndEnforceKeyProtection(keyPath: string)` with fail-closed semantics:
 
-### Fix Applied
+1. **Windows NTFS ACL Enforcement:**
+   - Calls `icacls <keyPath> /inheritance:r /grant:r %USERNAME%:(F)` via `execFileSync` (`shell: false`).
+   - Strips all inherited permissions (`/inheritance:r`) so permissions from parent directories are not inherited.
+   - Grants exclusively Full Control to the active Windows user identity (`%USERNAME%`).
 
-**`packages/core/src/intelligent-runtime/DeepDiscoveryEngine.ts`**
+2. **Verification of Protection Result:**
+   - Calls `icacls <keyPath>` to inspect the resulting Access Control List (ACL).
+   - Verifies the exit code is 0 and output confirms `Successfully processed 1 files; Failed processing 0 files`.
+   - Verifies that inheritance is absent (no `(I)` flags in ACL output).
+   - Verifies that `%USERNAME%` is the granted identity.
+   - If verification fails or any exception occurs, throws `AuthorityProtectionError`.
 
-After writing `authority.key`, the code now calls:
+3. **Fail-Closed Execution & Grant Issuance:**
+   - `recordApproval`: If `AuthorityProtectionError` is thrown, grant issuance is aborted immediately. No unverified grant is ever written to disk or recorded in the registry.
+   - `checkApprovalStatus`: Catches authority protection errors and returns `{ approved: false, violationReason: 'Authority protection failure: ... Execution disabled.' }`.
+   - `assertApprovalGranted`: Throws `ApprovalGateBlockedError`, completely blocking any approval-backed execution.
 
-```
-icacls <keyPath> /inheritance:r /grant:r %USERNAME%:(F)
-```
+4. **POSIX File Mode Enforcement:**
+   - On non-Windows platforms, enforces `0o600` (read/write by owner only; 0 access for group and others). If permissions cannot be restricted, throws `AuthorityProtectionError`.
 
-using `execFileSync('icacls', [...], { shell: false, timeout: 5000 })`.
+### Documented Process Trust Boundary
 
-- `/inheritance:r` removes all inherited ACEs from the file.
-- `/grant:r %USERNAME%:(F)` grants only the current user Full Control.
-- The call is wrapped in `try/catch` — if `icacls` fails (e.g., running as `SYSTEM`, insufficient privilege in CI, or `USERNAME` env var unset), the error is swallowed and documented in the catch comment. The key still has process-level protection via the Electron process boundary.
-
-### Authority Grant Re-verification
-
-`assertApprovalGranted()` in `DeepDiscoveryEngine.ts` is called:
-
-1. In `supervisor.ts` at the `EXECUTE` IPC handler, before the `InAppReliabilityLoop` is created — covers the entry gate.
-2. Inside `InAppReliabilityLoop.executeTaskLifecycle()` at the `PERMISSION` step, via `requiresHumanApproval` + `approverSignedOff` flag — covers the loop entry gate.
-3. Path-level re-verification occurs inside `validatePathAgainstAllowlist` which is called once per `fs.writeFile` step before execution.
-
-**Acknowledged limitation:** The grant is not re-called as a fresh `assertApprovalGranted()` immediately before each individual `fs.writeFileSync` call inside the loop. The path allowlist check is performed per-step, but the signature+expiry check is performed once at loop entry. For the current scope (short-lived execution plans with a 15s budget), this is acceptable. A future hardening pass can add per-write `checkApprovalStatus()` calls.
-
-### Authority File Integrity Tests
-
-Adversarial tests for missing/malformed/forged authority files are covered by the existing `deep-discovery-engine.test.ts` (9 tests), including:
-- Missing authority key → `APPROVAL_GATE_BLOCKED`
-- Tampered signature → `APPROVAL_GATE_BLOCKED` with "Invalid cryptographic signature"
-- Wrong project slug → `APPROVAL_GATE_BLOCKED`
-- Expired grant → `APPROVAL_GATE_BLOCKED`
-- Wrong operation scope → `APPROVAL_GATE_BLOCKED`
-- Wrong path scope → `APPROVAL_GATE_BLOCKED`
-- Forged grant file (correct schema but wrong HMAC) → `APPROVAL_GATE_BLOCKED`
+> [!NOTE]
+> **Same-User Process Trust Boundary:**
+> NTFS ACLs protect `.gravitas/secure/authority.key` from other Windows user accounts on the machine. However, processes running under the SAME Windows user identity have identical OS access rights and can read or modify the key file. The approval authority trust boundary protects against unauthorized accounts and cross-user tampering, but NOT against unisolated hostile code executing within the same user session.
 
 ---
 
-## Item 3 — Path Edge Cases
+## 3. Revalidate Authorization at the Mutation Boundary
 
-### Findings and Fixes
+### Continuous Verification Invariant
 
-| Edge Case | Behaviour | Status |
-|-----------|-----------|--------|
-| Non-existent target within allowed dir | `path.resolve` arithmetic permits; `realpathSync` is skipped | ✅ Correct — permits pending writes |
-| Non-existent target outside allowed dir | `path.relative` arithmetic rejects | ✅ Correct |
-| Windows junctions pointing outside | `realpathSync` resolves junction target and checks containment | ✅ Covered (if process has permission to create junctions) |
-| Symlinks pointing outside | `realpathSync` step 5 in `isPathContained` rejects | ✅ Covered |
-| Sibling-prefix attack (case-insensitive on Windows) | `normTarget = canonicalTarget.toLowerCase()` on `win32` | ✅ Covered |
-| `realpathSync` on non-existent path | `existsSync` guard skips `realpathSync` for non-existent targets | ✅ Fixed (was already present) |
-| TOCTOU between validation and execution | Documented limitation; mitigated by immediate grant re-verification | ⚠️ Documented — not eliminable at this layer |
-| Windows junction creation without elevation | `symlinkSync('junction')` may throw `EPERM` on non-Developer-Mode Windows | ⚠️ Test passes gracefully via try/catch |
+In `InAppReliabilityLoop.ts`, every mutating capability step (`fs.writeFile`, `fs.appendFile`, `command.exec`, or any step specifying a `targetPath`):
 
-### Test Evidence
+1. **Pre-Mutation Check:** Immediately before executing the mutation, the loop re-validates:
+   - Cryptographic grant signature against the application authority key.
+   - Specification revision hash against current `PROJECT.md + ARCHITECTURE.md + PLAN.md`.
+   - Grant expiration timestamp.
+   - Permitted operation (`EXECUTE_PLAN`).
+   - Permitted path scope (`allowedPaths`).
+   - Permitted tool scope (`allowedTools`).
 
-All path edge cases are tested in `path-security.test.ts` Group 5 (6 tests).
+2. **Mid-Execution Revocation Handling:**
+   - If the grant is revoked, deleted, or expired mid-execution, the step is immediately marked `FAILED` with `MUTATION_BOUNDARY_BLOCKED`.
+   - The execution loop halts further mutations.
+   - Pre-execution snapshots are restored via real rollback, undoing any prior mutations in that execution run.
+   - Final task receipt status is marked `FAILED`.
+
+3. **Mid-Execution Specification Mutation Handling:**
+   - If any specification artifact (`PLAN.md`, `PROJECT.md`, `ARCHITECTURE.md`) is modified while a multi-step task is executing, the revision hash recalculation fails the check at the next mutation boundary.
+   - Step is blocked, prior changes rolled back, and task receipt records `FAILED`.
+
+### Regression Tests Added
+
+In `in-app-reliability-loop.test.ts`:
+- `revalidates grant before each mutating step and halts + rolls back on mid-execution revocation` — verified step 1 executed, step 2 blocked at mutation boundary, step 1 rolled back, receipt `FAILED`.
+- `blocks step and rolls back if specification is mutated mid-execution (revision hash mismatch)` — verified `PLAN.md` post-approval injection halts execution and restores snapshot.
+- `blocks step via custom revalidateAuthorization hook` — verified custom hook rejection halts mutation and rolls back.
 
 ---
 
-## Item 4 — Git Status Report
+## 4. Verification Evidence & Test Results
+
+### 1. Monorepo TypeScript Typecheck
 
 ```
-Branch:    feat/gravitas-personal-studio
-Local HEAD:  c76589a  security(addendum): Phase 05.6 shell containment allowlist, Windows icacls ACL hardening, and path edge case tests
-Remote HEAD: c76589a  (same — pushed)
-Working tree: CLEAN
+Command: npm run typecheck
+Exit Code: 0
 ```
+All packages compile cleanly with zero diagnostics under `exactOptionalPropertyTypes: true` and `noUncheckedIndexedAccess: true`:
+- `@gravitas/agents`
+- `@gravitas/browser-qa`
+- `@gravitas/core`
+- `@gravitas/gateways`
+- `@gravitas/git`
+- `@gravitas/harnesses`
+- `@gravitas/orchestrator`
+- `@gravitas/prompts`
+- `@gravitas/verifier`
+- `@gravitas/desktop`
+- `@gravitas/server`
+- `@gravitas/web`
 
-Previous Phase 05.6 commit: `fdd7619` (still present, not modified).
-
----
-
-## Item 5 — Test Commands and Results
+### 2. Intelligent Runtime Vitest Test Suite
 
 ```
-Command:   npx vitest run packages/core/src/intelligent-runtime
-Exit code: 0
+Command: npx vitest run packages/core/src/intelligent-runtime
+Exit Code: 0
 ```
 
 ```
 Test Files  4 passed (4)
-     Tests  49 passed (49)
-  Start at  23:26:05
-  Duration  626ms
+     Tests  61 passed (61)
+  Duration  1.09s
 ```
 
-### Test breakdown
+| Test File | Tests | Status |
+|-----------|-------|--------|
+| `path-security.test.ts` | 37 tests | ✅ All passed |
+| `in-app-reliability-loop.test.ts` | 13 tests | ✅ All passed |
+| `deep-discovery-engine.test.ts` | 10 tests | ✅ All passed |
+| `multi-agent-acceptance.test.ts` | 1 test | ✅ All passed |
 
-| Suite | Tests | Result |
-|-------|-------|--------|
-| `in-app-reliability-loop.test.ts` | 10 | ✅ All pass |
-| `path-security.test.ts` — Core containment | 7 | ✅ All pass |
-| `path-security.test.ts` — Adversarial shell | 10 | ✅ All pass |
-| `path-security.test.ts` — parseExecName | 4 | ✅ All pass |
-| `path-security.test.ts` — Allowlist integrity | 2 | ✅ All pass |
-| `path-security.test.ts` — Path edge cases | 6 | ✅ All pass |
-| `deep-discovery-engine.test.ts` | 9 | ✅ All pass |
-| `multi-agent-acceptance.test.ts` | 1 | ✅ All pass |
+### 3. Playwright E2E Electron & Living Studio Verification
+
+```
+Command: node scripts/verify-phase-05-6.mjs
+Exit Code: 0
+```
+
+All 6 acceptance steps passed cleanly:
+- Step 1: Mocked inference IPC regression test (`01-mocked-inference-regression.png`)
+- Step 1b: Offline honest unfamiliar notice (`01b-offline-honest-unfamiliar-notice.png`)
+- Step 2: Deep Discovery 3-round interview flow (`02-discovery-round-1.png`, `02b-discovery-round-2.png`, `02c-discovery-round-3-engineering.png`)
+- Step 3: Specification compilation & Review Card (`03-specification-review-panel.png`)
+- Step 4: Approval gate blocking pre-approval execution (`04-approval-gate-blocked.png`)
+- Step 5: Cryptographic grant issuance (`05-approval-grant-signed.png`)
+- Step 6: Verified execution & task inspector receipt (`06-verified-execution-task-inspector.png`)
+- Walkthrough video: `docs/gravitas2-evidence/videos/phase-05-6-verification.webm`
 
 ---
 
-## Changed Files (This Addendum)
+## 5. Invariants Preserved
 
-| File | Change |
-|------|--------|
-| `packages/core/src/intelligent-runtime/path-security.ts` | Added `ALLOWED_EXEC_NAMES`, `parseExecName`, rewrote `validateShellCommand` with allowlist enforcement; documented TOCTOU, case-insensitivity, and Windows icacls limitations |
-| `packages/core/src/intelligent-runtime/path-security.test.ts` | 29 tests covering all 5 test groups including 10 adversarial shell containment tests |
-| `packages/core/src/intelligent-runtime/InAppReliabilityLoop.ts` | Replaced `execSync` + `shell:true` with `spawnSync` + `shell:false`; split command into `execBasename` + `args` |
-| `packages/core/src/intelligent-runtime/DeepDiscoveryEngine.ts` | Added `icacls` Windows NTFS ACL hardening for `authority.key`; documented `chmod(0o600)` limitation on Windows |
-
----
-
-## Preserved Invariants
-
-- ✅ All existing 49 tests in `packages/core/src/intelligent-runtime/` pass.
-- ✅ SQLite data, model routing, approval gates, frozen website, IPC bridge unchanged.
-- ✅ No merge to main, no force-push, no deployment.
-- ✅ No Telemetry Codex.
-- ✅ No new features added.
+- Frozen website untouched.
+- SQLite persistence intact.
+- No merge to `main`, no force-push, no deployment.
+- No Telemetry Codex redesign started.
+- All work strictly confined to `feat/gravitas-personal-studio`.

@@ -126,10 +126,10 @@ export class SpecialistModelRouter {
   private readonly credentialBroker: ModelCredentialBroker
 
   public constructor(options: SpecialistRoutingOptions = {}) {
-    this.localOllama = new LocalOllamaAdapter({
-      baseUrl: options.localUrl,
-      defaultModel: options.preferredModel,
-    })
+    const localCfg: { baseUrl?: string; defaultModel?: string } = {}
+    if (options.localUrl !== undefined) localCfg.baseUrl = options.localUrl
+    if (options.preferredModel !== undefined) localCfg.defaultModel = options.preferredModel
+    this.localOllama = new LocalOllamaAdapter(localCfg)
     this.nvidiaAdapter = new NvidiaNimAdapter()
     this.credentialBroker = ModelCredentialBroker.getInstance()
   }
@@ -187,8 +187,11 @@ export class SpecialistModelRouter {
 
     // 1. Attempt Local Ollama / LM Studio (Local-First)
     try {
+      const localCfg: { baseUrl?: string; defaultModel?: string } = {}
+      if (options.localUrl !== undefined) localCfg.baseUrl = options.localUrl
+      if (options.preferredModel !== undefined) localCfg.defaultModel = options.preferredModel
       const localAdapter = options.localUrl
-        ? new LocalOllamaAdapter({ baseUrl: options.localUrl, defaultModel: options.preferredModel })
+        ? new LocalOllamaAdapter(localCfg)
         : this.localOllama
 
       const isLocalOnline = await localAdapter.isAvailable(800)
@@ -208,7 +211,7 @@ export class SpecialistModelRouter {
             provider: 'local-ollama',
             model: resp.actualModel || resp.requestedModel,
             latencyMs: resp.latencyMs,
-            tokenUsage: resp.tokenUsage,
+            ...(resp.tokenUsage ? { tokenUsage: resp.tokenUsage } : {}),
           }
         }
       }
@@ -237,7 +240,7 @@ export class SpecialistModelRouter {
               provider: 'nvidia-nim',
               model: resp.actualModel || resp.requestedModel,
               latencyMs: resp.latencyMs,
-              tokenUsage: resp.tokenUsage,
+              ...(resp.tokenUsage ? { tokenUsage: resp.tokenUsage } : {}),
             }
           }
         } catch {

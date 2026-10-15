@@ -19,7 +19,9 @@ import {
   validatePathAgainstAllowlist,
   validateShellCommand,
   parseExecName,
+  tokenizeCommandLine,
 } from './path-security.js'
+import { DeepDiscoveryEngine } from './DeepDiscoveryEngine.js'
 
 export type ReliabilityLoopState =
   | 'INTAKE'
@@ -160,6 +162,13 @@ export class InAppReliabilityLoop {
       reconnaissance?: { status: 'PERFORMED' | 'NOT_PERFORMED'; details?: string }
       tokenUsage?: { promptTokens: number; completionTokens: number; totalTokens: number }
       allowedPaths?: readonly string[]
+      projectRoot?: string
+      projectSlug?: string
+      revalidateAuthorization?: (step: {
+        toolName?: string | undefined
+        targetPath?: string | undefined
+        command?: string | undefined
+      }) => void
     }
   ): Promise<MachineCheckableReceipt> {
     const startedAt = new Date().toISOString()
@@ -349,10 +358,65 @@ export class InAppReliabilityLoop {
         }
       }
 
+      // Mutation Boundary Authorization Revalidation (Security Closure Item 3)
+      // Verify grant signature, expiry, revision, operation, and path scope immediately before each mutating capability operation
+      const isMutatingStep =
+        item.toolName === 'fs.writeFile' ||
+        item.toolName === 'fs.appendFile' ||
+        item.toolName === 'command.exec' ||
+        Boolean(item.targetPath)
+
+      if (isMutatingStep) {
+        if (options?.revalidateAuthorization) {
+          try {
+            options.revalidateAuthorization({
+              toolName: item.toolName,
+              targetPath: item.targetPath,
+              command: item.payload?.command,
+            })
+          } catch (authErr: any) {
+            hasStepFailed = true
+            executedSteps.push({
+              stepNumber: i + 1,
+              description: item.description,
+              action: 'EXECUTE',
+              targetPath: item.targetPath,
+              toolName: item.toolName,
+              status: 'FAILED',
+              outputSnippet: `MUTATION_BOUNDARY_BLOCKED: ${authErr?.message || 'Authorization check failed at mutation boundary'}`,
+            })
+            continue
+          }
+        } else if (options?.projectRoot && options?.projectSlug) {
+          try {
+            const authEngine = new DeepDiscoveryEngine()
+            authEngine.assertApprovalGranted(options.projectRoot, options.projectSlug, {
+              operation: 'EXECUTE_PLAN',
+              ...(item.targetPath ? { requestedPaths: [item.targetPath] } : {}),
+              ...(item.toolName ? { requestedTools: [item.toolName] } : {}),
+            })
+          } catch (authErr: any) {
+            hasStepFailed = true
+            executedSteps.push({
+              stepNumber: i + 1,
+              description: item.description,
+              action: 'EXECUTE',
+              targetPath: item.targetPath,
+              toolName: item.toolName,
+              status: 'FAILED',
+              outputSnippet: `MUTATION_BOUNDARY_BLOCKED: ${authErr?.message || 'Authorization check failed at mutation boundary'}`,
+            })
+            continue
+          }
+        }
+      }
+
       // Capability-Limited Tool Execution
       try {
         let output = ''
-        if (item.toolName === 'fs.writeFile' && item.targetPath && item.payload?.content !== undefined) {
+        if (item.action) {
+          output = await item.action()
+        } else if (item.toolName === 'fs.writeFile' && item.targetPath && item.payload?.content !== undefined) {
           const canonical = path.resolve(item.targetPath)
           fs.mkdirSync(path.dirname(canonical), { recursive: true })
           fs.writeFileSync(canonical, item.payload.content, item.payload.encoding || 'utf-8')
@@ -364,15 +428,10 @@ export class InAppReliabilityLoop {
           output = `Appended ${Buffer.byteLength(item.payload.content)} bytes to ${canonical}`
         } else if (item.toolName === 'command.exec' && item.payload?.command) {
           // Security: use spawnSync with shell:false — never execSync which invokes cmd.exe on Windows.
-          // The executable was already allowlist-checked by validateShellCommand above.
-          const rawCmd = item.payload.command
-          const execBasename = parseExecName(rawCmd)
-          // Split remaining tokens after the executable name
-          const trimmedCmd = rawCmd.trim()
-          const afterExec = trimmedCmd.startsWith('"')
-            ? trimmedCmd.slice(trimmedCmd.indexOf('"', 1) + 1).trim()
-            : trimmedCmd.slice(execBasename.length).trim()
-          const args = afterExec.length > 0 ? afterExec.split(/\s+/) : []
+          // The command and arguments were already allowlist-checked by validateShellCommand above.
+          const tokens = tokenizeCommandLine(item.payload.command)
+          const execBasename = parseExecName(tokens[0] || '')
+          const args = tokens.slice(1)
           const spawnResult = spawnSync(execBasename, args, {
             cwd: item.payload.cwd || process.cwd(),
             encoding: 'utf-8',
@@ -384,8 +443,6 @@ export class InAppReliabilityLoop {
             throw new Error(`Command exited with code ${spawnResult.status}: ${spawnResult.stderr || '(no stderr)'}`)
           }
           output = (spawnResult.stdout || '').trim()
-        } else if (item.action) {
-          output = await item.action()
         } else {
           output = 'Step completed with verified no-op'
         }
