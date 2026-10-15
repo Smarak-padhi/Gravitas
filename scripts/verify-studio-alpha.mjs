@@ -45,7 +45,7 @@ async function runStudioAlphaVerification() {
     // ─── STEP 1: CAPTURE CLEAN 2D STUDIO HOME SCREEN (ALL PANELS COLLAPSED) ──────
     console.log('\n[Step 1] Capturing Clean Studio Home Screen (1280x800)...')
     await mainWin.mouse.move(640, 360)
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 3000))
     const shot1 = path.join(EVIDENCE_DIR, '01-clean-studio.png')
     await mainWin.screenshot({ path: shot1 })
     fs.copyFileSync(shot1, path.join(ARTIFACT_DIR, '01-clean-studio.png'))
@@ -58,15 +58,15 @@ async function runStudioAlphaVerification() {
     if (summonGravBtn) {
       await summonGravBtn.click()
     }
-    await new Promise((r) => setTimeout(r, 1200))
+    await new Promise((r) => setTimeout(r, 1500))
 
     // Type "What's due today?" in the chat input
     const chatInput = 'input[placeholder*="Ask Grav something"]'
     await mainWin.click(chatInput)
     await mainWin.fill(chatInput, "What's due today?")
-    await new Promise((r) => setTimeout(r, 600))
+    await new Promise((r) => setTimeout(r, 800))
     await mainWin.press(chatInput, 'Enter')
-    await new Promise((r) => setTimeout(r, 2500))
+    await new Promise((r) => setTimeout(r, 3000))
 
     const shot2 = path.join(EVIDENCE_DIR, '02-grav-chat-floating.png')
     await mainWin.screenshot({ path: shot2 })
@@ -76,11 +76,10 @@ async function runStudioAlphaVerification() {
     // Close Grav conversation surface
     await mainWin.evaluate(() => {
       const closeButtons = Array.from(document.querySelectorAll('button'))
-      // find close button in modal
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 1200))
 
     // ─── STEP 3: OPEN ADA'S NOTES PANEL (REAL SQLITE WAL) ──────────────────────
     console.log('\n[Step 3] Opening Ada\'s Knowledge Hub & Course Notes (SQLite)...')
@@ -88,7 +87,7 @@ async function runStudioAlphaVerification() {
     if (notesBtn) {
       await notesBtn.click()
     }
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 2000))
 
     const shot3 = path.join(EVIDENCE_DIR, '03-ada-notes-panel.png')
     await mainWin.screenshot({ path: shot3 })
@@ -101,13 +100,13 @@ async function runStudioAlphaVerification() {
     if (textarea) {
       await textarea.click()
       await textarea.type('\n\n// Verified in Living Studio Alpha at ' + new Date().toLocaleTimeString())
-      await new Promise((r) => setTimeout(r, 800))
+      await new Promise((r) => setTimeout(r, 1000))
       // Click Save to SQLite button
       const saveBtn = await mainWin.$('button:has-text("Save to SQLite")')
       if (saveBtn) {
         await saveBtn.click()
       }
-      await new Promise((r) => setTimeout(r, 1500))
+      await new Promise((r) => setTimeout(r, 2000))
     }
 
     // Close Ada's notes panel
@@ -116,7 +115,7 @@ async function runStudioAlphaVerification() {
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 1200))
 
     // ─── STEP 4: VERIFIED TASK EVENT PRODUCING AN ACTIVITY BUBBLE ────────────────
     console.log('\n[Step 4] Opening Cipher\'s Agenda & Triggering Task Completion Bubble...')
@@ -124,7 +123,7 @@ async function runStudioAlphaVerification() {
     if (agendaBtn) {
       await agendaBtn.click()
     }
-    await new Promise((r) => setTimeout(r, 1200))
+    await new Promise((r) => setTimeout(r, 1500))
 
     // Click visible checkbox on first task in the active floating panel
     await mainWin.evaluate(() => {
@@ -132,7 +131,7 @@ async function runStudioAlphaVerification() {
       const visible = checkboxes.find((el) => el.offsetParent !== null)
       if (visible) visible.click()
     })
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 1500))
 
     // Close Cipher's panel to view the activity bubble in the studio
     await mainWin.evaluate(() => {
@@ -140,14 +139,14 @@ async function runStudioAlphaVerification() {
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 1200))
+    await new Promise((r) => setTimeout(r, 1500))
 
-    // Click interactive Coffee Mug on Grav's desk to demonstrate Phase 03 prop hotspot micro-interaction
+    // Click interactive Coffee Mug on Grav's desk to demonstrate prop hotspot micro-interaction
     await mainWin.evaluate(() => {
       const coffeeBtn = document.querySelector('button[aria-label*="Coffee Mug"]')
       if (coffeeBtn) coffeeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 2000))
 
     const shot4 = path.join(EVIDENCE_DIR, '04-activity-bubble.png')
     await mainWin.screenshot({ path: shot4 })
@@ -160,7 +159,7 @@ async function runStudioAlphaVerification() {
     if (musicCorner) {
       await musicCorner.click()
     }
-    await new Promise((r) => setTimeout(r, 1800))
+    await new Promise((r) => setTimeout(r, 2500))
 
     const shot5 = path.join(EVIDENCE_DIR, '05-music-corner.png')
     await mainWin.screenshot({ path: shot5 })
@@ -173,7 +172,7 @@ async function runStudioAlphaVerification() {
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 1000))
+    await new Promise((r) => setTimeout(r, 1500))
 
     // ─── STEP 6: LAZY-LOADED THREE.JS 3D OFFICE VIEWPORT ──────────────────────
     console.log('\n[Step 6] Opening Lazy-Loaded Three.js 3D Office Viewport...')
@@ -182,7 +181,7 @@ async function runStudioAlphaVerification() {
       await officeBtn.click()
     }
     // Allow WebGL context and 3D mesh animation to render multiple frames
-    await new Promise((r) => setTimeout(r, 3500))
+    await new Promise((r) => setTimeout(r, 4500))
 
     const shot6 = path.join(EVIDENCE_DIR, '06-threejs-office.png')
     await mainWin.screenshot({ path: shot6 })
@@ -196,11 +195,11 @@ async function runStudioAlphaVerification() {
       const closeBtn = closeButtons.find((b) => b.querySelector('svg.lucide-x'))
       if (closeBtn) closeBtn.click()
     })
-    await new Promise((r) => setTimeout(r, 2500))
+    await new Promise((r) => setTimeout(r, 2000))
 
     // Final calm studio view before concluding video
     await mainWin.mouse.move(640, 360)
-    await new Promise((r) => setTimeout(r, 1500))
+    await new Promise((r) => setTimeout(r, 3000))
 
     // Obtain the recorded video
     const page = mainWin
