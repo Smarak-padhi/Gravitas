@@ -20,6 +20,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
+import { validatePathAgainstAllowlist } from './path-security.js'
 
 export interface GlobalPreferences {
   readonly author: string
@@ -62,13 +63,20 @@ export interface DiscussionInterview {
 }
 
 export interface ApprovalGrant {
+  readonly grantId: string
   readonly projectSlug: string
   readonly revisionHash: string
+  readonly operation: 'EXECUTE_PLAN' | 'RUN_TOOL' | 'ALL_SCOPED_OPERATIONS'
+  readonly allowedPaths: readonly string[]
+  readonly allowedTools: readonly string[]
   readonly approvedBy: string
-  readonly timestamp: string
-  readonly notes: string
-  readonly allowedPaths?: readonly string[]
+  readonly issuedAt: string
+  readonly expiresAt: string
+  readonly userConsentVerified: boolean
   readonly signature: string
+  readonly notes?: string
+  /** @deprecated Kept for backward compatibility with existing tests */
+  readonly timestamp?: string
 }
 
 export interface SpecificationManifest {
@@ -313,7 +321,81 @@ ${data.architectureOverview}
   }
 
   /**
-   * Checks if human sign-off has been recorded in APPROVALS.md and validates revision hash.
+   * Retrieves or creates the application-owned machine authority secret key.
+   * Stored in `.gravitas/secure/authority.key`, protected from ordinary spec edits.
+   */
+  public getOrCreateAuthorityKey(projectRoot = process.cwd()): string {
+    const secureDir = path.join(projectRoot, '.gravitas', 'secure')
+    const keyPath = path.join(secureDir, 'authority.key')
+    try {
+      if (fs.existsSync(keyPath)) {
+        const key = fs.readFileSync(keyPath, 'utf-8').trim()
+        if (key.length >= 32) return key
+      }
+    } catch {
+      // Create fresh key if unreadable
+    }
+
+    fs.mkdirSync(secureDir, { recursive: true })
+    const freshKey = crypto.randomBytes(32).toString('hex')
+    try {
+      fs.writeFileSync(keyPath, freshKey, { encoding: 'utf-8', mode: 0o600 })
+    } catch {
+      fs.writeFileSync(keyPath, freshKey, 'utf-8')
+    }
+    return freshKey
+  }
+
+  /**
+   * Computes HMAC-SHA256 signature for an approval grant binding all authorization scopes.
+   */
+  public computeGrantSignature(secretKey: string, grant: Omit<ApprovalGrant, 'signature'>): string {
+    const normPaths = (grant.allowedPaths || []).map((p) => path.resolve(p)).sort().join(',')
+    const normTools = (grant.allowedTools || []).slice().sort().join(',')
+    const payload = [
+      grant.grantId,
+      grant.projectSlug,
+      grant.revisionHash,
+      grant.operation,
+      normPaths,
+      normTools,
+      grant.issuedAt,
+      grant.expiresAt,
+      grant.userConsentVerified ? 'true' : 'false',
+      grant.approvedBy,
+    ].join('::')
+
+    return crypto.createHmac('sha256', secretKey).update(payload).digest('hex')
+  }
+
+  /**
+   * Loads the application-owned secure grants registry from `.gravitas/secure/approval-registry.json`.
+   */
+  public getSecureRegistry(projectRoot = process.cwd()): Record<string, ApprovalGrant> {
+    const regPath = path.join(projectRoot, '.gravitas', 'secure', 'approval-registry.json')
+    try {
+      if (fs.existsSync(regPath)) {
+        return JSON.parse(fs.readFileSync(regPath, 'utf-8'))
+      }
+    } catch {
+      // Empty registry
+    }
+    return {}
+  }
+
+  /**
+   * Saves an approval grant to the application-owned secure grants registry.
+   */
+  public saveSecureGrant(projectRoot: string, grant: ApprovalGrant): void {
+    const secureDir = path.join(projectRoot, '.gravitas', 'secure')
+    fs.mkdirSync(secureDir, { recursive: true })
+    const reg = this.getSecureRegistry(projectRoot)
+    reg[grant.projectSlug] = grant
+    fs.writeFileSync(path.join(secureDir, 'approval-registry.json'), JSON.stringify(reg, null, 2), 'utf-8')
+  }
+
+  /**
+   * Checks if human sign-off has been authenticated in application secure state and validates revision hash.
    */
   public checkApprovalStatus(projectRoot: string, projectSlug: string): {
     approved: boolean
@@ -324,113 +406,205 @@ ${data.architectureOverview}
     currentHash?: string | undefined
     hashMatches?: boolean | undefined
     grant?: ApprovalGrant | undefined
+    signatureValid?: boolean | undefined
+    expired?: boolean | undefined
+    violationReason?: string | undefined
   } {
+    const secureRegistry = this.getSecureRegistry(projectRoot)
     const specsDir = path.join(projectRoot, '.gravitas', 'specs', projectSlug)
-    const approvalsPath = path.join(specsDir, 'APPROVALS.md')
     const grantPath = path.join(specsDir, 'approval-grant.json')
-    if (!fs.existsSync(approvalsPath)) {
-      return { approved: false }
-    }
+    const approvalsPath = path.join(specsDir, 'APPROVALS.md')
 
-    const content = fs.readFileSync(approvalsPath, 'utf-8')
-    const isApproved = content.includes('Current Gate Status: `APPROVED`') || content.includes('Sign-off Status: `APPROVED`')
+    let grant = secureRegistry[projectSlug]
 
-    const reviewerMatch = content.match(/Reviewer:\*{0,2}\s*`?([^`\r\n]+)`?/)
-    const timestampMatch = content.match(/Timestamp:\*{0,2}\s*`?([^`\r\n]+)`?/)
-    const notesMatch = content.match(/Review Notes:\*{0,2}\s*`?([^`\r\n]+)`?/)
-    const revMatch = content.match(/Revision Hash:\*{0,2}\s*`?([^`\r\n]+)`?/)
-
-    let grant: ApprovalGrant | undefined
-    if (fs.existsSync(grantPath)) {
+    // Fallback to reading grant from specs directory, but ONLY if its signature verifies with application key!
+    if (!grant && fs.existsSync(grantPath)) {
       try {
         grant = JSON.parse(fs.readFileSync(grantPath, 'utf-8'))
       } catch {
-        // Fallback to text parsed fields
+        // Ignored
       }
     }
 
+    if (!grant) {
+      return { approved: false, violationReason: 'No authorization grant recorded.' }
+    }
+
+    const secretKey = this.getOrCreateAuthorityKey(projectRoot)
+    const expectedSig = this.computeGrantSignature(secretKey, grant)
+    const signatureValid = grant.signature === expectedSig
+
     const currentHash = computeSpecificationHash(projectRoot, projectSlug)
-    const recordedHash = grant?.revisionHash || revMatch?.[1]
-    const hashMatches = recordedHash ? recordedHash === currentHash : true
+    const hashMatches = grant.revisionHash === currentHash
+    const expired = grant.expiresAt ? new Date(grant.expiresAt).getTime() <= Date.now() : false
+
+    const isApproved = signatureValid && hashMatches && !expired && grant.userConsentVerified === true
 
     return {
       approved: isApproved,
-      reviewer: grant?.approvedBy || reviewerMatch?.[1],
-      timestamp: grant?.timestamp || timestampMatch?.[1],
-      notes: grant?.notes || notesMatch?.[1],
-      revisionHash: recordedHash,
+      reviewer: grant.approvedBy,
+      timestamp: grant.issuedAt || grant.timestamp,
+      notes: grant.notes,
+      revisionHash: grant.revisionHash,
       currentHash,
       hashMatches,
       grant,
+      signatureValid,
+      expired,
+      violationReason: !signatureValid
+        ? 'Invalid cryptographic signature: grant forged or tampered'
+        : !hashMatches
+        ? `Specification modified post-approval (grant=${grant.revisionHash}, current=${currentHash})`
+        : expired
+        ? 'Authorization grant has expired'
+        : undefined,
     }
   }
 
   /**
-   * Records human approval in APPROVALS.md and creates approval-grant.json, unlocking execution.
+   * Records authenticated owner approval in application-owned secure state and mirrors to APPROVALS.md.
    */
   public recordApproval(
     projectRoot: string,
     projectSlug: string,
     reviewer: string,
     notes = 'Approved by user for phased execution.',
-    options?: { allowedPaths?: readonly string[] }
+    options?: {
+      allowedPaths?: readonly string[]
+      allowedTools?: readonly string[]
+      operation?: 'EXECUTE_PLAN' | 'RUN_TOOL' | 'ALL_SCOPED_OPERATIONS'
+      ttlSeconds?: number
+      userConsentVerified?: boolean
+      expiresAt?: string
+    }
   ): ApprovalGrant {
     const specsDir = path.join(projectRoot, '.gravitas', 'specs', projectSlug)
     const approvalsPath = path.join(specsDir, 'APPROVALS.md')
     const grantPath = path.join(specsDir, 'approval-grant.json')
-    const timestamp = new Date().toISOString()
+    const issuedAt = new Date().toISOString()
+    const ttlMs = (options?.ttlSeconds || 3600) * 1000
+    const expiresAt = options?.expiresAt || new Date(Date.now() + ttlMs).toISOString()
     const revisionHash = computeSpecificationHash(projectRoot, projectSlug)
+    const secretKey = this.getOrCreateAuthorityKey(projectRoot)
 
-    const signaturePayload = `${projectSlug}:${revisionHash}:${timestamp}:${reviewer}`
-    const signature = crypto.createHmac('sha256', 'gravitas-kernel-local-auth').update(signaturePayload).digest('hex')
+    const grantId = `grant_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
+    const operation = options?.operation || 'ALL_SCOPED_OPERATIONS'
+    const allowedPaths = (options?.allowedPaths || []).map((p) => path.resolve(p))
+    const allowedTools = options?.allowedTools || ['fs.writeFile', 'fs.appendFile', 'command.exec', 'testRunner']
+    const userConsentVerified = options?.userConsentVerified !== false
 
-    const grant: ApprovalGrant = {
+    const grantData: Omit<ApprovalGrant, 'signature'> = {
+      grantId,
       projectSlug,
       revisionHash,
+      operation,
+      allowedPaths,
+      allowedTools,
       approvedBy: reviewer,
-      timestamp,
+      issuedAt,
+      expiresAt,
+      userConsentVerified,
       notes,
-      allowedPaths: options?.allowedPaths ?? [],
+      timestamp: issuedAt,
+    }
+
+    const signature = this.computeGrantSignature(secretKey, grantData)
+    const grant: ApprovalGrant = {
+      ...grantData,
       signature,
     }
 
+    // 1. Save in application-owned secure store (Authorization source)
+    this.saveSecureGrant(projectRoot, grant)
+
+    // 2. Mirror into spec directory as readable artifact
     fs.mkdirSync(specsDir, { recursive: true })
     fs.writeFileSync(grantPath, JSON.stringify(grant, null, 2), 'utf-8')
 
     const content = `# Approval Ledger — ${projectSlug}
 
 > [!NOTE]
-> Specification approved. Human sign-off cryptographically bound to revision hash.
+> Specification approved. Human sign-off cryptographically bound to revision hash and scope.
+> Authorization stored in application-owned secure state.
 
 ## Current Gate Status: \`APPROVED\`
 
+- **Grant ID:** \`${grantId}\`
 - **Specification Revision Hash:** \`${revisionHash}\`
 - **Sign-off Status:** \`APPROVED\`
 - **Reviewer:** \`${reviewer}\`
-- **Timestamp:** \`${timestamp}\`
+- **Operation Authorized:** \`${operation}\`
+- **Issued At:** \`${issuedAt}\`
+- **Expires At:** \`${expiresAt}\`
+- **Allowed Tools:** \`${allowedTools.join(', ')}\`
+- **Allowed Paths:** \`${allowedPaths.join(', ')}\`
 - **Review Notes:** \`${notes}\`
-- **Cryptographic Grant:** \`approval-grant.json\`
+- **Cryptographic Grant:** \`approval-grant.json\` (Signature verified via application authority key)
 `
     fs.writeFileSync(approvalsPath, content, 'utf-8')
     return grant
   }
 
   /**
-   * Strictly asserts that approval has been granted and revision hash matches current spec files. Throws if blocked.
+   * Strictly asserts that approval has been granted and authenticated in application secure state,
+   * matches current spec files, is not expired, and permits requested operation and scopes. Throws if blocked.
    */
-  public assertApprovalGranted(projectRoot: string, projectSlug: string): void {
+  public assertApprovalGranted(
+    projectRoot: string,
+    projectSlug: string,
+    options?: {
+      operation?: string
+      requestedPaths?: readonly string[]
+      requestedTools?: readonly string[]
+    }
+  ): void {
     const status = this.checkApprovalStatus(projectRoot, projectSlug)
-    if (!status.approved) {
+    if (!status.approved || !status.grant) {
       throw new ApprovalGateBlockedError(
         projectSlug,
-        'Execution blocked by Human Approval Gate. Explicit sign-off required in APPROVALS.md.'
+        status.violationReason || 'Execution blocked by Human Approval Gate. Explicit sign-off required.'
       )
     }
-    if (status.revisionHash && !status.hashMatches) {
+
+    const grant = status.grant
+
+    // 1. Check operation scope
+    if (options?.operation && grant.operation !== 'ALL_SCOPED_OPERATIONS' && grant.operation !== options.operation) {
       throw new ApprovalGateBlockedError(
         projectSlug,
-        `Execution blocked: Specification modified post-approval (approved=${status.revisionHash}, current=${status.currentHash}). Re-approval required.`
+        `Execution blocked: Operation "${options.operation}" is not authorized by grant (authorized: "${grant.operation}").`
       )
+    }
+
+    // 2. Check path scopes
+    if (options?.requestedPaths && options.requestedPaths.length > 0) {
+      if (!grant.allowedPaths || grant.allowedPaths.length === 0) {
+        throw new ApprovalGateBlockedError(
+          projectSlug,
+          'Execution blocked: No write scope authorized in approval grant.'
+        )
+      }
+      for (const target of options.requestedPaths) {
+        const val = validatePathAgainstAllowlist(target, grant.allowedPaths)
+        if (!val.allowed) {
+          throw new ApprovalGateBlockedError(
+            projectSlug,
+            `Execution blocked: Target path "${target}" violates approval grant scope.`
+          )
+        }
+      }
+    }
+
+    // 3. Check tool scopes
+    if (options?.requestedTools && options.requestedTools.length > 0) {
+      for (const tool of options.requestedTools) {
+        if (!grant.allowedTools.includes(tool)) {
+          throw new ApprovalGateBlockedError(
+            projectSlug,
+            `Execution blocked: Tool "${tool}" violates approval grant scope (allowed: [${grant.allowedTools.join(', ')}]).`
+          )
+        }
+      }
     }
   }
 }

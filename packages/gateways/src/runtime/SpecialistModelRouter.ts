@@ -263,28 +263,40 @@ export class SpecialistModelRouter {
    * Deterministic local fallback responses when no LLM runtime is running.
    */
   private generateDeterministicFallback(specialistId: SpecialistId, query: string): string {
-    const q = query.toLowerCase()
+    const q = query.toLowerCase().trim()
 
-    if (specialistId === 'ada') {
-      if (q.includes('master theorem') || q.includes('recurrence')) {
-        return `**Master Theorem Active Recall:**\nFor recurrence relations of the form $T(n) = aT(n/b) + f(n)$ where $a \\ge 1, b > 1$:\n- **Case 1:** If $f(n) = O(n^{\\log_b a - \\epsilon})$, then $T(n) = \\Theta(n^{\\log_b a})$.\n- **Case 2:** If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$ ($k \\ge 0$), then $T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$.\n- **Case 3:** If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$ with regularity $af(n/b) \\le cf(n)$, then $T(n) = \\Theta(f(n))$.`
-      }
-      return `**Ada Study Note Synthesis:**\nI have reviewed your query regarding "${query}". While running in offline local mode, your active study notes and flashcards remain fully indexed in SQLite WAL. Would you like to launch an active recall quiz or open the Knowledge Hub?`
+    // 1. Check for specific specialist domains
+    if (specialistId === 'ada' && (q.includes('master theorem') || q.includes('recurrence'))) {
+      return `**Master Theorem Active Recall:**\nFor recurrence relations of the form $T(n) = aT(n/b) + f(n)$ where $a \\ge 1, b > 1$:\n- **Case 1:** If $f(n) = O(n^{\\log_b a - \\epsilon})$, then $T(n) = \\Theta(n^{\\log_b a})$.\n- **Case 2:** If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$ ($k \\ge 0$), then $T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$.\n- **Case 3:** If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$ with regularity $af(n/b) \\le cf(n)$, then $T(n) = \\Theta(f(n))$.`
     }
 
-    if (specialistId === 'pixel') {
+    if (specialistId === 'pixel' && (q.includes('token') || q.includes('color') || q.includes('palette') || q.includes('contrast') || q.includes('wcag'))) {
       return `**Pixel Design Audit:**\nReviewed interface geometry for "${query}".\n- **Color Tokens:** Background: #141A16, Accent: #81B29A, Surface: rgba(22, 29, 25, 0.92).\n- **WCAG Status:** All text contrast meets 4.5:1 ratio against graphite surfaces.\n- **Spatial Layout:** Floating panels anchored with 80px safe margins above dock.`
     }
 
-    if (specialistId === 'cipher') {
+    if (specialistId === 'cipher' && (q.includes('sqlite') || q.includes('wal') || q.includes('schema') || q.includes('telemetry') || q.includes('test'))) {
       return `**Cipher Systems Report:**\nExecuted local telemetry check for "${query}".\n- **Database:** SQLite WAL mode active, zero uncommitted transactions.\n- **Security:** Credential isolation active. No secrets logged.\n- **Test Status:** Core & Gateway test suites verified clean.`
     }
 
-    if (specialistId === 'scout') {
+    if (specialistId === 'scout' && (q.includes('note') || q.includes('index') || q.includes('cite') || q.includes('citation') || q.includes('paper'))) {
       return `**Scout Research Digest:**\nSynthesized knowledge references for "${query}".\n- Local study notes indexed in SQLite WAL.\n- Citations verified and tagged with subject categories.\n- Ready to query project documentation or external papers upon online reconnection.`
     }
 
-    // Default Grav
-    return `**Grav Studio Flow:**\nReceived: "${query}".\nI am keeping your studio organized and focused. You can check your agenda, trigger a 25m Focus Sprint, or summon any specialist companion for deep work.`
+    if (specialistId === 'grav' && (q.includes('agenda') || q.includes('focus') || q.includes('timer') || q.includes('schedule'))) {
+      return `**Grav Studio Flow:**\nFocus sprint and agenda tools are active. You can start a 25-minute Pomodoro sprint, review today's priorities, or summon specialized companions (Ada, Pixel, Cipher, Scout) for dedicated tasks.`
+    }
+
+    // 2. Open-ended question handling: Never return canned productivity text for unfamiliar questions
+    const isOpenEndedQuestion =
+      /^(what|how|why|explain|describe|write|compare|solve|tell me|who|when|where|can you|is it)\b/i.test(q) ||
+      q.endsWith('?') ||
+      q.split(/\s+/).length > 4
+
+    if (isOpenEndedQuestion) {
+      return `### 📡 Offline Notice: Local LLM Required for Open-Ended Queries\n\nI received your query: *"\"${query.trim()}\"*.\n\nBecause no local language model daemon is currently active on \`localhost:11434\` (Ollama) or \`localhost:1234\` (LM Studio), I cannot generate an open-ended synthesis without risking inaccurate canned output.\n\n**To enable full local model inference:**\n1. Install and start Ollama (\`ollama serve\`).\n2. Pull a local model (e.g. \`ollama pull llama3.2\` or \`ollama pull mistral\`).\n\n**Deterministic capabilities currently active offline:**\n- 📚 **Study Nook**: Master Theorem quizzes, Algorithms notes, and active-recall flashcards.\n- 📋 **Deep Discovery**: 3-round architecture interviews and specification generation.\n- 🎨 **Design System**: Design token inspection and WCAG AAA contrast audits.\n- 🗄️ **Systems & DB**: SQLite WAL telemetry, schema verification, and test execution.\n- 📅 **Agenda**: Task tracking and 25-minute focus sprints.`
+    }
+
+    // Default bounded response acknowledging specialist role
+    return `### Offline Mode Active\n\nReceived: "${query}". I am operating in bounded offline mode. To answer open-ended engineering questions with generative reasoning, start a local Ollama daemon on \`localhost:11434\`. For local tasks, you can use our built-in study notes, agenda, and deep discovery workflows.`
   }
 }

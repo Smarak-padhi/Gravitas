@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
@@ -63,6 +63,7 @@ export interface ChatMessage {
   text: string
   timestamp: string
   actionReceipt?: { title: string; details: string; status?: 'success' | 'info' | 'warning' } | undefined
+  actionButton?: { label: string; actionPrompt: string } | undefined
 }
 
 export interface StudyNoteItem {
@@ -251,7 +252,18 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
 }) => {
   // Grav Chat State
   const [inputText, setInputText] = useState('')
-  const [showFullTranscript, setShowFullTranscript] = useState(false)
+  const [showFullTranscript, setShowFullTranscript] = useState(true)
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = chatScrollRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+      const t1 = setTimeout(() => { if (el) el.scrollTop = el.scrollHeight }, 80)
+      const t2 = setTimeout(() => { if (el) el.scrollTop = el.scrollHeight }, 250)
+      return () => { clearTimeout(t1); clearTimeout(t2) }
+    }
+  }, [messages, showFullTranscript])
 
   // Ada Notes State
   const [notesList, setNotesList] = useState<StudyNoteItem[]>(DEFAULT_STUDY_NOTES)
@@ -663,6 +675,8 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
 
             {/* Conversation Stream with KaTeX Math Rendering */}
             <div
+              id="chat-conversation-stream"
+              ref={chatScrollRef}
               style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -768,6 +782,39 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                           <div style={{ color: '#8E949B', marginTop: '2px', fontSize: '11px' }}>
                             {msg.actionReceipt.details}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Explicit Interactive Action Button (Gate 05.6 Requirement E) */}
+                      {msg.actionButton && (
+                        <div style={{ marginTop: '10px' }}>
+                          <button
+                            onClick={() => {
+                              if (msg.actionButton && onSendMessage) {
+                                onSendMessage(msg.actionButton.actionPrompt)
+                              }
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '7px 14px',
+                              background: '#F4A261',
+                              color: '#101214',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 10px rgba(244, 162, 97, 0.35)',
+                              transition: 'all 0.15s ease',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.1)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.filter = 'none')}
+                          >
+                            <CheckCircle size={13} color="#101214" />
+                            <span>{msg.actionButton.label}</span>
+                          </button>
                         </div>
                       )}
                     </div>

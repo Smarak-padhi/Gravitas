@@ -14,6 +14,11 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { execSync } from 'node:child_process'
+import {
+  validatePathAgainstAllowlist,
+  validateShellCommand,
+} from './path-security.js'
 
 export type ReliabilityLoopState =
   | 'INTAKE'
@@ -134,7 +139,18 @@ export class InAppReliabilityLoop {
   public async executeTaskLifecycle(
     rawIntent: string,
     contractInput: Partial<TaskContract> & { title: string },
-    executionPlan: readonly { description: string; action: () => Promise<string>; targetPath?: string; toolName?: string }[],
+    executionPlan: readonly {
+      description: string
+      action?: () => Promise<string>
+      targetPath?: string
+      toolName?: string
+      payload?: {
+        content?: string
+        encoding?: BufferEncoding
+        command?: string
+        cwd?: string
+      }
+    }[],
     validationRunner: () => Promise<ValidationCheckResult[]>,
     recoveryStrategy?: (failedCheck: ValidationCheckResult) => Promise<boolean>,
     options?: {
@@ -277,29 +293,6 @@ export class InAppReliabilityLoop {
         }
       }
 
-      // Allowed Paths Enforcement
-      if (contract.allowedPaths.length > 0 && item.targetPath) {
-        const normTarget = path.normalize(item.targetPath).replace(/^[\\\/]/, '')
-        const isAllowed = contract.allowedPaths.some((allowed) => {
-          const normAllowed = path.normalize(allowed).replace(/^[\\\/]/, '')
-          return normTarget.startsWith(normAllowed) || normAllowed.startsWith(normTarget)
-        })
-
-        if (!isAllowed) {
-          hasStepFailed = true
-          executedSteps.push({
-            stepNumber: i + 1,
-            description: item.description,
-            action: 'EXECUTE',
-            targetPath: item.targetPath,
-            toolName: item.toolName,
-            status: 'FAILED',
-            outputSnippet: `BLOCKED: Target path "${item.targetPath}" violates contract allowedPaths: [${contract.allowedPaths.join(', ')}]`,
-          })
-          continue
-        }
-      }
-
       // Allowed Tools Enforcement
       if (item.toolName && contract.allowedTools.length > 0 && !contract.allowedTools.includes(item.toolName)) {
         hasStepFailed = true
@@ -315,8 +308,72 @@ export class InAppReliabilityLoop {
         continue
       }
 
+      // Allowed Paths Enforcement & Containment Checks (Gate 05.6 Requirement C)
+      const isWriteTool = item.toolName === 'fs.writeFile' || item.toolName === 'fs.appendFile'
+      if (item.targetPath || isWriteTool) {
+        const pathCheck = validatePathAgainstAllowlist(item.targetPath || '', contract.allowedPaths)
+        if (!pathCheck.allowed) {
+          hasStepFailed = true
+          executedSteps.push({
+            stepNumber: i + 1,
+            description: item.description,
+            action: 'EXECUTE',
+            targetPath: item.targetPath,
+            toolName: item.toolName,
+            status: 'FAILED',
+            outputSnippet: `BLOCKED: ${pathCheck.violationReason || 'Target path violates contract allowedPaths'}`,
+          })
+          continue
+        }
+      }
+
+      // Shell Command & Working Directory Verification
+      if (item.toolName === 'command.exec' && item.payload?.command) {
+        const cmdCheck = validateShellCommand(
+          item.payload.command,
+          item.payload.cwd || process.cwd(),
+          contract.allowedPaths
+        )
+        if (!cmdCheck.allowed) {
+          hasStepFailed = true
+          executedSteps.push({
+            stepNumber: i + 1,
+            description: item.description,
+            action: 'EXECUTE',
+            toolName: item.toolName,
+            status: 'FAILED',
+            outputSnippet: `BLOCKED: ${cmdCheck.violationReason}`,
+          })
+          continue
+        }
+      }
+
+      // Capability-Limited Tool Execution
       try {
-        const output = await item.action()
+        let output = ''
+        if (item.toolName === 'fs.writeFile' && item.targetPath && item.payload?.content !== undefined) {
+          const canonical = path.resolve(item.targetPath)
+          fs.mkdirSync(path.dirname(canonical), { recursive: true })
+          fs.writeFileSync(canonical, item.payload.content, item.payload.encoding || 'utf-8')
+          output = `Wrote ${Buffer.byteLength(item.payload.content)} bytes to ${canonical}`
+        } else if (item.toolName === 'fs.appendFile' && item.targetPath && item.payload?.content !== undefined) {
+          const canonical = path.resolve(item.targetPath)
+          fs.mkdirSync(path.dirname(canonical), { recursive: true })
+          fs.appendFileSync(canonical, item.payload.content, item.payload.encoding || 'utf-8')
+          output = `Appended ${Buffer.byteLength(item.payload.content)} bytes to ${canonical}`
+        } else if (item.toolName === 'command.exec' && item.payload?.command) {
+          const out = execSync(item.payload.command, {
+            cwd: item.payload.cwd || process.cwd(),
+            encoding: 'utf-8',
+            timeout: 10000,
+          })
+          output = out.trim()
+        } else if (item.action) {
+          output = await item.action()
+        } else {
+          output = 'Step completed with verified no-op'
+        }
+
         executedSteps.push({
           stepNumber: i + 1,
           description: item.description,

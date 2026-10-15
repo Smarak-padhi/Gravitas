@@ -397,6 +397,7 @@ export const App: React.FC = () => {
         text: response.text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         actionReceipt: response.actionReceipt,
+        actionButton: response.actionButton,
       }
 
       // Append assistant reply to specialist's conversation thread

@@ -150,4 +150,136 @@ describe('Gate 05.4: Deep Discovery Engine & Strict Approval Gate', () => {
     const status = engine.checkApprovalStatus(tempDir, projectSlug)
     expect(status.hashMatches).toBe(false)
   })
+
+  it('rejects falsified APPROVALS.md when no authenticated grant exists in application secure state', () => {
+    const projectSlug = 'falsified-markdown-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Falsified Markdown Test',
+      intent: 'Test that editing APPROVALS.md cannot grant authorization.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    // Attacker manually edits APPROVALS.md to say APPROVED
+    const approvalsPath = path.join(tempDir, '.gravitas', 'specs', projectSlug, 'APPROVALS.md')
+    fs.writeFileSync(
+      approvalsPath,
+      '# Fake Approval\n## Current Gate Status: `APPROVED`\n- **Sign-off Status:** `APPROVED`\n- **Reviewer:** `fake-admin`\n'
+    )
+
+    // Assertion must strictly block because no authentic signed grant exists
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug)
+    }).toThrow(ApprovalGateBlockedError)
+
+    const status = engine.checkApprovalStatus(tempDir, projectSlug)
+    expect(status.approved).toBe(false)
+  })
+
+  it('strictly blocks execution when an approval grant signature is forged or tampered', () => {
+    const projectSlug = 'forged-signature-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Forged Signature Test',
+      intent: 'Verify HMAC signature checking.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    const grant = engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved')
+
+    // Tamper with grant signature in secure registry
+    const regPath = path.join(tempDir, '.gravitas', 'secure', 'approval-registry.json')
+    const reg = JSON.parse(fs.readFileSync(regPath, 'utf-8'))
+    reg[projectSlug].signature = 'deadbeef0000111122223333444455556666777788889999aaaabbbbccccdddd'
+    fs.writeFileSync(regPath, JSON.stringify(reg, null, 2), 'utf-8')
+
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug)
+    }).toThrow(ApprovalGateBlockedError)
+
+    const status = engine.checkApprovalStatus(tempDir, projectSlug)
+    expect(status.approved).toBe(false)
+    expect(status.signatureValid).toBe(false)
+  })
+
+  it('strictly blocks execution when approval grant has expired', () => {
+    const projectSlug = 'expired-grant-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Expired Grant Test',
+      intent: 'Verify time-based grant expiration.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    // Grant created with past expiration timestamp
+    engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved', {
+      expiresAt: new Date(Date.now() - 60000).toISOString(),
+    })
+
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug)
+    }).toThrow(ApprovalGateBlockedError)
+
+    const status = engine.checkApprovalStatus(tempDir, projectSlug)
+    expect(status.approved).toBe(false)
+    expect(status.expired).toBe(true)
+  })
+
+  it('enforces authorized path and tool scopes at authorization check boundary', () => {
+    const projectSlug = 'scoped-authorization-test'
+    engine.generateSpecificationSuite(tempDir, projectSlug, {
+      projectTitle: 'Scoped Authorization Test',
+      intent: 'Verify path and tool scope bounds.',
+      discussion: { topic: 'Testing', answeredQuestions: [], resolvedDecisions: [] },
+      architectureOverview: 'Clean architecture',
+      phasedPlan: [{ phase: 'Phase 1', tasks: ['Task 1'] }],
+    })
+
+    const allowedPath = path.join(tempDir, 'src', 'components')
+    const evilPath = path.join(tempDir, 'evil', 'payload.js')
+
+    engine.recordApproval(tempDir, projectSlug, 'Smarak Padhi', 'Approved', {
+      allowedPaths: [allowedPath],
+      allowedTools: ['fs.writeFile', 'testRunner'],
+      operation: 'EXECUTE_PLAN',
+    })
+
+    // 1. Authorized path and tools must pass
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug, {
+        operation: 'EXECUTE_PLAN',
+        requestedPaths: [path.join(allowedPath, 'Button.tsx')],
+        requestedTools: ['fs.writeFile'],
+      })
+    }).not.toThrow()
+
+    // 2. Unauthorized path outside scope must throw
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug, {
+        operation: 'EXECUTE_PLAN',
+        requestedPaths: [evilPath],
+        requestedTools: ['fs.writeFile'],
+      })
+    }).toThrow(ApprovalGateBlockedError)
+
+    // 3. Unauthorized tool outside scope must throw
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug, {
+        operation: 'EXECUTE_PLAN',
+        requestedPaths: [path.join(allowedPath, 'Button.tsx')],
+        requestedTools: ['dangerous.shellExec'],
+      })
+    }).toThrow(ApprovalGateBlockedError)
+
+    // 4. Unauthorized operation must throw
+    expect(() => {
+      engine.assertApprovalGranted(tempDir, projectSlug, {
+        operation: 'RUN_UNAPPROVED_OP',
+      })
+    }).toThrow(ApprovalGateBlockedError)
+  })
 })
+

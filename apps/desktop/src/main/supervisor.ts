@@ -1295,13 +1295,19 @@ export class DesktopSupervisor {
         const revisionHash = payload.approval?.revisionHash || computeSpecificationHash(projectRoot, projectSlug)
         const reviewer = payload.approval?.reviewer || 'Smarak Padhi <smarakpadhi58@gmail.com>'
         const notes = payload.approval?.notes || 'Owner specification sign-off granted for disposable portfolio.'
+        const fixtureDir = path.resolve(projectRoot, 'test-fixtures', 'disposable-portfolio')
 
         const grant = deepDiscovery.recordApproval(
           projectRoot,
           projectSlug,
           reviewer,
           notes,
-          { allowedPaths: ['test-fixtures/disposable-portfolio/*'] }
+          {
+            allowedPaths: [fixtureDir],
+            allowedTools: ['fs.writeFile', 'fs.appendFile', 'command.exec', 'testRunner'],
+            operation: 'EXECUTE_PLAN',
+            userConsentVerified: true,
+          }
         )
 
         return {
@@ -1316,9 +1322,17 @@ export class DesktopSupervisor {
       }
 
       if (payload.action === 'EXECUTE') {
-        // Enforce approval gate first
+        const fixtureDir = path.resolve(projectRoot, 'test-fixtures', 'disposable-portfolio')
+        const stylesPath = path.join(fixtureDir, 'styles.css')
+        const indexPath = path.join(fixtureDir, 'index.html')
+
+        // Enforce approval gate first with explicit scope checks
         try {
-          deepDiscovery.assertApprovalGranted(projectRoot, projectSlug)
+          deepDiscovery.assertApprovalGranted(projectRoot, projectSlug, {
+            operation: 'EXECUTE_PLAN',
+            requestedPaths: [stylesPath, indexPath],
+            requestedTools: ['fs.writeFile', 'testRunner'],
+          })
         } catch (err: any) {
           const revHash = computeSpecificationHash(projectRoot, projectSlug)
           return {
@@ -1332,9 +1346,6 @@ export class DesktopSupervisor {
         }
 
         const reliabilityLoop = new InAppReliabilityLoop()
-        const fixtureDir = path.resolve(projectRoot, 'test-fixtures', 'disposable-portfolio')
-        const stylesPath = path.join(fixtureDir, 'styles.css')
-        const indexPath = path.join(fixtureDir, 'index.html')
 
         const contractInput: Partial<TaskContract> & { title: string } = {
           contractId: `contract_${projectSlug}_${Date.now()}`,
