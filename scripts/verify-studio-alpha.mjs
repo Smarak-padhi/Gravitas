@@ -87,19 +87,34 @@ async function runStudioAlphaVerification() {
     if (notesBtn) {
       await notesBtn.click()
     }
-    await new Promise((r) => setTimeout(r, 2000))
+    await new Promise((r) => setTimeout(r, 1500))
+
+    // Toggle Preview mode to demonstrate rendered Markdown and KaTeX math formulas (Gate B3)
+    console.log('Toggling Preview Mode to display rendered Markdown & KaTeX Math...')
+    const previewBtn = await mainWin.$('button:has-text("Preview")')
+    if (previewBtn) {
+      await previewBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 1500))
 
     const shot3 = path.join(EVIDENCE_DIR, '03-ada-notes-panel.png')
     await mainWin.screenshot({ path: shot3 })
     fs.copyFileSync(shot3, path.join(ARTIFACT_DIR, '03-ada-notes-panel.png'))
     console.log(`  Saved: ${shot3}`)
 
+    // Switch to Edit mode to demonstrate live editing and dirty-state tracking
+    const editBtn = await mainWin.$('button:has-text("Edit")')
+    if (editBtn) {
+      await editBtn.click()
+    }
+    await new Promise((r) => setTimeout(r, 800))
+
     // Type an edit into note editor and save to SQLite
     console.log('Editing note content and clicking Save to SQLite...')
     const textarea = await mainWin.$('textarea')
     if (textarea) {
       await textarea.click()
-      await textarea.type('\n\n// Verified in Living Studio Alpha at ' + new Date().toLocaleTimeString())
+      await textarea.type('\n\n// Verified in Studio Beta with KaTeX Math at ' + new Date().toLocaleTimeString())
       await new Promise((r) => setTimeout(r, 1000))
       // Click Save to SQLite button
       const saveBtn = await mainWin.$('button:has-text("Save to SQLite")')

@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
   Send,
@@ -14,7 +14,15 @@ import {
   ExternalLink,
   Sliders,
   Sparkles,
+  Minus,
+  Eye,
+  Edit3,
+  Columns,
+  AlertTriangle,
+  RotateCcw,
 } from 'lucide-react'
+import { marked } from 'marked'
+import katex from 'katex'
 import { ThreeOfficeViewport } from '../ThreeOfficeViewport.js'
 
 export type ActivePanel =
@@ -33,8 +41,130 @@ export interface ChatMessage {
   actionReceipt?: { title: string; details: string } | undefined
 }
 
+export interface StudyNoteItem {
+  id: string
+  title: string
+  subject: string
+  content: string
+}
+
+export const DEFAULT_STUDY_NOTES: StudyNoteItem[] = [
+  {
+    id: 'note_algorithms_core',
+    title: 'Algorithms: Master Theorem & Complexity Analysis',
+    subject: 'Algorithms',
+    content: `# Divide and Conquer Recurrences
+
+## Master Theorem Form
+For recurrence relations of the form:
+$$T(n) = aT(n/b) + f(n)$$
+where $a \\ge 1, b > 1$:
+
+1. **Case 1**: If $f(n) = O(n^{\\log_b a - \\epsilon})$ for some $\\epsilon > 0$, then:
+   $$T(n) = \\Theta(n^{\\log_b a})$$
+2. **Case 2**: If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$ where $k \\ge 0$, then:
+   $$T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$$
+3. **Case 3**: If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$ and regularity holds $a f(n/b) \\le c f(n)$, then:
+   $$T(n) = \\Theta(f(n))$$
+
+### Graph Traversal & Shortest Path Bounds
+- **Dijkstra with Min-Heap**: $\\mathcal{O}((V + E) \\log V)$
+- **Bellman-Ford**: $\\mathcal{O}(V \\cdot E)$
+- **Floyd-Warshall**: $\\mathcal{O}(V^3)$
+`,
+  },
+  {
+    id: 'note_os_virtual_memory',
+    title: 'Operating Systems: Virtual Memory & Page Replacement',
+    subject: 'Operating Systems',
+    content: `# Virtual Memory Architecture
+
+## Address Translation
+Given a virtual address with page size $P = 2^p$:
+- **Virtual Page Number (VPN)**: $\\text{VPN} = \\lfloor \\text{VA} / P \\rfloor$
+- **Page Offset**: $\\text{Offset} = \\text{VA} \\pmod P$
+
+### Page Replacement Algorithms
+1. **Optimal (MIN)**: Replace the page that will not be used for the longest period. (Theoretical upper bound).
+2. **LRU (Least Recently Used)**: Replace page with oldest access timestamp.
+3. **Clock Algorithm (Second Chance)**: Approximate LRU using a single reference bit per page frame.
+`,
+  },
+  {
+    id: 'note_databases_wal',
+    title: 'Database Systems: B+ Trees & WAL Logging',
+    subject: 'Databases',
+    content: `# Database Storage & Concurrency
+
+## Write-Ahead Logging (WAL) Protocol
+1. Any modification to a database page must be recorded in the WAL on non-volatile storage **before** the dirty page is written to disk.
+2. A transaction is committed only when its commit record is flushed to the WAL.
+
+### B+ Tree Search Complexity
+For a tree of order $M$ containing $N$ keys:
+$$\\text{Height} \\le \\lceil \\log_{\\lceil M/2 \\rceil} ((N+1)/2) \\rceil$$
+Search cost is bounded by $\\mathcal{O}(\\log_M N)$ disk page reads.
+`,
+  },
+]
+
+/**
+ * Gate B3: Markdown renderer with KaTeX mathematical expression support
+ */
+export function renderMarkdownWithMath(markdownText: string): string {
+  if (!markdownText) return ''
+  const mathPlaceholders: { token: string; html: string }[] = []
+  let tokenCounter = 0
+
+  // 1. Display math blocks: $$ ... $$
+  let processed = markdownText.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => {
+    const token = `KATEXBLOCK${tokenCounter++}TOKEN`
+    try {
+      const html = katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false })
+      mathPlaceholders.push({
+        token,
+        html: `<div class="katex-display-math" style="margin: 14px 0; overflow-x: auto; text-align: center; padding: 6px 0;">${html}</div>`,
+      })
+    } catch {
+      mathPlaceholders.push({ token, html: `<code>$$${tex}$$</code>` })
+    }
+    return token
+  })
+
+  // 2. Inline math expressions: $ ... $
+  processed = processed.replace(/(^|[^\\])\$([^\$\n]+?)\$/g, (_, prefix, tex) => {
+    const token = `KATEXINLINE${tokenCounter++}TOKEN`
+    try {
+      const html = katex.renderToString(tex.trim(), { displayMode: false, throwOnError: false })
+      mathPlaceholders.push({
+        token,
+        html: `<span class="katex-inline-math" style="padding: 0 2px;">${html}</span>`,
+      })
+    } catch {
+      mathPlaceholders.push({ token, html: `<code>$${tex}$</code>` })
+    }
+    return `${prefix}${token}`
+  })
+
+  // 3. Parse Markdown using marked
+  let html = ''
+  try {
+    html = marked.parse(processed, { async: false, breaks: true }) as string
+  } catch {
+    html = processed
+  }
+
+  // 4. Restore math placeholders
+  for (const { token, html: mathHtml } of mathPlaceholders) {
+    html = html.replace(token, mathHtml)
+  }
+
+  return html
+}
+
 export interface FloatingPanelsProps {
   activePanel: ActivePanel
+  minimizedPanel?: ActivePanel | null
   messages: readonly ChatMessage[]
   dueTasks: readonly any[]
   dueAssignments: readonly any[]
@@ -43,6 +173,8 @@ export interface FloatingPanelsProps {
   isExecuting: boolean
   isReducedMotion: boolean
   onClose: () => void
+  onMinimize?: () => void
+  onRestore?: (panel: ActivePanel) => void
   onSendMessage: (text: string) => void
   onVoiceToggle: () => void
   onSaveNote: (note: { id?: string; title: string; content: string; subject: string }) => Promise<void>
@@ -52,6 +184,7 @@ export interface FloatingPanelsProps {
 
 export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   activePanel,
+  minimizedPanel,
   messages,
   dueTasks,
   dueAssignments,
@@ -60,23 +193,98 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   isExecuting,
   isReducedMotion,
   onClose,
+  onMinimize,
+  onRestore,
   onSendMessage,
   onVoiceToggle,
   onSaveNote,
   onTaskCompleted,
   onOpenExternal,
 }) => {
+  // Grav Chat State
   const [inputText, setInputText] = useState('')
-  const [noteTitle, setNoteTitle] = useState(activeNote?.title || 'Algorithms: Master Theorem & Complexity')
-  const [noteSubject, setNoteSubject] = useState(activeNote?.subject || 'Algorithms')
-  const [noteContent, setNoteContent] = useState(
-    activeNote?.content ||
-      `# Divide and Conquer Analysis\n\n## Master Theorem Form\nFor recurrence relations:\n$$T(n) = aT(n/b) + f(n)$$\nwhere $a \\ge 1, b > 1$:\n\n1. If $f(n) = O(n^{\\log_b a - \\epsilon})$, then $T(n) = \\Theta(n^{\\log_b a})$.\n2. If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$, then $T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$.\n3. If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$, then $T(n) = \\Theta(f(n))$.`
-  )
+  const [showFullTranscript, setShowFullTranscript] = useState(false)
+
+  // Ada Notes State
+  const [notesList, setNotesList] = useState<StudyNoteItem[]>(DEFAULT_STUDY_NOTES)
+  const [selectedNoteId, setSelectedNoteId] = useState<string>(activeNote?.id || DEFAULT_STUDY_NOTES[0].id)
+  const [noteTitle, setNoteTitle] = useState(activeNote?.title || DEFAULT_STUDY_NOTES[0].title)
+  const [noteSubject, setNoteSubject] = useState(activeNote?.subject || DEFAULT_STUDY_NOTES[0].subject)
+  const [noteContent, setNoteContent] = useState(activeNote?.content || DEFAULT_STUDY_NOTES[0].content)
+  const [cleanContent, setCleanContent] = useState(activeNote?.content || DEFAULT_STUDY_NOTES[0].content)
+  const [cleanTitle, setCleanTitle] = useState(activeNote?.title || DEFAULT_STUDY_NOTES[0].title)
+  const [noteViewMode, setNoteViewMode] = useState<'edit' | 'preview' | 'split'>('edit')
   const [noteSavedFeedback, setNoteSavedFeedback] = useState(false)
+
+  // Unsaved Changes Protection Guard (Gate B2 / B3)
+  const [showUnsavedGuard, setShowUnsavedGuard] = useState(false)
+  const [pendingGuardAction, setPendingGuardAction] = useState<(() => void) | null>(null)
+
+  // Music State
   const [musicPlaying, setMusicPlaying] = useState(true)
 
-  if (activePanel === 'NONE') return null
+  // Track dirty state
+  const isDirty = noteContent !== cleanContent || noteTitle !== cleanTitle
+
+  // Synchronize with external activeNote updates
+  useEffect(() => {
+    if (activeNote) {
+      setNoteTitle(activeNote.title)
+      setNoteSubject(activeNote.subject)
+      setNoteContent(activeNote.content)
+      setCleanContent(activeNote.content)
+      setCleanTitle(activeNote.title)
+      if (activeNote.id) setSelectedNoteId(activeNote.id)
+    }
+  }, [activeNote])
+
+  // Guarded Close handler
+  const handleRequestClose = () => {
+    if (activePanel === 'ADA_NOTES' && isDirty) {
+      setPendingGuardAction(() => onClose)
+      setShowUnsavedGuard(true)
+    } else {
+      onClose()
+    }
+  }
+
+  // Guarded Minimize handler
+  const handleRequestMinimize = () => {
+    if (onMinimize) {
+      if (activePanel === 'ADA_NOTES' && isDirty) {
+        setPendingGuardAction(() => onMinimize)
+        setShowUnsavedGuard(true)
+      } else {
+        onMinimize()
+      }
+    } else {
+      handleRequestClose()
+    }
+  }
+
+  // Guarded Note Switch handler
+  const handleSelectNote = (noteId: string) => {
+    if (noteId === selectedNoteId) return
+
+    const target = notesList.find((n) => n.id === noteId)
+    if (!target) return
+
+    const switchNote = () => {
+      setSelectedNoteId(target.id)
+      setNoteTitle(target.title)
+      setNoteSubject(target.subject)
+      setNoteContent(target.content)
+      setCleanContent(target.content)
+      setCleanTitle(target.title)
+    }
+
+    if (isDirty) {
+      setPendingGuardAction(() => switchNote)
+      setShowUnsavedGuard(true)
+    } else {
+      switchNote()
+    }
+  }
 
   const handleSend = () => {
     if (!inputText.trim() || isExecuting) return
@@ -85,14 +293,73 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
   }
 
   const handleSaveCurrentNote = async () => {
-    await onSaveNote({
-      id: activeNote?.id || 'note_algorithms_core',
+    const updated = {
+      id: selectedNoteId,
       title: noteTitle,
       subject: noteSubject,
       content: noteContent,
-    })
+    }
+    await onSaveNote(updated)
+    setCleanContent(noteContent)
+    setCleanTitle(noteTitle)
+    setNotesList((prev) => prev.map((n) => (n.id === selectedNoteId ? updated : n)))
     setNoteSavedFeedback(true)
     setTimeout(() => setNoteSavedFeedback(false), 2500)
+  }
+
+  const handleConfirmSaveAndProceed = async () => {
+    await handleSaveCurrentNote()
+    setShowUnsavedGuard(false)
+    if (pendingGuardAction) pendingGuardAction()
+    setPendingGuardAction(null)
+  }
+
+  const handleConfirmDiscardAndProceed = () => {
+    setNoteContent(cleanContent)
+    setNoteTitle(cleanTitle)
+    setShowUnsavedGuard(false)
+    if (pendingGuardAction) pendingGuardAction()
+    setPendingGuardAction(null)
+  }
+
+  if (activePanel === 'NONE') {
+    // Show restored pill if minimized
+    if (minimizedPanel && onRestore) {
+      return (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '88px',
+            right: '24px',
+            zIndex: 40,
+            pointerEvents: 'auto',
+          }}
+        >
+          <button
+            onClick={() => onRestore(minimizedPanel)}
+            style={{
+              background: 'rgba(24, 28, 33, 0.95)',
+              border: '1px solid #4A89C8',
+              borderRadius: '20px',
+              padding: '8px 16px',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#EDEAE3',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(74, 137, 200, 0.2)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <Layers size={14} color="#4A89C8" />
+            <span>Restore {minimizedPanel.replace('_', ' ')}</span>
+          </button>
+        </div>
+      )
+    }
+    return null
   }
 
   return (
@@ -105,9 +372,10 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
+        paddingBottom: '80px', // Gate B2: Maintain safe margin so no controls hide behind bottom dock
       }}
     >
-      {/* ── 1. GRAV FLOATING CONVERSATION SURFACE ── */}
+      {/* ── 1. GRAV FLOATING CONVERSATION SURFACE (CONTEXTUALLY TETHERED NEAR DESK) ── */}
       {activePanel === 'GRAV_CONVERSATION' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -115,13 +383,14 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           exit={{ opacity: 0, scale: 0.94, y: 15 }}
           transition={{ type: 'spring', damping: 24, stiffness: 320 }}
           style={{
+            position: 'relative',
             width: '560px',
             maxWidth: '92vw',
             height: '520px',
-            background: 'rgba(20, 23, 27, 0.96)',
-            border: '1px solid #323A44',
+            background: 'rgba(20, 23, 27, 0.97)',
+            border: '1px solid #37414D',
             borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(244, 162, 97, 0.15)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 24px rgba(244, 162, 97, 0.18)',
             backdropFilter: 'blur(16px)',
             display: 'flex',
             flexDirection: 'column',
@@ -155,32 +424,51 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               </span>
               <span
                 style={{
-                  fontSize: '11px',
+                  fontSize: '10.5px',
                   padding: '2px 6px',
                   borderRadius: '6px',
                   background: '#23282F',
-                  color: '#9DA3A8',
+                  color: '#F4A261',
+                  fontWeight: 600,
                 }}
               >
-                On-Demand
+                Tethered to Center Desk
               </span>
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#8E949B',
-                cursor: 'pointer',
-                padding: '4px',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={handleRequestMinimize}
+                title="Minimize panel"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Minus size={15} />
+              </button>
+              <button
+                onClick={handleRequestClose}
+                title="Close panel (Esc)"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Conversation Stream */}
@@ -212,7 +500,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                 <span>Ask Grav to check what's due, take study notes, or launch an approved desktop tool.</span>
               </div>
             ) : (
-              messages.map((msg) => (
+              (showFullTranscript ? messages : messages.slice(-4)).map((msg) => (
                 <div
                   key={msg.id}
                   style={{
@@ -260,6 +548,26 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   </span>
                 </div>
               ))
+            )}
+
+            {/* Gate B2: Transcript expand toggle */}
+            {messages.length > 4 && (
+              <div style={{ textAlign: 'center', margin: '4px 0' }}>
+                <button
+                  onClick={() => setShowFullTranscript((prev) => !prev)}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #2B333D',
+                    borderRadius: '12px',
+                    padding: '3px 10px',
+                    fontSize: '11px',
+                    color: '#9FA4A8',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showFullTranscript ? 'Show Recent Context' : `View Full Transcript (${messages.length} messages)`}
+                </button>
+              </div>
             )}
           </div>
 
@@ -331,10 +639,25 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               <Send size={15} />
             </button>
           </div>
+
+          {/* Gate B2: Contextual downward tether anchor pointing toward Grav's center desk */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 0,
+              height: 0,
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderTop: '8px solid #37414D',
+            }}
+          />
         </motion.div>
       )}
 
-      {/* ── 2. ADA KNOWLEDGE HUB & STUDY NOTES PANEL ── */}
+      {/* ── 2. ADA KNOWLEDGE HUB & UPGRADED STUDY NOTES PANEL (GATE B3) ── */}
       {activePanel === 'ADA_NOTES' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -342,71 +665,202 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           exit={{ opacity: 0, scale: 0.94, y: 15 }}
           transition={{ type: 'spring', damping: 24, stiffness: 320 }}
           style={{
-            width: '680px',
-            maxWidth: '94vw',
-            height: '560px',
-            background: 'rgba(20, 25, 23, 0.97)',
+            position: 'relative',
+            width: noteViewMode === 'split' ? '920px' : '680px',
+            maxWidth: '96vw',
+            height: '600px',
+            background: 'rgba(20, 25, 23, 0.98)',
             border: '1px solid #2D3A32',
             borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 24px rgba(129, 178, 154, 0.15)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 24px rgba(129, 178, 154, 0.16)',
             backdropFilter: 'blur(16px)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
             pointerEvents: 'auto',
+            transition: 'width 0.2s ease',
           }}
         >
           {/* Header */}
           <div
             style={{
-              padding: '14px 20px',
+              padding: '12px 20px',
               borderBottom: '1px solid #243028',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: 'rgba(22, 29, 25, 0.9)',
+              background: 'rgba(22, 29, 25, 0.92)',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <BookOpen size={16} color="#81B29A" />
               <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
-                Ada's Knowledge Hub — Course Notes
+                Ada's Knowledge Hub
               </span>
-              <span
+
+              {/* Note Selector Dropdown */}
+              <select
+                value={selectedNoteId}
+                onChange={(e) => handleSelectNote(e.target.value)}
                 style={{
-                  fontSize: '10.5px',
-                  padding: '2px 6px',
+                  background: '#151D18',
+                  border: '1px solid #2B3830',
                   borderRadius: '6px',
-                  background: '#233028',
-                  color: '#81B29A',
-                  fontWeight: 600,
+                  color: '#EDEAE3',
+                  fontSize: '11.5px',
+                  padding: '3px 8px',
+                  outline: 'none',
+                  cursor: 'pointer',
                 }}
               >
-                SQLite WAL
-              </span>
+                {notesList.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {n.subject}: {n.title.slice(0, 32)}...
+                  </option>
+                ))}
+              </select>
+
+              {/* Dirty-State Indicator (Gate B3) */}
+              {isDirty ? (
+                <span
+                  style={{
+                    fontSize: '10.5px',
+                    padding: '2px 7px',
+                    borderRadius: '6px',
+                    background: 'rgba(244, 162, 97, 0.15)',
+                    border: '1px solid rgba(244, 162, 97, 0.4)',
+                    color: '#F4A261',
+                    fontWeight: 600,
+                  }}
+                >
+                  ● Unsaved Changes
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: '10.5px',
+                    padding: '2px 7px',
+                    borderRadius: '6px',
+                    background: 'rgba(129, 178, 154, 0.15)',
+                    border: '1px solid rgba(129, 178, 154, 0.4)',
+                    color: '#81B29A',
+                    fontWeight: 600,
+                  }}
+                >
+                  ✓ Saved to SQLite
+                </span>
+              )}
             </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Mode Toggle: Edit | Preview | Split */}
+              <div
+                style={{
+                  display: 'flex',
+                  background: '#151D18',
+                  border: '1px solid #28342C',
+                  borderRadius: '6px',
+                  padding: '2px',
+                  gap: '2px',
+                }}
+              >
+                <button
+                  onClick={() => setNoteViewMode('edit')}
+                  title="Editor Only"
+                  style={{
+                    background: noteViewMode === 'edit' ? '#27342C' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: noteViewMode === 'edit' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Edit3 size={11} />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={() => setNoteViewMode('preview')}
+                  title="Markdown & KaTeX Math Preview"
+                  style={{
+                    background: noteViewMode === 'preview' ? '#27342C' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: noteViewMode === 'preview' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Eye size={11} />
+                  <span>Preview</span>
+                </button>
+                <button
+                  onClick={() => setNoteViewMode('split')}
+                  title="Side-by-Side Split View"
+                  style={{
+                    background: noteViewMode === 'split' ? '#27342C' : 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    color: noteViewMode === 'split' ? '#EDEAE3' : '#8E949B',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Columns size={11} />
+                  <span>Split</span>
+                </button>
+              </div>
+
+              {/* Save Button */}
               <button
                 onClick={handleSaveCurrentNote}
                 style={{
-                  background: '#81B29A',
-                  border: 'none',
+                  background: isDirty ? '#81B29A' : '#233028',
+                  border: '1px solid #81B29A',
                   borderRadius: '6px',
                   padding: '5px 12px',
-                  fontSize: '12px',
+                  fontSize: '11.5px',
                   fontWeight: 600,
-                  color: '#101713',
+                  color: isDirty ? '#101713' : '#81B29A',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
                   cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <Save size={13} />
                 <span>{noteSavedFeedback ? 'Saved ✓' : 'Save to SQLite'}</span>
               </button>
+
               <button
-                onClick={onClose}
+                onClick={handleRequestMinimize}
+                title="Minimize panel"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <Minus size={15} />
+              </button>
+              <button
+                onClick={handleRequestClose}
+                title="Close panel (Esc)"
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -423,7 +877,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           {/* Note Metadata Bar */}
           <div
             style={{
-              padding: '10px 20px',
+              padding: '8px 20px',
               background: 'rgba(18, 24, 20, 0.8)',
               borderBottom: '1px solid #222C25',
               display: 'flex',
@@ -440,9 +894,9 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                 background: '#141A16',
                 border: '1px solid #2B372F',
                 borderRadius: '6px',
-                padding: '6px 10px',
+                padding: '5px 10px',
                 color: '#EDEAE3',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: 600,
                 outline: 'none',
               }}
@@ -451,49 +905,181 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               type="text"
               value={noteSubject}
               onChange={(e) => setNoteSubject(e.target.value)}
-              placeholder="Subject (e.g. Algorithms)..."
+              placeholder="Subject..."
               style={{
                 flex: 1,
                 background: '#141A16',
                 border: '1px solid #2B372F',
                 borderRadius: '6px',
-                padding: '6px 10px',
+                padding: '5px 10px',
                 color: '#81B29A',
-                fontSize: '12.5px',
+                fontSize: '12px',
                 outline: 'none',
               }}
             />
           </div>
 
-          {/* Note Markdown Textarea */}
-          <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column' }}>
-            <textarea
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
-              style={{
-                flex: 1,
-                width: '100%',
-                background: '#121714',
-                border: '1px solid #243027',
-                borderRadius: '8px',
-                padding: '14px',
-                color: '#EDEAE3',
-                fontSize: '13px',
-                fontFamily: 'Geist Mono, Cascadia Code, monospace',
-                lineHeight: 1.6,
-                resize: 'none',
-                outline: 'none',
-              }}
-            />
-            <div style={{ fontSize: '11px', color: '#73857B', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-              <span>Markdown and KaTeX LaTeX math supported. Preserved verbatim in local SQLite.</span>
-              <span>Subject: {noteSubject}</span>
-            </div>
+          {/* Body Content: Edit, Preview, or Split */}
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: '12px 20px' }}>
+            {/* Editor Pane */}
+            {(noteViewMode === 'edit' || noteViewMode === 'split') && (
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  marginRight: noteViewMode === 'split' ? '12px' : 0,
+                }}
+              >
+                <textarea
+                  value={noteContent}
+                  onChange={(e) => setNoteContent(e.target.value)}
+                  style={{
+                    flex: 1,
+                    width: '100%',
+                    background: '#121714',
+                    border: '1px solid #243027',
+                    borderRadius: '8px',
+                    padding: '14px',
+                    color: '#EDEAE3',
+                    fontSize: '12.5px',
+                    fontFamily: 'Geist Mono, Cascadia Code, monospace',
+                    lineHeight: 1.6,
+                    resize: 'none',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Preview Pane with KaTeX Math Rendering (Gate B3) */}
+            {(noteViewMode === 'preview' || noteViewMode === 'split') && (
+              <div
+                style={{
+                  flex: 1,
+                  background: '#131815',
+                  border: '1px solid #243027',
+                  borderRadius: '8px',
+                  padding: '16px 20px',
+                  overflowY: 'auto',
+                  color: '#EDEAE3',
+                  fontSize: '13px',
+                  lineHeight: 1.6,
+                }}
+                dangerouslySetInnerHTML={{
+                  __html: renderMarkdownWithMath(noteContent),
+                }}
+              />
+            )}
           </div>
+
+          {/* Footer Status */}
+          <div
+            style={{
+              padding: '8px 20px',
+              borderTop: '1px solid #222C25',
+              fontSize: '11px',
+              color: '#73857B',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>Markdown & KaTeX LaTeX enabled ($...$ inline, $$...$$ block). Persists to SQLite WAL.</span>
+            <span>Subject: {noteSubject}</span>
+          </div>
+
+          {/* Unsaved Changes Confirmation Modal Guard (Gate B2 / B3) */}
+          {showUnsavedGuard && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(10, 14, 12, 0.85)',
+                backdropFilter: 'blur(6px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 60,
+              }}
+            >
+              <div
+                style={{
+                  width: '380px',
+                  background: '#1A211D',
+                  border: '1px solid #37473D',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  boxShadow: '0 16px 40px rgba(0, 0, 0, 0.6)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#F4A261' }}>
+                  <AlertTriangle size={18} />
+                  <span style={{ fontWeight: 600, fontSize: '14px', color: '#EDEAE3' }}>
+                    Unsaved Note Changes
+                  </span>
+                </div>
+                <div style={{ fontSize: '12.5px', color: '#9DA3A8', lineHeight: 1.5 }}>
+                  You have unsaved edits in <strong>"{noteTitle}"</strong>. Would you like to save them to local SQLite before leaving?
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                  <button
+                    onClick={() => {
+                      setShowUnsavedGuard(false)
+                      setPendingGuardAction(null)
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid #343E38',
+                      borderRadius: '6px',
+                      padding: '5px 10px',
+                      color: '#9DA3A8',
+                      fontSize: '11.5px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Keep Editing
+                  </button>
+                  <button
+                    onClick={handleConfirmDiscardAndProceed}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid #C96B61',
+                      borderRadius: '6px',
+                      padding: '5px 10px',
+                      color: '#E76F51',
+                      fontSize: '11.5px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Discard
+                  </button>
+                  <button
+                    onClick={handleConfirmSaveAndProceed}
+                    style={{
+                      background: '#81B29A',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '5px 12px',
+                      color: '#101713',
+                      fontWeight: 600,
+                      fontSize: '11.5px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Save & Proceed
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
 
-      {/* ── 3. CIPHER TASKS & SYSTEMS AGENDA PANEL ── */}
+      {/* ── 3. CIPHER TASKS & SYSTEMS AGENDA PANEL (GATE B4) ── */}
       {activePanel === 'CIPHER_TASKS' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -504,10 +1090,10 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
             width: '620px',
             maxWidth: '92vw',
             height: '520px',
-            background: 'rgba(18, 22, 28, 0.97)',
+            background: 'rgba(18, 22, 28, 0.98)',
             border: '1px solid #2A3644',
             borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 24px rgba(74, 137, 200, 0.15)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 24px rgba(74, 137, 200, 0.16)',
             backdropFilter: 'blur(16px)',
             display: 'flex',
             flexDirection: 'column',
@@ -523,27 +1109,55 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: 'rgba(20, 26, 33, 0.9)',
+              background: 'rgba(20, 26, 33, 0.92)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Clock size={16} color="#4A89C8" />
               <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
-                What's Due Today — Tasks & Assignments
+                Cipher's Agenda — Tasks & Coursework
+              </span>
+              <span
+                style={{
+                  fontSize: '10.5px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#1A232F',
+                  color: '#4A89C8',
+                  fontWeight: 600,
+                }}
+              >
+                SQLite WAL Store
               </span>
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#8E949B',
-                cursor: 'pointer',
-                padding: '4px',
-              }}
-            >
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={handleRequestMinimize}
+                title="Minimize panel"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <Minus size={15} />
+              </button>
+              <button
+                onClick={handleRequestClose}
+                title="Close panel (Esc)"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Agenda Items List */}
@@ -667,7 +1281,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
         </motion.div>
       )}
 
-      {/* ── 4. CHILL CORNER / MUSIC CONCEPT PLAYER ── */}
+      {/* ── 4. CHILL CORNER / MUSIC CONCEPT PLAYER (GATE B5) ── */}
       {activePanel === 'MUSIC_CORNER' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -677,10 +1291,10 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
           style={{
             width: '420px',
             maxWidth: '90vw',
-            background: 'rgba(22, 25, 29, 0.96)',
+            background: 'rgba(22, 25, 29, 0.98)',
             border: '1px solid #373E47',
             borderRadius: '16px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.65), 0 0 20px rgba(217, 119, 54, 0.2)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7), 0 0 20px rgba(217, 119, 54, 0.2)',
             backdropFilter: 'blur(16px)',
             display: 'flex',
             flexDirection: 'column',
@@ -716,9 +1330,33 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                 PROTOTYPE CONCEPT
               </span>
             </div>
-            <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#8E949B', cursor: 'pointer' }}>
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={handleRequestMinimize}
+                title="Minimize panel"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <Minus size={15} />
+              </button>
+              <button
+                onClick={handleRequestClose}
+                title="Close panel (Esc)"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Vinyl Visualizer Card */}
@@ -806,7 +1444,7 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
         </motion.div>
       )}
 
-      {/* ── 5. THREE.JS LIVING 3D OFFICE VIEWPORT ── */}
+      {/* ── 5. THREE.JS LIVING 3D OFFICE VIEWPORT (GATE B0 TRUTHFUL PROTOTYPE) ── */}
       {activePanel === 'OFFICE_3D' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -836,13 +1474,13 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: 'rgba(20, 24, 28, 0.9)',
+              background: 'rgba(20, 24, 28, 0.92)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Layers size={16} color="#F4A261" />
               <span style={{ fontSize: '13.5px', fontWeight: 600, color: '#EDEAE3' }}>
-                Three.js Living 3D Office Viewport
+                Three.js Studio Prototype (Single Desk & Droid)
               </span>
               <span
                 style={{
@@ -854,12 +1492,36 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                   fontWeight: 600,
                 }}
               >
-                LAZY-LOADED WEBGL
+                PROTOTYPE VIEWPORT
               </span>
             </div>
-            <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#8E949B', cursor: 'pointer' }}>
-              <X size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={handleRequestMinimize}
+                title="Minimize panel"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <Minus size={15} />
+              </button>
+              <button
+                onClick={handleRequestClose}
+                title="Close panel (Esc)"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#8E949B',
+                  cursor: 'pointer',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* 3D Canvas Container */}
@@ -870,16 +1532,21 @@ export const FloatingPanels: React.FC<FloatingPanelsProps> = ({
                 position: 'absolute',
                 bottom: '12px',
                 left: '12px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: 'rgba(16, 18, 20, 0.85)',
-                border: '1px solid #252A30',
+                right: '12px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                background: 'rgba(16, 18, 20, 0.9)',
+                border: '1px solid #2A3038',
                 fontSize: '11px',
-                color: '#8E949B',
+                color: '#9FA4A8',
                 pointerEvents: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
               }}
             >
-              Real-time WebGL isometric studio view. Disposed on close to prevent background GPU consumption.
+              <span>Three.js WebGL prototype. Disposed on unmount. Existing multi-room diorama preserved in <code>apps/web/src/hq3d/</code> for Phase 08.</span>
+              <span style={{ color: '#F4A261' }}>Zero GPU draw when closed</span>
             </div>
           </div>
         </motion.div>

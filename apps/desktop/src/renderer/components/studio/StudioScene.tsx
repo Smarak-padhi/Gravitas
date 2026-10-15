@@ -111,13 +111,25 @@ export const StudioScene: React.FC<StudioSceneProps> = ({
         {/* ── Studio Wall ── */}
         <rect x="0" y="0" width="1280" height="510" fill="url(#studioWall)" />
 
+        {/* ── Architectural Wall-Floor Baseboard Molding (Gate B1 Polish) ── */}
+        <rect x="0" y="506" width="1280" height="8" fill="#1C2127" />
+        <line x1="0" y1="506" x2="1280" y2="506" stroke="#2B333E" strokeWidth="1.5" />
+        <line x1="0" y1="514" x2="1280" y2="514" stroke="#121518" strokeWidth="1.5" />
+
         {/* ── Floor Surface (Perspective Base) ── */}
-        <polygon points="0,510 1280,510 1280,800 0,800" fill="url(#studioFloor)" />
+        <polygon points="0,514 1280,514 1280,800 0,800" fill="url(#studioFloor)" />
         {/* Subtle Horizontal Floor Planks */}
-        <line x1="0" y1="560" x2="1280" y2="560" stroke="#22262B" strokeWidth="1" />
-        <line x1="0" y1="620" x2="1280" y2="620" stroke="#1D2125" strokeWidth="1" />
-        <line x1="0" y1="690" x2="1280" y2="690" stroke="#181B1E" strokeWidth="1" />
+        <line x1="0" y1="565" x2="1280" y2="565" stroke="#22262B" strokeWidth="1" />
+        <line x1="0" y1="625" x2="1280" y2="625" stroke="#1D2125" strokeWidth="1" />
+        <line x1="0" y1="695" x2="1280" y2="695" stroke="#181B1E" strokeWidth="1" />
         <line x1="0" y1="770" x2="1280" y2="770" stroke="#141618" strokeWidth="1" />
+
+        {/* ── Floor Pedestal & Desk Ambient Drop Shadows (Gate B1 Polish) ── */}
+        <ellipse cx="640" cy="625" rx="190" ry="24" fill="#000000" opacity="0.45" />
+        <ellipse cx="230" cy="640" rx="90" ry="16" fill="#000000" opacity="0.38" />
+        <ellipse cx="320" cy="380" rx="75" ry="14" fill="#000000" opacity="0.35" />
+        <ellipse cx="980" cy="640" rx="95" ry="16" fill="#000000" opacity="0.38" />
+        <ellipse cx="940" cy="380" rx="80" ry="14" fill="#000000" opacity="0.35" />
 
         {/* ── Loft Arched Windows (Night Sky with City/Stars) ── */}
         <g opacity="0.85">

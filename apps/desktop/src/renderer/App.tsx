@@ -45,22 +45,52 @@ export const App: React.FC = () => {
     content: `# Divide and Conquer Analysis\n\n## Master Theorem Form\nFor recurrence relations of the form:\n$$T(n) = aT(n/b) + f(n)$$\nwhere $a \\ge 1, b > 1$:\n\n1. **Case 1**: If $f(n) = O(n^{\\log_b a - \\epsilon})$ for some constant $\\epsilon > 0$, then $T(n) = \\Theta(n^{\\log_b a})$.\n2. **Case 2**: If $f(n) = \\Theta(n^{\\log_b a} \\log^k n)$ where $k \\ge 0$, then $T(n) = \\Theta(n^{\\log_b a} \\log^{k+1} n)$.\n3. **Case 3**: If $f(n) = \\Omega(n^{\\log_b a + \\epsilon})$ for some constant $\\epsilon > 0$, and regularity condition $af(n/b) \\le cf(n)$ holds, then $T(n) = \\Theta(f(n))$.`,
   })
 
-  // Helper: Trigger temporary activity bubble for an agent
-  const triggerBubble = useCallback((agentId: MascotId, text: string, kind: 'info' | 'success' | 'warning' | 'error' = 'success', duration = 4500) => {
-    setAgentBubbles((prev) => ({
-      ...prev,
-      [agentId]: { text, kind, timestamp: Date.now() },
-    }))
-    setAgentStates((prev) => ({
-      ...prev,
-      [agentId]: kind === 'error' ? 'error' : 'success',
-    }))
+  const [minimizedPanel, setMinimizedPanel] = useState<ActivePanel | null>(null)
 
-    setTimeout(() => {
-      setAgentBubbles((prev) => ({ ...prev, [agentId]: null }))
-      setAgentStates((prev) => ({ ...prev, [agentId]: 'idle' }))
-    }, duration)
-  }, [])
+  // Helper: Trigger temporary activity bubble for an agent with category distinction (Gate B4)
+  const triggerBubble = useCallback(
+    (
+      agentId: MascotId,
+      text: string,
+      kind: 'info' | 'success' | 'warning' | 'error' = 'success',
+      category: 'work' | 'decorative' | 'system' = 'work',
+      duration = 4500
+    ) => {
+      setAgentBubbles((prev) => ({
+        ...prev,
+        [agentId]: { text, kind, category, timestamp: Date.now() },
+      }))
+      setAgentStates((prev) => ({
+        ...prev,
+        [agentId]:
+          kind === 'error'
+            ? 'error'
+            : kind === 'warning'
+            ? 'waiting_permission'
+            : 'success',
+      }))
+
+      setTimeout(() => {
+        setAgentBubbles((prev) => ({ ...prev, [agentId]: null }))
+        setAgentStates((prev) => ({ ...prev, [agentId]: 'idle' }))
+      }, duration)
+    },
+    []
+  )
+
+  const handleMinimize = () => {
+    setMinimizedPanel(activePanel)
+    setActivePanel('NONE')
+    setActiveAgent(null)
+  }
+
+  const handleRestore = (panel: ActivePanel) => {
+    setActivePanel(panel)
+    setMinimizedPanel(null)
+    if (panel === 'GRAV_CONVERSATION') setActiveAgent('grav')
+    else if (panel === 'ADA_NOTES') setActiveAgent('ada')
+    else if (panel === 'CIPHER_TASKS') setActiveAgent('cipher')
+  }
 
   // Initialize data from real SQLite databases
   useEffect(() => {
@@ -285,8 +315,8 @@ export const App: React.FC = () => {
         console.warn('Failed to save note to bridge:', err)
       }
     }
-    // Genuine activity bubble on Ada
-    triggerBubble('ada', `Saved "${note.title.slice(0, 22)}..." to SQLite`, 'success')
+    // Genuine activity bubble on Ada (Gate B4: work event)
+    triggerBubble('ada', `Saved "${note.title.slice(0, 22)}..." to SQLite`, 'success', 'work')
   }
 
   // Handle Task completion in SQLite
@@ -302,8 +332,8 @@ export const App: React.FC = () => {
         console.warn('Failed to update task:', err)
       }
     }
-    // Genuine activity bubble on Cipher
-    triggerBubble('cipher', `Task updated in local database`, 'success')
+    // Genuine activity bubble on Cipher (Gate B4: work event)
+    triggerBubble('cipher', `Task updated in local database`, 'success', 'work')
   }
 
   return (
@@ -355,13 +385,14 @@ export const App: React.FC = () => {
           setActiveAgent('cipher')
         }}
         onCoffeeSip={() => {
-          triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info')
+          // Gate B4: Separate purely decorative reaction from true work updates
+          triggerBubble('grav', 'Fresh brew poured ☕ Ready to engineer.', 'info', 'decorative')
         }}
         onPixelCanvas={() => {
-          triggerBubble('pixel', 'Drafting board active — UI wireframes loaded', 'info')
+          triggerBubble('pixel', 'Drafting board active — UI wireframes loaded', 'info', 'decorative')
         }}
         onScoutObservatory={() => {
-          triggerBubble('scout', 'Observatory focused — Scanning research sources', 'info')
+          triggerBubble('scout', 'Observatory focused — Scanning research sources', 'info', 'decorative')
         }}
       />
 
@@ -383,9 +414,10 @@ export const App: React.FC = () => {
         isListening={isListening}
       />
 
-      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES ── */}
+      {/* ── FLOATING ON-DEMAND SPATIAL WORK SURFACES (GATE B2 & B3) ── */}
       <FloatingPanels
         activePanel={activePanel}
+        minimizedPanel={minimizedPanel}
         messages={messages}
         dueTasks={dueTasks}
         dueAssignments={dueAssignments}
@@ -397,6 +429,8 @@ export const App: React.FC = () => {
           setActivePanel('NONE')
           setActiveAgent(null)
         }}
+        onMinimize={handleMinimize}
+        onRestore={handleRestore}
         onSendMessage={handleSendMessage}
         onVoiceToggle={handleVoiceToggle}
         onSaveNote={handleSaveNote}

@@ -16,6 +16,7 @@ export type MascotState =
 export interface MascotBubbleData {
   text: string
   kind?: 'info' | 'success' | 'warning' | 'error'
+  category?: 'work' | 'decorative' | 'system'
   timestamp?: number
 }
 

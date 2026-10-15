@@ -1,5 +1,5 @@
 import { build } from 'esbuild'
-import { copyFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -98,6 +98,21 @@ async function run() {
   copyFileSync(join(__dirname, 'src/renderer/assets/fonts/GeistMono-Variable.woff2'), join(__dirname, 'dist/renderer/assets/fonts/GeistMono-Variable.woff2'))
   copyFileSync(join(__dirname, 'src/renderer/index.html'), join(__dirname, 'dist/renderer/index.html'))
   copyFileSync(join(__dirname, 'src/renderer/companion.html'), join(__dirname, 'dist/renderer/companion.html'))
+
+  // Copy KaTeX CSS and fonts for mathematical formula rendering in Ada's Knowledge Hub
+  try {
+    const katexDist = join(__dirname, '../../node_modules/katex/dist')
+    copyFileSync(join(katexDist, 'katex.min.css'), join(__dirname, 'dist/renderer/assets/katex.min.css'))
+    const katexFonts = join(katexDist, 'fonts')
+    for (const f of readdirSync(katexFonts)) {
+      if (f.endsWith('.woff2')) {
+        copyFileSync(join(katexFonts, f), join(__dirname, 'dist/renderer/assets/fonts', f))
+      }
+    }
+  } catch (err) {
+    console.warn('Could not copy KaTeX assets:', err)
+  }
+
   console.log('Desktop package bundled successfully.')
 }
 

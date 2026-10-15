@@ -109,22 +109,31 @@ export const ThreeOfficeViewport: React.FC<ThreeOfficeViewportProps> = ({ isRedu
     let animId = 0
     let angle = 0
 
-    const renderLoop = () => {
-      if (!isReducedMotion) {
-        angle += 0.005
-        camera.position.x = Math.sin(angle) * 7
-        camera.position.z = Math.cos(angle) * 7
-        camera.lookAt(0, 1.2, 0)
+    const renderStatic = () => {
+      camera.position.set(5, 5, 7)
+      camera.lookAt(0, 0.8, 0)
+      renderer.render(scene, camera)
+    }
 
-        // Subtle buddy bob
-        buddyGroup.position.y = 1.65 + Math.sin(angle * 4) * 0.02
-      }
+    const renderLoop = () => {
+      angle += 0.005
+      camera.position.x = Math.sin(angle) * 7
+      camera.position.z = Math.cos(angle) * 7
+      camera.lookAt(0, 1.2, 0)
+
+      // Subtle buddy bob
+      buddyGroup.position.y = 1.65 + Math.sin(angle * 4) * 0.02
 
       renderer.render(scene, camera)
       animId = requestAnimationFrame(renderLoop)
     }
 
-    renderLoop()
+    if (isReducedMotion) {
+      // Gate B0: When reduced motion is active, render static scene once without continuous rAF loop
+      renderStatic()
+    } else {
+      renderLoop()
+    }
 
     const handleResize = () => {
       if (!container) return
@@ -133,13 +142,38 @@ export const ThreeOfficeViewport: React.FC<ThreeOfficeViewportProps> = ({ isRedu
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      if (isReducedMotion) {
+        renderStatic()
+      }
     }
 
     window.addEventListener('resize', handleResize)
 
     return () => {
-      cancelAnimationFrame(animId)
+      if (animId) {
+        cancelAnimationFrame(animId)
+      }
       window.removeEventListener('resize', handleResize)
+
+      // Gate B0: Thoroughly traverse and dispose all geometries and materials in the scene
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry?.dispose()
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((mat) => mat.dispose())
+          } else if (obj.material) {
+            obj.material.dispose()
+          }
+        } else if (obj instanceof THREE.GridHelper) {
+          obj.geometry?.dispose()
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((mat) => mat.dispose())
+          } else if (obj.material) {
+            obj.material.dispose()
+          }
+        }
+      })
+
       renderer.dispose()
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement)
